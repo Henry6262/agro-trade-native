@@ -1,10 +1,6 @@
-import { View, Text } from 'react-native';
+import { Redirect } from 'expo-router';
 
 export default function Home() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text style={{ fontSize: 24 }}>Welcome to Agro Trade!</Text>
-      <Text>The app is working on web!</Text>
-    </View>
-  );
+  // Immediately redirect to user selection page
+  return <Redirect href="/user-selection" />;
 }
