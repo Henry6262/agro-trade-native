@@ -1,0 +1,118 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database with PostGIS
+  postgres:
+    image: postgis/postgis:14-3.2
+    container_name: agro-trade-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: agro_trade_dev
+      POSTGRES_USER: agro_trade_user
+      POSTGRES_PASSWORD: agro_trade_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-postgis.sql:/docker-entrypoint-initdb.d/init-postgis.sql
+    networks:
+      - agro-trade-network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U agro_trade_user -d agro_trade_dev']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: agro-trade-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    networks:
+      - agro-trade-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: redis-server --appendonly yes --requirepass redis_password
+
+  # Backend API (Development)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: agro-trade-api
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://agro_trade_user:agro_trade_password@postgres:5432/agro_trade_dev?schema=public
+      REDIS_URL: redis://:redis_password@redis:6379
+      PORT: 3000
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - agro-trade-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run start:dev
+
+  # Prisma Studio (Database GUI)
+  prisma-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: agro-trade-prisma-studio
+    ports:
+      - '5555:5555'
+    environment:
+      DATABASE_URL: postgresql://agro_trade_user:agro_trade_password@postgres:5432/agro_trade_dev?schema=public
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - agro-trade-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: npx prisma studio --hostname 0.0.0.0
+    profiles:
+      - studio
+
+  # Nginx Reverse Proxy (Optional, for production-like setup)
+  nginx:
+    image: nginx:alpine
+    container_name: agro-trade-nginx
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    networks:
+      - agro-trade-network
+    depends_on:
+      - api
+    profiles:
+      - nginx
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  agro-trade-network:
+    driver: bridge
