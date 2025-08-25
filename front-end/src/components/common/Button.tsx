@@ -9,15 +9,17 @@ import {
 } from 'react-native';
 import { BaseComponentProps } from '../../types';
 
-interface ButtonProps extends TouchableOpacityProps, BaseComponentProps {
-  title: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
-  size?: 'small' | 'medium' | 'large';
+interface ButtonProps extends Omit<TouchableOpacityProps, 'className'>, BaseComponentProps {
+  className?: string;
+  title?: string;
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'gradient' | 'gradient-green' | 'gradient-blue' | 'gradient-yellow';
+  size?: 'sm' | 'small' | 'medium' | 'large';
   loading?: boolean;
   disabled?: boolean;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   fullWidth?: boolean;
+  children?: React.ReactNode;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -29,10 +31,12 @@ export const Button: React.FC<ButtonProps> = ({
   leftIcon,
   rightIcon,
   fullWidth = false,
+  children,
   onPress,
   testID,
   accessibilityLabel,
   style,
+  className,
   ...props
 }) => {
   const getVariantStyles = (): { container: string; text: string } => {
@@ -62,6 +66,26 @@ export const Button: React.FC<ButtonProps> = ({
           container: 'bg-red-600 border-red-600',
           text: 'text-white',
         };
+      case 'gradient-green':
+        return {
+          container: 'bg-gradient-to-r from-green-600 to-green-700 border-green-600',
+          text: 'text-white',
+        };
+      case 'gradient-blue':
+        return {
+          container: 'bg-gradient-to-r from-blue-600 to-blue-700 border-blue-600',
+          text: 'text-white',
+        };
+      case 'gradient-yellow':
+        return {
+          container: 'bg-gradient-to-r from-yellow-600 to-yellow-700 border-yellow-600',
+          text: 'text-black',
+        };
+      case 'gradient':
+        return {
+          container: '',
+          text: 'text-white',
+        };
       default:
         return {
           container: 'bg-primary-600 border-primary-600',
@@ -72,6 +96,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   const getSizeStyles = (): { container: string; text: string } => {
     switch (size) {
+      case 'sm':
       case 'small':
         return {
           container: 'px-3 py-2 rounded-md',
@@ -109,6 +134,7 @@ export const Button: React.FC<ButtonProps> = ({
         ${sizeStyles.container}
         ${disabledStyles}
         ${widthStyles}
+        ${className || ''}
         border flex-row items-center justify-center
       `}
       onPress={isDisabled ? undefined : onPress}
@@ -123,27 +149,41 @@ export const Button: React.FC<ButtonProps> = ({
       {loading && (
         <ActivityIndicator 
           size="small" 
-          color={variant === 'outline' || variant === 'ghost' ? '#22C55E' : '#FFFFFF'}
+          color={
+            variant === 'outline' || variant === 'ghost' 
+              ? '#22C55E' 
+              : variant === 'gradient-yellow' 
+                ? '#000000' 
+                : '#FFFFFF'
+          }
           className="mr-2"
         />
       )}
       
-      {leftIcon && !loading && (
-        <React.Fragment>
-          {leftIcon}
-          <Text className="w-2" />
-        </React.Fragment>
-      )}
-      
-      <Text className={`${variantStyles.text} ${sizeStyles.text}`}>
-        {title}
-      </Text>
-      
-      {rightIcon && !loading && (
-        <React.Fragment>
-          <Text className="w-2" />
-          {rightIcon}
-        </React.Fragment>
+      {children ? (
+        children
+      ) : (
+        <>
+          {leftIcon && !loading && (
+            <React.Fragment>
+              {leftIcon}
+              <Text className="w-2" />
+            </React.Fragment>
+          )}
+          
+          {title && (
+            <Text className={`${variantStyles.text} ${sizeStyles.text}`}>
+              {title}
+            </Text>
+          )}
+          
+          {rightIcon && !loading && (
+            <React.Fragment>
+              <Text className="w-2" />
+              {rightIcon}
+            </React.Fragment>
+          )}
+        </>
       )}
     </TouchableOpacity>
   );

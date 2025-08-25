@@ -8,6 +8,8 @@ export type RootStackParamList = {
   OrderDetail: { orderId: string };
   ProductDetail: { productId: string };
   Profile: undefined;
+  OAuthCallback: undefined;
+  Onboarding: NavigatorScreenParams<OnboardingStackParamList>;
 };
 
 export type AuthStackParamList = {
@@ -23,21 +25,38 @@ export type OnboardingStackParamList = {
   SellerProductSelection: undefined;
   SellerProductDetails: { products: string[] };
   SellerMarketInsights: undefined;
+  SellerOnboardingFlow: undefined;
   BuyerProductSelection: undefined;
   BuyerRequirements: { products: string[] };
   BuyerMarketOverview: undefined;
+  BuyerOnboardingFlow: undefined;
   TransportFleetInfo: undefined;
   TransportJobPreferences: undefined;
   TransportOpportunities: undefined;
-  AccountCreation: undefined;
+  TransporterOnboardingFlow: undefined;
   OnboardingComplete: undefined;
 };
 
 export type MainTabParamList = {
   Marketplace: undefined;
   Orders: undefined;
+  Dashboard: NavigatorScreenParams<DashboardStackParamList>;
   Profile: undefined;
   Search: undefined;
+};
+
+export type DashboardStackParamList = {
+  DashboardMain: { userRole?: 'admin' | 'seller' | 'buyer' | 'transporter' };
+  CommandCenter: undefined;
+  AgentNetwork: undefined;
+  Operations: undefined;
+  Intelligence: undefined;
+  SellerDashboard: { activeTab?: string };
+  BuyerDashboard: { activeTab?: string };
+  TransporterDashboard: { activeTab?: string };
+  TransporterBidding: undefined;
+  TransporterTransfers: undefined;
+  TransporterFleet: undefined;
 };
 
 export type MarketplaceStackParamList = {

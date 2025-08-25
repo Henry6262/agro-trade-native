@@ -1,3 +1,82 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Fix for React Native Web scrolling issues */
+html {
+  height: 100%;
+  overflow-y: auto;
+}
+
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Force all main containers to allow scrolling */
+#root > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* React Native Web specific fixes */
+div[dir="auto"] {
+  min-height: 0;
+  flex-shrink: 0;
+}
+
+/* Ensure ScrollView works properly on web */
+div[data-testid*="ScrollView"],
+div[class*="css-view"][style*="overflow"] {
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
+  height: 100%;
+}
+
+/* Fix SafeAreaView on web */
+div[style*="flex: 1"] {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ensure content is scrollable */
+div[style*="flex-grow"] {
+  overflow-y: auto;
+}
+
+/* Override any fixed positioning that might block scrolling */
+* {
+  max-height: none !important;
+}
+
+/* Specific fix for navigation containers */
+div[role="navigation"] {
+  flex-shrink: 0;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px 10px rgba(234, 179, 8, 0.3);
+  }
+}
+
+.pulse-yellow {
+  animation: pulse-glow 2s infinite;
+}

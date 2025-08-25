@@ -2,77 +2,100 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   UseGuards,
-  Request,
-  HttpCode,
+  Req,
+  Res,
+  Body,
   HttpStatus,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
+import { ConfigService } from '@nestjs/config';
+import { Response } from 'express';
+import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { RegisterWithCompanyDto } from './dto/register-with-company.dto';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { Public } from './decorators/public.decorator';
+import { User } from '@prisma/client';
 
-@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private configService: ConfigService,
+  ) {}
 
-  @Post('register')
-  @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({ status: 201, description: 'User registered successfully' })
-  @ApiResponse({ status: 400, description: 'Bad request' })
-  async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
-  }
-
-  @Post('login')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard('local'))
-  @ApiOperation({ summary: 'Login with email and password' })
-  @ApiResponse({ status: 200, description: 'Login successful' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async login(@Request() req, @Body() loginDto: LoginDto) {
-    return this.authService.login(req.user);
-  }
-
+  @Public()
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: 'Login with Google OAuth' })
   async googleAuth() {
-    // Guard redirects to Google
+    // Initiates Google OAuth flow
   }
 
+  @Public()
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  @ApiOperation({ summary: 'Google OAuth callback' })
-  async googleAuthRedirect(@Request() req) {
-    return this.authService.login(req.user);
+  async googleAuthCallback(@Req() req: any, @Res() res: Response) {
+    // Google OAuth callback
+    const result = await this.authService.login(req.user);
+    
+    // Log the user information we got from Google
+    console.log('Google OAuth User Info:', {
+      id: result.user.id,
+      email: result.user.email,
+      name: result.user.name,
+      hasProfile: result.user.hasProfile,
+    });
+    
+    // Redirect to frontend with tokens and user info
+    // Use ConfigService to get the CLIENT_URL from environment
+    const frontendUrl = this.configService.get<string>('CLIENT_URL') || 'http://localhost:8081';
+    console.log('Redirecting to frontend URL:', frontendUrl);
+    
+    const params = new URLSearchParams({
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      hasProfile: String(result.user.hasProfile),
+      // Add user information to the redirect
+      userId: result.user.id,
+      userEmail: result.user.email || '',
+      userName: result.user.name || '',
+    });
+    
+    res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
   }
 
+  @Public()
   @Post('refresh')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Refresh access token' })
-  @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
-  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
-  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto) {
-    return this.authService.refreshToken(refreshTokenDto.refreshToken);
+  async refreshToken(@Body() dto: RefreshTokenDto) {
+    return this.authService.refreshToken(dto.refreshToken);
   }
 
-  @Get('profile')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'Profile retrieved successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  getProfile(@Request() req) {
-    return req.user;
+  @Public()
+  @Post('register-with-company')
+  async registerWithCompany(@Body() dto: RegisterWithCompanyDto) {
+    return this.authService.registerWithCompany(dto);
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@CurrentUser() user: User) {
+    // In JWT, logout is handled client-side by removing the token
+    return { message: 'Logged out successfully' };
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getProfile(@CurrentUser() user: User) {
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      phone: user.phone,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 }

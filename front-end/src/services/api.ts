@@ -25,15 +25,33 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle errors globally
+// Response interceptor to handle errors globally and token refresh
 api.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  (error) => {
-    if (error.response?.status === 401) {
-      // Unauthorized - clear auth state
-      useAuthStore.getState().logout();
+  async (error) => {
+    const originalRequest = error.config;
+    
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        // Attempt to refresh the token
+        await useAuthStore.getState().refreshTokens();
+        
+        // Get the new token and retry the original request
+        const newToken = useAuthStore.getState().token;
+        if (newToken) {
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        // Refresh failed, logout user
+        console.error('Token refresh failed:', refreshError);
+        useAuthStore.getState().logout();
+        return Promise.reject(refreshError);
+      }
     }
     
     // Log error for debugging

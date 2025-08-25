@@ -1,0 +1,20 @@
+{
+  "name": "agro-trade",
+  "version": "1.0.0",
+  "description": "Agro Trade Platform - Visual Testing Suite",
+  "scripts": {
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots",
+    "test:visual:ui": "playwright test --ui",
+    "test:visual:report": "playwright show-report",
+    "test:install": "playwright install",
+    "start:web": "cd fe-dashboar/v0-agro-trade-dashboard && npm run dev",
+    "start:native": "cd front-end && npx expo start --web",
+    "start:all": "concurrently \"npm run start:web\" \"npm run start:native\""
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "concurrently": "^8.2.2",
+    "playwright": "^1.55.0"
+  }
+}

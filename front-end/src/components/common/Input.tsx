@@ -42,24 +42,24 @@ export const Input: React.FC<InputProps> = ({
 
   const getVariantStyles = () => {
     const hasError = !!error;
-    const focusedColor = hasError ? 'border-red-500' : 'border-primary-500';
-    const defaultColor = hasError ? 'border-red-300' : 'border-gray-300';
+    const focusedColor = hasError ? 'border-red-500' : 'border-green-500';
+    const defaultColor = hasError ? 'border-red-300' : 'border-neutral-600';
 
     switch (variant) {
       case 'filled':
         return {
-          container: `bg-gray-100 border-b-2 ${isFocused ? focusedColor : defaultColor}`,
-          input: 'bg-transparent',
+          container: `bg-neutral-800 border-b-2 ${isFocused ? focusedColor : defaultColor}`,
+          input: 'bg-transparent text-white',
         };
       case 'outline':
         return {
-          container: `border-2 rounded-lg ${isFocused ? focusedColor : defaultColor}`,
-          input: 'bg-transparent',
+          container: `bg-neutral-800 border-2 rounded-lg ${isFocused ? focusedColor : defaultColor}`,
+          input: 'bg-transparent text-white',
         };
       default:
         return {
-          container: `border-b-2 ${isFocused ? focusedColor : defaultColor}`,
-          input: 'bg-transparent',
+          container: `bg-neutral-800 border-b-2 ${isFocused ? focusedColor : defaultColor}`,
+          input: 'bg-transparent text-white',
         };
     }
   };
@@ -100,7 +100,7 @@ export const Input: React.FC<InputProps> = ({
   return (
     <View className="w-full">
       {label && (
-        <Text className={`${sizeStyles.label} font-medium text-gray-700 mb-1`}>
+        <Text className={`${sizeStyles.label} font-medium text-neutral-300 mb-1`}>
           {label}
           {required && <Text className="text-red-500 ml-1">*</Text>}
         </Text>
@@ -114,11 +114,11 @@ export const Input: React.FC<InputProps> = ({
         )}
         
         <TextInput
-          className={`${variantStyles.input} ${sizeStyles.input} flex-1 text-gray-900`}
+          className={`${variantStyles.input} ${sizeStyles.input} flex-1`}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor="#6b7280"
           secureTextEntry={showPassword}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -130,7 +130,7 @@ export const Input: React.FC<InputProps> = ({
         
         {isPassword && (
           <TouchableOpacity onPress={handlePasswordToggle} className="ml-3">
-            <Text className="text-gray-500 text-sm">
+            <Text className="text-neutral-400 text-sm">
               {isPasswordVisible ? 'Hide' : 'Show'}
             </Text>
           </TouchableOpacity>
@@ -146,7 +146,7 @@ export const Input: React.FC<InputProps> = ({
       {(error || helperText) && (
         <Text
           className={`${sizeStyles.label} mt-1 ${
-            error ? 'text-red-500' : 'text-gray-500'
+            error ? 'text-red-500' : 'text-neutral-400'
           }`}
         >
           {error || helperText}

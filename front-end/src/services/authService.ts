@@ -4,6 +4,7 @@ import {
   LoginForm,
   RegisterForm,
   ApiResponse,
+  UserRole,
 } from '../types';
 
 export interface LoginResponse {
@@ -16,6 +17,36 @@ export interface RegisterResponse {
   user: User;
   token: string;
   refreshToken: string;
+}
+
+export interface GoogleAuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    phone?: string;
+    role: UserRole;
+    hasProfile: boolean;
+  };
+}
+
+export interface CompanyInfo {
+  companyName: string;
+  vatNumber?: string;
+  businessLicense?: string;
+  companyAddress?: string;
+  website?: string;
+  establishedYear?: number;
+}
+
+export interface RegisterWithCompanyDto {
+  email: string;
+  name: string;
+  phone?: string;
+  role: UserRole;
+  companyInfo?: CompanyInfo;
 }
 
 export const authService = {
@@ -79,8 +110,21 @@ export const authService = {
   },
 
   // Social authentication
-  googleAuth: async (token: string): Promise<LoginResponse> => {
-    return apiClient.post<ApiResponse<LoginResponse>>('/auth/google', { token })
+  googleAuth: async (token: string): Promise<GoogleAuthResponse> => {
+    return apiClient.post<ApiResponse<GoogleAuthResponse>>('/auth/google', { token })
       .then((response) => response.data);
+  },
+
+  // Onboarding registration
+  registerWithCompany: async (data: RegisterWithCompanyDto): Promise<RegisterResponse> => {
+    return apiClient.post<ApiResponse<RegisterResponse>>('/auth/register-with-company', data)
+      .then((response) => response.data);
+  },
+
+  // Refresh token
+  refreshAccessToken: async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
+    return apiClient.post<ApiResponse<{ accessToken: string; refreshToken: string }>>('/auth/refresh', {
+      refreshToken,
+    }).then((response) => response.data);
   },
 };

@@ -72,16 +72,16 @@ export const RoleSelectionScreen: React.FC<Props> = ({ navigation }) => {
 
     nextStep();
     
-    // Navigate based on selected role
+    // Navigate based on selected role - using new complete flows
     switch (localSelectedRole) {
       case 'seller':
-        navigation.navigate('SellerProductSelection');
+        navigation.navigate('SellerOnboardingFlow');
         break;
       case 'buyer':
-        navigation.navigate('BuyerProductSelection');
+        navigation.navigate('BuyerOnboardingFlow');
         break;
       case 'transport':
-        navigation.navigate('TransportFleetInfo');
+        navigation.navigate('TransporterOnboardingFlow');
         break;
       default:
         break;
@@ -223,15 +223,16 @@ export const RoleSelectionScreenLarge: React.FC<Props> = ({ navigation }) => {
     if (!localSelectedRole) return;
     nextStep();
     
+    // Navigate to complete flows for all roles
     switch (localSelectedRole) {
       case 'seller':
-        navigation.navigate('SellerProductSelection');
+        navigation.navigate('SellerOnboardingFlow');
         break;
       case 'buyer':
-        navigation.navigate('BuyerProductSelection');
+        navigation.navigate('BuyerOnboardingFlow');
         break;
       case 'transport':
-        navigation.navigate('TransportFleetInfo');
+        navigation.navigate('TransporterOnboardingFlow');
         break;
     }
   };

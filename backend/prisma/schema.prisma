@@ -1,590 +1,270 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Simplified Agro Trade Schema - MVP User Onboarding
+// Version: 1.0 (Minimal)
+// Focus: User authentication and progressive profile completion
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  extensions = [postgis]
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-// Enums
+// ==================== ENUMS ====================
+
 enum UserRole {
-  FARMER    // Seller
-  FACTORY   // Buyer
+  FARMER
+  BUYER
   TRANSPORTER
   ADMIN
-  BROKER
 }
 
-enum UserStatus {
+enum TruckType {
+  FLATBED
+  TANKER
+  REEFER
+  OTHER
+}
+
+enum ProductCategory {
+  WHEAT
+  CORN
+  SUNFLOWER
+  BARLEY
+  OATS
+  RAPESEED
+  PEAS
+  SOYBEAN_MEAL
+  WHEAT_BRAN
+  ALFALFA
+  OTHER
+}
+
+enum ProductUnit {
+  TON
+  KG
+}
+
+enum ProductStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+}
+
+enum DocumentType {
+  ID_CARD
+  BUSINESS_LICENSE
+  VAT_CERT
+  INSURANCE
+  OTHER
+}
+
+enum VerificationStatus {
   PENDING
-  ACTIVE
-  SUSPENDED
-  BANNED
-}
-
-enum OrderType {
-  SELL      // Farmers create sell orders
-  BUY       // Factories create buy requests
-}
-
-enum OrderStatus {
-  ACTIVE
-  MATCHED
-  COMPLETED
-  CANCELLED
-  EXPIRED
-}
-
-enum DealStatus {
-  PENDING_APPROVAL
   APPROVED
   REJECTED
-  IN_PROGRESS
-  DELIVERED
-  COMPLETED
-  DISPUTED
-  CANCELLED
 }
 
-enum TransportJobStatus {
-  OPEN
-  BIDDING
-  ASSIGNED
-  IN_TRANSIT
-  DELIVERED
-  COMPLETED
-  CANCELLED
-}
+// ==================== CORE TABLES ====================
 
-enum BidStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-  WITHDRAWN
-}
-
-enum PaymentStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
-  REFUNDED
-}
-
-enum NotificationType {
-  ORDER_MATCHED
-  DEAL_CREATED
-  DEAL_APPROVED
-  DEAL_REJECTED
-  TRANSPORT_BID_RECEIVED
-  TRANSPORT_ASSIGNED
-  DELIVERY_STARTED
-  DELIVERY_COMPLETED
-  PAYMENT_RECEIVED
-  SYSTEM_ALERT
-}
-
-// User Management
+// 1. Users - Core authentication and identity
 model User {
-  id          String     @id @default(cuid())
-  email       String     @unique
-  phone       String?    @unique
-  firstName   String
-  lastName    String
-  avatar      String?
-  role        UserRole
-  status      UserStatus @default(PENDING)
-  
-  // OAuth fields
-  googleId    String?    @unique
-  
-  // Profile completion
-  isProfileComplete Boolean @default(false)
-  emailVerified     Boolean @default(false)
-  phoneVerified     Boolean @default(false)
-  
-  // Location (PostGIS point)
-  location    Unsupported("geometry(Point, 4326)")?
-  address     String?
-  city        String?
-  state       String?
-  country     String?
-  zipCode     String?
-  
-  // Business information
-  companyName    String?
-  businessLicense String?
-  taxId          String?
-  
-  // Timestamps
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  lastLoginAt DateTime?
-  
+  id        String   @id @default(cuid())
+  googleId  String?  @unique @map("google_id")
+  email     String   @unique
+  name      String?
+  phone     String?
+  role      UserRole
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
   // Relations
-  profile       UserProfile?
-  sellOrders    Order[]      @relation("SellerOrders")
-  buyOrders     Order[]      @relation("BuyerOrders")
-  dealsAsSeller Deal[]       @relation("SellerDeals")
-  dealsAsBuyer  Deal[]       @relation("BuyerDeals")
-  transportJobs TransportJob[] @relation("CreatedTransportJobs")
-  assignedTransportJobs TransportJob[] @relation("AssignedTransporter")
-  bids          TransportBid[]
-  payments      Payment[]
-  notifications Notification[]
-  reviews       Review[]     @relation("ReviewsGiven")
-  receivedReviews Review[]   @relation("ReviewsReceived")
-  
+  farmerProfile      FarmerProfile?
+  buyerProfile       BuyerProfile?
+  transporterProfile TransporterProfile?
+  companyInfo        CompanyInfo?
+  trucks             Truck[]
+  products           Product[]
+  documents          KycDocument[]
+  fleetVehicles      FleetVehicle[]
+  transporterBases   TransporterBase[] @relation("TransporterBases")
+
   @@map("users")
 }
 
-model UserProfile {
-  id     String @id @default(cuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+// 2. Role-based Profiles
+
+model FarmerProfile {
+  userId         String  @id @map("user_id")
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  // Farmer/Seller specific fields
-  farmSize        Float?
-  cropsGrown      String[]
-  certifications  String[]
-  yearsExperience Int?
+  farmName       String? @map("farm_name")
+  locationAddress String? @map("location_address")
+  locationLat    Float?  @map("location_lat")
+  locationLng    Float?  @map("location_lng")
+  businessId     String? @map("business_id") // VAT/license number
+  iban           String?
+  certifications Json?   // Array of certification names
   
-  // Factory/Buyer specific fields
-  industryType       String?
-  processingCapacity Float?
-  requiredCertifications String[]
-  
-  // Transporter specific fields
-  vehicleTypes       String[]
-  maxCapacity        Float?
-  coverageAreas      String[]
-  licenseNumber      String?
-  insuranceDetails   String?
-  
-  // Common fields
-  description   String?
-  website       String?
-  socialLinks   Json?
-  preferences   Json?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("user_profiles")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("farmer_profiles")
 }
 
-// Product & Category Management
-model Category {
-  id          String @id @default(cuid())
-  name        String @unique
-  description String?
-  image       String?
-  isActive    Boolean @default(true)
+model BuyerProfile {
+  userId          String  @id @map("user_id")
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  // Hierarchy
-  parentId String?
-  parent   Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
-  children Category[] @relation("CategoryHierarchy")
+  companyName     String? @map("company_name")
+  vatId           String? @map("vat_id")
+  billingAddress  Json?   @map("billing_address") // {street, city, state, zip, country}
+  paymentMethod   Json?   @map("payment_method")  // {type, details}
   
-  products Product[]
-  orders   Order[]
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("buyer_profiles")
+}
+
+model TransporterProfile {
+  userId          String  @id @map("user_id")
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  companyName     String? @map("company_name")
+  licenseNumber   String? @map("license_number")
+  baseLocationAddress String? @map("base_location_address")
+  baseLocationLat Float?  @map("base_location_lat")
+  baseLocationLng Float?  @map("base_location_lng")
+  insuranceDocUrl String? @map("insurance_doc_url")
+  iban            String?
   
-  @@map("categories")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("transporter_profiles")
+}
+
+// Company Information for enhanced registration flow
+model CompanyInfo {
+  userId          String  @id @map("user_id")
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  companyName     String  @map("company_name")
+  vatNumber       String? @map("vat_number")
+  businessLicense String? @map("business_license")
+  companyAddress  Json?   @map("company_address") // {street, city, state, zip, country}
+  website         String?
+  establishedYear Int?    @map("established_year")
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("company_info")
+}
+
+// Multiple base locations for transporters
+model TransporterBase {
+  id            String  @id @default(cuid())
+  transporterId String  @map("transporter_id")
+  user          User    @relation("TransporterBases", fields: [transporterId], references: [id], onDelete: Cascade)
+  
+  name          String  // Base name/identifier
+  address       String
+  latitude      Float
+  longitude     Float
+  isPrimary     Boolean @default(false) @map("is_primary")
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([transporterId])
+  @@map("transporter_bases")
+}
+
+// Enhanced fleet vehicle information for transporters
+model FleetVehicle {
+  id            String    @id @default(cuid())
+  transporterId String    @map("transporter_id")
+  transporter   User      @relation(fields: [transporterId], references: [id], onDelete: Cascade)
+  
+  plateNumber   String    @map("plate_number")
+  vehicleType   TruckType @map("vehicle_type")
+  capacityKg    Int       @map("capacity_kg")
+  year          Int?
+  make          String?
+  model         String?
+  fuelType      String?   @map("fuel_type") // DIESEL, GASOLINE, etc.
+  active        Boolean   @default(true)
+  
+  // Documentation
+  registrationDoc String? @map("registration_doc")
+  insuranceDoc    String? @map("insurance_doc")
+  licenseDoc      String? @map("license_doc")
+  
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([transporterId])
+  @@map("fleet_vehicles")
+}
+
+// 3. Assets
+
+model Truck {
+  id            String    @id @default(cuid())
+  transporterId String    @map("transporter_id")
+  transporter   User      @relation(fields: [transporterId], references: [id], onDelete: Cascade)
+  
+  plateNumber   String    @map("plate_number")
+  capacityKg    Int       @map("capacity_kg")
+  type          TruckType
+  active        Boolean   @default(true)
+  
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@index([transporterId])
+  @@map("trucks")
 }
 
 model Product {
-  id          String @id @default(cuid())
-  name        String
-  description String?
-  image       String?
-  unit        String // kg, tons, boxes, etc.
+  id            String          @id @default(cuid())
+  farmerId      String          @map("farmer_id")
+  farmer        User            @relation(fields: [farmerId], references: [id], onDelete: Cascade)
   
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
+  category      ProductCategory
+  quantity      Decimal         @db.Decimal(10, 2)
+  unit          ProductUnit
+  locationAddress String?       @map("location_address")
+  locationLat   Float?          @map("location_lat")
+  locationLng   Float?          @map("location_lng")
+  status        ProductStatus   @default(AVAILABLE)
   
-  // Product specifications
-  specifications Json?
-  qualityGrades  String[]
-  seasonality    Json?
-  
-  isActive  Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  orders Order[]
-  
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  @@index([farmerId])
+  @@index([status])
   @@map("products")
 }
 
-// Order Management
-model Order {
-  id          String      @id @default(cuid())
-  type        OrderType
-  status      OrderStatus @default(ACTIVE)
-  
-  // Product details
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-  
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
-  
-  quantity      Float
-  unit          String
-  pricePerUnit  Float
-  totalValue    Float
-  
-  // Quality specifications
-  qualityGrade    String?
-  specifications  Json?
-  packagingType   String?
-  
-  // Location (PostGIS point)
-  location    Unsupported("geometry(Point, 4326)")
-  address     String
-  city        String
-  state       String
-  country     String
-  
-  // Seller (for SELL orders)
-  sellerId String?
-  seller   User?   @relation("SellerOrders", fields: [sellerId], references: [id])
-  
-  // Buyer (for BUY orders)
-  buyerId String?
-  buyer   User?   @relation("BuyerOrders", fields: [buyerId], references: [id])
-  
-  // Timing
-  availableFrom DateTime?
-  availableTo   DateTime?
-  deliveryBy    DateTime?
-  
-  // Additional details
-  description String?
-  images      String[]
-  documents   String[]
-  
-  // Matching preferences
-  preferredBuyerTypes  String[]
-  preferredSellerTypes String[]
-  maxDistance          Float? // in kilometers
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  expiresAt DateTime?
-  
-  // Relations
-  deals Deal[]
-  
-  @@map("orders")
-}
+// 4. Compliance (Optional at MVP)
 
-// Deal & Transaction Management
-model Deal {
-  id       String     @id @default(cuid())
-  status   DealStatus @default(PENDING_APPROVAL)
-  dealCode String     @unique // Human readable code like AGT-2024-001
+model KycDocument {
+  id          String             @id @default(cuid())
+  userId      String             @map("user_id")
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  // Order references
-  sellOrderId String
-  sellOrder   Order @relation(fields: [sellOrderId], references: [id])
-  
-  // Parties
-  sellerId String
-  seller   User   @relation("SellerDeals", fields: [sellerId], references: [id])
-  
-  buyerId String
-  buyer   User   @relation("BuyerDeals", fields: [buyerId], references: [id])
-  
-  // Deal terms
-  quantity        Float
-  unit           String
-  agreedPrice    Float
-  totalAmount    Float
-  
-  // Commission (5% platform fee)
-  commissionRate   Float   @default(0.05)
-  commissionAmount Float
-  sellerAmount     Float   // Total - Commission
-  
-  // Quality & specifications
-  qualityGrade   String?
-  specifications Json?
-  packagingType  String?
-  
-  // Delivery details
-  deliveryAddress String
-  deliveryDate    DateTime?
-  
-  // Approval tracking
-  sellerApprovedAt DateTime?
-  buyerApprovedAt  DateTime?
-  adminApprovedAt  DateTime?
-  
-  // Contract details
-  contractTerms String?
-  documents     String[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  expiresAt DateTime? // Approval deadline
-  
-  // Relations
-  transportJob TransportJob?
-  payments     Payment[]
-  reviews      Review[]
-  
-  @@map("deals")
-}
+  docType     DocumentType       @map("doc_type")
+  docUrl      String             @map("doc_url")
+  status      VerificationStatus @default(PENDING)
+  submittedAt DateTime           @default(now()) @map("submitted_at")
+  reviewedAt  DateTime?          @map("reviewed_at")
+  reviewNotes String?            @map("review_notes")
 
-// Transportation & Logistics
-model TransportJob {
-  id     String             @id @default(cuid())
-  status TransportJobStatus @default(OPEN)
-  jobCode String            @unique // Human readable code like TRN-2024-001
-  
-  // Associated deal
-  dealId String @unique
-  deal   Deal   @relation(fields: [dealId], references: [id])
-  
-  // Created by (usually admin/broker)
-  createdById String
-  createdBy   User   @relation("CreatedTransportJobs", fields: [createdById], references: [id])
-  
-  // Assigned transporter
-  assignedTransporterId String?
-  assignedTransporter   User?   @relation("AssignedTransporter", fields: [assignedTransporterId], references: [id])
-  
-  // Route details
-  pickupLocation    Unsupported("geometry(Point, 4326)")
-  pickupAddress     String
-  deliveryLocation  Unsupported("geometry(Point, 4326)")
-  deliveryAddress   String
-  
-  // Job details
-  cargoDescription String
-  weight           Float
-  volume           Float?
-  specialRequirements String?
-  
-  // Vehicle requirements
-  requiredVehicleType String?
-  temperatureControl  Boolean @default(false)
-  hazardousMaterial   Boolean @default(false)
-  
-  // Timing
-  pickupDate       DateTime
-  expectedDelivery DateTime
-  actualPickupAt   DateTime?
-  actualDeliveryAt DateTime?
-  
-  // Pricing
-  budgetRange    Json? // {min: number, max: number}
-  finalPrice     Float?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  // Relations
-  bids     TransportBid[]
-  tracking TrackingUpdate[]
-  
-  @@map("transport_jobs")
-}
-
-model TransportBid {
-  id     String    @id @default(cuid())
-  status BidStatus @default(PENDING)
-  
-  // Job and bidder
-  transportJobId String
-  transportJob   TransportJob @relation(fields: [transportJobId], references: [id])
-  
-  bidderId String
-  bidder   User   @relation(fields: [bidderId], references: [id])
-  
-  // Bid details
-  proposedPrice Float
-  estimatedDelivery DateTime
-  vehicleDetails Json? // vehicle type, capacity, etc.
-  
-  // Additional information
-  message     String?
-  documents   String[]
-  insurance   Json?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  expiresAt DateTime?
-  
-  @@unique([transportJobId, bidderId])
-  @@map("transport_bids")
-}
-
-model TrackingUpdate {
-  id String @id @default(cuid())
-  
-  transportJobId String
-  transportJob   TransportJob @relation(fields: [transportJobId], references: [id])
-  
-  // Location (PostGIS point)
-  location    Unsupported("geometry(Point, 4326)")
-  address     String?
-  
-  status      String
-  message     String?
-  images      String[]
-  
-  // Metadata
-  recordedBy  String? // User ID who recorded this update
-  deviceId    String?
-  accuracy    Float?
-  
-  createdAt DateTime @default(now())
-  
-  @@map("tracking_updates")
-}
-
-// Payment Management
-model Payment {
-  id            String        @id @default(cuid())
-  status        PaymentStatus @default(PENDING)
-  paymentMethod String        // stripe, bank_transfer, etc.
-  
-  // Associated deal
-  dealId String
-  deal   Deal   @relation(fields: [dealId], references: [id])
-  
-  // Payer
-  payerId String
-  payer   User   @relation(fields: [payerId], references: [id])
-  
-  // Payment details
-  amount        Float
-  currency      String @default("USD")
-  
-  // Stripe integration
-  stripePaymentIntentId String?
-  stripeChargeId        String?
-  
-  // Transaction details
-  transactionId String?
-  reference     String?
-  
-  // Metadata
-  metadata Json?
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  processedAt DateTime?
-  
-  @@map("payments")
-}
-
-// Review & Rating System
-model Review {
-  id      String @id @default(cuid())
-  rating  Int    // 1-5 stars
-  comment String?
-  
-  // Associated deal
-  dealId String
-  deal   Deal   @relation(fields: [dealId], references: [id])
-  
-  // Reviewer and reviewee
-  reviewerId String
-  reviewer   User   @relation("ReviewsGiven", fields: [reviewerId], references: [id])
-  
-  revieweeId String
-  reviewee   User   @relation("ReviewsReceived", fields: [revieweeId], references: [id])
-  
-  // Review categories
-  communicationRating Int?
-  qualityRating      Int?
-  timelinessRating   Int?
-  overallRating      Int
-  
-  // Metadata
-  isVerified Boolean @default(false)
-  images     String[]
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@unique([dealId, reviewerId]) // One review per deal per reviewer
-  @@map("reviews")
-}
-
-// Notification System
-model Notification {
-  id      String           @id @default(cuid())
-  type    NotificationType
-  title   String
-  message String
-  data    Json?
-  
-  // Recipient
-  userId String
-  user   User   @relation(fields: [userId], references: [id])
-  
-  // Status
-  isRead Boolean @default(false)
-  readAt DateTime?
-  
-  // Channel tracking
-  sentViaEmail Boolean @default(false)
-  sentViaPush  Boolean @default(false)
-  sentViaWS    Boolean @default(false)
-  
-  createdAt DateTime @default(now())
-  expiresAt DateTime?
-  
-  @@map("notifications")
-}
-
-// System Configuration
-model SystemConfig {
-  id    String @id @default(cuid())
-  key   String @unique
-  value String
-  type  String @default("string") // string, number, boolean, json
-  
-  description String?
-  isActive    Boolean @default(true)
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  
-  @@map("system_config")
-}
-
-// Audit Log
-model AuditLog {
-  id       String @id @default(cuid())
-  action   String
-  entity   String // User, Order, Deal, etc.
-  entityId String
-  
-  userId String? // Who performed the action
-  
-  // Changes
-  oldValues Json?
-  newValues Json?
-  
-  // Request details
-  ipAddress String?
-  userAgent String?
-  
-  createdAt DateTime @default(now())
-  
-  @@map("audit_logs")
+  @@index([userId])
+  @@index([status])
+  @@map("kyc_documents")
 }

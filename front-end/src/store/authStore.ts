@@ -7,6 +7,7 @@ interface AuthState {
   // State
   user: User | null;
   token: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -14,11 +15,13 @@ interface AuthState {
   // Actions
   setUser: (user: User) => void;
   setToken: (token: string) => void;
-  login: (user: User, token: string) => void;
+  setRefreshToken: (refreshToken: string) => void;
+  login: (user: User, token: string, refreshToken?: string) => void;
   logout: () => void;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string) => void;
+  refreshTokens: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -27,6 +30,7 @@ export const useAuthStore = create<AuthState>()(
       // Initial state
       user: null,
       token: null,
+      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
@@ -40,10 +44,15 @@ export const useAuthStore = create<AuthState>()(
         set({ token });
       },
 
-      login: (user: User, token: string) => {
+      setRefreshToken: (refreshToken: string) => {
+        set({ refreshToken });
+      },
+
+      login: (user: User, token: string, refreshToken?: string) => {
         set({
           user,
           token,
+          refreshToken: refreshToken || null,
           isAuthenticated: true,
           isLoading: false,
           error: null,
@@ -54,10 +63,37 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: null,
           token: null,
+          refreshToken: null,
           isAuthenticated: false,
           isLoading: false,
           error: null,
         });
+      },
+
+      refreshTokens: async () => {
+        const state = get();
+        if (!state.refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        try {
+          set({ isLoading: true, error: null });
+          
+          // Import authService dynamically to avoid circular dependency
+          const { authService } = await import('../services/authService');
+          const response = await authService.refreshAccessToken(state.refreshToken);
+          
+          set({
+            token: response.accessToken,
+            refreshToken: response.refreshToken,
+            isLoading: false,
+          });
+        } catch (error: any) {
+          console.error('Token refresh failed:', error);
+          // If refresh fails, logout the user
+          get().logout();
+          throw error;
+        }
       },
 
       clearError: () => {
@@ -78,6 +114,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
+        refreshToken: state.refreshToken,
         isAuthenticated: state.isAuthenticated,
       }),
     }

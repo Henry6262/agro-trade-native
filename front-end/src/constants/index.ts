@@ -1,6 +1,6 @@
 // App-wide constants
 export const APP_CONFIG = {
-  API_URL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000/api',
+  API_URL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000/api',
   APP_NAME: 'AgroTrade',
   VERSION: '1.0.0',
 } as const;

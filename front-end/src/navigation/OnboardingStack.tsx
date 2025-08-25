@@ -1,6 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import type { OnboardingStackParamList } from '../types';
+import type { OnboardingStackParamList } from './types';
 
 // Onboarding Screens
 import { RoleSelectionScreen } from '../screens/onboarding/RoleSelectionScreen';
@@ -10,12 +10,14 @@ import {
 } from '../screens/onboarding/ProductSelectionScreen';
 import { SellerProductDetailsScreen } from '../screens/onboarding/seller/ProductDetailsScreen';
 import { SellerMarketInsightsScreen } from '../screens/onboarding/seller/MarketInsightsScreen';
+import { SellerOnboardingFlowScreen } from '../screens/onboarding/seller/SellerOnboardingFlowScreen';
 import { BuyerRequirementsScreen } from '../screens/onboarding/buyer/RequirementsScreen';
 import { BuyerMarketOverviewScreen } from '../screens/onboarding/buyer/MarketOverviewScreen';
+import { BuyerOnboardingFlowScreen } from '../screens/onboarding/buyer/BuyerOnboardingFlowScreen';
 import { TransportFleetInfoScreen } from '../screens/onboarding/transport/FleetInfoScreen';
 import { TransportJobPreferencesScreen } from '../screens/onboarding/transport/JobPreferencesScreen';
 import { TransportOpportunitiesScreen } from '../screens/onboarding/transport/OpportunitiesScreen';
-import { AccountCreationScreen } from '../screens/onboarding/AccountCreationScreen';
+import { TransporterOnboardingFlowScreen } from '../screens/onboarding/transporter/TransporterOnboardingFlowScreen';
 import { OnboardingCompleteScreen } from '../screens/onboarding/OnboardingCompleteScreen';
 
 const Stack = createStackNavigator<OnboardingStackParamList>();
@@ -88,6 +90,15 @@ export const OnboardingStack: React.FC = () => {
         }}
       />
 
+      {/* New Seller Onboarding Flow */}
+      <Stack.Screen 
+        name="SellerOnboardingFlow" 
+        component={SellerOnboardingFlowScreen}
+        options={{
+          title: 'Seller Onboarding',
+        }}
+      />
+
       {/* Buyer Flow */}
       <Stack.Screen 
         name="BuyerProductSelection" 
@@ -108,6 +119,15 @@ export const OnboardingStack: React.FC = () => {
         component={BuyerMarketOverviewScreen}
         options={{
           title: 'Market Overview',
+        }}
+      />
+
+      {/* New Buyer Onboarding Flow */}
+      <Stack.Screen 
+        name="BuyerOnboardingFlow" 
+        component={BuyerOnboardingFlowScreen}
+        options={{
+          title: 'Buyer Onboarding',
         }}
       />
 
@@ -134,14 +154,16 @@ export const OnboardingStack: React.FC = () => {
         }}
       />
 
-      {/* Common Screens */}
+      {/* New Transporter Onboarding Flow */}
       <Stack.Screen 
-        name="AccountCreation" 
-        component={AccountCreationScreen}
+        name="TransporterOnboardingFlow" 
+        component={TransporterOnboardingFlowScreen}
         options={{
-          title: 'Create Account',
+          title: 'Transporter Onboarding',
         }}
       />
+
+      {/* Common Screens */}
       <Stack.Screen 
         name="OnboardingComplete" 
         component={OnboardingCompleteScreen}
