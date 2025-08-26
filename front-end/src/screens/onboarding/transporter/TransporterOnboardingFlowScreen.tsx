@@ -1,67 +1,73 @@
-import React, { useState, useEffect } from 'react'
-import { View, StatusBar } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
-import type { StackNavigationProp } from '@react-navigation/stack'
-import type { OnboardingStackParamList } from '../../../navigation/types'
-import { TransporterOnboarding } from '../../../components/onboarding'
-import { AuthModal } from '../../../components/onboarding/shared/AuthModal'
-import { useOnboardingStore } from '../../../store/onboardingStore'
+import React, { useState, useEffect } from 'react';
+import { View, StatusBar, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { RootStackParamList } from '../../../navigation/types';
+import { TransporterOnboarding } from '../../../components/onboarding';
+import { InlineAuth } from '../../../components/onboarding/shared/InlineAuth';
+import { useOnboardingStore } from '../../../store/onboardingStore';
 
-type TransporterOnboardingFlowScreenNavigationProp = StackNavigationProp<
-  OnboardingStackParamList,
-  'TransporterOnboardingFlow'
->
+type NavigationProp = StackNavigationProp<RootStackParamList, 'TransporterOnboardingFlow'>;
 
-export function TransporterOnboardingFlowScreen() {
-  const navigation = useNavigation<TransporterOnboardingFlowScreenNavigationProp>()
-  const [showAuthModal, setShowAuthModal] = useState(false)
-  const onboardingStore = useOnboardingStore()
+interface Props {
+  navigation: NavigationProp;
+  route: any;
+}
+
+export const TransporterOnboardingFlowScreen: React.FC<Props> = ({ navigation }) => {
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const onboardingStore = useOnboardingStore();
 
   useEffect(() => {
-    // Set user role to transport when entering this flow
-    onboardingStore.setRole('transport')
+    // Set user role to transporter when entering this flow
+    onboardingStore.setRole('transport');
     
     // Save onboarding data when component mounts
-    onboardingStore.saveOnboardingData().catch(console.error)
+    onboardingStore.saveOnboardingData?.().catch(console.error);
     
-    // Check if we're returning from Google OAuth
-    const googleAuthData = (onboardingStore as any).googleAuthData
+    // Check if we're returning from OAuth
+    const googleAuthData = onboardingStore.googleAuthData;
     if (googleAuthData?.isAuthenticated) {
-      console.log('Returning from Google OAuth, showing modal with pre-filled data')
-      // Show the auth modal with the second step (business details)
-      setShowAuthModal(true)
+      console.log('Returning from OAuth, showing modal with pre-filled data');
+      setShowAuthModal(true);
     }
-  }, [])
+  }, []);
 
   const handleComplete = async () => {
     try {
       // Save current onboarding data before showing auth modal
-      await onboardingStore.saveOnboardingData()
-      // Show authentication modal instead of directly navigating
-      setShowAuthModal(true)
+      await onboardingStore.saveOnboardingData?.();
+      setShowAuthModal(true);
     } catch (error) {
-      console.error('Failed to save onboarding data:', error)
-      // Still show auth modal even if save fails
-      setShowAuthModal(true)
+      console.error('Failed to save onboarding data:', error);
+      setShowAuthModal(true);
     }
-  }
+  };
 
   const handleAuthComplete = () => {
-    setShowAuthModal(false)
-    navigation.navigate('OnboardingComplete')
+    setShowAuthModal(false);
+    navigation.navigate('OnboardingComplete');
+  };
+
+  if (showAuthModal) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#111827' }}>
+        <StatusBar barStyle="light-content" backgroundColor="#111827" />
+        <ScrollView style={{ flex: 1 }}>
+          <InlineAuth
+            onClose={() => setShowAuthModal(false)}
+            onComplete={handleAuthComplete}
+            userRole="transport"
+          />
+        </ScrollView>
+      </View>
+    );
   }
 
   return (
-    <View className="flex-1 bg-white">
-      <StatusBar barStyle="dark-content" backgroundColor="white" />
+    <View style={{ flex: 1, backgroundColor: '#111827' }}>
+      <StatusBar barStyle="light-content" backgroundColor="#111827" />
       <TransporterOnboarding onComplete={handleComplete} />
-      
-      <AuthModal
-        visible={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onComplete={handleAuthComplete}
-        userRole="transport"
-      />
     </View>
-  )
-}
+  );
+};

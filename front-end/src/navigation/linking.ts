@@ -1,5 +1,6 @@
-// For web, we can use simple prefixes
-const prefix = '/';
+import * as Linking from 'expo-linking';
+
+const prefix = Linking.createURL('/');
 
 export const linking = {
   prefixes: [prefix, 'http://localhost:8081/', 'http://localhost:8082/'],
@@ -13,14 +14,12 @@ export const linking = {
           Profile: 'profile',
         },
       },
-      Onboarding: {
-        screens: {
-          RoleSelection: 'onboarding/role',
-          SellerOnboardingFlow: 'onboarding/seller',
-          BuyerOnboardingFlow: 'onboarding/buyer', 
-          TransporterOnboardingFlow: 'onboarding/transporter',
-        },
-      },
+      // Flattened onboarding screens
+      RoleSelection: 'onboarding/role',
+      SellerOnboardingFlow: 'onboarding/seller',
+      BuyerOnboardingFlow: 'onboarding/buyer', 
+      TransporterOnboardingFlow: 'onboarding/transporter',
+      OnboardingComplete: 'onboarding/complete',
       Auth: {
         screens: {
           Welcome: 'auth/welcome',

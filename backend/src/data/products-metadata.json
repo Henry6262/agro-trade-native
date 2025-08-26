@@ -1,0 +1,232 @@
+[
+  {
+    "name": "Barley",
+    "category": "BARLEY",
+    "image": "https://res.cloudinary.com/dczn89mek/image/upload/v1756192666/barley_nw6okk.png",
+    "description": "High-quality barley ideal for brewing, animal feed, and food production. Known for its versatility and nutritional value.",
+    "nutritionalInfo": "Rich in fiber, vitamins B1, B3, and minerals including selenium, copper, and manganese.",
+    "useCases": [
+      "Malting for beer production",
+      "Animal feed",
+      "Soups and stews",
+      "Barley flour"
+    ],
+    "harvestSeason": "June to August",
+    "storageRecommendations": "Store in cool, dry conditions with moisture content below 14%",
+    "priceRange": {
+      "min": 200,
+      "max": 280
+    }
+  },
+  {
+    "name": "Corn (Maize)",
+    "category": "CORN",
+    "image": "https://res.cloudinary.com/dczn89mek/image/upload/v1756192559/corn_jiuqv5.webp",
+    "description": "Premium yellow corn suitable for human consumption, animal feed, and industrial processing. Non-GMO varieties available.",
+    "nutritionalInfo": "Good source of carbohydrates, vitamin B, fiber, and essential minerals.",
+    "useCases": [
+      "Animal feed",
+      "Corn flour and meal",
+      "Ethanol production",
+      "Food processing",
+      "Corn oil"
+    ],
+    "harvestSeason": "September to November",
+    "storageRecommendations": "Maintain moisture below 15%, store in ventilated silos",
+    "priceRange": {
+      "min": 220,
+      "max": 300
+    }
+  },
+  {
+    "name": "Peas",
+    "category": "PEAS",
+    "image": "https://res.cloudinary.com/dczn89mek/image/upload/v1756192558/peas_qjdrjq.webp",
+    "description": "High-protein yellow and green peas perfect for food processing and animal feed. Excellent source of plant-based protein.",
+    "nutritionalInfo": "High in protein (23-25%), fiber, vitamins A, C, K, and folate.",
+    "useCases": [
+      "Split peas",
+      "Pea flour",
+      "Animal feed",
+      "Protein powder",
+      "Food processing"
+    ],
+    "harvestSeason": "July to September",
+    "storageRecommendations": "Store at 14% moisture or less, protect from pests",
+    "priceRange": {
+      "min": 320,
+      "max": 400
+    }
+  },
+  {
+    "name": "Soybean",
+    "category": "SOYBEAN_MEAL",
+    "image": "https://res.cloudinary.com/dczn89mek/image/upload/v1756192559/soybean_jzz3oq.jpg",
+    "description": "Premium soybeans for meal and oil production. High protein content ideal for animal feed and food processing.",
+    "nutritionalInfo": "Excellent source of complete protein (36-40%), healthy fats, and isoflavones.",
+    "useCases": [
+      "Soybean meal",
+      "Soy oil",
+      "Tofu production",
+      "Animal feed",
+      "Soy flour"
+    ],
+    "harvestSeason": "September to October",
+    "storageRecommendations": "Store at 13% moisture or less in aerated bins",
+    "priceRange": {
+      "min": 380,
+      "max": 480
+    }
+  },
+  {
+    "name": "Sunflower",
+    "category": "SUNFLOWER",
+    "image": "https://res.cloudinary.com/dczn89mek/image/upload/v1756192558/sunflower_jbywaa.webp",
+    "description": "High-oil content sunflower seeds perfect for oil production and confectionery use. Both black oil and striped varieties available.",
+    "nutritionalInfo": "Rich in vitamin E, healthy fats, protein, and minerals like magnesium and selenium.",
+    "useCases": [
+      "Sunflower oil production",
+      "Confectionery seeds",
+      "Bird feed",
+      "Bakery products"
+    ],
+    "harvestSeason": "August to October",
+    "storageRecommendations": "Store at 10% moisture or less, protect from heat",
+    "priceRange": {
+      "min": 420,
+      "max": 520
+    }
+  },
+  {
+    "name": "Durum Wheat",
+    "category": "WHEAT",
+    "image": "https://res.cloudinary.com/dczn89mek/image/upload/v1756192558/durum_wheat_maskoy.png",
+    "description": "Premium durum wheat with high protein content and excellent gluten quality, perfect for pasta and semolina production.",
+    "nutritionalInfo": "High protein (13-15%), rich in B vitamins, iron, and dietary fiber.",
+    "useCases": [
+      "Pasta production",
+      "Semolina",
+      "Couscous",
+      "Specialty breads"
+    ],
+    "harvestSeason": "July to August",
+    "storageRecommendations": "Store at 13.5% moisture or less, maintain good ventilation",
+    "priceRange": {
+      "min": 300,
+      "max": 380
+    }
+  },
+  {
+    "name": "Oats",
+    "category": "OATS",
+    "image": "https://res.cloudinary.com/dczn89mek/image/upload/v1756192558/oats_g2ugm8.webp",
+    "description": "Premium milling oats suitable for human consumption and animal feed. High in soluble fiber and beta-glucans.",
+    "nutritionalInfo": "Excellent source of beta-glucan fiber, protein, vitamins B1 and B5, and minerals.",
+    "useCases": [
+      "Oatmeal and rolled oats",
+      "Oat flour",
+      "Animal feed",
+      "Oat milk production"
+    ],
+    "harvestSeason": "July to September",
+    "storageRecommendations": "Store at 14% moisture or less, protect from heat and moisture",
+    "priceRange": {
+      "min": 180,
+      "max": 250
+    }
+  },
+  {
+    "name": "Soft Wheat",
+    "category": "WHEAT",
+    "image": "https://res.cloudinary.com/dczn89mek/image/upload/v1756192558/soft_wheat_bfxdaa.png",
+    "description": "High-quality soft wheat with lower protein content, ideal for pastries, cakes, cookies, and crackers.",
+    "nutritionalInfo": "Good source of carbohydrates, B vitamins, and minerals including iron and zinc.",
+    "useCases": [
+      "Pastry flour",
+      "Cake flour",
+      "Cookies and crackers",
+      "Breakfast cereals"
+    ],
+    "harvestSeason": "June to August",
+    "storageRecommendations": "Store at 13.5% moisture or less in clean, dry bins",
+    "priceRange": {
+      "min": 260,
+      "max": 340
+    }
+  },
+  {
+    "name": "Canola (Rapeseed)",
+    "category": "RAPESEED",
+    "image": "https://res.cloudinary.com/dczn89mek/image/upload/v1756192554/canola_wom5lk.png",
+    "description": "Premium canola/rapeseed for oil production. Low in erucic acid and glucosinolates, ideal for food-grade oil.",
+    "nutritionalInfo": "High in healthy monounsaturated fats, omega-3 fatty acids, and vitamin E.",
+    "useCases": [
+      "Canola oil production",
+      "Biodiesel",
+      "Animal feed (meal)",
+      "Industrial lubricants"
+    ],
+    "harvestSeason": "July to August",
+    "storageRecommendations": "Store at 8-9% moisture, protect from heat to prevent quality loss",
+    "priceRange": {
+      "min": 450,
+      "max": 550
+    }
+  },
+  {
+    "name": "Wheat Bran",
+    "category": "WHEAT_BRAN",
+    "image": "https://res.cloudinary.com/dczn89mek/image/upload/v1756192552/wheat_bran_q6qze9.png",
+    "description": "High-fiber wheat bran, a valuable by-product of wheat milling. Excellent for animal feed and human nutrition.",
+    "nutritionalInfo": "Very high in dietary fiber, B vitamins, minerals, and antioxidants.",
+    "useCases": [
+      "Animal feed supplement",
+      "Breakfast cereals",
+      "Bakery products",
+      "Dietary supplements"
+    ],
+    "harvestSeason": "Available year-round",
+    "storageRecommendations": "Store in dry conditions, protect from moisture and pests",
+    "priceRange": {
+      "min": 160,
+      "max": 220
+    }
+  },
+  {
+    "name": "Alfalfa Pellets",
+    "category": "ALFALFA",
+    "image": "https://res.cloudinary.com/dczn89mek/image/upload/v1756192552/alfalfa_pallets_saqhco.webp",
+    "description": "High-quality alfalfa compressed into pellets for easy storage and transport. Premium livestock feed with high nutritional value.",
+    "nutritionalInfo": "High in protein (15-20%), calcium, vitamins A, D, E, and K.",
+    "useCases": [
+      "Horse feed",
+      "Cattle feed",
+      "Small animal feed",
+      "Organic fertilizer"
+    ],
+    "harvestSeason": "Multiple cuts from May to October",
+    "storageRecommendations": "Store in dry, well-ventilated areas, protect from moisture",
+    "priceRange": {
+      "min": 230,
+      "max": 320
+    }
+  },
+  {
+    "name": "Other Agricultural Products",
+    "category": "OTHER",
+    "image": "https://res.cloudinary.com/dczn89mek/image/upload/v1756192556/other_gagfht.png",
+    "description": "Various other agricultural products available upon request, including specialty grains, seeds, and agricultural by-products.",
+    "nutritionalInfo": "Varies by product type",
+    "useCases": [
+      "Specialty markets",
+      "Custom orders",
+      "Niche applications"
+    ],
+    "harvestSeason": "Varies by product",
+    "storageRecommendations": "Product-specific storage requirements",
+    "priceRange": {
+      "min": 0,
+      "max": 0
+    }
+  }
+]

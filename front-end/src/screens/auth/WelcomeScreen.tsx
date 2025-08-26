@@ -19,7 +19,7 @@ export default function WelcomeScreen() {
         <View className="w-full space-y-4">
           <Button
             title="Get Started"
-            onPress={() => navigation.navigate('Onboarding' as never)}
+            onPress={() => navigation.navigate('RoleSelection' as never)}
             fullWidth
           />
           <Button

@@ -19,6 +19,8 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Force all main containers to allow scrolling */
@@ -27,7 +29,30 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow: auto;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* CRITICAL FIX: Target the exact elements from onboarding screens */
+/* First level - the main app wrapper */
+.css-view-g5y9jx.r-flex-13awgt0:first-child {
+  position: unset !important;
+  height: 100% !important;
+}
+
+/* Second level - the white background container */
+.css-view-g5y9jx.r-minHeight-2llsf {
+  height: 100% !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Third level - ensure proper flex layout */
+.css-view-g5y9jx.r-flex-13awgt0 > .css-view-g5y9jx.r-flex-13awgt0 {
+  height: 100% !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 /* React Native Web specific fixes */
@@ -56,9 +81,36 @@ div[style*="flex-grow"] {
   overflow-y: auto;
 }
 
-/* Override any fixed positioning that might block scrolling */
-* {
-  max-height: none !important;
+/* Onboarding specific layout fixes */
+/* Fix for the sidebar and main content layout */
+.css-view-g5y9jx[style*="width: 96px"] {
+  position: fixed !important;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* Fix for the main content area next to sidebar */
+.css-view-g5y9jx[style*="width: 96px"] + .css-view-g5y9jx {
+  margin-left: 96px;
+  height: 100vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Fix for the navigation bar at bottom */
+.css-view-g5y9jx[style*="position: absolute"][style*="bottom: 0"][style*="z-index: 9999"] {
+  position: fixed !important;
+  bottom: 0;
+  left: 96px;
+  right: 0;
+  z-index: 100 !important;
+}
+
+/* Ensure scrollable content has proper padding for fixed navigation */
+.r-WebkitOverflowScrolling-150rngu {
+  padding-bottom: 100px !important;
 }
 
 /* Specific fix for navigation containers */
@@ -69,14 +121,55 @@ div[role="navigation"] {
 @keyframes pulse-glow {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.7);
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7);
   }
   50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px 10px rgba(234, 179, 8, 0.3);
+    transform: scale(1.15);
+    box-shadow: 0 0 20px 10px rgba(251, 191, 36, 0.3);
+  }
+}
+
+@keyframes pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+@keyframes glow-fade {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.5);
   }
 }
 
 .pulse-yellow {
   animation: pulse-glow 2s infinite;
+}
+
+/* Apply animations to current step circle */
+.current-step-circle {
+  animation: pulse-scale 2s infinite ease-in-out;
+}
+
+.current-step-glow {
+  animation: glow-fade 2s infinite ease-in-out;
+}
+
+/* Ensure progress sidebar is properly positioned */
+.progress-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 96px;
+  z-index: 100;
+  background-color: #1f2937;
+  border-right: 1px solid #4b5563;
 }

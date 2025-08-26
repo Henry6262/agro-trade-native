@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { View, SafeAreaView, ScrollView } from 'react-native'
+import { View, ScrollView } from 'react-native'
 import type { OnboardingStep } from '../../../types/onboarding'
 import { roleSteps } from '../../../constants/onboarding'
 import { ProgressSidebar } from '../shared/ProgressSidebar'
@@ -7,7 +7,7 @@ import { Navigation } from '../shared/Navigation'
 import { FleetInformation } from './FleetInformation'
 import { LocationInformation } from './LocationInformation'
 import { TransporterListing } from './TransporterListing'
-import { useOnboardingStore } from '../../../stores/onboarding-store'
+import { useOnboardingStore } from '../../../store/onboardingStore'
 
 interface TransporterOnboardingProps {
   onComplete?: () => void
@@ -103,7 +103,8 @@ export function TransporterOnboarding({ onComplete }: TransporterOnboardingProps
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
-      <View style={{ flex: 1, flexDirection: 'row', backgroundColor: '#111827' }}>
+      <View style={{ flex: 1, flexDirection: 'row', backgroundColor: '#111827', position: 'relative' }}>
+        {/* Fixed Progress Sidebar */}
         <ProgressSidebar
           steps={steps}
           currentStepIndex={currentStepIndex}
@@ -111,6 +112,7 @@ export function TransporterOnboarding({ onComplete }: TransporterOnboardingProps
           isAnimating={isAnimating}
         />
 
+        {/* Main Content */}
         <View style={{ flex: 1, position: 'relative' }}>
           <ScrollView 
             style={{ flex: 1 }} 

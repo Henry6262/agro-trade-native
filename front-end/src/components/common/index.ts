@@ -8,3 +8,4 @@ export { EmptyState } from './EmptyState';
 export { ErrorState } from './ErrorState';
 export { Modal } from './Modal';
 export { WebScrollView } from './WebScrollView';
+export { WebLayoutFix } from './WebLayoutFix';

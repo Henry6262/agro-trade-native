@@ -77,6 +77,7 @@ interface OnboardingStore extends OnboardingState {
   submitOnboarding: (companyInfo?: CompanyInfo, userInfo?: { name: string; email: string; phone?: string }) => Promise<void>;
   authenticateWithGoogle: (googleToken: string) => Promise<void>;
   setGoogleAuthData: (data: { name: string; email: string; isAuthenticated: boolean }) => void;
+  googleAuthData?: { name: string; email: string; isAuthenticated: boolean };
   
   // Computed properties
   getProgress: () => number;
@@ -96,6 +97,7 @@ const getInitialState = () => ({
   selectedProducts: [] as string[],
   sellerSpecifications: {} as Record<string, any>,
   buyerSpecifications: {} as Record<string, any>,
+  googleAuthData: undefined as { name: string; email: string; isAuthenticated: boolean } | undefined,
   isLoading: false,
   isSubmitting: false,
   error: null,
@@ -413,7 +415,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
         set((draft) => {
           // Store Google auth data temporarily for use in the modal
           // This will be used to pre-fill the auth form
-          (draft as any).googleAuthData = data;
+          draft.googleAuthData = data;
           console.log('Google auth data stored:', data);
         });
       },
@@ -621,6 +623,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
         selectedProducts: state.selectedProducts,
         sellerSpecifications: state.sellerSpecifications,
         buyerSpecifications: state.buyerSpecifications,
+        googleAuthData: state.googleAuthData,
         // Don't persist loading and error states
       }),
     }

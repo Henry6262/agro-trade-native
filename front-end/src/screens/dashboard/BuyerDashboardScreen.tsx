@@ -356,7 +356,12 @@ export default function BuyerDashboardScreen({ activeTab = 'orders' }: BuyerDash
 
   if (activeTab === 'requests') {
     return (
-      <View className="p-6 space-y-6">
+      <ScrollView 
+        className="flex-1 bg-black"
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+      >
+        <View className="p-6 space-y-6">
         <View className="flex-row justify-between items-center">
           <View>
             <Text className="text-2xl font-bold text-white">My Requests</Text>
@@ -644,13 +649,19 @@ export default function BuyerDashboardScreen({ activeTab = 'orders' }: BuyerDash
             </Card>
           </View>
         )}
-      </View>
+        </View>
+      </ScrollView>
     );
   }
 
   if (activeTab === 'orders') {
     return (
-      <View className="p-6 space-y-6">
+      <ScrollView 
+        className="flex-1 bg-black"
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+      >
+        <View className="p-6 space-y-6">
         <View>
           <Text className="text-2xl font-bold text-white">My Orders</Text>
           <Text className="text-neutral-400">Track your orders and purchase performance</Text>
@@ -887,7 +898,8 @@ export default function BuyerDashboardScreen({ activeTab = 'orders' }: BuyerDash
             ))}
           </View>
         </View>
-      </View>
+        </View>
+      </ScrollView>
     );
   }
 

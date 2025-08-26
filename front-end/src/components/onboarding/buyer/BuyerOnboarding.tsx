@@ -1,31 +1,36 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { View, SafeAreaView, ScrollView } from 'react-native'
+import { View, ScrollView } from 'react-native'
 import type { OnboardingStep, ProductSpecification } from '../../../types/onboarding'
 import { roleSteps } from '../../../constants/onboarding'
 import { ProgressSidebar } from '../shared/ProgressSidebar'
 import { Navigation } from '../shared/Navigation'
-import { ProductSelection } from '../seller/ProductSelection' // Reuse product selection
+import { ProductSelectionBackend } from '../ProductSelectionBackend' // Use simplified backend-integrated product selection
 import { BuyerSpecifications } from './BuyerSpecifications'
 import { BuyerMarketRequest } from './BuyerMarketRequest'
-import { useOnboardingStore } from '../../../stores/onboarding-store'
+import { useOnboardingStore } from '../../../store/onboardingStore'
 
 interface BuyerOnboardingProps {
   onComplete?: () => void
 }
 
 export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
-  const [currentStepIndex, setCurrentStepIndex] = useState(1) // Start from products step (role is already selected)
-  const [steps, setSteps] = useState<OnboardingStep[]>([])
-  const [productSpecifications, setProductSpecifications] = useState<ProductSpecification[]>([])
-  const [isAnimating, setIsAnimating] = useState(false)
-  const [progressLineHeight, setProgressLineHeight] = useState(0)
-
   const { 
     selectedProducts, 
     setSelectedProducts, 
     buyerSpecifications, 
-    updateBuyerSpecification 
+    updateBuyerSpecification,
+    setBuyerRequirements,
+    buyerData,
+    currentStep,
+    setStep
   } = useOnboardingStore()
+  
+  // Initialize with saved step or default to 1 (products step)
+  const [currentStepIndex, setCurrentStepIndex] = useState(currentStep > 0 ? currentStep : 1)
+  const [steps, setSteps] = useState<OnboardingStep[]>([])
+  const [productSpecifications, setProductSpecifications] = useState<ProductSpecification[]>([])
+  const [isAnimating, setIsAnimating] = useState(false)
+  const [progressLineHeight, setProgressLineHeight] = useState(0)
 
   useEffect(() => {
     const buyerSteps = roleSteps.buyer.map((step, index) => ({
@@ -72,6 +77,34 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
     }
   }, [selectedProducts, buyerSpecifications, productSpecifications])
 
+  // Sync selectedProducts to buyerData.requiredProducts
+  useEffect(() => {
+    if (selectedProducts.length > 0) {
+      // Import products data to get product names and categories
+      const { products } = require('../../../constants/onboarding')
+      
+      const requirements = selectedProducts.map(productId => {
+        const product = products.find((p: any) => p.id === productId)
+        const specs = buyerSpecifications[productId] || {}
+        
+        return {
+          productId,
+          productName: product?.name || 'Unknown Product',
+          category: product?.category || 'Other',
+          quantity: {
+            amount: specs.quantity || 0,
+            unit: specs.unit || 'tons' as const
+          },
+          maxPrice: specs.pricePerKilo ? parseFloat(specs.pricePerKilo) : undefined,
+          qualityRequirements: specs.qualityRequirements || [],
+          deliveryDeadline: specs.deliveryDeadline
+        }
+      })
+      
+      setBuyerRequirements(requirements)
+    }
+  }, [selectedProducts, buyerSpecifications, setBuyerRequirements])
+
   // Update Zustand store when specifications change - use callback to prevent circular updates
   const updateStoreSpecs = useCallback(() => {
     productSpecifications.forEach(spec => {
@@ -100,7 +133,9 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
         // Last step, complete onboarding
         onComplete?.()
       } else {
-        setCurrentStepIndex((prev) => Math.min(prev + 1, steps.length - 1))
+        const nextStep = Math.min(currentStepIndex + 1, steps.length - 1)
+        setCurrentStepIndex(nextStep)
+        setStep(nextStep) // Save to store
         setSteps((prev) =>
           prev.map((step, index) => ({
             ...step,
@@ -117,7 +152,9 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
 
     setIsAnimating(true)
     setTimeout(() => {
-      setCurrentStepIndex((prev) => Math.max(prev - 1, 1))
+      const prevStep = Math.max(currentStepIndex - 1, 1)
+      setCurrentStepIndex(prevStep)
+      setStep(prevStep) // Save to store
       setIsAnimating(false)
     }, 300)
   }
@@ -148,7 +185,7 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
 
     switch (currentStep.id) {
       case 'products':
-        return <ProductSelection />
+        return <ProductSelectionBackend />
       case 'specifications':
         return (
           <BuyerSpecifications
@@ -172,39 +209,37 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
-      <View style={{ flex: 1, flexDirection: 'row', backgroundColor: '#111827' }}>
-        <ProgressSidebar
-          steps={steps}
+    <View style={{ flex: 1, flexDirection: 'row', backgroundColor: '#111827' }}>
+      {/* Fixed Progress Sidebar */}
+      <ProgressSidebar
+        steps={steps}
+        currentStepIndex={currentStepIndex}
+        progressLineHeight={progressLineHeight}
+        isAnimating={isAnimating}
+      />
+
+      {/* Main Content */}
+      <View style={{ flex: 1 }}>
+        <ScrollView 
+          contentContainerStyle={{ 
+            flexGrow: 1,
+            padding: 24, 
+            paddingBottom: 100 
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          {renderStepContent()}
+        </ScrollView>
+
+        <Navigation
           currentStepIndex={currentStepIndex}
-          progressLineHeight={progressLineHeight}
+          totalSteps={steps.length}
+          canProceedToNext={canProceedToNext()}
           isAnimating={isAnimating}
+          onBack={handleBack}
+          onNext={handleNext}
         />
-
-        <View style={{ flex: 1, position: 'relative' }}>
-          <ScrollView 
-            contentContainerStyle={{ 
-              flexGrow: 1,
-              padding: 24, 
-              paddingBottom: 100 
-            }}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={{ maxWidth: 800, alignSelf: 'center', width: '100%' }}>
-              {renderStepContent()}
-            </View>
-          </ScrollView>
-
-          <Navigation
-            currentStepIndex={currentStepIndex}
-            totalSteps={steps.length}
-            canProceedToNext={canProceedToNext()}
-            isAnimating={isAnimating}
-            onBack={handleBack}
-            onNext={handleNext}
-          />
-        </View>
       </View>
-    </SafeAreaView>
+    </View>
   )
 }

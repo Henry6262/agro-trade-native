@@ -9,7 +9,12 @@ export type RootStackParamList = {
   ProductDetail: { productId: string };
   Profile: undefined;
   OAuthCallback: undefined;
-  Onboarding: NavigatorScreenParams<OnboardingStackParamList>;
+  // Flattened onboarding screens
+  RoleSelection: undefined;
+  BuyerOnboardingFlow: undefined;
+  SellerOnboardingFlow: undefined;
+  TransporterOnboardingFlow: undefined;
+  OnboardingComplete: undefined;
 };
 
 export type AuthStackParamList = {
@@ -17,7 +22,6 @@ export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
-  Onboarding: NavigatorScreenParams<OnboardingStackParamList>;
 };
 
 export type OnboardingStackParamList = {

@@ -53,7 +53,7 @@ export const Modal: React.FC<ModalProps> = ({
       default: // medium
         return {
           width: Math.min(400, screenWidth * 0.85),
-          maxHeight: '80%',
+          maxHeight: screenHeight * 0.8,
         };
     }
   };

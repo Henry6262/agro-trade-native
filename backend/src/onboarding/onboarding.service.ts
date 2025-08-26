@@ -82,12 +82,12 @@ export class OnboardingService {
           tx.product.create({
             data: {
               farmerId: userId,
+              name: productData.name || productData.category,
               category: productData.category,
-              quantity: productData.quantity,
-              unit: productData.unit,
-              locationAddress: productData.locationAddress,
-              locationLat: productData.locationLat,
-              locationLng: productData.locationLng,
+              quantity: productData.quantity || 0,
+              unit: productData.unit || 'TON',
+              pricePerUnit: productData.pricePerTon || 0,
+              location: productData.locationAddress,
             },
           })
         )
@@ -239,19 +239,19 @@ export class OnboardingService {
       }
 
       // Clear existing bases and create new ones
-      await tx.transporterBase.deleteMany({
-        where: { transporterId: userId }
+      await tx.base.deleteMany({
+        where: { userId: userId }
       });
 
       const bases = await Promise.all(
         data.bases.map(baseData =>
-          tx.transporterBase.create({
+          tx.base.create({
             data: {
-              transporterId: userId,
+              userId: userId,
               name: baseData.name,
               address: baseData.address,
-              latitude: baseData.latitude,
-              longitude: baseData.longitude,
+              city: 'Unknown', // Default city
+              type: 'DEPOT' as const,
               isPrimary: baseData.isPrimary || false,
             },
           })
@@ -303,7 +303,7 @@ export class OnboardingService {
         transporterProfile: true,
         companyInfo: true,
         products: true,
-        transporterBases: true,
+        bases: true,
         fleetVehicles: true,
       },
     });
@@ -339,14 +339,14 @@ export class OnboardingService {
         if (user.transporterProfile) completedSteps.push('profile');
         else missingSteps.push('profile');
         
-        if (user.transporterBases && user.transporterBases.length > 0) completedSteps.push('bases');
+        if (user.bases && user.bases.length > 0) completedSteps.push('bases');
         else missingSteps.push('bases');
         
         if (user.fleetVehicles && user.fleetVehicles.length > 0) completedSteps.push('fleet');
         else missingSteps.push('fleet');
         
         isComplete = user.transporterProfile !== null && 
-                    user.transporterBases.length > 0 && 
+                    user.bases.length > 0 && 
                     user.fleetVehicles.length > 0;
         break;
     }

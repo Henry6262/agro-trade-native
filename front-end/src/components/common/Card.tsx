@@ -105,6 +105,7 @@ export const Card: React.FC<CardProps> = ({
   );
 };
 
+// Simplified Card sub-components to reduce nesting
 export const CardHeader: React.FC<CardHeaderProps> = ({
   children,
   className,
@@ -112,7 +113,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   accessibilityLabel,
 }) => (
   <View
-    className={`flex flex-col space-y-1.5 p-6 ${className || ''}`}
+    className={`space-y-1.5 ${className || ''}`}
     testID={testID}
     accessibilityLabel={accessibilityLabel}
   >
@@ -127,7 +128,7 @@ export const CardTitle: React.FC<CardTitleProps> = ({
   accessibilityLabel,
 }) => (
   <Text
-    className={`text-2xl font-semibold leading-none tracking-tight text-white ${className || ''}`}
+    className={`text-xl font-semibold text-white ${className || ''}`}
     testID={testID}
     accessibilityLabel={accessibilityLabel}
   >
@@ -142,7 +143,7 @@ export const CardContent: React.FC<CardContentProps> = ({
   accessibilityLabel,
 }) => (
   <View
-    className={`p-6 pt-0 ${className || ''}`}
+    className={className || ''}
     testID={testID}
     accessibilityLabel={accessibilityLabel}
   >
@@ -172,7 +173,7 @@ export const CardFooter: React.FC<CardFooterProps> = ({
   accessibilityLabel,
 }) => (
   <View
-    className={`flex items-center p-6 pt-0 ${className || ''}`}
+    className={`items-center ${className || ''}`}
     testID={testID}
     accessibilityLabel={accessibilityLabel}
   >

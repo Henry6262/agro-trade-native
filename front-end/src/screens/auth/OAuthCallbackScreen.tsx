@@ -40,11 +40,18 @@ export const OAuthCallbackScreen: React.FC = () => {
         });
 
         if (accessToken && refreshToken) {
+          console.log('Setting tokens in auth store...');
           // Update auth store with tokens and user info
           authStore.setTokens(accessToken, refreshToken);
           
           // Decode the userName properly
           const decodedUserName = userName ? decodeURIComponent(userName) : '';
+          
+          console.log('Setting user in auth store:', {
+            email: userEmail,
+            name: decodedUserName,
+            role: onboardingStore.selectedRole
+          });
           
           // Update auth store with user information
           if (userEmail && decodedUserName) {
@@ -59,23 +66,17 @@ export const OAuthCallbackScreen: React.FC = () => {
             });
           }
 
-          // Check if we should return to the modal
-          const shouldReturnToModal = localStorage.getItem('oauth_return_to_modal') === 'true';
-          const savedUserRole = localStorage.getItem('oauth_user_role');
+          // Load onboarding data to get the saved role
+          await onboardingStore.loadOnboardingData();
+          const savedUserRole = onboardingStore.selectedRole;
           
-          console.log('Should return to modal:', shouldReturnToModal);
-          console.log('Saved user role:', savedUserRole);
-          
-          // Clean up localStorage
-          localStorage.removeItem('oauth_return_to_modal');
-          localStorage.removeItem('oauth_user_role');
+          console.log('Saved user role from store:', savedUserRole);
 
           if (!hasProfile) {
             // User doesn't have a complete profile, return to onboarding with modal
             console.log('User has no profile, returning to onboarding flow...');
             
-            // Load saved onboarding data
-            await onboardingStore.loadOnboardingData();
+            // Onboarding data already loaded above
             
             // Store Google auth data in onboarding store
             onboardingStore.setGoogleAuthData({
@@ -92,25 +93,17 @@ export const OAuthCallbackScreen: React.FC = () => {
             
             if (role === 'seller') {
               console.log('Navigating to SellerOnboardingFlow...');
-              navigation.navigate('Onboarding', { 
-                screen: 'SellerOnboardingFlow'
-              });
+              navigation.navigate('SellerOnboardingFlow');
             } else if (role === 'buyer') {
               console.log('Navigating to BuyerOnboardingFlow...');
-              navigation.navigate('Onboarding', { 
-                screen: 'BuyerOnboardingFlow'
-              });
+              navigation.navigate('BuyerOnboardingFlow');
             } else if (role === 'transport') {
               console.log('Navigating to TransporterOnboardingFlow...');
-              navigation.navigate('Onboarding', { 
-                screen: 'TransporterOnboardingFlow'
-              });
+              navigation.navigate('TransporterOnboardingFlow');
             } else {
               // Fallback to role selection if no role is set
               console.log('No role found, navigating to RoleSelection...');
-              navigation.navigate('Onboarding', { 
-                screen: 'RoleSelection'
-              });
+              navigation.navigate('RoleSelection');
             }
           } else if (hasProfile) {
             // User has complete profile, go to main app
@@ -121,16 +114,12 @@ export const OAuthCallbackScreen: React.FC = () => {
           } else {
             // No specific flow, go to role selection
             console.log('No specific flow, navigating to role selection...');
-            navigation.navigate('Onboarding', {
-              screen: 'RoleSelection'
-            });
+            navigation.navigate('RoleSelection');
           }
         } else {
           // No tokens, something went wrong
           console.error('OAuth callback missing tokens');
-          navigation.navigate('Onboarding', {
-            screen: 'RoleSelection'
-          });
+          navigation.navigate('RoleSelection');
         }
       }
     };

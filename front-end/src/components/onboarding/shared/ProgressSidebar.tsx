@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   View,
   Text,
   Animated,
+  Platform,
 } from 'react-native'
-import { Check } from 'lucide-react-native'
+import { Check, Leaf } from 'lucide-react-native'
 import type { OnboardingStep } from '../../../types/onboarding'
 
 interface ProgressSidebarProps {
@@ -17,182 +18,290 @@ interface ProgressSidebarProps {
 export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, isAnimating }: ProgressSidebarProps) {
   const progressAnimation = useRef(new Animated.Value(0)).current
   const pulseAnimation = useRef(new Animated.Value(1)).current
-  const opacityAnimation = useRef(new Animated.Value(0.3)).current
+  const glowAnimation = useRef(new Animated.Value(0)).current
 
+  // Calculate progress based on completed steps
   useEffect(() => {
+    const totalSteps = steps.length - 1;
+    const completedSteps = currentStepIndex;
+    const progressPercent = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
+    
     Animated.timing(progressAnimation, {
-      toValue: progressLineHeight,
-      duration: 1200,
+      toValue: progressPercent,
+      duration: 800,
       useNativeDriver: false,
     }).start()
-  }, [progressLineHeight])
+  }, [currentStepIndex, steps.length])
 
+  // Pulsating animation for current step
   useEffect(() => {
-    const pulse = Animated.sequence([
-      Animated.parallel([
-        Animated.timing(pulseAnimation, {
-          toValue: 1.15,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnimation, {
-          toValue: 0.8,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.parallel([
-        Animated.timing(pulseAnimation, {
-          toValue: 1,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnimation, {
-          toValue: 0.3,
-          duration: 1500,
-          useNativeDriver: true,
-        }),
-      ]),
-    ])
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.parallel([
+          Animated.timing(pulseAnimation, {
+            toValue: 1.2,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(glowAnimation, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.parallel([
+          Animated.timing(pulseAnimation, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(glowAnimation, {
+            toValue: 0,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ]),
+      ])
+    )
 
-    const loopAnimation = Animated.loop(pulse)
-    loopAnimation.start()
+    pulse.start()
+    return () => pulse.stop()
+  }, [currentStepIndex, pulseAnimation, glowAnimation])
 
-    return () => loopAnimation.stop()
-  }, [currentStepIndex, pulseAnimation, opacityAnimation])
+  // Calculate centered positioning for steps with 60% coverage
+  const [containerHeight, setContainerHeight] = useState(600); // Default height
+  const containerRef = useRef<View>(null);
+  
+  // Calculate dimensions
+  const availableHeight = containerHeight * 0.6; // Use 60% of container height
+  const stepSpacing = steps.length > 1 ? availableHeight / (steps.length - 1) : 0;
+  const progressHeight = steps.length > 1 ? availableHeight : 0;
+  
+  // Center the progress area vertically
+  const logoHeight = 120; // Approximate logo section height
+  const bottomPadding = 80; // Space for percentage display
+  const contentHeight = containerHeight - logoHeight - bottomPadding;
+  const verticalOffset = (contentHeight - progressHeight) / 2;
+  const startOffset = logoHeight + verticalOffset;
 
   return (
-    <View style={{
-      width: 120,
-      backgroundColor: '#1F2937',
-      borderRightWidth: 1,
-      borderRightColor: '#374151',
-      alignItems: 'center',
-      paddingVertical: 32,
-      position: 'relative'
-    }}>
+    <View 
+      ref={containerRef}
+      style={{ 
+        width: 75, 
+        height: '100%', 
+        backgroundColor: '#1f2937', 
+        borderRightWidth: 1, 
+        borderRightColor: '#4b5563',
+        alignItems: 'center',
+        position: 'relative'
+      }}
+      onLayout={(event) => {
+        const { height } = event.nativeEvent.layout;
+        setContainerHeight(height);
+      }}
+    >
+      {/* Logo Section */}
       <View style={{
-        position: 'absolute',
-        left: '50%',
-        marginLeft: -1,
-        top: 68, // Adjusted for circle size
-        bottom: 68, // Adjusted for circle size
-        width: 2,
-        backgroundColor: '#374151'
+        paddingTop: 24,
+        paddingBottom: 32,
+        alignItems: 'center',
       }}>
-        <Animated.View
-          style={{
-            width: '100%',
-            backgroundColor: '#22C55E',
-            borderRadius: 1,
-            position: 'relative',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.1,
-            shadowRadius: 2,
-            elevation: 2,
-            height: progressAnimation,
-          }}
-        >
-          <View style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: '#10B981',
-            borderRadius: 1,
-            opacity: 0.6
-          }} />
-        </Animated.View>
+        <View style={{
+          width: 48,
+          height: 48,
+          borderRadius: 24,
+          backgroundColor: '#22c55e',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 8,
+        }}>
+          <Leaf size={24} color="white" />
+        </View>
+        <Text style={{
+          color: '#22c55e',
+          fontSize: 12,
+          fontWeight: 'bold',
+          letterSpacing: 0.5,
+        }}>
+          AGRO
+        </Text>
+        <Text style={{
+          color: '#9ca3af',
+          fontSize: 10,
+          fontWeight: '500',
+        }}>
+          TRADE
+        </Text>
       </View>
 
-      <View style={{ position: 'relative', zIndex: 10 }}>
-        {steps.map((step, index) => (
-          <View
-            key={step.id}
-            style={{
-              alignItems: 'center',
-              marginBottom: index < steps.length - 1 ? 40 : 0
-            }}
-          >
-            <Animated.View
-              style={[
-                {
-                  width: 40,
-                  height: 40,
-                  borderRadius: 20,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  position: 'relative',
-                  backgroundColor: index < currentStepIndex
-                    ? '#22C55E'
-                    : index === currentStepIndex
-                      ? '#FCD34D' // Yellow background for active step
-                      : '#374151',
-                  borderWidth: index === currentStepIndex ? 3 : 2,
-                  borderColor: index === currentStepIndex 
-                    ? '#F59E0B' // Yellow border for active step
-                    : index < currentStepIndex 
-                      ? '#22C55E'
-                      : '#6B7280',
-                  shadowColor: index === currentStepIndex ? '#F59E0B' : '#000',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: index === currentStepIndex ? 0.6 : 0.2,
-                  shadowRadius: index === currentStepIndex ? 8 : 4,
-                  elevation: index === currentStepIndex ? 8 : 4
-                },
-                index === currentStepIndex && {
-                  transform: [{ scale: pulseAnimation }],
-                  shadowColor: '#F59E0B',
-                  shadowOffset: { width: 0, height: 0 },
-                  shadowOpacity: opacityAnimation,
-                  shadowRadius: 12,
-                  elevation: 10
-                },
-              ]}
-            >
-              {index < currentStepIndex ? (
-                <Check size={16} color="white" />
-              ) : (
-                <Text style={{
-                  fontSize: 14,
-                  fontWeight: '600',
-                  color: index === currentStepIndex 
-                    ? '#92400E' // Dark yellow text for active step
-                    : index < currentStepIndex 
-                      ? 'white' 
-                      : '#9CA3AF'
-                }}>
-                  {index + 1}
-                </Text>
-              )}
-            </Animated.View>
-
-            <View style={{ alignItems: 'center', marginTop: 8 }}>
-              <Text style={{ fontSize: 12, fontWeight: '500', color: '#9CA3AF', textAlign: 'center' }}>{step.title}</Text>
-              <Text style={{ fontSize: 10, color: '#6B7280', textAlign: 'center', marginTop: 2 }}>{step.description}</Text>
-            </View>
-          </View>
-        ))}
-      </View>
-
+      {/* Progress Container */}
       <View style={{
         position: 'absolute',
-        bottom: 16,
-        backgroundColor: 'rgba(31, 41, 55, 0.8)',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: '#374151'
+        top: startOffset,
+        width: '100%',
+        alignItems: 'center',
+        height: progressHeight,
+      }}>
+        {/* Progress Line Background */}
+        <View style={{
+          position: 'absolute',
+          left: '50%',
+          marginLeft: -1,
+          top: 0,
+          height: progressHeight,
+          width: 2,
+          backgroundColor: '#374151',
+        }}>
+          {/* Animated Progress Line */}
+          <Animated.View 
+            style={{
+              width: 2,
+              backgroundColor: '#22c55e',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              height: progressAnimation.interpolate({
+                inputRange: [0, 100],
+                outputRange: ['0%', '100%'],
+              }),
+            }}
+          />
+        </View>
+
+        {/* Steps */}
+        {steps.map((step, index) => {
+          const isCompleted = index < currentStepIndex;
+          const isCurrent = index === currentStepIndex;
+          const isPending = index > currentStepIndex;
+          
+          return (
+            <View
+              key={step.id}
+              style={{
+                position: 'absolute',
+                alignItems: 'center',
+                top: index * stepSpacing - 16, // Center the circle on the position
+                width: '100%',
+              }}
+            >
+              {/* Step Circle Container */}
+              <View style={{
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 40,
+                height: 40,
+              }}>
+                {/* Glow effect for current step */}
+                {isCurrent && (
+                  <Animated.View
+                    style={{
+                      position: 'absolute',
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      backgroundColor: '#fbbf24',
+                      opacity: glowAnimation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.3, 0.6],
+                      }),
+                      transform: [{ 
+                        scale: glowAnimation.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [1, 1.5],
+                        })
+                      }],
+                    }}
+                  />
+                )}
+                
+                {/* Main Step Circle */}
+                <Animated.View
+                  style={[
+                    {
+                      width: 32,
+                      height: 32,
+                      borderRadius: 16,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: isCompleted ? '#22c55e' : isCurrent ? '#fbbf24' : '#374151',
+                      borderWidth: isCurrent ? 2 : 0,
+                      borderColor: isCurrent ? '#f59e0b' : 'transparent',
+                      elevation: isCurrent ? 4 : 0,
+                      shadowColor: isCurrent ? '#fbbf24' : 'transparent',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: isCurrent ? 0.3 : 0,
+                      shadowRadius: 4,
+                    },
+                    isCurrent && {
+                      transform: [{ scale: pulseAnimation }],
+                    },
+                  ]}
+                >
+                  {isCompleted ? (
+                    <Check size={16} color="white" strokeWidth={3} />
+                  ) : (
+                    <Text style={{
+                      fontSize: 14,
+                      fontWeight: '700',
+                      color: isCurrent ? '#78350f' : isPending ? '#6b7280' : '#d1d5db'
+                    }}>
+                      {index + 1}
+                    </Text>
+                  )}
+                </Animated.View>
+              </View>
+
+              {/* Step Labels - Below circles, only show for current step */}
+              {isCurrent && (
+                <View style={{ 
+                  position: 'absolute',
+                  top: 40,
+                  width: 80,
+                  alignItems: 'center',
+                }}>
+                  <Text style={{
+                    fontSize: 10,
+                    fontWeight: '600',
+                    color: '#fbbf24',
+                    textAlign: 'center',
+                    marginBottom: 2,
+                  }} numberOfLines={2}>
+                    {step.title}
+                  </Text>
+                  <Text style={{
+                    fontSize: 8,
+                    color: '#9ca3af',
+                    textAlign: 'center',
+                  }} numberOfLines={2}>
+                    {step.description}
+                  </Text>
+                </View>
+              )}
+            </View>
+          );
+        })}
+      </View>
+
+      {/* Progress Percentage Display */}
+      <View style={{
+        position: 'absolute',
+        bottom: 24,
+        alignItems: 'center',
       }}>
         <Text style={{
-          fontSize: 12,
-          fontWeight: '600',
-          color: '#9CA3AF'
+          color: '#22c55e',
+          fontSize: 18,
+          fontWeight: 'bold',
         }}>
-          {Math.round(progressLineHeight)}%
+          {Math.round((currentStepIndex / (steps.length - 1)) * 100)}%
+        </Text>
+        <Text style={{
+          color: '#6b7280',
+          fontSize: 10,
+          marginTop: 2,
+        }}>
+          Complete
         </Text>
       </View>
     </View>

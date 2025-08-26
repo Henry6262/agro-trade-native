@@ -9,6 +9,7 @@ export interface User {
   phone?: string;
   location?: Location;
   onboardingComplete?: boolean;
+  hasProfile?: boolean;
   preferences?: UserPreferences;
   createdAt: string;
   updatedAt: string;

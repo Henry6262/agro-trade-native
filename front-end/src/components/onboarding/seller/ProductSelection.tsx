@@ -12,7 +12,7 @@ import {
 import { WebScrollView } from '../../common/WebScrollView'
 import { Search, X, Filter } from 'lucide-react-native'
 import { products, categories } from '../../../constants/onboarding'
-import { useOnboardingStore } from '../../../stores/onboarding-store'
+import { useOnboardingStore } from '../../../store/onboardingStore'
 import type { FilterState } from '../../../types/onboarding'
 import { Badge } from '../../common/Badge'
 

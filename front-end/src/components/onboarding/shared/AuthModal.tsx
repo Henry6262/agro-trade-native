@@ -208,7 +208,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       slideAnimation.value = withTiming(1, { duration: 300 });
       
       // Check if we have Google auth data to pre-fill
-      const googleAuthData = (onboardingStore as any).googleAuthData;
+      const googleAuthData = onboardingStore.googleAuthData;
       if (googleAuthData?.isAuthenticated) {
         console.log('Pre-filling form with Google auth data:', googleAuthData);
         
@@ -291,9 +291,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           // Store onboarding data and modal state before redirecting
           await onboardingStore.saveOnboardingData();
           
-          // Store that we should return to the auth modal after OAuth
-          localStorage.setItem('oauth_return_to_modal', 'true');
-          localStorage.setItem('oauth_user_role', userRole);
+          // Store the user role in the onboarding store before OAuth
+          onboardingStore.setRole(userRole);
           
           // Redirect to Google OAuth
           window.location.href = googleOAuthUrl;

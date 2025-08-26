@@ -371,7 +371,7 @@ export default function DashboardMainScreen() {
             </View>
             <View className="flex-row items-center gap-4">
               <TouchableOpacity 
-                onPress={() => navigation.navigate('Onboarding' as any)}
+                onPress={() => navigation.navigate('RoleSelection' as any)}
                 className="flex-row items-center gap-2 px-3 py-1.5 border border-green-500 rounded"
               >
                 <UserPlus color="#22C55E" size={16} />

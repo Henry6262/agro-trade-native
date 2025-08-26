@@ -1,26 +1,36 @@
 import React, { useState, useEffect } from 'react'
-import { View, SafeAreaView, ScrollView } from 'react-native'
+import { View, ScrollView, SafeAreaView } from 'react-native'
 import type { OnboardingStep, ProductSpecification } from '../../../types/onboarding'
 import { roleSteps } from '../../../constants/onboarding'
 import { ProgressSidebar } from '../shared/ProgressSidebar'
 import { Navigation } from '../shared/Navigation'
-import { ProductSelection } from './ProductSelection'
+import { ProductSelectionBackend } from '../ProductSelectionBackend'
 import { ProductSpecifications } from './ProductSpecifications'
 import { MarketOverview } from './MarketOverview'
-import { useOnboardingStore } from '../../../stores/onboarding-store'
+import { useOnboardingStore } from '../../../store/onboardingStore'
 
 interface SellerOnboardingProps {
   onComplete?: () => void
 }
 
 export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
-  const [currentStepIndex, setCurrentStepIndex] = useState(1) // Start from products step (role is already selected)
+  const { 
+    selectedProducts, 
+    setSelectedProducts, 
+    sellerSpecifications, 
+    updateSellerSpecification,
+    setSellerProducts,
+    sellerData,
+    currentStep,
+    setStep
+  } = useOnboardingStore()
+  
+  // Initialize with saved step or default to 1 (products step)
+  const [currentStepIndex, setCurrentStepIndex] = useState(currentStep > 0 ? currentStep : 1)
   const [steps, setSteps] = useState<OnboardingStep[]>([])
   const [productSpecifications, setProductSpecifications] = useState<ProductSpecification[]>([])
   const [isAnimating, setIsAnimating] = useState(false)
   const [progressLineHeight, setProgressLineHeight] = useState(0)
-
-  const { selectedProducts, setSelectedProducts, sellerSpecifications, updateSellerSpecification } = useOnboardingStore()
 
   useEffect(() => {
     const sellerSteps = roleSteps.seller.map((step, index) => ({
@@ -37,6 +47,38 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
     const progressPercentage = totalSteps > 0 ? Math.max(0, (completedSteps / totalSteps) * 100) : 0
     setProgressLineHeight(Math.min(progressPercentage, 100))
   }, [currentStepIndex, steps.length])
+
+  // Sync selectedProducts to sellerData.selectedProducts
+  useEffect(() => {
+    if (selectedProducts.length > 0) {
+      // Import products data to get product names and categories
+      const { products } = require('../../../constants/onboarding')
+      
+      const productSelections = selectedProducts.map(productId => {
+        const product = products.find((p: any) => p.id === productId)
+        const specs = sellerSpecifications[productId] || {}
+        
+        return {
+          productId,
+          productName: product?.name || 'Unknown Product',
+          category: product?.category || 'Other',
+          varieties: specs.varieties || [],
+          quantity: {
+            amount: specs.quantity || 0,
+            unit: specs.unit || 'tons' as const
+          },
+          priceRange: specs.pricePerKilo ? {
+            min: parseFloat(specs.pricePerKilo) * 0.9,
+            max: parseFloat(specs.pricePerKilo) * 1.1,
+            currency: 'USD'
+          } : undefined,
+          qualitySpecs: specs.qualitySpecs || []
+        }
+      })
+      
+      setSellerProducts(productSelections)
+    }
+  }, [selectedProducts, sellerSpecifications, setSellerProducts])
 
   // Sync selectedProducts with specifications
   useEffect(() => {
@@ -112,7 +154,7 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
 
     switch (currentStep.id) {
       case 'products':
-        return <ProductSelection />
+        return <ProductSelectionBackend />
       case 'specifications':
         return (
           <ProductSpecifications
@@ -136,7 +178,8 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
-      <View style={{ flex: 1, flexDirection: 'row', backgroundColor: '#111827' }}>
+      <View style={{ flex: 1, flexDirection: 'row', backgroundColor: '#111827', position: 'relative' }}>
+        {/* Fixed Progress Sidebar */}
         <ProgressSidebar
           steps={steps}
           currentStepIndex={currentStepIndex}
@@ -144,6 +187,7 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
           isAnimating={isAnimating}
         />
 
+        {/* Main Content */}
         <View style={{ flex: 1, position: 'relative' }}>
           <ScrollView 
             contentContainerStyle={{ 

@@ -63,9 +63,21 @@ export const productService = {
     return productService.getProducts({ ...params, category: categoryId });
   },
 
-  // Get product categories
+  // Get product categories with metadata
   getCategories: async (): Promise<ProductCategory[]> => {
     return apiClient.get<ApiResponse<ProductCategory[]>>('/products/categories')
+      .then((response) => response.data);
+  },
+
+  // Get product metadata (for onboarding)
+  getProductMetadata: async (): Promise<any> => {
+    return apiClient.get<ApiResponse<any>>('/products/metadata')
+      .then((response) => response.data);
+  },
+
+  // Get categories with metadata (for product selection)
+  getCategoriesWithMetadata: async (): Promise<any[]> => {
+    return apiClient.get<ApiResponse<any[]>>('/products/categories')
       .then((response) => response.data);
   },
 

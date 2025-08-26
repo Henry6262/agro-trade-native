@@ -7,7 +7,6 @@ import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 import WelcomeScreen from '../screens/auth/WelcomeScreen';
-import { OnboardingStack } from './OnboardingStack';
 
 const Stack = createStackNavigator<AuthStackParamList>();
 
@@ -26,11 +25,6 @@ export default function AuthStack() {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-      <Stack.Screen 
-        name="Onboarding" 
-        component={OnboardingStack} 
-        options={{ headerShown: false }}
-      />
     </Stack.Navigator>
   );
 }

@@ -12,7 +12,7 @@ import { Plus, Truck, Trash2 } from 'lucide-react-native'
 import { Card } from '../../common/Card'
 import { Badge } from '../../common/Badge'
 import { Button } from '../../common/Button'
-import { useOnboardingStore } from '../../../stores/onboarding-store'
+import { useOnboardingStore } from '../../../store/onboardingStore'
 
 interface TruckInfo {
   id: string

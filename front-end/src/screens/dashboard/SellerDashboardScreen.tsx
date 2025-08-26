@@ -40,6 +40,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/commo
 import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
+import { FixedProgressHeader } from '../../components/dashboard/FixedProgressHeader';
 
 interface SellerDashboardScreenProps {
   activeTab?: string;
@@ -53,6 +54,7 @@ export default function SellerDashboardScreen({ activeTab = 'products' }: Seller
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [selectedQualityTags, setSelectedQualityTags] = useState<string[]>([]);
   const [showProductPopover, setShowProductPopover] = useState(false);
+  const [activeTradeStage, setActiveTradeStage] = useState<number | null>(null);
 
   const earningsData = {
     totalEarnings: 156750,
@@ -294,16 +296,20 @@ export default function SellerDashboardScreen({ activeTab = 'products' }: Seller
 
   const renderStageIndicator = (currentStage: number) => {
     const stages = getTradeStages();
+    const { width } = Dimensions.get('window');
+    const isMobile = width < 768;
+    const progressWidth = isMobile ? Math.min(width * 0.8, 320) : 400; // Max 320px on mobile, 400px on desktop
+    
     return (
-      <View className="relative mb-6">
+      <View className={`relative mb-6 ${isMobile ? 'mx-auto' : ''}`} style={{ maxWidth: progressWidth }}>
         {/* Progress Bar Background */}
-        <View className="absolute top-4 left-8 right-8 h-0.5 bg-neutral-700 z-0" />
+        <View className="absolute top-4 left-4 right-4 h-0.5 bg-neutral-700 z-0" />
 
         {/* Active Progress Bar */}
         <View
-          className="absolute top-4 left-8 h-0.5 bg-green-500 z-0"
+          className="absolute top-4 left-4 h-0.5 bg-green-500 z-0"
           style={{
-            width: `${(currentStage / (stages.length - 1)) * 100 - 16}%`,
+            width: `${(currentStage / (stages.length - 1)) * (progressWidth - 32)}px`,
           }}
         />
 
@@ -317,7 +323,7 @@ export default function SellerDashboardScreen({ activeTab = 'products' }: Seller
             return (
               <View key={index} className="items-center">
                 <View
-                  className={`w-8 h-8 rounded-full items-center justify-center relative ${
+                  className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'} rounded-full items-center justify-center relative ${
                     isCompleted
                       ? "bg-green-500"
                       : isCurrent
@@ -327,14 +333,14 @@ export default function SellerDashboardScreen({ activeTab = 'products' }: Seller
                 >
                   <Icon
                     color={isCompleted || isCurrent ? "#ffffff" : "#9CA3AF"}
-                    size={16}
+                    size={isMobile ? 14 : 16}
                   />
                   {isCurrent && (
                     <View className="absolute inset-0 rounded-full bg-yellow-500 opacity-75" />
                   )}
                 </View>
                 <Text
-                  className={`text-xs text-center mt-2 max-w-16 ${
+                  className={`${isMobile ? 'text-[10px]' : 'text-xs'} text-center mt-1 ${isMobile ? 'max-w-14' : 'max-w-16'} ${
                     isCompleted
                       ? "text-green-400"
                       : isCurrent
@@ -433,7 +439,12 @@ export default function SellerDashboardScreen({ activeTab = 'products' }: Seller
     const numColumns = width > 1024 ? 3 : width > 768 ? 2 : 1;
     
     return (
-      <View className="p-6 bg-black flex-1">
+      <ScrollView 
+        className="flex-1 bg-black"
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+      >
+        <View className="p-6">
         {/* Header */}
         <View className="flex-row justify-between items-center mb-6">
           <View>
@@ -657,7 +668,8 @@ export default function SellerDashboardScreen({ activeTab = 'products' }: Seller
             </Card>
           </View>
         </Modal>
-      </View>
+        </View>
+      </ScrollView>
     );
   }
 
@@ -666,7 +678,19 @@ export default function SellerDashboardScreen({ activeTab = 'products' }: Seller
     const isMobile = width < 768;
     
     return (
-      <ScrollView className="p-6 bg-black">
+      <View className="flex-1 bg-black">
+        {/* Fixed Progress Header - shows when a trade is expanded */}
+        {expandedTrade && activeTradeStage !== null && (
+          <FixedProgressHeader currentStage={activeTradeStage} />
+        )}
+        
+        <ScrollView 
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentInsetAdjustmentBehavior="automatic"
+          style={{ paddingTop: expandedTrade ? 80 : 0 }}
+        >
+          <View className="p-6">
         {/* Header */}
         <View className="mb-6">
           <Text className="text-2xl font-bold text-white">My Trades</Text>
@@ -849,7 +873,10 @@ export default function SellerDashboardScreen({ activeTab = 'products' }: Seller
                     </Badge>
                   </View>
 
-                  {renderStageIndicator(trade.currentStage)}
+                  {/* Fixed Progress Indicator Container */}
+                  <View className="bg-neutral-900 -mx-6 px-6 py-3 -mt-4 mb-4 border-b border-neutral-700">
+                    {renderStageIndicator(trade.currentStage)}
+                  </View>
 
                   {/* Trade Details */}
                   <View className="mb-4">
@@ -879,7 +906,15 @@ export default function SellerDashboardScreen({ activeTab = 'products' }: Seller
 
                   <View className="items-center mt-4">
                     <TouchableOpacity
-                      onPress={() => setExpandedTrade(expandedTrade === trade.id ? null : trade.id)}
+                      onPress={() => {
+                        if (expandedTrade === trade.id) {
+                          setExpandedTrade(null);
+                          setActiveTradeStage(null);
+                        } else {
+                          setExpandedTrade(trade.id);
+                          setActiveTradeStage(trade.currentStage);
+                        }
+                      }}
                       className="px-4 py-2 bg-neutral-700 hover:bg-neutral-600 rounded"
                     >
                       <Text className="text-neutral-400 hover:text-white text-sm">
@@ -935,7 +970,9 @@ export default function SellerDashboardScreen({ activeTab = 'products' }: Seller
             ))}
           </View>
         </View>
-      </ScrollView>
+        </View>
+        </ScrollView>
+      </View>
     );
   }
 

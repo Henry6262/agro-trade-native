@@ -1,69 +1,73 @@
-import React, { useEffect, useState } from 'react'
-import {
-  View,
-  SafeAreaView,
-} from 'react-native'
-import type { StackScreenProps } from '@react-navigation/stack'
-import { SellerOnboarding } from '../../../components/onboarding/seller/SellerOnboarding'
-import { useOnboardingStore } from '../../../store/onboardingStore'
-import type { OnboardingStackParamList } from '../../../navigation/types'
-import { AuthModal } from '../../../components/onboarding/shared/AuthModal'
+import React, { useState, useEffect } from 'react';
+import { View, StatusBar, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
+import type { RootStackParamList } from '../../../navigation/types';
+import { SellerOnboarding } from '../../../components/onboarding';
+import { InlineAuth } from '../../../components/onboarding/shared/InlineAuth';
+import { useOnboardingStore } from '../../../store/onboardingStore';
 
-type Props = StackScreenProps<OnboardingStackParamList, 'SellerOnboardingFlow'>
+type NavigationProp = StackNavigationProp<RootStackParamList, 'SellerOnboardingFlow'>;
 
-export function SellerOnboardingFlowScreen({ navigation, route }: Props) {
-  const onboardingStore = useOnboardingStore()
-  const [showAuthModal, setShowAuthModal] = useState(false)
+interface Props {
+  navigation: NavigationProp;
+  route: any;
+}
+
+export const SellerOnboardingFlowScreen: React.FC<Props> = ({ navigation }) => {
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const onboardingStore = useOnboardingStore();
 
   useEffect(() => {
     // Set user role to seller when entering this flow
-    onboardingStore.setRole('seller')
+    onboardingStore.setRole('seller');
     
     // Save onboarding data when component mounts
-    onboardingStore.saveOnboardingData().catch(console.error)
+    onboardingStore.saveOnboardingData?.().catch(console.error);
     
-    // Check if we're returning from Google OAuth
-    const googleAuthData = (onboardingStore as any).googleAuthData
+    // Check if we're returning from OAuth
+    const googleAuthData = onboardingStore.googleAuthData;
     if (googleAuthData?.isAuthenticated) {
-      console.log('Returning from Google OAuth, showing modal with pre-filled data')
-      // Show the auth modal with the second step (business details)
-      setShowAuthModal(true)
+      console.log('Returning from OAuth, showing modal with pre-filled data');
+      setShowAuthModal(true);
     }
-    
-    // Reset store if needed (optional, depending on your requirements)
-    return () => {
-      // onboardingStore.resetOnboarding() // Uncomment if you want to reset on exit
-    }
-  }, [])
+  }, []);
 
   const handleComplete = async () => {
     try {
       // Save current onboarding data before showing auth modal
-      await onboardingStore.saveOnboardingData()
-      // Show authentication modal instead of directly navigating
-      setShowAuthModal(true)
+      await onboardingStore.saveOnboardingData?.();
+      setShowAuthModal(true);
     } catch (error) {
-      console.error('Failed to save onboarding data:', error)
-      // Still show auth modal even if save fails
-      setShowAuthModal(true)
+      console.error('Failed to save onboarding data:', error);
+      setShowAuthModal(true);
     }
-  }
+  };
 
   const handleAuthComplete = () => {
-    setShowAuthModal(false)
-    navigation.navigate('OnboardingComplete')
+    setShowAuthModal(false);
+    navigation.navigate('OnboardingComplete');
+  };
+
+  if (showAuthModal) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#111827' }}>
+        <StatusBar barStyle="light-content" backgroundColor="#111827" />
+        <ScrollView style={{ flex: 1 }}>
+          <InlineAuth
+            onClose={() => setShowAuthModal(false)}
+            onComplete={handleAuthComplete}
+            userRole="seller"
+          />
+        </ScrollView>
+      </View>
+    );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View style={{ flex: 1, backgroundColor: '#111827' }}>
+      <StatusBar barStyle="light-content" backgroundColor="#111827" />
       <SellerOnboarding onComplete={handleComplete} />
-      
-      <AuthModal
-        visible={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onComplete={handleAuthComplete}
-        userRole="seller"
-      />
-    </SafeAreaView>
-  )
-}
+    </View>
+  );
+};
