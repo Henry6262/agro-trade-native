@@ -25,7 +25,7 @@ interface CategoryWithMetadata {
 }
 
 export function ProductSelectionBackend() {
-  const { selectedProducts, setSelectedProducts } = useOnboardingStore()
+  const { selectedProducts, setSelectedProducts, setSelectedProductsMetadata } = useOnboardingStore()
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -68,10 +68,15 @@ export function ProductSelectionBackend() {
       ? selectedProducts.filter((cat) => cat !== productCategory)
       : [...selectedProducts, productCategory]
     setSelectedProducts(newSelected)
+    
+    // Also update metadata
+    const selectedMetadata = products.filter(p => newSelected.includes(p.category))
+    setSelectedProductsMetadata(selectedMetadata)
   }
 
   const clearAllProducts = () => {
     setSelectedProducts([])
+    setSelectedProductsMetadata([])
   }
 
   const renderProductItem = ({ item: product }: { item: CategoryWithMetadata }) => (
@@ -79,19 +84,14 @@ export function ProductSelectionBackend() {
       key={product.category}
       style={{
         width: '31%',
-        aspectRatio: 1,
         marginHorizontal: '1%',
-        marginBottom: 12,
+        marginBottom: 16,
       }}
       onPress={() => toggleProduct(product.category)}
       activeOpacity={0.8}
     >
       <View
         style={{
-          flex: 1,
-          padding: 12,
-          alignItems: 'center',
-          justifyContent: 'center',
           backgroundColor: selectedProducts.includes(product.category) 
             ? 'rgba(34, 197, 94, 0.1)' 
             : '#1F2937',
@@ -100,48 +100,75 @@ export function ProductSelectionBackend() {
             ? '#22C55E' 
             : '#374151',
           borderRadius: 12,
+          overflow: 'hidden',
         }}
       >
-        {product.image ? (
-          <Image 
-            source={{ uri: product.image }}
-            style={{ 
-              width: 48, 
-              height: 48, 
-              marginBottom: 8,
-              resizeMode: 'contain'
-            }}
-          />
-        ) : (
-          <View 
-            style={{ 
-              width: 48, 
-              height: 48, 
-              backgroundColor: '#374151',
-              borderRadius: 24,
-              marginBottom: 8
-            }}
-          />
-        )}
-        <Text
+        {/* Square Image Container */}
+        <View 
           style={{
-            fontSize: 13,
-            fontWeight: selectedProducts.includes(product.category) ? '600' : '500',
-            color: selectedProducts.includes(product.category) ? '#22C55E' : '#D1D5DB',
-            textAlign: 'center',
-            lineHeight: 18,
+            width: '100%',
+            aspectRatio: 1,
+            backgroundColor: '#111827',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 12,
           }}
-          numberOfLines={2}
         >
-          {product.name}
-        </Text>
+          {product.image ? (
+            <Image 
+              source={{ uri: product.image }}
+              style={{ 
+                width: '100%', 
+                height: '100%',
+                resizeMode: 'contain'
+              }}
+            />
+          ) : (
+            <View 
+              style={{ 
+                width: '70%', 
+                height: '70%', 
+                backgroundColor: '#374151',
+                borderRadius: 8,
+              }}
+            />
+          )}
+        </View>
+        
+        {/* Product Name Section */}
+        <View 
+          style={{
+            padding: 8,
+            minHeight: 45,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: selectedProducts.includes(product.category)
+              ? 'rgba(34, 197, 94, 0.05)'
+              : '#1F2937',
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 12,
+              fontWeight: selectedProducts.includes(product.category) ? '600' : '500',
+              color: selectedProducts.includes(product.category) ? '#22C55E' : '#D1D5DB',
+              textAlign: 'center',
+              lineHeight: 16,
+            }}
+            numberOfLines={2}
+          >
+            {product.name}
+          </Text>
+        </View>
       </View>
+      
+      {/* Selection Checkmark */}
       {selectedProducts.includes(product.category) && (
-        <View
+        <View 
           style={{
             position: 'absolute',
-            top: -4,
-            right: -4,
+            top: -6,
+            right: -6,
             width: 24,
             height: 24,
             backgroundColor: '#22C55E',
@@ -150,6 +177,11 @@ export function ProductSelectionBackend() {
             justifyContent: 'center',
             borderWidth: 2,
             borderColor: '#111827',
+            elevation: 2,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.25,
+            shadowRadius: 4,
           }}
         >
           <Text style={{ color: 'white', fontSize: 12, fontWeight: 'bold' }}>✓</Text>
@@ -160,50 +192,37 @@ export function ProductSelectionBackend() {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#111827' }}>
+      <View className="flex-1 items-center justify-center bg-gray-900">
         <ActivityIndicator size="large" color="#22C55E" />
-        <Text style={{ color: '#9CA3AF', marginTop: 16 }}>Loading products...</Text>
+        <Text className="text-gray-400 mt-4">Loading products...</Text>
       </View>
     )
   }
 
   if (error) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#111827', padding: 24 }}>
-        <View style={{
-          width: 64,
-          height: 64,
-          backgroundColor: '#DC2626',
-          borderRadius: 32,
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 16,
-        }}>
+      <View className="flex-1 items-center justify-center bg-gray-900 p-6">
+        <View className="w-16 h-16 bg-red-600 rounded-full items-center justify-center mb-4">
           <AlertCircle size={32} color="#FFFFFF" />
         </View>
-        <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF', marginBottom: 8 }}>
+        <Text className="text-lg font-semibold text-white mb-2">
           Error Loading Products
         </Text>
-        <Text style={{ fontSize: 14, color: '#9CA3AF', textAlign: 'center', marginBottom: 24 }}>
+        <Text className="text-sm text-gray-400 text-center mb-6">
           {error}
         </Text>
         <TouchableOpacity
           onPress={loadProductData}
-          style={{
-            paddingHorizontal: 24,
-            paddingVertical: 12,
-            backgroundColor: '#22C55E',
-            borderRadius: 8,
-          }}
+          className="px-6 py-3 bg-primary-500 rounded-lg"
         >
-          <Text style={{ color: '#FFFFFF', fontWeight: '600' }}>Retry</Text>
+          <Text className="text-white font-semibold">Retry</Text>
         </TouchableOpacity>
       </View>
     )
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
+    <SafeAreaView className="flex-1 bg-gray-900">
       <WebScrollView 
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ 
@@ -211,51 +230,36 @@ export function ProductSelectionBackend() {
           padding: 16 
         }}
       >
-        <View style={{ gap: 24 }}>
+        <View className="space-y-6">
           {/* Header */}
-          <View style={{ alignItems: 'center', gap: 8 }}>
-            <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#FFFFFF', textAlign: 'center' }}>
+          <View className="items-center space-y-2">
+            <Text className="text-3xl font-bold text-white text-center">
               What do you trade?
             </Text>
-            <Text style={{ fontSize: 16, color: '#9CA3AF', textAlign: 'center' }}>
+            <Text className="text-base text-gray-400 text-center">
               Select all the agricultural products you work with
             </Text>
           </View>
 
           {/* Search Bar */}
-          <View style={{ gap: 16 }}>
-            <View style={{ position: 'relative' }}>
-              <View style={{ position: 'absolute', left: 12, top: 14, zIndex: 10 }}>
+          <View className="space-y-4">
+            <View className="relative">
+              <View className="absolute left-3 top-3.5 z-10">
                 <Search size={20} color="#6B7280" />
               </View>
               <TextInput
                 placeholder="Search products..."
                 value={searchQuery}
                 onChangeText={setSearchQuery}
-                style={{
-                  paddingLeft: 44,
-                  paddingRight: searchQuery ? 44 : 16,
-                  paddingVertical: 12,
-                  fontSize: 16,
-                  borderWidth: 2,
-                  borderColor: '#374151',
-                  borderRadius: 8,
-                  backgroundColor: '#1F2937',
-                  color: '#FFFFFF',
-                }}
+                className={`
+                  pl-11 py-3 text-base border-2 border-gray-600 rounded-lg bg-gray-800 text-white
+                  ${searchQuery ? 'pr-11' : 'pr-4'}
+                `}
                 placeholderTextColor="#6B7280"
               />
               {searchQuery && (
                 <TouchableOpacity
-                  style={{
-                    position: 'absolute',
-                    right: 12,
-                    top: 14,
-                    width: 24,
-                    height: 24,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
+                  className="absolute right-3 top-3.5 w-6 h-6 items-center justify-center"
                   onPress={() => setSearchQuery('')}
                 >
                   <X size={16} color="#6B7280" />
@@ -265,18 +269,12 @@ export function ProductSelectionBackend() {
 
             {/* Selection Info */}
             {selectedProducts.length > 0 && (
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Badge
-                  style={{
-                    backgroundColor: '#22C55E',
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                  }}
-                >
+              <View className="flex-row items-center justify-between">
+                <Badge className="bg-primary-500 px-3 py-1.5">
                   {`${selectedProducts.length} product${selectedProducts.length > 1 ? 's' : ''} selected`}
                 </Badge>
                 <TouchableOpacity onPress={clearAllProducts}>
-                  <Text style={{ fontSize: 14, color: '#EF4444', fontWeight: '500' }}>Clear all</Text>
+                  <Text className="text-sm text-red-500 font-medium">Clear all</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -284,11 +282,11 @@ export function ProductSelectionBackend() {
 
           {/* Agricultural Products Section */}
           <View>
-            <View style={{ marginBottom: 16 }}>
-              <Text style={{ fontSize: 20, fontWeight: '600', color: '#FFFFFF', marginBottom: 4 }}>
+            <View className="mb-4">
+              <Text className="text-xl font-semibold text-white mb-1">
                 Agricultural Products
               </Text>
-              <Text style={{ fontSize: 14, color: '#9CA3AF' }}>
+              <Text className="text-sm text-gray-400">
                 {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} available
               </Text>
             </View>
@@ -304,34 +302,16 @@ export function ProductSelectionBackend() {
                 keyExtractor={(item) => item.category}
               />
             ) : (
-              <View
-                style={{
-                  padding: 32,
-                  alignItems: 'center',
-                  backgroundColor: '#1F2937',
-                  borderWidth: 1,
-                  borderColor: '#374151',
-                  borderRadius: 8,
-                }}
-              >
-                <View style={{ gap: 16, alignItems: 'center' }}>
-                  <View
-                    style={{
-                      width: 64,
-                      height: 64,
-                      backgroundColor: '#374151',
-                      borderRadius: 32,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
+              <View className="p-8 items-center bg-gray-800 border border-gray-600 rounded-lg">
+                <View className="space-y-4 items-center">
+                  <View className="w-16 h-16 bg-gray-600 rounded-full items-center justify-center">
                     <Search size={32} color="#6B7280" />
                   </View>
-                  <View style={{ alignItems: 'center', gap: 4 }}>
-                    <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF' }}>
+                  <View className="items-center space-y-1">
+                    <Text className="text-lg font-semibold text-white">
                       No products found
                     </Text>
-                    <Text style={{ fontSize: 14, color: '#9CA3AF', textAlign: 'center' }}>
+                    <Text className="text-sm text-gray-400 text-center">
                       Try adjusting your search
                     </Text>
                   </View>
@@ -342,19 +322,11 @@ export function ProductSelectionBackend() {
 
           {/* Bottom Summary */}
           {selectedProducts.length > 0 && (
-            <View
-              style={{
-                padding: 16,
-                backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                borderWidth: 1,
-                borderColor: 'rgba(34, 197, 94, 0.3)',
-                borderRadius: 8,
-              }}
-            >
-              <Text style={{ fontSize: 16, color: '#22C55E', fontWeight: '600', textAlign: 'center' }}>
+            <View className="p-4 bg-primary-500/10 border border-primary-500/30 rounded-lg">
+              <Text className="text-base text-primary-500 font-semibold text-center">
                 Great! You've selected {selectedProducts.length} product{selectedProducts.length > 1 ? 's' : ''}
               </Text>
-              <Text style={{ fontSize: 14, color: '#10B981', textAlign: 'center', marginTop: 4 }}>
+              <Text className="text-sm text-green-500 text-center mt-1">
                 You can proceed to the next step
               </Text>
             </View>

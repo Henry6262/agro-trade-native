@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  SafeAreaView,
+  Modal,
+  Pressable,
 } from 'react-native'
-import { Plus, Truck, Trash2 } from 'lucide-react-native'
+import { Plus, Truck, Trash2, ChevronDown } from 'lucide-react-native'
 import { Card } from '../../common/Card'
 import { Badge } from '../../common/Badge'
 import { Button } from '../../common/Button'
@@ -22,11 +23,23 @@ interface TruckInfo {
   count?: number // Add count for grouped trucks
 }
 
+const truckTypes = [
+  'Standard',
+  'Refrigerated',
+  'Flatbed',
+  'Container',
+  'Tanker',
+  'Dump Truck',
+  'Box Truck',
+  'Livestock',
+]
+
 export function FleetInformation() {
   const { transportData, setFleetInfo } = useOnboardingStore()
   const [newTruck, setNewTruck] = useState({ capacity: '', unit: 'tons' as 'tons' | 'kg', type: 'Standard' })
-  const [batchMode, setBatchMode] = useState(false)
-  const [batchCount, setBatchCount] = useState('')
+  const [batchMode, setBatchMode] = useState(true) // Always active
+  const [batchCount, setBatchCount] = useState('1')
+  const [showTruckTypeModal, setShowTruckTypeModal] = useState(false)
   
   // Get current fleet from store or initialize empty
   const currentFleet = transportData?.fleetInfo?.vehicleTypes || []
@@ -117,7 +130,7 @@ export function FleetInformation() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
+    <>
       <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 16 }} showsVerticalScrollIndicator={false}>
         <View style={{ paddingBottom: 96 }}>
           <View style={{ alignItems: 'center', marginBottom: 32 }}>
@@ -150,30 +163,13 @@ export function FleetInformation() {
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Plus size={20} color="#ea580c" />
-                  <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF', marginLeft: 8 }}>Add Truck to Fleet</Text>
+                  <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF', marginLeft: 8 }}>Add Trucks to Fleet</Text>
                 </View>
-                <TouchableOpacity
-                  onPress={() => setBatchMode(!batchMode)}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 6,
-                    backgroundColor: batchMode ? '#ea580c' : '#374151',
-                    borderWidth: 1,
-                    borderColor: batchMode ? '#ea580c' : '#9CA3AF'
-                  }}
-                >
-                  <Text style={{ fontSize: 12, color: batchMode ? '#FFFFFF' : '#9CA3AF', fontWeight: '500' }}>
-                    Batch Mode
-                  </Text>
-                </TouchableOpacity>
               </View>
 
               <View style={{ flexDirection: 'row', marginBottom: 16 }}>
                 <View style={{ flex: 1, marginRight: 16 }}>
-                  <Text style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}>Capacity</Text>
+                  <Text style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}>Capacity (tons)</Text>
                   <TextInput
                     keyboardType="numeric"
                     placeholder="e.g., 10"
@@ -184,41 +180,38 @@ export function FleetInformation() {
                   />
                 </View>
                 
-                {batchMode && (
-                  <View style={{ width: 80, marginRight: 16 }}>
-                    <Text style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}>Count</Text>
-                    <TextInput
-                      keyboardType="numeric"
-                      placeholder="1"
-                      value={batchCount}
-                      onChangeText={setBatchCount}
-                      style={{ fontSize: 16, borderWidth: 1, borderColor: '#374151', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: '#111827', color: '#FFFFFF' }}
-                      placeholderTextColor="#9CA3AF"
-                    />
-                  </View>
-                )}
-                
-                <View style={{ width: 80 }}>
-                  <Text style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}>Unit</Text>
-                  <View style={{ borderWidth: 1, borderColor: '#374151', borderRadius: 8, backgroundColor: '#111827' }}>
-                    <TextInput
-                      value={newTruck.unit}
-                      editable={false}
-                      style={{ paddingHorizontal: 12, paddingVertical: 8, color: '#FFFFFF' }}
-                    />
-                  </View>
+                <View style={{ width: 80, marginRight: 16 }}>
+                  <Text style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}>Quantity</Text>
+                  <TextInput
+                    keyboardType="numeric"
+                    placeholder="1"
+                    value={batchCount}
+                    onChangeText={setBatchCount}
+                    style={{ fontSize: 16, borderWidth: 1, borderColor: '#374151', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: '#111827', color: '#FFFFFF' }}
+                    placeholderTextColor="#9CA3AF"
+                  />
                 </View>
               </View>
 
               <View style={{ marginBottom: 16 }}>
                 <Text style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}>Truck Type</Text>
-                <TextInput
-                  value={newTruck.type}
-                  onChangeText={(text) => setNewTruck({ ...newTruck, type: text })}
-                  placeholder="e.g., Standard, Refrigerated, Flatbed"
-                  style={{ borderWidth: 1, borderColor: '#374151', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: '#111827', color: '#FFFFFF' }}
-                  placeholderTextColor="#9CA3AF"
-                />
+                <TouchableOpacity
+                  onPress={() => setShowTruckTypeModal(true)}
+                  style={{ 
+                    borderWidth: 1, 
+                    borderColor: '#374151', 
+                    borderRadius: 8, 
+                    paddingHorizontal: 12, 
+                    paddingVertical: 10, 
+                    backgroundColor: '#111827',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <Text style={{ color: '#FFFFFF', fontSize: 16 }}>{newTruck.type}</Text>
+                  <ChevronDown size={20} color="#9CA3AF" />
+                </TouchableOpacity>
               </View>
 
               <TouchableOpacity
@@ -233,7 +226,7 @@ export function FleetInformation() {
                 activeOpacity={0.8}
               >
                 <Text style={{ color: 'white', fontWeight: '500', textAlign: 'center' }}>
-                  {batchMode && batchCount ? `Add ${batchCount} Trucks` : 'Add Truck'}
+                  {batchCount && Number(batchCount) > 1 ? `Add ${batchCount} Trucks` : 'Add Truck'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -300,6 +293,62 @@ export function FleetInformation() {
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+
+      {/* Truck Type Modal */}
+      <Modal
+        visible={showTruckTypeModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowTruckTypeModal(false)}
+      >
+        <Pressable 
+          style={{
+            flex: 1,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          onPress={() => setShowTruckTypeModal(false)}
+        >
+          <View 
+            style={{
+              backgroundColor: '#1F2937',
+              borderRadius: 12,
+              padding: 20,
+              width: '80%',
+              maxWidth: 400,
+              borderWidth: 1,
+              borderColor: '#374151',
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF', marginBottom: 16 }}>Select Truck Type</Text>
+            {truckTypes.map((type) => (
+              <TouchableOpacity
+                key={type}
+                onPress={() => {
+                  setNewTruck({ ...newTruck, type })
+                  setShowTruckTypeModal(false)
+                }}
+                style={{
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                  borderRadius: 8,
+                  backgroundColor: newTruck.type === type ? '#ea580c' : 'transparent',
+                  marginBottom: 8,
+                }}
+              >
+                <Text style={{ 
+                  color: newTruck.type === type ? '#FFFFFF' : '#9CA3AF',
+                  fontSize: 16,
+                  fontWeight: newTruck.type === type ? '600' : '400'
+                }}>
+                  {type}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Pressable>
+      </Modal>
+    </>
   )
 }

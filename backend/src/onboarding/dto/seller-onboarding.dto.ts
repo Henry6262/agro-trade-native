@@ -3,6 +3,10 @@ import { Type } from 'class-transformer';
 import { ProductCategory, ProductUnit } from '@prisma/client';
 
 export class ProductSpecificationDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
   @IsEnum(ProductCategory)
   @IsNotEmpty()
   category: ProductCategory;
@@ -14,6 +18,10 @@ export class ProductSpecificationDto {
   @IsEnum(ProductUnit)
   @IsNotEmpty()
   unit: ProductUnit;
+
+  @IsOptional()
+  @IsNumber()
+  pricePerTon?: number;
 
   @IsOptional()
   @IsString()

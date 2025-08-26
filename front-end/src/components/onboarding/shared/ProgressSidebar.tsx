@@ -87,14 +87,14 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
   return (
     <View 
       ref={containerRef}
-      style={{ 
-        width: 75, 
-        height: '100%', 
-        backgroundColor: '#1f2937', 
-        borderRightWidth: 1, 
-        borderRightColor: '#4b5563',
+      style={{
+        width: 75,
+        height: '100%',
+        backgroundColor: '#1F2937',
+        borderRightWidth: 1,
+        borderRightColor: '#4B5563',
         alignItems: 'center',
-        position: 'relative'
+        position: 'relative',
       }}
       onLayout={(event) => {
         const { height } = event.nativeEvent.layout;
@@ -111,7 +111,7 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
           width: 48,
           height: 48,
           borderRadius: 24,
-          backgroundColor: '#22c55e',
+          backgroundColor: '#22C55E',
           alignItems: 'center',
           justifyContent: 'center',
           marginBottom: 8,
@@ -119,15 +119,15 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
           <Leaf size={24} color="white" />
         </View>
         <Text style={{
-          color: '#22c55e',
+          color: '#22C55E',
           fontSize: 12,
           fontWeight: 'bold',
-          letterSpacing: 0.5,
+          letterSpacing: 1,
         }}>
           AGRO
         </Text>
         <Text style={{
-          color: '#9ca3af',
+          color: '#9CA3AF',
           fontSize: 10,
           fontWeight: '500',
         }}>
@@ -136,28 +136,32 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
       </View>
 
       {/* Progress Container */}
-      <View style={{
-        position: 'absolute',
-        top: startOffset,
-        width: '100%',
-        alignItems: 'center',
-        height: progressHeight,
-      }}>
-        {/* Progress Line Background */}
-        <View style={{
+      <View 
+        style={{
           position: 'absolute',
-          left: '50%',
-          marginLeft: -1,
-          top: 0,
+          width: '100%',
+          alignItems: 'center',
+          top: startOffset,
           height: progressHeight,
-          width: 2,
-          backgroundColor: '#374151',
-        }}>
+        }}
+      >
+        {/* Progress Line Background */}
+        <View 
+          style={{
+            position: 'absolute',
+            backgroundColor: '#4B5563',
+            width: 2,
+            left: '50%',
+            marginLeft: -1,
+            top: 0,
+            height: progressHeight,
+          }}
+        >
           {/* Animated Progress Line */}
           <Animated.View 
             style={{
               width: 2,
-              backgroundColor: '#22c55e',
+              backgroundColor: '#22C55E',
               position: 'absolute',
               top: 0,
               left: 0,
@@ -181,17 +185,12 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
               style={{
                 position: 'absolute',
                 alignItems: 'center',
-                top: index * stepSpacing - 16, // Center the circle on the position
                 width: '100%',
+                top: index * stepSpacing - 16, // Center the circle on the position
               }}
             >
               {/* Step Circle Container */}
-              <View style={{
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: 40,
-                height: 40,
-              }}>
+              <View style={{ alignItems: 'center', justifyContent: 'center', width: 40, height: 40 }}>
                 {/* Glow effect for current step */}
                 {isCurrent && (
                   <Animated.View
@@ -200,7 +199,7 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
                       width: 40,
                       height: 40,
                       borderRadius: 20,
-                      backgroundColor: '#fbbf24',
+                      backgroundColor: '#FBBF24',
                       opacity: glowAnimation.interpolate({
                         inputRange: [0, 1],
                         outputRange: [0.3, 0.6],
@@ -224,11 +223,11 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
                       borderRadius: 16,
                       alignItems: 'center',
                       justifyContent: 'center',
-                      backgroundColor: isCompleted ? '#22c55e' : isCurrent ? '#fbbf24' : '#374151',
+                      backgroundColor: isCompleted ? '#22C55E' : isCurrent ? '#FBBF24' : '#4B5563',
                       borderWidth: isCurrent ? 2 : 0,
-                      borderColor: isCurrent ? '#f59e0b' : 'transparent',
+                      borderColor: isCurrent ? '#F59E0B' : 'transparent',
                       elevation: isCurrent ? 4 : 0,
-                      shadowColor: isCurrent ? '#fbbf24' : 'transparent',
+                      shadowColor: isCurrent ? '#FBBF24' : 'transparent',
                       shadowOffset: { width: 0, height: 2 },
                       shadowOpacity: isCurrent ? 0.3 : 0,
                       shadowRadius: 4,
@@ -241,43 +240,50 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
                   {isCompleted ? (
                     <Check size={16} color="white" strokeWidth={3} />
                   ) : (
-                    <Text style={{
-                      fontSize: 14,
-                      fontWeight: '700',
-                      color: isCurrent ? '#78350f' : isPending ? '#6b7280' : '#d1d5db'
-                    }}>
+                    <Text 
+                      style={{
+                        fontSize: 14,
+                        fontWeight: 'bold',
+                        color: isCurrent ? '#92400E' : isPending ? '#6B7280' : '#D1D5DB',
+                      }}
+                    >
                       {index + 1}
                     </Text>
                   )}
                 </Animated.View>
               </View>
 
-              {/* Step Labels - Below circles, only show for current step */}
-              {isCurrent && (
-                <View style={{ 
-                  position: 'absolute',
-                  top: 40,
-                  width: 80,
-                  alignItems: 'center',
-                }}>
-                  <Text style={{
+              {/* Step Labels - Below circles, show for all steps */}
+              <View style={{
+                position: 'absolute',
+                top: 40,
+                width: 80,
+                alignItems: 'center',
+              }}>
+                <Text 
+                  style={{
                     fontSize: 10,
-                    fontWeight: '600',
-                    color: '#fbbf24',
+                    fontWeight: isCurrent ? '600' : '500',
+                    color: isCompleted ? '#22C55E' : isCurrent ? '#FBBF24' : '#9CA3AF',
                     textAlign: 'center',
                     marginBottom: 2,
-                  }} numberOfLines={2}>
-                    {step.title}
-                  </Text>
-                  <Text style={{
+                  }}
+                  numberOfLines={2}
+                >
+                  {step.title}
+                </Text>
+                <Text 
+                  style={{
                     fontSize: 8,
-                    color: '#9ca3af',
+                    color: isCurrent ? '#9CA3AF' : '#6B7280',
                     textAlign: 'center',
-                  }} numberOfLines={2}>
-                    {step.description}
-                  </Text>
-                </View>
-              )}
+                    opacity: isCurrent ? 1 : 0.7,
+                  }}
+                  numberOfLines={2}
+                >
+                  {step.description}
+                </Text>
+              </View>
             </View>
           );
         })}
@@ -290,14 +296,14 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
         alignItems: 'center',
       }}>
         <Text style={{
-          color: '#22c55e',
+          color: '#22C55E',
           fontSize: 18,
           fontWeight: 'bold',
         }}>
           {Math.round((currentStepIndex / (steps.length - 1)) * 100)}%
         </Text>
         <Text style={{
-          color: '#6b7280',
+          color: '#6B7280',
           fontSize: 10,
           marginTop: 2,
         }}>

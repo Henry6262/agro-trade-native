@@ -34,6 +34,8 @@ interface OnboardingStore extends OnboardingState {
   // Common product selection
   selectedProducts: string[];
   setSelectedProducts: (products: string[]) => void;
+  selectedProductsMetadata: any[];
+  setSelectedProductsMetadata: (metadata: any[]) => void;
   
   // Additional store properties not in OnboardingState
   transportData?: TransportOnboardingData;
@@ -95,6 +97,7 @@ const getInitialState = () => ({
   transportData: undefined,
   isComplete: false,
   selectedProducts: [] as string[],
+  selectedProductsMetadata: [] as any[],
   sellerSpecifications: {} as Record<string, any>,
   buyerSpecifications: {} as Record<string, any>,
   googleAuthData: undefined as { name: string; email: string; isAuthenticated: boolean } | undefined,
@@ -234,6 +237,11 @@ export const useOnboardingStore = create<OnboardingStore>()(
       setSelectedProducts: (products: string[]) =>
         set((state) => {
           state.selectedProducts = products;
+        }),
+      
+      setSelectedProductsMetadata: (metadata: any[]) =>
+        set((state) => {
+          state.selectedProductsMetadata = metadata;
         }),
 
       // Seller specifications

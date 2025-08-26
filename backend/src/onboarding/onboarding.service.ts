@@ -252,6 +252,8 @@ export class OnboardingService {
               address: baseData.address,
               city: 'Unknown', // Default city
               type: 'DEPOT' as const,
+              latitude: baseData.latitude,
+              longitude: baseData.longitude,
               isPrimary: baseData.isPrimary || false,
             },
           })

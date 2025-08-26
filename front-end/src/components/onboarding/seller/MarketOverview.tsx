@@ -39,35 +39,35 @@ export function MarketOverview({ selectedProducts, specifications, onComplete }:
   }, 0)
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
+    <SafeAreaView className="flex-1 bg-gray-900">
       <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 16 }} showsVerticalScrollIndicator={false}>
-        <View style={{ paddingBottom: 96 }}>
-          <View style={{ alignItems: 'center', marginBottom: 24 }}>
-            <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#22C55E', textAlign: 'center', marginBottom: 12 }}>
+        <View className="pb-24">
+          <View className="items-center mb-6">
+            <Text className="text-3xl font-bold text-primary-500 text-center mb-3">
               Ready to Sell
             </Text>
-            <Text style={{ color: '#9CA3AF', fontSize: 16, textAlign: 'center' }}>Review your products and connect with buyers</Text>
+            <Text className="text-gray-400 text-base text-center">Review your products and connect with buyers</Text>
           </View>
 
-          <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 24 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 24 }}>
+          <View className="flex-row justify-center items-center mb-6">
+            <View className="flex-row items-center mr-6">
               <Users size={16} color="#22C55E" />
-              <Text style={{ fontSize: 14, color: '#22C55E', marginLeft: 8 }}>1,847 active buyers</Text>
+              <Text className="text-sm text-primary-500 ml-2">1,847 active buyers</Text>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View className="flex-row items-center">
               <TrendingUp size={16} color="#3B82F6" />
-              <Text style={{ fontSize: 14, color: '#3B82F6', marginLeft: 8 }}>₹2.8Cr traded today</Text>
+              <Text className="text-sm text-blue-500 ml-2">₹2.8Cr traded today</Text>
             </View>
           </View>
 
-          <Card style={{ padding: 24, backgroundColor: '#1F2937', borderColor: '#374151' }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <ShoppingCart size={20} color="#22C55E" style={{ marginRight: 8 }} />
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FFFFFF' }}>Your Products</Text>
+          <Card className="p-6 bg-gray-800 border-gray-600">
+            <View className="flex-row items-center justify-between mb-6">
+              <View className="flex-row items-center">
+                <ShoppingCart size={20} color="#22C55E" className="mr-2" />
+                <Text className="text-xl font-bold text-white">Your Products</Text>
               </View>
-              <Badge style={{ backgroundColor: 'rgba(34, 197, 94, 0.2)', borderColor: '#22C55E' }}>
-                <Text style={{ color: '#22C55E' }}>
+              <Badge className="bg-primary-500/20 border-primary-500">
+                <Text className="text-primary-500">
                   {specifications.length} item{specifications.length !== 1 ? 's' : ''}
                 </Text>
               </Badge>
@@ -92,63 +92,51 @@ export function MarketOverview({ selectedProducts, specifications, onComplete }:
                 return (
                   <View
                     key={spec.productId}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: 16,
-                      backgroundColor: '#111827',
-                      borderRadius: 8,
-                      borderWidth: 1,
-                      borderColor: '#374151',
-                      marginBottom: 16
-                    }}
+                    className="flex-row items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-600 mb-4"
                   >
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Text style={{ fontSize: 24, marginRight: 16 }}>{product.icon}</Text>
+                    <View className="flex-row items-center">
+                      <Text className="text-2xl mr-4">{product.icon}</Text>
                       <View>
-                        <Text style={{ fontWeight: '600', color: '#FFFFFF' }}>{product.name}</Text>
-                        <Text style={{ fontSize: 14, color: '#9CA3AF' }}>
+                        <Text className="font-semibold text-white">{product.name}</Text>
+                        <Text className="text-sm text-gray-400">
                           {spec.quantity} {spec.unit} • ₹{spec.pricePerKilo}/kg
                         </Text>
                       </View>
                     </View>
-                    <View style={{ alignItems: 'flex-end' }}>
-                      <Text style={{ fontWeight: '600', color: '#FFFFFF' }}>₹{itemValue.toLocaleString()}</Text>
-                      <Text style={{ fontSize: 12, color: '#9CA3AF' }}>{itemWeight}kg total</Text>
+                    <View className="items-end">
+                      <Text className="font-semibold text-white">₹{itemValue.toLocaleString()}</Text>
+                      <Text className="text-xs text-gray-400">{itemWeight}kg total</Text>
                     </View>
                   </View>
                 )
               })}
             </View>
 
-            <View style={{ borderTopWidth: 1, borderTopColor: '#374151', marginTop: 24, paddingTop: 16 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View className="border-t border-gray-600 mt-6 pt-4">
+              <View className="flex-row justify-between items-center">
                 <View>
-                  <Text style={{ fontWeight: '600', color: '#FFFFFF' }}>Total Weight</Text>
-                  <Text style={{ fontSize: 14, color: '#9CA3AF' }}>{totalWeight.toLocaleString()} kg</Text>
+                  <Text className="font-semibold text-white">Total Weight</Text>
+                  <Text className="text-sm text-gray-400">{totalWeight.toLocaleString()} kg</Text>
                 </View>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={{ fontWeight: '600', color: '#FFFFFF' }}>Total Value</Text>
-                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#22C55E' }}>₹{totalValue.toLocaleString()}</Text>
+                <View className="items-end">
+                  <Text className="font-semibold text-white">Total Value</Text>
+                  <Text className="text-lg font-bold text-primary-500">₹{totalValue.toLocaleString()}</Text>
                 </View>
               </View>
             </View>
           </Card>
 
-          <View style={{ alignItems: 'center', marginTop: 32 }}>
+          <View className="items-center mt-8">
             <TouchableOpacity
+              className={`
+                w-full py-6 px-4 rounded-lg flex-row items-center justify-center
+                ${
+                  specifications.length === 0 || !specifications.every((spec) => spec.quantity && spec.pricePerKilo)
+                    ? 'bg-gray-600'
+                    : 'bg-primary-500'
+                }
+              `}
               style={{
-                width: '100%',
-                paddingVertical: 24,
-                paddingHorizontal: 16,
-                borderRadius: 8,
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: (specifications.length === 0 || !specifications.every((spec) => spec.quantity && spec.pricePerKilo)) 
-                  ? '#374151' 
-                  : '#22C55E',
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
@@ -159,11 +147,11 @@ export function MarketOverview({ selectedProducts, specifications, onComplete }:
               disabled={specifications.length === 0 || !specifications.every((spec) => spec.quantity && spec.pricePerKilo)}
               activeOpacity={0.8}
             >
-              <Zap size={20} color="white" style={{ marginRight: 8 }} />
-              <Text style={{ color: 'white', fontSize: 18, fontWeight: '600' }}>Create Sell Request</Text>
+              <Zap size={20} color="white" className="mr-2" />
+              <Text className="text-white text-lg font-semibold">Create Sell Request</Text>
             </TouchableOpacity>
 
-            <Text style={{ fontSize: 12, color: '#9CA3AF', textAlign: 'center', marginTop: 12 }}>You'll be asked to sign in to complete your listing</Text>
+            <Text className="text-xs text-gray-400 text-center mt-3">You'll be asked to sign in to complete your listing</Text>
           </View>
         </View>
       </ScrollView>

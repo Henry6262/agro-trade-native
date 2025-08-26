@@ -10,7 +10,6 @@ import {
   Alert,
 } from 'react-native'
 import { MapPin, Plus, X, Truck, Settings } from 'lucide-react-native'
-import { Card } from '../../common/Card'
 import { Badge } from '../../common/Badge'
 import { useOnboardingStore } from '../../../store/onboardingStore'
 
@@ -276,7 +275,7 @@ export function LocationInformation() {
 
           {/* Bases List */}
           {bases.map((base, index) => (
-            <Card key={base.id} style={{ backgroundColor: '#1F2937', borderColor: '#374151', padding: 20, marginBottom: 16 }}>
+            <View key={base.id} style={{ padding: 20, marginBottom: 16 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
@@ -293,9 +292,6 @@ export function LocationInformation() {
                       {base.city}, {base.state}, {base.country}
                     </Text>
                   </View>
-                  {base.address && (
-                    <Text style={{ color: '#9CA3AF', fontSize: 12, marginLeft: 24 }}>{base.address}</Text>
-                  )}
                 </View>
                 
                 {!base.isMainBase && (
@@ -308,54 +304,12 @@ export function LocationInformation() {
                 )}
               </View>
 
-              {availableFleet.length > 0 && (
-                <View>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <Text style={{ color: '#FFFFFF', fontWeight: '500' }}>
-                      Assigned Trucks ({base.assignedTrucks.length})
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setSelectedBaseForAssignment(base.id)
-                        setShowTruckAssignmentModal(true)
-                      }}
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        backgroundColor: '#374151',
-                        paddingHorizontal: 8,
-                        paddingVertical: 4,
-                        borderRadius: 6
-                      }}
-                    >
-                      <Settings size={12} color="#9CA3AF" />
-                      <Text style={{ color: '#9CA3AF', fontSize: 12, marginLeft: 4 }}>Assign</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                    {base.assignedTrucks.length > 0 ? base.assignedTrucks.map((truckId, truckIndex) => {
-                      const truck = availableFleet.find(t => t.id === truckId)
-                      return truck ? (
-                        <Badge key={truckId} style={{ backgroundColor: '#374151', margin: 2 }}>
-                          <Text style={{ color: '#9CA3AF', fontSize: 10 }}>
-                            Truck {availableFleet.indexOf(truck) + 1} ({truck.capacity}t)
-                          </Text>
-                        </Badge>
-                      ) : null
-                    }) : (
-                      <Text style={{ color: '#6B7280', fontSize: 12, fontStyle: 'italic' }}>
-                        No trucks assigned
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              )}
-            </Card>
+              
+            </View>
           ))}
 
           {bases.length === 0 && (
-            <Card style={{ padding: 32, alignItems: 'center', backgroundColor: '#1F2937', borderColor: '#374151' }}>
+            <View style={{ padding: 32, alignItems: 'center' }}>
               <MapPin size={48} color="#9CA3AF" />
               <Text style={{ color: '#FFFFFF', fontSize: 18, fontWeight: '600', marginTop: 16, marginBottom: 8 }}>
                 No Bases Added
@@ -363,7 +317,7 @@ export function LocationInformation() {
               <Text style={{ color: '#9CA3AF', textAlign: 'center' }}>
                 Add your first base to get started with location management
               </Text>
-            </Card>
+            </View>
           )}
         </View>
       </ScrollView>

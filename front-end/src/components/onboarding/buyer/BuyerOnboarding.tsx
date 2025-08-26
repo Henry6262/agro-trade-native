@@ -7,6 +7,8 @@ import { Navigation } from '../shared/Navigation'
 import { ProductSelectionBackend } from '../ProductSelectionBackend' // Use simplified backend-integrated product selection
 import { BuyerSpecifications } from './BuyerSpecifications'
 import { BuyerMarketRequest } from './BuyerMarketRequest'
+import { BaseManagementFlow } from '../base-management/BaseManagementUI'
+import { ImprovedDistribution } from '../base-management/ImprovedDistribution'
 import { useOnboardingStore } from '../../../store/onboardingStore'
 
 interface BuyerOnboardingProps {
@@ -25,24 +27,24 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
     setStep
   } = useOnboardingStore()
   
-  // Initialize with saved step or default to 1 (products step)
-  const [currentStepIndex, setCurrentStepIndex] = useState(currentStep > 0 ? currentStep : 1)
+  // Initialize with saved step or default to 0 (products step is now first)
+  const [currentStepIndex, setCurrentStepIndex] = useState(currentStep >= 0 ? currentStep : 0)
   const [steps, setSteps] = useState<OnboardingStep[]>([])
   const [productSpecifications, setProductSpecifications] = useState<ProductSpecification[]>([])
   const [isAnimating, setIsAnimating] = useState(false)
   const [progressLineHeight, setProgressLineHeight] = useState(0)
 
   useEffect(() => {
-    const buyerSteps = roleSteps.buyer.map((step, index) => ({
+    const buyerSteps = roleSteps.buyer.map((step) => ({
       ...step,
-      completed: index === 0, // First step (role) is already completed
+      completed: false, // No steps completed initially
     }))
     setSteps(buyerSteps)
   }, [])
 
   useEffect(() => {
     // Calculate progress based on completed steps
-    const completedSteps = currentStepIndex - 1 // Current step index starts from 1, so subtract 1 for completed
+    const completedSteps = currentStepIndex // Current step index starts from 0
     const totalSteps = steps.length - 1 // Total steps excluding the current one
     const progressPercentage = totalSteps > 0 ? Math.max(0, (completedSteps / totalSteps) * 100) : 0
     setProgressLineHeight(Math.min(progressPercentage, 100))
@@ -148,11 +150,11 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
   }
 
   const handleBack = () => {
-    if (currentStepIndex === 1 || isAnimating) return // Can't go back before products step
+    if (currentStepIndex === 0 || isAnimating) return // Can't go back before products step
 
     setIsAnimating(true)
     setTimeout(() => {
-      const prevStep = Math.max(currentStepIndex - 1, 1)
+      const prevStep = Math.max(currentStepIndex - 1, 0)
       setCurrentStepIndex(prevStep)
       setStep(prevStep) // Save to store
       setIsAnimating(false)
@@ -172,6 +174,13 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
           spec.unit && spec.unit.toString().trim() !== '' &&
           spec.pricePerKilo && spec.pricePerKilo.toString().trim() !== ''
         )
+      case 'bases':
+        // Allow proceeding without bases - user can add them later
+        return true
+      case 'distribution':
+        // Check if all products are distributed
+        const distributions = useOnboardingStore.getState().buyerData?.distributions || []
+        return distributions.length > 0 && distributions.every(d => d.totalDistributed === d.totalQuantity)
       case 'market':
         return true
       default:
@@ -194,6 +203,34 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
             onSpecificationsChange={setProductSpecifications}
           />
         )
+      case 'bases':
+        return <BaseManagementFlow />
+      case 'distribution':
+        const bases = useOnboardingStore.getState().buyerData?.bases || []
+        const products = selectedProducts.map(productId => {
+          const spec = productSpecifications.find(s => s.productId === productId)
+          return {
+            id: productId,
+            name: productId, // You may want to get actual product names
+            totalQuantity: parseFloat(spec?.quantity || '0'),
+            unit: spec?.unit || 'tons'
+          }
+        })
+        return (
+          <View className="flex-1">
+            {products.length > 0 && (
+              <ImprovedDistribution
+                userType="buyer"
+                bases={bases}
+                product={products[0]}
+                onDistributionComplete={(dist) => {
+                  console.log('Distribution complete:', dist);
+                  // TODO: Save distribution to store and handle multiple products
+                }}
+              />
+            )}
+          </View>
+        )
       case 'market':
         return (
           <BuyerMarketRequest
@@ -209,7 +246,7 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
   }
 
   return (
-    <View style={{ flex: 1, flexDirection: 'row', backgroundColor: '#111827' }}>
+    <View className="flex-1 flex-row bg-gray-900">
       {/* Fixed Progress Sidebar */}
       <ProgressSidebar
         steps={steps}
@@ -219,11 +256,10 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
       />
 
       {/* Main Content */}
-      <View style={{ flex: 1 }}>
+      <View className="flex-1">
         <ScrollView 
           contentContainerStyle={{ 
             flexGrow: 1,
-            padding: 24, 
             paddingBottom: 100 
           }}
           showsVerticalScrollIndicator={false}

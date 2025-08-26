@@ -2,21 +2,23 @@ import type { UserRole, StepConfig, Product } from "../types/onboarding"
 
 export const roleSteps: Record<UserRole, StepConfig[]> = {
   seller: [
-    { id: "role", title: "Role", description: "Select your role" },
     { id: "products", title: "Products", description: "Choose products" },
     { id: "specifications", title: "Details", description: "Add specifications" },
+    { id: "bases", title: "Locations", description: "Storage locations" },
+    { id: "distribution", title: "Distribution", description: "Stock distribution" },
     { id: "market", title: "Market", description: "Create sell request" },
   ],
   buyer: [
-    { id: "role", title: "Role", description: "Select your role" },
     { id: "products", title: "Products", description: "What to buy" },
     { id: "specifications", title: "Requirements", description: "Your needs" },
+    { id: "bases", title: "Delivery", description: "Delivery locations" },
+    { id: "distribution", title: "Distribution", description: "Quantity per location" },
     { id: "market", title: "Request", description: "Create offer" },
   ],
   transporter: [
-    { id: "role", title: "Role", description: "Select your role" },
     { id: "fleet", title: "Fleet", description: "Your trucks" },
-    { id: "location", title: "Location", description: "Your base" },
+    { id: "bases", title: "Bases", description: "Operating locations" },
+    { id: "location", title: "Coverage", description: "Service areas" },
     { id: "listing", title: "Listing", description: "Create profile" },
   ],
 }

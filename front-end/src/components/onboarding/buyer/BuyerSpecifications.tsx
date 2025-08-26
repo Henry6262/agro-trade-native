@@ -1,33 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
-  SafeAreaView,
+  Dimensions,
+  Image,
 } from 'react-native'
-import { Animated } from 'react-native'
-import { Plus, X, ChevronDown, Package } from 'lucide-react-native'
-import { Card } from '../../common/Card'
-import { Badge } from '../../common/Badge'
-import { Input } from '../../common/Input'
-import { Button } from '../../common/Button'
-import { products } from '../../../constants/onboarding'
+import { Plus, ChevronUp, Package, Calendar } from 'lucide-react-native'
 import type { ProductSpecification } from '../../../types/onboarding'
+import { useOnboardingStore } from '../../../store/onboardingStore'
 
 interface BuyerSpecificationsProps {
   selectedProducts: string[]
   specifications: ProductSpecification[]
   onSpecificationsChange: (specifications: ProductSpecification[]) => void
-}
-
-interface CustomField {
-  id: string
-  name: string
-  value: string
-  type: 'text' | 'number' | 'percentage'
 }
 
 export function BuyerSpecifications({
@@ -36,362 +24,300 @@ export function BuyerSpecifications({
   onSpecificationsChange,
 }: BuyerSpecificationsProps) {
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set())
-  const [customFields, setCustomFields] = useState<Record<string, CustomField[]>>({})
+  const { selectedProductsMetadata, setSelectedProductsMetadata } = useOnboardingStore()
+  const [loading, setLoading] = useState(false)
+  const { width } = Dimensions.get('window')
+  const isLargeScreen = width >= 768
 
-  const safeSpecifications = specifications || []
+  // Load product metadata if missing
+  useEffect(() => {
+    if (selectedProducts.length > 0 && selectedProductsMetadata.length === 0) {
+      loadProductMetadata()
+    }
+  }, [selectedProducts])
+
+  const loadProductMetadata = async () => {
+    try {
+      setLoading(true)
+      const { productService } = await import('../../../services/productService')
+      const categoriesResponse = await productService.getCategoriesWithMetadata()
+      // Filter to only include selected products
+      const selectedMetadata = categoriesResponse.filter(cat => 
+        selectedProducts.includes(cat.category)
+      )
+      setSelectedProductsMetadata(selectedMetadata)
+    } catch (err) {
+      console.error('Error loading product metadata:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const updateSpecification = (productId: string, field: string, value: any) => {
-    const updatedSpecs = safeSpecifications.map((spec) =>
-      spec.productId === productId ? { ...spec, [field]: value } : spec,
-    )
+    const updatedSpecs = specifications.map((spec) => {
+      if (spec.productId === productId) {
+        const updates = { ...spec, [field]: value }
+        // Always set unit to tons
+        if (field === 'quantity') {
+          updates.unit = 'tons'
+        }
+        return updates
+      }
+      return spec
+    })
     onSpecificationsChange(updatedSpecs)
   }
 
-  const toggleCard = (productId: string) => {
-    setExpandedCards((prev) => {
-      const newSet = new Set(prev)
-      if (newSet.has(productId)) {
-        newSet.delete(productId)
-      } else {
-        newSet.add(productId)
-      }
-      return newSet
-    })
-  }
-
-  const addCustomField = (productId: string) => {
-    const newField: CustomField = {
-      id: Date.now().toString(),
-      name: '',
-      value: '',
-      type: 'text',
+  const toggleCardExpansion = (productId: string) => {
+    const newExpanded = new Set(expandedCards)
+    if (newExpanded.has(productId)) {
+      newExpanded.delete(productId)
+    } else {
+      newExpanded.add(productId)
     }
-
-    setCustomFields((prev) => ({
-      ...prev,
-      [productId]: [...(prev[productId] || []), newField],
-    }))
+    setExpandedCards(newExpanded)
   }
 
-  const updateCustomField = (productId: string, fieldId: string, updates: Partial<CustomField>) => {
-    setCustomFields((prev) => ({
-      ...prev,
-      [productId]: prev[productId]?.map((field) => (field.id === fieldId ? { ...field, ...updates } : field)) || [],
-    }))
+  const addQualityRequirement = (productId: string, requirement: string) => {
+    const spec = specifications.find((s) => s.productId === productId)
+    if (spec && requirement.trim()) {
+      const currentRequirements = spec.qualityRequirements || []
+      updateSpecification(productId, 'qualityRequirements', [...currentRequirements, requirement.trim()])
+    }
   }
 
-  const removeCustomField = (productId: string, fieldId: string) => {
-    setCustomFields((prev) => ({
-      ...prev,
-      [productId]: prev[productId]?.filter((field) => field.id !== fieldId) || [],
-    }))
+  const removeQualityRequirement = (productId: string, index: number) => {
+    const spec = specifications.find((s) => s.productId === productId)
+    if (spec && spec.qualityRequirements) {
+      const updated = spec.qualityRequirements.filter((_, i) => i !== index)
+      updateSpecification(productId, 'qualityRequirements', updated)
+    }
   }
 
-  const renderProductCard = (productId: string) => {
-    const product = products.find((p) => p.id === productId)
-    const spec = safeSpecifications.find((s) => s.productId === productId)
+  const renderSpecificationCard = (productId: string, index: number) => {
+    // Use metadata from store
+    const product = selectedProductsMetadata.find((p) => p.category === productId)
+    const spec = specifications.find((s) => s.productId === productId)
     if (!product || !spec) return null
 
     const isExpanded = expandedCards.has(productId)
-    const hasRequiredFields = spec.quantity && spec.unit && spec.pricePerKilo
+    const hasRequiredFields = spec.quantity && spec.pricePerKilo
 
     return (
-      <View
-        key={productId}
-        style={{ marginBottom: 16 }}
+      <View 
+        key={productId} 
+        className={`${isLargeScreen ? 'w-1/2' : 'w-full'} p-2`}
       >
-        <Card
-          style={{
-            overflow: 'hidden',
-            borderWidth: 2,
-            backgroundColor: hasRequiredFields ? 'rgba(34, 197, 94, 0.1)' : '#1F2937',
-            borderColor: hasRequiredFields ? 'rgba(34, 197, 94, 0.3)' : '#374151',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 4
-          }}
-        >
-          <View
-            style={{
-              padding: 16,
-              borderBottomWidth: 1,
-              borderBottomColor: '#374151',
-              backgroundColor: hasRequiredFields ? 'rgba(34, 197, 94, 0.15)' : '#374151'
-            }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 12,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#FFFFFF',
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 2,
-                    elevation: 2,
-                    marginRight: 12
-                  }}
-                >
-                  <Text style={{ fontSize: 24 }}>{product.icon}</Text>
+        <View className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+          {/* Card Header */}
+          <View className="p-4 border-b border-gray-700">
+            <View className="flex-row items-center">
+              {product.image ? (
+                <Image 
+                  source={{ uri: product.image }}
+                  className="w-12 h-12 rounded-lg mr-3"
+                  resizeMode="cover"
+                />
+              ) : (
+                <View className="w-12 h-12 rounded-lg bg-gray-700 items-center justify-center mr-3">
+                  <Package size={24} color="#9CA3AF" />
                 </View>
-                <View>
-                  <Text style={{ fontWeight: 'bold', fontSize: 18, color: '#FFFFFF' }}>{product.name}</Text>
-                  <Text style={{ fontSize: 14, color: '#9CA3AF' }}>{product.category}</Text>
-                </View>
+              )}
+              <View className="flex-1">
+                <Text className="font-bold text-lg text-white">{product.name || product.category}</Text>
               </View>
-              <Badge
-                variant={hasRequiredFields ? 'default' : 'secondary'}
-                style={{
-                  backgroundColor: hasRequiredFields ? 'rgba(34, 197, 94, 0.9)' : '#374151',
-                  borderColor: hasRequiredFields ? '#22C55E' : '#9CA3AF'
-                }}
-              >
-                <Text style={{ color: hasRequiredFields ? '#FFFFFF' : '#9CA3AF' }}>
-                  {hasRequiredFields ? 'Ready' : 'Setup Required'}
-                </Text>
-              </Badge>
             </View>
           </View>
 
-          <View style={{ padding: 16 }}>
-            <View style={{ flexDirection: 'row', marginBottom: 16 }}>
-              <View style={{ flex: 1, marginRight: 12 }}>
-                <Text style={{ fontSize: 12, fontWeight: '600', color: '#9CA3AF', marginBottom: 8 }}>
-                  Amount Needed <Text style={{ color: '#EF4444', marginLeft: 4 }}>*</Text>
+          {/* Card Content */}
+          <View className="p-4">
+            {/* Required Fields in One Row */}
+            <View className="flex-row -mx-1 mb-4">
+              {/* Quantity Field */}
+              <View className="flex-1 px-1">
+                <Text className="text-xs font-semibold text-gray-400 mb-2">
+                  Quantity (tons) <Text className="text-red-500">*</Text>
                 </Text>
                 <TextInput
-                  keyboardType="numeric"
                   value={spec.quantity?.toString() || ''}
                   onChangeText={(text) => updateSpecification(productId, 'quantity', text)}
-                  placeholder="e.g., 100"
-                  style={{
-                    borderWidth: 2,
-                    borderColor: !spec.quantity ? '#EF4444' : '#374151',
-                    borderRadius: 8,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    fontSize: 14,
-                    backgroundColor: '#1F2937',
-                    color: '#FFFFFF'
-                  }}
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <View style={{ flex: 1, marginRight: 12 }}>
-                <Text style={{ fontSize: 12, fontWeight: '600', color: '#9CA3AF', marginBottom: 8 }}>
-                  Unit <Text style={{ color: '#EF4444', marginLeft: 4 }}>*</Text>
-                </Text>
-                <View style={{ borderWidth: 2, borderColor: '#374151', borderRadius: 8, backgroundColor: '#1F2937' }}>
-                  <TextInput
-                    value={spec.unit?.toString() || ''}
-                    onChangeText={(text) => updateSpecification(productId, 'unit', text)}
-                    placeholder="kg, tons, etc."
-                    style={{ paddingHorizontal: 12, paddingVertical: 8, fontSize: 14, color: '#FFFFFF' }}
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-              </View>
-
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 12, fontWeight: '600', color: '#9CA3AF', marginBottom: 8 }}>
-                  Max Price per {spec.unit || 'Unit'} <Text style={{ color: '#EF4444', marginLeft: 4 }}>*</Text>
-                </Text>
-                <TextInput
+                  placeholder="e.g., 50"
                   keyboardType="numeric"
-                  value={spec.pricePerKilo?.toString() || ''}
-                  onChangeText={(text) => updateSpecification(productId, 'pricePerKilo', text)}
-                  placeholder="Max price"
-                  style={{
-                    borderWidth: 2,
-                    borderColor: !spec.pricePerKilo ? '#EF4444' : '#374151',
-                    borderRadius: 8,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    fontSize: 14,
-                    backgroundColor: '#1F2937',
-                    color: '#FFFFFF'
-                  }}
-                  placeholderTextColor="#9CA3AF"
+                  className={`border-2 rounded-lg px-3 py-3 bg-gray-900 text-white ${
+                    !spec.quantity ? 'border-red-500' : 'border-gray-600'
+                  }`}
+                  placeholderTextColor="#6B7280"
                 />
+              </View>
+
+              {/* Max Price Field */}
+              <View className="flex-1 px-1">
+                <Text className="text-xs font-semibold text-gray-400 mb-2">
+                  Max Price/Kilo (€) <Text className="text-red-500">*</Text>
+                </Text>
+                <View className="relative">
+                  <Text className="absolute left-3 top-3.5 text-gray-400 text-base z-10">€</Text>
+                  <TextInput
+                    value={spec.pricePerKilo?.toString() || ''}
+                    onChangeText={(text) => updateSpecification(productId, 'pricePerKilo', text)}
+                    placeholder="30.00"
+                    keyboardType="decimal-pad"
+                    className={`border-2 rounded-lg pl-8 pr-3 py-3 bg-gray-900 text-white ${
+                      !spec.pricePerKilo ? 'border-red-500' : 'border-gray-600'
+                    }`}
+                    placeholderTextColor="#6B7280"
+                  />
+                </View>
               </View>
             </View>
 
-            <View style={{ paddingTop: 8 }}>
-              <TouchableOpacity
-                onPress={() => toggleCard(productId)}
-                style={{
-                  width: '100%',
-                  borderWidth: 2,
-                  borderStyle: 'dashed',
-                  borderColor: '#374151',
-                  borderRadius: 8,
-                  padding: 12,
-                  backgroundColor: 'rgba(31, 41, 55, 0.5)'
-                }}
-                activeOpacity={0.7}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                  <Plus size={16} color="#9CA3AF" />
-                  <Text style={{ marginLeft: 8, color: '#9CA3AF', fontWeight: '500' }}>
-                    {isExpanded ? 'Hide Custom Requirements' : 'Add Custom Requirements'}
-                  </Text>
-                  <ChevronDown
-                    size={16}
-                    color="#9CA3AF"
-                    style={{
-                      marginLeft: 8,
-                      transform: [{ rotate: isExpanded ? '180deg' : '0deg' }],
-                    }}
+            {/* Delivery Deadline */}
+            <View className="mb-4">
+                <Text className="text-xs font-semibold text-gray-400 mb-2">
+                  Delivery Deadline
+                </Text>
+                <View className="relative">
+                  <Calendar size={16} color="#6B7280" className="absolute left-3 top-3.5 z-10" />
+                  <TextInput
+                    value={spec.deliveryDeadline || ''}
+                    onChangeText={(text) => updateSpecification(productId, 'deliveryDeadline', text)}
+                    placeholder="DD/MM/YYYY"
+                    className="border-2 border-gray-600 rounded-lg pl-10 pr-3 py-3 bg-gray-900 text-white"
+                    placeholderTextColor="#6B7280"
                   />
                 </View>
-              </TouchableOpacity>
-            </View>
+              </View>
 
+            {/* Quality Requirements Button */}
+            <TouchableOpacity
+              onPress={() => toggleCardExpansion(productId)}
+              className="border-2 border-dashed border-gray-700 rounded-lg py-3 flex-row items-center justify-center bg-gray-900/50"
+            >
+              {isExpanded ? (
+                <ChevronUp size={16} color="#9CA3AF" />
+              ) : (
+                <Plus size={16} color="#9CA3AF" />
+              )}
+              <Text className="text-gray-400 ml-2 text-sm">
+                {isExpanded ? 'Hide' : 'Add'} Quality Requirements
+              </Text>
+            </TouchableOpacity>
+
+            {/* Expanded Quality Requirements */}
             {isExpanded && (
-              <View style={{ paddingTop: 16, borderTopWidth: 1, borderTopColor: '#374151' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <Text style={{ fontWeight: '600', color: '#FFFFFF' }}>
-                    Custom Requirements
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => addCustomField(productId)}
-                    style={{ backgroundColor: '#22C55E', borderRadius: 8, paddingHorizontal: 16, paddingVertical: 8 }}
-                    activeOpacity={0.8}
+              <View className="mt-4">
+                <Text className="text-xs font-semibold text-gray-400 mb-2">
+                  Quality Requirements
+                </Text>
+                
+                {/* Existing Requirements */}
+                {spec.qualityRequirements && spec.qualityRequirements.length > 0 && (
+                  <View className="mb-3 space-y-2">
+                    {spec.qualityRequirements.map((req, idx) => (
+                      <View key={idx} className="flex-row items-center justify-between bg-gray-800 rounded-lg px-3 py-2">
+                        <Text className="text-sm text-gray-300 flex-1">{req}</Text>
+                        <TouchableOpacity
+                          onPress={() => removeQualityRequirement(productId, idx)}
+                          className="ml-2 p-1"
+                        >
+                          <Text className="text-red-500 text-xs">Remove</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* Add New Requirement */}
+                <View className="flex-row">
+                  <TextInput
+                    placeholder="e.g., Organic certified, Grade A"
+                    onSubmitEditing={(e) => {
+                      addQualityRequirement(productId, e.nativeEvent.text)
+                      e.nativeEvent.text = ''
+                    }}
+                    className="flex-1 border-2 border-gray-600 rounded-lg px-3 py-2 bg-gray-900 text-white mr-2"
+                    placeholderTextColor="#6B7280"
+                  />
+                  <TouchableOpacity 
+                    className="bg-blue-600 rounded-lg px-4 py-2 justify-center"
                   >
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Plus size={16} color="white" />
-                      <Text style={{ marginLeft: 4, color: 'white', fontWeight: '500' }}>Add Field</Text>
-                    </View>
+                    <Plus size={16} color="#FFFFFF" />
                   </TouchableOpacity>
                 </View>
 
-                {customFields[productId]?.map((field) => (
-                  <View
-                    key={field.id}
-                    style={{ padding: 16, backgroundColor: '#1F2937', borderRadius: 8, borderWidth: 1, borderColor: '#374151', marginBottom: 12 }}
-                  >
-                    <View style={{ flexDirection: 'row', marginBottom: 12 }}>
-                      <TextInput
-                        value={field.name}
-                        onChangeText={(text) => updateCustomField(productId, field.id, { name: text })}
-                        placeholder="Requirement name"
-                        style={{
-                          flex: 1,
-                          borderWidth: 1,
-                          borderColor: '#374151',
-                          borderRadius: 8,
-                          paddingHorizontal: 12,
-                          paddingVertical: 8,
-                          backgroundColor: '#111827',
-                          color: '#FFFFFF',
-                          marginRight: 12
-                        }}
-                        placeholderTextColor="#9CA3AF"
-                      />
-                      <TouchableOpacity
-                        onPress={() => removeCustomField(productId, field.id)}
-                        style={{ borderWidth: 1, borderColor: '#EF4444', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 }}
-                        activeOpacity={0.7}
-                      >
-                        <X size={16} color="#EF4444" />
-                      </TouchableOpacity>
-                    </View>
-                    
-                    <View style={{ flexDirection: 'row' }}>
-                      <View style={{ flex: 1, borderWidth: 1, borderColor: '#374151', borderRadius: 8, backgroundColor: '#111827', marginRight: 12 }}>
-                        <TextInput
-                          value={field.type}
-                          placeholder="Type"
-                          editable={false}
-                          style={{ paddingHorizontal: 12, paddingVertical: 8, color: '#9CA3AF' }}
-                          placeholderTextColor="#9CA3AF"
-                        />
-                      </View>
-                      <TextInput
-                        keyboardType={field.type === 'text' ? 'default' : 'numeric'}
-                        value={field.value}
-                        onChangeText={(text) => updateCustomField(productId, field.id, { value: text })}
-                        placeholder={field.type === 'percentage' ? '0-100%' : 'Value'}
-                        style={{
-                          flex: 1,
-                          borderWidth: 1,
-                          borderColor: '#374151',
-                          borderRadius: 8,
-                          paddingHorizontal: 12,
-                          paddingVertical: 8,
-                          backgroundColor: '#111827',
-                          color: '#FFFFFF'
-                        }}
-                        placeholderTextColor="#9CA3AF"
-                      />
-                    </View>
-                  </View>
-                ))}
-
-                {(!customFields[productId] || customFields[productId].length === 0) && (
-                  <View style={{ alignItems: 'center', paddingVertical: 32 }}>
-                    <Text style={{ color: '#9CA3AF' }}>No custom requirements added yet.</Text>
-                    <Text style={{ fontSize: 14, color: '#9CA3AF' }}>Click "Add Field" to specify your needs.</Text>
-                  </View>
-                )}
+                {/* Additional Notes */}
+                <View className="mt-4">
+                  <Text className="text-xs font-semibold text-gray-400 mb-2">
+                    Additional Notes
+                  </Text>
+                  <TextInput
+                    value={spec.notes || ''}
+                    onChangeText={(text) => updateSpecification(productId, 'notes', text)}
+                    placeholder="Any special requirements or preferences..."
+                    multiline
+                    numberOfLines={3}
+                    className="border-2 border-gray-600 rounded-lg px-3 py-3 bg-gray-900 text-white"
+                    placeholderTextColor="#6B7280"
+                  />
+                </View>
               </View>
             )}
           </View>
-        </Card>
+        </View>
+      </View>
+    )
+  }
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-gray-900 items-center justify-center">
+        <Package size={48} color="#9CA3AF" />
+        <Text className="text-gray-400 mt-4">Loading product details...</Text>
       </View>
     )
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: 96 }} showsVerticalScrollIndicator={false}>
-        <View style={{ padding: 16 }}>
-          <View style={{ alignItems: 'center', marginBottom: 24 }}>
-            <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#22C55E', textAlign: 'center', marginBottom: 12 }}>
-              Your Requirements
+    <View className="flex-1 bg-gray-900">
+      <ScrollView 
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="p-4">
+          {/* Header */}
+          <View className="items-center mb-6">
+            <Text className="text-3xl font-bold text-blue-500 text-center mb-3">
+              Purchase Requirements
             </Text>
-            <Text style={{ color: '#9CA3AF', fontSize: 16, maxWidth: 600, textAlign: 'center' }}>
-              Specify what you're looking for in each product. Add custom requirements for specific needs.
+            <Text className="text-gray-400 text-base text-center max-w-lg">
+              Specify quantity in tons and maximum price per kilo in euros.
+              {'\n'}Add quality requirements to find the best suppliers.
             </Text>
           </View>
 
-          {safeSpecifications.length > 0 && (
-            <View>
-              {safeSpecifications.map((spec) => renderProductCard(spec.productId))}
+          {/* Product Cards Grid */}
+          {specifications.length > 0 ? (
+            <View className={`${isLargeScreen ? 'flex-row flex-wrap -mx-2' : ''}`}>
+              {specifications.map((spec, index) => 
+                renderSpecificationCard(spec.productId, index)
+              )}
             </View>
-          )}
-
-          {safeSpecifications.length === 0 && (
-            <Card style={{ padding: 24, alignItems: 'center', backgroundColor: '#1F2937', borderColor: '#374151' }}>
-              <View style={{ alignItems: 'center' }}>
-                <View style={{ 
-                  width: 64, 
-                  height: 64, 
-                  backgroundColor: '#374151', 
-                  borderRadius: 32, 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  marginBottom: 16 
-                }}>
-                  <Package size={24} color="#9CA3AF" />
-                </View>
-                <View style={{ alignItems: 'center' }}>
-                  <Text style={{ fontWeight: '600', fontSize: 18, color: '#FFFFFF', marginBottom: 8 }}>No Products Selected</Text>
-                  <Text style={{ fontSize: 14, color: '#9CA3AF', textAlign: 'center' }}>Go back to select products first</Text>
-                </View>
+          ) : (
+            <View className="bg-gray-800 border border-gray-700 rounded-lg p-8 items-center">
+              <View className="w-16 h-16 bg-gray-700 rounded-full items-center justify-center mb-4">
+                <Package size={32} color="#6B7280" />
               </View>
-            </Card>
+              <Text className="text-lg font-semibold text-white mb-2">
+                No Products Selected
+              </Text>
+              <Text className="text-sm text-gray-400 text-center">
+                Go back to select products first
+              </Text>
+            </View>
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   )
 }
