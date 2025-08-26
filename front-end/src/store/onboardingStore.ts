@@ -54,6 +54,8 @@ interface OnboardingStore extends OnboardingState {
   setMarketInsights: (insights: MarketInsights) => void;
   sellerSpecifications: Record<string, any>;
   updateSellerSpecification: (productId: string, specs: any) => void;
+  setSellerBases: (bases: any[]) => void;
+  setSellerDistributions: (distributions: any[]) => void;
   
   // Buyer actions
   setBuyerRequirements: (requirements: ProductRequirement[]) => void;
@@ -62,6 +64,8 @@ interface OnboardingStore extends OnboardingState {
   updateBuyerRequirement: (productId: string, updates: Partial<ProductRequirement>) => void;
   buyerSpecifications: Record<string, any>;
   updateBuyerSpecification: (productId: string, specs: any) => void;
+  setBuyerBases: (bases: any[]) => void;
+  setBuyerDistributions: (distributions: any[]) => void;
   
   // Transport actions
   setFleetInfo: (fleetInfo: FleetInformation) => void;
@@ -259,6 +263,13 @@ export const useOnboardingStore = create<OnboardingStore>()(
             state.sellerData.bases = bases;
           }
         }),
+      
+      setSellerDistributions: (distributions: any[]) =>
+        set((state) => {
+          if (state.sellerData) {
+            state.sellerData.distributions = distributions;
+          }
+        }),
 
       // Buyer specifications  
       updateBuyerSpecification: (productId: string, specs: any) =>
@@ -273,6 +284,13 @@ export const useOnboardingStore = create<OnboardingStore>()(
         set((state) => {
           if (state.buyerData) {
             state.buyerData.bases = bases;
+          }
+        }),
+      
+      setBuyerDistributions: (distributions: any[]) =>
+        set((state) => {
+          if (state.buyerData) {
+            state.buyerData.distributions = distributions;
           }
         }),
 

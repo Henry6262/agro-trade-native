@@ -167,7 +167,7 @@ export const InlineAuth: React.FC<InlineAuthProps> = ({
     try {
       if (provider === 'google') {
         // For Google OAuth, we need to redirect to the backend OAuth endpoint
-        const apiUrl = APP_CONFIG.API_URL || 'http://localhost:4000/api';
+        const apiUrl = APP_CONFIG.API_URL;
         const googleOAuthUrl = `${apiUrl}/auth/google`;
         
         // In React Native Web, we can use window.location for OAuth redirect

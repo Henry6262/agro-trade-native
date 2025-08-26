@@ -8,7 +8,7 @@ import { ProductSelectionBackend } from '../ProductSelectionBackend'
 import { ProductSpecifications } from './ProductSpecifications'
 import { MarketOverview } from './MarketOverview'
 import { BaseManagementFlow } from '../base-management/BaseManagementUI'
-import { DraggableDistribution } from '../base-management/DraggableDistribution'
+import { MultiProductDistribution } from '../base-management/MultiProductDistribution'
 import { useOnboardingStore } from '../../../store/onboardingStore'
 
 interface SellerOnboardingProps {
@@ -186,21 +186,29 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
             unit: spec?.unit || 'tons',
             image: metadata?.image
           }
-        })
+        }).filter(p => p.totalQuantity > 0) // Only include products with quantity
+        
         return (
           <View className="flex-1">
-            {products.length > 0 && (
-              <DraggableDistribution
+            {products.length > 0 ? (
+              <MultiProductDistribution
                 userType="seller"
-                product={products[0]}
-                onDistributionComplete={(dist) => {
-                  console.log('Distribution complete:', dist);
+                products={products}
+                onComplete={(distributions) => {
+                  console.log('All distributions complete:', distributions);
                   // Save to store
-                  useOnboardingStore.getState().setSellerDistributions?.([
-                    { productId: products[0].id, distribution: dist }
-                  ]);
+                  useOnboardingStore.getState().setSellerDistributions(distributions);
                 }}
               />
+            ) : (
+              <View className="flex-1 bg-gray-900 p-4">
+                <View className="bg-gray-800 rounded-xl p-6 items-center">
+                  <Text className="text-white text-lg font-bold">No Products to Distribute</Text>
+                  <Text className="text-gray-400 text-sm text-center mt-2">
+                    Please add product quantities in the specifications step
+                  </Text>
+                </View>
+              </View>
             )}
           </View>
         )

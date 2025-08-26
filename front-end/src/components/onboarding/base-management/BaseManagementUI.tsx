@@ -54,7 +54,7 @@ export const BaseManagementFlow: React.FC = () => {
   }, [bases, selectedRole]);
 
   return (
-    <ScrollView className="">
+    <ScrollView className="h-full">
       {/* Header */}
       <View className=" p-6 border-b border-gray-200">
         <Text className="text-2xl text-white font-bold text-gray-900 mb-2">

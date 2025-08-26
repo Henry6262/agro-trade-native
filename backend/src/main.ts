@@ -14,20 +14,20 @@ async function bootstrap() {
         'http://localhost:8081',
         'http://localhost:8082',
         'http://localhost:19006', // Expo web
+        process.env.CLIENT_URL,
         process.env.FRONTEND_URL,
       ].filter(Boolean);
       
-      // Allow requests with no origin (mobile apps, Postman, etc.)
-      if (!origin) return callback(null, true);
-      
-      // Check if the origin is allowed
-      if (allowedOrigins.some(allowed => allowed && origin.startsWith(allowed))) {
-        callback(null, true);
-      } else if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
-        // Allow any localhost origin for development
-        callback(null, true);
+      // In production, be more strict
+      if (process.env.NODE_ENV === 'production') {
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
       } else {
-        callback(new Error('Not allowed by CORS'));
+        // In development, allow any origin
+        callback(null, true);
       }
     },
     credentials: true,
@@ -47,11 +47,13 @@ async function bootstrap() {
   // Global prefix
   app.setGlobalPrefix('api');
   
-  const port = process.env.PORT || 4000;
+  const port = process.env.PORT || 3000;
   await app.listen(port);
   
-  console.log(`🚀 Application is running on: http://localhost:${port}/api`);
-  console.log(`📝 Google OAuth: http://localhost:${port}/api/auth/google`);
+  console.log(`🚀 Application is running on port ${port}`);
 }
 
 bootstrap();
+
+// Export the app for Vercel
+export default bootstrap;
