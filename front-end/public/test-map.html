@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Maps Click Test</title>
+  <style>
+    #map {
+      width: 100%;
+      height: 600px;
+      background-color: #ccc;
+    }
+    #info {
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+      background: #f0f0f0;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div id="info">
+    <h1>Google Maps Click Test</h1>
+    <p>Click anywhere on the map. You should see:</p>
+    <ul>
+      <li>A red marker appear</li>
+      <li>Coordinates logged below</li>
+      <li>Console logs</li>
+    </ul>
+    <div id="logs"></div>
+  </div>
+  <div id="map"></div>
+
+  <script>
+    let map;
+    let markers = [];
+    
+    function addLog(message) {
+      console.log(message);
+      const logsDiv = document.getElementById('logs');
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+      logsDiv.insertBefore(entry, logsDiv.firstChild);
+    }
+
+    function initMap() {
+      addLog('Initializing map...');
+      
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 42.7339, lng: 25.4858 },
+        zoom: 8,
+        clickableIcons: false,
+      });
+
+      addLog('Map created');
+
+      // Add click listener
+      map.addListener('click', (event) => {
+        addLog(`CLICKED! Lat: ${event.latLng.lat()}, Lng: ${event.latLng.lng()}`);
+        
+        // Clear previous markers
+        markers.forEach(m => m.setMap(null));
+        markers = [];
+        
+        // Add marker
+        const marker = new google.maps.Marker({
+          position: event.latLng,
+          map: map,
+          animation: google.maps.Animation.DROP,
+        });
+        
+        markers.push(marker);
+        
+        // Add circle
+        const circle = new google.maps.Circle({
+          center: event.latLng,
+          radius: 500,
+          map: map,
+          strokeColor: '#FF0000',
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: '#FF0000',
+          fillOpacity: 0.35,
+        });
+        
+        markers.push(circle);
+      });
+
+      addLog('Click listener added');
+      
+      // Test other events
+      map.addListener('idle', () => {
+        addLog('Map is idle and ready');
+      });
+    }
+
+    window.initMap = initMap;
+  </script>
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCyufA02eE2szI8_Q2DSxIa5AabNSik3MA&callback=initMap">
+  </script>
+</body>
+</html>

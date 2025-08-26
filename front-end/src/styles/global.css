@@ -108,11 +108,6 @@ div[style*="flex-grow"] {
   z-index: 100 !important;
 }
 
-/* Ensure scrollable content has proper padding for fixed navigation */
-.r-WebkitOverflowScrolling-150rngu {
-  padding-bottom: 100px !important;
-}
-
 /* Specific fix for navigation containers */
 div[role="navigation"] {
   flex-shrink: 0;

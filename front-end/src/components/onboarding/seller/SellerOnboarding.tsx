@@ -8,7 +8,7 @@ import { ProductSelectionBackend } from '../ProductSelectionBackend'
 import { ProductSpecifications } from './ProductSpecifications'
 import { MarketOverview } from './MarketOverview'
 import { BaseManagementFlow } from '../base-management/BaseManagementUI'
-import { ImprovedDistribution } from '../base-management/ImprovedDistribution'
+import { DraggableDistribution } from '../base-management/DraggableDistribution'
 import { useOnboardingStore } from '../../../store/onboardingStore'
 
 interface SellerOnboardingProps {
@@ -18,7 +18,8 @@ interface SellerOnboardingProps {
 export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
   const { 
     selectedProducts, 
-    setSelectedProducts, 
+    setSelectedProducts,
+    selectedProductsMetadata, 
     sellerSpecifications, 
     updateSellerSpecification,
     setSellerProducts,
@@ -175,26 +176,29 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
       case 'bases':
         return <BaseManagementFlow />
       case 'distribution':
-        const bases = useOnboardingStore.getState().sellerData?.bases || []
         const products = selectedProducts.map(productId => {
           const spec = productSpecifications.find(s => s.productId === productId)
+          const metadata = selectedProductsMetadata.find(m => m.category === productId)
           return {
             id: productId,
-            name: productId, // You may want to get actual product names
+            name: metadata?.name || productId,
             totalQuantity: parseFloat(spec?.quantity || '0'),
-            unit: spec?.unit || 'tons'
+            unit: spec?.unit || 'tons',
+            image: metadata?.image
           }
         })
         return (
           <View className="flex-1">
             {products.length > 0 && (
-              <ImprovedDistribution
+              <DraggableDistribution
                 userType="seller"
-                bases={bases}
                 product={products[0]}
                 onDistributionComplete={(dist) => {
                   console.log('Distribution complete:', dist);
-                  // TODO: Save distribution to store and handle multiple products
+                  // Save to store
+                  useOnboardingStore.getState().setSellerDistributions?.([
+                    { productId: products[0].id, distribution: dist }
+                  ]);
                 }}
               />
             )}

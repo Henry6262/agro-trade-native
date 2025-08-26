@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, TextInput, Alert } from 'reac
 import { Plus, MapPin, Warehouse, Trash2, Edit2, Check } from 'lucide-react-native';
 import { PieChart } from 'react-native-chart-kit';
 import MapView, { Marker } from 'react-native-maps';
+import { useOnboardingStore } from '../../../store/onboardingStore';
 
 // Types
 interface Base {
@@ -30,9 +31,27 @@ interface ProductDistribution {
 
 // Main Component for Base Management
 export const BaseManagementFlow: React.FC = () => {
-  const [bases, setBases] = useState<Base[]>([]);
+  const { selectedRole, sellerData, buyerData, setSellerBases, setBuyerBases } = useOnboardingStore();
+  const [bases, setBases] = useState<Base[]>(() => {
+    // Initialize from store
+    if (selectedRole === 'seller') {
+      return sellerData?.bases || [];
+    } else if (selectedRole === 'buyer') {
+      return buyerData?.bases || [];
+    }
+    return [];
+  });
   const [showAddBase, setShowAddBase] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+
+  // Save to store whenever bases change
+  useEffect(() => {
+    if (selectedRole === 'seller') {
+      setSellerBases(bases);
+    } else if (selectedRole === 'buyer') {
+      setBuyerBases(bases);
+    }
+  }, [bases, selectedRole]);
 
   return (
     <ScrollView className="">
@@ -82,7 +101,8 @@ export const BaseManagementFlow: React.FC = () => {
         <AddBaseModal
           onClose={() => setShowAddBase(false)}
           onSave={(base) => {
-            setBases([...bases, base]);
+            const newBases = [...bases, base];
+            setBases(newBases);
             setShowAddBase(false);
           }}
         />

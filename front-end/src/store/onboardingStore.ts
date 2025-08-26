@@ -252,6 +252,13 @@ export const useOnboardingStore = create<OnboardingStore>()(
             ...specs,
           };
         }),
+      
+      setSellerBases: (bases: any[]) =>
+        set((state) => {
+          if (state.sellerData) {
+            state.sellerData.bases = bases;
+          }
+        }),
 
       // Buyer specifications  
       updateBuyerSpecification: (productId: string, specs: any) =>
@@ -260,6 +267,13 @@ export const useOnboardingStore = create<OnboardingStore>()(
             ...state.buyerSpecifications[productId],
             ...specs,
           };
+        }),
+      
+      setBuyerBases: (bases: any[]) =>
+        set((state) => {
+          if (state.buyerData) {
+            state.buyerData.bases = bases;
+          }
         }),
 
       // Buyer actions
@@ -627,8 +641,9 @@ export const useOnboardingStore = create<OnboardingStore>()(
         transportData: state.transportData,
         isComplete: state.isComplete,
         currentStep: state.currentStep,
-        totalSteps: state.totalSteps,
         selectedProducts: state.selectedProducts,
+        selectedProductsMetadata: state.selectedProductsMetadata,
+        totalSteps: state.totalSteps,
         sellerSpecifications: state.sellerSpecifications,
         buyerSpecifications: state.buyerSpecifications,
         googleAuthData: state.googleAuthData,

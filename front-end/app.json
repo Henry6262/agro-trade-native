@@ -42,14 +42,6 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "scheme": "agrotrade",
-    "plugins": [
-      [
-        "expo-router",
-        {
-          "root": "./app"
-        }
-      ]
-    ]
+    "scheme": "agrotrade"
   }
 }
