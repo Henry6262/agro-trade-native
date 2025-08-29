@@ -1,6 +1,11 @@
 import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested, IsNumber } from 'class-validator';
 import { Type } from 'class-transformer';
 import { UserRole } from '@prisma/client';
+import { 
+  SellerOnboardingDataDto, 
+  BuyerOnboardingDataDto, 
+  TransporterOnboardingDataDto 
+} from './onboarding-data.dto';
 
 export class CompanyRegistrationDto {
   @IsString()
@@ -54,4 +59,7 @@ export class RegisterWithCompanyDto {
   @ValidateNested()
   @Type(() => CompanyRegistrationDto)
   companyInfo?: CompanyRegistrationDto;
+  
+  @IsOptional()
+  onboardingData?: SellerOnboardingDataDto | BuyerOnboardingDataDto | TransporterOnboardingDataDto;
 }

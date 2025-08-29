@@ -8,7 +8,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "nest build",
-    "vercel-build": "prisma generate && nest build",
+    "vercel-build": "npm install && prisma generate",
     "postinstall": "prisma generate",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -29,7 +29,8 @@
     "prisma:seed:prod": "node dist/prisma/seed.js",
     "prisma:seed-products": "ts-node prisma/seed-products.ts",
     "prisma:seed-catalog": "ts-node prisma/seed-catalog.ts",
-    "prisma:seed-multibase": "ts-node prisma/seed-multibase.ts"
+    "prisma:seed-multibase": "ts-node prisma/seed-multibase.ts",
+    "prisma:seed-regional-pricing": "ts-node prisma/seed-regional-pricing.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

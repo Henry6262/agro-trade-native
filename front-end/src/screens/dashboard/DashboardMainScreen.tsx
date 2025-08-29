@@ -25,6 +25,7 @@ import {
   UserPlus,
   Menu,
   Link,
+  User,
 } from 'lucide-react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -37,6 +38,9 @@ import IntelligenceScreen from './IntelligenceScreen';
 import SellerDashboardScreen from './SellerDashboardScreen';
 import BuyerDashboardScreen from './BuyerDashboardScreen';
 import TransporterDashboardScreen from './TransporterDashboardScreen';
+import { ProfileDrawer } from '../../components/dashboard/ProfileDrawer';
+import { useAuthStore } from '../../store/authStore';
+import { AdminPricingZonesScreen } from '../admin/AdminPricingZonesScreen';
 
 type DashboardMainScreenNavigationProp = StackNavigationProp<
   DashboardStackParamList,
@@ -57,13 +61,29 @@ export default function DashboardMainScreen() {
   const navigation = useNavigation<DashboardMainScreenNavigationProp>();
   const route = useRoute<DashboardMainScreenRouteProp>();
   const { width: screenWidth } = Dimensions.get('window');
+  const { user, isAuthenticated } = useAuthStore();
   
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Start collapsed on mobile
   const [userRole, setUserRole] = useState<'admin' | 'seller' | 'buyer' | 'transporter'>(
-    route.params?.userRole || 'admin'
+    user?.role || route.params?.userRole || 'admin'
   );
   const [showRoleSelector, setShowRoleSelector] = useState(false);
+  const [showProfileDrawer, setShowProfileDrawer] = useState(false);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+
+  // Ensure authenticated users stay on dashboard
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      navigation.navigate('RoleSelection' as never);
+    }
+    
+    // Check if we're coming from onboarding with success animation
+    if (route.params?.showSuccessAnimation) {
+      setShowProfileDrawer(true);
+      setShowSuccessAnimation(true);
+    }
+  }, [isAuthenticated, route.params]);
 
   const getNavigationItems = (): NavigationItem[] => {
     if (userRole === 'seller') {
@@ -94,6 +114,7 @@ export default function DashboardMainScreen() {
       { id: 'agents', icon: Users, label: 'NETWORK' },
       { id: 'operations', icon: Package, label: 'TRADE OPS' },
       { id: 'intelligence', icon: TrendingUp, label: 'MARKET INTEL' },
+      { id: 'pricing', icon: BarChart3, label: 'PRICING ZONES' },
     ];
   };
 
@@ -137,6 +158,7 @@ export default function DashboardMainScreen() {
     if (activeSection === 'agents') return <AgentNetworkScreen />;
     if (activeSection === 'operations') return <OperationsScreen />;
     if (activeSection === 'intelligence') return <IntelligenceScreen />;
+    if (activeSection === 'pricing') return <AdminPricingZonesScreen />;
     return <CommandCenterScreen />;
   };
 
@@ -383,6 +405,14 @@ export default function DashboardMainScreen() {
               <TouchableOpacity className="p-2">
                 <RefreshCw color="#9CA3AF" size={16} />
               </TouchableOpacity>
+              <TouchableOpacity 
+                className="p-2 ml-2"
+                onPress={() => setShowProfileDrawer(true)}
+              >
+                <View className="w-8 h-8 bg-emerald-500 rounded-full items-center justify-center">
+                  <User color="white" size={16} />
+                </View>
+              </TouchableOpacity>
             </View>
           </View>
 
@@ -510,6 +540,16 @@ export default function DashboardMainScreen() {
           </View>
         </TouchableOpacity>
       </Modal>
+      
+      {/* Profile Drawer */}
+      <ProfileDrawer 
+        visible={showProfileDrawer}
+        onClose={() => {
+          setShowProfileDrawer(false);
+          setShowSuccessAnimation(false);
+        }}
+        showSuccessAnimation={showSuccessAnimation}
+      />
     </SafeAreaView>
   );
 }

@@ -72,40 +72,24 @@ export const OAuthCallbackScreen: React.FC = () => {
           
           console.log('Saved user role from store:', savedUserRole);
 
-          if (!hasProfile) {
-            // User doesn't have a complete profile, return to onboarding with modal
-            console.log('User has no profile, returning to onboarding flow...');
+          // Since we're removing business profile completion, treat all authenticated users as having a complete profile
+          if (accessToken && userEmail) {
+            // User is authenticated, go directly to dashboard
+            console.log('User authenticated via Google, navigating to dashboard...');
             
-            // Onboarding data already loaded above
-            
-            // Store Google auth data in onboarding store
+            // Store success flag for showing animation
             onboardingStore.setGoogleAuthData({
               name: decodedUserName || '',
               email: userEmail || '',
               isAuthenticated: true,
             });
             
-            console.log('Google auth data set, navigating to onboarding...');
-            
-            // Navigate based on the user's role
-            const role = savedUserRole || onboardingStore.selectedRole;
-            console.log('Navigating with role:', role);
-            
-            if (role === 'seller') {
-              console.log('Navigating to SellerOnboardingFlow...');
-              navigation.navigate('SellerOnboardingFlow');
-            } else if (role === 'buyer') {
-              console.log('Navigating to BuyerOnboardingFlow...');
-              navigation.navigate('BuyerOnboardingFlow');
-            } else if (role === 'transport') {
-              console.log('Navigating to TransporterOnboardingFlow...');
-              navigation.navigate('TransporterOnboardingFlow');
-            } else {
-              // Fallback to role selection if no role is set
-              console.log('No role found, navigating to RoleSelection...');
-              navigation.navigate('RoleSelection');
-            }
-          } else if (hasProfile) {
+            // Navigate to a success screen or directly to dashboard
+            // The success animation will show on the dashboard
+            navigation.navigate('Main', {
+              screen: 'Dashboard'
+            });
+          } else if (!hasProfile && false) { // Disabled old flow
             // User has complete profile, go to main app
             console.log('User has complete profile, navigating to dashboard...');
             navigation.navigate('Main', {

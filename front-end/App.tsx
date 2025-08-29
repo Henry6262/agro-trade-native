@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import RootNavigator from './src/navigation/RootNavigator';
-import { authStore } from './src/store/authStore';
+import { useAuthStore } from './src/store/authStore';
+import './src/styles/nativewind.setup';
 import './src/styles/global.css';
 
 const queryClient = new QueryClient();
@@ -18,9 +19,10 @@ export default function App() {
     // Initialize auth state
     const checkAuthState = async () => {
       try {
-        await authStore.loadStoredData();
-        const isAuthenticated = authStore.isAuthenticated();
-        const user = authStore.user;
+        // The auth store automatically loads from AsyncStorage via persist middleware
+        const authState = useAuthStore.getState();
+        const isAuthenticated = authState.isAuthenticated;
+        const user = authState.user;
         
         setAppState({
           isAuthenticated,

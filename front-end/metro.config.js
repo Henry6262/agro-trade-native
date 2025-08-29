@@ -21,7 +21,7 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     // Return a mock module for web to prevent import errors
     return {
       type: 'sourceFile', 
-      filePath: require.resolve('./src/components/onboarding/base-management/GoogleMapWeb.tsx'),
+      filePath: require.resolve('./src/components/dashboard/base-management/GoogleMapWeb.tsx'),
     };
   }
   

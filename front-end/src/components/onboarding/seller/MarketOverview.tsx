@@ -1,16 +1,20 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
+  ActivityIndicator,
 } from 'react-native'
-import { TrendingUp, Users, Zap, ShoppingCart } from 'lucide-react-native'
+import { TrendingUp, Users, Zap, ShoppingCart, MapPin, DollarSign, Building2 } from 'lucide-react-native'
 import { products } from '../../../constants/onboarding'
 import type { ProductSpecification } from '../../../types/onboarding'
 import { Card } from '../../common/Card'
 import { Badge } from '../../common/Badge'
+import { useOnboardingStore } from '../../../store/onboardingStore'
+import axios from 'axios'
+import { API_URL } from '../../../config/api'
 
 interface MarketOverviewProps {
   selectedProducts: string[]
@@ -19,9 +23,35 @@ interface MarketOverviewProps {
 }
 
 export function MarketOverview({ selectedProducts, specifications, onComplete }: MarketOverviewProps) {
+  const { userLocation } = useOnboardingStore()
+  const [pricingData, setPricingData] = useState<any[]>([])
+  const [loadingPrices, setLoadingPrices] = useState(false)
+
+  useEffect(() => {
+    if (userLocation?.latitude && userLocation?.longitude) {
+      fetchPricingData()
+    }
+  }, [userLocation])
+
+  const fetchPricingData = async () => {
+    try {
+      setLoadingPrices(true)
+      const response = await axios.post(`${API_URL}/location/pricing`, {
+        latitude: userLocation?.latitude,
+        longitude: userLocation?.longitude,
+        productIds: selectedProducts,
+      })
+      setPricingData(response.data.data || [])
+    } catch (error) {
+      console.error('Failed to fetch pricing:', error)
+    } finally {
+      setLoadingPrices(false)
+    }
+  }
+
   const handleCreateSellRequest = () => {
     // Handle sell request creation
-    console.log('Creating sell request with:', { selectedProducts, specifications })
+    console.log('Creating sell request with:', { selectedProducts, specifications, userLocation })
     onComplete?.()
   }
 
@@ -44,20 +74,70 @@ export function MarketOverview({ selectedProducts, specifications, onComplete }:
         <View className="pb-24">
           <View className="items-center mb-6">
             <Text className="text-3xl font-bold text-primary-500 text-center mb-3">
-              Ready to Sell
+              Almost Done! 🎉
             </Text>
-            <Text className="text-gray-400 text-base text-center">Review your products and connect with buyers</Text>
+            <Text className="text-gray-400 text-base text-center">Review your setup and start trading</Text>
           </View>
 
-          <View className="flex-row justify-center items-center mb-6">
-            <View className="flex-row items-center mr-6">
-              <Users size={16} color="#22C55E" />
-              <Text className="text-sm text-primary-500 ml-2">1,847 active buyers</Text>
-            </View>
-            <View className="flex-row items-center">
-              <TrendingUp size={16} color="#3B82F6" />
-              <Text className="text-sm text-blue-500 ml-2">₹2.8Cr traded today</Text>
-            </View>
+          {/* Location Card */}
+          {userLocation && (
+            <Card className="p-4 bg-gray-800 border-gray-600 mb-4">
+              <View className="flex-row items-center">
+                <MapPin size={20} color="#3B82F6" />
+                <View className="ml-3 flex-1">
+                  <Text className="text-white font-medium">Your Location</Text>
+                  <Text className="text-gray-400">
+                    {userLocation.city ? `${userLocation.city}, ${userLocation.country}` : 'Location detected'}
+                  </Text>
+                </View>
+                <Badge className="bg-blue-500/20 border-blue-500">
+                  <Text className="text-blue-400 text-xs">Regional Pricing Active</Text>
+                </Badge>
+              </View>
+            </Card>
+          )}
+
+          {/* Regional Pricing Info */}
+          {loadingPrices ? (
+            <Card className="p-6 bg-gray-800 border-gray-600 mb-4">
+              <View className="items-center">
+                <ActivityIndicator size="small" color="#3B82F6" />
+                <Text className="text-gray-400 mt-2">Loading regional prices...</Text>
+              </View>
+            </Card>
+          ) : pricingData.length > 0 && (
+            <Card className="p-4 bg-gray-800 border-gray-600 mb-4">
+              <View className="flex-row items-center mb-3">
+                <DollarSign size={20} color="#10B981" />
+                <Text className="text-white font-medium ml-2">Regional Market Prices</Text>
+              </View>
+              {pricingData.map((price, index) => (
+                <View key={index} className="flex-row justify-between py-2 border-t border-gray-700">
+                  <Text className="text-gray-300">{price.productName}</Text>
+                  <Text className="text-green-400 font-medium">
+                    €{price.minPrice}-{price.maxPrice}/{price.unit || 'ton'}
+                  </Text>
+                </View>
+              ))}
+            </Card>
+          )}
+
+          {/* Quick Features */}
+          <View className="flex-row justify-between mb-6">
+            <Card className="flex-1 p-3 bg-gray-800 border-gray-600 mr-2">
+              <View className="items-center">
+                <Users size={20} color="#22C55E" />
+                <Text className="text-xs text-gray-400 mt-1">Active Buyers</Text>
+                <Text className="text-lg font-bold text-white">1,847</Text>
+              </View>
+            </Card>
+            <Card className="flex-1 p-3 bg-gray-800 border-gray-600 ml-2">
+              <View className="items-center">
+                <Building2 size={20} color="#8B5CF6" />
+                <Text className="text-xs text-gray-400 mt-1">Base Management</Text>
+                <Text className="text-sm text-purple-400">After Setup</Text>
+              </View>
+            </Card>
           </View>
 
           <Card className="p-6 bg-gray-800 border-gray-600">
@@ -126,6 +206,29 @@ export function MarketOverview({ selectedProducts, specifications, onComplete }:
             </View>
           </Card>
 
+          {/* What's Next Card */}
+          <Card className="p-4 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-500/30 mb-6">
+            <Text className="text-white font-semibold mb-3">✨ After You Complete Setup</Text>
+            <View className="space-y-2">
+              <View className="flex-row items-center">
+                <Text className="text-green-400 mr-2">✓</Text>
+                <Text className="text-gray-300 text-sm">Add multiple warehouse/silo locations</Text>
+              </View>
+              <View className="flex-row items-center">
+                <Text className="text-green-400 mr-2">✓</Text>
+                <Text className="text-gray-300 text-sm">Manage inventory across all bases</Text>
+              </View>
+              <View className="flex-row items-center">
+                <Text className="text-green-400 mr-2">✓</Text>
+                <Text className="text-gray-300 text-sm">Get matched with verified buyers</Text>
+              </View>
+              <View className="flex-row items-center">
+                <Text className="text-green-400 mr-2">✓</Text>
+                <Text className="text-gray-300 text-sm">Access real-time market analytics</Text>
+              </View>
+            </View>
+          </Card>
+
           <View className="items-center mt-8">
             <TouchableOpacity
               className={`
@@ -148,10 +251,11 @@ export function MarketOverview({ selectedProducts, specifications, onComplete }:
               activeOpacity={0.8}
             >
               <Zap size={20} color="white" className="mr-2" />
-              <Text className="text-white text-lg font-semibold">Create Sell Request</Text>
+              <Text className="text-white text-lg font-semibold">Complete Setup</Text>
             </TouchableOpacity>
 
-            <Text className="text-xs text-gray-400 text-center mt-3">You'll be asked to sign in to complete your listing</Text>
+            <Text className="text-xs text-gray-400 text-center mt-3">You'll be asked to sign in to finalize your account</Text>
+            <Text className="text-xs text-green-400 text-center mt-1">Setup time: Less than 5 minutes!</Text>
           </View>
         </View>
       </ScrollView>

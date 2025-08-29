@@ -21,6 +21,14 @@ import { SellerOnboardingFlowScreen } from '../screens/onboarding/seller/SellerO
 import { TransporterOnboardingFlowScreen } from '../screens/onboarding/transporter/TransporterOnboardingFlowScreen';
 import { OnboardingCompleteScreen } from '../screens/onboarding/OnboardingCompleteScreen';
 
+// Import Admin Screens
+import { AdminDashboardScreen } from '../screens/admin/AdminDashboardScreen';
+import { AdminPricingZonesScreen } from '../screens/admin/AdminPricingZonesScreen';  
+import { AdminZoneDetailsScreen } from '../screens/admin/AdminZoneDetailsScreen';
+import { AdminProductPricesScreen } from '../screens/admin/AdminProductPricesScreen';
+import BulkPriceUpdateScreen from '../screens/admin/BulkPriceUpdateScreen';
+import { AdminMapView } from '../screens/admin/AdminMapView';
+
 const Stack = createStackNavigator<RootStackParamList>();
 
 interface RootNavigatorProps {
@@ -40,14 +48,16 @@ export default function RootNavigator({ appState }: RootNavigatorProps) {
     const pathname = window.location.pathname;
     if (pathname.includes('/auth/callback')) {
       initialRouteName = 'OAuthCallback';
+    } else if (appState.isAuthenticated) {
+      // Always go to dashboard if authenticated
+      initialRouteName = 'Main';
     }
   } else if (appState.isReady) {
     // Only determine route after app initialization is complete
     if (!appState.isAuthenticated) {
       initialRouteName = 'RoleSelection';
-    } else if (appState.needsOnboarding) {
-      initialRouteName = 'RoleSelection';
     } else {
+      // Always go to dashboard if authenticated
       initialRouteName = 'Main';
     }
   }
@@ -71,6 +81,9 @@ export default function RootNavigator({ appState }: RootNavigatorProps) {
           <Stack.Screen name="SellerOnboardingFlow" component={SellerOnboardingFlowScreen} />
           <Stack.Screen name="TransporterOnboardingFlow" component={TransporterOnboardingFlowScreen} />
           <Stack.Screen name="OnboardingComplete" component={OnboardingCompleteScreen} />
+          
+          {/* Base Management */}
+          <Stack.Screen name="BaseManagement" component={require('../screens/dashboard/BaseManagementScreen').default} />
           
           {/* Auth Stack available but not shown by default */}
           <Stack.Screen name="Auth" component={AuthStack} />
@@ -133,6 +146,14 @@ export default function RootNavigator({ appState }: RootNavigatorProps) {
               headerTintColor: '#22C55E',
             }}
           />
+          
+          {/* Admin Screens */}
+          <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
+          <Stack.Screen name="AdminPricingZones" component={AdminPricingZonesScreen} />
+          <Stack.Screen name="AdminZoneDetails" component={AdminZoneDetailsScreen} />
+          <Stack.Screen name="AdminProductPrices" component={AdminProductPricesScreen} />
+          <Stack.Screen name="AdminBulkPriceUpdate" component={BulkPriceUpdateScreen} />
+          <Stack.Screen name="AdminMapView" component={AdminMapView} />
         </Stack.Navigator>
       </NavigationContainer>
   );

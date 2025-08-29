@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { View, ScrollView, SafeAreaView } from 'react-native'
+import { View, ScrollView, SafeAreaView, Text } from 'react-native'
 import type { OnboardingStep } from '../../../types/onboarding'
-import { roleSteps } from '../../../constants/onboarding'
+import { simplifiedRoleSteps } from '../../../constants/simplifiedOnboarding'
 import { ProgressSidebar } from '../shared/ProgressSidebar'
 import { Navigation } from '../shared/Navigation'
 import { FleetInformation } from './FleetInformation'
 import { LocationInformation } from './LocationInformation'
 import { TransporterListing } from './TransporterListing'
-import { BaseManagementFlow } from '../base-management/BaseManagementUI'
+// Base management moved to dashboard
 import { useOnboardingStore } from '../../../store/onboardingStore'
 
 interface TransporterOnboardingProps {
@@ -15,19 +15,24 @@ interface TransporterOnboardingProps {
 }
 
 export function TransporterOnboarding({ onComplete }: TransporterOnboardingProps) {
-  const [currentStepIndex, setCurrentStepIndex] = useState(0) // Start from fleet step (which is now first)
+  const { transportData, currentStep, setStep, saveOnboardingData } = useOnboardingStore()
+  
+  const [currentStepIndex, setCurrentStepIndex] = useState(currentStep >= 0 ? currentStep : 0)
   const [steps, setSteps] = useState<OnboardingStep[]>([])
   const [isAnimating, setIsAnimating] = useState(false)
   const [progressLineHeight, setProgressLineHeight] = useState(0)
 
-  const { transportData } = useOnboardingStore()
-
   useEffect(() => {
-    const transporterSteps = roleSteps.transporter.map((step) => ({
+    const transporterSteps = simplifiedRoleSteps.transporter.map((step, index) => ({
       ...step,
-      completed: false, // No steps completed initially
+      completed: index < currentStepIndex, // Mark previous steps as completed
     }))
     setSteps(transporterSteps)
+    
+    // Sync current step index with store on mount
+    if (currentStep !== currentStepIndex) {
+      setCurrentStepIndex(currentStep)
+    }
   }, [])
 
   useEffect(() => {
@@ -38,16 +43,26 @@ export function TransporterOnboarding({ onComplete }: TransporterOnboardingProps
     setProgressLineHeight(Math.min(progressPercentage, 100))
   }, [currentStepIndex, steps.length])
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!canProceedToNext() || isAnimating) return
 
     setIsAnimating(true)
+    
+    // Save onboarding data to persist state
+    try {
+      await saveOnboardingData()
+    } catch (error) {
+      console.error('Failed to save onboarding data:', error)
+    }
+    
     setTimeout(() => {
       if (currentStepIndex === steps.length - 1) {
         // Last step, complete onboarding
         onComplete?.()
       } else {
-        setCurrentStepIndex((prev) => Math.min(prev + 1, steps.length - 1))
+        const nextStep = Math.min(currentStepIndex + 1, steps.length - 1)
+        setCurrentStepIndex(nextStep)
+        setStep(nextStep) // Save to store
         setSteps((prev) =>
           prev.map((step, index) => ({
             ...step,
@@ -59,12 +74,22 @@ export function TransporterOnboarding({ onComplete }: TransporterOnboardingProps
     }, 300)
   }
 
-  const handleBack = () => {
+  const handleBack = async () => {
     if (currentStepIndex === 0 || isAnimating) return // Can't go back before fleet step
 
     setIsAnimating(true)
+    
+    // Save onboarding data to persist state
+    try {
+      await saveOnboardingData()
+    } catch (error) {
+      console.error('Failed to save onboarding data:', error)
+    }
+    
     setTimeout(() => {
-      setCurrentStepIndex((prev) => Math.max(prev - 1, 0))
+      const prevStep = Math.max(currentStepIndex - 1, 0)
+      setCurrentStepIndex(prevStep)
+      setStep(prevStep) // Save to store
       setIsAnimating(false)
     }, 300)
   }
@@ -76,13 +101,13 @@ export function TransporterOnboarding({ onComplete }: TransporterOnboardingProps
     switch (currentStep.id) {
       case 'fleet':
         return transportData?.fleetInfo?.vehicleCount > 0
-      case 'bases':
-        // For now, allow proceeding without bases - user can add them later
+      case 'coverage':
+        // Allow proceeding without requiring coverage data for now
         return true
-      case 'location':
-        // Allow proceeding without requiring location data
+      case 'preferences':
+        // Allow proceeding without preferences for now
         return true
-      case 'listing':
+      case 'overview':
         return true
       default:
         return true
@@ -96,11 +121,19 @@ export function TransporterOnboarding({ onComplete }: TransporterOnboardingProps
     switch (currentStep.id) {
       case 'fleet':
         return <FleetInformation />
-      case 'bases':
-        return <BaseManagementFlow />
-      case 'location':
+      case 'coverage':
         return <LocationInformation />
-      case 'listing':
+      case 'preferences':
+        // Job preferences component
+        return (
+          <View className="flex-1 p-6 bg-gray-800 rounded-xl m-4">
+            <Text className="text-white text-xl font-bold mb-4">Job Preferences</Text>
+            <Text className="text-gray-400 mb-6">
+              Select your preferred cargo types and routes
+            </Text>
+          </View>
+        )
+      case 'overview':
         return <TransporterListing onComplete={onComplete} />
       default:
         return null

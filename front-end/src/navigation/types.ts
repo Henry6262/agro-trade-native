@@ -15,6 +15,18 @@ export type RootStackParamList = {
   SellerOnboardingFlow: undefined;
   TransporterOnboardingFlow: undefined;
   OnboardingComplete: undefined;
+  // Base Management
+  BaseManagement: undefined;
+  // Admin screens
+  AdminDashboard: undefined;
+  AdminPricingZones: undefined;
+  AdminZoneDetails: { zoneId: string };
+  AdminProductPrices: undefined;
+  AdminMarketConditions: undefined;
+  AdminAnalytics: undefined;
+  AdminBulkPriceUpdate: undefined;
+  AdminImportExport: undefined;
+  AdminMapView: undefined;
 };
 
 export type AuthStackParamList = {
@@ -50,7 +62,7 @@ export type MainTabParamList = {
 };
 
 export type DashboardStackParamList = {
-  DashboardMain: { userRole?: 'admin' | 'seller' | 'buyer' | 'transporter' };
+  DashboardMain: { userRole?: 'admin' | 'seller' | 'buyer' | 'transporter'; showSuccessAnimation?: boolean };
   CommandCenter: undefined;
   AgentNetwork: undefined;
   Operations: undefined;

@@ -123,6 +123,7 @@ model User {
   bases              Base[]              // Multiple bases per user
   stocks             BaseStock[]         // Stock across all bases
   demands            BaseDemand[]        // Demand across all bases
+  locationProfile    UserLocationProfile?
 
   @@map("users")
 }
@@ -411,6 +412,8 @@ model ProductCatalog {
   listings        ProductListing[]
   stocks          BaseStock[]
   demands         BaseDemand[]
+  productPrices   ProductPrice[]
+  seasonalPricing SeasonalPricing[]
   
   @@index([isActive])
   @@index([sortOrder])
@@ -528,4 +531,216 @@ model KycDocument {
   @@index([userId])
   @@index([status])
   @@map("kyc_documents")
+}
+
+// ==================== REGIONAL PRICING SYSTEM ====================
+
+// Countries we operate in
+model Country {
+  id           String   @id @default(cuid())
+  name         String   @unique // Bulgaria, Greece
+  code         String   @unique // BG, GR
+  flagEmoji    String   @map("flag_emoji") // 🇧🇬, 🇬🇷
+  currencyCode String   @map("currency_code") // BGN, EUR
+  isActive     Boolean  @default(true) @map("is_active")
+  sortOrder    Int      @default(0) @map("sort_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  regions      Region[]
+  
+  @@map("countries")
+}
+
+// Administrative regions/states within countries
+model Region {
+  id        String   @id @default(cuid())
+  countryId String   @map("country_id")
+  country   Country  @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  
+  name      String   // Sofia Oblast, Plovdiv Oblast, Attica, Macedonia
+  code      String?  // Optional region code
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  cities    City[]
+  
+  @@unique([countryId, name])
+  @@index([countryId])
+  @@map("regions")
+}
+
+// Cities with coordinates
+model City {
+  id         String   @id @default(cuid())
+  regionId   String   @map("region_id")
+  region     Region   @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  
+  name       String   // Sofia, Plovdiv, Athens, Thessaloniki
+  latitude   Float
+  longitude  Float
+  population Int?     // Optional population data
+  isCapital  Boolean  @default(false) @map("is_capital")
+  isActive   Boolean  @default(true) @map("is_active")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  
+  pricingZones CityPricingZone[]
+  userLocationProfiles UserLocationProfile[]
+  
+  @@unique([regionId, name])
+  @@index([regionId])
+  @@index([latitude, longitude])
+  @@map("cities")
+}
+
+// Logical pricing zones (can group multiple cities)
+model PricingZone {
+  id              String   @id @default(cuid())
+  name            String   @unique // Sofia Metro, Northern Bulgaria, Southern Greece
+  description     String?  @db.Text
+  color           String?  // Hex color for UI display
+  isActive        Boolean  @default(true) @map("is_active")
+  marketSize      String?  @map("market_size")
+  transportAccess String?  @map("transport_access")
+  storageCapacity String?  @map("storage_capacity")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+  
+  cities           CityPricingZone[]
+  productPrices    ProductPrice[]
+  seasonalPricing  SeasonalPricing[]
+  marketConditions MarketCondition[]
+  
+  @@index([isActive])
+  @@map("pricing_zones")
+}
+
+// Junction table: Many cities can belong to many pricing zones
+model CityPricingZone {
+  cityId        String      @map("city_id")
+  city          City        @relation(fields: [cityId], references: [id], onDelete: Cascade)
+  pricingZoneId String      @map("pricing_zone_id")
+  pricingZone   PricingZone @relation(fields: [pricingZoneId], references: [id], onDelete: Cascade)
+  
+  priority      Int         @default(1) // Higher priority zones take precedence
+  isDefault     Boolean     @default(false) @map("is_default") // Default zone for the city
+  createdAt     DateTime    @default(now()) @map("created_at")
+  
+  @@id([cityId, pricingZoneId])
+  @@index([cityId])
+  @@index([pricingZoneId])
+  @@map("city_pricing_zones")
+}
+
+// Product prices per zone with date ranges
+model ProductPrice {
+  id            String      @id @default(cuid())
+  productId     String      @map("product_id")
+  product       ProductCatalog @relation(fields: [productId], references: [id], onDelete: Cascade)
+  pricingZoneId String      @map("pricing_zone_id")
+  pricingZone   PricingZone @relation(fields: [pricingZoneId], references: [id], onDelete: Cascade)
+  
+  minPrice      Decimal     @map("min_price") @db.Decimal(10, 2)
+  maxPrice      Decimal     @map("max_price") @db.Decimal(10, 2)
+  currency      String      @default("EUR") // EUR, BGN
+  unit          ProductUnit @default(TON)
+  
+  effectiveDate DateTime    @default(now()) @map("effective_date")
+  expiresDate   DateTime?   @map("expires_date")
+  qualityGrade  String?     @map("quality_grade")
+  
+  confidenceLevel Float?    @map("confidence_level") // Price confidence score (0-1)
+  dataSource    String?     @map("data_source") // Data source for the price
+  
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  createdBy     String?     @map("created_by") // Admin user who set the price
+  
+  @@unique([productId, pricingZoneId, qualityGrade, effectiveDate])
+  @@index([productId, pricingZoneId])
+  @@index([effectiveDate])
+  @@map("product_prices")
+}
+
+// Seasonal price adjustments
+model SeasonalPricing {
+  id            String      @id @default(cuid())
+  productId     String      @map("product_id")
+  product       ProductCatalog @relation(fields: [productId], references: [id], onDelete: Cascade)
+  pricingZoneId String      @map("pricing_zone_id")
+  pricingZone   PricingZone @relation(fields: [pricingZoneId], references: [id], onDelete: Cascade)
+  
+  season        String      // Spring, Summer, Fall, Winter
+  startMonth    Int         @map("start_month") // 1-12
+  endMonth      Int         @map("end_month") // 1-12
+  priceMultiplier Float     @map("price_multiplier") // 1.2 = 20% increase
+  description   String?     @db.Text
+  isActive      Boolean     @default(true) @map("is_active")
+  
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+  
+  @@unique([productId, pricingZoneId, season])
+  @@index([productId, pricingZoneId])
+  @@map("seasonal_pricing")
+}
+
+// Market conditions affecting prices
+model MarketCondition {
+  id            String      @id @default(cuid())
+  pricingZoneId String      @map("pricing_zone_id")
+  pricingZone   PricingZone @relation(fields: [pricingZoneId], references: [id], onDelete: Cascade)
+  
+  date          DateTime    @db.Date
+  supplyLevel   Int         @map("supply_level") // 0-100 scale
+  demandLevel   Int         @map("demand_level") // 0-100 scale
+  weatherImpact Float?      @map("weather_impact") // Impact factor
+  transportCost Float?      @map("transport_cost")
+  
+  notes         String?     @db.Text
+  dataSource    String?     @map("data_source")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedBy     String?     @map("updated_by")
+  
+  @@unique([pricingZoneId, date])
+  @@index([pricingZoneId])
+  @@index([date])
+  @@map("market_conditions")
+}
+
+// User location profiles for pricing
+model UserLocationProfile {
+  userId         String   @id @map("user_id")
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Current location
+  cityId         String?  @map("city_id")
+  city           City?    @relation(fields: [cityId], references: [id])
+  
+  // Manual address if no city match
+  address        String?
+  latitude       Float?
+  longitude      Float?
+  
+  // Detected location
+  detectedCity   String?  @map("detected_city")
+  detectedRegion String?  @map("detected_region")
+  detectedCountry String? @map("detected_country")
+  
+  // Location detection method
+  geocodingSource String?    @map("geocoding_source") // auto, manual, ip-based
+  geocodingAccuracy String?  @map("geocoding_accuracy") // Location accuracy
+  
+  // Preferences
+  prefersMetricUnits Boolean @default(true) @map("prefers_metric_units")
+  prefersLocalCurrency Boolean @default(true) @map("prefers_local_currency")
+  
+  lastLocationUpdate DateTime? @map("last_location_update")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  @@index([cityId])
+  @@map("user_location_profiles")
 }

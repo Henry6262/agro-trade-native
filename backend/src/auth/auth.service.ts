@@ -2,8 +2,13 @@ import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/co
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
-import { User, UserRole } from '@prisma/client';
+import { User, UserRole, BaseType, ProductUnit, StockStatus } from '@prisma/client';
 import { RegisterWithCompanyDto } from './dto/register-with-company.dto';
+import { 
+  SellerOnboardingDataDto, 
+  BuyerOnboardingDataDto, 
+  TransporterOnboardingDataDto 
+} from './dto/onboarding-data.dto';
 
 export interface JwtPayload {
   sub: string;
@@ -52,7 +57,11 @@ export class AuthService {
           },
         });
       } else {
-        // Create new user - role will be selected during onboarding
+        // For existing user sign-in attempts, don't create a new user
+        // The Google strategy should handle this case
+        console.log(`New Google user detected: ${email}`);
+        
+        // Create minimal user record for OAuth flow - will need profile completion
         user = await this.prisma.user.create({
           data: {
             googleId: id,
@@ -185,6 +194,77 @@ export class AuthService {
               farmName: data.companyInfo?.companyName || null,
             },
           });
+          
+          // Process seller onboarding data
+          if (data.onboardingData) {
+            const sellerData = data.onboardingData as SellerOnboardingDataDto;
+            console.log('Processing seller onboarding data:', sellerData);
+            
+            // Create bases
+            if (sellerData.bases && sellerData.bases.length > 0) {
+              for (const baseData of sellerData.bases) {
+                const base = await tx.base.create({
+                  data: {
+                    userId: user.id,
+                    name: baseData.name,
+                    type: baseData.type as BaseType,
+                    address: baseData.address,
+                    city: baseData.city,
+                    region: baseData.region,
+                    country: baseData.country,
+                    postalCode: baseData.postalCode,
+                    latitude: baseData.latitude,
+                    longitude: baseData.longitude,
+                    storageCapacity: baseData.storageCapacity,
+                    isPrimary: baseData.isPrimary || false,
+                    isActive: true,
+                  },
+                });
+                
+                // Create stock entries for each product at this base
+                for (const spec of sellerData.productSpecifications) {
+                  // Find distribution for this product and base
+                  const distribution = sellerData.distributions?.find(d => 
+                    d.productId === spec.productId
+                  )?.distributions?.find(d => 
+                    d.baseId === baseData.name // Match by base name temporarily
+                  );
+                  
+                  if (distribution) {
+                    await tx.baseStock.create({
+                      data: {
+                        baseId: base.id,
+                        userId: user.id,
+                        productId: spec.productId,
+                        quantity: distribution.quantity,
+                        unit: spec.unit as ProductUnit,
+                        status: StockStatus.AVAILABLE,
+                        pricePerUnit: spec.pricePerKilo,
+                      },
+                    });
+                  }
+                }
+              }
+            }
+            
+            // Create product listings for seller's products
+            for (const spec of sellerData.productSpecifications) {
+              const pricePerUnit = spec.pricePerKilo || 0;
+              await tx.productListing.create({
+                data: {
+                  userId: user.id,
+                  productId: spec.productId,
+                  listingType: 'SELL',
+                  quantity: spec.quantity,
+                  unit: spec.unit as ProductUnit,
+                  pricePerUnit: pricePerUnit,
+                  totalValue: spec.quantity * pricePerUnit,
+                  status: 'ACTIVE',
+                  description: `Varieties: ${spec.varieties?.join(', ') || 'N/A'}`,
+                },
+              });
+            }
+          }
           break;
         
         case UserRole.BUYER:
@@ -194,6 +274,78 @@ export class AuthService {
               companyName: data.companyInfo?.companyName || null,
             },
           });
+          
+          // Process buyer onboarding data
+          if (data.onboardingData) {
+            const buyerData = data.onboardingData as BuyerOnboardingDataDto;
+            console.log('Processing buyer onboarding data:', buyerData);
+            
+            // Create bases/delivery locations
+            if (buyerData.bases && buyerData.bases.length > 0) {
+              for (const baseData of buyerData.bases) {
+                const base = await tx.base.create({
+                  data: {
+                    userId: user.id,
+                    name: baseData.name,
+                    type: baseData.type as BaseType,
+                    address: baseData.address,
+                    city: baseData.city,
+                    region: baseData.region,
+                    country: baseData.country,
+                    postalCode: baseData.postalCode,
+                    latitude: baseData.latitude,
+                    longitude: baseData.longitude,
+                    storageCapacity: baseData.storageCapacity,
+                    isPrimary: baseData.isPrimary || false,
+                    isActive: true,
+                  },
+                });
+                
+                // Create demand entries for each product at this base
+                for (const req of buyerData.productRequirements) {
+                  // Find distribution for this product and base
+                  const distribution = buyerData.distributions?.find(d => 
+                    d.productId === req.productId
+                  )?.distributions?.find(d => 
+                    d.baseId === baseData.name // Match by base name temporarily
+                  );
+                  
+                  if (distribution) {
+                    await tx.baseDemand.create({
+                      data: {
+                        baseId: base.id,
+                        userId: user.id,
+                        productId: req.productId,
+                        requiredQuantity: distribution.quantity,
+                        unit: req.unit as ProductUnit,
+                        maxPricePerUnit: req.maxPricePerKilo,
+                        urgency: 'within_week',
+                        remainingQuantity: distribution.quantity,
+                      },
+                    });
+                  }
+                }
+              }
+            }
+            
+            // Create buy listings for buyer's requirements
+            for (const req of buyerData.productRequirements) {
+              const pricePerUnit = req.maxPricePerKilo || 0;
+              await tx.productListing.create({
+                data: {
+                  userId: user.id,
+                  productId: req.productId,
+                  listingType: 'BUY',
+                  quantity: req.quantity,
+                  unit: req.unit as ProductUnit,
+                  pricePerUnit: pricePerUnit,
+                  totalValue: req.quantity * pricePerUnit,
+                  status: 'ACTIVE',
+                  description: `Delivery: ${req.deliveryFrequency || 'As needed'}`,
+                },
+              });
+            }
+          }
           break;
         
         case UserRole.TRANSPORTER:
@@ -203,11 +355,67 @@ export class AuthService {
               companyName: data.companyInfo?.companyName || null,
             },
           });
+          
+          // Process transporter onboarding data
+          if (data.onboardingData) {
+            const transportData = data.onboardingData as TransporterOnboardingDataDto;
+            console.log('Processing transporter onboarding data:', transportData);
+            
+            // Update transporter profile with additional details
+            await tx.transporterProfile.update({
+              where: { userId: user.id },
+              data: {
+                baseLocationAddress: transportData.baseLocation?.address,
+                // Store fleet and service area in profile for now
+                // In future, create separate Fleet and ServiceArea tables
+              },
+            });
+            
+            // Create fleet vehicles
+            if (transportData.fleetInfo.vehicleCount > 0) {
+              // For now, create generic vehicles based on count
+              // In future, allow detailed vehicle registration
+              for (let i = 0; i < transportData.fleetInfo.vehicleCount; i++) {
+                await tx.fleetVehicle.create({
+                  data: {
+                    transporterId: user.id,
+                    plateNumber: `TEMP-${i + 1}`,
+                    vehicleType: 'FLATBED', // Default, will map from vehicleTypes later
+                    capacityKg: Math.round((transportData.fleetInfo.totalCapacity / transportData.fleetInfo.vehicleCount) * 1000), // Convert tons to kg
+                    active: true,
+                  },
+                });
+              }
+            }
+          }
           break;
       }
 
+      // Generate JWT tokens for the new user
+      const payload: JwtPayload = {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+      };
+
+      const accessToken = this.jwtService.sign(payload);
+      
+      const refreshToken = this.jwtService.sign(payload, {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.get('JWT_REFRESH_EXPIRES_IN', '30d'),
+      });
+
       return {
-        user,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          phone: user.phone,
+          role: user.role,
+          hasProfile: true,
+        },
+        token: accessToken,
+        refreshToken,
         companyInfo,
         profile,
         message: 'User registered successfully'

@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { View, ScrollView, SafeAreaView } from 'react-native'
+import { View, ScrollView, SafeAreaView, Text } from 'react-native'
 import type { OnboardingStep, ProductSpecification } from '../../../types/onboarding'
-import { roleSteps } from '../../../constants/onboarding'
+import { simplifiedRoleSteps } from '../../../constants/simplifiedOnboarding'
 import { ProgressSidebar } from '../shared/ProgressSidebar'
 import { Navigation } from '../shared/Navigation'
-import { ProductSelectionBackend } from '../ProductSelectionBackend'
-import { ProductSpecifications } from './ProductSpecifications'
-import { MarketOverview } from './MarketOverview'
-import { BaseManagementFlow } from '../base-management/BaseManagementUI'
-import { MultiProductDistribution } from '../base-management/MultiProductDistribution'
+import { ProductSelectionSimple } from './ProductSelectionSimple'
+import { ProductSpecificationsWithLocation } from './ProductSpecificationsWithLocation'
+import { SimplifiedMarketOverview } from './SimplifiedMarketOverview'
 import { useOnboardingStore } from '../../../store/onboardingStore'
 
 interface SellerOnboardingProps {
@@ -18,14 +16,12 @@ interface SellerOnboardingProps {
 export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
   const { 
     selectedProducts, 
-    setSelectedProducts,
-    selectedProductsMetadata, 
     sellerSpecifications, 
     updateSellerSpecification,
     setSellerProducts,
-    sellerData,
     currentStep,
-    setStep
+    setStep,
+    saveOnboardingData
   } = useOnboardingStore()
   
   // Initialize with saved step or default to 0 (products step is now first)
@@ -36,11 +32,16 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
   const [progressLineHeight, setProgressLineHeight] = useState(0)
 
   useEffect(() => {
-    const sellerSteps = roleSteps.seller.map((step, index) => ({
+    const sellerSteps = simplifiedRoleSteps.seller.map((step, index) => ({
       ...step,
-      completed: false, // No steps completed initially
+      completed: index < currentStepIndex, // Mark previous steps as completed
     }))
     setSteps(sellerSteps)
+    
+    // Sync current step index with store on mount
+    if (currentStep !== currentStepIndex) {
+      setCurrentStepIndex(currentStep)
+    }
   }, [])
 
   useEffect(() => {
@@ -102,19 +103,40 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
     setProductSpecifications(newSpecs)
   }, [selectedProducts]) // Removed sellerSpecifications dependency to prevent loop
 
-  // Update Zustand store when specifications change
+  // Update Zustand store when specifications change and save data
   useEffect(() => {
     productSpecifications.forEach(spec => {
       updateSellerSpecification(spec.productId, spec)
     })
-  }, [productSpecifications]) // Removed updateSellerSpecification dependency since it's stable
+    
+    // Auto-save data when specifications change
+    if (productSpecifications.length > 0) {
+      const saveTimer = setTimeout(() => {
+        saveOnboardingData().catch(console.error)
+      }, 1000) // Debounce save by 1 second
+      
+      return () => clearTimeout(saveTimer)
+    }
+  }, [productSpecifications, updateSellerSpecification, saveOnboardingData]) // Added back dependencies
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!canProceedToNext() || isAnimating) return
 
     setIsAnimating(true)
+    
+    // Save current step to store
+    const nextStep = Math.min(currentStepIndex + 1, steps.length - 1)
+    setStep(nextStep)
+    
+    // Save onboarding data to persist state
+    try {
+      await saveOnboardingData()
+    } catch (error) {
+      console.error('Failed to save onboarding data:', error)
+    }
+    
     setTimeout(() => {
-      setCurrentStepIndex((prev) => Math.min(prev + 1, steps.length - 1))
+      setCurrentStepIndex(nextStep)
       setSteps((prev) =>
         prev.map((step, index) => ({
           ...step,
@@ -125,12 +147,24 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
     }, 300)
   }
 
-  const handleBack = () => {
+  const handleBack = async () => {
     if (currentStepIndex === 0 || isAnimating) return // Can't go back before products step
 
     setIsAnimating(true)
+    
+    // Save current step to store
+    const prevStep = Math.max(currentStepIndex - 1, 0)
+    setStep(prevStep)
+    
+    // Save onboarding data to persist state
+    try {
+      await saveOnboardingData()
+    } catch (error) {
+      console.error('Failed to save onboarding data:', error)
+    }
+    
     setTimeout(() => {
-      setCurrentStepIndex((prev) => Math.max(prev - 1, 0))
+      setCurrentStepIndex(prevStep)
       setIsAnimating(false)
     }, 300)
   }
@@ -142,16 +176,16 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
     switch (currentStep.id) {
       case 'products':
         return selectedProducts.length > 0
-      case 'specifications':
-        return productSpecifications.every((spec) => spec.quantity.trim() !== '' && spec.unit.trim() !== '')
-      case 'bases':
-        // Allow proceeding without bases - user can add them later
-        return true
-      case 'distribution':
-        // Check if all products are distributed
-        const distributions = useOnboardingStore.getState().sellerData?.distributions || []
-        return distributions.length > 0 && distributions.every(d => d.totalDistributed === d.totalQuantity)
-      case 'market':
+      case 'details-location':
+        // Check if all products have quantities and location in the store
+        const store = useOnboardingStore.getState()
+        const hasLocation = store.userLocation !== null
+        const hasQuantities = selectedProducts.every(productId => {
+          const spec = store.sellerSpecifications[productId]
+          return spec && spec.quantity && parseFloat(spec.quantity) > 0
+        })
+        return hasLocation && hasQuantities
+      case 'overview':
         return true
       default:
         return true
@@ -164,57 +198,12 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
 
     switch (currentStep.id) {
       case 'products':
-        return <ProductSelectionBackend />
-      case 'specifications':
+        return <ProductSelectionSimple />
+      case 'details-location':
+        return <ProductSpecificationsWithLocation />
+      case 'overview':
         return (
-          <ProductSpecifications
-            selectedProducts={selectedProducts}
-            specifications={productSpecifications}
-            onSpecificationsChange={setProductSpecifications}
-          />
-        )
-      case 'bases':
-        return <BaseManagementFlow />
-      case 'distribution':
-        const products = selectedProducts.map(productId => {
-          const spec = productSpecifications.find(s => s.productId === productId)
-          const metadata = selectedProductsMetadata.find(m => m.category === productId)
-          return {
-            id: productId,
-            name: metadata?.name || productId,
-            totalQuantity: parseFloat(spec?.quantity || '0'),
-            unit: spec?.unit || 'tons',
-            image: metadata?.image
-          }
-        }).filter(p => p.totalQuantity > 0) // Only include products with quantity
-        
-        return (
-          <View className="flex-1">
-            {products.length > 0 ? (
-              <MultiProductDistribution
-                userType="seller"
-                products={products}
-                onComplete={(distributions) => {
-                  console.log('All distributions complete:', distributions);
-                  // Save to store
-                  useOnboardingStore.getState().setSellerDistributions(distributions);
-                }}
-              />
-            ) : (
-              <View className="flex-1 bg-gray-900 p-4">
-                <View className="bg-gray-800 rounded-xl p-6 items-center">
-                  <Text className="text-white text-lg font-bold">No Products to Distribute</Text>
-                  <Text className="text-gray-400 text-sm text-center mt-2">
-                    Please add product quantities in the specifications step
-                  </Text>
-                </View>
-              </View>
-            )}
-          </View>
-        )
-      case 'market':
-        return (
-          <MarketOverview
+          <SimplifiedMarketOverview
             selectedProducts={selectedProducts}
             specifications={productSpecifications}
             onComplete={onComplete}

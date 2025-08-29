@@ -1,17 +1,15 @@
-import React, { useState } from 'react'
+import React from 'react'
 import {
   View,
   Text,
-  TextInput,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
+  Image,
+  Dimensions,
 } from 'react-native'
-import { Calendar, TrendingUp, Users, Package } from 'lucide-react-native'
-import { Card } from '../../common/Card'
-import { Badge } from '../../common/Badge'
-import { products } from '../../../constants/onboarding'
+import { Package, MapPin, ShoppingCart, Info, Check } from 'lucide-react-native'
 import type { ProductSpecification } from '../../../types/onboarding'
+import { useOnboardingStore } from '../../../store/onboardingStore'
 
 interface BuyerMarketRequestProps {
   selectedProducts: string[]
@@ -26,204 +24,217 @@ export function BuyerMarketRequest({
   onSpecificationsChange,
   onComplete,
 }: BuyerMarketRequestProps) {
-  const [deliveryDeadline, setDeliveryDeadline] = useState('')
-
-  const totalValue = specifications.reduce((sum, spec) => {
-    const quantity = Number(spec.quantity) || 0
-    const price = Number(spec.pricePerKilo) || 0
-    return sum + quantity * price
-  }, 0)
-
-  const totalWeight = specifications.reduce((sum, spec) => {
-    return sum + (Number(spec.quantity) || 0)
-  }, 0)
-
-  const getMarketInsights = () => {
-    const productCount = specifications.length
-    const avgPrice = totalValue / totalWeight || 0
-
-    return {
-      activeSellers: Math.floor(Math.random() * 50) + 20,
-      availableStock: Math.floor(totalWeight * (2 + Math.random() * 3)),
-      matchRate: Math.floor(85 + Math.random() * 15),
-      avgMarketPrice: avgPrice * (0.9 + Math.random() * 0.2),
-    }
-  }
-
-  const insights = getMarketInsights()
+  const { width } = Dimensions.get('window')
+  const isLargeScreen = width >= 768
+  
+  const { 
+    selectedProductsMetadata, 
+    userLocation,
+    buyerSpecifications 
+  } = useOnboardingStore()
 
   const handleComplete = () => {
+    console.log('Completing purchase request with:', { selectedProducts, specifications })
     onComplete?.()
   }
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 16, paddingBottom: 96 }} showsVerticalScrollIndicator={false}>
-        <View>
-          <View style={{ alignItems: 'center', marginBottom: 32 }}>
-            <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#22C55E', textAlign: 'center', marginBottom: 12 }}>
-              Purchase Request
+  // Calculate totals
+  const calculateTotals = () => {
+    let totalQuantity = 0
+    let totalBudget = 0
+
+    specifications.forEach(spec => {
+      const quantity = parseFloat(spec.quantity) || 0
+      const pricePerKilo = parseFloat(spec.pricePerKilo) || 0
+      const multiplier = spec.unit === 'tons' || spec.unit === 'ton' ? 1000 : 
+                        spec.unit === 'quintal' ? 100 : 1
+      const quantityInKg = quantity * multiplier
+      totalQuantity += quantityInKg / 1000 // Convert to tons
+      totalBudget += quantityInKg * pricePerKilo
+    })
+
+    return { totalQuantity, totalBudget }
+  }
+
+  const { totalQuantity, totalBudget } = calculateTotals()
+
+  // Format currency with K, M suffixes
+  const formatCurrency = (value: number) => {
+    if (value >= 1000000) {
+      return `€${(value / 1000000).toFixed(1)}M`
+    } else if (value >= 1000) {
+      return `€${(value / 1000).toFixed(1)}K`
+    }
+    return `€${value.toFixed(0)}`
+  }
+
+  const renderProductCard = (spec: ProductSpecification, index: number) => {
+    const metadata = selectedProductsMetadata.find(m => m.category === spec.productId)
+    const productName = metadata?.name || spec.productId
+    
+    const quantity = parseFloat(spec.quantity) || 0
+    const pricePerKilo = parseFloat(spec.pricePerKilo) || 0
+    const multiplier = spec.unit === 'tons' || spec.unit === 'ton' ? 1000 : 
+                      spec.unit === 'quintal' ? 100 : 1
+    const quantityInKg = quantity * multiplier
+    const totalPrice = quantityInKg * pricePerKilo
+
+    return (
+      <View 
+        key={spec.productId} 
+        className={`${isLargeScreen ? 'w-1/2' : 'w-full'} p-2`}
+      >
+        <View className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
+          {/* Product Image */}
+          {metadata?.image && (
+            <View className="relative">
+              <Image
+                source={{ uri: metadata.image }}
+                style={{ width: '100%', height: 140 }}
+                resizeMode="cover"
+              />
+              <View className="absolute top-2 right-2 bg-gray-900/80 px-2 py-1 rounded-lg">
+                <Text className="text-white text-xs font-semibold">Request</Text>
+              </View>
+            </View>
+          )}
+          
+          {/* Product Details */}
+          <View className="p-4">
+            <Text className="text-white font-bold text-lg mb-2">
+              {productName}
             </Text>
-            <Text style={{ color: '#9CA3AF', fontSize: 16, maxWidth: 600, textAlign: 'center' }}>
-              Review your buying requirements and set delivery preferences
-            </Text>
-          </View>
-
-          <Card style={{ padding: 24, backgroundColor: '#1F2937', borderWidth: 2, borderColor: '#3B82F6', marginBottom: 32 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-              <View style={{ width: 40, height: 40, borderRadius: 8, backgroundColor: 'rgba(59, 130, 246, 0.2)', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
-                <Calendar size={20} color="#3B82F6" />
-              </View>
-              <View>
-                <Text style={{ fontWeight: '600', color: '#FFFFFF' }}>Delivery Deadline</Text>
-                <Text style={{ fontSize: 14, color: '#9CA3AF' }}>When do you need this delivered?</Text>
-              </View>
-            </View>
-            <TextInput
-              value={deliveryDeadline}
-              onChangeText={setDeliveryDeadline}
-              placeholder="Enter delivery date (YYYY-MM-DD)"
-              style={{ maxWidth: 300, borderWidth: 2, borderColor: '#3B82F6', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: '#111827', color: '#FFFFFF' }}
-              placeholderTextColor="#9CA3AF"
-            />
-          </Card>
-
-          <Card style={{ padding: 24, backgroundColor: '#1F2937', borderColor: '#374151', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 6, elevation: 6 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 24 }}>
-              <View style={{ width: 40, height: 40, borderRadius: 8, backgroundColor: 'rgba(34, 197, 94, 0.2)', alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
-                <Package size={20} color="#22C55E" />
-              </View>
-              <View>
-                <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF' }}>Request Summary</Text>
-                <Text style={{ fontSize: 14, color: '#9CA3AF' }}>{specifications.length} products in your request</Text>
-              </View>
+            
+            {/* Quantity Required */}
+            <View className="flex-row items-center mb-3">
+              <Package size={16} color="#9ca3af" />
+              <Text className="text-gray-300 ml-2">
+                {spec.quantity} {spec.unit} required
+              </Text>
             </View>
 
-            <View>
-              {specifications.map((spec, index) => {
-                const product = products.find((p) => p.id === spec.productId)
-                if (!product) return null
-
-                const quantity = Number(spec.quantity) || 0
-                const price = Number(spec.pricePerKilo) || 0
-                const itemTotal = quantity * price
-
-                return (
-                  <View
-                    key={spec.productId}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      padding: 16,
-                      backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                      borderRadius: 12,
-                      borderWidth: 1,
-                      borderColor: 'rgba(34, 197, 94, 0.3)',
-                      marginBottom: 16
-                    }}
-                  >
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <View style={{ width: 48, height: 48, borderRadius: 12, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2, marginRight: 16 }}>
-                        <Text style={{ fontSize: 24 }}>{product.icon}</Text>
-                      </View>
-                      <View>
-                        <Text style={{ fontWeight: '600', color: '#FFFFFF' }}>{product.name}</Text>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                          <Text style={{ fontSize: 14, color: '#9CA3AF' }}>
-                            {spec.quantity} {spec.unit}
-                          </Text>
-                          <Text style={{ fontSize: 14, color: '#9CA3AF', marginHorizontal: 8 }}>•</Text>
-                          <Text style={{ fontSize: 14, color: '#9CA3AF' }}>
-                            Max ₹{spec.pricePerKilo}/{spec.unit}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                    <View style={{ alignItems: 'flex-end' }}>
-                      <Text style={{ fontWeight: 'bold', fontSize: 18, color: '#FFFFFF' }}>₹{itemTotal.toFixed(2)}</Text>
-                      <Badge variant="secondary" style={{ backgroundColor: '#374151', borderColor: '#9CA3AF' }}>
-                        <Text style={{ fontSize: 12, color: '#9CA3AF' }}>Budget</Text>
-                      </Badge>
-                    </View>
-                  </View>
-                )
-              })}
-            </View>
-
-            <View style={{ marginTop: 24, paddingTop: 24, borderTopWidth: 1, borderTopColor: '#374151' }}>
-              <View style={{ flexDirection: 'row', marginBottom: 16 }}>
-                <View style={{ flex: 1, alignItems: 'center', padding: 16, backgroundColor: '#374151', borderRadius: 8, marginRight: 8 }}>
-                  <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#FFFFFF' }}>{totalWeight}</Text>
-                  <Text style={{ fontSize: 14, color: '#9CA3AF' }}>Total Weight (kg)</Text>
-                </View>
-                <View style={{ flex: 1, alignItems: 'center', padding: 16, backgroundColor: 'rgba(34, 197, 94, 0.1)', borderRadius: 8, marginLeft: 8 }}>
-                  <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#22C55E' }}>₹{totalValue.toFixed(2)}</Text>
-                  <Text style={{ fontSize: 14, color: '#22C55E' }}>Total Budget</Text>
-                </View>
+            {/* Price and Budget Info */}
+            <View className="flex-row justify-between">
+              <View className="flex-1 mr-2">
+                <Text className="text-gray-500 text-xs mb-1">Max Price</Text>
+                <Text className="text-gray-300 font-semibold">
+                  €{pricePerKilo}/kg
+                </Text>
+              </View>
+              <View className="flex-1">
+                <Text className="text-gray-500 text-xs mb-1">Budget</Text>
+                <Text className="text-white font-bold text-lg">
+                  {formatCurrency(totalPrice)}
+                </Text>
               </View>
             </View>
-          </Card>
-
-          <View style={{ marginBottom: 32 }}>
-            <Card style={{ padding: 16, backgroundColor: 'rgba(59, 130, 246, 0.1)', borderColor: '#3B82F6', marginBottom: 16 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Users size={32} color="#3B82F6" style={{ marginRight: 12 }} />
-                <View>
-                  <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#3B82F6' }}>{insights.activeSellers}</Text>
-                  <Text style={{ fontSize: 14, color: '#3B82F6' }}>Active Sellers</Text>
-                  <Text style={{ fontSize: 12, color: '#3B82F6', marginTop: 4 }}>Ready to fulfill requests</Text>
-                </View>
-              </View>
-            </Card>
-
-            <Card style={{ padding: 16, backgroundColor: 'rgba(34, 197, 94, 0.1)', borderColor: '#22C55E', marginBottom: 16 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Package size={32} color="#22C55E" style={{ marginRight: 12 }} />
-                <View>
-                  <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#22C55E' }}>{insights.availableStock.toLocaleString()}</Text>
-                  <Text style={{ fontSize: 14, color: '#22C55E' }}>kg Available</Text>
-                  <Text style={{ fontSize: 12, color: '#22C55E', marginTop: 4 }}>In selected products</Text>
-                </View>
-              </View>
-            </Card>
-
-            <Card style={{ padding: 16, backgroundColor: 'rgba(217, 119, 6, 0.1)', borderColor: '#D97706' }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TrendingUp size={32} color="#D97706" style={{ marginRight: 12 }} />
-                <View>
-                  <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#D97706' }}>{insights.matchRate}%</Text>
-                  <Text style={{ fontSize: 14, color: '#D97706' }}>Success Rate</Text>
-                  <Text style={{ fontSize: 12, color: '#D97706', marginTop: 4 }}>Request fulfillment</Text>
-                </View>
-              </View>
-            </Card>
-          </View>
-
-          <View style={{ alignItems: 'center', paddingTop: 32 }}>
-            <TouchableOpacity
-              onPress={handleComplete}
-              style={{
-                backgroundColor: '#22C55E',
-                borderRadius: 8,
-                paddingHorizontal: 48,
-                paddingVertical: 16,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 6,
-                elevation: 6
-              }}
-              activeOpacity={0.8}
-            >
-              <Text style={{ color: 'white', fontSize: 18, fontWeight: '600' }}>Create Purchase Request</Text>
-            </TouchableOpacity>
-            <Text style={{ fontSize: 14, color: '#9CA3AF', marginTop: 12, textAlign: 'center' }}>
-              Submit your buying requirements to connect with sellers
-            </Text>
           </View>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      </View>
+    )
+  }
+
+  return (
+    <ScrollView className="flex-1 bg-gray-900" showsVerticalScrollIndicator={false}>
+      <View className="p-4 pb-24">
+        {/* Header Section */}
+        <View className="mb-6">
+          <Text className="text-3xl font-bold text-primary-500 text-center mb-2">
+            Purchase Request
+          </Text>
+          <Text className="text-gray-400 text-center">
+            Review your complete request before submitting
+          </Text>
+        </View>
+
+        {/* Delivery Location */}
+        {userLocation && (
+          <View className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700">
+            <View className="flex-row items-center">
+              <MapPin size={20} color="#3b82f6" />
+              <View className="ml-3 flex-1">
+                <Text className="text-gray-400 text-sm">Delivery Location</Text>
+                <Text className="text-white font-semibold">
+                  {userLocation.city}{userLocation.country && `, ${userLocation.country}`}
+                </Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Summary Stats - All in one row */}
+        <View className="flex-row mb-6 -mx-1">
+          <View className="flex-1 px-1">
+            <View className="bg-gray-800 rounded-lg p-3 border border-gray-700">
+              <Text className="text-gray-400 text-xs">Products</Text>
+              <Text className="text-lg font-bold text-white">
+                {selectedProducts.length}
+              </Text>
+            </View>
+          </View>
+          
+          <View className="flex-1 px-1">
+            <View className="bg-gray-800 rounded-lg p-3 border border-gray-700">
+              <Text className="text-gray-400 text-xs">Volume</Text>
+              <Text className="text-lg font-bold text-white">
+                {totalQuantity.toFixed(1)}t
+              </Text>
+            </View>
+          </View>
+          
+          <View className="flex-1 px-1">
+            <View className="bg-gray-800 rounded-lg p-3 border border-gray-700">
+              <Text className="text-gray-400 text-xs">Budget</Text>
+              <Text className="text-lg font-bold text-white">
+                {formatCurrency(totalBudget)}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Products Grid */}
+        <View className="mb-4">
+          <Text className="text-lg font-semibold text-white mb-3">
+            Products to Purchase ({selectedProducts.length})
+          </Text>
+          <View className="flex-row flex-wrap -mx-2">
+            {specifications.map((spec, index) => renderProductCard(spec, index))}
+          </View>
+        </View>
+
+        {/* Information Notice */}
+        <View className="bg-blue-900/20 rounded-xl p-4 mb-6 border border-blue-700/30">
+          <View className="flex-row">
+            <Info size={20} color="#60a5fa" />
+            <View className="ml-3 flex-1">
+              <Text className="text-blue-400 font-semibold mb-1">How it Works</Text>
+              <Text className="text-blue-300 text-sm">
+                Once submitted, your purchase request will be sent to verified sellers. 
+                You'll receive quotes within 24-48 hours and can choose the best offer.
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Action Buttons */}
+        <TouchableOpacity
+          onPress={handleComplete}
+          className="bg-blue-500 rounded-xl py-4 px-6 flex-row justify-center items-center mb-3"
+        >
+          <ShoppingCart size={20} color="white" />
+          <Text className="text-white font-bold text-lg ml-2">
+            Submit Purchase Request
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          className="bg-gray-800 rounded-xl py-3 px-6 flex-row justify-center items-center border border-gray-700"
+        >
+          <Text className="text-gray-400 font-medium">
+            Save as Draft
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   )
 }

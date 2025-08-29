@@ -9,6 +9,7 @@ import {
   Alert,
   SafeAreaView,
   Platform,
+  Dimensions,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -18,7 +19,7 @@ import Animated, {
   withSpring,
   interpolate,
 } from 'react-native-reanimated';
-import { X, Check } from 'lucide-react-native';
+import { X, Check, CheckCircle, User } from 'lucide-react-native';
 import { Button } from '../../common/Button';
 import { useOnboardingStore } from '../../../store/onboardingStore';
 import { useAuthStore } from '../../../store/authStore';
@@ -169,9 +170,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onComplete,
   userRole,
 }) => {
-  const [currentStep, setCurrentStep] = useState<'auth' | 'details'>('auth');
+  const [currentStep, setCurrentStep] = useState<'auth' | 'details' | 'success'>('auth');
   const [authMethod, setAuthMethod] = useState<'oauth' | 'email' | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successData, setSuccessData] = useState<{name: string, email: string}>({ name: '', email: '' });
+  
+  // Animation values for success screen
+  const successFadeAnim = useSharedValue(0);
+  const successScaleAnim = useSharedValue(0.3);
+  const checkmarkScale = useSharedValue(0);
+  const textOpacity = useSharedValue(0);
   
   // Zustand stores
   const onboardingStore = useOnboardingStore();
@@ -207,24 +216,40 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     if (visible) {
       slideAnimation.value = withTiming(1, { duration: 300 });
       
-      // Check if we have Google auth data to pre-fill
+      // Check if we have Google auth data
       const googleAuthData = onboardingStore.googleAuthData;
       if (googleAuthData?.isAuthenticated) {
-        console.log('Pre-filling form with Google auth data:', googleAuthData);
+        console.log('Google auth successful, showing success animation:', googleAuthData);
         
-        // Pre-fill the auth data
-        setAuthData(prev => ({
-          ...prev,
+        // Store data for success animation
+        setSuccessData({
           name: googleAuthData.name || '',
-          email: googleAuthData.email || '',
-        }));
+          email: googleAuthData.email || ''
+        });
         
-        // Skip to business details step since we're already authenticated
-        setCurrentStep('details');
-        setAuthMethod('oauth');
-        
-        // Clear the Google auth data from store after using it
+        // Clear the Google auth data from store
         onboardingStore.setGoogleAuthData({ name: '', email: '', isAuthenticated: false });
+        
+        // Show success animation
+        setShowSuccess(true);
+        setCurrentStep('success');
+        
+        // Start success animations
+        successFadeAnim.value = withTiming(1, { duration: 400 });
+        successScaleAnim.value = withSpring(1, { friction: 4, tension: 40 });
+        
+        setTimeout(() => {
+          checkmarkScale.value = withSpring(1, { friction: 3, tension: 40 });
+        }, 400);
+        
+        setTimeout(() => {
+          textOpacity.value = withTiming(1, { duration: 400 });
+        }, 700);
+        
+        // Complete after animation
+        setTimeout(() => {
+          onComplete();
+        }, 2500);
       }
     } else {
       slideAnimation.value = withTiming(0, { duration: 300 });
@@ -387,12 +412,35 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setErrors({});
     
     try {
-      // For email signup, we'll collect the data and move to details step
-      // The actual registration happens in handleComplete with all data
-      setCurrentStep('details');
+      // Skip business details - submit directly with minimal info
+      const companyInfo: CompanyInfo = {
+        companyName: authData.name + "'s Business",
+        vatNumber: undefined,
+        businessLicense: undefined,
+        companyAddress: undefined,
+        website: undefined,
+        establishedYear: undefined,
+      };
+
+      const userInfo = {
+        name: authData.name,
+        email: authData.email,
+        phone: undefined,
+      };
+
+      // Submit onboarding data to backend
+      await onboardingStore.submitOnboarding(companyInfo, userInfo);
+      
+      // Success
+      Alert.alert(
+        'Welcome!', 
+        `Your ${getRoleDisplayName()} account has been created successfully!`,
+        [{ text: 'Get Started', onPress: onComplete }]
+      );
     } catch (error: any) {
-      console.error('Email signup preparation failed:', error);
-      Alert.alert('Error', 'Failed to proceed. Please try again.');
+      console.error('Sign up failed:', error);
+      const errorMessage = error?.message || 'Failed to create account. Please try again.';
+      Alert.alert('Error', errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -493,7 +541,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={{ fontSize: 18, marginRight: 8 }}>{getRoleIcon()}</Text>
                   <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#111827' }}>
-                    {currentStep === 'auth' ? 'Create Account' : 'Business Details'}
+                    Create Account
                   </Text>
                 </View>
                 <TouchableOpacity onPress={handleClose} style={{ padding: 4 }}>
@@ -507,7 +555,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 showsVerticalScrollIndicator={false}
               >
                 {/* Global Error Display */}
-                {storeError && (
+                {storeError && currentStep !== 'success' && (
                   <View style={{
                     backgroundColor: '#fef2f2',
                     borderWidth: 1,
@@ -521,7 +569,98 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     </Text>
                   </View>
                 )}
-                {currentStep === 'auth' && (
+
+                {/* Success Animation */}
+                {currentStep === 'success' && showSuccess && (
+                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 }}>
+                    <Animated.View
+                      style={{
+                        opacity: successFadeAnim.value,
+                        transform: [{ scale: successScaleAnim.value }],
+                        alignItems: 'center',
+                      }}
+                    >
+                      {/* Profile Avatar with Checkmark */}
+                      <View style={{ position: 'relative', marginBottom: 32 }}>
+                        <View style={{
+                          width: 120,
+                          height: 120,
+                          backgroundColor: '#10b981',
+                          borderRadius: 60,
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}>
+                          <User size={60} color="white" strokeWidth={2} />
+                        </View>
+                        <Animated.View
+                          style={{
+                            position: 'absolute',
+                            bottom: -4,
+                            right: -4,
+                            transform: [{ scale: checkmarkScale.value }],
+                          }}
+                        >
+                          <View style={{
+                            backgroundColor: 'white',
+                            borderRadius: 24,
+                            padding: 2,
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.1,
+                            shadowRadius: 4,
+                            elevation: 3,
+                          }}>
+                            <View style={{
+                              backgroundColor: '#10b981',
+                              borderRadius: 20,
+                              padding: 4,
+                            }}>
+                              <CheckCircle size={32} color="white" strokeWidth={3} />
+                            </View>
+                          </View>
+                        </Animated.View>
+                      </View>
+
+                      {/* Success Message */}
+                      <Animated.View style={{ opacity: textOpacity.value, alignItems: 'center' }}>
+                        <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#111827', marginBottom: 12 }}>
+                          Welcome to AgroTrade!
+                        </Text>
+                        
+                        {successData.name && (
+                          <Text style={{ fontSize: 20, color: '#374151', marginBottom: 8 }}>
+                            Hi, {successData.name}! 👋
+                          </Text>
+                        )}
+                        
+                        <Text style={{ fontSize: 16, color: '#6b7280', textAlign: 'center', marginBottom: 8 }}>
+                          Your profile has been created successfully
+                        </Text>
+                        
+                        {successData.email && (
+                          <Text style={{ fontSize: 14, color: '#9ca3af' }}>
+                            {successData.email}
+                          </Text>
+                        )}
+                        
+                        <View style={{ marginTop: 24, flexDirection: 'row', alignItems: 'center' }}>
+                          <View style={{
+                            width: 8,
+                            height: 8,
+                            backgroundColor: '#10b981',
+                            borderRadius: 4,
+                            marginRight: 8,
+                          }} />
+                          <Text style={{ fontSize: 14, color: '#6b7280' }}>
+                            Preparing your dashboard...
+                          </Text>
+                        </View>
+                      </Animated.View>
+                    </Animated.View>
+                  </View>
+                )}
+
+                {currentStep === 'auth' && !showSuccess && (
                   <>
                     <Text style={{ fontSize: 16, color: '#6b7280', marginBottom: 24, textAlign: 'center' }}>
                       Create your account to start as a {getRoleDisplayName()}
@@ -638,70 +777,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   </>
                 )}
 
-                {currentStep === 'details' && (
-                  <>
-                    <View style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      marginBottom: 24,
-                      padding: 16,
-                      backgroundColor: '#dcfce7',
-                      borderRadius: 12
-                    }}>
-                      <Check size={20} color="#16a34a" />
-                      <Text style={{ marginLeft: 8, color: '#16a34a', fontWeight: '500' }}>
-                        Account created successfully!
-                      </Text>
-                    </View>
-
-                    <Text style={{ fontSize: 16, color: '#6b7280', marginBottom: 24, textAlign: 'center' }}>
-                      Complete your business profile to get started
-                    </Text>
-
-                    <FormField
-                      label="Company Name"
-                      placeholder="Enter your company name"
-                      value={businessData.companyName}
-                      onChangeText={(text) => setBusinessData({ ...businessData, companyName: text })}
-                      error={errors.companyName}
-                      required
-                    />
-
-                    <FormField
-                      label="VAT Number / Company ID"
-                      placeholder="Enter your VAT number or company ID"
-                      value={businessData.vatNumber}
-                      onChangeText={(text) => setBusinessData({ ...businessData, vatNumber: text })}
-                      error={errors.vatNumber}
-                      required
-                    />
-
-                    <FormField
-                      label="Business Type"
-                      placeholder="e.g., Agriculture, Manufacturing, Logistics"
-                      value={businessData.businessType}
-                      onChangeText={(text) => setBusinessData({ ...businessData, businessType: text })}
-                    />
-
-                    <FormField
-                      label="Contact Number"
-                      placeholder="Enter your business phone number"
-                      value={businessData.contactNumber}
-                      onChangeText={(text) => setBusinessData({ ...businessData, contactNumber: text })}
-                      keyboardType="phone-pad"
-                      error={errors.contactNumber}
-                      required
-                    />
-
-                    <Button
-                      title={isProcessing ? "Completing Setup..." : "Complete Setup"}
-                      onPress={handleComplete}
-                      disabled={isProcessing}
-                      variant="primary"
-                      size="large"
-                    />
-                  </>
-                )}
               </ScrollView>
 
               {/* Terms and Privacy */}

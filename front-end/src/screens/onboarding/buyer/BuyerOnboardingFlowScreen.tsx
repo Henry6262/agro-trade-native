@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 import type { RootStackParamList } from '../../../navigation/types';
 import { BuyerOnboarding } from '../../../components/onboarding';
-import { InlineAuth } from '../../../components/onboarding/shared/InlineAuth';
+import { AuthModal } from '../../../components/onboarding/shared/AuthModal';
 import { useOnboardingStore } from '../../../store/onboardingStore';
 
 type BuyerOnboardingFlowScreenNavigationProp = StackNavigationProp<
@@ -55,25 +55,16 @@ export const BuyerOnboardingFlowScreen: React.FC<Props> = ({ navigation }) => {
     navigation.navigate('OnboardingComplete');
   };
 
-  if (showAuthModal) {
-    return (
-      <View style={{ flex: 1, backgroundColor: '#111827' }}>
-        <StatusBar barStyle="light-content" backgroundColor="#111827" />
-        <ScrollView style={{ flex: 1 }}>
-          <InlineAuth
-            onClose={() => setShowAuthModal(false)}
-            onComplete={handleAuthComplete}
-            userRole="buyer"
-          />
-        </ScrollView>
-      </View>
-    );
-  }
-
   return (
     <View style={{ flex: 1, backgroundColor: '#111827' }}>
       <StatusBar barStyle="light-content" backgroundColor="#111827" />
       <BuyerOnboarding onComplete={handleComplete} />
+      <AuthModal
+        visible={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onComplete={handleAuthComplete}
+        userRole="buyer"
+      />
     </View>
   );
 };

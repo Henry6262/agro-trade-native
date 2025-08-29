@@ -9,6 +9,7 @@ import {
   FlatList,
   Dimensions,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import {
   Plus,
   Edit,
@@ -34,6 +35,7 @@ import {
   Carrot,
   Milk,
   Egg,
+  Building2,
 } from 'lucide-react-native';
 
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/common/Card';
@@ -47,6 +49,7 @@ interface SellerDashboardScreenProps {
 }
 
 export default function SellerDashboardScreen({ activeTab = 'products' }: SellerDashboardScreenProps = {}) {
+  const navigation = useNavigation();
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [expandedTrade, setExpandedTrade] = useState<string | null>(null);
   const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
@@ -451,13 +454,22 @@ export default function SellerDashboardScreen({ activeTab = 'products' }: Seller
             <Text className="text-2xl font-bold text-white">My Products</Text>
             <Text className="text-neutral-400">Manage your agricultural products and listings</Text>
           </View>
-          <TouchableOpacity
-            onPress={() => setShowAddProduct(true)}
-            className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded flex-row items-center gap-2"
-          >
-            <Plus color="#ffffff" size={16} />
-            <Text className="text-white">Add Product</Text>
-          </TouchableOpacity>
+          <View className="flex-row gap-2">
+            <TouchableOpacity
+              onPress={() => navigation.navigate('BaseManagement' as any)}
+              className="bg-neutral-700 hover:bg-neutral-600 text-white py-2 px-4 rounded flex-row items-center gap-2"
+            >
+              <Building2 color="#ffffff" size={16} />
+              <Text className="text-white">Bases</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setShowAddProduct(true)}
+              className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded flex-row items-center gap-2"
+            >
+              <Plus color="#ffffff" size={16} />
+              <Text className="text-white">Add Product</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Products Grid */}

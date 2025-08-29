@@ -1,5 +1,4 @@
 // Seller Components
-export { ProductSelection } from './seller/ProductSelection'
 export { ProductSpecifications } from './seller/ProductSpecifications'
 export { MarketOverview } from './seller/MarketOverview'
 export { SellerOnboarding } from './seller/SellerOnboarding'

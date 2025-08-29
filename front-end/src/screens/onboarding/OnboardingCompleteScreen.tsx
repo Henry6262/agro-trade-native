@@ -23,10 +23,24 @@ export const OnboardingCompleteScreen: React.FC<Props> = ({ navigation }) => {
   const { selectedRole, resetOnboarding } = useOnboardingStore();
 
   const handleContinue = () => {
-    // Navigate to main dashboard
+    const userRole = selectedRole || user?.role;
+    
+    // Navigate to dashboard with success animation
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Main', params: { userRole: selectedRole || user?.role } }],
+      routes: [{ 
+        name: 'Main', 
+        params: { 
+          screen: 'Dashboard',
+          params: {
+            screen: 'DashboardMain',
+            params: {
+              userRole: userRole,
+              showSuccessAnimation: true
+            }
+          }
+        } 
+      }],
     });
     
     // Clear onboarding data
