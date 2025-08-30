@@ -1,37 +1,169 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProductCategory, ProductStatus } from '@prisma/client';
-import * as fs from 'fs';
-import * as path from 'path';
 
 @Injectable()
 export class ProductsService {
   private productMetadata: any[];
 
   constructor(private prisma: PrismaService) {
-    this.loadProductMetadata();
+    this.initializeProductMetadata();
   }
 
-  private loadProductMetadata() {
-    try {
-      const metadataPath = path.join(process.cwd(), 'src', 'data', 'products-metadata.json');
-      if (fs.existsSync(metadataPath)) {
-        const data = fs.readFileSync(metadataPath, 'utf-8');
-        this.productMetadata = JSON.parse(data);
-      } else {
-        console.warn('Product metadata file not found. Run npm run prisma:seed-products to generate it.');
-        this.productMetadata = [];
+  private initializeProductMetadata() {
+    // Hardcoded metadata for products - works on Vercel
+    this.productMetadata = [
+      {
+        category: 'WHEAT',
+        name: 'Wheat',
+        displayName: 'Wheat',
+        description: 'High-quality wheat varieties for milling and baking',
+        image: '/images/products/wheat.jpg',
+        unit: 'TON',
+        specifications: {
+          protein: '11-14%',
+          moisture: 'Max 14%',
+          testWeight: 'Min 76 kg/hl'
+        }
+      },
+      {
+        category: 'CORN',
+        name: 'Corn',
+        displayName: 'Corn / Maize',
+        description: 'Yellow corn suitable for feed and processing',
+        image: '/images/products/corn.jpg',
+        unit: 'TON',
+        specifications: {
+          moisture: 'Max 14%',
+          brokenKernels: 'Max 3%',
+          foreignMatter: 'Max 2%'
+        }
+      },
+      {
+        category: 'SUNFLOWER',
+        name: 'Sunflower',
+        displayName: 'Sunflower Seeds',
+        description: 'High-oil content sunflower seeds',
+        image: '/images/products/sunflower.jpg',
+        unit: 'TON',
+        specifications: {
+          oilContent: 'Min 44%',
+          moisture: 'Max 9%',
+          impurities: 'Max 3%'
+        }
+      },
+      {
+        category: 'BARLEY',
+        name: 'Barley',
+        displayName: 'Barley',
+        description: 'Feed and malting barley',
+        image: '/images/products/barley.jpg',
+        unit: 'TON',
+        specifications: {
+          protein: '9-12%',
+          moisture: 'Max 14%',
+          germination: 'Min 95% (malting)'
+        }
+      },
+      {
+        category: 'OATS',
+        name: 'Oats',
+        displayName: 'Oats',
+        description: 'Premium oats for human consumption and animal feed',
+        image: '/images/products/oats.jpg',
+        unit: 'TON',
+        specifications: {
+          testWeight: 'Min 50 kg/hl',
+          moisture: 'Max 14%',
+          groats: 'Min 70%'
+        }
+      },
+      {
+        category: 'RAPESEED',
+        name: 'Rapeseed',
+        displayName: 'Rapeseed / Canola',
+        description: 'Premium rapeseed for oil production',
+        image: '/images/products/rapeseed.jpg',
+        unit: 'TON',
+        specifications: {
+          oilContent: 'Min 42%',
+          moisture: 'Max 9%',
+          erucicAcid: 'Max 2%'
+        }
+      },
+      {
+        category: 'PEAS',
+        name: 'Peas',
+        displayName: 'Peas',
+        description: 'Yellow and green peas for food and feed',
+        image: '/images/products/peas.jpg',
+        unit: 'TON',
+        specifications: {
+          protein: 'Min 23%',
+          moisture: 'Max 14%',
+          foreignMatter: 'Max 1%'
+        }
+      },
+      {
+        category: 'SOYBEAN_MEAL',
+        name: 'Soybean Meal',
+        displayName: 'Soybean Meal',
+        description: 'High-protein soybean meal for animal feed',
+        image: '/images/products/soybean-meal.jpg',
+        unit: 'TON',
+        specifications: {
+          protein: 'Min 44-48%',
+          moisture: 'Max 12%',
+          fiber: 'Max 7%'
+        }
+      },
+      {
+        category: 'WHEAT_BRAN',
+        name: 'Wheat Bran',
+        displayName: 'Wheat Bran',
+        description: 'Premium wheat bran for animal feed',
+        image: '/images/products/wheat-bran.jpg',
+        unit: 'TON',
+        specifications: {
+          protein: 'Min 15%',
+          fiber: '10-12%',
+          moisture: 'Max 14%'
+        }
+      },
+      {
+        category: 'ALFALFA',
+        name: 'Alfalfa',
+        displayName: 'Alfalfa Pellets',
+        description: 'High-quality alfalfa pellets for livestock',
+        image: '/images/products/alfalfa.jpg',
+        unit: 'TON',
+        specifications: {
+          protein: 'Min 17%',
+          fiber: 'Max 32%',
+          moisture: 'Max 12%'
+        }
       }
-    } catch (error) {
-      console.error('Error loading product metadata:', error);
-      this.productMetadata = [];
-    }
+    ];
   }
 
   async getProductMetadata() {
+    // Also get actual products from database
+    const products = await this.prisma.product.findMany({
+      include: {
+        farmer: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      }
+    });
+
     return {
       success: true,
       data: this.productMetadata,
+      products: products,
       message: 'Product metadata retrieved successfully'
     };
   }
@@ -153,7 +285,8 @@ export class ProductsService {
     
     const categoriesWithData = await Promise.all(
       categories.map(async (category) => {
-        // Check if category exists in catalog
+        const metadata = this.productMetadata.find(m => m.category === category);
+        
         // Count available products for this category
         const productCount = await this.prisma.product.count({
           where: {
@@ -161,8 +294,6 @@ export class ProductsService {
             status: ProductStatus.AVAILABLE
           }
         });
-        
-        const metadata = this.productMetadata.find(m => m.category === category);
         
         return {
           category,
