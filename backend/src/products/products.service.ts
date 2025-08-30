@@ -47,7 +47,7 @@ export class ProductsService {
             id: true,
             name: true,
             email: true,
-            phone: true
+            phoneNumber: true
           }
         }
       }
@@ -88,7 +88,7 @@ export class ProductsService {
             id: true,
             name: true,
             email: true,
-            phone: true
+            phoneNumber: true
           }
         }
       }
@@ -117,7 +117,7 @@ export class ProductsService {
             id: true,
             name: true,
             email: true,
-            phone: true,
+            phoneNumber: true,
             farmerProfile: true
           }
         }
@@ -154,22 +154,22 @@ export class ProductsService {
     const categoriesWithData = await Promise.all(
       categories.map(async (category) => {
         // Check if category exists in catalog
-        const catalogEntry = await this.prisma.productCatalog.findUnique({
-          where: { category }
+        // Count available products for this category
+        const productCount = await this.prisma.product.count({
+          where: {
+            category,
+            status: ProductStatus.AVAILABLE
+          }
         });
-        
-        if (!catalogEntry) {
-          return null;
-        }
         
         const metadata = this.productMetadata.find(m => m.category === category);
         
         return {
           category,
-          name: metadata?.name || catalogEntry.displayName || category,
-          image: metadata?.image || catalogEntry.image || null,
-          description: metadata?.description || catalogEntry.description || null,
-          availableProducts: 1 // For now, show 1 if category exists in catalog
+          name: metadata?.name || category,
+          image: metadata?.image || null,
+          description: metadata?.description || null,
+          availableProducts: productCount
         };
       })
     );

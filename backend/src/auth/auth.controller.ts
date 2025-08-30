@@ -13,8 +13,7 @@ import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
-import { RegisterWithCompanyDto } from './dto/register-with-company.dto';
+// DTOs removed temporarily
 import { CurrentUser } from './decorators/current-user.decorator';
 import { Public } from './decorators/public.decorator';
 import { User } from '@prisma/client';
@@ -54,8 +53,7 @@ export class AuthController {
     console.log('Redirecting to frontend URL:', frontendUrl);
     
     const params = new URLSearchParams({
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
+      accessToken: result.access_token,
       hasProfile: String(result.user.hasProfile),
       // Add user information to the redirect
       userId: result.user.id,
@@ -67,16 +65,9 @@ export class AuthController {
   }
 
   @Public()
-  @Post('refresh')
-  async refreshToken(@Body() dto: RefreshTokenDto) {
-    return this.authService.refreshToken(dto.refreshToken);
-  }
+  // Refresh token endpoint temporarily disabled
 
-  @Public()
-  @Post('register-with-company')
-  async registerWithCompany(@Body() dto: RegisterWithCompanyDto) {
-    return this.authService.registerWithCompany(dto);
-  }
+  // Register with company endpoint temporarily disabled
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
@@ -92,7 +83,7 @@ export class AuthController {
       id: user.id,
       email: user.email,
       name: user.name,
-      phone: user.phone,
+      phoneNumber: user.phoneNumber,
       role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,

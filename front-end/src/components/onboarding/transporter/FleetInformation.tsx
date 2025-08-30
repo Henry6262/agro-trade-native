@@ -14,6 +14,7 @@ import { Card } from '../../common/Card'
 import { Badge } from '../../common/Badge'
 import { Button } from '../../common/Button'
 import { useOnboardingStore } from '../../../store/onboardingStore'
+import { OnboardingLayout } from '../shared/OnboardingLayout'
 
 interface TruckInfo {
   id: string
@@ -131,8 +132,7 @@ export function FleetInformation() {
 
   return (
     <>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 16 }} showsVerticalScrollIndicator={false}>
-        <View style={{ paddingBottom: 96 }}>
+      <OnboardingLayout>
           <View style={{ alignItems: 'center', marginBottom: 32 }}>
             <View style={{ width: 64, height: 64, backgroundColor: 'rgba(234, 88, 12, 0.2)', borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
               <Truck size={32} color="#ea580c" />
@@ -291,8 +291,7 @@ export function FleetInformation() {
               <Text style={{ color: '#9CA3AF', marginTop: 16, textAlign: 'center' }}>No trucks added yet. Add your first truck to get started.</Text>
             </View>
           )}
-        </View>
-      </ScrollView>
+      </OnboardingLayout>
 
       {/* Truck Type Modal */}
       <Modal

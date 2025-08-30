@@ -1,0 +1,56 @@
+import React from 'react';
+import { View, ScrollView, Dimensions, ViewStyle } from 'react-native';
+
+interface OnboardingLayoutProps {
+  children: React.ReactNode;
+  scrollable?: boolean;
+  style?: ViewStyle;
+  contentStyle?: ViewStyle;
+}
+
+export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({ 
+  children, 
+  scrollable = true,
+  style,
+  contentStyle
+}) => {
+  const { width } = Dimensions.get('window');
+  
+  // Calculate 10% margins
+  const horizontalMargin = width * 0.1;
+  
+  const containerStyle: ViewStyle = {
+    flex: 1,
+    backgroundColor: '#111827', // bg-gray-900
+    ...style
+  };
+  
+  const contentContainerStyle: ViewStyle = {
+    paddingHorizontal: horizontalMargin,
+    paddingTop: 20,
+    paddingBottom: 100,
+    ...contentStyle
+  };
+
+  if (scrollable) {
+    return (
+      <View style={containerStyle}>
+        <ScrollView 
+          contentContainerStyle={{
+            flexGrow: 1,
+            ...contentContainerStyle
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          {children}
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[containerStyle, contentContainerStyle]}>
+      {children}
+    </View>
+  );
+};

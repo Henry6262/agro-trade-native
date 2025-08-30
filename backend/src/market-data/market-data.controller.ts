@@ -104,7 +104,12 @@ export class MarketDataController {
   @Public()
   @Get('commodities')
   async getAvailableCommodities() {
-    const { TRACKED_COMMODITIES } = await import('./market-data.service');
+    // Define tracked commodities locally
+    const TRACKED_COMMODITIES = {
+      agricultural: ['WHEAT', 'CORN', 'SUNFLOWER', 'BARLEY', 'OATS', 'RAPESEED', 'SOYBEAN'],
+      fuel: ['DIESEL'],
+      currency: ['EUR/USD']
+    };
     
     return {
       success: true,

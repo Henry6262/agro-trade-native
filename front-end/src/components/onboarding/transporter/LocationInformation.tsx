@@ -12,6 +12,7 @@ import {
 import { MapPin, Plus, X, Truck, Settings } from 'lucide-react-native'
 import { Badge } from '../../common/Badge'
 import { useOnboardingStore } from '../../../store/onboardingStore'
+import { OnboardingLayout } from '../shared/OnboardingLayout'
 
 interface BaseLocation {
   id: string
@@ -241,8 +242,7 @@ export function LocationInformation() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 16 }} showsVerticalScrollIndicator={false}>
-        <View style={{ paddingBottom: 96 }}>
+      <OnboardingLayout>
           <View style={{ alignItems: 'center', marginBottom: 32 }}>
             <View style={{ width: 64, height: 64, backgroundColor: 'rgba(37, 99, 235, 0.2)', borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
               <MapPin size={32} color="#2563eb" />
@@ -319,8 +319,7 @@ export function LocationInformation() {
               </Text>
             </View>
           )}
-        </View>
-      </ScrollView>
+      </OnboardingLayout>
 
       {/* Add Base Modal */}
       <Modal visible={showAddBaseModal} transparent animationType="fade">

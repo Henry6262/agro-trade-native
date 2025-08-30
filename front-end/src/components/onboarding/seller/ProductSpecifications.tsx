@@ -85,15 +85,20 @@ export function ProductSpecifications({
     if (!product || !spec) return null
 
     const isExpanded = expandedCards.has(productId)
+    const isCompleted = spec.quantity && spec.quantity.toString().trim() !== ''
 
     return (
       <View 
         key={productId} 
         className={`${isLargeScreen ? 'w-1/2' : 'w-full'} p-2`}
       >
-        <View className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden">
+        <View className={`border rounded-lg overflow-hidden ${
+          isCompleted 
+            ? 'bg-emerald-500/10 border-emerald-500' 
+            : 'bg-gray-800 border-gray-700'
+        }`}>
           {/* Card Header */}
-          <View className="p-4 border-b border-gray-700">
+          <View className="p-4 border-b border-gray-700 relative">
             <View className="flex-row items-center">
               {product.image ? (
                 <Image 
@@ -109,6 +114,11 @@ export function ProductSpecifications({
               <View className="flex-1">
                 <Text className="font-bold text-lg text-white">{product.name || product.category}</Text>
               </View>
+              {isCompleted && (
+                <View className="absolute top-2 right-2 bg-emerald-500 rounded-full w-6 h-6 items-center justify-center">
+                  <Text className="text-white text-sm font-bold">✓</Text>
+                </View>
+              )}
             </View>
           </View>
 
@@ -124,9 +134,10 @@ export function ProductSpecifications({
                 <TextInput
                   value={spec.quantity?.toString() || ''}
                   onChangeText={(text) => updateSpecification(productId, 'quantity', text)}
-                  placeholder="e.g., 100"
+                  placeholder="100"
                   keyboardType="numeric"
-                  className={`border-2 rounded-lg px-3 py-3 bg-gray-900 text-white ${
+                  maxLength={6}
+                  className={`border-2 rounded-lg px-2 py-2 bg-gray-900 text-white text-center ${
                     !spec.quantity ? 'border-red-500' : 'border-gray-600'
                   }`}
                   placeholderTextColor="#6B7280"

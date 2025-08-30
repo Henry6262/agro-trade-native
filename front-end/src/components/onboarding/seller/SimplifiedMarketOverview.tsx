@@ -10,6 +10,8 @@ import {
 import { Package, MapPin, TrendingUp, Info, Check } from 'lucide-react-native';
 import type { ProductSpecification } from '../../../types/onboarding';
 import { useOnboardingStore } from '../../../store/onboardingStore';
+import { OnboardingLayout } from '../shared/OnboardingLayout';
+import { ResponsiveGrid } from '../shared/ResponsiveGrid';
 
 interface SimplifiedMarketOverviewProps {
   selectedProducts: string[];
@@ -87,10 +89,6 @@ export function SimplifiedMarketOverview({
     const estimatedMax = priceRange ? quantityInTons * priceRange.max : 0;
 
     return (
-      <View 
-        key={spec.productId} 
-        className={`${isLargeScreen ? 'w-1/2' : 'w-full'} p-2`}
-      >
         <View className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
           {/* Product Image */}
           {metadata?.image && (
@@ -144,13 +142,11 @@ export function SimplifiedMarketOverview({
             </View>
           </View>
         </View>
-      </View>
     );
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-900" showsVerticalScrollIndicator={false}>
-      <View className="p-4 pb-24">
+    <OnboardingLayout>
         {/* Header Section */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-primary-500 text-center mb-2">
@@ -213,9 +209,9 @@ export function SimplifiedMarketOverview({
           <Text className="text-lg font-semibold text-white mb-3">
             Your Products ({selectedProducts.length})
           </Text>
-          <View className="flex-row flex-wrap -mx-2">
+          <ResponsiveGrid minItemWidth={200} maxItemWidth={300} spacing={16}>
             {specifications.map((spec, index) => renderProductCard(spec, index))}
-          </View>
+          </ResponsiveGrid>
         </View>
 
         {/* Information Notice */}
@@ -250,7 +246,6 @@ export function SimplifiedMarketOverview({
             Save as Draft
           </Text>
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+    </OnboardingLayout>
   );
 }

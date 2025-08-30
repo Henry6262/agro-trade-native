@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Users, ShoppingBag, Truck, LogIn } from 'lucide-react-native';
 import { useOnboardingStore } from '../../store/onboardingStore';
 import { useAuthStore } from '../../store/authStore';
-import { LottieRoleCard } from '../../components/onboarding/LottieRoleCard';
+import { AnimatedRoleCard } from '../../components/onboarding/AnimatedRoleCard';
 import { authService, GoogleAuthResponse } from '../../services/authService';
 import { APP_CONFIG } from '../../constants';
 
@@ -35,21 +35,18 @@ export const RoleSelectionScreen: React.FC = () => {
     {
       id: 'buyer' as const,
       title: 'Buyer',
-      animation: require('../../assets/animations/buyer.json'),
       color: '#3B82F6',
       gradient: ['#3B82F6', '#1E40AF'],
     },
     {
       id: 'seller' as const,
       title: 'Seller',
-      animation: require('../../assets/animations/seller.json'),
       color: '#10B981',
       gradient: ['#10B981', '#065F46'],
     },
     {
       id: 'transport' as const,
       title: 'Transporter',
-      animation: require('../../assets/animations/transporter.json'),
       color: '#8B5CF6',
       gradient: ['#8B5CF6', '#5B21B6'],
     },
@@ -237,14 +234,13 @@ export const RoleSelectionScreen: React.FC = () => {
             }} />
           </View>
 
-          {/* Role Cards - Compact with Lottie Animations */}
+          {/* Role Cards - Compact with Animated Icons */}
           <View>
             {roleCards.map((card, index) => (
-              <LottieRoleCard
+              <AnimatedRoleCard
                 key={card.id}
                 id={card.id}
                 title={card.title}
-                animationSource={card.animation}
                 color={card.color}
                 gradient={card.gradient}
                 isSelected={selectedRole === card.id}

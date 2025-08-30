@@ -10,6 +10,7 @@ import { Truck, MapPin, Package, Users, TrendingUp } from 'lucide-react-native'
 import { Card } from '../../common/Card'
 import { Badge } from '../../common/Badge'
 import { useOnboardingStore } from '../../../store/onboardingStore'
+import { OnboardingLayout } from '../shared/OnboardingLayout'
 
 interface TransporterListingProps {
   onComplete?: () => void
@@ -30,8 +31,7 @@ export function TransporterListing({ onComplete }: TransporterListingProps) {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 16 }} showsVerticalScrollIndicator={false}>
-        <View style={{ paddingBottom: 96 }}>
+      <OnboardingLayout>
           <View style={{ alignItems: 'center', marginBottom: 32 }}>
             <View style={{ width: 64, height: 64, backgroundColor: 'rgba(5, 150, 105, 0.2)', borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
               <Package size={32} color="#22C55E" />
@@ -166,8 +166,7 @@ export function TransporterListing({ onComplete }: TransporterListingProps) {
               Sign in with Google to complete your profile and start receiving transport requests
             </Text>
           </View>
-        </View>
-      </ScrollView>
+      </OnboardingLayout>
     </SafeAreaView>
   )
 }

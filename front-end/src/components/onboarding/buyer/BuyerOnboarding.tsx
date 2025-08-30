@@ -250,15 +250,7 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
 
       {/* Main Content */}
       <View className="flex-1">
-        <ScrollView 
-          contentContainerStyle={{ 
-            flexGrow: 1,
-            paddingBottom: 100 
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          {renderStepContent()}
-        </ScrollView>
+        {renderStepContent()}
 
         <Navigation
           currentStepIndex={currentStepIndex}

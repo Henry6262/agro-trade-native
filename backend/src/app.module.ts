@@ -6,8 +6,6 @@ import { AuthModule } from './auth/auth.module';
 import { MarketDataModule } from './market-data/market-data.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { ProductsModule } from './products/products.module';
-import { LocationModule } from './location/location.module';
-import { AdminModule } from './admin/admin.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
@@ -21,8 +19,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     MarketDataModule,
     OnboardingModule,
     ProductsModule,
-    LocationModule,
-    AdminModule,
   ],
   providers: [
     {

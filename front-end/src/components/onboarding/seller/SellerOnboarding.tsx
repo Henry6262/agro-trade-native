@@ -4,7 +4,7 @@ import type { OnboardingStep, ProductSpecification } from '../../../types/onboar
 import { simplifiedRoleSteps } from '../../../constants/simplifiedOnboarding'
 import { ProgressSidebar } from '../shared/ProgressSidebar'
 import { Navigation } from '../shared/Navigation'
-import { ProductSelectionSimple } from './ProductSelectionSimple'
+import { ProductSelectionUnified } from '../ProductSelectionUnified'
 import { ProductSpecificationsWithLocation } from './ProductSpecificationsWithLocation'
 import { SimplifiedMarketOverview } from './SimplifiedMarketOverview'
 import { useOnboardingStore } from '../../../store/onboardingStore'
@@ -198,7 +198,7 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
 
     switch (currentStep.id) {
       case 'products':
-        return <ProductSelectionSimple />
+        return <ProductSelectionUnified />
       case 'details-location':
         return <ProductSpecificationsWithLocation />
       case 'overview':
@@ -227,17 +227,7 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
 
         {/* Main Content */}
         <View className="flex-1 relative">
-          <ScrollView 
-            contentContainerStyle={{ 
-              flexGrow: 1,
-              paddingBottom: 100 
-            }}
-            showsVerticalScrollIndicator={false}
-          >
-            <View className="max-w-4xl self-center w-full">
-              {renderStepContent()}
-            </View>
-          </ScrollView>
+          {renderStepContent()}
 
           <Navigation
             currentStepIndex={currentStepIndex}

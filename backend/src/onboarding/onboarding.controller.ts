@@ -17,9 +17,14 @@ export class OnboardingController {
     @Request() req: any,
     @Body() sellerOnboardingDto: SellerOnboardingDto
   ) {
-    return this.onboardingService.completeSellerOnboarding(
+    // Store the onboarding data first
+    await this.onboardingService.updateFarmerProfile(
       req.user.sub,
       sellerOnboardingDto
+    );
+    // Then mark onboarding as complete
+    return this.onboardingService.completeOnboarding(
+      req.user.sub
     );
   }
 
@@ -28,9 +33,14 @@ export class OnboardingController {
     @Request() req: any,
     @Body() buyerOnboardingDto: BuyerOnboardingDto
   ) {
-    return this.onboardingService.completeBuyerOnboarding(
+    // Store the onboarding data first
+    await this.onboardingService.updateBuyerProfile(
       req.user.sub,
       buyerOnboardingDto
+    );
+    // Then mark onboarding as complete
+    return this.onboardingService.completeOnboarding(
+      req.user.sub
     );
   }
 
@@ -39,9 +49,14 @@ export class OnboardingController {
     @Request() req: any,
     @Body() transporterOnboardingDto: TransporterOnboardingDto
   ) {
-    return this.onboardingService.completeTransporterOnboarding(
+    // Store the onboarding data first
+    await this.onboardingService.updateTransporterProfile(
       req.user.sub,
       transporterOnboardingDto
+    );
+    // Then mark onboarding as complete
+    return this.onboardingService.completeOnboarding(
+      req.user.sub
     );
   }
 

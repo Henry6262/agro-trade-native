@@ -3,27 +3,6 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
-import { AlphaVantageService } from './alpha-vantage.service';
-import { firstValueFrom } from 'rxjs';
-
-// Define the commodities we track
-export const TRACKED_COMMODITIES = {
-  // Agricultural
-  WHEAT: 'WHEAT',
-  CORN: 'CORN',
-  SUNFLOWER: 'SUNFLOWER',
-  BARLEY: 'BARLEY',
-  OATS: 'OATS',
-  RAPESEED: 'RAPESEED',
-  SOYBEAN: 'SOYBEAN',
-  // Fuel
-  DIESEL: 'DIESEL',
-  GASOLINE: 'GASOLINE',
-  CRUDEOIL: 'CRUDEOIL',
-  // Currency
-  EUR: 'EUR',
-  USD: 'USD',
-};
 
 interface MarketPrice {
   commodity: string;
@@ -37,196 +16,102 @@ interface MarketPrice {
 @Injectable()
 export class MarketDataService {
   private readonly logger = new Logger(MarketDataService.name);
-  private readonly useAlphaVantage: boolean;
   private cachedPrices: MarketPrice[] = [];
   private lastFetchTime: Date | null = null;
-  private readonly CACHE_DURATION_MS = 3600000; // 1 hour cache
+  private readonly CACHE_DURATION_MS = 300000; // 5 minutes cache
 
   constructor(
     private httpService: HttpService,
     private configService: ConfigService,
     private prisma: PrismaService,
-    private alphaVantageService: AlphaVantageService,
   ) {
-    const apiKey = this.configService.get('ALPHA_VANTAGE_API_KEY', '');
-    this.useAlphaVantage = apiKey && apiKey !== 'demo';
-    
-    // Initialize with mock data
-    this.cachedPrices = this.getMockPrices();
-    this.lastFetchTime = new Date();
+    // Initialize with empty cache
+    this.fetchLatestPrices();
   }
 
-  // Fetch latest prices from API
+  // Fetch latest prices from database
   async fetchLatestPrices(): Promise<MarketPrice[]> {
     try {
-      if (!this.useAlphaVantage) {
-        this.logger.log('Using mock data (no Alpha Vantage API key configured)');
-        return this.getMockPrices();
+      // Get all regions with their prices
+      const regions = await this.prisma.region.findMany({
+        where: { isActive: true },
+        include: {
+          prices: true,
+        },
+      });
+
+      // Calculate average prices across all regions for each product
+      const pricesByProduct = new Map<string, { total: number; count: number; currency: string }>();
+      
+      for (const region of regions) {
+        for (const price of region.prices) {
+          const key = price.productCategory;
+          if (!pricesByProduct.has(key)) {
+            pricesByProduct.set(key, { total: 0, count: 0, currency: price.currency });
+          }
+          const current = pricesByProduct.get(key)!;
+          current.total += price.pricePerUnit.toNumber();
+          current.count += 1;
+        }
       }
 
-      this.logger.log('Fetching real market data from Alpha Vantage...');
+      // Convert to MarketPrice format
       const prices: MarketPrice[] = [];
+      const now = new Date();
       
-      // Fetch agricultural commodities
-      const wheat = await this.alphaVantageService.fetchCommodityPrice('WHEAT');
-      if (wheat) {
+      for (const [commodity, data] of pricesByProduct) {
+        const avgPrice = data.total / data.count;
         prices.push({
-          commodity: 'WHEAT',
-          price: this.alphaVantageService.convertToMetricTon('WHEAT', wheat.price),
-          currency: 'USD',
+          commodity,
+          price: Math.round(avgPrice * 100) / 100,
+          currency: data.currency,
           unit: 'per metric ton',
-          changePercent: wheat.changePercent,
-          timestamp: wheat.timestamp,
+          changePercent: (Math.random() - 0.5) * 4, // Mock change for now
+          timestamp: now,
         });
       }
+
+      // Add diesel price (mock for now)
+      prices.push({
+        commodity: 'DIESEL',
+        price: 3.45,
+        currency: 'EUR',
+        unit: 'per gallon',
+        changePercent: (Math.random() - 0.5) * 3,
+        timestamp: now,
+      });
+
+      // Add EUR/USD exchange rate (mock)
+      prices.push({
+        commodity: 'EUR',
+        price: 1.08,
+        currency: 'USD',
+        unit: 'per EUR',
+        changePercent: (Math.random() - 0.5) * 1,
+        timestamp: now,
+      });
       
-      const corn = await this.alphaVantageService.fetchCommodityPrice('CORN');
-      if (corn) {
-        prices.push({
-          commodity: 'CORN',
-          price: this.alphaVantageService.convertToMetricTon('CORN', corn.price),
-          currency: 'USD',
-          unit: 'per metric ton',
-          changePercent: corn.changePercent,
-          timestamp: corn.timestamp,
-        });
-      }
-      
-      // Fetch crude oil for diesel estimation
-      const wti = await this.alphaVantageService.fetchCommodityPrice('WTI');
-      if (wti) {
-        const dieselPrice = this.alphaVantageService.estimateDieselFromCrude(wti.price);
-        prices.push({
-          commodity: 'DIESEL',
-          price: dieselPrice,
-          currency: 'USD',
-          unit: 'per gallon',
-          changePercent: wti.changePercent, // Use crude oil change as proxy
-          timestamp: wti.timestamp,
-        });
-      }
-      
-      // Fetch EUR/USD exchange rate
-      const eurUsd = await this.alphaVantageService.fetchExchangeRate('EUR', 'USD');
-      if (eurUsd) {
-        prices.push({
-          commodity: 'EUR',
-          price: eurUsd,
-          currency: 'USD',
-          unit: 'per EUR',
-          timestamp: new Date(),
-        });
-      }
-      
-      // If we got real data, cache it
+      // Cache the prices
       if (prices.length > 0) {
         this.cachedPrices = prices;
         this.lastFetchTime = new Date();
-        return prices;
+        this.logger.log(`Fetched ${prices.length} prices from database`);
       }
       
-      // Fallback to mock data if API fails
-      return this.getMockPrices();
+      return prices;
     } catch (error) {
-      this.logger.error('Failed to fetch market prices:', error);
-      return this.getMockPrices();
+      this.logger.error('Error fetching prices from database:', error);
+      // Return cached prices if available
+      if (this.cachedPrices.length > 0) {
+        return this.cachedPrices;
+      }
+      // Last resort: return minimal mock data
+      return this.getMinimalMockPrices();
     }
   }
 
-  // Transform API response to our format
-  private transformApiResponse(data: any): MarketPrice[] {
-    const { rates, timestamp } = data;
-    const prices: MarketPrice[] = [];
-
-    for (const [commodity, price] of Object.entries(rates)) {
-      prices.push({
-        commodity,
-        price: 1 / (price as number), // API returns inverted rates
-        currency: 'USD',
-        unit: this.getUnit(commodity),
-        timestamp: new Date(timestamp * 1000),
-      });
-    }
-
-    return prices;
-  }
-
-  // Get unit for commodity
-  private getUnit(commodity: string): string {
-    const units: Record<string, string> = {
-      WHEAT: 'per metric ton',
-      CORN: 'per metric ton',
-      SUNFLOWER: 'per metric ton',
-      BARLEY: 'per metric ton',
-      OATS: 'per metric ton',
-      RAPESEED: 'per metric ton',
-      SOYBEAN: 'per metric ton',
-      DIESEL: 'per gallon',
-      GASOLINE: 'per gallon',
-      CRUDEOIL: 'per barrel',
-      EUR: 'per EUR',
-      USD: 'per USD',
-    };
-    return units[commodity] || 'per unit';
-  }
-
-  // Mock prices for development/demo
-  private getMockPrices(): MarketPrice[] {
-    const now = new Date();
-    return [
-      {
-        commodity: 'WHEAT',
-        price: 245.50 + Math.random() * 10 - 5,
-        currency: 'USD',
-        unit: 'per metric ton',
-        changePercent: Math.random() * 4 - 2,
-        timestamp: now,
-      },
-      {
-        commodity: 'CORN',
-        price: 189.25 + Math.random() * 8 - 4,
-        currency: 'USD',
-        unit: 'per metric ton',
-        changePercent: Math.random() * 4 - 2,
-        timestamp: now,
-      },
-      {
-        commodity: 'SUNFLOWER',
-        price: 510.00 + Math.random() * 15 - 7.5,
-        currency: 'USD',
-        unit: 'per metric ton',
-        changePercent: Math.random() * 4 - 2,
-        timestamp: now,
-      },
-      {
-        commodity: 'BARLEY',
-        price: 220.00 + Math.random() * 10 - 5,
-        currency: 'USD',
-        unit: 'per metric ton',
-        changePercent: Math.random() * 4 - 2,
-        timestamp: now,
-      },
-      {
-        commodity: 'DIESEL',
-        price: 3.45 + Math.random() * 0.2 - 0.1,
-        currency: 'USD',
-        unit: 'per gallon',
-        changePercent: Math.random() * 3 - 1.5,
-        timestamp: now,
-      },
-      {
-        commodity: 'EUR',
-        price: 1.08 + Math.random() * 0.02 - 0.01,
-        currency: 'USD',
-        unit: 'per EUR',
-        changePercent: Math.random() * 1 - 0.5,
-        timestamp: now,
-      },
-    ];
-  }
-
-  // Get latest prices from cache/database
-  async getLatestPrices(): Promise<any[]> {
+  // Get latest prices with caching
+  async getLatestPrices(): Promise<MarketPrice[]> {
     // Check if cache is still valid
     if (this.lastFetchTime && this.cachedPrices.length > 0) {
       const cacheAge = Date.now() - this.lastFetchTime.getTime();
@@ -240,14 +125,20 @@ export class MarketDataService {
     return this.fetchLatestPrices();
   }
 
-  // Get historical prices
-  async getHistoricalPrices(
-    commodity: string,
-    days: number = 30,
-  ): Promise<any[]> {
-    // For demo, generate mock historical data
+  // Get prices for a specific commodity
+  async getCommodityPrice(commodity: string): Promise<MarketPrice | null> {
+    const prices = await this.getLatestPrices();
+    return prices.find(p => p.commodity === commodity) || null;
+  }
+
+  // Get historical prices (mock for now)
+  async getHistoricalPrices(commodity: string, days: number = 30): Promise<MarketPrice[]> {
+    const currentPrice = await this.getCommodityPrice(commodity);
+    if (!currentPrice) {
+      return [];
+    }
+
     const prices: MarketPrice[] = [];
-    const basePrice = this.getBasePrice(commodity);
     const now = new Date();
 
     for (let i = days; i >= 0; i--) {
@@ -255,13 +146,11 @@ export class MarketDataService {
       date.setDate(date.getDate() - i);
       
       // Add some random variation
-      const variation = (Math.random() - 0.5) * basePrice * 0.05;
+      const variation = (Math.random() - 0.5) * currentPrice.price * 0.05;
       
       prices.push({
-        commodity,
-        price: basePrice + variation,
-        currency: 'USD',
-        unit: this.getUnit(commodity),
+        ...currentPrice,
+        price: currentPrice.price + variation,
         timestamp: date,
       });
     }
@@ -269,73 +158,172 @@ export class MarketDataService {
     return prices;
   }
 
-  private getBasePrice(commodity: string): number {
-    const basePrices: Record<string, number> = {
-      WHEAT: 245,
-      CORN: 189,
-      SUNFLOWER: 510,
-      BARLEY: 220,
-      OATS: 200,
-      RAPESEED: 480,
-      SOYBEAN: 420,
-      DIESEL: 3.45,
-      GASOLINE: 3.20,
-      CRUDEOIL: 85,
-      EUR: 1.08,
-    };
-    return basePrices[commodity] || 100;
+  // Get prices for a specific region
+  async getRegionalPrices(regionName: string): Promise<MarketPrice[]> {
+    try {
+      const region = await this.prisma.region.findFirst({
+        where: { 
+          name: {
+            equals: regionName,
+            mode: 'insensitive',
+          },
+        },
+        include: {
+          prices: true,
+        },
+      });
+
+      if (!region) {
+        return [];
+      }
+
+      const now = new Date();
+      return region.prices.map(price => ({
+        commodity: price.productCategory,
+        price: price.pricePerUnit.toNumber(),
+        currency: price.currency,
+        unit: 'per metric ton',
+        changePercent: (Math.random() - 0.5) * 4,
+        timestamp: now,
+      }));
+    } catch (error) {
+      this.logger.error('Error fetching regional prices:', error);
+      return [];
+    }
   }
 
   // Calculate transport cost based on fuel prices
-  async calculateTransportCost(
-    distanceKm: number,
-    weightTons: number,
-  ): Promise<any> {
+  async calculateTransportCost(distanceKm: number, weightTons: number): Promise<any> {
     // Get current diesel price
     const prices = await this.getLatestPrices();
     const dieselPrice = prices.find(p => p.commodity === 'DIESEL')?.price || 3.45;
     
-    // Convert USD/gallon to EUR/liter (approximately)
-    const dieselPricePerLiter = dieselPrice * 0.264172 * 0.92; // gallons to liters * USD to EUR
+    // Convert EUR/gallon to EUR/liter
+    const dieselPricePerLiter = dieselPrice * 0.264172;
     
-    // Calculate fuel consumption
-    // Average truck consumes ~35L/100km when loaded
-    const fuelConsumption = 35; // liters per 100km
-    const totalFuelNeeded = (distanceKm / 100) * fuelConsumption;
-    const fuelCost = totalFuelNeeded * dieselPricePerLiter;
+    // Typical fuel consumption: 35L/100km for a loaded truck
+    const fuelConsumption = 35;
+    const totalFuel = (distanceKm / 100) * fuelConsumption;
+    const fuelCost = totalFuel * dieselPricePerLiter;
     
-    // Add driver cost, maintenance, margin
-    const driverCost = distanceKm * 0.5; // €0.50 per km
-    const maintenanceCost = distanceKm * 0.2; // €0.20 per km
-    const margin = (fuelCost + driverCost + maintenanceCost) * 0.15; // 15% margin
+    // Add driver cost, tolls, maintenance (roughly €0.50 per km)
+    const otherCosts = distanceKm * 0.50;
     
-    const totalCost = fuelCost + driverCost + maintenanceCost + margin;
+    // Total cost
+    const totalCost = fuelCost + otherCosts;
+    
+    // Cost per ton
+    const costPerTon = totalCost / weightTons;
     
     return {
       distance: distanceKm,
       weight: weightTons,
-      fuelNeeded: totalFuelNeeded.toFixed(2),
-      fuelCost: fuelCost.toFixed(2),
-      driverCost: driverCost.toFixed(2),
-      maintenanceCost: maintenanceCost.toFixed(2),
-      margin: margin.toFixed(2),
-      totalCost: totalCost.toFixed(2),
-      costPerTon: (totalCost / weightTons).toFixed(2),
-      costPerKm: (totalCost / distanceKm).toFixed(2),
+      fuelCost: Math.round(fuelCost * 100) / 100,
+      otherCosts: Math.round(otherCosts * 100) / 100,
+      totalCost: Math.round(totalCost * 100) / 100,
+      costPerTon: Math.round(costPerTon * 100) / 100,
       currency: 'EUR',
     };
   }
 
-  // Scheduled job to update prices (runs 3 times daily)
-  @Cron('0 6,12,18 * * *')
-  async updatePricesJob() {
-    this.logger.log('Running scheduled price update...');
+  // Get commodity list from database
+  async getCommodityList(): Promise<string[]> {
     try {
-      const prices = await this.fetchLatestPrices();
-      // In production, store these in database
-      this.logger.log(`Updated ${prices.length} commodity prices`);
+      const prices = await this.prisma.regionalPrice.findMany({
+        select: {
+          productCategory: true,
+        },
+        distinct: ['productCategory'],
+      });
+      
+      const commodities = prices.map(p => p.productCategory);
+      // Add fuel and currency as any type since they're not ProductCategory
+      commodities.push('DIESEL' as any, 'EUR' as any);
+      return commodities;
     } catch (error) {
-      this.logger.error('Failed to update prices:', error);
+      this.logger.error('Error fetching commodity list:', error);
+      return ['WHEAT', 'CORN', 'SUNFLOWER', 'BARLEY', 'OATS', 'RAPESEED', 'DIESEL', 'EUR'];
     }
+  }
+
+  // Refresh prices from database
+  async refreshPrices(): Promise<MarketPrice[]> {
+    this.logger.log('Refreshing prices from database...');
+    // Clear cache to force fresh fetch
+    this.lastFetchTime = null;
+    return this.fetchLatestPrices();
+  }
+
+  // Get market summary with regional data
+  async getMarketSummary(): Promise<any> {
+    const prices = await this.getLatestPrices();
+    
+    // Get regions count
+    const regions = await this.prisma.region.count({
+      where: { isActive: true },
+    });
+    
+    const summary = {
+      timestamp: new Date(),
+      totalCommodities: prices.length - 2, // Exclude DIESEL and EUR
+      totalRegions: regions,
+      averageChangePercent: prices.reduce((acc, p) => acc + (p.changePercent || 0), 0) / prices.length,
+      topGainers: prices
+        .filter(p => p.changePercent && p.changePercent > 0)
+        .sort((a, b) => (b.changePercent || 0) - (a.changePercent || 0))
+        .slice(0, 3),
+      topLosers: prices
+        .filter(p => p.changePercent && p.changePercent < 0)
+        .sort((a, b) => (a.changePercent || 0) - (b.changePercent || 0))
+        .slice(0, 3),
+      marketTrend: this.calculateMarketTrend(prices),
+    };
+    return summary;
+  }
+
+  // Calculate overall market trend
+  private calculateMarketTrend(prices: MarketPrice[]): string {
+    const avgChange = prices.reduce((acc, p) => acc + (p.changePercent || 0), 0) / prices.length;
+    if (avgChange > 1) return 'bullish';
+    if (avgChange < -1) return 'bearish';
+    return 'neutral';
+  }
+
+  // Get minimal mock prices as last resort
+  private getMinimalMockPrices(): MarketPrice[] {
+    const now = new Date();
+    return [
+      {
+        commodity: 'WHEAT',
+        price: 245,
+        currency: 'EUR',
+        unit: 'per metric ton',
+        changePercent: 0,
+        timestamp: now,
+      },
+      {
+        commodity: 'CORN',
+        price: 189,
+        currency: 'EUR',
+        unit: 'per metric ton',
+        changePercent: 0,
+        timestamp: now,
+      },
+      {
+        commodity: 'SUNFLOWER',
+        price: 510,
+        currency: 'EUR',
+        unit: 'per metric ton',
+        changePercent: 0,
+        timestamp: now,
+      },
+    ];
+  }
+
+  // Scheduled task to refresh prices
+  @Cron(CronExpression.EVERY_30_MINUTES)
+  async handleCron() {
+    this.logger.log('Running scheduled price refresh...');
+    await this.refreshPrices();
   }
 }

@@ -16,6 +16,8 @@ import axios from 'axios';
 import { API_URL } from '../../../config/api';
 import { useOnboardingStore } from '../../../store/onboardingStore';
 import { Input } from '../../common';
+import { OnboardingLayout } from '../shared/OnboardingLayout';
+import { ResponsiveGrid } from '../shared/ResponsiveGrid';
 
 interface ProductSpecification {
   productId: string;
@@ -268,7 +270,7 @@ export function ProductSpecificationsWithLocation() {
       quantity * ((priceRange.min + priceRange.max) / 2) : 0;
 
     return (
-      <View key={productId} className="mb-4">
+      <View key={productId}>
         <View className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
           <View className="flex-row">
             {/* Product Image - Larger and on the left */}
@@ -335,8 +337,7 @@ export function ProductSpecificationsWithLocation() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-900" showsVerticalScrollIndicator={false}>
-      <View className="p-4 pb-24">
+    <OnboardingLayout>
         {/* Header */}
         <View className="mb-6">
           <Text className="text-2xl font-bold text-primary-500 mb-2">
@@ -417,13 +418,11 @@ export function ProductSpecificationsWithLocation() {
         )}
 
         {/* Product Cards */}
-        <View>
+        <ResponsiveGrid minItemWidth={300} maxItemWidth={500} spacing={16}>
           {specifications.map((spec, index) => 
             renderSpecificationCard(spec.productId, index)
           )}
-        </View>
-
-      </View>
-    </ScrollView>
+        </ResponsiveGrid>
+    </OnboardingLayout>
   );
 }

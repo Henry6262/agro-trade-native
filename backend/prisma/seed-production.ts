@@ -1,7 +1,16 @@
 import { PrismaClient, UserRole, ProductUnit, ProductStatus, ProductCategory } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
-const prisma = new PrismaClient();
+// Production database URL - will be set via environment variable
+const databaseUrl = process.env.PROD_DATABASE_URL || "postgres://3ca54ea7e50cdecd5942b3c91fe3bc303ef54ab75a02f0a321b6cac693e4c1dd:sk_IsdY9ZVx010kBUvvETGrW@db.prisma.io:5432/postgres?sslmode=require";
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: databaseUrl,
+    },
+  },
+});
 
 // Bulgarian regions with their major cities
 const BULGARIAN_REGIONS = [
@@ -86,9 +95,6 @@ async function seedRegions() {
       },
     });
     regions.push(region);
-    
-    // For now, we'll just track the main city per region
-    // In a real app, you'd have a separate cities table
   }
   
   // Create Greek regions
@@ -137,7 +143,7 @@ async function seedRegionalPrices(regions: any[]) {
 async function seedUsers() {
   console.log('👥 Creating users...');
   
-  const hashedPassword = await bcrypt.hash('password123', 10);
+  const hashedPassword = await bcrypt.hash('Demo2024!', 10);
   
   // Admin user
   const admin = await prisma.user.create({
@@ -157,7 +163,7 @@ async function seedUsers() {
   // Farmer in Plovdiv (South Central region)
   const farmer = await prisma.user.create({
     data: {
-      email: 'farmer@example.com',
+      email: 'demo.farmer@agrotrade.com',
       password: hashedPassword,
       role: UserRole.FARMER,
       name: 'Ivan Petrov',
@@ -196,7 +202,7 @@ async function seedUsers() {
   // Buyer in Sofia (Southwestern region)
   const buyer = await prisma.user.create({
     data: {
-      email: 'buyer@example.com',
+      email: 'demo.buyer@agrotrade.com',
       password: hashedPassword,
       role: UserRole.BUYER,
       name: 'Maria Dimitrova',
@@ -232,10 +238,49 @@ async function seedUsers() {
     },
   });
   
+  // Additional Buyer for variety
+  const buyer2 = await prisma.user.create({
+    data: {
+      email: 'demo.processor@agrotrade.com',
+      password: hashedPassword,
+      role: UserRole.BUYER,
+      name: 'Dimitri Georgiev',
+      phoneNumber: '+359888000005',
+      isActive: true,
+      isEmailVerified: true,
+      isPhoneVerified: true,
+      onboardingCompleted: true,
+      buyerProfile: {
+        create: {
+          companyName: 'Balkan Food Processing',
+          businessType: 'Food Processor',
+          preferredProducts: ['Sunflower', 'Rapeseed', 'Corn'],
+          estimatedVolume: 3000,
+          volumeUnit: 'tons/month',
+          latitude: 43.2141,
+          longitude: 27.9147,
+          companyInfo: {
+            create: {
+              name: 'Balkan Food Processing SA',
+              registrationNumber: 'BG400123789',
+              vatNumber: 'BG400123789',
+              address: '50 Industrial Park',
+              city: 'Varna',
+              country: 'Bulgaria',
+              postalCode: '9000',
+              phoneNumber: '+359888000005',
+              email: 'supplies@balkanfood.bg',
+            },
+          },
+        },
+      },
+    },
+  });
+  
   // Transporter in Varna (Northeastern region)
   const transporter = await prisma.user.create({
     data: {
-      email: 'transporter@example.com',
+      email: 'demo.transport@agrotrade.com',
       password: hashedPassword,
       role: UserRole.TRANSPORTER,
       name: 'Georgi Ivanov',
@@ -270,8 +315,8 @@ async function seedUsers() {
     },
   });
   
-  console.log('✅ Created 4 users with profiles');
-  return { admin, farmer, buyer, transporter };
+  console.log('✅ Created 5 users with profiles');
+  return { admin, farmer, buyer, buyer2, transporter };
 }
 
 async function seedProducts(farmerId: string) {
@@ -283,7 +328,7 @@ async function seedProducts(farmerId: string) {
         farmerId,
         category: 'WHEAT',
         name: 'Premium Winter Wheat',
-        description: 'High protein winter wheat, 13% protein content',
+        description: 'High protein winter wheat, 13% protein content, EU Organic certified',
         quantity: 500,
         unit: ProductUnit.TON,
         pricePerUnit: 245,
@@ -295,7 +340,7 @@ async function seedProducts(farmerId: string) {
         farmerId,
         category: 'CORN',
         name: 'Yellow Corn Grade 2',
-        description: 'Quality yellow corn for feed and processing',
+        description: 'Quality yellow corn for feed and processing, moisture content <14%',
         quantity: 1000,
         unit: ProductUnit.TON,
         pricePerUnit: 189,
@@ -307,7 +352,7 @@ async function seedProducts(farmerId: string) {
         farmerId,
         category: 'SUNFLOWER',
         name: 'High-Oil Sunflower Seeds',
-        description: 'Sunflower seeds with 44% oil content',
+        description: 'Sunflower seeds with 44% oil content, ideal for oil production',
         quantity: 200,
         unit: ProductUnit.TON,
         pricePerUnit: 510,
@@ -315,10 +360,46 @@ async function seedProducts(farmerId: string) {
         harvestDate: new Date('2024-10-01'),
         status: ProductStatus.AVAILABLE,
       },
+      {
+        farmerId,
+        category: 'BARLEY',
+        name: 'Malting Barley',
+        description: 'Premium malting barley, suitable for brewing industry',
+        quantity: 300,
+        unit: ProductUnit.TON,
+        pricePerUnit: 220,
+        location: 'Plovdiv, Bulgaria',
+        harvestDate: new Date('2024-07-20'),
+        status: ProductStatus.AVAILABLE,
+      },
+      {
+        farmerId,
+        category: 'RAPESEED',
+        name: 'Canola/Rapeseed',
+        description: 'High-quality rapeseed, 42% oil content, low erucic acid',
+        quantity: 150,
+        unit: ProductUnit.TON,
+        pricePerUnit: 480,
+        location: 'Plovdiv, Bulgaria',
+        harvestDate: new Date('2024-08-10'),
+        status: ProductStatus.AVAILABLE,
+      },
+      {
+        farmerId,
+        category: 'OATS',
+        name: 'Milling Oats',
+        description: 'Premium oats suitable for human consumption and animal feed',
+        quantity: 250,
+        unit: ProductUnit.TON,
+        pricePerUnit: 200,
+        location: 'Plovdiv, Bulgaria',
+        harvestDate: new Date('2024-08-01'),
+        status: ProductStatus.AVAILABLE,
+      },
     ],
   });
   
-  console.log('✅ Created 3 products');
+  console.log('✅ Created 6 products');
 }
 
 async function seedTrucks(transporterId: string) {
@@ -344,16 +425,30 @@ async function seedTrucks(transporterId: string) {
         currentLocation: 'Sofia, Bulgaria',
         isAvailable: true,
       },
+      {
+        transporterId,
+        plateNumber: 'B9012EF',
+        capacity: 30,
+        unit: ProductUnit.TON,
+        type: 'CURTAIN_SIDE',
+        currentLocation: 'Plovdiv, Bulgaria',
+        isAvailable: true,
+      },
     ],
   });
   
-  console.log('✅ Created 2 trucks');
+  console.log('✅ Created 3 trucks');
 }
 
 async function main() {
-  console.log('🌱 Starting database seed...\n');
+  console.log('🌱 Starting PRODUCTION database seed...\n');
+  console.log('📍 Database URL:', databaseUrl.substring(0, 50) + '...\n');
   
   try {
+    // Test connection
+    await prisma.$connect();
+    console.log('✅ Connected to database successfully\n');
+    
     // Clean database
     await cleanDatabase();
     
@@ -368,15 +463,15 @@ async function main() {
     await seedProducts(farmer.id);
     await seedTrucks(transporter.id);
     
-    console.log('\n🎉 Database seeded successfully!');
+    console.log('\n🎉 Production database seeded successfully!');
     console.log('\n📊 Summary:');
     console.log(`   - ${BULGARIAN_REGIONS.length} Bulgarian regions`);
     console.log(`   - ${GREEK_REGIONS.length} Greek regions`);
     console.log(`   - ${PRODUCTS.length} product types`);
     console.log(`   - ${regions.length * PRODUCTS.length} regional prices`);
-    console.log('   - 4 users (admin, farmer, buyer, transporter)');
-    console.log('   - 3 products');
-    console.log('   - 2 trucks');
+    console.log('   - 5 users (admin, farmer, 2 buyers, transporter)');
+    console.log('   - 6 products');
+    console.log('   - 3 trucks');
     
     console.log('\n📍 Bulgarian Regions:');
     BULGARIAN_REGIONS.forEach((region, i) => {
@@ -384,11 +479,12 @@ async function main() {
     });
     
     console.log('\n🔐 Login credentials:');
-    console.log('   All users: password123');
-    console.log('   - admin@agrotrade.com');
-    console.log('   - farmer@example.com');
-    console.log('   - buyer@example.com');
-    console.log('   - transporter@example.com');
+    console.log('   All users: Demo2024!');
+    console.log('   - admin@agrotrade.com (Admin)');
+    console.log('   - demo.farmer@agrotrade.com (Farmer)');
+    console.log('   - demo.buyer@agrotrade.com (Buyer - Sofia)');
+    console.log('   - demo.processor@agrotrade.com (Buyer - Varna)');
+    console.log('   - demo.transport@agrotrade.com (Transporter)');
     
   } catch (error) {
     console.error('❌ Seed failed:', error);

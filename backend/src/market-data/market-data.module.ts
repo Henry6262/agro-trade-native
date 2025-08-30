@@ -3,7 +3,6 @@ import { HttpModule } from '@nestjs/axios';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MarketDataService } from './market-data.service';
 import { MarketDataController } from './market-data.controller';
-import { AlphaVantageService } from './alpha-vantage.service';
 import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
@@ -13,7 +12,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     PrismaModule,
   ],
   controllers: [MarketDataController],
-  providers: [MarketDataService, AlphaVantageService],
+  providers: [MarketDataService],
   exports: [MarketDataService],
 })
 export class MarketDataModule {}
