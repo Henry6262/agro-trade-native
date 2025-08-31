@@ -9,36 +9,48 @@ async function bootstrap() {
   if (!cachedApp) {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
     
-    // Enable CORS with multiple origins
+    // Enable CORS with environment-based configuration
+    const corsOrigins = process.env.CORS_ORIGINS?.split(',').map(origin => origin.trim()) || [];
+    const allowAllOrigins = process.env.CORS_ALLOW_ALL === 'true';
+    
     app.enableCors({
       origin: (origin, callback) => {
-        // Allow requests from localhost on any port
+        // In development or if explicitly allowing all origins
+        if (process.env.NODE_ENV !== 'production' || allowAllOrigins) {
+          callback(null, true);
+          return;
+        }
+        
+        // In production, check against allowed origins
         const allowedOrigins = [
+          ...corsOrigins,
+          // Always allow localhost for development
           'http://localhost:3000',
           'http://localhost:8081',
           'http://localhost:8082',
-          'http://localhost:8083', // Expo web alternative port
-          'http://localhost:19006', // Expo web
-          'https://agro-trade-native.vercel.app', // Production frontend
-          'https://agro-trade-native-*.vercel.app', // Preview deployments
-          process.env.CLIENT_URL,
-          process.env.FRONTEND_URL,
-        ].filter(Boolean);
+          'http://localhost:19006',
+        ];
         
-        // In production, be more permissive for Vercel deployments
-        if (process.env.NODE_ENV === 'production') {
-          // Allow any Vercel app or configured origins
-          if (!origin || 
-              allowedOrigins.includes(origin) || 
-              origin?.includes('vercel.app') ||
-              origin?.includes('localhost')) {
+        // Check if origin is allowed
+        if (!origin || allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          // Check for pattern matching (e.g., *.vercel.app)
+          const isAllowed = allowedOrigins.some(allowed => {
+            if (allowed.includes('*')) {
+              const pattern = allowed.replace(/\*/g, '.*');
+              const regex = new RegExp(`^${pattern}$`);
+              return regex.test(origin);
+            }
+            return false;
+          });
+          
+          if (isAllowed) {
             callback(null, true);
           } else {
+            console.warn(`CORS blocked origin: ${origin}`);
             callback(new Error('Not allowed by CORS'));
           }
-        } else {
-          // In development, allow any origin
-          callback(null, true);
         }
       },
       credentials: true,
