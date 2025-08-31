@@ -109,7 +109,7 @@ export const ProductSelectionUnified: React.FC = () => {
 
       {/* Product Grid */}
       {products && products.length > 0 ? (
-        <ProductGrid columns={{ xs: 2, sm: 3, lg: 4 }} spacing={12}>
+        <ProductGrid columns={{ xs: 1, sm: 2, lg: 3 }} spacing={8}>
           {products.map((product) => {
             const isSelected = selectedProductIds.includes(product.id);
             

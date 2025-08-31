@@ -270,20 +270,20 @@ export function ProductSpecificationsWithLocation() {
       quantity * ((priceRange.min + priceRange.max) / 2) : 0;
 
     return (
-      <View key={productId}>
+      <View key={productId} className="mb-4">
         <View className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
           <View className="flex-row">
-            {/* Product Image - Larger and on the left */}
-            <View className="w-32 h-32">
+            {/* Product Image - Responsive sizing */}
+            <View style={{ width: width < 400 ? 60 : 80, height: width < 400 ? 60 : 80, flexShrink: 0 }}>
               {product?.image ? (
                 <Image 
                   source={{ uri: product.image }}
-                  style={{ width: 128, height: 128 }}
+                  style={{ width: '100%', height: '100%' }}
                   resizeMode="cover"
                 />
               ) : (
                 <View className="w-full h-full bg-gray-700 items-center justify-center">
-                  <Package size={40} color="#9CA3AF" />
+                  <Package size={isLargeScreen ? 40 : 24} color="#9CA3AF" />
                 </View>
               )}
             </View>

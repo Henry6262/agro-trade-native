@@ -16,30 +16,20 @@ export const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
 }) => {
   const { width } = Dimensions.get('window');
   
-  // Account for 10% margins on each side (20% total)
-  const availableWidth = width * 0.8;
-  
   // Calculate how many items can fit per row
   const calculateItemsPerRow = () => {
-    // Try to fit as many items as possible within constraints
-    let itemsPerRow = Math.floor(availableWidth / minItemWidth);
+    // For very small screens, always use 1 column
+    if (width < 400) return 1;
     
-    // Ensure at least 1 item per row
-    if (itemsPerRow < 1) itemsPerRow = 1;
+    // For medium screens, try 2 columns
+    if (width < 768) return Math.min(2, children.length);
     
-    // Calculate actual item width
-    const itemWidth = (availableWidth - (spacing * (itemsPerRow - 1))) / itemsPerRow;
-    
-    // If items would be too wide, add more items per row
-    if (itemWidth > maxItemWidth && itemsPerRow < children.length) {
-      itemsPerRow = Math.ceil(availableWidth / maxItemWidth);
-    }
-    
-    return itemsPerRow;
+    // For larger screens, calculate based on min width
+    const possibleItems = Math.floor(width / minItemWidth);
+    return Math.max(1, Math.min(possibleItems, children.length));
   };
   
   const itemsPerRow = calculateItemsPerRow();
-  const itemWidth = (availableWidth - (spacing * (itemsPerRow - 1))) / itemsPerRow;
   
   return (
     <View 
@@ -53,7 +43,7 @@ export const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
         <View
           key={index}
           style={{
-            width: itemWidth,
+            width: `${100 / itemsPerRow}%`,
             paddingHorizontal: spacing / 2,
             paddingVertical: spacing / 2,
           }}
@@ -83,18 +73,17 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 }) => {
   const { width } = Dimensions.get('window');
   
-  // Account for 10% margins on each side
-  const availableWidth = width * 0.8;
-  
   // Determine columns based on screen size
   const getColumns = () => {
+    // Single column for very small screens
+    if (width < 400) return 1;
+    // Use configured columns for different breakpoints
     if (width < 640) return columns.xs || 2;
     if (width < 1024) return columns.sm || 3;
     return columns.lg || 4;
   };
   
-  const numColumns = getColumns();
-  const itemWidth = (availableWidth - (spacing * (numColumns - 1))) / numColumns;
+  const numColumns = Math.min(getColumns(), children.length);
   
   return (
     <View 
@@ -108,7 +97,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         <View
           key={index}
           style={{
-            width: itemWidth,
+            width: `${100 / numColumns}%`,
             paddingHorizontal: spacing / 2,
             paddingVertical: spacing / 2,
           }}

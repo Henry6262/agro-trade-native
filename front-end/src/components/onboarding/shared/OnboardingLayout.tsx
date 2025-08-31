@@ -14,11 +14,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   style,
   contentStyle
 }) => {
-  const { width } = Dimensions.get('window');
-  
-  // Calculate 10% margins
-  const horizontalMargin = width * 0.1;
-  
   const containerStyle: ViewStyle = {
     flex: 1,
     backgroundColor: '#111827', // bg-gray-900
@@ -26,9 +21,10 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   };
   
   const contentContainerStyle: ViewStyle = {
-    paddingHorizontal: horizontalMargin,
+    flexGrow: 1,
+    paddingHorizontal: 16, // Consistent padding
     paddingTop: 20,
-    paddingBottom: 100,
+    paddingBottom: 120, // Increased to account for navigation buttons
     ...contentStyle
   };
 
@@ -36,11 +32,11 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     return (
       <View style={containerStyle}>
         <ScrollView 
-          contentContainerStyle={{
-            flexGrow: 1,
-            ...contentContainerStyle
-          }}
+          contentContainerStyle={contentContainerStyle}
           showsVerticalScrollIndicator={false}
+          bounces={true}
+          scrollEnabled={true}
+          keyboardShouldPersistTaps="handled"
         >
           {children}
         </ScrollView>

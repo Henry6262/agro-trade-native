@@ -161,17 +161,20 @@ export function BuyerSpecifications({
                 Max Price/Kilo (€) <Text className="text-red-500">*</Text>
               </Text>
               <View className="relative">
-                <Text className="absolute left-3 top-3.5 text-gray-400 text-base z-10">€</Text>
+                <View className="absolute left-3 top-0 bottom-0 justify-center z-10">
+                  <Text className="text-gray-400 text-base">€</Text>
+                </View>
                 <TextInput
                   value={spec.pricePerKilo?.toString() || ''}
                   onChangeText={(text) => updateSpecification(productId, 'pricePerKilo', text)}
                   placeholder="30"
                   keyboardType="decimal-pad"
                   maxLength={6}
-                  className={`border-2 rounded-lg pl-6 pr-2 py-2 bg-gray-900 text-white text-center ${
+                  className={`border-2 rounded-lg pl-8 pr-2 py-2 bg-gray-900 text-white ${
                     !spec.pricePerKilo ? 'border-red-500' : 'border-gray-600'
                   }`}
                   placeholderTextColor="#6B7280"
+                  style={{ fontSize: 16 }}
                 />
               </View>
             </View>

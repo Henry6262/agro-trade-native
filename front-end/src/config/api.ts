@@ -1,5 +1,4 @@
 // API Configuration
-import logger from '@/utils/logger';
 
 // Determine if we're in development or production
 const isDev = __DEV__ || process.env.NODE_ENV === 'development';
@@ -10,7 +9,7 @@ const getApiUrl = () => {
   if (process.env.EXPO_PUBLIC_API_URL) {
     return process.env.EXPO_PUBLIC_API_URL;
   }
-  logger.error('No backend API URL found');
+  console.error('No backend API URL found');
   return 'http://localhost:4000/api';
   };
 
