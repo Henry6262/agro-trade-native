@@ -116,11 +116,12 @@ export function BuyerSpecifications({
               <Image 
                 source={{ uri: product.image }}
                 className="w-16 h-16 rounded-lg mr-3"
+                style={{ minHeight: 120, width: 120, height: 120 }}
                 resizeMode="cover"
               />
             ) : (
-              <View className="w-16 h-16 rounded-lg bg-gray-700 items-center justify-center mr-3">
-                <Package size={28} color="#9CA3AF" />
+              <View className="rounded-lg bg-gray-700 items-center justify-center mr-3" style={{ minHeight: 120, width: 120, height: 120 }}>
+                <Package size={48} color="#9CA3AF" />
               </View>
             )}
             <View className="flex-1">

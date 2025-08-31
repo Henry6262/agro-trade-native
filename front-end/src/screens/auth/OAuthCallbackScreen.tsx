@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../navigation/types';
 import { useAuthStore } from '../../store/authStore';
 import { useOnboardingStore } from '../../store/onboardingStore';
+import { ExistingAccountModal } from '../../components/auth/ExistingAccountModal';
+import { APP_CONFIG } from '../../constants';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -12,6 +14,12 @@ export const OAuthCallbackScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
   const authStore = useAuthStore();
   const onboardingStore = useOnboardingStore();
+  const [showExistingAccountModal, setShowExistingAccountModal] = useState(false);
+  const [existingAccountData, setExistingAccountData] = useState<{
+    email: string;
+    name: string;
+    role?: string;
+  } | null>(null);
 
   useEffect(() => {
     const handleOAuthCallback = async () => {
@@ -72,10 +80,20 @@ export const OAuthCallbackScreen: React.FC = () => {
           
           console.log('Saved user role from store:', savedUserRole);
 
-          // Since we're removing business profile completion, treat all authenticated users as having a complete profile
-          if (accessToken && userEmail) {
-            // User is authenticated, go directly to dashboard
-            console.log('User authenticated via Google, navigating to dashboard...');
+          // Check if user has an existing profile
+          if (hasProfile && accessToken && userEmail) {
+            // User has an existing account - show modal to let them choose
+            console.log('Existing account detected, showing options...');
+            
+            setExistingAccountData({
+              email: userEmail,
+              name: decodedUserName,
+              role: savedUserRole,
+            });
+            setShowExistingAccountModal(true);
+          } else if (accessToken && userEmail && !hasProfile) {
+            // New user, continue with onboarding
+            console.log('New user authenticated via Google, continuing onboarding...');
             
             // Store success flag for showing animation
             onboardingStore.setGoogleAuthData({
@@ -84,20 +102,24 @@ export const OAuthCallbackScreen: React.FC = () => {
               isAuthenticated: true,
             });
             
-            // Navigate to a success screen or directly to dashboard
-            // The success animation will show on the dashboard
-            navigation.navigate('Main', {
-              screen: 'Dashboard'
-            });
-          } else if (!hasProfile && false) { // Disabled old flow
-            // User has complete profile, go to main app
-            console.log('User has complete profile, navigating to dashboard...');
-            navigation.navigate('Main', {
-              screen: 'Dashboard'
-            });
+            // Navigate back to the onboarding flow they came from
+            const role = savedUserRole || 'buyer';
+            switch (role) {
+              case 'seller':
+                navigation.navigate('SellerOnboardingFlow');
+                break;
+              case 'buyer':
+                navigation.navigate('BuyerOnboardingFlow');
+                break;
+              case 'transporter':
+                navigation.navigate('TransporterOnboardingFlow');
+                break;
+              default:
+                navigation.navigate('RoleSelection');
+            }
           } else {
-            // No specific flow, go to role selection
-            console.log('No specific flow, navigating to role selection...');
+            // No tokens or error, go to role selection
+            console.log('OAuth error or no tokens, navigating to role selection...');
             navigation.navigate('RoleSelection');
           }
         } else {
@@ -114,12 +136,62 @@ export const OAuthCallbackScreen: React.FC = () => {
     }, 100);
   }, []); // Remove dependencies to avoid re-running
 
+  const handleLoginExisting = () => {
+    // User wants to login to their existing profile
+    console.log('User chose to login to existing profile');
+    setShowExistingAccountModal(false);
+    
+    // Navigate to dashboard
+    navigation.navigate('Main', {
+      screen: 'Dashboard'
+    });
+  };
+
+  const handleCreateNew = () => {
+    // User wants to create a new profile with a different role
+    console.log('User chose to create new profile');
+    setShowExistingAccountModal(false);
+    
+    // Clear existing data and go to role selection
+    onboardingStore.resetOnboarding();
+    navigation.navigate('RoleSelection');
+  };
+
+  const handleSwitchAccount = () => {
+    // User wants to use a different Google account
+    console.log('User chose to switch Google account');
+    setShowExistingAccountModal(false);
+    
+    // Sign out and redirect to Google OAuth with account selection
+    authStore.logout();
+    const apiUrl = APP_CONFIG.API_URL || 'http://localhost:4000/api';
+    const googleOAuthUrl = `${apiUrl}/auth/google?prompt=select_account`;
+    
+    if (Platform.OS === 'web') {
+      window.location.href = googleOAuthUrl;
+    }
+  };
+
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc' }}>
-      <ActivityIndicator size="large" color="#22C55E" />
-      <Text style={{ marginTop: 16, fontSize: 16, color: '#6b7280' }}>
-        Completing authentication...
-      </Text>
-    </View>
+    <>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+        <ActivityIndicator size="large" color="#22C55E" />
+        <Text style={{ marginTop: 16, fontSize: 16, color: '#6b7280' }}>
+          Completing authentication...
+        </Text>
+      </View>
+      
+      {existingAccountData && (
+        <ExistingAccountModal
+          visible={showExistingAccountModal}
+          userEmail={existingAccountData.email}
+          userName={existingAccountData.name}
+          userRole={existingAccountData.role}
+          onLoginExisting={handleLoginExisting}
+          onCreateNew={handleCreateNew}
+          onSwitchAccount={handleSwitchAccount}
+        />
+      )}
+    </>
   );
 };

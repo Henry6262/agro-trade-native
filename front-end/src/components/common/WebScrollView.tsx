@@ -15,11 +15,11 @@ export const WebScrollView: React.FC<ScrollViewProps> = ({
   const webStyle = Platform.OS === 'web' ? {
     height: '100%',
     overflow: 'auto' as any,
+    WebkitOverflowScrolling: 'touch' as any,
   } : {};
 
   const webContentContainerStyle = Platform.OS === 'web' ? {
     flexGrow: 1,
-    minHeight: '100%',
     ...(contentContainerStyle as any),
   } : {
     flexGrow: 1,
