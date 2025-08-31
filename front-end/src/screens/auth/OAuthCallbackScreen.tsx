@@ -43,14 +43,17 @@ export const OAuthCallbackScreen: React.FC = () => {
           userEmail,
           userName: decodeURIComponent(userName || ''),
           userId,
-          hasTokens: !!(accessToken && refreshToken),
+          hasAccessToken: !!accessToken,
+          hasRefreshToken: !!refreshToken,
+          tokenLength: accessToken?.length || 0,
           currentOnboardingRole: onboardingStore.selectedRole,
         });
 
-        if (accessToken && refreshToken) {
+        // Backend might only send accessToken for OAuth (refresh handled server-side)
+        if (accessToken) {
           console.log('Setting tokens in auth store...');
           // Update auth store with tokens and user info
-          authStore.setTokens(accessToken, refreshToken);
+          authStore.setTokens(accessToken, refreshToken || accessToken); // Use accessToken as refresh if not provided
           
           // Decode the userName properly
           const decodedUserName = userName ? decodeURIComponent(userName) : '';
@@ -123,8 +126,8 @@ export const OAuthCallbackScreen: React.FC = () => {
             navigation.navigate('RoleSelection');
           }
         } else {
-          // No tokens, something went wrong
-          console.error('OAuth callback missing tokens');
+          // No access token, something went wrong
+          console.error('OAuth callback missing access token');
           navigation.navigate('RoleSelection');
         }
       }

@@ -5,6 +5,28 @@ export const ScrollFix: React.FC<{ children: React.ReactNode }> = ({ children })
   useEffect(() => {
     if (Platform.OS === 'web') {
       const fixScrolling = () => {
+        // CRITICAL FIX: Find containers next to progress sidebar (width: 96px)
+        // These are the main content containers in onboarding sections
+        const sidebarElements = document.querySelectorAll('[style*="width: 96px"]');
+        sidebarElements.forEach((sidebar) => {
+          const nextSibling = sidebar.nextElementSibling as HTMLElement;
+          if (nextSibling && nextSibling.style) {
+            // This is the main content container next to the sidebar
+            nextSibling.style.height = '100vh';
+            nextSibling.style.overflow = 'hidden';
+            nextSibling.style.display = 'flex';
+            nextSibling.style.flexDirection = 'column';
+            
+            // Find the scrollable area within this container
+            const scrollableChild = nextSibling.querySelector('[class*="r-WebkitOverflowScrolling"]') as HTMLElement;
+            if (scrollableChild) {
+              scrollableChild.style.height = '100%';
+              scrollableChild.style.overflow = 'auto';
+              scrollableChild.style.webkitOverflowScrolling = 'touch';
+            }
+          }
+        });
+        
         // Find all ScrollView elements
         const scrollViews = document.querySelectorAll('[class*="r-WebkitOverflowScrolling"]');
         scrollViews.forEach((element) => {
