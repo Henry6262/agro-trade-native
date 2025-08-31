@@ -19,13 +19,19 @@ async function bootstrap() {
           'http://localhost:8082',
           'http://localhost:8083', // Expo web alternative port
           'http://localhost:19006', // Expo web
+          'https://agro-trade-native.vercel.app', // Production frontend
+          'https://agro-trade-native-*.vercel.app', // Preview deployments
           process.env.CLIENT_URL,
           process.env.FRONTEND_URL,
         ].filter(Boolean);
         
-        // In production, be more strict
+        // In production, be more permissive for Vercel deployments
         if (process.env.NODE_ENV === 'production') {
-          if (!origin || allowedOrigins.includes(origin)) {
+          // Allow any Vercel app or configured origins
+          if (!origin || 
+              allowedOrigins.includes(origin) || 
+              origin?.includes('vercel.app') ||
+              origin?.includes('localhost')) {
             callback(null, true);
           } else {
             callback(new Error('Not allowed by CORS'));
@@ -37,7 +43,8 @@ async function bootstrap() {
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      exposedHeaders: ['Content-Range', 'X-Content-Range'],
     });
     
     // Global validation pipe

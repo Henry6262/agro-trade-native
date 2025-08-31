@@ -1,4 +1,5 @@
 // API Configuration
+import logger from '@/utils/logger';
 
 // Determine if we're in development or production
 const isDev = __DEV__ || process.env.NODE_ENV === 'development';
@@ -9,21 +10,9 @@ const getApiUrl = () => {
   if (process.env.EXPO_PUBLIC_API_URL) {
     return process.env.EXPO_PUBLIC_API_URL;
   }
-  
-  // Default to localhost for development on port 4000
-  if (isDev) {
-    // For Android emulator, use 10.0.2.2 instead of localhost
-    // For iOS simulator and web, use localhost
-    if (typeof window !== 'undefined' && window.location?.hostname === 'localhost') {
-      return 'http://localhost:4000/api';
-    }
-    // Default for React Native
-    return 'http://10.0.2.2:4000/api'; // Android emulator
-  }
-  
-  // Production URL (replace with your actual production API)
-  return 'https://api.agrotrade.com/api';
-};
+  logger.error('No backend API URL found');
+  return 'http://localhost:4000/api';
+  };
 
 export const API_URL = getApiUrl();
 

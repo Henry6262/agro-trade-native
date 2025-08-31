@@ -27,6 +27,7 @@
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts",
     "prisma:seed:prod": "node dist/prisma/seed.js",
+    "seed:production": "ts-node prisma/seed-production.ts",
     "prisma:seed-products": "ts-node prisma/seed-products.ts",
     "prisma:seed-catalog": "ts-node prisma/seed-catalog.ts",
     "prisma:seed-multibase": "ts-node prisma/seed-multibase.ts",
