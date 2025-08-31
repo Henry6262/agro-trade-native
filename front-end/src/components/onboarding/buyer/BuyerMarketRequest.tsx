@@ -11,7 +11,7 @@ import { Package, MapPin, ShoppingCart, Info, Check } from 'lucide-react-native'
 import type { ProductSpecification } from '../../../types/onboarding'
 import { useOnboardingStore } from '../../../store/onboardingStore'
 import { OnboardingLayout } from '../shared/OnboardingLayout'
-import { ResponsiveGrid } from '../shared/ResponsiveGrid'
+import { DynamicGrid } from '../shared/DynamicGrid'
 
 interface BuyerMarketRequestProps {
   selectedProducts: string[]
@@ -193,9 +193,9 @@ export function BuyerMarketRequest({
           <Text className="text-lg font-semibold text-white mb-3">
             Products to Purchase ({selectedProducts.length})
           </Text>
-          <ResponsiveGrid minItemWidth={200} maxItemWidth={300} spacing={16}>
+          <DynamicGrid minItemWidth={200} maxItemWidth={350} spacing={12}>
             {specifications.map((spec, index) => renderProductCard(spec, index))}
-          </ResponsiveGrid>
+          </DynamicGrid>
         </View>
 
         {/* Information Notice */}
