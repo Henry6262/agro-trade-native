@@ -226,7 +226,7 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
         />
 
         {/* Main Content */}
-        <View className="flex-1 relative" style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <View className="flex-1 relative">
           {renderStepContent()}
 
           <Navigation

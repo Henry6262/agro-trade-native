@@ -26,7 +26,17 @@ import BuyerDashboard from "./buyer/page"
 
 export default function AgriculturalTradeDashboard() {
   const [activeSection, setActiveSection] = useState("overview")
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [sidebarExpanded, setSidebarExpanded] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkScreenSize()
+    window.addEventListener('resize', checkScreenSize)
+    return () => window.removeEventListener('resize', checkScreenSize)
+  }, [])
   const [userRole, setUserRole] = useState("admin")
   const [showOnboardingPrompt, setShowOnboardingPrompt] = useState(false)
 
@@ -105,60 +115,68 @@ export default function AgriculturalTradeDashboard() {
 
   return (
     <div className="flex h-screen">
-      {/* Desktop Sidebar */}
-      <div
-        className={`${sidebarCollapsed ? "w-16" : "w-70"} bg-neutral-900 border-r border-neutral-700 transition-all duration-300 fixed md:relative z-50 md:z-auto h-full md:h-auto ${!sidebarCollapsed ? "hidden md:block" : "hidden md:block"}`}
-      >
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-8">
-            <div className={`${sidebarCollapsed ? "hidden" : "block"}`}>
-              <h1 className="text-green-500 font-bold text-lg tracking-wider">AGRI TRADE</h1>
-              <p className="text-neutral-500 text-xs">v1.0.0 PLATFORM</p>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="text-neutral-400 hover:text-green-500"
-            >
-              <ChevronRight
-                className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform ${sidebarCollapsed ? "" : "rotate-180"}`}
-              />
-            </Button>
-          </div>
-
-          <nav className="space-y-2">
-            {navigationItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded transition-colors ${
-                  activeSection === item.id
-                    ? "bg-green-500 text-white"
-                    : "text-neutral-400 hover:text-white hover:bg-neutral-800"
-                }`}
+      {/* Desktop Sidebar - Only show on desktop */}
+      {!isMobile && (
+        <div
+          className={`${
+            sidebarExpanded ? "w-60" : "w-16"
+          } bg-neutral-900 border-r border-neutral-700 transition-all duration-300 h-full flex-shrink-0`}
+        >
+          <div className="p-4">
+            <div className="flex items-center justify-between mb-8">
+              {sidebarExpanded && (
+                <div>
+                  <h1 className="text-green-500 font-bold text-lg tracking-wider">AGRI TRADE</h1>
+                  <p className="text-neutral-500 text-xs">v1.0.0 PLATFORM</p>
+                </div>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSidebarExpanded(!sidebarExpanded)}
+                className="text-neutral-400 hover:text-green-500"
               >
-                <item.icon className="w-5 h-5 md:w-5 md:h-5 sm:w-6 sm:h-6" />
-                {!sidebarCollapsed && <span className="text-sm font-medium">{item.label}</span>}
-              </button>
-            ))}
-          </nav>
-
-          {!sidebarCollapsed && (
-            <div className="mt-8 p-4 bg-neutral-800 border border-neutral-700 rounded">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-xs text-white">PLATFORM ONLINE</span>
-              </div>
-              <div className="text-xs text-neutral-500">
-                <div>UPTIME: 99.8%</div>
-                <div>ACTIVE TRADES: 47</div>
-                <div>MATCHES TODAY: 12</div>
-              </div>
+                <ChevronRight
+                  className={`w-5 h-5 transition-transform ${sidebarExpanded ? "rotate-180" : ""}`}
+                />
+              </Button>
             </div>
-          )}
+
+            <nav className="space-y-2">
+              {navigationItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveSection(item.id)}
+                  className={`w-full flex items-center gap-3 p-3 rounded transition-colors ${
+                    activeSection === item.id
+                      ? "bg-green-500 text-white"
+                      : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+                  }`}
+                >
+                  <item.icon className={`${sidebarExpanded ? "w-6 h-6" : "w-5 h-5"} flex-shrink-0`} />
+                  {sidebarExpanded && (
+                    <span className="text-sm font-medium">{item.label}</span>
+                  )}
+                </button>
+              ))}
+            </nav>
+
+            {sidebarExpanded && (
+              <div className="mt-8 p-4 bg-neutral-800 border border-neutral-700 rounded">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-white">PLATFORM ONLINE</span>
+                </div>
+                <div className="text-xs text-neutral-500">
+                  <div>UPTIME: 99.8%</div>
+                  <div>ACTIVE TRADES: 47</div>
+                  <div>MATCHES TODAY: 12</div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
@@ -214,28 +232,30 @@ export default function AgriculturalTradeDashboard() {
         </div>
 
         {/* Dashboard Content */}
-        <div className="flex-1 overflow-auto pb-20 md:pb-0">{renderContent()}</div>
+        <div className={`flex-1 overflow-auto ${isMobile ? "pb-16" : ""}`}>{renderContent()}</div>
       </div>
 
-      {/* Mobile Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-neutral-900 border-t border-neutral-700 md:hidden z-50">
-        <div className={`grid h-16 ${userRole === "transporter" ? "grid-cols-4" : "grid-cols-3"}`}>
-          {navigationItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              className={`flex flex-col items-center justify-center gap-1 p-2 transition-colors ${
-                activeSection === item.id
-                  ? "bg-green-500 text-white"
-                  : "text-neutral-400 hover:text-white hover:bg-neutral-800"
-              }`}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="text-xs font-medium">{item.label}</span>
-            </button>
-          ))}
+      {/* Mobile Bottom Navigation - Only show on mobile */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 bg-neutral-900 border-t border-neutral-700 z-50">
+          <div className={`grid h-16 ${userRole === "transporter" ? "grid-cols-4" : "grid-cols-3"}`}>
+            {navigationItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveSection(item.id)}
+                className={`flex flex-col items-center justify-center gap-1 p-2 transition-colors ${
+                  activeSection === item.id
+                    ? "bg-green-500 text-white"
+                    : "text-neutral-400 hover:text-white hover:bg-neutral-800"
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="text-[10px] font-medium">{item.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

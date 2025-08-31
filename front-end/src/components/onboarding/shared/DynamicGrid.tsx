@@ -17,12 +17,20 @@ export const DynamicGrid: React.FC<DynamicGridProps> = ({
   const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
   
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
     const updateDimensions = ({ window }: any) => {
-      setScreenWidth(window.width);
+      // Debounce dimension changes to prevent rapid re-renders
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setScreenWidth(window.width);
+      }, 100);
     };
     
     const subscription = Dimensions.addEventListener('change', updateDimensions);
-    return () => subscription?.remove();
+    return () => {
+      clearTimeout(timeoutId);
+      subscription?.remove();
+    };
   }, []);
   
   // Account for OnboardingLayout 10% margins on each side

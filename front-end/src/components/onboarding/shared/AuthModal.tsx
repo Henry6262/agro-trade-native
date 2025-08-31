@@ -682,6 +682,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                             color="#4285f4"
                           />
                           
+                          {/* Disabled for now - only Google auth is active
                           <OAuthButton
                             provider="apple"
                             onPress={() => handleOAuthSignIn('apple')}
@@ -697,6 +698,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                             label="Continue with Facebook"
                             color="#1877f2"
                           />
+                          */}
                         </View>
 
                         {/* Divider */}

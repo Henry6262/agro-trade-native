@@ -249,7 +249,7 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
       />
 
       {/* Main Content */}
-      <View className="flex-1" style={{ height: '100vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <View className="flex-1">
         {renderStepContent()}
 
         <Navigation

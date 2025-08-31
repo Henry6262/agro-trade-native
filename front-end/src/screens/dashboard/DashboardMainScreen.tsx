@@ -219,7 +219,7 @@ export default function DashboardMainScreen() {
                     >
                       <Icon
                         color={activeSection === item.id ? '#ffffff' : '#9CA3AF'}
-                        size={20}
+                        size={24}
                       />
                       {!sidebarCollapsed && (
                         <Text
@@ -321,7 +321,7 @@ export default function DashboardMainScreen() {
                       >
                         <Icon
                           color={activeSection === item.id ? '#ffffff' : '#9CA3AF'}
-                          size={20}
+                          size={24}
                         />
                         <Text
                           className={`text-sm font-medium ${

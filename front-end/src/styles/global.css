@@ -67,7 +67,7 @@ div[data-testid*="ScrollView"],
 [class*="css-view"][style*="overflow"],
 div[style*="overflow: hidden scroll"],
 div[style*="overflow-x: hidden"][style*="overflow-y: scroll"] {
-  overflow: auto !important;
+  /* overflow: auto !important; */
   -webkit-overflow-scrolling: touch;
   height: 100%;
   max-height: 100vh;
