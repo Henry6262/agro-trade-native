@@ -136,6 +136,40 @@ model CompanyInfo {
   @@map("company_info")
 }
 
+// ==================== PRODUCT CATALOG ====================
+
+model ProductCatalog {
+  id                     String          @id @default(cuid())
+  category               ProductCategory @unique
+  name                   String          @unique
+  displayName            String          @map("display_name")
+  description            String?         @db.Text
+  image                  String?         // Cloudinary URL
+  
+  nutritionalInfo        String?         @map("nutritional_info") @db.Text
+  useCases               String[]        @map("use_cases")
+  harvestSeason          String?         @map("harvest_season")
+  storageRecommendations String?         @map("storage_recommendations") @db.Text
+  
+  priceRangeMin          Decimal?        @map("price_range_min") @db.Decimal(10, 2)
+  priceRangeMax          Decimal?        @map("price_range_max") @db.Decimal(10, 2)
+  defaultUnit            ProductUnit     @default(TON) @map("default_unit")
+  
+  qualityGrades          String[]        @map("quality_grades")
+  certifications         String[]
+  specifications         Json?
+  
+  isActive               Boolean         @default(true) @map("is_active")
+  sortOrder              Int?            @map("sort_order")
+  
+  createdAt              DateTime        @default(now()) @map("created_at")
+  updatedAt              DateTime        @updatedAt @map("updated_at")
+  
+  @@index([category])
+  @@index([isActive])
+  @@map("product_catalog")
+}
+
 // ==================== PRODUCTS ====================
 
 model Product {
