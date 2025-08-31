@@ -17,7 +17,7 @@ import { API_URL } from '../../../config/api';
 import { useOnboardingStore } from '../../../store/onboardingStore';
 import { Input } from '../../common';
 import { OnboardingLayout } from '../shared/OnboardingLayout';
-import { ResponsiveGrid } from '../shared/ResponsiveGrid';
+import { DynamicGrid } from '../shared/DynamicGrid';
 
 interface ProductSpecification {
   productId: string;
@@ -270,11 +270,11 @@ export function ProductSpecificationsWithLocation() {
       quantity * ((priceRange.min + priceRange.max) / 2) : 0;
 
     return (
-      <View key={productId} className="mb-4">
-        <View className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+      <View key={productId}>
+        <View className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden h-full">
           <View className="flex-row">
             {/* Product Image - Responsive sizing */}
-            <View style={{ width: width < 400 ? 60 : 80, height: width < 400 ? 60 : 80, flexShrink: 0 }}>
+            <View style={{ width: 70, height: 70, flexShrink: 0 }}>
               {product?.image ? (
                 <Image 
                   source={{ uri: product.image }}
@@ -418,11 +418,11 @@ export function ProductSpecificationsWithLocation() {
         )}
 
         {/* Product Cards */}
-        <ResponsiveGrid minItemWidth={300} maxItemWidth={500} spacing={16}>
+        <DynamicGrid minItemWidth={280} maxItemWidth={400} spacing={12}>
           {specifications.map((spec, index) => 
             renderSpecificationCard(spec.productId, index)
           )}
-        </ResponsiveGrid>
+        </DynamicGrid>
     </OnboardingLayout>
   );
 }

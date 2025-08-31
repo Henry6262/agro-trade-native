@@ -103,11 +103,12 @@ export function BuyerSpecifications({
     const isCompleted = hasRequiredFields && spec.quantity.toString().trim() !== '' && spec.pricePerKilo.toString().trim() !== ''
 
     return (
-      <View className={`border rounded-lg overflow-hidden ${
-        isCompleted 
-          ? 'bg-emerald-500/10 border-emerald-500' 
-          : 'bg-gray-800 border-gray-700'
-      }`}>
+      <View key={productId} className="mb-4">
+        <View className={`border rounded-lg overflow-hidden ${
+          isCompleted 
+            ? 'bg-emerald-500/10 border-emerald-500' 
+            : 'bg-gray-800 border-gray-700'
+        }`}>
         {/* Card Header */}
         <View className="p-4 border-b border-gray-700 relative">
           <View className="flex-row items-center">
@@ -273,6 +274,7 @@ export function BuyerSpecifications({
           )}
         </View>
       </View>
+      </View>
     )
   }
 
@@ -303,11 +305,11 @@ export function BuyerSpecifications({
 
       {/* Product Cards Grid */}
       {specifications.length > 0 ? (
-        <ResponsiveGrid minItemWidth={300} maxItemWidth={400} spacing={16}>
+        <View>
           {specifications.map((spec, index) => 
             renderSpecificationCard(spec.productId, index)
           )}
-        </ResponsiveGrid>
+        </View>
       ) : (
         <View className="bg-gray-800 border border-gray-700 rounded-lg p-8 items-center">
           <View className="w-16 h-16 bg-gray-700 rounded-full items-center justify-center mb-4">

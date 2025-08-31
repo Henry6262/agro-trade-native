@@ -5,7 +5,7 @@ import axios from 'axios';
 import { API_URL } from '../../config/api';
 import { useOnboardingStore } from '../../store/onboardingStore';
 import { OnboardingLayout } from './shared/OnboardingLayout';
-import { ProductGrid } from './shared/ResponsiveGrid';
+import { DynamicGrid } from './shared/DynamicGrid';
 
 interface Product {
   id: string;
@@ -109,7 +109,7 @@ export const ProductSelectionUnified: React.FC = () => {
 
       {/* Product Grid */}
       {products && products.length > 0 ? (
-        <ProductGrid columns={{ xs: 1, sm: 2, lg: 3 }} spacing={8}>
+        <DynamicGrid minItemWidth={130} maxItemWidth={300} spacing={8}>
           {products.map((product) => {
             const isSelected = selectedProductIds.includes(product.id);
             
@@ -156,7 +156,7 @@ export const ProductSelectionUnified: React.FC = () => {
               </TouchableOpacity>
             );
           })}
-        </ProductGrid>
+        </DynamicGrid>
       ) : (
         <View className="flex-1 justify-center items-center">
           <Text className="text-gray-500">No products available</Text>

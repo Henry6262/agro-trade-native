@@ -11,7 +11,7 @@ import { Package, MapPin, TrendingUp, Info, Check } from 'lucide-react-native';
 import type { ProductSpecification } from '../../../types/onboarding';
 import { useOnboardingStore } from '../../../store/onboardingStore';
 import { OnboardingLayout } from '../shared/OnboardingLayout';
-import { ResponsiveGrid } from '../shared/ResponsiveGrid';
+import { DynamicGrid } from '../shared/DynamicGrid';
 
 interface SimplifiedMarketOverviewProps {
   selectedProducts: string[];
@@ -209,20 +209,9 @@ export function SimplifiedMarketOverview({
           <Text className="text-lg font-semibold text-white mb-3">
             Your Products ({selectedProducts.length})
           </Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -6 }}>
-            {specifications.map((spec, index) => {
-              const itemsPerRow = width < 400 ? 1 : width < 768 ? 2 : 3;
-              return (
-                <View key={index} style={{ 
-                  width: `${100 / itemsPerRow}%`, 
-                  paddingHorizontal: 6, 
-                  paddingVertical: 6 
-                }}>
-                  {renderProductCard(spec, index)}
-                </View>
-              );
-            })}
-          </View>
+          <DynamicGrid minItemWidth={200} maxItemWidth={350} spacing={12}>
+            {specifications.map((spec, index) => renderProductCard(spec, index))}
+          </DynamicGrid>
         </View>
 
         {/* Information Notice */}
