@@ -63,25 +63,52 @@ export const ProductSelectionUnified: React.FC = () => {
   };
 
   const toggleProduct = (productId: string) => {
-    const newSelection = selectedProductIds.includes(productId)
-      ? selectedProductIds.filter(id => id !== productId)
-      : [...selectedProductIds, productId];
-    
-    setSelectedProductIds(newSelection);
-    
-    // Update store immediately
-    updateSelectedProducts(newSelection);
-    
-    // Update metadata
-    const metadata = newSelection.map(id => {
-      const product = products.find(p => p.id === id);
-      return {
-        category: id,
-        name: product?.name || 'Unknown Product',
-        image: product?.image || null,
-      };
-    });
-    setSelectedProductsMetadata(metadata);
+    // For sellers: single selection with auto-advance
+    // For buyers: multi-selection (existing behavior)
+    if (role === 'seller') {
+      // Single selection for sellers
+      const newSelection = selectedProductIds.includes(productId) ? [] : [productId];
+      
+      setSelectedProductIds(newSelection);
+      updateSelectedProducts(newSelection);
+      
+      // Update metadata
+      const metadata = newSelection.map(id => {
+        const product = products.find(p => p.id === id);
+        return {
+          category: id,
+          name: product?.name || 'Unknown Product',
+          image: product?.image || null,
+        };
+      });
+      setSelectedProductsMetadata(metadata);
+      
+      // Auto-advance to next step for sellers after selection
+      if (newSelection.length > 0) {
+        setTimeout(() => {
+          nextStep();
+        }, 800); // Brief delay to show selection feedback
+      }
+    } else {
+      // Multi-selection for buyers (existing behavior)
+      const newSelection = selectedProductIds.includes(productId)
+        ? selectedProductIds.filter(id => id !== productId)
+        : [...selectedProductIds, productId];
+      
+      setSelectedProductIds(newSelection);
+      updateSelectedProducts(newSelection);
+      
+      // Update metadata
+      const metadata = newSelection.map(id => {
+        const product = products.find(p => p.id === id);
+        return {
+          category: id,
+          name: product?.name || 'Unknown Product',
+          image: product?.image || null,
+        };
+      });
+      setSelectedProductsMetadata(metadata);
+    }
   };
 
   if (loading) {
@@ -103,7 +130,10 @@ export const ProductSelectionUnified: React.FC = () => {
           {role === 'buyer' ? 'What do you need?' : 'What do you offer?'}
         </Text>
         <Text className="text-gray-400">
-          Select the agricultural products you want to {role === 'buyer' ? 'purchase' : 'sell'}
+          {role === 'buyer' 
+            ? 'Select the agricultural products you want to purchase' 
+            : 'Select one agricultural product you want to sell'
+          }
         </Text>
       </View>
 

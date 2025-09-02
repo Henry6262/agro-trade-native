@@ -132,7 +132,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
           // Set total steps based on role
           switch (role) {
             case 'seller':
-              state.totalSteps = 6; // Role → Products → Details → Insights → Account → Complete
+              state.totalSteps = 4; // Products → Quantity/Pricing → Custom Offer → Account
               state.sellerData = { selectedProducts: [] };
               break;
             case 'buyer':

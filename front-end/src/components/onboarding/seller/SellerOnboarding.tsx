@@ -5,7 +5,8 @@ import { simplifiedRoleSteps } from '../../../constants/simplifiedOnboarding'
 import { ProgressSidebar } from '../shared/ProgressSidebar'
 import { Navigation } from '../shared/Navigation'
 import { ProductSelectionUnified } from '../ProductSelectionUnified'
-import { ProductSpecificationsWithLocation } from './ProductSpecificationsWithLocation'
+import { QuantityPricingStep } from './QuantityPricingStep'
+import { CustomOfferStep } from './CustomOfferStep'
 import { SimplifiedMarketOverview } from './SimplifiedMarketOverview'
 import { useOnboardingStore } from '../../../store/onboardingStore'
 
@@ -173,19 +174,22 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
     const currentStep = steps[currentStepIndex]
     if (!currentStep) return false
 
+    const store = useOnboardingStore.getState()
+
     switch (currentStep.id) {
       case 'products':
         return selectedProducts.length > 0
-      case 'details-location':
-        // Check if all products have quantities and location in the store
-        const store = useOnboardingStore.getState()
+      case 'quantity-pricing':
+        // Check if quantity is set and location is provided
         const hasLocation = store.userLocation !== null
-        const hasQuantities = selectedProducts.every(productId => {
-          const spec = store.sellerSpecifications[productId]
-          return spec && spec.quantity && parseFloat(spec.quantity) > 0
-        })
-        return hasLocation && hasQuantities
-      case 'overview':
+        const productId = selectedProducts[0]
+        const spec = store.sellerSpecifications[productId]
+        const hasQuantity = spec && spec.quantity && parseFloat(spec.quantity) > 0
+        return hasLocation && hasQuantity
+      case 'custom-offer':
+        // Always allow proceeding from custom offer step
+        return true
+      case 'account':
         return true
       default:
         return true
@@ -199,9 +203,11 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
     switch (currentStep.id) {
       case 'products':
         return <ProductSelectionUnified />
-      case 'details-location':
-        return <ProductSpecificationsWithLocation />
-      case 'overview':
+      case 'quantity-pricing':
+        return <QuantityPricingStep />
+      case 'custom-offer':
+        return <CustomOfferStep />
+      case 'account':
         return (
           <SimplifiedMarketOverview
             selectedProducts={selectedProducts}

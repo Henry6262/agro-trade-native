@@ -6,7 +6,7 @@ import { RootStackParamList } from '../../navigation/types';
 import { useAuthStore } from '../../store/authStore';
 import { useOnboardingStore } from '../../store/onboardingStore';
 import { ExistingAccountModal } from '../../components/auth/ExistingAccountModal';
-import { APP_CONFIG } from '../../constants';
+import { ENV } from '../../utils/environment';
 
 type NavigationProp = StackNavigationProp<RootStackParamList>;
 
@@ -167,8 +167,7 @@ export const OAuthCallbackScreen: React.FC = () => {
     
     // Sign out and redirect to Google OAuth with account selection
     authStore.logout();
-    const apiUrl = APP_CONFIG.API_URL || 'http://localhost:4000/api';
-    const googleOAuthUrl = `${apiUrl}/auth/google?prompt=select_account`;
+    const googleOAuthUrl = `${ENV.googleOAuthUrl}?prompt=select_account`;
     
     if (Platform.OS === 'web') {
       window.location.href = googleOAuthUrl;

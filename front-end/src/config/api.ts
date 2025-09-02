@@ -1,19 +1,11 @@
 // API Configuration
+import { ENV } from '../utils/environment';
 
 // Determine if we're in development or production
 const isDev = __DEV__ || process.env.NODE_ENV === 'development';
 
-// Use environment variable or default to localhost for development
-const getApiUrl = () => {
-  // Check for environment variable first
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
-  }
-  console.error('No backend API URL found');
-  return 'http://localhost:4000/api';
-  };
-
-export const API_URL = getApiUrl();
+// Use dynamic environment-based API URL
+export const API_URL = ENV.apiUrl;
 
 // WebSocket URL for real-time features
 export const WS_URL = API_URL.replace('http', 'ws').replace('/api', '');

@@ -60,7 +60,8 @@ async function cleanDatabase() {
   await prisma.$transaction([
     prisma.truck.deleteMany(),
     prisma.product.deleteMany(),
-    prisma.regionalPrice.deleteMany(),
+    // Note: RegionalPrice table doesn't exist in current migrations
+    // prisma.regionalPrice.deleteMany(),
     prisma.transporterProfile.deleteMany(),
     prisma.buyerProfile.deleteMany(),
     prisma.farmerProfile.deleteMany(),
@@ -112,6 +113,9 @@ async function seedRegionalPrices(regions: any[]) {
   
   let priceCount = 0;
   
+  // Note: RegionalPrice table doesn't exist in current migrations
+  // Commenting out regional price seeding
+  /*
   for (const region of regions) {
     for (const product of PRODUCTS) {
       // Add regional variation (±10% from base price)
@@ -130,6 +134,7 @@ async function seedRegionalPrices(regions: any[]) {
       priceCount++;
     }
   }
+  */
   
   console.log(`✅ Created ${priceCount} regional prices`);
 }

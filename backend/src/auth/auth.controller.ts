@@ -48,9 +48,30 @@ export class AuthController {
     });
     
     // Redirect to frontend with tokens and user info
-    // Use ConfigService to get the CLIENT_URL from environment
-    const frontendUrl = this.configService.get<string>('CLIENT_URL') || 'http://localhost:8081';
-    console.log('Redirecting to frontend URL:', frontendUrl);
+    // Determine the frontend URL based on environment
+    let frontendUrl = this.configService.get<string>('CLIENT_URL');
+    
+    // In production, use the proper frontend URLs based on deployment
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+      // Check if we have a specific production URL configured
+      if (process.env.CLIENT_PRODUCTION_URL) {
+        // Use the production URL from environment
+        frontendUrl = process.env.CLIENT_PRODUCTION_URL;
+      } else if (process.env.VERCEL_URL) {
+        // If deployed on Vercel, construct the frontend URL
+        frontendUrl = 'https://agro-trade-native.vercel.app';
+      } else {
+        // Fallback
+        frontendUrl = frontendUrl || 'https://agro-trade-native.vercel.app';
+      }
+    }
+    
+    // Fallback to localhost for development
+    if (!frontendUrl) {
+      frontendUrl = 'http://localhost:8081';
+    }
+    
+    console.log('Redirecting to frontend URL:', frontendUrl, 'Environment:', process.env.NODE_ENV);
     
     const params = new URLSearchParams({
       accessToken: result.access_token,

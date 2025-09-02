@@ -25,7 +25,7 @@ import { useOnboardingStore } from '../../../store/onboardingStore';
 import { useAuthStore } from '../../../store/authStore';
 import { authService, CompanyInfo } from '../../../services/authService';
 import { UserRole } from '../../../types';
-import { APP_CONFIG } from '../../../constants';
+import { ENV } from '../../../utils/environment';
 
 interface AuthModalProps {
   visible: boolean;
@@ -308,8 +308,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (provider === 'google') {
         // For Google OAuth, we need to redirect to the backend OAuth endpoint
         // The backend expects a GET request to /api/auth/google
-        const apiUrl = APP_CONFIG.API_URL;
-        const googleOAuthUrl = `${apiUrl}/auth/google`;
+        const googleOAuthUrl = ENV.googleOAuthUrl;
         
         // In React Native Web, we can use window.location for OAuth redirect
         if (Platform.OS === 'web') {

@@ -10,10 +10,24 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     private configService: ConfigService,
     private authService: AuthService,
   ) {
+    // Determine callback URL based on environment
+    let callbackURL = configService.get('GOOGLE_CALLBACK_URL');
+    
+    // In production, use the proper callback URL
+    if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+      if (process.env.API_PRODUCTION_URL) {
+        // Use configured production API URL
+        callbackURL = `${process.env.API_PRODUCTION_URL}/auth/google/callback`;
+      } else if (process.env.VERCEL_URL) {
+        // Use Vercel URL if available  
+        callbackURL = `https://${process.env.VERCEL_URL}/api/auth/google/callback`;
+      }
+    }
+    
     super({
       clientID: configService.get('GOOGLE_CLIENT_ID'),
       clientSecret: configService.get('GOOGLE_CLIENT_SECRET'),
-      callbackURL: configService.get('GOOGLE_CALLBACK_URL'),
+      callbackURL: callbackURL || 'http://localhost:4000/api/auth/google/callback',
       scope: ['email', 'profile'],
     });
   }

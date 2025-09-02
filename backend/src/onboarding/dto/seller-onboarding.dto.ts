@@ -2,6 +2,82 @@ import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested, IsNu
 import { Type } from 'class-transformer';
 import { ProductCategory, ProductUnit } from '@prisma/client';
 
+export class LocationBasedPricingDto {
+  @IsNumber()
+  @IsNotEmpty()
+  latitude: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  longitude: number;
+
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @IsOptional()
+  @IsString()
+  country?: string;
+
+  @IsOptional()
+  priceRange?: {
+    min: number;
+    max: number;
+    currency: string;
+    confidence: 'high' | 'medium' | 'low';
+  };
+
+  @IsOptional()
+  @IsBoolean()
+  requestedCustomOffer?: boolean;
+}
+
+export class CustomOfferDataDto {
+  @IsOptional()
+  @IsBoolean()
+  organicCertified?: boolean;
+
+  @IsOptional()
+  @IsString()
+  harvestDate?: string;
+
+  @IsOptional()
+  @IsString()
+  qualityGrade?: 'premium' | 'standard' | 'economy';
+
+  @IsOptional()
+  @IsString()
+  storageType?: 'cold' | 'ambient' | 'controlled';
+
+  @IsOptional()
+  @IsString()
+  packaging?: 'bulk' | 'bags' | 'crates' | 'custom';
+
+  @IsOptional()
+  @IsString()
+  customPackagingDetails?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  deliveryFlexible?: boolean;
+
+  @IsOptional()
+  @IsString()
+  minOrderQuantity?: string;
+
+  @IsOptional()
+  @IsString()
+  specialRequests?: string;
+
+  @IsOptional()
+  @IsString()
+  contactPreference?: 'email' | 'phone' | 'both';
+
+  @IsOptional()
+  @IsString()
+  urgency?: 'immediate' | 'within_week' | 'within_month' | 'flexible';
+}
+
 export class ProductSpecificationDto {
   @IsOptional()
   @IsString()
@@ -24,16 +100,18 @@ export class ProductSpecificationDto {
   pricePerTon?: number;
 
   @IsOptional()
-  @IsString()
-  locationAddress?: string;
+  @ValidateNested()
+  @Type(() => LocationBasedPricingDto)
+  locationBasedPricing?: LocationBasedPricingDto;
 
   @IsOptional()
-  @IsNumber()
-  locationLat?: number;
+  @ValidateNested()
+  @Type(() => CustomOfferDataDto)
+  customOfferData?: CustomOfferDataDto;
 
   @IsOptional()
-  @IsNumber()
-  locationLng?: number;
+  @IsBoolean()
+  wantCustomOffer?: boolean;
 }
 
 export class CompanyInfoDto {

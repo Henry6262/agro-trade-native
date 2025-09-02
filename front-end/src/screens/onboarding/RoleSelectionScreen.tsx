@@ -9,7 +9,7 @@ import { useOnboardingStore } from '../../store/onboardingStore';
 import { useAuthStore } from '../../store/authStore';
 import { AnimatedRoleCard } from '../../components/onboarding/AnimatedRoleCard';
 import { authService, GoogleAuthResponse } from '../../services/authService';
-import { APP_CONFIG } from '../../constants';
+import { ENV } from '../../utils/environment';
 
 type RoleSelectionScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -77,8 +77,7 @@ export const RoleSelectionScreen: React.FC = () => {
     
     try {
       // For existing users, redirect to Google OAuth without role selection
-      const apiUrl = APP_CONFIG.API_URL;
-      const googleOAuthUrl = `${apiUrl}/auth/google`;
+      const googleOAuthUrl = ENV.googleOAuthUrl;
       
       if (Platform.OS === 'web') {
         // Store current state

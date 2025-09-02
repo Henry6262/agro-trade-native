@@ -12,7 +12,7 @@ import { useOnboardingStore } from '../../../store/onboardingStore';
 import { useAuthStore } from '../../../store/authStore';
 import { authService } from '../../../services/authService';
 import { UserRole } from '../../../types';
-import { APP_CONFIG } from '../../../constants';
+import { ENV } from '../../../utils/environment';
 
 interface InlineAuthProps {
   onClose: () => void;
@@ -99,9 +99,8 @@ export const InlineAuth: React.FC<InlineAuthProps> = ({
     
     try {
       // For Google OAuth, redirect to the backend OAuth endpoint
-      const apiUrl = APP_CONFIG.API_URL;
       const role = userRole || selectedRole || 'buyer';
-      const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}`;
+      const googleOAuthUrl = `${ENV.googleOAuthUrl}?role=${role}`;
       
       if (Platform.OS === 'web') {
         // Store onboarding data and role before redirecting
