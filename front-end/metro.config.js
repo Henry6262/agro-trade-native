@@ -6,22 +6,13 @@ const config = getDefaultConfig(__dirname);
 // Keep package exports enabled for other packages
 config.resolver.unstable_enablePackageExports = true;
 
-// Fix for Zustand import.meta error and react-native-maps on web
+// Add platform-specific extensions and aliases for web compatibility
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  // Force Zustand to use CommonJS to avoid import.meta issues
-  if (moduleName === 'zustand' || moduleName.startsWith('zustand/')) {
-    return {
-      type: 'sourceFile',
-      filePath: require.resolve(moduleName),
-    };
-  }
-  
-  // Handle react-native-maps on web - return mock module
+  // Redirect react-native-maps to a web shim on web platform
   if (platform === 'web' && moduleName === 'react-native-maps') {
-    // Return a mock module for web to prevent import errors
     return {
-      type: 'sourceFile', 
-      filePath: require.resolve('./src/components/dashboard/base-management/GoogleMapWeb.tsx'),
+      filePath: require.resolve('./src/utils/maps.web.ts'),
+      type: 'sourceFile',
     };
   }
   
@@ -29,4 +20,8 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   return context.resolveRequest(context, moduleName, platform);
 };
 
-module.exports = withNativeWind(config, { input: './src/styles/global.css' });
+// Enable NativeWind without CSS file import
+module.exports = withNativeWind(config, { 
+  input: './src/styles/global.css',
+  inlineRem: false 
+});

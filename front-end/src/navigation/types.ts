@@ -3,30 +3,14 @@ import type { NavigatorScreenParams } from '@react-navigation/native';
 
 export type RootStackParamList = {
   Auth: NavigatorScreenParams<AuthStackParamList>;
-  Main: NavigatorScreenParams<MainTabParamList>;
+  Onboarding: NavigatorScreenParams<OnboardingStackParamList>;
+  Main: NavigatorScreenParams<DashboardStackParamList>;
+  Admin: NavigatorScreenParams<AdminStackParamList>;
+  OAuthCallback: undefined;
   OrderCreate: { productId?: string };
   OrderDetail: { orderId: string };
   ProductDetail: { productId: string };
   Profile: undefined;
-  OAuthCallback: undefined;
-  // Flattened onboarding screens
-  RoleSelection: undefined;
-  BuyerOnboardingFlow: undefined;
-  SellerOnboardingFlow: undefined;
-  TransporterOnboardingFlow: undefined;
-  OnboardingComplete: undefined;
-  // Base Management
-  BaseManagement: undefined;
-  // Admin screens
-  AdminDashboard: undefined;
-  AdminPricingZones: undefined;
-  AdminZoneDetails: { zoneId: string };
-  AdminProductPrices: undefined;
-  AdminMarketConditions: undefined;
-  AdminAnalytics: undefined;
-  AdminBulkPriceUpdate: undefined;
-  AdminImportExport: undefined;
-  AdminMapView: undefined;
 };
 
 export type AuthStackParamList = {
@@ -38,16 +22,19 @@ export type AuthStackParamList = {
 
 export type OnboardingStackParamList = {
   RoleSelection: undefined;
-  SellerProductSelection: undefined;
-  SellerProductDetails: { products: string[] };
-  SellerMarketInsights: undefined;
-  SellerOnboardingFlow: undefined;
-  BuyerProductSelection: undefined;
-  BuyerRequirements: { products: string[] };
-  BuyerMarketOverview: undefined;
   BuyerOnboardingFlow: undefined;
-  TransportFleetInfo: undefined;
-  TransportJobPreferences: undefined;
+  SellerOnboardingFlow: undefined;
+  TransporterOnboardingFlow: undefined;
+  OnboardingComplete: undefined;
+};
+
+export type AdminStackParamList = {
+  AdminDashboard: undefined;
+  AdminPricingZones: undefined;
+  AdminZoneDetails: { zoneId: string };
+  AdminProductPrices: undefined;
+  BulkPriceUpdate: undefined;
+  AdminMapView: undefined;
   TransportOpportunities: undefined;
   TransporterOnboardingFlow: undefined;
   OnboardingComplete: undefined;

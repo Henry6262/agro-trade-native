@@ -1,6 +1,6 @@
 import { apiClient } from './api';
-import { useOnboardingStore } from '../store/onboardingStore';
-import { useAuthStore } from '../store/authStore';
+import { useOnboardingStore } from '../stores/onboarding.store';
+import { useAuthStore } from '../stores/auth.store';
 import { authService } from './authService';
 import type {
   ApiResponse,
@@ -8,7 +8,7 @@ import type {
   BuyerOnboardingData,
   TransportOnboardingData,
   UserRole,
-} from '../types';
+} from '../shared/types';
 
 export interface OnboardingSubmissionData {
   role: UserRole;

@@ -28,117 +28,123 @@ model User {
   updatedAt           DateTime    @updatedAt @map("updated_at")
 
   // Relations
-  farmerProfile      FarmerProfile?
-  buyerProfile       BuyerProfile?
-  transporterProfile TransporterProfile?
-  products           Product[]           @relation("FarmerProducts")
+  company            Company?
+  addresses          Address[]
+  trucks             Truck[]         // For transporters
+  
+  // Marketplace activities
+  saleListings       SaleListing[]       @relation("SellerListings")
+  buyListings        BuyListing[]        @relation("BuyerListings")
   
   @@index([email])
   @@index([role])
   @@map("users")
 }
 
-model FarmerProfile {
-  userId             String      @id @map("user_id")
-  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  farmName           String?     @map("farm_name")
-  farmLocation       String?     @map("farm_location")
-  cropsGrown         String[]    @map("crops_grown")
-  latitude           Float?
-  longitude          Float?
-  certifications     String[]
-  yearsOfExperience  Int?        @map("years_of_experience")
-  
-  // Company info
-  companyInfo        CompanyInfo?
-  
-  createdAt          DateTime    @default(now()) @map("created_at")
-  updatedAt          DateTime    @updatedAt @map("updated_at")
-
-  @@map("farmer_profiles")
-}
-
-model BuyerProfile {
-  userId             String      @id @map("user_id")
-  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  companyName        String?     @map("company_name")
-  businessType       String?     @map("business_type")
-  preferredProducts  String[]    @map("preferred_products")
-  estimatedVolume    Float?      @map("estimated_volume")
-  volumeUnit         String?     @map("volume_unit")
-  latitude           Float?
-  longitude          Float?
-  
-  // Company info
-  companyInfo        CompanyInfo?
-  
-  createdAt          DateTime    @default(now()) @map("created_at")
-  updatedAt          DateTime    @updatedAt @map("updated_at")
-
-  @@map("buyer_profiles")
-}
-
-model TransporterProfile {
-  userId              String      @id @map("user_id")
-  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  companyName         String?     @map("company_name")
-  licenseNumber       String?     @map("license_number")
-  baseLocationAddress String?     @map("base_location_address")
-  baseLocationLat     Float?      @map("base_location_lat")
-  baseLocationLng     Float?      @map("base_location_lng")
-  insuranceDocUrl     String?     @map("insurance_doc_url")
-  iban                String?
-  
-  // Company info
-  companyInfo         CompanyInfo?
-  
-  // Fleet
-  trucks              Truck[]
-  
-  createdAt           DateTime    @default(now()) @map("created_at")
-  updatedAt           DateTime    @updatedAt @map("updated_at")
-
-  @@map("transporter_profiles")
-}
-
-model CompanyInfo {
+model Company {
   id                 String      @id @default(cuid())
   
-  // Relations
-  farmerId           String?     @unique @map("farmer_id")
-  farmer             FarmerProfile? @relation(fields: [farmerId], references: [userId])
-  
-  buyerId            String?     @unique @map("buyer_id")
-  buyer              BuyerProfile? @relation(fields: [buyerId], references: [userId])
-  
-  transporterId      String?     @unique @map("transporter_id")
-  transporter        TransporterProfile? @relation(fields: [transporterId], references: [userId])
+  // Link to user
+  userId             String      @unique @map("user_id")
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   // Company details
-  name               String
+  legalName          String      @map("legal_name")
   registrationNumber String?     @map("registration_number")
   vatNumber          String?     @map("vat_number")
-  address            String?
-  city               String?
-  state              String?
-  country            String?
-  postalCode         String?     @map("postal_code")
   phoneNumber        String?     @map("phone_number")
   email              String?
   website            String?
   
+  // Relations
+  addresses          Address[]
+  
   createdAt          DateTime    @default(now()) @map("created_at")
   updatedAt          DateTime    @updatedAt @map("updated_at")
 
-  @@map("company_info")
+  @@map("companies")
 }
 
-// ==================== PRODUCT CATALOG ====================
+// ==================== ADDRESSES ====================
 
-model ProductCatalog {
+model Address {
+  id          String      @id @default(cuid())
+  
+  // Relations (an address can belong to different entities)
+  userId      String?     @map("user_id")
+  user        User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  companyId   String?     @map("company_id")
+  company     Company?    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  
+  // Address details
+  addressType AddressType @map("address_type")
+  label       String?     // "Main Farm", "Warehouse #2", etc.
+  
+  street      String?
+  cityId      String?     @map("city_id")
+  city        City?       @relation(fields: [cityId], references: [id])
+  postalCode  String?     @map("postal_code")
+  country     String?
+  
+  latitude    Float?
+  longitude   Float?
+  
+  isDefault   Boolean     @default(false) @map("is_default")
+  
+  // Used by
+  saleListings        SaleListing[]      @relation("ListingAddress")
+  buyListings         BuyListing[]       @relation("DeliveryAddress")
+  
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  
+  @@index([userId])
+  @@index([companyId])
+  @@map("addresses")
+}
+
+// ==================== LOCATION HIERARCHY ====================
+
+model Region {
+  id        String   @id @default(cuid())
+  name      String   // Northwestern, North Central, etc.
+  country   String   // Bulgaria, Greece
+  isActive  Boolean  @default(true) @map("is_active")
+  
+  // Cities in this region
+  cities    City[]
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@unique([name, country])
+  @@index([country])
+  @@map("regions")
+}
+
+model City {
+  id        String   @id @default(cuid())
+  name      String   // Sofia, Plovdiv, Varna, etc.
+  
+  regionId  String   @map("region_id")
+  region    Region   @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  addresses     Address[]
+  regionalPrices RegionalPrice[]
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@unique([name, regionId])
+  @@index([regionId])
+  @@map("cities")
+}
+
+// ==================== PRODUCT DEFINITIONS ====================
+
+model Product {
   id                     String          @id @default(cuid())
   category               ProductCategory @unique
   name                   String          @unique
@@ -146,105 +152,279 @@ model ProductCatalog {
   description            String?         @db.Text
   image                  String?         // Cloudinary URL
   
-  nutritionalInfo        String?         @map("nutritional_info") @db.Text
-  useCases               String[]        @map("use_cases")
+  // Product characteristics
   harvestSeason          String?         @map("harvest_season")
   storageRecommendations String?         @map("storage_recommendations") @db.Text
   
+  // Price guidance
   priceRangeMin          Decimal?        @map("price_range_min") @db.Decimal(10, 2)
   priceRangeMax          Decimal?        @map("price_range_max") @db.Decimal(10, 2)
   defaultUnit            ProductUnit     @default(TON) @map("default_unit")
   
-  qualityGrades          String[]        @map("quality_grades")
-  certifications         String[]
-  specifications         Json?
-  
   isActive               Boolean         @default(true) @map("is_active")
   sortOrder              Int?            @map("sort_order")
+  
+  // Relations
+  specTemplates          ProductSpecTemplate[]
+  saleListings           SaleListing[]
+  buyListings            BuyListing[]
+  regionalPrices         RegionalPrice[]
   
   createdAt              DateTime        @default(now()) @map("created_at")
   updatedAt              DateTime        @updatedAt @map("updated_at")
   
   @@index([category])
   @@index([isActive])
-  @@map("product_catalog")
-}
-
-// ==================== PRODUCTS ====================
-
-model Product {
-  id            String          @id @default(cuid())
-  farmerId      String          @map("farmer_id")
-  farmer        User            @relation("FarmerProducts", fields: [farmerId], references: [id], onDelete: Cascade)
-  
-  category      ProductCategory
-  name          String
-  description   String?         @db.Text
-  quantity      Decimal         @db.Decimal(10, 2)
-  unit          ProductUnit     @default(TON)
-  pricePerUnit  Decimal         @map("price_per_unit") @db.Decimal(10, 2)
-  
-  location      String?
-  harvestDate   DateTime?       @map("harvest_date")
-  
-  status        ProductStatus   @default(AVAILABLE)
-  
-  createdAt     DateTime        @default(now()) @map("created_at")
-  updatedAt     DateTime        @updatedAt @map("updated_at")
-  
-  @@index([farmerId])
-  @@index([category])
-  @@index([status])
   @@map("products")
 }
 
-// ==================== TRANSPORT ====================
+// ==================== FLEXIBLE SPECIFICATION SYSTEM ====================
 
-model Truck {
-  id                 String      @id @default(cuid())
-  transporterId      String      @map("transporter_id")
-  transporter        TransporterProfile @relation(fields: [transporterId], references: [userId], onDelete: Cascade)
-  
-  plateNumber        String      @unique @map("plate_number")
-  capacity           Float
-  unit               ProductUnit @default(TON)
-  type               TruckType
-  currentLocation    String?     @map("current_location")
-  isAvailable        Boolean     @default(true) @map("is_available")
-  
-  createdAt          DateTime    @default(now()) @map("created_at")
-  updatedAt          DateTime    @updatedAt @map("updated_at")
-
-  @@index([transporterId])
-  @@map("trucks")
-}
-
-// ==================== SIMPLE REGIONAL PRICING ====================
-
-model Region {
+model SpecificationType {
   id          String   @id @default(cuid())
-  name        String   // Sofia, Plovdiv, Thessaloniki, Athens, etc.
-  country     String   // Bulgaria, Greece
-  isActive    Boolean  @default(true) @map("is_active")
+  code        String   @unique  // moisture, protein, oil_content, test_weight, etc.
+  name        String            // "Moisture Content", "Protein Content", etc.
+  unit        String?           // "%", "kg/hl", "ppm", etc.
+  dataType    DataType         // NUMBER, TEXT, BOOLEAN, ENUM
   
-  // Prices for this region
-  prices      RegionalPrice[]
+  // For ENUM types, store options
+  enumOptions Json?            // ["Grade A", "Grade B", "Feed Grade"]
+  
+  // Validation rules
+  minValue    Float?
+  maxValue    Float?
+  
+  // Used in specifications
+  productSpecTemplates  ProductSpecTemplate[]
+  listingSpecs          ListingSpec[]
   
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
   
-  @@unique([name, country])
-  @@index([country])
-  @@map("regions")
+  @@map("specification_types")
 }
+
+model ProductSpecTemplate {
+  id            String   @id @default(cuid())
+  
+  productId     String   @map("product_id")
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  specTypeId    String   @map("spec_type_id")
+  specificationType SpecificationType @relation(fields: [specTypeId], references: [id])
+  
+  // How important is this spec for this product?
+  importance    Importance  // CRITICAL, IMPORTANT, OPTIONAL
+  
+  displayOrder  Int      @default(0) @map("display_order")  // Order in UI forms
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  @@unique([productId, specTypeId])
+  @@index([productId])
+  @@map("product_spec_templates")
+}
+
+// ==================== MARKETPLACE LISTINGS ====================
+
+model SaleListing {
+  id            String          @id @default(cuid())
+  
+  // What product is being sold
+  productId     String          @map("product_id")
+  product       Product         @relation(fields: [productId], references: [id])
+  
+  // Who is selling
+  sellerId      String          @map("seller_id")
+  seller        User            @relation("SellerListings", fields: [sellerId], references: [id], onDelete: Cascade)
+  
+  // Location
+  addressId     String?         @map("address_id")
+  address       Address?        @relation("ListingAddress", fields: [addressId], references: [id])
+  
+  // Listing details
+  quantity      Decimal         @db.Decimal(10, 2)
+  unit          ProductUnit     @default(TON)
+  
+  // Seller's asking price (optional - platform can suggest)
+  askingPrice   Decimal?        @map("asking_price") @db.Decimal(10, 2)
+  
+  // Product specifics
+  harvestDate   DateTime?       @map("harvest_date")
+  
+  // Quality specifications (flexible - seller provides what they know)
+  specifications ListingSpec[]
+  
+  // Platform-calculated quality assessment
+  qualityScore   Int?           @map("quality_score")  // 0-100 based on provided specs
+  qualityGrade   String?        @map("quality_grade")  // "Premium", "Standard", "Feed"
+  
+  // Status and visibility
+  status        ListingStatus   @default(ACTIVE)
+  viewCount     Int            @default(0) @map("view_count")
+  
+  // Offers made for this listing
+  offers        Offer[]
+  
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  
+  @@index([sellerId])
+  @@index([productId])
+  @@index([addressId])
+  @@index([status])
+  @@map("sale_listings")
+}
+
+model BuyListing {
+  id            String   @id @default(cuid())
+  
+  // What product is needed
+  productId     String   @map("product_id")
+  product       Product  @relation(fields: [productId], references: [id])
+  
+  // Who is buying
+  buyerId       String   @map("buyer_id")
+  buyer         User     @relation("BuyerListings", fields: [buyerId], references: [id], onDelete: Cascade)
+  
+  // Delivery location
+  deliveryAddressId String? @map("delivery_address_id")
+  deliveryAddress   Address? @relation("DeliveryAddress", fields: [deliveryAddressId], references: [id])
+  
+  // Purchase details
+  quantity      Decimal  @db.Decimal(10, 2)
+  unit          ProductUnit @default(TON)
+  
+  // Budget
+  maxPricePerUnit Decimal? @map("max_price_per_unit") @db.Decimal(10, 2)
+  
+  // Timeline
+  neededBy      DateTime? @map("needed_by")
+  
+  // Required specifications
+  specifications ListingSpec[]
+  
+  // Status
+  status        RequestStatus @default(ACTIVE)
+  
+  // Offers received for this request
+  offers        Offer[]
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  @@index([buyerId])
+  @@index([productId])
+  @@index([deliveryAddressId])
+  @@index([status])
+  @@map("buy_listings")
+}
+
+// ==================== UNIFIED SPECIFICATION VALUES ====================
+
+model ListingSpec {
+  id          String   @id @default(cuid())
+  
+  // Can belong to either sale or buy listing
+  saleListingId String?   @map("sale_listing_id")
+  saleListing   SaleListing? @relation(fields: [saleListingId], references: [id], onDelete: Cascade)
+  
+  buyListingId  String?   @map("buy_listing_id")
+  buyListing    BuyListing? @relation(fields: [buyListingId], references: [id], onDelete: Cascade)
+  
+  specTypeId  String   @map("spec_type_id")
+  specificationType SpecificationType @relation(fields: [specTypeId], references: [id])
+  
+  // For sale listings: actual values
+  // For buy listings: exact requirements or midpoint of range
+  valueNumber Float?   @map("value_number")
+  valueText   String?  @map("value_text")
+  valueBool   Boolean? @map("value_bool")
+  
+  // For buy listings: acceptable ranges
+  minValue    Float?   @map("min_value")
+  maxValue    Float?   @map("max_value")
+  
+  // Platform assessment (for sale listings)
+  qualityImpact QualityImpact? @map("quality_impact") // POSITIVE, NEUTRAL, NEGATIVE
+  
+  // How strict is this requirement (for buy listings)
+  strictness    Strictness? // MANDATORY, PREFERRED, OPTIONAL
+  
+  // Price impact for variations (for buy listings)
+  priceAdjustmentPerUnit Decimal? @map("price_adjustment_per_unit") @db.Decimal(10, 2)
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  @@unique([saleListingId, specTypeId])
+  @@unique([buyListingId, specTypeId])
+  @@index([saleListingId])
+  @@index([buyListingId])
+  @@map("listing_specs")
+}
+
+// ==================== MATCHING & OFFERS ====================
+
+model Offer {
+  id            String   @id @default(cuid())
+  
+  // Linking supply and demand
+  saleListingId String?  @map("sale_listing_id")
+  saleListing   SaleListing? @relation(fields: [saleListingId], references: [id], onDelete: Cascade)
+  
+  buyListingId  String?  @map("buy_listing_id")
+  buyListing    BuyListing? @relation(fields: [buyListingId], references: [id], onDelete: Cascade)
+  
+  // Offer details
+  offeredPrice  Decimal  @map("offered_price") @db.Decimal(10, 2)
+  quantity      Decimal  @db.Decimal(10, 2)
+  unit          ProductUnit @default(TON)
+  
+  // Quality match assessment
+  matchScore    Int      @map("match_score")  // 0-100 based on spec alignment
+  matchDetails  Json?    @map("match_details") // Detailed breakdown of spec matches
+  
+  // Price calculation breakdown
+  basePrice     Decimal  @map("base_price") @db.Decimal(10, 2)
+  qualityAdjustment Decimal? @map("quality_adjustment") @db.Decimal(10, 2)
+  quantityDiscount Decimal? @map("quantity_discount") @db.Decimal(10, 2)
+  transportCost Decimal?  @map("transport_cost") @db.Decimal(10, 2)
+  finalPrice    Decimal   @map("final_price") @db.Decimal(10, 2)
+  
+  // Terms
+  validUntil    DateTime @map("valid_until")
+  deliveryTerms String?  @map("delivery_terms")
+  paymentTerms  String?  @map("payment_terms")
+  
+  // Status tracking
+  status        OfferStatus @default(PENDING)
+  rejectionReason String?  @map("rejection_reason")
+  
+  // Who created the offer
+  createdBy     OfferCreator @map("created_by") // PLATFORM, SELLER, BUYER
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  
+  @@index([saleListingId])
+  @@index([buyListingId])
+  @@index([status])
+  @@map("offers")
+}
+
+// ==================== REGIONAL PRICING ====================
 
 model RegionalPrice {
   id              String          @id @default(cuid())
   
-  regionId        String          @map("region_id")
-  region          Region          @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  cityId          String          @map("city_id")
+  city            City            @relation(fields: [cityId], references: [id], onDelete: Cascade)
   
-  productCategory ProductCategory @map("product_category")
+  productId       String          @map("product_id")
+  product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
   pricePerUnit    Decimal         @map("price_per_unit") @db.Decimal(10, 2)
   currency        String          @default("EUR")
   unit            ProductUnit     @default(TON)
@@ -252,10 +432,37 @@ model RegionalPrice {
   // Track price changes
   lastUpdated     DateTime        @default(now()) @map("last_updated")
   
-  @@unique([regionId, productCategory])
-  @@index([regionId])
-  @@index([productCategory])
+  @@unique([cityId, productId])
+  @@index([cityId])
+  @@index([productId])
   @@map("regional_prices")
+}
+
+// ==================== TRANSPORT ====================
+
+model Truck {
+  id                 String      @id @default(cuid())
+  
+  // Owner (must be a transporter)
+  ownerId            String      @map("owner_id")
+  owner              User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  plateNumber        String      @unique @map("plate_number")
+  capacity           Float       // in tons
+  unit               ProductUnit @default(TON)
+  type               TruckType
+  
+  // Current status
+  currentLocation    String?     @map("current_location")
+  latitude           Float?
+  longitude          Float?
+  isAvailable        Boolean     @default(true) @map("is_available")
+  
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+
+  @@index([ownerId])
+  @@map("trucks")
 }
 
 // ==================== ENUMS ====================
@@ -267,18 +474,30 @@ enum UserRole {
   TRANSPORTER
 }
 
-enum ProductCategory {
-  WHEAT
-  CORN
-  SUNFLOWER
-  BARLEY
-  OATS
-  RAPESEED
-  PEAS
-  SOYBEAN_MEAL
-  WHEAT_BRAN
-  ALFALFA
+enum AddressType {
+  BILLING
+  SHIPPING
+  FARM
+  WAREHOUSE
+  OFFICE
+  PICKUP
+  DELIVERY
   OTHER
+}
+
+enum ProductCategory {
+  SOFT_WHEAT      // Pastry/cake flour grade
+  DURUM_WHEAT     // Pasta production grade
+  CORN_MAIZE      // Feed and processing
+  BARLEY          // Malting and feed
+  OATS            // Milling and feed
+  SUNFLOWER       // High oleic oil production
+  RAPESEED        // Oil and biodiesel
+  PEAS            // Food and feed grade
+  SOYBEAN_MEAL    // High protein feed
+  WHEAT_BRAN      // Animal feed
+  ALFALFA         // Livestock feed
+  OTHER           // Various cereals & oilseeds
 }
 
 enum ProductUnit {
@@ -288,11 +507,60 @@ enum ProductUnit {
   PIECE
 }
 
-enum ProductStatus {
-  AVAILABLE
+enum DataType {
+  NUMBER
+  TEXT
+  BOOLEAN
+  ENUM
+}
+
+enum Importance {
+  CRITICAL    // Must have for this product type
+  IMPORTANT   // Should have for pricing
+  OPTIONAL    // Nice to have
+}
+
+enum QualityImpact {
+  POSITIVE    // Better than standard
+  NEUTRAL     // Within standard range
+  NEGATIVE    // Below standard
+}
+
+enum Strictness {
+  MANDATORY   // Must meet requirement
+  PREFERRED   // Should meet, but flexible
+  OPTIONAL    // Nice to have
+}
+
+enum ListingStatus {
+  ACTIVE
   SOLD
   PENDING
+  EXPIRED
   CANCELLED
+}
+
+enum RequestStatus {
+  ACTIVE
+  FULFILLED
+  PARTIALLY_FULFILLED
+  EXPIRED
+  CANCELLED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  WITHDRAWN
+  NEGOTIATING
+}
+
+enum OfferCreator {
+  PLATFORM    // Auto-generated by matching algorithm
+  SELLER      // Direct offer from seller
+  BUYER       // Counter-offer from buyer
 }
 
 enum TruckType {

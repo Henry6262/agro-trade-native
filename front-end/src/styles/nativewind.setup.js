@@ -1,2 +1,3 @@
-// NativeWind v4 configuration
-// Dark mode is configured through tailwind.config.js and doesn't require StyleSheet.setFlag
+// NativeWind setup for React Native
+// This file ensures NativeWind is properly initialized
+import './global.css';

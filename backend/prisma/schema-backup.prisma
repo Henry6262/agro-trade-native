@@ -1,0 +1,306 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== USERS & AUTH ====================
+
+model User {
+  id                  String      @id @default(cuid())
+  email               String      @unique
+  password            String?
+  name                String?
+  phoneNumber         String?     @unique @map("phone_number")
+  role                UserRole    @default(BUYER)
+  isActive            Boolean     @default(true) @map("is_active")
+  isEmailVerified     Boolean     @default(false) @map("is_email_verified")
+  isPhoneVerified     Boolean     @default(false) @map("is_phone_verified")
+  onboardingCompleted Boolean     @default(false) @map("onboarding_completed")
+  lastLogin           DateTime?   @map("last_login")
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  farmerProfile      FarmerProfile?
+  buyerProfile       BuyerProfile?
+  transporterProfile TransporterProfile?
+  products           Product[]           @relation("FarmerProducts")
+  
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model FarmerProfile {
+  userId             String      @id @map("user_id")
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  farmName           String?     @map("farm_name")
+  farmLocation       String?     @map("farm_location")
+  cropsGrown         String[]    @map("crops_grown")
+  latitude           Float?
+  longitude          Float?
+  certifications     String[]
+  yearsOfExperience  Int?        @map("years_of_experience")
+  
+  // Company info
+  companyInfo        CompanyInfo?
+  
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+
+  @@map("farmer_profiles")
+}
+
+model BuyerProfile {
+  userId             String      @id @map("user_id")
+  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  companyName        String?     @map("company_name")
+  businessType       String?     @map("business_type")
+  preferredProducts  String[]    @map("preferred_products")
+  estimatedVolume    Float?      @map("estimated_volume")
+  volumeUnit         String?     @map("volume_unit")
+  latitude           Float?
+  longitude          Float?
+  
+  // Company info
+  companyInfo        CompanyInfo?
+  
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+
+  @@map("buyer_profiles")
+}
+
+model TransporterProfile {
+  userId              String      @id @map("user_id")
+  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  companyName         String?     @map("company_name")
+  licenseNumber       String?     @map("license_number")
+  baseLocationAddress String?     @map("base_location_address")
+  baseLocationLat     Float?      @map("base_location_lat")
+  baseLocationLng     Float?      @map("base_location_lng")
+  insuranceDocUrl     String?     @map("insurance_doc_url")
+  iban                String?
+  
+  // Company info
+  companyInfo         CompanyInfo?
+  
+  // Fleet
+  trucks              Truck[]
+  
+  createdAt           DateTime    @default(now()) @map("created_at")
+  updatedAt           DateTime    @updatedAt @map("updated_at")
+
+  @@map("transporter_profiles")
+}
+
+model CompanyInfo {
+  id                 String      @id @default(cuid())
+  
+  // Relations
+  farmerId           String?     @unique @map("farmer_id")
+  farmer             FarmerProfile? @relation(fields: [farmerId], references: [userId])
+  
+  buyerId            String?     @unique @map("buyer_id")
+  buyer              BuyerProfile? @relation(fields: [buyerId], references: [userId])
+  
+  transporterId      String?     @unique @map("transporter_id")
+  transporter        TransporterProfile? @relation(fields: [transporterId], references: [userId])
+  
+  // Company details
+  name               String
+  registrationNumber String?     @map("registration_number")
+  vatNumber          String?     @map("vat_number")
+  address            String?
+  city               String?
+  state              String?
+  country            String?
+  postalCode         String?     @map("postal_code")
+  phoneNumber        String?     @map("phone_number")
+  email              String?
+  website            String?
+  
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+
+  @@map("company_info")
+}
+
+// ==================== PRODUCT CATALOG ====================
+
+model ProductCatalog {
+  id                     String          @id @default(cuid())
+  category               ProductCategory @unique
+  name                   String          @unique
+  displayName            String          @map("display_name")
+  description            String?         @db.Text
+  image                  String?         // Cloudinary URL
+  
+  nutritionalInfo        String?         @map("nutritional_info") @db.Text
+  useCases               String[]        @map("use_cases")
+  harvestSeason          String?         @map("harvest_season")
+  storageRecommendations String?         @map("storage_recommendations") @db.Text
+  
+  priceRangeMin          Decimal?        @map("price_range_min") @db.Decimal(10, 2)
+  priceRangeMax          Decimal?        @map("price_range_max") @db.Decimal(10, 2)
+  defaultUnit            ProductUnit     @default(TON) @map("default_unit")
+  
+  qualityGrades          String[]        @map("quality_grades")
+  certifications         String[]
+  specifications         Json?
+  
+  isActive               Boolean         @default(true) @map("is_active")
+  sortOrder              Int?            @map("sort_order")
+  
+  createdAt              DateTime        @default(now()) @map("created_at")
+  updatedAt              DateTime        @updatedAt @map("updated_at")
+  
+  @@index([category])
+  @@index([isActive])
+  @@map("product_catalog")
+}
+
+// ==================== PRODUCTS ====================
+
+model Product {
+  id            String          @id @default(cuid())
+  farmerId      String          @map("farmer_id")
+  farmer        User            @relation("FarmerProducts", fields: [farmerId], references: [id], onDelete: Cascade)
+  
+  category      ProductCategory
+  name          String
+  description   String?         @db.Text
+  quantity      Decimal         @db.Decimal(10, 2)
+  unit          ProductUnit     @default(TON)
+  pricePerUnit  Decimal         @map("price_per_unit") @db.Decimal(10, 2)
+  
+  location      String?
+  harvestDate   DateTime?       @map("harvest_date")
+  
+  status        ProductStatus   @default(AVAILABLE)
+  
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+  
+  @@index([farmerId])
+  @@index([category])
+  @@index([status])
+  @@map("products")
+}
+
+// ==================== TRANSPORT ====================
+
+model Truck {
+  id                 String      @id @default(cuid())
+  transporterId      String      @map("transporter_id")
+  transporter        TransporterProfile @relation(fields: [transporterId], references: [userId], onDelete: Cascade)
+  
+  plateNumber        String      @unique @map("plate_number")
+  capacity           Float
+  unit               ProductUnit @default(TON)
+  type               TruckType
+  currentLocation    String?     @map("current_location")
+  isAvailable        Boolean     @default(true) @map("is_available")
+  
+  createdAt          DateTime    @default(now()) @map("created_at")
+  updatedAt          DateTime    @updatedAt @map("updated_at")
+
+  @@index([transporterId])
+  @@map("trucks")
+}
+
+// ==================== SIMPLE REGIONAL PRICING ====================
+
+model Region {
+  id          String   @id @default(cuid())
+  name        String   // Sofia, Plovdiv, Thessaloniki, Athens, etc.
+  country     String   // Bulgaria, Greece
+  isActive    Boolean  @default(true) @map("is_active")
+  
+  // Prices for this region
+  prices      RegionalPrice[]
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  @@unique([name, country])
+  @@index([country])
+  @@map("regions")
+}
+
+model RegionalPrice {
+  id              String          @id @default(cuid())
+  
+  regionId        String          @map("region_id")
+  region          Region          @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  
+  productCategory ProductCategory @map("product_category")
+  pricePerUnit    Decimal         @map("price_per_unit") @db.Decimal(10, 2)
+  currency        String          @default("EUR")
+  unit            ProductUnit     @default(TON)
+  
+  // Track price changes
+  lastUpdated     DateTime        @default(now()) @map("last_updated")
+  
+  @@unique([regionId, productCategory])
+  @@index([regionId])
+  @@index([productCategory])
+  @@map("regional_prices")
+}
+
+// ==================== ENUMS ====================
+
+enum UserRole {
+  ADMIN
+  FARMER
+  BUYER
+  TRANSPORTER
+}
+
+enum ProductCategory {
+  WHEAT
+  CORN
+  SUNFLOWER
+  BARLEY
+  OATS
+  RAPESEED
+  PEAS
+  SOYBEAN_MEAL
+  WHEAT_BRAN
+  ALFALFA
+  OTHER
+}
+
+enum ProductUnit {
+  TON
+  KG
+  LITER
+  PIECE
+}
+
+enum ProductStatus {
+  AVAILABLE
+  SOLD
+  PENDING
+  CANCELLED
+}
+
+enum TruckType {
+  FLATBED
+  REFRIGERATED
+  TANKER
+  CONTAINER
+  CURTAIN_SIDE
+  BOX_TRUCK
+  OTHER
+}

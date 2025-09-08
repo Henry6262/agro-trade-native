@@ -113,28 +113,9 @@ export class AuthService {
   }
 
   private async checkProfileCompletion(user: User): Promise<boolean> {
-    switch (user.role) {
-      case UserRole.FARMER:
-        const farmerProfile = await this.prisma.farmerProfile.findUnique({
-          where: { userId: user.id },
-        });
-        return !!farmerProfile;
-
-      case UserRole.BUYER:
-        const buyerProfile = await this.prisma.buyerProfile.findUnique({
-          where: { userId: user.id },
-        });
-        return !!buyerProfile;
-
-      case UserRole.TRANSPORTER:
-        const transporterProfile = await this.prisma.transporterProfile.findUnique({
-          where: { userId: user.id },
-        });
-        return !!transporterProfile;
-
-      default:
-        return false;
-    }
+    // Since we removed profile tables, we now check if the user has completed onboarding
+    // based on the onboardingCompleted field in the user table
+    return user.onboardingCompleted;
   }
 
   async getUserById(userId: string): Promise<User | null> {

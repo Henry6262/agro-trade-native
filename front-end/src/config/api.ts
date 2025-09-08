@@ -1,5 +1,5 @@
 // API Configuration
-import { ENV } from '../utils/environment';
+import { ENV } from '../shared/utils/environment';
 
 // Determine if we're in development or production
 const isDev = __DEV__ || process.env.NODE_ENV === 'development';

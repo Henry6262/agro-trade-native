@@ -121,49 +121,9 @@ div[role="navigation"] {
   flex-shrink: 0;
 }
 
-@keyframes pulse-glow {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7);
-  }
-  50% {
-    transform: scale(1.15);
-    box-shadow: 0 0 20px 10px rgba(251, 191, 36, 0.3);
-  }
-}
+/* Keyframes temporarily disabled for React Native compatibility */
 
-@keyframes pulse-scale {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-}
-
-@keyframes glow-fade {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.5);
-  }
-}
-
-.pulse-yellow {
-  animation: pulse-glow 2s infinite;
-}
-
-/* Apply animations to current step circle */
-.current-step-circle {
-  animation: pulse-scale 2s infinite ease-in-out;
-}
-
-.current-step-glow {
-  animation: glow-fade 2s infinite ease-in-out;
-}
+/* Animation classes temporarily disabled for React Native compatibility */
 
 /* Ensure progress sidebar is properly positioned */
 .progress-sidebar {

@@ -1,40 +1,43 @@
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { DashboardStackParamList } from './types';
+import { UserDataProvider } from '../contexts/UserDataContext';
 
-import DashboardMainScreen from '../screens/dashboard/DashboardMainScreen';
-import CommandCenterScreen from '../screens/dashboard/CommandCenterScreen';
-import AgentNetworkScreen from '../screens/dashboard/AgentNetworkScreen';
-import OperationsScreen from '../screens/dashboard/OperationsScreen';
-import IntelligenceScreen from '../screens/dashboard/IntelligenceScreen';
-import SellerDashboardScreen from '../screens/dashboard/SellerDashboardScreen';
-import BuyerDashboardScreen from '../screens/dashboard/BuyerDashboardScreen';
-import TransporterDashboardScreen from '../screens/dashboard/TransporterDashboardScreen';
-import TransporterBiddingScreen from '../screens/dashboard/TransporterBiddingScreen';
-import TransporterTransfersScreen from '../screens/dashboard/TransporterTransfersScreen';
-import TransporterFleetScreen from '../screens/dashboard/TransporterFleetScreen';
+import DashboardMainScreen from '../features/dashboard/screens/DashboardMainScreen';
+import CommandCenterScreen from '../features/dashboard/screens/admin/CommandCenterScreen';
+import AgentNetworkScreen from '../features/dashboard/screens/admin/AgentNetworkScreen';
+import OperationsScreen from '../features/dashboard/screens/admin/OperationsScreen';
+import IntelligenceScreen from '../features/dashboard/screens/shared/IntelligenceScreen';
+import SellerDashboardScreen from '../features/dashboard/screens/seller/SellerDashboardScreen';
+import BuyerDashboardScreen from '../features/dashboard/screens/buyer/BuyerDashboardScreen';
+import TransporterDashboardScreen from '../features/dashboard/screens/transporter/TransporterDashboardScreen';
+import TransporterBiddingScreen from '../features/dashboard/screens/transporter/TransporterBiddingScreen';
+import TransporterTransfersScreen from '../features/dashboard/screens/transporter/TransporterTransfersScreen';
+import TransporterFleetScreen from '../features/dashboard/screens/transporter/TransporterFleetScreen';
 
-const Stack = createStackNavigator<DashboardStackParamList>();
+const Stack = createNativeStackNavigator<DashboardStackParamList>();
 
 export default function DashboardStack() {
   return (
-    <Stack.Navigator
-      initialRouteName="DashboardMain"
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen name="DashboardMain" component={DashboardMainScreen} />
-      <Stack.Screen name="CommandCenter" component={CommandCenterScreen} />
-      <Stack.Screen name="AgentNetwork" component={AgentNetworkScreen} />
-      <Stack.Screen name="Operations" component={OperationsScreen} />
-      <Stack.Screen name="Intelligence" component={IntelligenceScreen} />
-      <Stack.Screen name="SellerDashboard" component={SellerDashboardScreen} />
-      <Stack.Screen name="BuyerDashboard" component={BuyerDashboardScreen} />
-      <Stack.Screen name="TransporterDashboard" component={TransporterDashboardScreen} />
-      <Stack.Screen name="TransporterBidding" component={TransporterBiddingScreen} />
-      <Stack.Screen name="TransporterTransfers" component={TransporterTransfersScreen} />
-      <Stack.Screen name="TransporterFleet" component={TransporterFleetScreen} />
-    </Stack.Navigator>
+    <UserDataProvider>
+      <Stack.Navigator
+        initialRouteName="DashboardMain"
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="DashboardMain" component={DashboardMainScreen} />
+        <Stack.Screen name="CommandCenter" component={CommandCenterScreen} />
+        <Stack.Screen name="AgentNetwork" component={AgentNetworkScreen} />
+        <Stack.Screen name="Operations" component={OperationsScreen} />
+        <Stack.Screen name="Intelligence" component={IntelligenceScreen} />
+        <Stack.Screen name="SellerDashboard" component={SellerDashboardScreen} />
+        <Stack.Screen name="BuyerDashboard" component={BuyerDashboardScreen} />
+        <Stack.Screen name="TransporterDashboard" component={TransporterDashboardScreen} />
+        <Stack.Screen name="TransporterBidding" component={TransporterBiddingScreen} />
+        <Stack.Screen name="TransporterTransfers" component={TransporterTransfersScreen} />
+        <Stack.Screen name="TransporterFleet" component={TransporterFleetScreen} />
+      </Stack.Navigator>
+    </UserDataProvider>
   );
 }

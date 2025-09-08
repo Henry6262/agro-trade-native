@@ -4,7 +4,7 @@ import {
   OrderCreateForm,
   ApiResponse,
   PaginatedResponse,
-} from '../types';
+} from '../shared/types';
 
 export interface OrdersListParams {
   page?: number;

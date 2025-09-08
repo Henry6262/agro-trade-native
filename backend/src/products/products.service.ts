@@ -1,163 +1,127 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ProductCategory, ProductStatus } from '@prisma/client';
+import { ProductCategory, ListingStatus } from '@prisma/client';
 
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
+  // Get all products with their specifications (for metadata)
   async getProductMetadata() {
-    // Get from database ProductCatalog table
-    const catalogItems = await this.prisma.productCatalog.findMany({
-      where: { isActive: true },
-      orderBy: { sortOrder: 'asc' }
-    });
-
-    // Also get actual products from database
     const products = await this.prisma.product.findMany({
+      where: { isActive: true },
       include: {
-        farmer: {
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
+        specTemplates: {
+          include: {
+            specificationType: true
+          },
+          orderBy: { displayOrder: 'asc' }
         }
-      }
+      },
+      orderBy: { sortOrder: 'asc' }
     });
 
     return {
       success: true,
-      data: catalogItems.map(item => ({
-        category: item.category,
-        name: item.name,
-        displayName: item.displayName,
-        description: item.description,
-        image: item.image,
-        nutritionalInfo: item.nutritionalInfo,
-        useCases: item.useCases,
-        harvestSeason: item.harvestSeason,
-        storageRecommendations: item.storageRecommendations,
-        priceRangeMin: item.priceRangeMin,
-        priceRangeMax: item.priceRangeMax,
-        unit: item.defaultUnit,
-        qualityGrades: item.qualityGrades,
-        certifications: item.certifications,
-        specifications: item.specifications
+      data: products.map(product => ({
+        id: product.id,
+        category: product.category,
+        name: product.name,
+        displayName: product.displayName,
+        description: product.description,
+        image: product.image,
+        harvestSeason: product.harvestSeason,
+        storageRecommendations: product.storageRecommendations,
+        priceRangeMin: product.priceRangeMin,
+        priceRangeMax: product.priceRangeMax,
+        defaultUnit: product.defaultUnit,
+        // Include specifications with full details
+        specifications: product.specTemplates.map(spec => ({
+          id: spec.specificationType.id,
+          code: spec.specificationType.code,
+          name: spec.specificationType.name,
+          unit: spec.specificationType.unit,
+          dataType: spec.specificationType.dataType,
+          importance: spec.importance,
+          displayOrder: spec.displayOrder,
+          // Validation rules
+          minValue: spec.specificationType.minValue,
+          maxValue: spec.specificationType.maxValue
+        }))
       })),
-      products: products,
       message: 'Product metadata retrieved successfully'
     };
   }
 
-  async getAllProducts(status?: string) {
-    const where = status ? { status: status as ProductStatus } : {};
-    
+  // Get all products (simplified, without specs)
+  async getAllProducts() {
     const products = await this.prisma.product.findMany({
-      where,
-      include: {
-        farmer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phoneNumber: true
-          }
-        }
-      }
-    });
-
-    // Get catalog data for enrichment
-    const catalogItems = await this.prisma.productCatalog.findMany({
-      where: { isActive: true }
-    });
-
-    // Create a map for quick lookup
-    const catalogMap = new Map(catalogItems.map(item => [item.category, item]));
-
-    // Enrich products with catalog metadata
-    const enrichedProducts = products.map(product => {
-      const catalogData = catalogMap.get(product.category);
-      return {
-        ...product,
-        metadata: catalogData ? {
-          displayName: catalogData.displayName,
-          image: catalogData.image,
-          description: catalogData.description,
-          specifications: catalogData.specifications
-        } : null
-      };
+      where: { isActive: true },
+      orderBy: { sortOrder: 'asc' }
     });
 
     return {
       success: true,
-      data: enrichedProducts,
-      total: enrichedProducts.length,
+      data: products,
+      total: products.length,
       message: 'Products retrieved successfully'
     };
   }
 
+  // Get products by category
   async getProductsByCategory(category: string) {
-    const categoryEnum = category.toUpperCase() as ProductCategory;
+    const categoryEnum = category.toUpperCase().replace('-', '_') as ProductCategory;
     
     if (!Object.values(ProductCategory).includes(categoryEnum)) {
       throw new NotFoundException(`Category ${category} not found`);
     }
 
-    const products = await this.prisma.product.findMany({
-      where: {
-        category: categoryEnum,
-        status: ProductStatus.AVAILABLE
-      },
+    const product = await this.prisma.product.findUnique({
+      where: { category: categoryEnum },
       include: {
-        farmer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phoneNumber: true
-          }
+        specTemplates: {
+          include: {
+            specificationType: true
+          },
+          orderBy: { displayOrder: 'asc' }
         }
       }
     });
 
-    // Get catalog metadata for this category
-    const catalogData = await this.prisma.productCatalog.findUnique({
-      where: { category: categoryEnum }
-    });
+    if (!product) {
+      throw new NotFoundException(`Product for category ${category} not found`);
+    }
 
     return {
       success: true,
       data: {
-        products,
-        metadata: catalogData ? {
-          displayName: catalogData.displayName,
-          image: catalogData.image,
-          description: catalogData.description,
-          nutritionalInfo: catalogData.nutritionalInfo,
-          useCases: catalogData.useCases,
-          specifications: catalogData.specifications,
-          qualityGrades: catalogData.qualityGrades,
-          certifications: catalogData.certifications
-        } : null
+        ...product,
+        specifications: product.specTemplates.map(spec => ({
+          id: spec.specificationType.id,
+          code: spec.specificationType.code,
+          name: spec.specificationType.name,
+          unit: spec.specificationType.unit,
+          dataType: spec.specificationType.dataType,
+          importance: spec.importance,
+          displayOrder: spec.displayOrder,
+          minValue: spec.specificationType.minValue,
+          maxValue: spec.specificationType.maxValue
+        }))
       },
-      total: products.length,
-      message: `Products in category ${category} retrieved successfully`
+      message: `Product in category ${category} retrieved successfully`
     };
   }
 
+  // Get product by ID with full specifications
   async getProductById(id: string) {
     const product = await this.prisma.product.findUnique({
       where: { id },
       include: {
-        farmer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phoneNumber: true,
-            farmerProfile: true
-          }
+        specTemplates: {
+          include: {
+            specificationType: true
+          },
+          orderBy: { displayOrder: 'asc' }
         }
       }
     });
@@ -166,50 +130,50 @@ export class ProductsService {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
 
-    // Get catalog metadata
-    const catalogData = await this.prisma.productCatalog.findUnique({
-      where: { category: product.category }
-    });
-
     return {
       success: true,
       data: {
         ...product,
-        metadata: catalogData ? {
-          displayName: catalogData.displayName,
-          image: catalogData.image,
-          description: catalogData.description,
-          specifications: catalogData.specifications
-        } : null
+        specifications: product.specTemplates.map(spec => ({
+          id: spec.specificationType.id,
+          code: spec.specificationType.code,
+          name: spec.specificationType.name,
+          unit: spec.specificationType.unit,
+          dataType: spec.specificationType.dataType,
+          importance: spec.importance,
+          displayOrder: spec.displayOrder,
+          minValue: spec.specificationType.minValue,
+          maxValue: spec.specificationType.maxValue
+        }))
       },
       message: 'Product retrieved successfully'
     };
   }
 
-  // Helper method to get all categories with their metadata
+  // Get all categories with product count (from sale listings)
   async getCategoriesWithMetadata() {
-    // Get all catalog entries
-    const catalogItems = await this.prisma.productCatalog.findMany({
+    const products = await this.prisma.product.findMany({
       where: { isActive: true },
       orderBy: { sortOrder: 'asc' }
     });
     
-    // Count available products for each category
+    // Count active sale listings for each category
     const categoriesWithData = await Promise.all(
-      catalogItems.map(async (catalogItem) => {
-        const productCount = await this.prisma.product.count({
+      products.map(async (product) => {
+        const listingCount = await this.prisma.saleListing.count({
           where: {
-            category: catalogItem.category,
-            status: ProductStatus.AVAILABLE
+            productId: product.id,
+            status: ListingStatus.ACTIVE
           }
         });
         
         return {
-          category: catalogItem.category,
-          name: catalogItem.displayName,
-          image: catalogItem.image,
-          description: catalogItem.description,
-          availableProducts: productCount
+          id: product.id,
+          category: product.category,
+          name: product.displayName,
+          image: product.image,
+          description: product.description,
+          availableListings: listingCount
         };
       })
     );
@@ -218,6 +182,41 @@ export class ProductsService {
       success: true,
       data: categoriesWithData,
       message: 'Categories retrieved successfully'
+    };
+  }
+
+  // NEW: Get regions with cities
+  async getRegionsWithCities() {
+    const regions = await this.prisma.region.findMany({
+      where: { isActive: true },
+      include: {
+        cities: {
+          orderBy: { name: 'asc' }
+        }
+      },
+      orderBy: [
+        { country: 'asc' },
+        { name: 'asc' }
+      ]
+    });
+
+    return {
+      success: true,
+      data: regions,
+      message: 'Regions retrieved successfully'
+    };
+  }
+
+  // NEW: Get all specification types
+  async getSpecificationTypes() {
+    const specTypes = await this.prisma.specificationType.findMany({
+      orderBy: { name: 'asc' }
+    });
+
+    return {
+      success: true,
+      data: specTypes,
+      message: 'Specification types retrieved successfully'
     };
   }
 }

@@ -15,13 +15,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     
     // In production, use the proper callback URL
     if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
-      if (process.env.API_PRODUCTION_URL) {
-        // Use configured production API URL
-        callbackURL = `${process.env.API_PRODUCTION_URL}/auth/google/callback`;
-      } else if (process.env.VERCEL_URL) {
-        // Use Vercel URL if available  
-        callbackURL = `https://${process.env.VERCEL_URL}/api/auth/google/callback`;
-      }
+      callbackURL = process.env.API_PRODUCTION_URL 
+        ? `${process.env.API_PRODUCTION_URL}/auth/google/callback`
+        : 'https://be-agro-trade-native.vercel.app/api/auth/google/callback';
     }
     
     super({

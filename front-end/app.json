@@ -13,6 +13,7 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "bundleIdentifier": "com.agrotrade.app",
       "supportsTablet": true,
       "config": {
         "googleMapsApiKey": "AIzaSyCyufA02eE2szI8_Q2DSxIa5AabNSik3MA"
@@ -23,6 +24,7 @@
       }
     },
     "android": {
+      "package": "com.agrotrade.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -42,6 +44,9 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "scheme": "agrotrade"
+    "scheme": "agrotrade",
+    "plugins": [
+      "expo-web-browser"
+    ]
   }
 }

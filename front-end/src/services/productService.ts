@@ -4,7 +4,7 @@ import {
   ProductCategory,
   ApiResponse,
   PaginatedResponse,
-} from '../types';
+} from '../shared/types';
 
 export interface ProductsListParams {
   page?: number;
@@ -31,19 +31,20 @@ export const productService = {
       }
     });
 
-    return apiClient.get<PaginatedResponse<Product>>(`/products?${queryParams.toString()}`);
+    const response = await apiClient.get<PaginatedResponse<Product>>(`/products?${queryParams.toString()}`);
+    return response.data;
   },
 
   // Get single product
   getProduct: async (productId: string): Promise<Product> => {
-    return apiClient.get<ApiResponse<Product>>(`/products/${productId}`)
-      .then((response) => response.data);
+    const response = await apiClient.get<Product>(`/products/${productId}`);
+    return response.data;
   },
 
   // Get featured products
   getFeaturedProducts: async (limit: number = 10): Promise<Product[]> => {
-    return apiClient.get<ApiResponse<Product[]>>(`/products/featured?limit=${limit}`)
-      .then((response) => response.data);
+    const response = await apiClient.get<Product[]>(`/products/featured?limit=${limit}`);
+    return response.data;
   },
 
   // Search products
@@ -65,20 +66,21 @@ export const productService = {
 
   // Get product categories with metadata
   getCategories: async (): Promise<ProductCategory[]> => {
-    return apiClient.get<ApiResponse<ProductCategory[]>>('/products/categories')
-      .then((response) => response.data);
+    const response = await apiClient.get<ProductCategory[]>('/products/categories');
+    return response.data;
   },
 
   // Get product metadata (for onboarding)
   getProductMetadata: async (): Promise<any> => {
-    return apiClient.get<ApiResponse<any>>('/products/metadata')
-      .then((response) => response.data);
+    const response = await apiClient.get<any>('/products/metadata');
+    // The apiClient now returns { data: T }, so we just need response.data
+    return response.data;
   },
 
   // Get categories with metadata (for product selection)
   getCategoriesWithMetadata: async (): Promise<any[]> => {
-    return apiClient.get<ApiResponse<any[]>>('/products/categories')
-      .then((response) => response.data);
+    const response = await apiClient.get<any[]>('/products/categories');
+    return response.data;
   },
 
   // Get products by seller
@@ -94,14 +96,14 @@ export const productService = {
     productId: string,
     limit: number = 5
   ): Promise<Product[]> => {
-    return apiClient.get<ApiResponse<Product[]>>(`/products/${productId}/similar?limit=${limit}`)
-      .then((response) => response.data);
+    const response = await apiClient.get<Product[]>(`/products/${productId}/similar?limit=${limit}`);
+    return response.data;
   },
 
   // Get product recommendations for user
   getRecommendedProducts: async (limit: number = 10): Promise<Product[]> => {
-    return apiClient.get<ApiResponse<Product[]>>(`/products/recommendations?limit=${limit}`)
-      .then((response) => response.data);
+    const response = await apiClient.get<Product[]>(`/products/recommendations?limit=${limit}`);
+    return response.data;
   },
 
   // Check product availability
@@ -113,9 +115,10 @@ export const productService = {
     maxQuantity: number;
     message?: string;
   }> => {
-    return apiClient.post<ApiResponse<any>>(`/products/${productId}/check-availability`, {
+    const response = await apiClient.post<any>(`/products/${productId}/check-availability`, {
       quantity,
-    }).then((response) => response.data);
+    });
+    return response.data;
   },
 
   // Get product reviews
@@ -131,25 +134,26 @@ export const productService = {
     review: string;
     createdAt: string;
   }>> => {
-    return apiClient.get<PaginatedResponse<any>>(
+    const response = await apiClient.get<PaginatedResponse<any>>(
       `/products/${productId}/reviews?page=${page}&limit=${limit}`
     );
+    return response.data;
   },
 
   // Add product to wishlist
   addToWishlist: async (productId: string): Promise<void> => {
-    return apiClient.post(`/products/${productId}/wishlist`);
+    await apiClient.post(`/products/${productId}/wishlist`);
   },
 
   // Remove product from wishlist
   removeFromWishlist: async (productId: string): Promise<void> => {
-    return apiClient.delete(`/products/${productId}/wishlist`);
+    await apiClient.delete(`/products/${productId}/wishlist`);
   },
 
   // Get user's wishlist
   getWishlist: async (): Promise<Product[]> => {
-    return apiClient.get<ApiResponse<Product[]>>('/products/wishlist')
-      .then((response) => response.data);
+    const response = await apiClient.get<Product[]>('/products/wishlist');
+    return response.data;
   },
 
   // Report product
@@ -158,7 +162,7 @@ export const productService = {
     reason: string,
     description?: string
   ): Promise<void> => {
-    return apiClient.post(`/products/${productId}/report`, {
+    await apiClient.post(`/products/${productId}/report`, {
       reason,
       description,
     });

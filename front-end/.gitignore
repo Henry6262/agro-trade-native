@@ -35,3 +35,9 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# Android binaries
+android/**/*.apk
+android/**/*.aab
+android/**/*.aar
+android/**/output.json

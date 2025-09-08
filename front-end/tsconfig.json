@@ -13,7 +13,17 @@
     "types": [
       "react",
       "react-native"
-    ]
+    ],
+    "baseUrl": "./",
+    "paths": {
+      "@features/*": ["src/features/*"],
+      "@shared/*": ["src/shared/*"],
+      "@navigation/*": ["src/navigation/*"],
+      "@stores/*": ["src/stores/*"],
+      "@services/*": ["src/services/*"],
+      "@assets/*": ["src/assets/*"],
+      "@styles/*": ["src/styles/*"]
+    }
   },
   "include": [
     "**/*.ts",

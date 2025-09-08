@@ -29,6 +29,9 @@ async function bootstrap() {
           'http://localhost:8081',
           'http://localhost:8082',
           'http://localhost:19006',
+          // Android emulator
+          'http://10.0.2.2:8081',
+          'http://10.0.2.2:19006',
         ];
         
         // Check if origin is allowed
@@ -80,10 +83,12 @@ async function bootstrap() {
 
 // For local development
 if (require.main === module) {
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 4000;
   bootstrap().then(app => {
-    app.listen(port, () => {
-      console.log(`🚀 Application is running on port ${port}`);
+    // Listen on all interfaces (0.0.0.0) for Android emulator access
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`🚀 Application is running on http://0.0.0.0:${port}`);
+      console.log(`📱 Android emulator can access at http://10.0.2.2:${port}`);
     });
   });
 }

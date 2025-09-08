@@ -1,11 +1,11 @@
+import './src/styles/nativewind.setup';
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
+import { Platform } from 'react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import RootNavigator from './src/navigation/RootNavigator';
-import { useAuthStore } from './src/store/authStore';
-import { ScrollFix } from './src/components/common/ScrollFix';
-import './src/styles/nativewind.setup';
-import './src/styles/global.css';
+import { useAuthStore } from './src/stores/auth.store';
+import configureGoogleSignIn from './src/config/googleSignIn';
 
 const queryClient = new QueryClient();
 
@@ -17,6 +17,15 @@ export default function App() {
   });
 
   useEffect(() => {
+    // Configure Google Sign-In on app start (mobile only)
+    if (Platform.OS !== 'web') {
+      try {
+        configureGoogleSignIn();
+      } catch (error) {
+        console.error('Failed to configure Google Sign-In:', error);
+      }
+    }
+    
     // Initialize auth state
     const checkAuthState = async () => {
       try {
@@ -27,7 +36,7 @@ export default function App() {
         
         setAppState({
           isAuthenticated,
-          needsOnboarding: isAuthenticated && (!user?.onboardingCompleted),
+          needsOnboarding: isAuthenticated && (!user?.onboardingComplete),
           isReady: true,
         });
       } catch (error) {
@@ -50,10 +59,8 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ScrollFix>
-        <StatusBar style="auto" />
-        <RootNavigator appState={appState} />
-      </ScrollFix>
+      <StatusBar style="auto" />
+      <RootNavigator appState={appState} />
     </QueryClientProvider>
   );
 }

@@ -26,8 +26,8 @@ export class ProductsController {
   @Get()
   @ApiOperation({ summary: 'Get all available products' })
   @ApiResponse({ status: 200, description: 'Returns all available products from database' })
-  async getAllProducts(@Query('status') status?: string) {
-    return this.productsService.getAllProducts(status);
+  async getAllProducts() {
+    return this.productsService.getAllProducts();
   }
 
   @Get('category/:category')
@@ -35,6 +35,20 @@ export class ProductsController {
   @ApiResponse({ status: 200, description: 'Returns products filtered by category' })
   async getProductsByCategory(@Param('category') category: string) {
     return this.productsService.getProductsByCategory(category);
+  }
+
+  @Get('regions')
+  @ApiOperation({ summary: 'Get all regions with cities' })
+  @ApiResponse({ status: 200, description: 'Returns regions with their cities' })
+  async getRegionsWithCities() {
+    return this.productsService.getRegionsWithCities();
+  }
+
+  @Get('specifications')
+  @ApiOperation({ summary: 'Get all specification types' })
+  @ApiResponse({ status: 200, description: 'Returns all available specification types' })
+  async getSpecificationTypes() {
+    return this.productsService.getSpecificationTypes();
   }
 
   @Get(':id')

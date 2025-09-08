@@ -1,407 +1,707 @@
-import { PrismaClient, UserRole, ProductUnit, ProductStatus, ProductCategory } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import { 
+  PrismaClient, 
+  ProductCategory,
+  DataType,
+  Importance,
+  ProductUnit
+} from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// Bulgarian regions with their major cities
-const BULGARIAN_REGIONS = [
-  {
-    name: 'Northwestern',
-    cities: ['Vidin', 'Montana', 'Vratsa', 'Pleven', 'Lovech'],
-  },
-  {
-    name: 'North Central', 
-    cities: ['Ruse', 'Razgrad', 'Silistra', 'Targovishte', 'Veliko Tarnovo'],
-  },
-  {
-    name: 'Northeastern',
-    cities: ['Varna', 'Dobrich', 'Shumen'],
-  },
-  {
-    name: 'Southwestern',
-    cities: ['Sofia', 'Pernik', 'Kyustendil', 'Blagoevgrad'],
-  },
-  {
-    name: 'South Central',
-    cities: ['Plovdiv', 'Pazardzhik', 'Stara Zagora', 'Haskovo', 'Kardzhali', 'Smolyan'],
-  },
-  {
-    name: 'Southeastern',
-    cities: ['Burgas', 'Sliven', 'Yambol'],
-  },
-];
-
-// Greek regions with cities
-const GREEK_REGIONS = [
-  {
-    name: 'Attica',
-    cities: ['Athens', 'Piraeus'],
-  },
-  {
-    name: 'Central Macedonia',
-    cities: ['Thessaloniki', 'Serres'],
-  },
-];
-
-// Product categories and base prices
-const PRODUCTS: { category: ProductCategory; basePrice: number }[] = [
-  { category: 'WHEAT', basePrice: 245 },
-  { category: 'CORN', basePrice: 189 },
-  { category: 'SUNFLOWER', basePrice: 510 },
-  { category: 'BARLEY', basePrice: 220 },
-  { category: 'OATS', basePrice: 200 },
-  { category: 'RAPESEED', basePrice: 480 },
-];
-
-async function cleanDatabase() {
-  console.log('🧹 Cleaning database...');
+async function main() {
+  console.log('🌱 Starting database seed (core data only)...');
   
-  // Delete in correct order to avoid foreign key constraints
+  // Clean database (only non-user data)
+  console.log('🧹 Cleaning database...');
   await prisma.$transaction([
-    prisma.truck.deleteMany(),
+    prisma.listingSpec.deleteMany(),
+    prisma.offer.deleteMany(),
+    prisma.buyListing.deleteMany(),
+    prisma.saleListing.deleteMany(),
+    prisma.productSpecTemplate.deleteMany(),
+    prisma.regionalPrice.deleteMany(),
     prisma.product.deleteMany(),
-    // Note: RegionalPrice table doesn't exist in current migrations
-    // prisma.regionalPrice.deleteMany(),
-    prisma.transporterProfile.deleteMany(),
-    prisma.buyerProfile.deleteMany(),
-    prisma.farmerProfile.deleteMany(),
-    prisma.companyInfo.deleteMany(),
-    prisma.user.deleteMany(),
+    prisma.specificationType.deleteMany(),
+    prisma.address.deleteMany(),
+    prisma.city.deleteMany(),
     prisma.region.deleteMany(),
+    prisma.truck.deleteMany(),
+    prisma.company.deleteMany(),
+    prisma.user.deleteMany(),
   ]);
-}
 
-async function seedRegions() {
+  // ==================== REGIONS & CITIES ====================
   console.log('🌍 Creating regions and cities...');
   
-  const regions = [];
-  
-  // Create Bulgarian regions
-  for (const regionData of BULGARIAN_REGIONS) {
-    // Create main region (using first city as the region representative)
-    const region = await prisma.region.create({
+  // Bulgarian Regions with Cities
+  const regions = await prisma.$transaction([
+    // Bulgaria - Northwestern
+    prisma.region.create({
       data: {
-        name: regionData.cities[0], // Use main city as region name for simplicity
+        name: 'Northwestern',
         country: 'Bulgaria',
-        isActive: true,
-      },
-    });
-    regions.push(region);
+        cities: {
+          create: [
+            { name: 'Vidin' },
+            { name: 'Montana' },
+            { name: 'Vratsa' },
+            { name: 'Pleven' },
+            { name: 'Lovech' },
+          ]
+        }
+      }
+    }),
     
-    // For now, we'll just track the main city per region
-    // In a real app, you'd have a separate cities table
-  }
-  
-  // Create Greek regions
-  for (const regionData of GREEK_REGIONS) {
-    const region = await prisma.region.create({
+    // Bulgaria - North Central
+    prisma.region.create({
       data: {
-        name: regionData.cities[0],
+        name: 'North Central',
+        country: 'Bulgaria',
+        cities: {
+          create: [
+            { name: 'Ruse' },
+            { name: 'Razgrad' },
+            { name: 'Silistra' },
+            { name: 'Targovishte' },
+            { name: 'Veliko Tarnovo' },
+            { name: 'Gabrovo' },
+          ]
+        }
+      }
+    }),
+    
+    // Bulgaria - Northeastern
+    prisma.region.create({
+      data: {
+        name: 'Northeastern',
+        country: 'Bulgaria',
+        cities: {
+          create: [
+            { name: 'Varna' },
+            { name: 'Dobrich' },
+            { name: 'Shumen' },
+          ]
+        }
+      }
+    }),
+    
+    // Bulgaria - Southwestern
+    prisma.region.create({
+      data: {
+        name: 'Southwestern',
+        country: 'Bulgaria',
+        cities: {
+          create: [
+            { name: 'Sofia' },
+            { name: 'Pernik' },
+            { name: 'Kyustendil' },
+            { name: 'Blagoevgrad' },
+          ]
+        }
+      }
+    }),
+    
+    // Bulgaria - South Central
+    prisma.region.create({
+      data: {
+        name: 'South Central',
+        country: 'Bulgaria',
+        cities: {
+          create: [
+            { name: 'Plovdiv' },
+            { name: 'Pazardzhik' },
+            { name: 'Stara Zagora' },
+            { name: 'Haskovo' },
+            { name: 'Kardzhali' },
+            { name: 'Smolyan' },
+          ]
+        }
+      }
+    }),
+    
+    // Bulgaria - Southeastern
+    prisma.region.create({
+      data: {
+        name: 'Southeastern',
+        country: 'Bulgaria',
+        cities: {
+          create: [
+            { name: 'Burgas' },
+            { name: 'Sliven' },
+            { name: 'Yambol' },
+          ]
+        }
+      }
+    }),
+    
+    // Greece - Central Macedonia
+    prisma.region.create({
+      data: {
+        name: 'Central Macedonia',
         country: 'Greece',
-        isActive: true,
-      },
-    });
-    regions.push(region);
-  }
+        cities: {
+          create: [
+            { name: 'Thessaloniki' },
+            { name: 'Serres' },
+            { name: 'Katerini' },
+            { name: 'Kilkis' },
+            { name: 'Veria' },
+          ]
+        }
+      }
+    }),
+    
+    // Greece - Attica
+    prisma.region.create({
+      data: {
+        name: 'Attica',
+        country: 'Greece',
+        cities: {
+          create: [
+            { name: 'Athens' },
+            { name: 'Piraeus' },
+            { name: 'Elefsina' },
+          ]
+        }
+      }
+    }),
+    
+    // Greece - Thessaly
+    prisma.region.create({
+      data: {
+        name: 'Thessaly',
+        country: 'Greece',
+        cities: {
+          create: [
+            { name: 'Larissa' },
+            { name: 'Volos' },
+            { name: 'Trikala' },
+            { name: 'Karditsa' },
+          ]
+        }
+      }
+    }),
+  ]);
+
+  // ==================== SPECIFICATION TYPES ====================
+  console.log('📋 Creating specification types...');
   
-  console.log(`✅ Created ${regions.length} regions`);
-  return regions;
+  const specTypes = await prisma.$transaction([
+    // Universal specs
+    prisma.specificationType.create({
+      data: {
+        code: 'moisture',
+        name: 'Moisture Content',
+        unit: '%',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 100,
+      }
+    }),
+    prisma.specificationType.create({
+      data: {
+        code: 'protein',
+        name: 'Protein Content',
+        unit: '%',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 100,
+      }
+    }),
+    prisma.specificationType.create({
+      data: {
+        code: 'oil_content',
+        name: 'Oil Content',
+        unit: '%',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 100,
+      }
+    }),
+    prisma.specificationType.create({
+      data: {
+        code: 'fiber',
+        name: 'Fiber Content',
+        unit: '%',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 100,
+      }
+    }),
+    prisma.specificationType.create({
+      data: {
+        code: 'purity',
+        name: 'Purity / Foreign Matter',
+        unit: '%',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 100,
+      }
+    }),
+    
+    // Wheat specific
+    prisma.specificationType.create({
+      data: {
+        code: 'hlw',
+        name: 'Hectoliter Weight (Test Weight)',
+        unit: 'kg/hl',
+        dataType: DataType.NUMBER,
+        minValue: 50,
+        maxValue: 100,
+      }
+    }),
+    prisma.specificationType.create({
+      data: {
+        code: 'falling_number',
+        name: 'Falling Number',
+        unit: 's',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 600,
+      }
+    }),
+    prisma.specificationType.create({
+      data: {
+        code: 'gluten_strength',
+        name: 'Gluten Strength',
+        unit: '%',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 100,
+      }
+    }),
+    
+    // Corn specific
+    prisma.specificationType.create({
+      data: {
+        code: 'broken_kernels',
+        name: 'Broken Kernels',
+        unit: '%',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 100,
+      }
+    }),
+    prisma.specificationType.create({
+      data: {
+        code: 'aflatoxins',
+        name: 'Aflatoxins',
+        unit: 'ppb',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 1000,
+      }
+    }),
+    
+    // Barley specific
+    prisma.specificationType.create({
+      data: {
+        code: 'germination',
+        name: 'Germination Rate',
+        unit: '%',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 100,
+      }
+    }),
+    
+    // Oats specific
+    prisma.specificationType.create({
+      data: {
+        code: 'groat',
+        name: 'Groat Percentage (Kernel Yield)',
+        unit: '%',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 100,
+      }
+    }),
+    prisma.specificationType.create({
+      data: {
+        code: 'test_weight',
+        name: 'Test Weight',
+        unit: 'kg/hl',
+        dataType: DataType.NUMBER,
+        minValue: 30,
+        maxValue: 80,
+      }
+    }),
+    
+    // Sunflower specific
+    prisma.specificationType.create({
+      data: {
+        code: 'hull',
+        name: 'Hull Content',
+        unit: '%',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 100,
+      }
+    }),
+    
+    // Rapeseed/Canola specific
+    prisma.specificationType.create({
+      data: {
+        code: 'glucosinolate',
+        name: 'Glucosinolate Content',
+        unit: 'μmol/g',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 100,
+      }
+    }),
+    
+    // Peas specific
+    prisma.specificationType.create({
+      data: {
+        code: 'split',
+        name: 'Split/Damage Percentage',
+        unit: '%',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 100,
+      }
+    }),
+    
+    // Wheat Bran specific
+    prisma.specificationType.create({
+      data: {
+        code: 'particle_size',
+        name: 'Particle Size',
+        unit: 'mm',
+        dataType: DataType.NUMBER,
+        minValue: 0,
+        maxValue: 10,
+      }
+    }),
+  ]);
+
+  // Get spec types by code for easier reference
+  const specByCode = specTypes.reduce((acc, spec) => {
+    acc[spec.code] = spec;
+    return acc;
+  }, {} as Record<string, typeof specTypes[0]>);
+
+  // ==================== PRODUCTS WITH IMAGES ====================
+  console.log('📦 Creating products with specifications...');
+  
+  const products = await prisma.$transaction([
+    // 1. Soft Wheat
+    prisma.product.create({
+      data: {
+        category: ProductCategory.SOFT_WHEAT,
+        name: 'soft_wheat',
+        displayName: 'Soft Wheat',
+        description: 'Low-protein wheat ideal for pastries, cakes, and biscuits. Best for products requiring tender texture.',
+        image: 'https://res.cloudinary.com/dczn89mek/image/upload/v1756192558/soft_wheat_bfxdaa.png',
+        harvestSeason: 'June - August',
+        storageRecommendations: 'Store in cool, dry conditions. Maintain moisture below 14%.',
+        priceRangeMin: 240,
+        priceRangeMax: 320,
+        defaultUnit: ProductUnit.TON,
+        specTemplates: {
+          create: [
+            { specTypeId: specByCode.protein.id, importance: Importance.CRITICAL, displayOrder: 1 },
+            { specTypeId: specByCode.hlw.id, importance: Importance.IMPORTANT, displayOrder: 2 },
+            { specTypeId: specByCode.falling_number.id, importance: Importance.OPTIONAL, displayOrder: 3 },
+            { specTypeId: specByCode.moisture.id, importance: Importance.CRITICAL, displayOrder: 4 },
+          ]
+        }
+      }
+    }),
+    
+    // 2. Durum Wheat
+    prisma.product.create({
+      data: {
+        category: ProductCategory.DURUM_WHEAT,
+        name: 'durum_wheat',
+        displayName: 'Durum Wheat',
+        description: 'High-protein wheat perfect for pasta and semolina production. Golden color and high gluten content.',
+        image: 'https://res.cloudinary.com/dczn89mek/image/upload/v1756192558/durum_wheat_maskoy.png',
+        harvestSeason: 'June - August',
+        storageRecommendations: 'Keep moisture below 14%, maintain protein quality.',
+        priceRangeMin: 280,
+        priceRangeMax: 380,
+        defaultUnit: ProductUnit.TON,
+        specTemplates: {
+          create: [
+            { specTypeId: specByCode.protein.id, importance: Importance.CRITICAL, displayOrder: 1 },
+            { specTypeId: specByCode.gluten_strength.id, importance: Importance.CRITICAL, displayOrder: 2 },
+            { specTypeId: specByCode.moisture.id, importance: Importance.CRITICAL, displayOrder: 3 },
+          ]
+        }
+      }
+    }),
+    
+    // 3. Corn/Maize
+    prisma.product.create({
+      data: {
+        category: ProductCategory.CORN_MAIZE,
+        name: 'corn_maize',
+        displayName: 'Corn/Maize',
+        description: 'Yellow corn for animal feed and food processing. Versatile grain for multiple uses.',
+        image: 'https://res.cloudinary.com/dczn89mek/image/upload/v1756192559/corn_jiuqv5.webp',
+        harvestSeason: 'September - October',
+        storageRecommendations: 'Moisture below 15%, ensure proper ventilation.',
+        priceRangeMin: 260,
+        priceRangeMax: 340,
+        defaultUnit: ProductUnit.TON,
+        specTemplates: {
+          create: [
+            { specTypeId: specByCode.moisture.id, importance: Importance.CRITICAL, displayOrder: 1 },
+            { specTypeId: specByCode.broken_kernels.id, importance: Importance.IMPORTANT, displayOrder: 2 },
+            { specTypeId: specByCode.aflatoxins.id, importance: Importance.CRITICAL, displayOrder: 3 },
+          ]
+        }
+      }
+    }),
+    
+    // 4. Barley
+    prisma.product.create({
+      data: {
+        category: ProductCategory.BARLEY,
+        name: 'barley',
+        displayName: 'Barley',
+        description: 'Two-row and six-row barley for malting and animal feed. Essential for brewing industry.',
+        image: 'https://res.cloudinary.com/dczn89mek/image/upload/v1756192552/barley_utfuak.png',
+        harvestSeason: 'June - July',
+        storageRecommendations: 'Keep dry with moisture below 14%.',
+        priceRangeMin: 220,
+        priceRangeMax: 300,
+        defaultUnit: ProductUnit.TON,
+        specTemplates: {
+          create: [
+            { specTypeId: specByCode.protein.id, importance: Importance.CRITICAL, displayOrder: 1 },
+            { specTypeId: specByCode.germination.id, importance: Importance.CRITICAL, displayOrder: 2 },
+            { specTypeId: specByCode.moisture.id, importance: Importance.CRITICAL, displayOrder: 3 },
+          ]
+        }
+      }
+    }),
+    
+    // 5. Oats
+    prisma.product.create({
+      data: {
+        category: ProductCategory.OATS,
+        name: 'oats',
+        displayName: 'Oats',
+        description: 'High-quality oats for human consumption and animal feed. Rich in fiber and nutrients.',
+        image: 'https://res.cloudinary.com/dczn89mek/image/upload/v1756192558/oats_g2ugm8.webp',
+        harvestSeason: 'July - August',
+        storageRecommendations: 'Store at moisture below 14%.',
+        priceRangeMin: 200,
+        priceRangeMax: 280,
+        defaultUnit: ProductUnit.TON,
+        specTemplates: {
+          create: [
+            { specTypeId: specByCode.test_weight.id, importance: Importance.CRITICAL, displayOrder: 1 },
+            { specTypeId: specByCode.groat.id, importance: Importance.IMPORTANT, displayOrder: 2 },
+            { specTypeId: specByCode.moisture.id, importance: Importance.CRITICAL, displayOrder: 3 },
+          ]
+        }
+      }
+    }),
+    
+    // 6. Sunflower
+    prisma.product.create({
+      data: {
+        category: ProductCategory.SUNFLOWER,
+        name: 'sunflower',
+        displayName: 'Sunflower Seeds',
+        description: 'High-oil content sunflower seeds for oil production. Premium quality for crushing.',
+        image: 'https://res.cloudinary.com/dczn89mek/image/upload/v1756192558/sunflower_jbywaa.webp',
+        harvestSeason: 'August - September',
+        storageRecommendations: 'Store at moisture below 9%, protect from pests.',
+        priceRangeMin: 420,
+        priceRangeMax: 580,
+        defaultUnit: ProductUnit.TON,
+        specTemplates: {
+          create: [
+            { specTypeId: specByCode.oil_content.id, importance: Importance.CRITICAL, displayOrder: 1 },
+            { specTypeId: specByCode.moisture.id, importance: Importance.CRITICAL, displayOrder: 2 },
+            { specTypeId: specByCode.hull.id, importance: Importance.IMPORTANT, displayOrder: 3 },
+          ]
+        }
+      }
+    }),
+    
+    // 7. Rapeseed/Canola
+    prisma.product.create({
+      data: {
+        category: ProductCategory.RAPESEED,
+        name: 'rapeseed',
+        displayName: 'Rapeseed/Canola',
+        description: 'Low-glucosinolate rapeseed for oil and biodiesel production. High-yielding oilseed.',
+        image: 'https://res.cloudinary.com/dczn89mek/image/upload/v1756192554/canola_wom5lk.png',
+        harvestSeason: 'July - August',
+        storageRecommendations: 'Maintain moisture below 9%, cool storage.',
+        priceRangeMin: 450,
+        priceRangeMax: 620,
+        defaultUnit: ProductUnit.TON,
+        specTemplates: {
+          create: [
+            { specTypeId: specByCode.oil_content.id, importance: Importance.CRITICAL, displayOrder: 1 },
+            { specTypeId: specByCode.glucosinolate.id, importance: Importance.IMPORTANT, displayOrder: 2 },
+            { specTypeId: specByCode.moisture.id, importance: Importance.CRITICAL, displayOrder: 3 },
+          ]
+        }
+      }
+    }),
+    
+    // 8. Peas
+    prisma.product.create({
+      data: {
+        category: ProductCategory.PEAS,
+        name: 'peas',
+        displayName: 'Peas',
+        description: 'Yellow and green peas for human consumption and animal feed. High protein legume.',
+        image: 'https://res.cloudinary.com/dczn89mek/image/upload/v1756192558/peas_qjdrjq.webp',
+        harvestSeason: 'June - July',
+        storageRecommendations: 'Store at moisture below 14%.',
+        priceRangeMin: 280,
+        priceRangeMax: 380,
+        defaultUnit: ProductUnit.TON,
+        specTemplates: {
+          create: [
+            { specTypeId: specByCode.protein.id, importance: Importance.CRITICAL, displayOrder: 1 },
+            { specTypeId: specByCode.split.id, importance: Importance.IMPORTANT, displayOrder: 2 },
+            { specTypeId: specByCode.moisture.id, importance: Importance.CRITICAL, displayOrder: 3 },
+          ]
+        }
+      }
+    }),
+    
+    // 9. Soybean Meal
+    prisma.product.create({
+      data: {
+        category: ProductCategory.SOYBEAN_MEAL,
+        name: 'soybean_meal',
+        displayName: 'Soybean Meal',
+        description: 'High-protein soybean meal for animal feed. Essential protein source in livestock nutrition.',
+        image: 'https://res.cloudinary.com/dczn89mek/image/upload/v1756192559/soybean_jzz3oq.jpg',
+        storageRecommendations: 'Keep dry, protect from contamination.',
+        priceRangeMin: 420,
+        priceRangeMax: 520,
+        defaultUnit: ProductUnit.TON,
+        specTemplates: {
+          create: [
+            { specTypeId: specByCode.protein.id, importance: Importance.CRITICAL, displayOrder: 1 },
+            { specTypeId: specByCode.fiber.id, importance: Importance.IMPORTANT, displayOrder: 2 },
+            { specTypeId: specByCode.moisture.id, importance: Importance.CRITICAL, displayOrder: 3 },
+          ]
+        }
+      }
+    }),
+    
+    // 10. Wheat Bran
+    prisma.product.create({
+      data: {
+        category: ProductCategory.WHEAT_BRAN,
+        name: 'wheat_bran',
+        displayName: 'Wheat Bran',
+        description: 'Wheat bran for animal feed supplementation. Rich in fiber and nutrients.',
+        image: 'https://res.cloudinary.com/dczn89mek/image/upload/v1756192552/wheat_bran_q6qze9.png',
+        storageRecommendations: 'Store in dry conditions.',
+        priceRangeMin: 180,
+        priceRangeMax: 250,
+        defaultUnit: ProductUnit.TON,
+        specTemplates: {
+          create: [
+            { specTypeId: specByCode.moisture.id, importance: Importance.CRITICAL, displayOrder: 1 },
+            { specTypeId: specByCode.particle_size.id, importance: Importance.OPTIONAL, displayOrder: 2 },
+            { specTypeId: specByCode.protein.id, importance: Importance.IMPORTANT, displayOrder: 3 },
+          ]
+        }
+      }
+    }),
+    
+    // 11. Alfalfa
+    prisma.product.create({
+      data: {
+        category: ProductCategory.ALFALFA,
+        name: 'alfalfa',
+        displayName: 'Alfalfa Pellets',
+        description: 'High-quality alfalfa pellets for livestock. Premium forage in pellet form.',
+        image: 'https://res.cloudinary.com/dczn89mek/image/upload/v1756192552/alfalfa_pallets_saqhco.webp',
+        harvestSeason: 'May - September (multiple cuts)',
+        storageRecommendations: 'Store in dry, ventilated area.',
+        priceRangeMin: 220,
+        priceRangeMax: 320,
+        defaultUnit: ProductUnit.TON,
+        specTemplates: {
+          create: [
+            { specTypeId: specByCode.protein.id, importance: Importance.CRITICAL, displayOrder: 1 },
+            { specTypeId: specByCode.fiber.id, importance: Importance.CRITICAL, displayOrder: 2 },
+            { specTypeId: specByCode.moisture.id, importance: Importance.CRITICAL, displayOrder: 3 },
+          ]
+        }
+      }
+    }),
+    
+    // 12. Other
+    prisma.product.create({
+      data: {
+        category: ProductCategory.OTHER,
+        name: 'other',
+        displayName: 'Other Cereals & Oilseeds',
+        description: 'Various agricultural products not listed in main categories.',
+        image: 'https://res.cloudinary.com/dczn89mek/image/upload/v1756192556/other_gagfht.png',
+        priceRangeMin: 200,
+        priceRangeMax: 500,
+        defaultUnit: ProductUnit.TON,
+        specTemplates: {
+          create: [
+            { specTypeId: specByCode.moisture.id, importance: Importance.IMPORTANT, displayOrder: 1 },
+            { specTypeId: specByCode.purity.id, importance: Importance.OPTIONAL, displayOrder: 2 },
+            { specTypeId: specByCode.protein.id, importance: Importance.OPTIONAL, displayOrder: 3 },
+            { specTypeId: specByCode.oil_content.id, importance: Importance.OPTIONAL, displayOrder: 4 },
+          ]
+        }
+      }
+    }),
+  ]);
+
+  // ==================== SUMMARY ====================
+  const regionCount = await prisma.region.count();
+  const cityCount = await prisma.city.count();
+  const productCount = await prisma.product.count();
+  const specTypeCount = await prisma.specificationType.count();
+  const specTemplateCount = await prisma.productSpecTemplate.count();
+
+  console.log('\n✅ Core database seeded successfully!');
+  console.log('\n📊 Summary:');
+  console.log(`   - ${regionCount} regions`);
+  console.log(`   - ${cityCount} cities`);
+  console.log(`   - ${productCount} products (all with Cloudinary images)`);
+  console.log(`   - ${specTypeCount} specification types`);
+  console.log(`   - ${specTemplateCount} product-specification links`);
+  
+  console.log('\n🌾 Products with specifications:');
+  console.log('   1. Soft Wheat → Protein, HLW, Falling Number');
+  console.log('   2. Durum Wheat → Protein, Gluten Strength');
+  console.log('   3. Corn/Maize → Moisture, Broken Kernels, Aflatoxins');
+  console.log('   4. Barley → Protein, Germination');
+  console.log('   5. Oats → Test Weight, Groat %');
+  console.log('   6. Sunflower → Oil %, Moisture, Hull %');
+  console.log('   7. Rapeseed/Canola → Oil %, Glucosinolate');
+  console.log('   8. Peas → Protein, Split %');
+  console.log('   9. Soybean Meal → Protein, Fiber');
+  console.log('   10. Wheat Bran → Moisture, Particle Size');
+  console.log('   11. Alfalfa Pellets → Protein, Fiber, Moisture');
+  console.log('   12. Other → Universal specs');
+  
+  console.log('\n🌍 Regions:');
+  console.log('   Bulgaria: Northwestern, North Central, Northeastern, Southwestern, South Central, Southeastern');
+  console.log('   Greece: Central Macedonia, Attica, Thessaly');
+  
+  console.log('\n✨ Ready for user onboarding!');
 }
 
-async function seedRegionalPrices(regions: any[]) {
-  console.log('💰 Creating regional prices...');
-  
-  let priceCount = 0;
-  
-  // Note: RegionalPrice table doesn't exist in current migrations
-  // Commenting out regional price seeding
-  /*
-  for (const region of regions) {
-    for (const product of PRODUCTS) {
-      // Add regional variation (±10% from base price)
-      const variation = 0.9 + Math.random() * 0.2;
-      const regionalPrice = Math.round(product.basePrice * variation * 100) / 100;
-      
-      await prisma.regionalPrice.create({
-        data: {
-          regionId: region.id,
-          productCategory: product.category,
-          pricePerUnit: regionalPrice,
-          currency: 'EUR',
-          unit: ProductUnit.TON,
-        },
-      });
-      priceCount++;
-    }
-  }
-  */
-  
-  console.log(`✅ Created ${priceCount} regional prices`);
-}
-
-async function seedUsers() {
-  console.log('👥 Creating users...');
-  
-  const hashedPassword = await bcrypt.hash('password123', 10);
-  
-  // Admin user
-  const admin = await prisma.user.create({
-    data: {
-      email: 'admin@agrotrade.com',
-      password: hashedPassword,
-      role: UserRole.ADMIN,
-      name: 'System Administrator',
-      phoneNumber: '+359888000001',
-      isActive: true,
-      isEmailVerified: true,
-      isPhoneVerified: true,
-      onboardingCompleted: true,
-    },
-  });
-  
-  // Farmer in Plovdiv (South Central region)
-  const farmer = await prisma.user.create({
-    data: {
-      email: 'farmer@example.com',
-      password: hashedPassword,
-      role: UserRole.FARMER,
-      name: 'Ivan Petrov',
-      phoneNumber: '+359888000002',
-      isActive: true,
-      isEmailVerified: true,
-      isPhoneVerified: true,
-      onboardingCompleted: true,
-      farmerProfile: {
-        create: {
-          farmName: 'Green Valley Farm',
-          farmLocation: 'Plovdiv, Bulgaria',
-          cropsGrown: ['Wheat', 'Corn', 'Sunflower'],
-          latitude: 42.1354,
-          longitude: 24.7453,
-          certifications: ['EU Organic', 'GlobalGAP'],
-          yearsOfExperience: 15,
-          companyInfo: {
-            create: {
-              name: 'Green Valley Farm EOOD',
-              registrationNumber: 'BG200123456',
-              vatNumber: 'BG200123456',
-              address: '15 Harvest Road',
-              city: 'Plovdiv',
-              country: 'Bulgaria',
-              postalCode: '4000',
-              phoneNumber: '+359888000002',
-              email: 'contact@greenvalleyfarm.bg',
-            },
-          },
-        },
-      },
-    },
-  });
-  
-  // Buyer in Sofia (Southwestern region)
-  const buyer = await prisma.user.create({
-    data: {
-      email: 'buyer@example.com',
-      password: hashedPassword,
-      role: UserRole.BUYER,
-      name: 'Maria Dimitrova',
-      phoneNumber: '+359888000003',
-      isActive: true,
-      isEmailVerified: true,
-      isPhoneVerified: true,
-      onboardingCompleted: true,
-      buyerProfile: {
-        create: {
-          companyName: 'Sofia Grain Mills',
-          businessType: 'Grain Mill',
-          preferredProducts: ['Wheat', 'Corn', 'Barley'],
-          estimatedVolume: 5000,
-          volumeUnit: 'tons/month',
-          latitude: 42.6977,
-          longitude: 23.3219,
-          companyInfo: {
-            create: {
-              name: 'Sofia Grain Mills AD',
-              registrationNumber: 'BG100987654',
-              vatNumber: 'BG100987654',
-              address: '100 Industrial Zone',
-              city: 'Sofia',
-              country: 'Bulgaria',
-              postalCode: '1000',
-              phoneNumber: '+359888000003',
-              email: 'procurement@sofiagrainmills.bg',
-            },
-          },
-        },
-      },
-    },
-  });
-  
-  // Transporter in Varna (Northeastern region)
-  const transporter = await prisma.user.create({
-    data: {
-      email: 'transporter@example.com',
-      password: hashedPassword,
-      role: UserRole.TRANSPORTER,
-      name: 'Georgi Ivanov',
-      phoneNumber: '+359888000004',
-      isActive: true,
-      isEmailVerified: true,
-      isPhoneVerified: true,
-      onboardingCompleted: true,
-      transporterProfile: {
-        create: {
-          companyName: 'Fast Transport Varna',
-          licenseNumber: 'BG-TRANS-2024-001',
-          baseLocationAddress: 'Varna, Bulgaria',
-          baseLocationLat: 43.2141,
-          baseLocationLng: 27.9147,
-          iban: 'BG80BNBG96611020345678',
-          companyInfo: {
-            create: {
-              name: 'Fast Transport Varna EOOD',
-              registrationNumber: 'BG300456789',
-              vatNumber: 'BG300456789',
-              address: '25 Port Road',
-              city: 'Varna',
-              country: 'Bulgaria',
-              postalCode: '9000',
-              phoneNumber: '+359888000004',
-              email: 'dispatch@fasttransport.bg',
-            },
-          },
-        },
-      },
-    },
-  });
-  
-  console.log('✅ Created 4 users with profiles');
-  return { admin, farmer, buyer, transporter };
-}
-
-async function seedProducts(farmerId: string) {
-  console.log('🌾 Creating products...');
-  
-  const products = await prisma.product.createMany({
-    data: [
-      {
-        farmerId,
-        category: 'WHEAT',
-        name: 'Premium Winter Wheat',
-        description: 'High protein winter wheat, 13% protein content',
-        quantity: 500,
-        unit: ProductUnit.TON,
-        pricePerUnit: 245,
-        location: 'Plovdiv, Bulgaria',
-        harvestDate: new Date('2024-07-15'),
-        status: ProductStatus.AVAILABLE,
-      },
-      {
-        farmerId,
-        category: 'CORN',
-        name: 'Yellow Corn Grade 2',
-        description: 'Quality yellow corn for feed and processing',
-        quantity: 1000,
-        unit: ProductUnit.TON,
-        pricePerUnit: 189,
-        location: 'Plovdiv, Bulgaria',
-        harvestDate: new Date('2024-09-01'),
-        status: ProductStatus.AVAILABLE,
-      },
-      {
-        farmerId,
-        category: 'SUNFLOWER',
-        name: 'High-Oil Sunflower Seeds',
-        description: 'Sunflower seeds with 44% oil content',
-        quantity: 200,
-        unit: ProductUnit.TON,
-        pricePerUnit: 510,
-        location: 'Plovdiv, Bulgaria',
-        harvestDate: new Date('2024-10-01'),
-        status: ProductStatus.AVAILABLE,
-      },
-    ],
-  });
-  
-  console.log('✅ Created 3 products');
-}
-
-async function seedTrucks(transporterId: string) {
-  console.log('🚚 Creating trucks...');
-  
-  await prisma.truck.createMany({
-    data: [
-      {
-        transporterId,
-        plateNumber: 'B1234AB',
-        capacity: 25,
-        unit: ProductUnit.TON,
-        type: 'FLATBED',
-        currentLocation: 'Varna, Bulgaria',
-        isAvailable: true,
-      },
-      {
-        transporterId,
-        plateNumber: 'B5678CD',
-        capacity: 40,
-        unit: ProductUnit.TON,
-        type: 'REFRIGERATED',
-        currentLocation: 'Sofia, Bulgaria',
-        isAvailable: true,
-      },
-    ],
-  });
-  
-  console.log('✅ Created 2 trucks');
-}
-
-async function main() {
-  console.log('🌱 Starting database seed...\n');
-  
-  try {
-    // Clean database
-    await cleanDatabase();
-    
-    // Seed regions and prices
-    const regions = await seedRegions();
-    await seedRegionalPrices(regions);
-    
-    // Seed users
-    const { farmer, transporter } = await seedUsers();
-    
-    // Seed products and trucks
-    await seedProducts(farmer.id);
-    await seedTrucks(transporter.id);
-    
-    console.log('\n🎉 Database seeded successfully!');
-    console.log('\n📊 Summary:');
-    console.log(`   - ${BULGARIAN_REGIONS.length} Bulgarian regions`);
-    console.log(`   - ${GREEK_REGIONS.length} Greek regions`);
-    console.log(`   - ${PRODUCTS.length} product types`);
-    console.log(`   - ${regions.length * PRODUCTS.length} regional prices`);
-    console.log('   - 4 users (admin, farmer, buyer, transporter)');
-    console.log('   - 3 products');
-    console.log('   - 2 trucks');
-    
-    console.log('\n📍 Bulgarian Regions:');
-    BULGARIAN_REGIONS.forEach((region, i) => {
-      console.log(`   ${i + 1}. ${region.name}: ${region.cities.join(', ')}`);
-    });
-    
-    console.log('\n🔐 Login credentials:');
-    console.log('   All users: password123');
-    console.log('   - admin@agrotrade.com');
-    console.log('   - farmer@example.com');
-    console.log('   - buyer@example.com');
-    console.log('   - transporter@example.com');
-    
-  } catch (error) {
-    console.error('❌ Seed failed:', error);
+main()
+  .catch((e) => {
+    console.error('❌ Seed failed:', e);
     process.exit(1);
-  } finally {
+  })
+  .finally(async () => {
     await prisma.$disconnect();
-  }
-}
-
-// Run the seed
-main();
+  });

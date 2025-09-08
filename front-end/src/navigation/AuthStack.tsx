@@ -1,14 +1,14 @@
 import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStackParamList } from './types';
 
 // Import screens
-import LoginScreen from '../screens/auth/LoginScreen';
-import RegisterScreen from '../screens/auth/RegisterScreen';
-import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
-import WelcomeScreen from '../screens/auth/WelcomeScreen';
+import LoginScreen from '../features/auth/screens/LoginScreen';
+import RegisterScreen from '../features/auth/screens/RegisterScreen';
+import ForgotPasswordScreen from '../features/auth/screens/ForgotPasswordScreen';
+import WelcomeScreen from '../features/auth/screens/WelcomeScreen';
 
-const Stack = createStackNavigator<AuthStackParamList>();
+const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export default function AuthStack() {
   return (
@@ -16,9 +16,7 @@ export default function AuthStack() {
       initialRouteName="Welcome"
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: '#ffffff' },
-        gestureEnabled: true,
-        gestureDirection: 'horizontal',
+        contentStyle: { backgroundColor: '#ffffff' },
       }}
     >
       <Stack.Screen name="Welcome" component={WelcomeScreen} />

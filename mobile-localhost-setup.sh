@@ -1,0 +1,17 @@
+#!/bin/bash
+
+echo "Setting up localhost access for Android emulator..."
+echo ""
+echo "Run these commands to forward localhost to your Android emulator:"
+echo ""
+echo "# Forward backend port"
+echo "adb reverse tcp:4000 tcp:4000"
+echo ""
+echo "# Forward frontend port"
+echo "adb reverse tcp:8081 tcp:8081"
+echo ""
+echo "After running these commands, your Android emulator can access:"
+echo "- http://localhost:4000 for backend"
+echo "- http://localhost:8081 for frontend"
+echo ""
+echo "No changes needed in Google OAuth Console!"

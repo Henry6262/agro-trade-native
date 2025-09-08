@@ -5,7 +5,7 @@ import {
   RegisterForm,
   ApiResponse,
   UserRole,
-} from '../types';
+} from '../shared/types';
 
 export interface LoginResponse {
   user: User;

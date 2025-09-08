@@ -1,10 +1,18 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { useAuthStore } from '../store/authStore';
-import { APP_CONFIG } from '../constants';
+import { useAuthStore } from '@stores/auth.store';
+import { getApiUrl } from '@shared/utils/environment';
+
+// Get the correct API URL based on platform
+const API_URL = getApiUrl();
+
+// Debug logging (disabled to prevent top-level execution)
+// console.log('=== API Configuration ===');
+// console.log('Platform:', Platform.OS);
+// console.log('API URL:', API_URL);
 
 // Create axios instance
 const api: AxiosInstance = axios.create({
-  baseURL: APP_CONFIG.API_URL,
+  baseURL: API_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -14,6 +22,9 @@ const api: AxiosInstance = axios.create({
 // Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
+    // Debug log the actual request URL (disabled for performance)
+    // console.log('API Request:', config.method?.toUpperCase(), config.baseURL + config.url);
+    
     const token = useAuthStore.getState().token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -21,6 +32,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
+    console.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
@@ -61,22 +73,22 @@ api.interceptors.response.use(
   }
 );
 
-// Generic API methods
+// Generic API methods with proper typing
 export const apiClient = {
-  get: <T>(url: string, config?: AxiosRequestConfig): Promise<T> =>
-    api.get(url, config).then((response) => response.data),
+  get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<{ data: T }> =>
+    api.get(url, config).then((response) => ({ data: response.data })),
 
-  post: <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
-    api.post(url, data, config).then((response) => response.data),
+  post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<{ data: T }> =>
+    api.post(url, data, config).then((response) => ({ data: response.data })),
 
-  put: <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
-    api.put(url, data, config).then((response) => response.data),
+  put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<{ data: T }> =>
+    api.put(url, data, config).then((response) => ({ data: response.data })),
 
-  delete: <T>(url: string, config?: AxiosRequestConfig): Promise<T> =>
-    api.delete(url, config).then((response) => response.data),
+  delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<{ data: T }> =>
+    api.delete(url, config).then((response) => ({ data: response.data })),
 
-  patch: <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
-    api.patch(url, data, config).then((response) => response.data),
+  patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<{ data: T }> =>
+    api.patch(url, data, config).then((response) => ({ data: response.data })),
 };
 
 export default api;
