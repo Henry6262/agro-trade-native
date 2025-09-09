@@ -308,7 +308,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (provider === 'google') {
         // For Google OAuth, we need to redirect to the backend OAuth endpoint
         // The backend expects a GET request to /api/auth/google
-        const googleOAuthUrl = ENV.googleOAuthUrl;
+        // Add prompt=select_account to force account selection
+        const googleOAuthUrl = `${ENV.googleOAuthUrl}?prompt=select_account`;
         
         // In React Native Web, we can use window.location for OAuth redirect
         if (Platform.OS === 'web') {
@@ -318,7 +319,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           // Store the user role in the onboarding store before OAuth
           onboardingStore.setRole(userRole);
           
-          // Redirect to Google OAuth
+          // Redirect to Google OAuth with account selection
           window.location.href = googleOAuthUrl;
         } else {
           // For native platforms, we'd use a WebView or deep linking

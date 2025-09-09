@@ -225,11 +225,11 @@ export const useProductStore = create<ProductStore>()(
       console.log('Fetching all product data...');
       
       // Fetch all data in parallel, but don't let one failure stop the others
-      // Use the methods from the current store instance, not from state
+      // Use the methods directly from the state to avoid creating new references
       const results = await Promise.allSettled([
-        get().fetchProductsWithSpecs(),
-        get().fetchRegions(),
-        get().fetchSpecificationTypes(),
+        state.fetchProductsWithSpecs(),
+        state.fetchRegions(),
+        state.fetchSpecificationTypes(),
       ]);
       
       // Log results

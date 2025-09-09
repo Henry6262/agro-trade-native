@@ -73,8 +73,9 @@ export const productService = {
   // Get product metadata (for onboarding)
   getProductMetadata: async (): Promise<any> => {
     const response = await apiClient.get<any>('/products/metadata');
-    // The apiClient now returns { data: T }, so we just need response.data
-    return response.data;
+    // The apiClient returns { data: T }, and the API returns { data: [...], message, success }
+    // So we need to extract the actual data array
+    return response.data?.data || response.data || [];
   },
 
   // Get categories with metadata (for product selection)

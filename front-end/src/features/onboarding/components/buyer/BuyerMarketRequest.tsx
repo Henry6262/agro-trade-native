@@ -1,17 +1,18 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   Image,
-  Dimensions,
 } from 'react-native'
-import { Package, MapPin, ShoppingCart, Info, Check } from 'lucide-react-native'
+import { MapPin, ShoppingCart, Info } from 'lucide-react-native'
 import type { ProductSpecification } from '@shared/types/onboarding'
 import { useOnboardingStore } from '@stores/onboarding.store'
+import { useProductStore } from '@stores/product.store'
 import { OnboardingLayout } from '../shared/OnboardingLayout'
-import { DynamicGrid } from '../shared/DynamicGrid'
+import { getApiUrl } from '@shared/utils/environment'
+import { BuyerSubmitDrawer } from './BuyerSubmitDrawer'
 
 interface BuyerMarketRequestProps {
   selectedProducts: string[]
@@ -26,39 +27,39 @@ export function BuyerMarketRequest({
   onSpecificationsChange,
   onComplete,
 }: BuyerMarketRequestProps) {
-  const { width } = Dimensions.get('window')
-  const isLargeScreen = width >= 768
-  
   const { 
     selectedProductsMetadata, 
     userLocation,
     buyerSpecifications 
   } = useOnboardingStore()
+  
+  const { products, getProductSpecifications } = useProductStore()
+  const [showSubmitDrawer, setShowSubmitDrawer] = useState(false)
 
   const handleComplete = () => {
-    console.log('Completing purchase request with:', { selectedProducts, specifications })
+    console.log('Opening submit drawer for purchase request')
+    setShowSubmitDrawer(true)
+  }
+  
+  const handleDrawerComplete = () => {
+    setShowSubmitDrawer(false)
     onComplete?.()
   }
 
-  // Calculate totals
-  const calculateTotals = () => {
-    let totalQuantity = 0
-    let totalBudget = 0
+  // Get the selected product
+  const selectedProductId = selectedProducts[0]
+  const selectedProduct = products.find(p => p.id === selectedProductId)
+  const productMetadata = selectedProductsMetadata.find(m => m.id === selectedProductId)
+  const spec = specifications[0] || buyerSpecifications[selectedProductId]
 
-    specifications.forEach(spec => {
-      const quantity = parseFloat(spec.quantity) || 0
-      const pricePerKilo = parseFloat(spec.pricePerKilo) || 0
-      const multiplier = spec.unit === 'tons' || spec.unit === 'ton' ? 1000 : 
-                        spec.unit === 'quintal' ? 100 : 1
-      const quantityInKg = quantity * multiplier
-      totalQuantity += quantityInKg / 1000 // Convert to tons
-      totalBudget += quantityInKg * pricePerKilo
-    })
+  // Get product specifications from backend
+  const productSpecs = selectedProductId ? getProductSpecifications(selectedProductId) : []
 
-    return { totalQuantity, totalBudget }
-  }
-
-  const { totalQuantity, totalBudget } = calculateTotals()
+  // Calculate totals for single product
+  const quantity = parseFloat(spec?.quantity) || 0
+  const pricePerKilo = parseFloat(spec?.pricePerKilo) || 0
+  const quantityInKg = quantity * 1000 // Convert tons to kg
+  const totalBudget = quantityInKg * pricePerKilo
 
   // Format currency with K, M suffixes
   const formatCurrency = (value: number) => {
@@ -70,73 +71,23 @@ export function BuyerMarketRequest({
     return `€${value.toFixed(0)}`
   }
 
-  const renderProductCard = (spec: ProductSpecification, index: number) => {
-    const metadata = selectedProductsMetadata.find(m => m.category === spec.productId)
-    const productName = metadata?.name || spec.productId
-    
-    const quantity = parseFloat(spec.quantity) || 0
-    const pricePerKilo = parseFloat(spec.pricePerKilo) || 0
-    const multiplier = spec.unit === 'tons' || spec.unit === 'ton' ? 1000 : 
-                      spec.unit === 'quintal' ? 100 : 1
-    const quantityInKg = quantity * multiplier
-    const totalPrice = quantityInKg * pricePerKilo
+  // Get product image URL
+  const productImage = selectedProduct?.image || productMetadata?.image
+  const imageUrl = productImage ? (
+    productImage.startsWith('http') 
+      ? productImage 
+      : `${getApiUrl().replace('/api', '')}/static/${productImage}`
+  ) : null
 
-    return (
-        <View className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700">
-          {/* Product Image */}
-          {metadata?.image && (
-            <View className="relative">
-              <Image
-                source={{ uri: metadata.image }}
-                style={{ width: '100%', height: 140 }}
-                resizeMode="cover"
-              />
-              <View className="absolute top-2 right-2 bg-gray-900/80 px-2 py-1 rounded-lg">
-                <Text className="text-white text-xs font-semibold">Request</Text>
-              </View>
-            </View>
-          )}
-          
-          {/* Product Details */}
-          <View className="p-4">
-            <Text className="text-white font-bold text-lg mb-2">
-              {productName}
-            </Text>
-            
-            {/* Quantity Required */}
-            <View className="flex-row items-center mb-3">
-              <Package size={16} color="#9ca3af" />
-              <Text className="text-gray-300 ml-2">
-                {spec.quantity} {spec.unit} required
-              </Text>
-            </View>
-
-            {/* Price and Budget Info */}
-            <View className="flex-row justify-between">
-              <View className="flex-1 mr-2">
-                <Text className="text-gray-500 text-xs mb-1">Max Price</Text>
-                <Text className="text-gray-300 font-semibold">
-                  €{pricePerKilo}/kg
-                </Text>
-              </View>
-              <View className="flex-1">
-                <Text className="text-gray-500 text-xs mb-1">Budget</Text>
-                <Text className="text-white font-bold text-lg">
-                  {formatCurrency(totalPrice)}
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-    )
-  }
+  const productName = selectedProduct?.displayName || selectedProduct?.name || productMetadata?.name || 'Unknown Product'
 
   return (
     <OnboardingLayout>
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-primary-500 text-center mb-2">
-            Purchase Request
+            Purchase Request Overview
           </Text>
           <Text className="text-gray-400 text-center">
             Review your complete request before submitting
@@ -145,7 +96,7 @@ export function BuyerMarketRequest({
 
         {/* Delivery Location */}
         {userLocation && (
-          <View className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700">
+          <View className="bg-gray-800 rounded-xl p-4 mb-6 border border-gray-700">
             <View className="flex-row items-center">
               <MapPin size={20} color="#3b82f6" />
               <View className="ml-3 flex-1">
@@ -158,44 +109,101 @@ export function BuyerMarketRequest({
           </View>
         )}
 
-        {/* Summary Stats - All in one row */}
-        <View className="flex-row mb-6 -mx-1">
-          <View className="flex-1 px-1">
-            <View className="bg-gray-800 rounded-lg p-3 border border-gray-700">
-              <Text className="text-gray-400 text-xs">Products</Text>
-              <Text className="text-lg font-bold text-white">
-                {selectedProducts.length}
-              </Text>
+        {/* Product Card with all details */}
+        <View className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 mb-6">
+          {/* Product Image */}
+          {imageUrl && (
+            <View className="relative">
+              <Image
+                source={{ uri: imageUrl }}
+                style={{ width: '100%', height: 180 }}
+                resizeMode="cover"
+              />
+              <View className="absolute top-3 right-3 bg-blue-500/90 px-3 py-1.5 rounded-lg">
+                <Text className="text-white text-xs font-semibold">Purchase Request</Text>
+              </View>
             </View>
-          </View>
+          )}
           
-          <View className="flex-1 px-1">
-            <View className="bg-gray-800 rounded-lg p-3 border border-gray-700">
-              <Text className="text-gray-400 text-xs">Volume</Text>
-              <Text className="text-lg font-bold text-white">
-                {totalQuantity.toFixed(1)}t
-              </Text>
+          {/* Product Details */}
+          <View className="p-5">
+            <Text className="text-white font-bold text-xl mb-3">
+              {productName}
+            </Text>
+            
+            {/* Main Requirements */}
+            <View className="bg-gray-900/50 rounded-lg p-4 mb-4">
+              <Text className="text-gray-400 text-sm font-semibold mb-3">Requirements</Text>
+              
+              {/* Quantity */}
+              <View className="flex-row justify-between mb-2">
+                <Text className="text-gray-400">Quantity Required:</Text>
+                <Text className="text-white font-semibold">
+                  {spec?.quantity || '0'} tons
+                </Text>
+              </View>
+              
+              {/* Max Price */}
+              <View className="flex-row justify-between mb-2">
+                <Text className="text-gray-400">Maximum Price:</Text>
+                <Text className="text-white font-semibold">
+                  €{pricePerKilo}/kg
+                </Text>
+              </View>
+              
+              {/* Total Budget */}
+              <View className="flex-row justify-between pt-2 border-t border-gray-700">
+                <Text className="text-gray-400">Total Budget:</Text>
+                <Text className="text-emerald-400 font-bold text-lg">
+                  {formatCurrency(totalBudget)}
+                </Text>
+              </View>
             </View>
-          </View>
-          
-          <View className="flex-1 px-1">
-            <View className="bg-gray-800 rounded-lg p-3 border border-gray-700">
-              <Text className="text-gray-400 text-xs">Budget</Text>
-              <Text className="text-lg font-bold text-white">
-                {formatCurrency(totalBudget)}
-              </Text>
-            </View>
-          </View>
-        </View>
 
-        {/* Products Grid */}
-        <View className="mb-4">
-          <Text className="text-lg font-semibold text-white mb-3">
-            Products to Purchase ({selectedProducts.length})
-          </Text>
-          <DynamicGrid minItemWidth={200} maxItemWidth={350} spacing={12}>
-            {specifications.map((spec, index) => renderProductCard(spec, index))}
-          </DynamicGrid>
+            {/* Product Specifications if any */}
+            {productSpecs && productSpecs.length > 0 && spec && (
+              <View className="bg-gray-900/50 rounded-lg p-4 mb-4">
+                <Text className="text-gray-400 text-sm font-semibold mb-3">Specifications</Text>
+                {productSpecs.map((prodSpec: any) => {
+                  const specKey = prodSpec.code || prodSpec.id
+                  const specValue = spec[specKey]
+                  if (specValue) {
+                    return (
+                      <View key={specKey} className="flex-row justify-between mb-2">
+                        <Text className="text-gray-400">{prodSpec.name || specKey}:</Text>
+                        <Text className="text-white">
+                          {specValue} {prodSpec.unit || ''}
+                        </Text>
+                      </View>
+                    )
+                  }
+                  return null
+                })}
+              </View>
+            )}
+
+            {/* Additional Notes */}
+            {spec?.notes && (
+              <View className="bg-gray-900/50 rounded-lg p-4">
+                <Text className="text-gray-400 text-sm font-semibold mb-2">Additional Requirements</Text>
+                <Text className="text-gray-300 text-sm">
+                  {spec.notes}
+                </Text>
+              </View>
+            )}
+
+            {/* Quality Requirements if any */}
+            {spec?.qualityRequirements && spec.qualityRequirements.length > 0 && (
+              <View className="bg-gray-900/50 rounded-lg p-4 mt-4">
+                <Text className="text-gray-400 text-sm font-semibold mb-2">Quality Requirements</Text>
+                {spec.qualityRequirements.map((req: string, idx: number) => (
+                  <View key={idx} className="flex-row items-center mb-1">
+                    <Text className="text-gray-300 text-sm">• {req}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
         </View>
 
         {/* Information Notice */}
@@ -212,24 +220,28 @@ export function BuyerMarketRequest({
           </View>
         </View>
 
-        {/* Action Buttons */}
+        {/* Action Button */}
         <TouchableOpacity
           onPress={handleComplete}
-          className="bg-blue-500 rounded-xl py-4 px-6 flex-row justify-center items-center mb-3"
+          className="bg-blue-500 rounded-xl py-4 px-6 flex-row justify-center items-center"
         >
           <ShoppingCart size={20} color="white" />
           <Text className="text-white font-bold text-lg ml-2">
             Submit Purchase Request
           </Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          className="bg-gray-800 rounded-xl py-3 px-6 flex-row justify-center items-center border border-gray-700"
-        >
-          <Text className="text-gray-400 font-medium">
-            Save as Draft
-          </Text>
-        </TouchableOpacity>
+      </ScrollView>
+      
+      {/* Submit Drawer with Authentication */}
+      {selectedProductId && (
+        <BuyerSubmitDrawer
+          visible={showSubmitDrawer}
+          onClose={() => setShowSubmitDrawer(false)}
+          productId={selectedProductId}
+          specifications={spec}
+          onComplete={handleDrawerComplete}
+        />
+      )}
     </OnboardingLayout>
   )
 }

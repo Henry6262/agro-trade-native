@@ -166,7 +166,8 @@ export const GoogleAuthMobile: React.FC<GoogleAuthMobileProps> = ({
     try {
       const role = userRole || selectedRole || 'buyer';
       const apiUrl = ENV.apiUrl;
-      const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}`;
+      // Add prompt=select_account to force account selection
+      const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}&prompt=select_account`;
       
       // Store onboarding data and role before redirecting
       await onboardingStore.saveOnboardingData();

@@ -51,15 +51,15 @@ export function ProductSpecificationInput({ spec, value, onChange, error }: Spec
           value={value}
           onChangeText={handleChange}
           placeholder={`Enter ${spec.name?.toLowerCase() || spec.code}`}
-          placeholderTextColor="#4B5563"
-          className={`flex-1 bg-gray-900/50 rounded-l-xl px-4 py-3 text-white ${
+          placeholderTextColor="#9CA3AF"
+          className={`flex-1 bg-white rounded-l-xl px-4 py-3 text-gray-900 ${
             error ? 'border border-red-500/50' : ''
           }`}
           keyboardType={spec.dataType === 'NUMBER' ? 'numeric' : 'default'}
         />
         {/* Unit/Type Square on the right */}
-        <View className="bg-gray-900/50 rounded-r-xl border-l border-gray-700 px-4 py-3 min-w-[60px] items-center justify-center">
-          <Text className="text-emerald-400 font-medium text-sm">
+        <View className="bg-white rounded-r-xl border-l border-gray-200 px-4 py-3 min-w-[60px] items-center justify-center">
+          <Text className="text-emerald-600 font-medium text-sm">
             {spec.unit || (spec.dataType === 'NUMBER' ? '#' : 'TXT')}
           </Text>
         </View>

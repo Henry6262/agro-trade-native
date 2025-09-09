@@ -114,6 +114,19 @@ export const authService = {
     return apiClient.post<ApiResponse<GoogleAuthResponse>>('/auth/google', { token })
       .then((response) => response.data);
   },
+  
+  // Native Google Sign-In
+  googleSignIn: async (data: {
+    idToken: string;
+    role: string;
+    email?: string | null;
+    name?: string | null;
+    googleId?: string;
+    photo?: string | null;
+  }): Promise<LoginResponse> => {
+    return apiClient.post<ApiResponse<LoginResponse>>('/auth/google/native', data)
+      .then((response) => response.data);
+  },
 
   // Onboarding registration
   registerWithCompany: async (data: RegisterWithCompanyDto): Promise<RegisterResponse> => {

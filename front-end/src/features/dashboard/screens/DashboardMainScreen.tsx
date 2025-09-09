@@ -24,6 +24,7 @@ import {
   Menu,
   Link,
   User,
+  LayoutGrid,
 } from 'lucide-react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -40,6 +41,7 @@ import { ProfileDrawer } from '../components/ProfileDrawer';
 import { useAuthStore } from '../../../stores/auth.store';
 import { AdminPricingZonesScreen } from '../../admin/screens/AdminPricingZonesScreen';
 import { Container } from '../../../shared/components';
+import PendingListingService from '../../../services/pendingListingService';
 
 type DashboardMainScreenNavigationProp = NativeStackNavigationProp<
   DashboardStackParamList,
@@ -64,19 +66,28 @@ export default function DashboardMainScreen() {
   
   const [activeSection, setActiveSection] = useState('overview');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Start collapsed
+  // State for testing different dashboards
+  const [testRole, setTestRole] = useState<'admin' | 'seller' | 'buyer' | 'transporter' | null>(null);
+  
   // Normalize user role to lowercase for consistency
   // Note: Backend uses 'FARMER' instead of 'SELLER'
   const userRole = React.useMemo(() => {
-    const role = user?.role || route.params?.userRole || 'FARMER';
+    // If testRole is set, use it (for testing purposes)
+    if (testRole) {
+      return testRole;
+    }
+    // Otherwise use the route param or user's actual role
+    const role = route.params?.userRole || user?.role || 'FARMER';
     const normalizedRole = role.toLowerCase();
     // Map 'farmer' to 'seller' for consistency with frontend naming
     if (normalizedRole === 'farmer') {
       return 'seller' as const;
     }
     return normalizedRole as 'admin' | 'seller' | 'buyer' | 'transporter';
-  }, [user?.role, route.params?.userRole]);
+  }, [user?.role, route.params?.userRole, testRole]);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [showDashboardSwitcher, setShowDashboardSwitcher] = useState(false);
 
   // Ensure authenticated users stay on dashboard
   React.useEffect(() => {
@@ -88,6 +99,18 @@ export default function DashboardMainScreen() {
     if (route.params?.showSuccessAnimation) {
       setShowProfileDrawer(true);
       setShowSuccessAnimation(true);
+    }
+    
+    // Check for pending buyer listings after authentication
+    if (isAuthenticated) {
+      const checkPendingListing = async () => {
+        const processed = await PendingListingService.processPendingListing();
+        if (processed) {
+          console.log('Successfully processed pending buyer listing');
+          // Optionally show a success message
+        }
+      };
+      checkPendingListing();
     }
   }, [isAuthenticated, route.params]);
 
@@ -394,6 +417,15 @@ export default function DashboardMainScreen() {
               </TouchableOpacity>
             </View>
             <View className="flex-row items-center gap-4">
+              {/* Dashboard Switcher Button */}
+              <TouchableOpacity 
+                onPress={() => setShowDashboardSwitcher(!showDashboardSwitcher)}
+                className="flex-row items-center bg-neutral-700 px-3 py-2 rounded-lg"
+              >
+                <LayoutGrid color="#9CA3AF" size={16} />
+                <Text className="text-neutral-300 text-sm ml-2">Switch Dashboard</Text>
+              </TouchableOpacity>
+              
               <TouchableOpacity className="p-2">
                 <Bell color="#9CA3AF" size={16} />
               </TouchableOpacity>
@@ -410,6 +442,69 @@ export default function DashboardMainScreen() {
               </TouchableOpacity>
             </View>
           </View>
+          
+          {/* Dashboard Switcher Dropdown */}
+          {showDashboardSwitcher && (
+            <View className="absolute top-16 right-6 bg-neutral-900 border border-neutral-700 rounded-lg p-2 z-50" style={{ minWidth: 200 }}>
+              <Text className="text-neutral-400 text-xs px-3 py-1 mb-1">TEST DASHBOARDS</Text>
+              
+              <TouchableOpacity
+                onPress={() => {
+                  setShowDashboardSwitcher(false);
+                  setTestRole('seller');
+                  setActiveSection('products');
+                }}
+                className={`flex-row items-center px-3 py-2 rounded ${
+                  userRole === 'seller' ? 'bg-neutral-800' : ''
+                }`}
+              >
+                <View className="w-2 h-2 bg-blue-500 rounded-full mr-2" />
+                <Text className="text-white">Seller Dashboard</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => {
+                  setShowDashboardSwitcher(false);
+                  setTestRole('buyer');
+                  setActiveSection('orders');
+                }}
+                className={`flex-row items-center px-3 py-2 rounded ${
+                  userRole === 'buyer' ? 'bg-neutral-800' : ''
+                }`}
+              >
+                <View className="w-2 h-2 bg-yellow-500 rounded-full mr-2" />
+                <Text className="text-white">Buyer Dashboard</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => {
+                  setShowDashboardSwitcher(false);
+                  setTestRole('transporter');
+                  setActiveSection('bidding');
+                }}
+                className={`flex-row items-center px-3 py-2 rounded ${
+                  userRole === 'transporter' ? 'bg-neutral-800' : ''
+                }`}
+              >
+                <View className="w-2 h-2 bg-green-500 rounded-full mr-2" />
+                <Text className="text-white">Transporter Dashboard</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => {
+                  setShowDashboardSwitcher(false);
+                  setTestRole('admin');
+                  setActiveSection('overview');
+                }}
+                className={`flex-row items-center px-3 py-2 rounded ${
+                  userRole === 'admin' ? 'bg-neutral-800' : ''
+                }`}
+              >
+                <View className="w-2 h-2 bg-purple-500 rounded-full mr-2" />
+                <Text className="text-white">Admin Dashboard</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* Dashboard Content */}
           <View className="flex-1">

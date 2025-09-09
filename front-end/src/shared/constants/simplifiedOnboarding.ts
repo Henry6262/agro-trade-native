@@ -8,9 +8,9 @@ export const simplifiedRoleSteps: Record<UserRole, StepConfig[]> = {
     { id: "account", title: "Overview", description: "Review and sell" },
   ],
   buyer: [
-    { id: "products", title: "Products", description: "What you need to buy" },
-    { id: "requirements", title: "Requirements", description: "Quantities & specs" },
-    { id: "location", title: "Location", description: "Delivery location" },
+    { id: "products", title: "Product", description: "Select what to buy" },
+    { id: "quantity-location", title: "Quantity & Location", description: "Amount and delivery" },
+    { id: "specifications", title: "Specifications", description: "Product requirements" },
     { id: "market", title: "Overview", description: "Review and complete" },
   ],
   transporter: [

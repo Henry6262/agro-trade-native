@@ -99,7 +99,8 @@ export const GoogleAuthSimple: React.FC<GoogleAuthSimpleProps> = ({
     try {
       const role = userRole || selectedRole || 'buyer';
       const apiUrl = ENV.apiUrl;
-      const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}`;
+      // Add prompt=select_account to force account selection
+      const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}&prompt=select_account`;
       
       console.log('Opening Google OAuth in browser:', googleOAuthUrl);
       

@@ -116,7 +116,8 @@ export const GoogleAuthOnly: React.FC<GoogleAuthOnlyProps> = ({
       const apiUrl = ENV.apiUrl;
       console.log('Using API URL:', apiUrl);
       
-      const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}`;
+      // Add prompt=select_account to force account selection
+      const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}&prompt=select_account`;
       console.log('Redirecting to Google OAuth:', googleOAuthUrl);
       
       if (Platform.OS === 'web') {

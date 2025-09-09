@@ -10,7 +10,6 @@ import {
 import { X, CheckCircle, User } from 'lucide-react-native';
 import { useOnboardingStore } from '../../../../stores/onboarding.store';
 import { useAuthStore } from '../../../../stores/auth.store';
-import { authService } from '../../../../services/authService';
 import { UserRole } from '../../../../shared/types';
 import { ENV } from '../../../../shared/utils/environment';
 
@@ -35,7 +34,6 @@ export const InlineAuth: React.FC<InlineAuthProps> = ({
   const checkmarkScale = new Animated.Value(0);
   const textOpacity = new Animated.Value(0);
 
-  const { login } = useAuthStore();
   const onboardingStore = useOnboardingStore();
   const { selectedRole, googleAuthData } = onboardingStore;
 
@@ -96,24 +94,30 @@ export const InlineAuth: React.FC<InlineAuthProps> = ({
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
+    const role = userRole || selectedRole || 'buyer';
     
     try {
-      // For Google OAuth, redirect to the backend OAuth endpoint
-      const role = userRole || selectedRole || 'buyer';
-      const googleOAuthUrl = `${ENV.googleOAuthUrl}?role=${role}`;
+      // Use OAuth web flow for ALL platforms to ensure account selection works
+      // The native SDK doesn't properly support account selection on Android
+      // Adding approval_prompt=force ensures fresh consent each time
+      const googleOAuthUrl = `${ENV.googleOAuthUrl}?role=${role}&prompt=select_account&access_type=online&approval_prompt=force`;
+      
+      // Store data before auth
+      await onboardingStore.saveOnboardingData();
+      onboardingStore.setRole(role as UserRole);
       
       if (Platform.OS === 'web') {
-        // Store onboarding data and role before redirecting
-        await onboardingStore.saveOnboardingData();
-        onboardingStore.setRole(role as UserRole);
-        
-        // Redirect to Google OAuth
+        // Web: Direct redirect
         window.location.href = googleOAuthUrl;
       } else {
-        // For native platforms
+        // Mobile: Open in system browser
+        // This ensures proper Google account selection
+        const Linking = require('react-native').Linking;
+        
+        // Show message to user
         Alert.alert(
-          'Sign in with Google', 
-          'Google authentication will open in your browser. Please complete the authentication and return to the app.',
+          'Sign in with Google',
+          'You will be redirected to your browser to sign in with Google. After signing in, you will be returned to the app.',
           [
             {
               text: 'Cancel',
@@ -123,8 +127,8 @@ export const InlineAuth: React.FC<InlineAuthProps> = ({
             {
               text: 'Continue',
               onPress: async () => {
-                await onboardingStore.saveOnboardingData();
-                Alert.alert('OAuth URL', googleOAuthUrl);
+                await Linking.openURL(googleOAuthUrl);
+                // The app will handle the callback when user returns
                 setIsLoading(false);
               },
             },
@@ -133,7 +137,7 @@ export const InlineAuth: React.FC<InlineAuthProps> = ({
       }
     } catch (error: any) {
       console.error('Google authentication failed:', error);
-      Alert.alert('Authentication Error', 'Failed to sign in with Google. Please try again.');
+      Alert.alert('Authentication Error', 'Failed to open Google sign in. Please try again.');
       setIsLoading(false);
     }
   };

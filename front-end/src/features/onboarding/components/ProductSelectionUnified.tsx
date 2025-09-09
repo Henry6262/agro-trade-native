@@ -40,8 +40,8 @@ export const ProductSelectionUnified: React.FC = () => {
 
   const toggleProduct = (productId: string) => {
     console.log('Toggle product:', productId, 'Role:', role);
-    if (role === 'seller') {
-      // For sellers: directly select and move to next step
+    if (role === 'seller' || role === 'buyer') {
+      // For both sellers and buyers: directly select and move to next step
       console.log('Selecting product and moving to next step:', productId);
       
       // Update selected products
@@ -66,7 +66,7 @@ export const ProductSelectionUnified: React.FC = () => {
         nextStep();
       }, 100);
     } else {
-      // Multi-selection for buyers (existing behavior)
+      // Multi-selection for other roles (if any)
       const newSelection = selectedProductIds.includes(productId)
         ? selectedProductIds.filter(id => id !== productId)
         : [...selectedProductIds, productId];
@@ -110,7 +110,7 @@ export const ProductSelectionUnified: React.FC = () => {
         </Text>
         <Text className="text-gray-400">
           {role === 'buyer' 
-            ? 'Select the agricultural products you want to purchase' 
+            ? 'Select one agricultural product you want to purchase' 
             : 'Select one agricultural product you want to sell'
           }
         </Text>
@@ -166,7 +166,7 @@ export const ProductSelectionUnified: React.FC = () => {
                         <Text className={`text-sm font-medium text-center ${isSelected ? 'text-white' : 'text-gray-300'}`} numberOfLines={2}>
                           {product.displayName || product.name}
                         </Text>
-                        {role === 'seller' && (
+                        {(role === 'seller' || role === 'buyer') && (
                           <Text className="text-xs text-gray-400 text-center mt-1">
                             Tap to select
                           </Text>

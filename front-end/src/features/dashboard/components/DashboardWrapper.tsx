@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Menu,
   User,
+  LayoutGrid,
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ProfileDrawer } from './ProfileDrawer';
@@ -50,6 +51,7 @@ export default function DashboardWrapper({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(screenWidth < 768);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+  const [showDashboardSwitcher, setShowDashboardSwitcher] = useState(false);
 
   // Ensure authenticated users stay on dashboard
   React.useEffect(() => {
@@ -73,6 +75,26 @@ export default function DashboardWrapper({
   };
 
   const brandColor = getRoleBrandColor();
+
+  const handleDashboardSwitch = (newRole: 'seller' | 'buyer' | 'transporter' | 'admin') => {
+    setShowDashboardSwitcher(false);
+    
+    // Navigate to the appropriate dashboard based on role
+    switch (newRole) {
+      case 'seller':
+        navigation.navigate('SellerDashboard' as never);
+        break;
+      case 'buyer':
+        navigation.navigate('BuyerDashboard' as never);
+        break;
+      case 'transporter':
+        navigation.navigate('TransporterDashboard' as never);
+        break;
+      case 'admin':
+        navigation.navigate('AdminDashboard' as never);
+        break;
+    }
+  };
 
   const renderSidebar = () => (
     <View
@@ -192,24 +214,82 @@ export default function DashboardWrapper({
 
         {/* Main Content Area */}
         <View className="flex-1">
-          {/* Mobile Header */}
-          {screenWidth < 768 && (
-            <View className="px-4 py-3 border-b border-neutral-800 flex-row items-center justify-between">
+          {/* Header with Dashboard Switcher */}
+          <View className="px-4 py-3 border-b border-neutral-800 flex-row items-center justify-between">
+            {screenWidth < 768 && (
               <TouchableOpacity
                 onPress={() => setShowMobileSidebar(true)}
                 className="p-2"
               >
                 <Menu color="#9CA3AF" size={24} />
               </TouchableOpacity>
-              <View className="flex-1 mx-4">
-                <Text className="text-white font-bold text-lg">{title}</Text>
-                <Text className="text-neutral-400 text-xs">{subtitle}</Text>
-              </View>
+            )}
+            
+            <View className="flex-1 mx-4">
+              <Text className="text-white font-bold text-lg">{title}</Text>
+              <Text className="text-neutral-400 text-xs">{subtitle}</Text>
+            </View>
+            
+            {/* Dashboard Switcher Button */}
+            <TouchableOpacity
+              onPress={() => setShowDashboardSwitcher(!showDashboardSwitcher)}
+              className="p-2 bg-neutral-800 rounded-lg mr-2 flex-row items-center"
+            >
+              <LayoutGrid color="#9CA3AF" size={20} />
+              <Text className="text-neutral-400 text-sm ml-2">Switch Dashboard</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              onPress={() => setShowProfileDrawer(true)}
+              className="p-2"
+            >
+              <User color="#9CA3AF" size={24} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Dashboard Switcher Dropdown */}
+          {showDashboardSwitcher && (
+            <View className="absolute top-16 right-4 bg-neutral-900 border border-neutral-700 rounded-lg p-2 z-50 shadow-lg">
+              <Text className="text-neutral-400 text-xs px-3 py-1 mb-1">TEST DASHBOARDS</Text>
+              
               <TouchableOpacity
-                onPress={() => setShowProfileDrawer(true)}
-                className="p-2"
+                onPress={() => handleDashboardSwitch('seller')}
+                className={`flex-row items-center px-3 py-2 rounded hover:bg-neutral-800 ${
+                  userRole === 'seller' ? 'bg-neutral-800' : ''
+                }`}
               >
-                <User color="#9CA3AF" size={24} />
+                <View className="w-2 h-2 bg-blue-500 rounded-full mr-2" />
+                <Text className="text-white">Seller Dashboard</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => handleDashboardSwitch('buyer')}
+                className={`flex-row items-center px-3 py-2 rounded hover:bg-neutral-800 ${
+                  userRole === 'buyer' ? 'bg-neutral-800' : ''
+                }`}
+              >
+                <View className="w-2 h-2 bg-yellow-500 rounded-full mr-2" />
+                <Text className="text-white">Buyer Dashboard</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => handleDashboardSwitch('transporter')}
+                className={`flex-row items-center px-3 py-2 rounded hover:bg-neutral-800 ${
+                  userRole === 'transporter' ? 'bg-neutral-800' : ''
+                }`}
+              >
+                <View className="w-2 h-2 bg-green-500 rounded-full mr-2" />
+                <Text className="text-white">Transporter Dashboard</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => handleDashboardSwitch('admin')}
+                className={`flex-row items-center px-3 py-2 rounded hover:bg-neutral-800 ${
+                  userRole === 'admin' ? 'bg-neutral-800' : ''
+                }`}
+              >
+                <View className="w-2 h-2 bg-purple-500 rounded-full mr-2" />
+                <Text className="text-white">Admin Dashboard</Text>
               </TouchableOpacity>
             </View>
           )}

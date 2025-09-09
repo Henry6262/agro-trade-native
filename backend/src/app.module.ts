@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { ProductsModule } from './products/products.module';
 import { SellerModule } from './seller/seller.module';
+import { BuyerModule } from './buyer/buyer.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
@@ -19,6 +20,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     OnboardingModule,
     ProductsModule,
     SellerModule,
+    BuyerModule,
   ],
   providers: [
     {

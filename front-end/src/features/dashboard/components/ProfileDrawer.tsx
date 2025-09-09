@@ -160,10 +160,24 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     },
   ]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    // Clear the auth session (now async)
+    await logout();
     onClose();
-    navigation.navigate('RoleSelection' as never);
+    
+    // Navigate to the Onboarding stack and then to RoleSelection
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: 'Onboarding' as never,
+          state: {
+            routes: [{ name: 'RoleSelection' }],
+            index: 0,
+          },
+        },
+      ],
+    });
   };
 
   const handleSave = () => {

@@ -5,9 +5,9 @@ import { simplifiedRoleSteps } from '@shared/constants/simplifiedOnboarding'
 import { ProgressSidebar } from '../shared/ProgressSidebar'
 import { Navigation } from '../shared/Navigation'
 import { ProductSelectionUnified } from '../ProductSelectionUnified' // Use unified product selection
+import { BuyerQuantityLocation } from './BuyerQuantityLocation'
 import { BuyerSpecifications } from './BuyerSpecifications'
 import { BuyerMarketRequest } from './BuyerMarketRequest'
-import { SimplifiedLocationStep } from '../shared/SimplifiedLocationStep'
 // Base management components moved to dashboard  
 import { useOnboardingStore } from '@stores/onboarding.store'
 import { useProductStore } from '@stores/product.store'
@@ -27,7 +27,8 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
     buyerData,
     currentStep,
     setStep,
-    saveOnboardingData
+    saveOnboardingData,
+    location
   } = useOnboardingStore()
   
   const { 
@@ -208,17 +209,29 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
     switch (currentStep.id) {
       case 'products':
         return selectedProducts.length > 0
-      case 'requirements':
-        return productSpecifications.every((spec) => 
-          spec.quantity && spec.quantity.toString().trim() !== '' && 
-          spec.unit && spec.unit.toString().trim() !== '' &&
-          spec.pricePerKilo && spec.pricePerKilo.toString().trim() !== ''
-        )
-      case 'location':
-        // Location is optional for now
+        
+      case 'quantity-location':
+        // Simplified validation - directly check store values
+        const productId = selectedProducts[0]
+        if (!productId) return false
+        
+        const spec = buyerSpecifications[productId]
+        if (!spec) return false
+        
+        // Parse quantity and price, handling string/number types
+        const quantity = spec.quantity ? parseFloat(spec.quantity.toString()) : 0
+        const price = spec.pricePerKilo ? parseFloat(spec.pricePerKilo.toString()) : 0
+        
+        // All three must be valid
+        return quantity > 0 && price > 0 && location !== null
+        
+      case 'specifications':
+        // Specifications are optional, user can proceed
         return true
+        
       case 'market':
         return true
+        
       default:
         return true
     }
@@ -231,7 +244,9 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
     switch (currentStep.id) {
       case 'products':
         return <ProductSelectionUnified />
-      case 'requirements':
+      case 'quantity-location':
+        return <BuyerQuantityLocation />
+      case 'specifications':
         return (
           <BuyerSpecifications
             selectedProducts={selectedProducts}
@@ -239,8 +254,6 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
             onSpecificationsChange={setProductSpecifications}
           />
         )
-      case 'location':
-        return <SimplifiedLocationStep />
       case 'market':
         return (
           <BuyerMarketRequest

@@ -68,7 +68,8 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      logout: () => {
+      logout: async () => {
+        // Clear state
         set({
           user: null,
           token: null,
@@ -77,6 +78,19 @@ export const useAuthStore = create<AuthState>()(
           isLoading: false,
           error: null,
         });
+        
+        // Clear AsyncStorage to ensure complete logout
+        try {
+          await AsyncStorage.removeItem('auth-storage');
+          // Clear any other app-specific storage if needed
+          await AsyncStorage.multiRemove([
+            'auth-storage',
+            'user-preferences',
+            'onboarding-data',
+          ]);
+        } catch (error) {
+          console.error('Error clearing storage on logout:', error);
+        }
       },
 
       refreshTokens: async () => {

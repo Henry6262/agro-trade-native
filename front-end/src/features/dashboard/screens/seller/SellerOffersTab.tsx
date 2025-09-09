@@ -136,57 +136,40 @@ export default function SellerOffersTab({ id }: SellerOffersTabProps = {}) {
             <Text className="text-neutral-400">Review and respond to buyer requests</Text>
           </View>
 
-          {/* Stats Cards - Responsive Grid */}
-          <View className={`${isMobile ? 'flex-row flex-wrap' : 'flex-row justify-between gap-2'} mb-6`}>
-            {/* Total Offers */}
-            <Card className={`bg-neutral-900 border-neutral-700 ${isMobile ? 'w-[48%] mb-2' : 'flex-1'}`}>
-              <CardContent className="p-3">
-                <View className="items-center">
-                  <Target color="#22c55e" size={20} />
-                  <Text className="text-xs text-neutral-400 mt-1">Total</Text>
-                  <Text className="text-lg font-bold text-white">{earningsData.totalOffers}</Text>
-                  <Text className="text-xs text-green-400">This Month</Text>
-                </View>
-              </CardContent>
-            </Card>
-
+          {/* Stats Cards - 3 in One Row */}
+          <View className="flex-row justify-between gap-2 mb-6">
             {/* Pending Offers */}
-            <Card className={`bg-neutral-900 border-neutral-700 ${isMobile ? 'w-[48%] mb-2' : 'flex-1'}`}>
-              <CardContent className="p-3">
-                <View className="items-center">
-                  <Clock color="#fb923c" size={20} />
-                  <Text className="text-xs text-neutral-400 mt-1">Pending</Text>
-                  <Text className="text-lg font-bold text-white">{earningsData.pendingOffers}</Text>
-                  <Text className="text-xs text-orange-400">Awaiting</Text>
+            <Card className="bg-neutral-900 border-neutral-700 flex-1">
+              <CardContent className="p-4">
+                <View className="flex-row items-center justify-between mb-2">
+                  <Clock color="#fb923c" size={24} />
+                  <Text className="text-2xl font-bold text-white">{earningsData.pendingOffers}</Text>
                 </View>
+                <Text className="text-xs text-neutral-400">Pending</Text>
               </CardContent>
             </Card>
 
             {/* Accepted */}
-            <Card className={`bg-neutral-900 border-neutral-700 ${isMobile ? 'w-[48%] mb-2' : 'flex-1'}`}>
-              <CardContent className="p-3">
-                <View className="items-center">
-                  <CheckCircle color="#60a5fa" size={20} />
-                  <Text className="text-xs text-neutral-400 mt-1">Accepted</Text>
-                  <Text className="text-lg font-bold text-white">{earningsData.acceptedThisMonth}</Text>
-                  <Text className="text-xs text-blue-400">
-                    {earningsData.conversionRate}% rate
-                  </Text>
+            <Card className="bg-neutral-900 border-neutral-700 flex-1">
+              <CardContent className="p-4">
+                <View className="flex-row items-center justify-between mb-2">
+                  <CheckCircle color="#60a5fa" size={24} />
+                  <Text className="text-2xl font-bold text-white">{earningsData.acceptedThisMonth}</Text>
                 </View>
+                <Text className="text-xs text-neutral-400">Accepted</Text>
               </CardContent>
             </Card>
 
             {/* Average Value */}
-            <Card className={`bg-neutral-900 border-neutral-700 ${isMobile ? 'w-[48%] mb-2' : 'flex-1'}`}>
-              <CardContent className="p-3">
-                <View className="items-center">
-                  <DollarSign color="#8b5cf6" size={20} />
-                  <Text className="text-xs text-neutral-400 mt-1">Avg Value</Text>
-                  <Text className="text-lg font-bold text-white">
+            <Card className="bg-neutral-900 border-neutral-700 flex-1">
+              <CardContent className="p-4">
+                <View className="flex-row items-center justify-between mb-2">
+                  <DollarSign color="#8b5cf6" size={24} />
+                  <Text className="text-2xl font-bold text-white">
                     ${(earningsData.averageOfferValue / 1000).toFixed(1)}k
                   </Text>
-                  <Text className="text-xs text-purple-400">Per Offer</Text>
                 </View>
+                <Text className="text-xs text-neutral-400">Avg Value</Text>
               </CardContent>
             </Card>
           </View>

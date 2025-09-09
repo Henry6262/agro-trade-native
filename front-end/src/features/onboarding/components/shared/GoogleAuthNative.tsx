@@ -41,7 +41,7 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
   const checkmarkScale = new Animated.Value(0);
   const textOpacity = new Animated.Value(0);
 
-  const { setTokens, setUser } = useAuthStore();
+  const { login } = useAuthStore();
   const onboardingStore = useOnboardingStore();
   const { selectedRole } = onboardingStore;
 
@@ -169,9 +169,8 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
       if (response?.data?.success) {
         const { access_token, user } = response.data;
         
-        // Store tokens and user info
-        setTokens(access_token, access_token);
-        setUser(user);
+        // Store tokens and user info using login method
+        login(user, access_token);
         
         // Show success animation
         showProfileCreatedAnimation();
@@ -198,7 +197,8 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
     try {
       const role = userRole || selectedRole || 'buyer';
       const apiUrl = ENV.apiUrl;
-      const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}`;
+      // Add prompt=select_account to force account selection
+      const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}&prompt=select_account`;
       
       // Store onboarding data and role before redirecting
       await onboardingStore.saveOnboardingData();
