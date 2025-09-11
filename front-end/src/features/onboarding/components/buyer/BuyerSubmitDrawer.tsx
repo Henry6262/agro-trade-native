@@ -167,12 +167,17 @@ export function BuyerSubmitDrawer({
           country: location?.country,
           address: location?.address,
         },
-        specifications: buyerSpec.specifications || {},
+        specifications: specifications || {},
         notes: buyerSpec.notes,
         status: 'ACTIVE',
       };
 
-      console.log('Submitting buy listing:', buyListingData);
+      console.log('=== Buy Listing Submission Debug ===');
+      console.log('buyerSpec:', buyerSpec);
+      console.log('specifications prop:', specifications);
+      console.log('specifications keys:', Object.keys(specifications || {}));
+      console.log('Final specifications being sent:', buyListingData.specifications);
+      console.log('Full buyListingData:', JSON.stringify(buyListingData, null, 2));
       
       // WORKAROUND: Skip onboarding completely for now
       // The onboarding endpoint expects different data than what we have
@@ -364,7 +369,9 @@ export function BuyerSubmitDrawer({
         >
           {/* Header */}
           <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-800">
-            <View className="w-10" />
+            <TouchableOpacity onPress={handleClose} className="p-2">
+              <Text className="text-blue-400 font-semibold">Back</Text>
+            </TouchableOpacity>
             <View className="h-1 w-12 bg-gray-700 rounded-full" />
             <TouchableOpacity onPress={handleClose} className="p-2">
               <X size={20} color="#9CA3AF" />

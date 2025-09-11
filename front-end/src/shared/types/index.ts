@@ -371,6 +371,161 @@ export type MainTabParamList = {
   Profile: undefined;
 };
 
+// Offers and Negotiations types
+export interface Offer {
+  id: string;
+  requestId: string;
+  sellerId: string;
+  seller: SellerProfile;
+  productId: string;
+  product: Product;
+  pricePerUnit: number;
+  currency: string;
+  quantity: number;
+  unit: string;
+  specifications: OfferSpecification[];
+  deliveryTerms: DeliveryTerms;
+  validUntil: string;
+  message?: string;
+  status: OfferStatus;
+  matchScore: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SellerProfile {
+  id: string;
+  name: string;
+  businessName?: string;
+  location: Location;
+  rating?: number;
+  reviewCount?: number;
+  verified: boolean;
+  avatar?: string;
+  experience?: number; // years in business
+  certifications?: string[];
+}
+
+export interface OfferSpecification {
+  id: string;
+  name: string;
+  value: string | number;
+  unit?: string;
+  category: SpecificationCategory;
+  matchesRequirement: boolean;
+  variance?: number; // percentage variance from requirement
+}
+
+export interface DeliveryTerms {
+  deliveryTime: number; // days
+  deliveryMethod: DeliveryMethod;
+  deliveryLocation?: Location;
+  shippingCost?: number;
+  incoterms?: string;
+  notes?: string;
+}
+
+export type DeliveryMethod = 'pickup' | 'delivery' | 'shipping' | 'fob' | 'cif';
+export type OfferStatus = 'pending' | 'accepted' | 'rejected' | 'countered' | 'expired' | 'withdrawn';
+export type SpecificationCategory = 'quality' | 'physical' | 'processing' | 'certification' | 'other';
+
+export interface BuyerRequest {
+  id: string;
+  buyerId: string;
+  buyer: User;
+  productId: string;
+  product: Product;
+  quantity: number;
+  unit: string;
+  maxPricePerUnit?: number;
+  currency: string;
+  specifications: BuyerSpecification[];
+  deliveryLocation: Location;
+  neededBy: string;
+  status: RequestStatus;
+  offers: Offer[];
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BuyerSpecification {
+  id: string;
+  name: string;
+  requiredValue: string | number;
+  unit?: string;
+  category: SpecificationCategory;
+  priority: SpecificationPriority;
+  tolerance?: number;
+}
+
+export type RequestStatus = 'active' | 'matched' | 'expired' | 'cancelled' | 'fulfilled';
+export type SpecificationPriority = 'required' | 'preferred' | 'optional';
+
+export interface SpecificationMatch {
+  specification: BuyerSpecification;
+  offerValue?: OfferSpecification;
+  matchType: MatchType;
+  score: number; // 0-100
+  message?: string;
+}
+
+export type MatchType = 'exact' | 'close' | 'partial' | 'missing' | 'exceeded';
+
+export interface NegotiationOffer {
+  id: string;
+  originalOfferId: string;
+  requestId: string;
+  buyerId: string;
+  sellerId: string;
+  type: NegotiationType;
+  pricePerUnit?: number;
+  quantity?: number;
+  specifications?: Partial<OfferSpecification>[];
+  deliveryTerms?: Partial<DeliveryTerms>;
+  message: string;
+  validUntil: string;
+  status: NegotiationStatus;
+  counterOffers: CounterOffer[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CounterOffer {
+  id: string;
+  negotiationId: string;
+  fromUserId: string;
+  pricePerUnit?: number;
+  quantity?: number;
+  specifications?: Partial<OfferSpecification>[];
+  deliveryTerms?: Partial<DeliveryTerms>;
+  message: string;
+  validUntil: string;
+  status: CounterOfferStatus;
+  createdAt: string;
+}
+
+export type NegotiationType = 'price' | 'quantity' | 'specifications' | 'delivery' | 'comprehensive';
+export type NegotiationStatus = 'pending' | 'accepted' | 'rejected' | 'countered' | 'expired';
+export type CounterOfferStatus = 'pending' | 'accepted' | 'rejected' | 'expired';
+
+export interface OfferAction {
+  type: OfferActionType;
+  offerId: string;
+  data?: any;
+  reason?: string;
+  message?: string;
+}
+
+export type OfferActionType = 'accept' | 'reject' | 'negotiate' | 'view_details';
+
+export interface RejectReason {
+  id: string;
+  label: string;
+  description: string;
+  requiresMessage: boolean;
+}
+
 // Component prop types
 export interface BaseComponentProps {
   testID?: string;

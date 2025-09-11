@@ -11,6 +11,7 @@ export class BuyerService {
     try {
       // WORKAROUND: Allow any authenticated user to create buyer listings
       console.log('Creating buyer listing for user:', userId);
+      console.log('DTO received:', JSON.stringify(dto, null, 2));
       
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
@@ -71,21 +72,74 @@ export class BuyerService {
       });
 
       // Add specifications if provided
-      // TODO: Fix specifications - need to map spec codes to specTypeId from SpecificationType table
-      // For now, skip specifications to allow buyer listing creation
-      /*
       if (dto.specifications && Object.keys(dto.specifications).length > 0) {
-        const specEntries = Object.entries(dto.specifications).map(([key, value]) => ({
-          listingType: 'BUY' as const,
-          buyListingId: buyListing.id,
-          specCode: key,
-          value: String(value),
-          specTypeId: 'TODO', // Need to look up from SpecificationType table
-        }));
+        console.log('Processing specifications:', dto.specifications);
+        
+        // Fields that are NOT specifications (they're core BuyListing fields)
+        const coreFields = ['productId', 'quantity', 'unit', 'pricePerKilo', 
+                           'maxPrice', 'deliveryDeadline', 'notes', 'neededBy'];
+        
+        // First, get or create specification types for each spec
+        const specEntries = [];
+        
+        for (const [key, value] of Object.entries(dto.specifications)) {
+          // Skip core fields and empty values
+          if (coreFields.includes(key) || value === null || value === undefined || value === '') continue;
+          
+          // Skip if the value looks like an ID (cuid pattern)
+          if (typeof value === 'string' && value.match(/^c[a-z0-9]{24,}$/)) {
+            console.log(`Skipping ${key} with ID-like value: ${value}`);
+            continue;
+          }
+          
+          // Try to find existing specification type or create a generic one
+          let specType = await this.prisma.specificationType.findFirst({
+            where: { 
+              OR: [
+                { name: key },
+                { code: key.toUpperCase() }
+              ]
+            }
+          });
+          
+          // If not found, create a new specification type
+          if (!specType) {
+            specType = await this.prisma.specificationType.create({
+              data: {
+                name: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim(),
+                code: key.toUpperCase().replace(/\s+/g, '_'),
+                dataType: typeof value === 'number' ? 'NUMBER' : 'TEXT',
+                unit: typeof value === 'number' ? 'UNIT' : null,
+              }
+            });
+          }
+          
+          // Prepare the specification entry (no listingType field in schema)
+          const specEntry: any = {
+            buyListingId: buyListing.id,
+            specTypeId: specType.id,
+          };
+          
+          // Set value based on data type
+          if (typeof value === 'number') {
+            specEntry.valueNumber = value; // Float type, not Decimal
+          } else {
+            specEntry.valueText = String(value);
+          }
+          
+          specEntries.push(specEntry);
+        }
 
-        await this.prisma.listingSpec.createMany({
-          data: specEntries,
-        });
+        // Create all specifications
+        if (specEntries.length > 0) {
+          console.log('Creating specification entries:', specEntries);
+          await this.prisma.listingSpec.createMany({
+            data: specEntries,
+          });
+          console.log('Specifications created successfully');
+        } else {
+          console.log('No specification entries to create');
+        }
 
         // Fetch the listing again with specifications
         return this.prisma.buyListing.findUnique({
@@ -101,11 +155,14 @@ export class BuyerService {
               },
             },
             deliveryAddress: true,
-            specifications: true,
+            specifications: {
+              include: {
+                specificationType: true,
+              }
+            },
           },
         });
       }
-      */
 
       return buyListing;
     } catch (error) {
@@ -120,7 +177,11 @@ export class BuyerService {
       include: {
         product: true,
         deliveryAddress: true,
-        specifications: true,
+        specifications: {
+          include: {
+            specificationType: true,
+          }
+        },
         offers: {
           include: {
             saleListing: {

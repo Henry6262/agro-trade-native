@@ -65,7 +65,7 @@ export default function DashboardMainScreen() {
   const { user, isAuthenticated } = useAuthStore();
   
   const [activeSection, setActiveSection] = useState('overview');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Start collapsed
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // Start expanded on desktop
   // State for testing different dashboards
   const [testRole, setTestRole] = useState<'admin' | 'seller' | 'buyer' | 'transporter' | null>(null);
   

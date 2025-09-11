@@ -1,140 +1,750 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
-  TextInput,
+  Alert,
+  ActivityIndicator,
+  RefreshControl,
+  Modal,
+  Image,
+  Dimensions,
+  Animated,
 } from 'react-native';
 import {
-  Plus,
   MapPin,
   Weight,
   DollarSign,
   Package,
-  ChevronDown,
+  Plus,
+  Edit,
+  Eye,
+  Star,
+  Calendar,
+  Zap,
+  Trophy,
   X,
-  Wheat,
-  Bean,
-  Apple,
-  Carrot,
-  Milk,
-  Egg,
+  Filter,
+  SortAsc,
+  Sparkles,
 } from 'lucide-react-native';
+import { apiClient } from '../../../../services/api';
 
-import { Card, CardContent, CardHeader, CardTitle } from '../../../../shared/components/Card';
+import { Card, CardContent } from '../../../../shared/components/Card';
 import { Badge } from '../../../../shared/components/Badge';
+import { ProductSelectionDrawerSimple as ProductSelectionDrawer } from '../../../../shared/components/ProductSelectionDrawerSimple';
+import { BuyerSpecificationsDrawer } from '../../../../shared/components/BuyerSpecificationsDrawer';
+import { ProductSpecificationsDrawer } from '../../../../shared/components/ProductSpecificationsDrawer';
+import { useOnboardingStore } from '../../../../stores/onboarding.store';
+import { BuyerSubmitDrawer } from '../../../onboarding/components/buyer/BuyerSubmitDrawer';
+import { useProductStore } from '../../../../stores/product.store';
+
+// New offer components
+import { OfferCard } from '../../../../shared/components/OfferCard';
+import { SpecificationComparison } from '../../../../shared/components/SpecificationComparison';
+import { NegotiationDrawer } from '../../../../shared/components/NegotiationDrawer';
+import { AcceptOfferModal } from '../../../../shared/components/AcceptOfferModal';
+import { RejectOfferModal } from '../../../../shared/components/RejectOfferModal';
+import { Offer, NegotiationOffer } from '../../../../shared/types';
+
+// Enhanced Offers Drawer Component
+interface OffersDrawerProps {
+  visible: boolean;
+  onClose: () => void;
+  offers: any[];
+  productName: string;
+  requestId: string;
+  buyerRequest?: any;
+}
+
+const OffersDrawer: React.FC<OffersDrawerProps> = ({ 
+  visible, 
+  onClose, 
+  offers, 
+  productName, 
+  requestId,
+  buyerRequest 
+}) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [slideAnim] = useState(new Animated.Value(0));
+  const [sortBy, setSortBy] = useState<'match' | 'price' | 'quantity' | 'delivery'>('match');
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Modal states
+  const [showNegotiation, setShowNegotiation] = useState(false);
+  const [showAcceptModal, setShowAcceptModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [selectedOffer, setSelectedOffer] = useState<any>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  useEffect(() => {
+    if (visible) {
+      setIsLoading(true);
+      Animated.timing(slideAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+      // Simulate loading time for offers
+      const timer = setTimeout(() => setIsLoading(false), 500);
+      return () => clearTimeout(timer);
+    } else {
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [visible]);
+
+  const transformOfferData = (rawOffer: any): Offer => {
+    // Handle both API data and mock data formats
+    const seller = rawOffer.saleListing?.seller || rawOffer.seller;
+    const sellerName = seller?.name || seller?.company?.name || 'Unknown Seller';
+    
+    return {
+      id: rawOffer.id || `offer_${Math.random()}`,
+      requestId: requestId,
+      sellerId: seller?.id || 'unknown',
+      seller: {
+        id: seller?.id || 'unknown',
+        name: sellerName,
+        businessName: seller?.company?.name || seller?.businessName,
+        location: {
+          id: 'loc_1',
+          address: rawOffer.originLocation || seller?.location || 'Unknown',
+          city: seller?.city || 'Unknown',
+          state: seller?.state || 'Unknown',
+          country: seller?.country || 'Unknown',
+          zipCode: seller?.zipCode || '00000',
+        },
+        rating: seller?.rating || 4.2,
+        reviewCount: seller?.reviewCount || 15,
+        verified: seller?.verified !== false,
+        avatar: seller?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(sellerName)}&background=10B981&color=fff`,
+      },
+      productId: rawOffer.product?.id || rawOffer.saleListing?.product?.id || 'unknown',
+      product: rawOffer.product || rawOffer.saleListing?.product || { name: productName },
+      pricePerUnit: parseFloat(rawOffer.offeredPrice || rawOffer.pricePerUnit) || 0,
+      currency: 'EUR',
+      quantity: parseFloat(rawOffer.quantity) || 0,
+      unit: rawOffer.unit || 'TON',
+      specifications: rawOffer.specifications?.map((spec: any) => ({
+        id: spec.id || `spec_${Math.random()}`,
+        name: spec.name || 'Unknown Spec',
+        value: spec.value || spec.valueText || spec.valueNumber || 'N/A',
+        category: 'quality',
+        matchesRequirement: spec.matchesRequirement !== false,
+      })) || [],
+      deliveryTerms: {
+        deliveryTime: rawOffer.deliveryDays || parseInt(rawOffer.deliveryTerms) || 14,
+        deliveryMethod: 'delivery',
+        deliveryLocation: rawOffer.deliveryLocation || rawOffer.deliveryTerms,
+      },
+      validUntil: rawOffer.validUntil || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      message: rawOffer.message,
+      status: rawOffer.status?.toLowerCase() || 'pending',
+      matchScore: rawOffer.matchScore || 85,
+      createdAt: rawOffer.createdAt || new Date().toISOString(),
+      updatedAt: rawOffer.updatedAt || new Date().toISOString(),
+    };
+  };
+
+  const sortedOffers = React.useMemo(() => {
+    const transformedOffers = offers.map(transformOfferData);
+    
+    return transformedOffers.sort((a, b) => {
+      switch (sortBy) {
+        case 'match':
+          return b.matchScore - a.matchScore;
+        case 'price':
+          return a.pricePerUnit - b.pricePerUnit;
+        case 'quantity':
+          return b.quantity - a.quantity;
+        case 'delivery':
+          return a.deliveryTerms.deliveryTime - b.deliveryTerms.deliveryTime;
+        default:
+          return b.matchScore - a.matchScore;
+      }
+    });
+  }, [offers, sortBy]);
+
+  const handleOfferAction = (action: string, offerId: string) => {
+    const offer = sortedOffers.find(o => o.id === offerId);
+    if (!offer) return;
+
+    setSelectedOffer(offer);
+    
+    switch (action) {
+      case 'accept':
+        setShowAcceptModal(true);
+        break;
+      case 'reject':
+        setShowRejectModal(true);
+        break;
+      case 'negotiate':
+        setShowNegotiation(true);
+        break;
+      case 'view_details':
+        // TODO: Implement detailed view
+        Alert.alert('Offer Details', 'Detailed view coming soon!');
+        break;
+    }
+  };
+
+  const handleAcceptOffer = async (offerId: string, notes?: string) => {
+    setActionLoading(true);
+    try {
+      // TODO: Implement actual API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      Alert.alert('Success', 'Offer accepted successfully!');
+      setShowAcceptModal(false);
+      setSelectedOffer(null);
+      // Refresh offers or update UI
+    } catch (error) {
+      Alert.alert('Error', 'Failed to accept offer. Please try again.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRejectOffer = async (offerId: string, reason: string, message?: string) => {
+    setActionLoading(true);
+    try {
+      // TODO: Implement actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      Alert.alert('Offer Rejected', 'The seller has been notified of your decision.');
+      setShowRejectModal(false);
+      setSelectedOffer(null);
+      // Refresh offers or update UI
+    } catch (error) {
+      Alert.alert('Error', 'Failed to reject offer. Please try again.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSubmitNegotiation = async (negotiation: Partial<NegotiationOffer>) => {
+    setActionLoading(true);
+    try {
+      // TODO: Implement actual API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      Alert.alert('Counter-Offer Sent', 'Your counter-offer has been sent to the seller.');
+      setShowNegotiation(false);
+      setSelectedOffer(null);
+      // Refresh offers or update UI
+    } catch (error) {
+      Alert.alert('Error', 'Failed to send counter-offer. Please try again.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  if (!visible) return null;
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="none"
+      transparent={true}
+      onRequestClose={onClose}
+      statusBarTranslucent={true}
+      presentationStyle="overFullScreen"
+    >
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' }}>
+        <Animated.View
+          style={{
+            flex: 1,
+            marginTop: 100,
+            backgroundColor: '#0A0A0A',
+            transform: [{
+              translateY: slideAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [300, 0],
+              })
+            }]
+          }}
+          className="rounded-t-3xl"
+        >
+          {/* Enhanced Header */}
+          <View className="p-6 border-b border-neutral-700/50">
+            <View className="flex-row justify-between items-center mb-4">
+              <TouchableOpacity onPress={onClose} className="p-2 -m-2">
+                <X color="#9CA3AF" size={24} />
+              </TouchableOpacity>
+              <View className="flex-1 items-center">
+                <Text className="text-xl font-bold text-white" numberOfLines={1}>
+                  {productName} Offers
+                </Text>
+                <Text className="text-sm text-neutral-400 mt-1">
+                  {offers.length} offer{offers.length !== 1 ? 's' : ''} received
+                </Text>
+              </View>
+              <View className="flex-row gap-2">
+                <TouchableOpacity 
+                  onPress={() => setShowFilters(!showFilters)}
+                  className="p-2 bg-neutral-800 rounded-lg border border-neutral-700"
+                >
+                  <Filter color="#9CA3AF" size={18} />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Sort Options */}
+            <View className="flex-row gap-2">
+              {[
+                { key: 'match', label: 'Best Match', icon: Sparkles },
+                { key: 'price', label: 'Price', icon: DollarSign },
+                { key: 'delivery', label: 'Delivery', icon: Star },
+              ].map(({ key, label, icon: Icon }) => (
+                <TouchableOpacity
+                  key={key}
+                  onPress={() => setSortBy(key as any)}
+                  className={`flex-row items-center px-3 py-2 rounded-lg border ${
+                    sortBy === key 
+                      ? 'bg-blue-500/20 border-blue-500/50' 
+                      : 'bg-neutral-800/50 border-neutral-700/50'
+                  }`}
+                >
+                  <Icon size={14} color={sortBy === key ? '#3B82F6' : '#9CA3AF'} />
+                  <Text className={`ml-2 text-xs font-medium ${
+                    sortBy === key ? 'text-blue-400' : 'text-neutral-400'
+                  }`}>
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Content */}
+          {isLoading ? (
+            <View className="flex-1 justify-center items-center">
+              <ActivityIndicator size="large" color="#10B981" />
+              <Text className="mt-4 text-gray-400">Loading offers...</Text>
+            </View>
+          ) : (
+            <ScrollView 
+              className="flex-1"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            >
+              <View className="p-6">
+                {offers.length === 0 ? (
+                  <View className="items-center py-12">
+                    <Package size={48} color="#6B7280" />
+                    <Text className="text-lg font-semibold text-white mt-4">No Offers Yet</Text>
+                    <Text className="text-gray-400 text-center mt-2">
+                      Offers will appear here when sellers respond to your request
+                    </Text>
+                  </View>
+                ) : (
+                  <View>
+                    {sortedOffers.map((offer) => (
+                      <OfferCard
+                        key={offer.id}
+                        offer={offer}
+                        buyerRequest={buyerRequest}
+                        onAccept={(id) => handleOfferAction('accept', id)}
+                        onReject={(id) => handleOfferAction('reject', id)}
+                        onNegotiate={(id) => handleOfferAction('negotiate', id)}
+                        onViewDetails={(id) => handleOfferAction('view_details', id)}
+                        isLoading={actionLoading}
+                      />
+                    ))}
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+          )}
+        </Animated.View>
+      </View>
+
+      {/* Modals */}
+      {selectedOffer && (
+        <>
+          <AcceptOfferModal
+            visible={showAcceptModal}
+            onClose={() => {
+              setShowAcceptModal(false);
+              setSelectedOffer(null);
+            }}
+            offer={selectedOffer}
+            buyerRequest={buyerRequest}
+            onConfirm={handleAcceptOffer}
+            isLoading={actionLoading}
+          />
+
+          <RejectOfferModal
+            visible={showRejectModal}
+            onClose={() => {
+              setShowRejectModal(false);
+              setSelectedOffer(null);
+            }}
+            offer={selectedOffer}
+            onConfirm={handleRejectOffer}
+            isLoading={actionLoading}
+          />
+
+          <NegotiationDrawer
+            visible={showNegotiation}
+            onClose={() => {
+              setShowNegotiation(false);
+              setSelectedOffer(null);
+            }}
+            offer={selectedOffer}
+            buyerRequest={buyerRequest}
+            onSubmit={handleSubmitNegotiation}
+            isLoading={actionLoading}
+          />
+        </>
+      )}
+    </Modal>
+  );
+};
 
 interface BuyerRequestsTabProps {
   id?: string;
 }
 
-export default function BuyerRequestsTab({ id }: BuyerRequestsTabProps = {}) {
-  const [showAddRequest, setShowAddRequest] = useState(false);
+export default function BuyerRequestsTab({}: BuyerRequestsTabProps = {}) {
   const [expandedRequest, setExpandedRequest] = useState<string | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [selectedQualityTags, setSelectedQualityTags] = useState<string[]>([]);
-  const [showProductPopover, setShowProductPopover] = useState(false);
+  const [buyerRequests, setBuyerRequests] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  // Offers drawer state
+  const [showOffersDrawer, setShowOffersDrawer] = useState(false);
+  const [selectedRequestOffers, setSelectedRequestOffers] = useState<any>(null);
+  
+  // Mock offers data for testing
+  const mockOffers = [
+    {
+      id: 'offer-1',
+      seller: {
+        id: 'seller-1',
+        name: 'Green Valley Farms',
+        location: 'Iowa, USA',
+        rating: 4.8,
+        verified: true,
+        avatar: 'https://ui-avatars.com/api/?name=Green+Valley&background=10B981&color=fff',
+      },
+      product: {
+        name: 'Premium Soft Wheat',
+        image: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=200&h=200&fit=crop',
+      },
+      pricePerUnit: 245,
+      quantity: 500,
+      unit: 'TON',
+      deliveryDays: 7,
+      matchScore: 92,
+      specifications: [
+        { name: 'Protein Content', buyerRequirement: '12-14%', sellerOffer: '13.2%', matchType: 'exact' },
+        { name: 'Moisture', buyerRequirement: '<14%', sellerOffer: '12.8%', matchType: 'exact' },
+        { name: 'Test Weight', buyerRequirement: '58 lb/bu', sellerOffer: '59 lb/bu', matchType: 'exact' },
+        { name: 'Foreign Material', buyerRequirement: '<2%', sellerOffer: '1.5%', matchType: 'exact' },
+      ],
+      totalValue: 122500,
+      savings: 2500,
+      deliveryTerms: 'FOB - Free on Board',
+      paymentTerms: 'Net 30 days',
+    },
+    {
+      id: 'offer-2',
+      seller: {
+        id: 'seller-2',
+        name: 'Midwest Grain Co.',
+        location: 'Nebraska, USA',
+        rating: 4.5,
+        verified: true,
+        avatar: 'https://ui-avatars.com/api/?name=Midwest+Grain&background=3B82F6&color=fff',
+      },
+      product: {
+        name: 'Standard Soft Wheat',
+        image: 'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=200&h=200&fit=crop',
+      },
+      pricePerUnit: 238,
+      quantity: 450,
+      unit: 'TON',
+      deliveryDays: 10,
+      matchScore: 78,
+      specifications: [
+        { name: 'Protein Content', buyerRequirement: '12-14%', sellerOffer: '11.8%', matchType: 'partial' },
+        { name: 'Moisture', buyerRequirement: '<14%', sellerOffer: '13.5%', matchType: 'exact' },
+        { name: 'Test Weight', buyerRequirement: '58 lb/bu', sellerOffer: '57 lb/bu', matchType: 'partial' },
+        { name: 'Foreign Material', buyerRequirement: '<2%', sellerOffer: '1.8%', matchType: 'exact' },
+      ],
+      totalValue: 107100,
+      savings: 5900,
+      deliveryTerms: 'CIF - Cost, Insurance & Freight',
+      paymentTerms: 'Letter of Credit',
+    },
+    {
+      id: 'offer-3',
+      seller: {
+        id: 'seller-3',
+        name: 'Prairie Harvest LLC',
+        location: 'Kansas, USA',
+        rating: 4.2,
+        verified: false,
+        avatar: 'https://ui-avatars.com/api/?name=Prairie+Harvest&background=F59E0B&color=fff',
+      },
+      product: {
+        name: 'Soft Wheat',
+        image: 'https://images.unsplash.com/photo-1530536951323-1f4e58c9e772?w=200&h=200&fit=crop',
+      },
+      pricePerUnit: 255,
+      quantity: 600,
+      unit: 'TON',
+      deliveryDays: 5,
+      matchScore: 65,
+      specifications: [
+        { name: 'Protein Content', buyerRequirement: '12-14%', sellerOffer: '11.2%', matchType: 'missing' },
+        { name: 'Moisture', buyerRequirement: '<14%', sellerOffer: '14.2%', matchType: 'missing' },
+        { name: 'Test Weight', buyerRequirement: '58 lb/bu', sellerOffer: '56 lb/bu', matchType: 'missing' },
+        { name: 'Foreign Material', buyerRequirement: '<2%', sellerOffer: '2.1%', matchType: 'partial' },
+      ],
+      totalValue: 153000,
+      savings: -3000,
+      deliveryTerms: 'EXW - Ex Works',
+      paymentTerms: 'Cash on Delivery',
+    },
+  ];
+  
+  // Four-step offer creation flow states
+  const [showProductSelection, setShowProductSelection] = useState(false);
+  const [showQuantityPrice, setShowQuantityPrice] = useState(false);
+  const [showProductSpecs, setShowProductSpecs] = useState(false);
+  const [showSubmitDrawer, setShowSubmitDrawer] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
+  const [quantityPriceSpecs, setQuantityPriceSpecs] = useState<any>(null);
+  const [productSpecifications, setProductSpecifications] = useState<any>({});
+  
+  const onboardingStore = useOnboardingStore();
+  const { products, fetchAllData, getProductById } = useProductStore();
 
-  const productDatabase = {
-    'Grains & Cereals': [
-      { id: 'wheat', name: 'Wheat', icon: Wheat },
-      { id: 'corn', name: 'Corn', icon: Package },
-      { id: 'rice', name: 'Rice', icon: Package },
-      { id: 'barley', name: 'Barley', icon: Wheat },
-      { id: 'oats', name: 'Oats', icon: Package },
-    ],
-    Legumes: [
-      { id: 'soybeans', name: 'Soybeans', icon: Bean },
-      { id: 'lentils', name: 'Lentils', icon: Bean },
-      { id: 'chickpeas', name: 'Chickpeas', icon: Bean },
-      { id: 'peas', name: 'Peas', icon: Bean },
-    ],
-    Fruits: [
-      { id: 'apples', name: 'Apples', icon: Apple },
-      { id: 'oranges', name: 'Oranges', icon: Apple },
-      { id: 'bananas', name: 'Bananas', icon: Apple },
-      { id: 'grapes', name: 'Grapes', icon: Apple },
-    ],
-    Vegetables: [
-      { id: 'carrots', name: 'Carrots', icon: Carrot },
-      { id: 'potatoes', name: 'Potatoes', icon: Package },
-      { id: 'onions', name: 'Onions', icon: Package },
-      { id: 'tomatoes', name: 'Tomatoes', icon: Apple },
-    ],
-    'Dairy & Livestock': [
-      { id: 'milk', name: 'Milk', icon: Milk },
-      { id: 'eggs', name: 'Eggs', icon: Egg },
-      { id: 'beef', name: 'Beef', icon: Package },
-      { id: 'pork', name: 'Pork', icon: Package },
-    ],
+  // Fetch products data on mount
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+  
+  // Fetch buyer listings on mount and refresh
+  useEffect(() => {
+    fetchBuyerListings();
+  }, []);
+
+  // Debug effect to monitor state changes
+  useEffect(() => {
+    console.log('showProductSelection changed to:', showProductSelection);
+  }, [showProductSelection]);
+
+  const fetchBuyerListings = async () => {
+    try {
+      setError(null);
+      const response = await apiClient.get('/buyer/listings');
+      
+      if (response?.data) {
+        console.log('Raw API response:', response.data);
+        
+        // Transform API data to match UI requirements
+        const transformedData = response.data.map((listing: any) => {
+          console.log('Processing listing:', listing.id);
+          console.log('Specifications for listing:', listing.specifications);
+          
+          return {
+          id: listing.id,
+          product: listing.product?.displayName || listing.product?.name || 'Unknown Product',
+          productId: listing.product?.id, // Store product ID for lookups
+          productCategory: listing.product?.category,
+          productImage: listing.product?.image, // Store product image from API
+          quantity: parseFloat(listing.quantity),
+          unit: listing.unit || 'TON',
+          maxPricePerUnit: listing.maxPricePerUnit ? parseFloat(listing.maxPricePerUnit) : null,
+          deliveryLocation: formatLocation(listing.deliveryAddress),
+          deliveryFlag: getCountryFlag(listing.deliveryAddress?.country),
+          requiredDate: listing.neededBy,
+          status: mapStatus(listing.status),
+          qualityRequirements: extractQualityRequirements(listing.specifications, listing),
+          offers: listing.offers?.length || 0,
+          bestOffer: getBestOfferPrice(listing.offers),
+          hasOffers: listing.offers && listing.offers.length > 0,
+          created: listing.createdAt,
+          notes: listing.notes,
+          rawData: listing, // Keep original data for detailed view
+        };
+        });
+        
+        setBuyerRequests(transformedData);
+      }
+    } catch (err: any) {
+      console.error('Error fetching buyer listings:', err);
+      setError(err?.response?.data?.message || 'Failed to load buyer requests');
+      
+      // Show error to user
+      Alert.alert(
+        'Error',
+        'Failed to load your buyer requests. Please try again.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
   };
 
-  const qualityTagsDatabase = [
-    'Organic',
-    'Non-GMO',
-    'Protein 14%',
-    'Protein 15%',
-    'Protein 16%',
-    'Protein 18%',
-    'Grade A',
-    'Grade B',
-    'Moisture 12%',
-    'Moisture 15%',
-    'Fair Trade',
-    'Pesticide Free',
-    'Gluten Free',
-    'Kosher',
-    'Halal',
-  ];
+  const onRefresh = () => {
+    setIsRefreshing(true);
+    fetchBuyerListings();
+  };
 
-  const buyerRequests = [
-    {
-      id: 'R001',
-      product: 'Premium Wheat',
-      quantity: 60,
-      maxPricePerTon: 285,
-      deliveryLocation: 'Chicago, IL',
-      deliveryFlag: '🇺🇸',
-      requiredDate: '2025-02-15',
-      status: 'Active',
-      qualityRequirements: ['Organic', 'Non-GMO', 'Protein 15%+'],
-      offers: 3,
-      bestOffer: 275,
-      created: '2025-01-20',
-      notes: 'Urgent requirement for feed production. Quality is priority over price.',
-    },
-    {
-      id: 'R002',
-      product: 'Soybeans',
-      quantity: 80,
-      maxPricePerTon: 370,
-      deliveryLocation: 'Detroit, MI',
-      deliveryFlag: '🇺🇸',
-      requiredDate: '2025-02-20',
-      status: 'Matched',
-      qualityRequirements: ['Organic', 'Protein 18%'],
-      offers: 7,
-      bestOffer: 355,
-      created: '2025-01-18',
-      notes: 'Looking for consistent supplier for long-term partnership.',
-    },
-    {
-      id: 'R003',
-      product: 'Corn Grain',
-      quantity: 45,
-      maxPricePerTon: 225,
-      deliveryLocation: 'Milwaukee, WI',
-      deliveryFlag: '🇺🇸',
-      requiredDate: '2025-02-10',
-      status: 'Expired',
-      qualityRequirements: ['Grade A', 'Moisture 14%'],
-      offers: 1,
-      bestOffer: 230,
-      created: '2025-01-15',
-      notes: 'Budget-conscious purchase for processing facility.',
-    },
-  ];
+  // Helper functions for data transformation
+  const formatLocation = (address: any) => {
+    if (!address) return 'Location not specified';
+    
+    const parts = [];
+    if (address.city) parts.push(address.city);
+    if (address.region) parts.push(address.region);
+    if (address.country) parts.push(address.country);
+    
+    return parts.join(', ') || address.street || 'Location not specified';
+  };
+
+  // Handle offers button press
+  const handleViewOffers = (request: any) => {
+    setSelectedRequestOffers(request);
+    setShowOffersDrawer(true);
+  };
+
+  // Get product image with fallback
+  const getProductImage = (request: any) => {
+    // First try to use the image from the API response
+    if (request.productImage) {
+      return request.productImage;
+    }
+    
+    // Then try to get from product store using product ID
+    if (request.productId) {
+      const productData = getProductById(request.productId);
+      if (productData?.image) {
+        return productData.image;
+      }
+    }
+    
+    // Fallback to category-based placeholder
+    const categoryImages: Record<string, string> = {
+      'SOFT_WHEAT': 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=200&h=200&fit=crop',
+      'HARD_WHEAT': 'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=200&h=200&fit=crop',
+      'DURUM_WHEAT': 'https://images.unsplash.com/photo-1530536951323-1f4e58c9e772?w=200&h=200&fit=crop',
+      'CORN': 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=200&h=200&fit=crop',
+      'SOYBEANS': 'https://images.unsplash.com/photo-1639843906836-5dba16a1ca18?w=200&h=200&fit=crop',
+      'RICE': 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=200&h=200&fit=crop',
+      'BARLEY': 'https://images.unsplash.com/photo-1548533197-f99f7cdc76c8?w=200&h=200&fit=crop',
+    };
+    
+    if (request.productCategory && categoryImages[request.productCategory]) {
+      return categoryImages[request.productCategory];
+    }
+    
+    // Final fallback
+    return 'https://via.placeholder.com/80x80/10B981/FFFFFF?text=' + (request.product?.charAt(0) || 'P');
+  };
+
+  const getCountryFlag = (country: string) => {
+    const flags: Record<string, string> = {
+      'United States': '🇺🇸',
+      'USA': '🇺🇸',
+      'Canada': '🇨🇦',
+      'Mexico': '🇲🇽',
+      'United Kingdom': '🇬🇧',
+      'UK': '🇬🇧',
+      'France': '🇫🇷',
+      'Germany': '🇩🇪',
+      'Spain': '🇪🇸',
+      'Italy': '🇮🇹',
+      // Add more as needed
+    };
+    return flags[country] || '🌍';
+  };
+
+  const mapStatus = (status: string) => {
+    const statusMap: Record<string, string> = {
+      'ACTIVE': 'Active',
+      'MATCHED': 'Matched',
+      'EXPIRED': 'Expired',
+      'CANCELLED': 'Cancelled',
+      'FULFILLED': 'Fulfilled',
+    };
+    return statusMap[status] || status;
+  };
+
+  const extractQualityRequirements = (specifications: any, rawListing?: any) => {
+    const requirements: string[] = [];
+    
+    console.log('extractQualityRequirements called with specifications:', specifications, 'rawListing:', rawListing);
+    
+    // Check if specifications is an object (from the creation flow)
+    if (specifications && typeof specifications === 'object' && !Array.isArray(specifications)) {
+      console.log('Processing specifications object:', specifications);
+      
+      // Extract specifications from the object format
+      Object.entries(specifications).forEach(([key, value]) => {
+        if (value && value !== '' && key !== 'notes' && key !== 'productId' && key !== 'quantity' && key !== 'maxPricePerUnit' && key !== 'unit' && key !== 'neededBy') {
+          // Format the key nicely
+          const formattedKey = key
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase())
+            .trim();
+          requirements.push(`${formattedKey}: ${value}`);
+        }
+      });
+    }
+    
+    // Extract from formal specifications array if they exist
+    if (specifications && Array.isArray(specifications) && specifications.length > 0) {
+      specifications.forEach(spec => {
+        // Check for both valueText and valueNumber
+        if (spec.valueText) {
+          // If there's a specificationType with a name, use it as a label
+          if (spec.specificationType?.name) {
+            requirements.push(`${spec.specificationType.name}: ${spec.valueText}`);
+          } else {
+            requirements.push(spec.valueText);
+          }
+        } else if (spec.valueNumber !== null && spec.valueNumber !== undefined) {
+          const label = spec.specificationType?.name || 'Value';
+          const unit = spec.specificationType?.unit || '';
+          requirements.push(`${label}: ${spec.valueNumber}${unit ? ' ' + unit : ''}`);
+        }
+      });
+    }
+    
+    // Also check for any product-specific requirements stored in the listing's notes
+    // The notes field might contain additional requirements
+    if (rawListing?.notes && rawListing.notes.includes(':')) {
+      // Try to parse structured notes that might contain specs
+      const lines = rawListing.notes.split('\n');
+      lines.forEach((line: string) => {
+        if (line.includes(':') && !line.toLowerCase().includes('note')) {
+          requirements.push(line.trim());
+        }
+      });
+    }
+    
+    console.log('Extracted requirements:', requirements);
+    return requirements;
+  };
+
+  const getBestOfferPrice = (offers: any[]) => {
+    if (!offers || offers.length === 0) return null;
+    
+    const prices = offers
+      .filter(offer => offer.pricePerUnit)
+      .map(offer => parseFloat(offer.pricePerUnit));
+    
+    return prices.length > 0 ? Math.min(...prices) : null;
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -149,310 +759,403 @@ export default function BuyerRequestsTab({ id }: BuyerRequestsTabProps = {}) {
     }
   };
 
-  const toggleQualityTag = (tag: string) => {
-    setSelectedQualityTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
+  
+  // Four-step flow handlers
+  const handleProductSelect = (productId: string, productData: any) => {
+    // For single selection, immediately proceed to quantity/price step
+    console.log('Product selected:', productId, productData);
+    
+    // Store the selected product data
+    setSelectedProducts([productData]); 
+    
+    // Update the onboarding store with the selected product
+    onboardingStore.setSelectedProducts([productId]);
+    onboardingStore.setSelectedProductsMetadata([productData]);
+    
+    // Close selection drawer and show quantity/price specifications
+    setShowProductSelection(false);
+    setShowQuantityPrice(true);
   };
+  
+  const handleQuantityPriceSave = (specs: any) => {
+    console.log('Quantity and price saved:', specs);
+    setQuantityPriceSpecs(specs);
+    
+    // Update the onboarding store with specifications
+    if (specs && specs.length > 0) {
+      const spec = specs[0];
+      if (spec.productId) {
+        onboardingStore.updateBuyerSpecification(spec.productId, spec);
+      }
+    }
+    
+    // Move to product specifications step
+    setShowQuantityPrice(false);
+    setShowProductSpecs(true);
+  };
+  
+  const handleProductSpecsSave = (specs: any) => {
+    console.log('Product specifications saved:', specs);
+    setProductSpecifications(specs);
+    
+    // Merge with quantity/price specs
+    if (quantityPriceSpecs && quantityPriceSpecs.length > 0) {
+      const mergedSpec = {
+        ...quantityPriceSpecs[0],
+        ...specs,  // Merge specs directly, not nested
+      };
+      
+      // Update the onboarding store with merged specifications
+      if (mergedSpec.productId) {
+        onboardingStore.updateBuyerSpecification(mergedSpec.productId, mergedSpec);
+      }
+    }
+    
+    // Move to submit step
+    setShowProductSpecs(false);
+    setShowSubmitDrawer(true);
+  };
+  
 
-  const removeQualityTag = (tag: string) => {
-    setSelectedQualityTags((prev) => prev.filter((t) => t !== tag));
-  };
+  // Show loading state on initial load
+  if (isLoading) {
+    return (
+      <View className="flex-1 bg-black justify-center items-center">
+        <ActivityIndicator size="large" color="#10B981" />
+        <Text className="text-gray-400 mt-4">Loading your buyer requests...</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView 
       className="flex-1 bg-black"
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior="automatic"
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={onRefresh}
+          tintColor="#10B981"
+        />
+      }
     >
       <View className="p-6 space-y-6">
-        <View className="flex-row justify-between items-center">
-          <View>
-            <Text className="text-2xl font-bold text-white">My Requests</Text>
-            <Text className="text-neutral-400">Manage your product requests and requirements</Text>
+        {/* Header */}
+        <View className="flex-row justify-between items-start mb-4">
+          <View className="flex-1">
+            <Text className="text-2xl font-bold text-white">Market Requests</Text>
+            <Text className="text-neutral-400">Create and manage your buying requirements</Text>
           </View>
           <TouchableOpacity
-            onPress={() => setShowAddRequest(true)}
-            className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded flex-row items-center gap-2"
+            onPress={() => {
+              console.log('Create button pressed, current state:', showProductSelection);
+              setShowProductSelection(true);
+              console.log('State should now be true');
+            }}
+            className="bg-green-500 rounded-xl w-12 h-12 items-center justify-center ml-4"
+            style={{
+              shadowColor: '#10B981',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.2,
+              shadowRadius: 4,
+              elevation: 4,
+            }}
           >
-            <Plus color="#ffffff" size={16} />
-            <Text className="text-white">New Request</Text>
+            <Plus color="#ffffff" size={24} strokeWidth={2.5} />
           </TouchableOpacity>
         </View>
 
+        {/* Empty State */}
+        {buyerRequests.length === 0 && !error && (
+          <View className="bg-neutral-900 rounded-xl p-8 items-center border border-neutral-700">
+            <Package size={48} color="#6B7280" />
+            <Text className="text-lg font-semibold text-white mt-4">No Buyer Requests Yet</Text>
+            <Text className="text-gray-400 text-center mt-2">
+              Create your first buyer request to start receiving offers from sellers
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowProductSelection(true)}
+              className="bg-blue-500 rounded-lg px-6 py-3 mt-6"
+            >
+              <Text className="text-white font-semibold">Create Your First Request</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <View className="bg-red-900/20 rounded-xl p-6 border border-red-700/30">
+            <Text className="text-red-400 font-semibold mb-2">Failed to Load Requests</Text>
+            <Text className="text-red-300 text-sm">{error}</Text>
+            <TouchableOpacity
+              onPress={fetchBuyerListings}
+              className="bg-red-500/20 rounded-lg px-4 py-2 mt-4 border border-red-500/50"
+            >
+              <Text className="text-red-400 font-semibold">Try Again</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Buyer Requests List */}
         <View className="space-y-4">
-          {buyerRequests.map((request) => (
-            <Card key={request.id} className="bg-neutral-900 border-neutral-700">
-              <CardContent className="p-6">
-                <View className="flex-row justify-between items-start mb-4">
-                  <View>
-                    <Text className="text-lg font-semibold text-white">{request.product}</Text>
-                    <View className="flex-row items-center gap-4 mt-2">
-                      <View className="flex-row items-center gap-1 bg-neutral-800/50 px-2 py-1 rounded">
-                        <Weight color="#60a5fa" size={16} />
-                        <Text className="text-white font-medium text-sm">{request.quantity} tons</Text>
-                      </View>
-                      <View className="flex-row items-center gap-1 bg-neutral-800/50 px-2 py-1 rounded">
-                        <DollarSign color="#60a5fa" size={16} />
-                        <Text className="text-white font-medium text-sm">${request.maxPricePerTon}/ton max</Text>
-                      </View>
-                      <View className="flex-row items-center gap-1 bg-blue-500/20 px-2 py-1 rounded">
-                        <Text className="text-blue-300 text-xs">Budget:</Text>
-                        <Text className="text-blue-400 font-bold">
-                          ${(request.quantity * request.maxPricePerTon).toLocaleString()}
+          {buyerRequests.map((request: any, index: number) => (
+            <Card key={request.id} className="bg-neutral-900 border-neutral-700 overflow-hidden">
+              <CardContent className="p-0">
+                {/* Top Section with Product Image and Details */}
+                <View className="flex-row p-4">
+                  {/* Product Image */}
+                  <View className="w-20 h-20 rounded-lg overflow-hidden bg-neutral-800 mr-4">
+                    <Image
+                      source={{ uri: getProductImage(request) }}
+                      className="w-full h-full"
+                      resizeMode="cover"
+                    />
+                  </View>
+                  
+                  {/* Product Details */}
+                  <View className="flex-1">
+                    <View className="flex-row justify-between items-start mb-2">
+                      <Text className="text-lg font-semibold text-white flex-1" numberOfLines={1}>
+                        {request.product}
+                      </Text>
+                      
+                      {/* Edit Icon Button */}
+                      <TouchableOpacity 
+                        className="ml-2 p-2 -m-2 active:scale-95" 
+                        activeOpacity={0.7}
+                        onPress={() => {
+                          // Future: Implement edit functionality
+                          console.log('Edit request:', request.id);
+                        }}
+                      >
+                        <Edit color="#60A5FA" size={20} />
+                      </TouchableOpacity>
+                    </View>
+                    
+                    {/* Location */}
+                    <View className="flex-row items-center mb-2">
+                      <MapPin color="#10B981" size={14} />
+                      <Text className="text-neutral-300 text-sm ml-1" numberOfLines={1}>
+                        {request.deliveryFlag} {request.deliveryLocation}
+                      </Text>
+                    </View>
+                    
+                    {/* Quantity and Price */}
+                    <View className="flex-row items-center gap-3">
+                      <View className="flex-row items-center">
+                        <Weight color="#60A5FA" size={14} />
+                        <Text className="text-white text-sm ml-1">
+                          {request.quantity} {request.unit.toLowerCase()}
                         </Text>
                       </View>
-                    </View>
-                  </View>
-                  <View className="flex-row items-center gap-2">
-                    <View className={`${getStatusColor(request.status)} px-2 py-1 rounded`}>
-                      <Text className="text-white text-xs">{request.status}</Text>
-                    </View>
-                    <View className="border border-blue-500 px-2 py-1 rounded">
-                      <Text className="text-blue-400 text-xs">{request.offers} offers</Text>
-                    </View>
-                  </View>
-                </View>
-
-                <View className="flex-row gap-4 mb-4">
-                  <View className="flex-1 space-y-2">
-                    <View>
-                      <Text className="text-sm text-neutral-400">Delivery Location:</Text>
-                      <View className="flex-row items-center gap-1 text-white">
-                        <MapPin color="#9CA3AF" size={12} />
-                        <Text className="text-white text-sm">{request.deliveryFlag} {request.deliveryLocation}</Text>
-                      </View>
-                    </View>
-                    <View>
-                      <Text className="text-sm text-neutral-400">Required Date:</Text>
-                      <Text className="text-white text-sm">{new Date(request.requiredDate).toLocaleDateString()}</Text>
-                    </View>
-                  </View>
-
-                  <View className="flex-1 space-y-2">
-                    <View>
-                      <Text className="text-sm text-neutral-400">Best Offer:</Text>
-                      <Text className="text-green-400 font-medium text-sm">${request.bestOffer}/ton</Text>
-                    </View>
-                    <View>
-                      <Text className="text-sm text-neutral-400">Created:</Text>
-                      <Text className="text-white text-sm">{new Date(request.created).toLocaleDateString()}</Text>
-                    </View>
-                  </View>
-                </View>
-
-                <View className="mb-4">
-                  <Text className="text-sm mb-2 text-neutral-400">Quality Requirements:</Text>
-                  <View className="flex-row flex-wrap gap-1">
-                    {request.qualityRequirements.map((req, index) => (
-                      <Badge key={index} variant="outline" className="text-xs border-blue-400 text-blue-300">
-                        {req}
-                      </Badge>
-                    ))}
-                  </View>
-                </View>
-
-                <View className="flex-row gap-2">
-                  <TouchableOpacity
-                    onPress={() =>
-                      setExpandedRequest(expandedRequest === request.id ? null : request.id)
-                    }
-                    className="px-3 py-2 bg-transparent border border-neutral-600 rounded"
-                  >
-                    <Text className="text-neutral-400 hover:text-white text-xs">
-                      {expandedRequest === request.id ? 'Hide Details' : 'View Details'}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity className="px-3 py-2 border border-blue-500 text-blue-400 hover:bg-blue-500/10 bg-transparent rounded">
-                    <Text className="text-blue-400 text-xs">Edit Request</Text>
-                  </TouchableOpacity>
-                  {request.status === 'Active' && (
-                    <TouchableOpacity className="px-3 py-2 border border-green-500 text-green-400 hover:bg-green-500/10 bg-transparent rounded">
-                      <Text className="text-green-400 text-xs">View Offers ({request.offers})</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-
-                {expandedRequest === request.id && (
-                  <View className="mt-4 pt-4 border-t border-neutral-700 space-y-3">
-                    <View>
-                      <Text className="text-sm font-medium text-white">Request Notes</Text>
-                      <View className="bg-neutral-800/50 rounded-lg p-3 mt-2">
-                        <Text className="text-neutral-300 text-sm">{request.notes}</Text>
-                      </View>
-                    </View>
-
-                    <View>
-                      <Text className="text-sm font-medium text-white">Request Summary</Text>
-                      <View className="text-sm space-y-1 mt-2">
-                        <View className="flex-row justify-between">
-                          <Text className="text-neutral-400">Total Budget:</Text>
-                          <Text className="text-white">
-                            ${(request.quantity * request.maxPricePerTon).toLocaleString()}
+                      {request.maxPricePerUnit && (
+                        <View className="flex-row items-center">
+                          <DollarSign color="#FBBF24" size={14} />
+                          <Text className="text-yellow-400 text-sm ml-1">
+                            €{request.maxPricePerUnit}/kg max
                           </Text>
                         </View>
-                        <View className="flex-row justify-between">
-                          <Text className="text-neutral-400">Potential Savings:</Text>
-                          <Text className="text-green-400">
-                            ${((request.maxPricePerTon - request.bestOffer) * request.quantity).toLocaleString()}
-                          </Text>
-                        </View>
-                        <View className="flex-row justify-between">
-                          <Text className="text-neutral-400">Days Until Required:</Text>
-                          <Text className="text-white">
-                            {Math.ceil(
-                              (new Date(request.requiredDate).getTime() - new Date().getTime()) /
-                                (1000 * 60 * 60 * 24),
-                            )}{' '}
-                            days
-                          </Text>
-                        </View>
-                      </View>
+                      )}
+                    </View>
+                  </View>
+                </View>
+
+                {/* Quality Requirements */}
+                {request.qualityRequirements.length > 0 && (
+                  <View className="px-4 pb-4">
+                    <View className="flex-row flex-wrap gap-1">
+                      {request.qualityRequirements.slice(0, 3).map((req: string, idx: number) => (
+                        <Badge key={idx} variant="outline" className="text-xs border-blue-400 text-blue-300">
+                          {req}
+                        </Badge>
+                      ))}
+                      {request.qualityRequirements.length > 3 && (
+                        <Badge variant="outline" className="text-xs border-neutral-500 text-neutral-400">
+                          +{request.qualityRequirements.length - 3} more
+                        </Badge>
+                      )}
                     </View>
                   </View>
                 )}
+
+                {/* Star Feature - Offers Section */}
+                <View className="px-4 pb-4">
+                  {request.offers > 0 ? (
+                    <TouchableOpacity
+                      onPress={() => handleViewOffers(request)}
+                      className="bg-gradient-to-br from-green-500/20 to-green-600/10 rounded-xl p-4 border border-green-500/30 active:scale-95"
+                      style={{
+                        shadowColor: '#10B981',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 4,
+                        elevation: 2,
+                      }}
+                      activeOpacity={0.8}
+                    >
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-1">
+                          <View className="flex-row items-center mb-1">
+                            <Star color="#10B981" size={18} fill="#10B981" />
+                            <Text className="text-green-400 font-semibold ml-2">
+                              {request.offers} Offer{request.offers > 1 ? 's' : ''} Received
+                            </Text>
+                          </View>
+                          
+                          {request.bestOffer ? (
+                            <View className="flex-row items-center">
+                              <Trophy color="#FBBF24" size={16} />
+                              <Text className="text-white font-bold ml-2">
+                                Best: €{request.bestOffer}/kg
+                              </Text>
+                              {request.maxPricePerUnit && request.bestOffer < request.maxPricePerUnit && (
+                                <View className="bg-green-500/20 px-2 py-1 rounded ml-2">
+                                  <Text className="text-green-400 text-xs font-medium">
+                                    Save €{((request.maxPricePerUnit - request.bestOffer) * request.quantity * 1000).toLocaleString()}
+                                  </Text>
+                                </View>
+                              )}
+                            </View>
+                          ) : (
+                            <Text className="text-neutral-300 text-sm">
+                              View all offers and compare prices
+                            </Text>
+                          )}
+                        </View>
+                        
+                        <View className="ml-4">
+                          <View className="w-12 h-12 bg-green-500/20 rounded-full items-center justify-center border border-green-500/40">
+                            <Eye color="#10B981" size={20} />
+                          </View>
+                        </View>
+                      </View>
+                    </TouchableOpacity>
+                  ) : (
+                    <View className="bg-gradient-to-br from-neutral-800/50 to-neutral-700/30 rounded-xl p-4 border border-neutral-600/50">
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-1">
+                          <View className="flex-row items-center mb-1">
+                            <Package color="#6B7280" size={18} />
+                            <Text className="text-neutral-400 font-medium ml-2">
+                              Waiting for Offers
+                            </Text>
+                          </View>
+                          <Text className="text-neutral-500 text-sm">
+                            Your request is live and visible to sellers
+                          </Text>
+                          {request.requiredDate && (
+                            <View className="flex-row items-center mt-2">
+                              <Calendar color="#FBBF24" size={14} />
+                              <Text className="text-yellow-400 text-sm ml-1">
+                                Due: {new Date(request.requiredDate).toLocaleDateString()}
+                              </Text>
+                            </View>
+                          )}
+                        </View>
+                        
+                        <View className="ml-4">
+                          <View className="w-12 h-12 bg-neutral-700/50 rounded-full items-center justify-center border border-neutral-600/50">
+                            <Zap color="#6B7280" size={20} />
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+                </View>
               </CardContent>
             </Card>
           ))}
         </View>
 
-        {/* Add Request Modal */}
-        {showAddRequest && (
-          <View className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <Card className="bg-neutral-900 border-neutral-700 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-              <CardHeader>
-                <CardTitle className="text-white">Create New Request</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <View>
-                  <Text className="text-neutral-300 mb-2">Product Type</Text>
-                  <TouchableOpacity
-                    onPress={() => setShowProductPopover(!showProductPopover)}
-                    className="w-full justify-between bg-neutral-800 border border-neutral-600 text-white hover:bg-neutral-700 p-3 rounded flex-row items-center"
-                  >
-                    {selectedProduct ? (
-                      <View className="flex-row items-center gap-2">
-                        <selectedProduct.icon color="#ffffff" size={16} />
-                        <Text className="text-white">{selectedProduct.name}</Text>
-                      </View>
-                    ) : (
-                      <Text className="text-white">Select a product...</Text>
-                    )}
-                    <ChevronDown color="#9CA3AF" size={16} />
-                  </TouchableOpacity>
-                </View>
-
-                <View className="flex-row gap-4">
-                  <View className="flex-1">
-                    <Text className="text-neutral-300 mb-2">Quantity (tons)</Text>
-                    <TextInput
-                      className="bg-neutral-800 border border-neutral-600 text-white p-3 rounded"
-                      placeholder="50"
-                      placeholderTextColor="#9CA3AF"
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-neutral-300 mb-2">Max price per ton ($)</Text>
-                    <TextInput
-                      className="bg-neutral-800 border border-neutral-600 text-white p-3 rounded"
-                      placeholder="280"
-                      placeholderTextColor="#9CA3AF"
-                    />
-                  </View>
-                </View>
-
-                <View>
-                  <Text className="text-neutral-300 mb-2">Delivery Location</Text>
-                  <TextInput
-                    className="bg-neutral-800 border border-neutral-600 text-white p-3 rounded"
-                    placeholder="Chicago, IL"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-
-                <View>
-                  <Text className="text-neutral-300 mb-2">Required Delivery Date</Text>
-                  <TextInput
-                    className="bg-neutral-800 border border-neutral-600 text-white p-3 rounded"
-                    placeholder="Select date"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-
-                <View>
-                  <Text className="text-neutral-300 mb-2">Quality Requirements</Text>
-                  <View className="space-y-2">
-                    {selectedQualityTags.length > 0 && (
-                      <View className="flex-row flex-wrap gap-1">
-                        {selectedQualityTags.map((tag) => (
-                          <Badge key={tag} variant="outline" className="text-xs border-blue-500 text-blue-400 pr-1">
-                            {tag}
-                            <TouchableOpacity
-                              onPress={() => removeQualityTag(tag)}
-                              className="ml-1 p-0"
-                            >
-                              <X color="#3b82f6" size={12} />
-                            </TouchableOpacity>
-                          </Badge>
-                        ))}
-                      </View>
-                    )}
-
-                    <View className="max-h-32 border border-neutral-600 rounded-md p-2 bg-neutral-800">
-                      <View className="flex-row flex-wrap gap-1">
-                        {qualityTagsDatabase
-                          .filter((tag) => !selectedQualityTags.includes(tag))
-                          .map((tag) => (
-                            <TouchableOpacity
-                              key={tag}
-                              onPress={() => toggleQualityTag(tag)}
-                              className="px-2 py-1 text-xs text-neutral-300 hover:bg-neutral-700 hover:text-blue-400 rounded"
-                            >
-                              <Text className="text-neutral-300 text-xs">+ {tag}</Text>
-                            </TouchableOpacity>
-                          ))}
-                      </View>
-                    </View>
-                  </View>
-                </View>
-
-                <View>
-                  <Text className="text-neutral-300 mb-2">Additional Notes</Text>
-                  <TextInput
-                    className="bg-neutral-800 border border-neutral-600 text-white p-3 rounded h-24"
-                    placeholder="Special requirements or notes..."
-                    placeholderTextColor="#9CA3AF"
-                    multiline
-                    numberOfLines={4}
-                  />
-                </View>
-
-                <View className="flex-row gap-2 pt-4">
-                  <TouchableOpacity
-                    onPress={() => {
-                      setShowAddRequest(false);
-                      setSelectedProduct(null);
-                      setSelectedQualityTags([]);
-                    }}
-                    className="flex-1 border border-neutral-600 text-neutral-300 py-3 rounded items-center"
-                  >
-                    <Text className="text-neutral-300">Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setShowAddRequest(false);
-                      setSelectedProduct(null);
-                      setSelectedQualityTags([]);
-                    }}
-                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded items-center"
-                  >
-                    <Text className="text-white">Create Request</Text>
-                  </TouchableOpacity>
-                </View>
-              </CardContent>
-            </Card>
-          </View>
+        {/* Three-step Request Creation Flow */}
+        <ProductSelectionDrawer
+          visible={showProductSelection}
+          onClose={() => {
+            console.log('Closing ProductSelectionDrawer');
+            setShowProductSelection(false);
+            setSelectedProducts([]);
+          }}
+          onProductSelect={handleProductSelect}
+          selectedProducts={[]} 
+          mode="single"
+        />
+        
+        {/* Step 2: Quantity & Price Drawer */}
+        {showQuantityPrice && selectedProducts.length > 0 && (
+          <BuyerSpecificationsDrawer
+            visible={showQuantityPrice}
+            onClose={() => {
+              setShowQuantityPrice(false);
+              // Go back to product selection
+              setShowProductSelection(true);
+            }}
+            onSave={handleQuantityPriceSave}
+            productId={selectedProducts[0].id}
+            productName={selectedProducts[0].name}
+          />
         )}
+        
+        {/* Step 3: Product Specifications Drawer */}
+        {showProductSpecs && selectedProducts.length > 0 && (
+          <ProductSpecificationsDrawer
+            visible={showProductSpecs}
+            onClose={() => {
+              setShowProductSpecs(false);
+              setSelectedProducts([]);
+              setQuantityPriceSpecs(null);
+              setProductSpecifications({});
+            }}
+            onBack={() => {
+              // Go back to quantity/price step
+              setShowProductSpecs(false);
+              setShowQuantityPrice(true);
+            }}
+            onNext={handleProductSpecsSave}
+            productId={selectedProducts[0].id}
+            productName={selectedProducts[0].name}
+            existingSpecs={productSpecifications}
+          />
+        )}
+        
+        {/* Step 4: Submit Drawer */}
+        {showSubmitDrawer && selectedProducts.length > 0 && quantityPriceSpecs && (
+          <BuyerSubmitDrawer
+            visible={showSubmitDrawer}
+            onClose={() => {
+              setShowSubmitDrawer(false);
+              // Go back to product specifications
+              setShowProductSpecs(true);
+            }}
+            productId={selectedProducts[0].id}
+            specifications={{
+              ...quantityPriceSpecs[0],
+              ...productSpecifications,  // Merge specifications directly
+            }}
+            onComplete={() => {
+              setShowSubmitDrawer(false);
+              setSelectedProducts([]);
+              setQuantityPriceSpecs(null);
+              setProductSpecifications({});
+              Alert.alert('Success', 'Your buyer request has been created successfully!');
+              // Refresh the listings to show the new one
+              fetchBuyerListings();
+            }}
+          />
+        )}
+
+        {/* Enhanced Offers Drawer */}
+        <OffersDrawer
+          visible={showOffersDrawer}
+          onClose={() => {
+            setShowOffersDrawer(false);
+            setSelectedRequestOffers(null);
+          }}
+          offers={selectedRequestOffers?.rawData?.offers || mockOffers} // Use real offers if available, fallback to mock
+          productName={selectedRequestOffers?.product || ''}
+          requestId={selectedRequestOffers?.id || ''}
+          buyerRequest={selectedRequestOffers}
+        />
       </View>
     </ScrollView>
   );

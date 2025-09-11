@@ -272,9 +272,10 @@ export default function BuyerOrdersTab({ id }: BuyerOrdersTabProps = {}) {
           </Card>
         </View>
 
-        {/* 2-column layout for Incoming Offers and Active Orders */}
+        {/* 2-column layout for Active Orders (Incoming Offers removed - now in buyer requests) */}
         <View className="flex-row gap-6">
-          {/* Incoming Offers */}
+          {/* Incoming Offers - HIDDEN (moved to buyer requests tab) */}
+          {false && (
           <View className="flex-1 space-y-4">
             <Text className="text-xl font-semibold text-white">Incoming Offers</Text>
             {incomingOffers.map((offer) => (
@@ -348,8 +349,9 @@ export default function BuyerOrdersTab({ id }: BuyerOrdersTabProps = {}) {
               </Card>
             ))}
           </View>
+          )}
 
-          {/* Active Orders */}
+          {/* Active Orders - Now full width since incoming offers are hidden */}
           <View className="flex-1 space-y-4">
             <Text className="text-xl font-semibold text-white">Active Orders</Text>
             {activeOrders.map((order) => (

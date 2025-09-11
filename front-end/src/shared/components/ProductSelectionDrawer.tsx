@@ -10,7 +10,7 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
-import { X, Check } from 'lucide-react-native';
+import { Check } from 'lucide-react-native';
 import { useProductStore } from '../../stores/product.store';
 
 interface ProductSelectionDrawerProps {
@@ -30,6 +30,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
   mode = 'single',
   selectedProducts = [],
 }) => {
+  console.log('ProductSelectionDrawer render, visible:', visible);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>(selectedProducts);
   
   // Ensure products is always an array, handle both direct array and response object
@@ -131,24 +132,38 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
     return 'https://via.placeholder.com/200x200/10B981/FFFFFF?text=Product';
   };
 
+  if (!visible) {
+    console.log('ProductSelectionDrawer not visible, returning null');
+    return null;
+  }
+
+  console.log('ProductSelectionDrawer rendering Modal');
+
   return (
     <Modal
-      visible={visible}
+      visible={true}
       animationType="slide"
       transparent={true}
       onRequestClose={onClose}
+      statusBarTranslucent={true}
+      presentationStyle="overFullScreen"
     >
-      <View className="flex-1 bg-black/50">
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}>
         <View 
-          className="bg-neutral-900 rounded-t-3xl mt-20"
-          style={{ flex: 1 }}
+          className="bg-neutral-900 rounded-t-3xl"
+          style={{ 
+            flex: 1,
+            marginTop: Platform.OS === 'web' ? 80 : 100,
+            backgroundColor: '#171717'
+          }}
         >
           {/* Header */}
           <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
-            <Text className="text-xl font-bold text-white">Select Product</Text>
             <TouchableOpacity onPress={onClose}>
-              <X color="#ffffff" size={24} />
+              <Text className="text-blue-400 font-semibold">Cancel</Text>
             </TouchableOpacity>
+            <Text className="text-xl font-bold text-white">Select Product</Text>
+            <View style={{ width: 50 }} />
           </View>
 
           {/* Content */}
