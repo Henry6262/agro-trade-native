@@ -673,6 +673,7 @@ export const UnifiedOffersDrawer: React.FC<UnifiedOffersDrawerProps> = ({
           style={{ 
             flex: 1,
             marginTop: 80,
+            backgroundColor: '#0A0A0A', // Solid black background
             transform: [{
               translateY: slideAnim.interpolate({
                 inputRange: [0, 1],
@@ -680,7 +681,7 @@ export const UnifiedOffersDrawer: React.FC<UnifiedOffersDrawerProps> = ({
               }),
             }],
           }}
-          className="bg-gradient-to-b from-neutral-900 to-black rounded-t-3xl"
+          className="rounded-t-3xl"
         >
           <KeyboardAvoidingView 
             style={{ flex: 1 }}

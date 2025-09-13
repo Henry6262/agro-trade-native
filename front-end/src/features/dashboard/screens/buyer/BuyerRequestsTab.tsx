@@ -30,12 +30,8 @@ import { apiClient } from '../../../../services/api';
 
 import { Card, CardContent } from '../../../../shared/components/Card';
 import { Badge } from '../../../../shared/components/Badge';
-import { ProductSelectionDrawerSimple as ProductSelectionDrawer } from '../../../../shared/components/ProductSelectionDrawerSimple';
-import { BuyerSpecificationsDrawer } from '../../../../shared/components/BuyerSpecificationsDrawer';
-import { ProductSpecificationsDrawer } from '../../../../shared/components/ProductSpecificationsDrawer';
-import { useOnboardingStore } from '../../../../stores/onboarding.store';
-import { BuyerSubmitDrawer } from '../../../onboarding/components/buyer/BuyerSubmitDrawer';
 import { useProductStore } from '../../../../stores/product.store';
+import { BuyerRequestCreationFlow } from './request-creation';
 import { BuyerRequestCard } from '../../../../shared/components/BuyerRequestCard';
 
 // New offer components
@@ -152,16 +148,9 @@ export default function BuyerRequestsTab({}: BuyerRequestsTabProps = {}) {
     },
   ];
   
-  // Four-step offer creation flow states
-  const [showProductSelection, setShowProductSelection] = useState(false);
-  const [showQuantityPrice, setShowQuantityPrice] = useState(false);
-  const [showProductSpecs, setShowProductSpecs] = useState(false);
-  const [showSubmitDrawer, setShowSubmitDrawer] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
-  const [quantityPriceSpecs, setQuantityPriceSpecs] = useState<any>(null);
-  const [productSpecifications, setProductSpecifications] = useState<any>({});
+  // Buyer request creation flow state
+  const [showRequestCreationFlow, setShowRequestCreationFlow] = useState(false);
   
-  const onboardingStore = useOnboardingStore();
   const { products, fetchAllData, getProductById } = useProductStore();
 
   // Fetch products data on mount
@@ -174,10 +163,6 @@ export default function BuyerRequestsTab({}: BuyerRequestsTabProps = {}) {
     fetchBuyerListings();
   }, []);
 
-  // Debug effect to monitor state changes
-  useEffect(() => {
-    console.log('showProductSelection changed to:', showProductSelection);
-  }, [showProductSelection]);
 
   const fetchBuyerListings = async () => {
     try {
@@ -185,12 +170,8 @@ export default function BuyerRequestsTab({}: BuyerRequestsTabProps = {}) {
       const response = await apiClient.get('/buyer/listings');
       
       if (response?.data) {
-        console.log('Raw API response:', response.data);
-        
         // Transform API data to match UI requirements
         const transformedData = response.data.map((listing: any) => {
-          console.log('Processing listing:', listing.id);
-          console.log('Specifications for listing:', listing.specifications);
           
           return {
           id: listing.id,
@@ -321,11 +302,8 @@ export default function BuyerRequestsTab({}: BuyerRequestsTabProps = {}) {
   const extractQualityRequirements = (specifications: any, rawListing?: any) => {
     const requirements: string[] = [];
     
-    console.log('extractQualityRequirements called with specifications:', specifications, 'rawListing:', rawListing);
-    
     // Check if specifications is an object (from the creation flow)
     if (specifications && typeof specifications === 'object' && !Array.isArray(specifications)) {
-      console.log('Processing specifications object:', specifications);
       
       // Extract specifications from the object format
       Object.entries(specifications).forEach(([key, value]) => {
@@ -371,7 +349,6 @@ export default function BuyerRequestsTab({}: BuyerRequestsTabProps = {}) {
       });
     }
     
-    console.log('Extracted requirements:', requirements);
     return requirements;
   };
 
@@ -399,60 +376,15 @@ export default function BuyerRequestsTab({}: BuyerRequestsTabProps = {}) {
   };
 
   
-  // Four-step flow handlers
-  const handleProductSelect = (productId: string, productData: any) => {
-    // For single selection, immediately proceed to quantity/price step
-    console.log('Product selected:', productId, productData);
-    
-    // Store the selected product data
-    setSelectedProducts([productData]); 
-    
-    // Update the onboarding store with the selected product
-    onboardingStore.setSelectedProducts([productId]);
-    onboardingStore.setSelectedProductsMetadata([productData]);
-    
-    // Close selection drawer and show quantity/price specifications
-    setShowProductSelection(false);
-    setShowQuantityPrice(true);
+  // Request creation flow handlers
+  const handleRequestCreationSuccess = (request: any) => {
+    setShowRequestCreationFlow(false);
+    // Refresh the listings to show the new one
+    fetchBuyerListings();
   };
-  
-  const handleQuantityPriceSave = (specs: any) => {
-    console.log('Quantity and price saved:', specs);
-    setQuantityPriceSpecs(specs);
-    
-    // Update the onboarding store with specifications
-    if (specs && specs.length > 0) {
-      const spec = specs[0];
-      if (spec.productId) {
-        onboardingStore.updateBuyerSpecification(spec.productId, spec);
-      }
-    }
-    
-    // Move to product specifications step
-    setShowQuantityPrice(false);
-    setShowProductSpecs(true);
-  };
-  
-  const handleProductSpecsSave = (specs: any) => {
-    console.log('Product specifications saved:', specs);
-    setProductSpecifications(specs);
-    
-    // Merge with quantity/price specs
-    if (quantityPriceSpecs && quantityPriceSpecs.length > 0) {
-      const mergedSpec = {
-        ...quantityPriceSpecs[0],
-        ...specs,  // Merge specs directly, not nested
-      };
-      
-      // Update the onboarding store with merged specifications
-      if (mergedSpec.productId) {
-        onboardingStore.updateBuyerSpecification(mergedSpec.productId, mergedSpec);
-      }
-    }
-    
-    // Move to submit step
-    setShowProductSpecs(false);
-    setShowSubmitDrawer(true);
+
+  const handleRequestCreationError = (error: string) => {
+    // Error is already shown by the flow component
   };
   
 
@@ -488,9 +420,7 @@ export default function BuyerRequestsTab({}: BuyerRequestsTabProps = {}) {
           </View>
           <TouchableOpacity
             onPress={() => {
-              console.log('Create button pressed, current state:', showProductSelection);
-              setShowProductSelection(true);
-              console.log('State should now be true');
+              setShowRequestCreationFlow(true);
             }}
             className="bg-green-500 rounded-xl w-12 h-12 items-center justify-center ml-4"
             style={{
@@ -514,7 +444,7 @@ export default function BuyerRequestsTab({}: BuyerRequestsTabProps = {}) {
               Create your first buyer request to start receiving offers from sellers
             </Text>
             <TouchableOpacity
-              onPress={() => setShowProductSelection(true)}
+              onPress={() => setShowRequestCreationFlow(true)}
               className="bg-blue-500 rounded-lg px-6 py-3 mt-6"
             >
               <Text className="text-white font-semibold">Create Your First Request</Text>
@@ -707,81 +637,13 @@ export default function BuyerRequestsTab({}: BuyerRequestsTabProps = {}) {
           ))}
         </View>
 
-        {/* Three-step Request Creation Flow */}
-        <ProductSelectionDrawer
-          visible={showProductSelection}
-          onClose={() => {
-            console.log('Closing ProductSelectionDrawer');
-            setShowProductSelection(false);
-            setSelectedProducts([]);
-          }}
-          onProductSelect={handleProductSelect}
-          selectedProducts={[]} 
-          mode="single"
+        {/* Buyer Request Creation Flow */}
+        <BuyerRequestCreationFlow
+          visible={showRequestCreationFlow}
+          onClose={() => setShowRequestCreationFlow(false)}
+          onSuccess={handleRequestCreationSuccess}
+          onError={handleRequestCreationError}
         />
-        
-        {/* Step 2: Quantity & Price Drawer */}
-        {showQuantityPrice && selectedProducts.length > 0 && (
-          <BuyerSpecificationsDrawer
-            visible={showQuantityPrice}
-            onClose={() => {
-              setShowQuantityPrice(false);
-              // Go back to product selection
-              setShowProductSelection(true);
-            }}
-            onSave={handleQuantityPriceSave}
-            productId={selectedProducts[0].id}
-            productName={selectedProducts[0].name}
-          />
-        )}
-        
-        {/* Step 3: Product Specifications Drawer */}
-        {showProductSpecs && selectedProducts.length > 0 && (
-          <ProductSpecificationsDrawer
-            visible={showProductSpecs}
-            onClose={() => {
-              setShowProductSpecs(false);
-              setSelectedProducts([]);
-              setQuantityPriceSpecs(null);
-              setProductSpecifications({});
-            }}
-            onBack={() => {
-              // Go back to quantity/price step
-              setShowProductSpecs(false);
-              setShowQuantityPrice(true);
-            }}
-            onNext={handleProductSpecsSave}
-            productId={selectedProducts[0].id}
-            productName={selectedProducts[0].name}
-            existingSpecs={productSpecifications}
-          />
-        )}
-        
-        {/* Step 4: Submit Drawer */}
-        {showSubmitDrawer && selectedProducts.length > 0 && quantityPriceSpecs && (
-          <BuyerSubmitDrawer
-            visible={showSubmitDrawer}
-            onClose={() => {
-              setShowSubmitDrawer(false);
-              // Go back to product specifications
-              setShowProductSpecs(true);
-            }}
-            productId={selectedProducts[0].id}
-            specifications={{
-              ...quantityPriceSpecs[0],
-              ...productSpecifications,  // Merge specifications directly
-            }}
-            onComplete={() => {
-              setShowSubmitDrawer(false);
-              setSelectedProducts([]);
-              setQuantityPriceSpecs(null);
-              setProductSpecifications({});
-              Alert.alert('Success', 'Your buyer request has been created successfully!');
-              // Refresh the listings to show the new one
-              fetchBuyerListings();
-            }}
-          />
-        )}
 
         {/* Enhanced Offers Drawer */}
         <UnifiedOffersDrawer

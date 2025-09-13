@@ -183,47 +183,33 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
     try {
       setIsLoadingAddress(true);
       
-      // Try using the location service first
-      try {
-        const locationData: LocationData = await locationService.reverseGeocode(latitude, longitude);
-        
-        const updatedLocation: SelectedLocation = {
-          latitude,
-          longitude,
-          address: locationData.formattedAddress,
-          city: locationData.city,
-          region: locationData.region,
-          country: locationData.country,
-          formattedAddress: locationData.formattedAddress,
-        };
-        
-        setSelectedLocation(updatedLocation);
-        onLocationSelect?.(updatedLocation);
-        
-      } catch (serviceError) {
-        // Fallback to expo-location reverse geocoding
-        const [address] = await Location.reverseGeocodeAsync({
-          latitude,
-          longitude,
-        });
-        
-        const formattedAddress = address
-          ? `${address.street || ''} ${address.city || ''} ${address.region || ''} ${address.country || ''}`.trim()
-          : `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-        
-        const updatedLocation: SelectedLocation = {
-          latitude,
-          longitude,
-          address: formattedAddress,
-          city: address?.city || undefined,
-          region: address?.region || undefined,
-          country: address?.country || undefined,
-          formattedAddress,
-        };
-        
-        setSelectedLocation(updatedLocation);
-        onLocationSelect?.(updatedLocation);
-      }
+      // Use expo-location reverse geocoding directly
+      // (Backend endpoint doesn't exist yet, skip the API call)
+      const [address] = await Location.reverseGeocodeAsync({
+        latitude,
+        longitude,
+      });
+      
+      const streetAddress = address
+        ? `${address.streetNumber || ''} ${address.street || ''}`.trim() || address.name || ''
+        : '';
+      
+      const formattedAddress = address
+        ? `${streetAddress} ${address.city || ''} ${address.region || ''} ${address.country || ''}`.trim()
+        : `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+      
+      const updatedLocation: SelectedLocation = {
+        latitude,
+        longitude,
+        address: streetAddress || formattedAddress,
+        city: address?.city || 'Unknown City',
+        region: address?.region || '',
+        country: address?.country || 'Unknown Country',
+        formattedAddress,
+      };
+      
+      setSelectedLocation(updatedLocation);
+      onLocationSelect?.(updatedLocation);
       
     } catch (error) {
       console.error('Reverse geocoding failed:', error);
@@ -246,6 +232,12 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   const handleConfirmLocation = () => {
     if (selectedLocation) {
       onLocationConfirm?.(selectedLocation);
+    } else {
+      Alert.alert(
+        'No Location Selected', 
+        'Please tap on the map to select a location before confirming.',
+        [{ text: 'OK' }]
+      );
     }
   };
 
@@ -265,16 +257,30 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   ];
 
   return (
-    <View style={[{ height }, style]} className="bg-gray-800 rounded-xl overflow-hidden">
-      {/* Header */}
-      <View className="p-4 bg-gray-700 border-b border-gray-600">
-        <Text className="text-white text-lg font-semibold">{title}</Text>
-        {selectedLocation?.formattedAddress && (
-          <Text className="text-gray-300 text-sm mt-1" numberOfLines={2}>
+    <View 
+      style={[
+        { flex: 1, backgroundColor: '#1F2937' }, // Always use flex: 1 for full height
+        style
+      ]}
+    >
+      {/* Header - Only show if title is provided */}
+      {title ? (
+        <View className="p-4 bg-gray-700 border-b border-gray-600">
+          <Text className="text-white text-lg font-semibold">{title}</Text>
+          {selectedLocation?.formattedAddress && (
+            <Text className="text-gray-300 text-sm mt-1" numberOfLines={2}>
+              {isLoadingAddress ? 'Getting address...' : selectedLocation.formattedAddress}
+            </Text>
+          )}
+        </View>
+      ) : selectedLocation?.formattedAddress ? (
+        // Compact header when no title
+        <View className="p-3 bg-gray-700 border-b border-gray-600">
+          <Text className="text-gray-300 text-sm" numberOfLines={2}>
             {isLoadingAddress ? 'Getting address...' : selectedLocation.formattedAddress}
           </Text>
-        )}
-      </View>
+        </View>
+      ) : null}
 
       {/* Search Bar (UI only) */}
       {showSearchBar && (
@@ -357,14 +363,14 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
           </TouchableOpacity>
         )}
 
-        {/* Selected location info panel */}
+        {/* Selected location info panel - Compact version */}
         {selectedLocation && (
-          <View className="absolute bottom-4 left-4 right-4">
-            <View className="bg-white rounded-lg p-4 shadow-lg">
-              <View className="flex-row items-start justify-between">
+          <View className="absolute bottom-2 left-2 right-2">
+            <View className="bg-white rounded-lg p-3 shadow-lg">
+              <View className="flex-row items-center justify-between">
                 <View className="flex-1">
-                  <Text className="text-gray-900 font-semibold">Selected Location</Text>
-                  <Text className="text-gray-600 text-sm mt-1">
+                  <Text className="text-gray-900 font-medium text-sm">Selected Location</Text>
+                  <Text className="text-gray-600 text-xs mt-0.5" numberOfLines={2}>
                     {isLoadingAddress 
                       ? 'Getting address...' 
                       : selectedLocation.formattedAddress || `${selectedLocation.latitude.toFixed(6)}, ${selectedLocation.longitude.toFixed(6)}`
@@ -375,31 +381,30 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
                   onPress={handleClearLocation}
                   className="ml-2 p-1"
                 >
-                  <X size={20} color="#6B7280" />
+                  <X size={18} color="#6B7280" />
                 </TouchableOpacity>
               </View>
               
               {onLocationConfirm && (
-                <View className="flex-row mt-3 space-x-2">
-                  <Button
-                    title={confirmButtonText}
+                <View className="flex-row mt-2">
+                  <TouchableOpacity
                     onPress={handleConfirmLocation}
-                    variant="primary"
-                    size="small"
-                    leftIcon={<Check size={16} color="white" />}
-                    className="flex-1"
-                  />
+                    className="flex-1 bg-green-500 rounded-lg py-2 px-3 flex-row items-center justify-center"
+                  >
+                    <Check size={16} color="white" />
+                    <Text className="text-white font-medium text-sm ml-1">{confirmButtonText}</Text>
+                  </TouchableOpacity>
                 </View>
               )}
             </View>
           </View>
         )}
 
-        {/* Help text when no location selected */}
+        {/* Help text when no location selected - Compact */}
         {!selectedLocation && mapReady && (
-          <View className="absolute bottom-4 left-4 right-4">
-            <View className="bg-blue-500/90 rounded-lg p-3">
-              <Text className="text-white text-sm text-center">
+          <View className="absolute bottom-2 left-2 right-2">
+            <View className="bg-blue-500/90 rounded-lg py-2 px-3">
+              <Text className="text-white text-xs text-center">
                 Tap anywhere on the map to select a location
               </Text>
             </View>

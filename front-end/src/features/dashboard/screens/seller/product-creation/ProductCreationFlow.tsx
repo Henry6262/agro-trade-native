@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, memo } from 'react';
 import { ProductCreationFlowProps } from './types';
 import { useProductCreation } from './hooks/useProductCreation';
 import { ProductSelectionStep } from './components/ProductSelectionStep';
 import { ProductSpecificationStep } from './components/ProductSpecificationStep';
 import { LocationConfirmationStep } from './components/LocationConfirmationStep';
 
-export const ProductCreationFlow: React.FC<ProductCreationFlowProps> = ({
+const ProductCreationFlowComponent: React.FC<ProductCreationFlowProps> = ({
   visible,
   onClose,
   onSuccess,
@@ -33,15 +33,11 @@ export const ProductCreationFlow: React.FC<ProductCreationFlowProps> = ({
     if (visible) {
       ensureMetadataLoaded();
       clearError();
-    }
-  }, [visible, ensureMetadataLoaded, clearError]);
-
-  // Reset flow when closing
-  useEffect(() => {
-    if (!visible) {
+    } else {
+      // Reset flow when closing
       resetFlow();
     }
-  }, [visible, resetFlow]);
+  }, [visible]); // Remove function dependencies to prevent re-renders
 
   // Handle errors
   useEffect(() => {
@@ -96,20 +92,25 @@ export const ProductCreationFlow: React.FC<ProductCreationFlowProps> = ({
     onClose();
   };
 
+  // Only render the active step to prevent unnecessary renders
+  if (!visible) return null;
+
   return (
     <>
       {/* Step 1: Product Selection */}
-      <ProductSelectionStep
-        visible={visible && currentStep === 'product-selection'}
-        onClose={handleClose}
-        onNext={handleProductSelect}
-        productMetadata={productMetadata}
-      />
+      {currentStep === 'product-selection' && (
+        <ProductSelectionStep
+          visible={true}
+          onClose={handleClose}
+          onNext={handleProductSelect}
+          productMetadata={productMetadata}
+        />
+      )}
 
       {/* Step 2: Product Specifications */}
-      {data.productData && (
+      {currentStep === 'specifications' && data.productData && (
         <ProductSpecificationStep
-          visible={visible && currentStep === 'specifications'}
+          visible={true}
           productData={data.productData}
           onClose={handleClose}
           onNext={handleSpecificationsSave}
@@ -118,13 +119,18 @@ export const ProductCreationFlow: React.FC<ProductCreationFlowProps> = ({
       )}
 
       {/* Step 3: Location Confirmation */}
-      <LocationConfirmationStep
-        visible={visible && currentStep === 'location-confirmation'}
-        onClose={handleClose}
-        onNext={handleLocationConfirm}
-        onBack={handleBack}
-        initialLocation={data.location || undefined}
-      />
+      {currentStep === 'location-confirmation' && (
+        <LocationConfirmationStep
+          visible={true}
+          onClose={handleClose}
+          onNext={handleLocationConfirm}
+          onBack={handleBack}
+          initialLocation={data.location || undefined}
+        />
+      )}
     </>
   );
 };
+
+// Export memoized component to prevent unnecessary re-renders
+export const ProductCreationFlow = memo(ProductCreationFlowComponent);

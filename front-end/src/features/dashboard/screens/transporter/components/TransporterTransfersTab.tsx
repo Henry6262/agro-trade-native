@@ -222,27 +222,29 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
               className="bg-gradient-to-r from-yellow-500/10 to-orange-500/5 border border-yellow-500/30 rounded-lg p-4 mb-3"
             >
               {/* Header */}
-              <View className="flex-row items-center justify-between mb-3">
-                <View className="flex-row items-center flex-1">
-                  <View className="w-10 h-10 bg-gradient-to-br from-yellow-500/30 to-yellow-600/10 rounded-lg items-center justify-center border border-yellow-500/30">
-                    <Package size={20} color="#FCD34D" />
-                  </View>
-                  <View className="ml-3 flex-1">
-                    <Text className="font-bold text-white">{offer.product}</Text>
-                    <View className="flex-row flex-wrap mt-1">
-                      {offer.tags.map((tag, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="mr-1 mb-1 text-xs border-yellow-500/50"
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
+              <View className="mb-3">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center flex-1 mr-2">
+                    <View className="w-10 h-10 bg-gradient-to-br from-yellow-500/30 to-yellow-600/10 rounded-lg items-center justify-center border border-yellow-500/30">
+                      <Package size={20} color="#FCD34D" />
+                    </View>
+                    <View className="ml-3 flex-1">
+                      <Text className="font-bold text-white">{offer.product}</Text>
+                      <View className="flex-row flex-wrap mt-1">
+                        {offer.tags.map((tag, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="mr-1 mb-1 text-xs border-yellow-500/50"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </View>
                     </View>
                   </View>
                 </View>
-                <View className="flex-row items-center">
+                <View className="flex-row items-center justify-end mt-2">
                   <Badge variant={offer.priority === "high" ? "destructive" : "secondary"} className="mr-2">
                     {offer.priority === "high" && <AlertTriangle size={12} color="#FFFFFF" />}
                     <Text className="text-xs ml-1">DIRECT OFFER</Text>
@@ -332,10 +334,8 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
                     className="bg-gradient-to-r from-green-600 to-green-700"
                     onPress={() => console.log('Accept')}
                   >
-                    <View className="flex-row items-center">
-                      <CheckCircle size={14} color="#FFFFFF" />
-                      <Text className="ml-1 text-white">ACCEPT</Text>
-                    </View>
+                    <CheckCircle size={14} color="#FFFFFF" />
+                    <Text className="ml-1 text-white">ACCEPT</Text>
                   </Button>
                 </View>
               </View>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -249,19 +249,19 @@ export default function SellerProductsTab({ id }: SellerProductsTabProps = {}) {
 
   
   // Product creation flow handlers
-  const handleProductCreationSuccess = async (product: any) => {
+  const handleProductCreationSuccess = useCallback(async (product: any) => {
     setShowProductCreationFlow(false);
     // Products list will be refreshed by the useProductCreation hook
-  };
+  }, []);
 
-  const handleProductCreationError = (error: string) => {
+  const handleProductCreationError = useCallback((error: string) => {
     console.error('Product creation error:', error);
     // Error handling is already done in the useProductCreation hook
-  };
+  }, []);
   
-  const startAddProductFlow = () => {
+  const startAddProductFlow = useCallback(() => {
     setShowProductCreationFlow(true);
-  };
+  }, []);
   
   const handleEditProduct = (product: any) => {
     // Get product image from metadata

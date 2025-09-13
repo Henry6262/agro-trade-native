@@ -17,6 +17,7 @@ interface BuyerSpecificationsDrawerProps {
   onSave: (specifications: any) => void;
   productId: string;
   productName: string;
+  onBack?: () => void;
 }
 
 export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps> = ({
@@ -25,6 +26,7 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
   onSave,
   productId,
   productName,
+  onBack,
 }) => {
   const [quantity, setQuantity] = useState('');
   const [pricePerKilo, setPricePerKilo] = useState('');
@@ -61,7 +63,7 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
           <View className="bg-neutral-900 rounded-t-3xl mt-20" style={{ flex: 1 }}>
             {/* Header */}
             <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
-              <TouchableOpacity onPress={onClose}>
+              <TouchableOpacity onPress={onBack || onClose}>
                 <Text className="text-blue-400 font-semibold">Back</Text>
               </TouchableOpacity>
               <Text className="text-xl font-bold text-white">Product Requirements</Text>

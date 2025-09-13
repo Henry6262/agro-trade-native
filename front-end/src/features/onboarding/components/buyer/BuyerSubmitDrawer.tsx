@@ -32,6 +32,7 @@ interface BuyerSubmitDrawerProps {
   productId: string;
   specifications: any;
   onComplete?: () => void;
+  onBack?: () => void;
 }
 
 // Enable LayoutAnimation on Android
@@ -44,7 +45,8 @@ export function BuyerSubmitDrawer({
   onClose, 
   productId, 
   specifications,
-  onComplete 
+  onComplete,
+  onBack
 }: BuyerSubmitDrawerProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -369,7 +371,7 @@ export function BuyerSubmitDrawer({
         >
           {/* Header */}
           <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-800">
-            <TouchableOpacity onPress={handleClose} className="p-2">
+            <TouchableOpacity onPress={onBack || handleClose} className="p-2">
               <Text className="text-blue-400 font-semibold">Back</Text>
             </TouchableOpacity>
             <View className="h-1 w-12 bg-gray-700 rounded-full" />

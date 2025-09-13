@@ -49,7 +49,7 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
   const [searchQuery, setSearchQuery] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [viewMode, setViewMode] = useState<ViewMode>('text');
-  const [showMapModal, setShowMapModal] = useState(false);
+  const [showMapView, setShowMapView] = useState(false);
 
   useEffect(() => {
     if (visible && !initialLocation) {
@@ -145,7 +145,12 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
     }
   };
 
-  const handleMapLocationSelect = (selectedLocation: SelectedLocation) => {
+  const handleMapLocationSelect = (selectedLocation: SelectedLocation | null) => {
+    // Handle null or undefined selectedLocation
+    if (!selectedLocation) {
+      return;
+    }
+    
     // Update the location state with map-selected data
     setLocation({
       address: selectedLocation.address || '',
@@ -157,9 +162,14 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
     });
   };
 
-  const handleMapLocationConfirm = (selectedLocation: SelectedLocation) => {
+  const handleMapLocationConfirm = (selectedLocation: SelectedLocation | null) => {
+    if (!selectedLocation) {
+      Alert.alert('No Location Selected', 'Please select a location on the map before confirming.');
+      return;
+    }
     handleMapLocationSelect(selectedLocation);
-    setShowMapModal(false);
+    setShowMapView(false);
+    setViewMode('text');
   };
 
   const validateForm = () => {
@@ -206,7 +216,8 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
   };
 
   const openMapPicker = () => {
-    setShowMapModal(true);
+    setShowMapView(true);
+    setViewMode('map');
   };
 
   return (
@@ -224,23 +235,48 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
           >
             {/* Header */}
             <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
-              <View>
-                <Text className="text-xl font-bold text-white">Confirm Location</Text>
+              <View className="flex-1">
+                <Text className="text-xl font-bold text-white">
+                  {showMapView ? 'Select on Map' : 'Confirm Location'}
+                </Text>
                 <Text className="text-sm text-neutral-400 mt-1">
-                  Where is this product located?
+                  {showMapView ? 'Tap on the map to select location' : 'Where is this product located?'}
                 </Text>
               </View>
-              <TouchableOpacity onPress={onClose}>
+              <TouchableOpacity onPress={showMapView ? () => {
+                setShowMapView(false);
+                setViewMode('text');
+              } : onClose}>
                 <X color="#ffffff" size={24} />
               </TouchableOpacity>
             </View>
 
-            {/* Content */}
-            <ScrollView 
-              className="flex-1 px-6"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 100 }}
-            >
+            {/* Content - Conditional rendering based on view mode */}
+            {showMapView ? (
+              // Map View
+              <View className="flex-1">
+                <LocationMapPicker
+                  onLocationSelect={handleMapLocationSelect}
+                  onLocationConfirm={handleMapLocationConfirm}
+                  initialLocation={
+                    location.latitude && location.longitude
+                      ? { latitude: location.latitude, longitude: location.longitude }
+                      : undefined
+                  }
+                  showUserLocation={true}
+                  showSearchBar={false}
+                  title=""
+                  confirmButtonText="Use This Location"
+                  style={{ borderRadius: 0 }}
+                />
+              </View>
+            ) : (
+              // Text Input View
+              <ScrollView 
+                className="flex-1 px-6"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 100 }}
+              >
               {/* View Mode Toggle */}
               <View className="mt-6">
                 <Text className="text-lg font-semibold text-green-400 mb-4">
@@ -405,9 +441,11 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
                 )}
               </View>
             </ScrollView>
+            )}
 
-            {/* Footer */}
-            <View className="absolute bottom-0 left-0 right-0 bg-neutral-800 border-t border-neutral-700 p-4">
+            {/* Footer - Show only in text mode */}
+            {!showMapView && (
+              <View className="absolute bottom-0 left-0 right-0 bg-neutral-800 border-t border-neutral-700 p-4">
               <TouchableOpacity
                 onPress={handleConfirm}
                 disabled={isLoadingLocation}
@@ -427,49 +465,7 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
                 )}
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Map Picker Modal */}
-      <Modal
-        visible={showMapModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowMapModal(false)}
-      >
-        <View className="flex-1 bg-black/50">
-          <View className="bg-neutral-900 rounded-t-3xl mt-20 flex-1">
-            {/* Map Header */}
-            <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
-              <View>
-                <Text className="text-xl font-bold text-white">Select on Map</Text>
-                <Text className="text-sm text-neutral-400 mt-1">
-                  Tap on the map to select location
-                </Text>
-              </View>
-              <TouchableOpacity onPress={() => setShowMapModal(false)}>
-                <X color="#ffffff" size={24} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Map Component */}
-            <View className="flex-1 bg-neutral-800">
-              <LocationMapPicker
-                onLocationSelect={handleMapLocationSelect}
-                onLocationConfirm={handleMapLocationConfirm}
-                initialLocation={
-                  location.latitude && location.longitude
-                    ? { latitude: location.latitude, longitude: location.longitude }
-                    : undefined
-                }
-                showUserLocation={true}
-                showSearchBar={false}
-                height={500}
-                title="Select Product Location"
-                confirmButtonText="Use This Location"
-              />
-            </View>
+            )}
           </View>
         </View>
       </Modal>

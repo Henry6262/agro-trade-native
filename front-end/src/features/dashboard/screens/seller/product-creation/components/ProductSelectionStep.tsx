@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProductSelectionDrawer } from '../../../../../shared/components/ProductSelectionDrawer';
+import { ProductSelectionDrawer } from '../../../../../../shared/components/ProductSelectionDrawer';
 import { ProductSelectionStepProps, ProductData } from '../types';
 
 export const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({

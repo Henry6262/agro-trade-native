@@ -11,9 +11,6 @@ import IntelligenceScreen from '../features/dashboard/screens/shared/Intelligenc
 import SellerDashboardScreen from '../features/dashboard/screens/seller/SellerDashboardScreen';
 import BuyerDashboardScreen from '../features/dashboard/screens/buyer/BuyerDashboardScreen';
 import TransporterDashboardScreen from '../features/dashboard/screens/transporter/TransporterDashboardScreen';
-import TransporterBiddingScreen from '../features/dashboard/screens/transporter/TransporterBiddingScreen';
-import TransporterTransfersScreen from '../features/dashboard/screens/transporter/TransporterTransfersScreen';
-import TransporterFleetScreen from '../features/dashboard/screens/transporter/TransporterFleetScreen';
 
 const Stack = createNativeStackNavigator<DashboardStackParamList>();
 
@@ -34,9 +31,6 @@ export default function DashboardStack() {
         <Stack.Screen name="SellerDashboard" component={SellerDashboardScreen} />
         <Stack.Screen name="BuyerDashboard" component={BuyerDashboardScreen} />
         <Stack.Screen name="TransporterDashboard" component={TransporterDashboardScreen} />
-        <Stack.Screen name="TransporterBidding" component={TransporterBiddingScreen} />
-        <Stack.Screen name="TransporterTransfers" component={TransporterTransfersScreen} />
-        <Stack.Screen name="TransporterFleet" component={TransporterFleetScreen} />
       </Stack.Navigator>
     </UserDataProvider>
   );

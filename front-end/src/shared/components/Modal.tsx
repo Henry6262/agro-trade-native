@@ -20,7 +20,7 @@ interface ModalProps extends BaseComponentProps {
   overlayClosable?: boolean;
 }
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export const Modal: React.FC<ModalProps> = ({
   visible,

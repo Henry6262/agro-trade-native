@@ -30,7 +30,6 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
   mode = 'single',
   selectedProducts = [],
 }) => {
-  console.log('ProductSelectionDrawer render, visible:', visible);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>(selectedProducts);
   
   // Ensure products is always an array, handle both direct array and response object
@@ -42,12 +41,16 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
   useEffect(() => {
     // Fetch products only when drawer opens and products aren't loaded
     // Check isLoadingProducts to prevent multiple simultaneous fetches
-    if (visible && products.length === 0 && !isLoadingProducts) {
-      fetchAllData().catch((error) => {
-        console.error('Error fetching products:', error);
-      });
+    if (visible && !isLoadingProducts) {
+      // Check if we need to fetch products
+      const currentProducts = Array.isArray(productsRaw) ? productsRaw : (productsRaw?.data || []);
+      if (currentProducts.length === 0) {
+        fetchAllData().catch((error) => {
+          console.error('Error fetching products:', error);
+        });
+      }
     }
-  }, [visible]); // Only depend on visible to avoid loops
+  }, [visible, isLoadingProducts]); // Depend on visible and isLoadingProducts only
 
   useEffect(() => {
     setSelectedProductIds(selectedProducts);
@@ -133,11 +136,8 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
   };
 
   if (!visible) {
-    console.log('ProductSelectionDrawer not visible, returning null');
     return null;
   }
-
-  console.log('ProductSelectionDrawer rendering Modal');
 
   return (
     <Modal

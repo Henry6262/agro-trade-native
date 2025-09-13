@@ -1,33 +1,35 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
 import { apiClient } from '../../../../../../services/api';
-import { useUserData } from '../../../../../../contexts/UserDataContext';
 import { useProductStore } from '../../../../../../stores/product.store';
+import { useOnboardingStore } from '../../../../../../stores/onboarding.store';
 import {
-  ProductCreationState,
-  ProductCreationStep,
+  BuyerRequestCreationState,
+  BuyerRequestCreationStep,
   ProductData,
+  BuyerSpecifications,
   ProductSpecifications,
   LocationData,
-  CreateListingDto,
+  CreateBuyerRequestDto,
 } from '../types';
 
-const initialState: ProductCreationState = {
+const initialState: BuyerRequestCreationState = {
   currentStep: 'product-selection',
   data: {
     productData: null,
-    specifications: null,
+    buyerSpecifications: null,
+    productSpecifications: null,
     location: null,
   },
   isLoading: false,
   error: null,
 };
 
-export const useProductCreation = () => {
-  const [state, setState] = useState<ProductCreationState>(initialState);
-  const { refreshProducts } = useUserData();
+export const useBuyerRequestCreation = () => {
+  const [state, setState] = useState<BuyerRequestCreationState>(initialState);
   const productMetadata = useProductStore((state) => state.products) || [];
   const fetchProductMetadata = useProductStore((state) => state.fetchAllData);
+  const onboardingStore = useOnboardingStore();
 
   // Ensure product metadata is loaded
   const ensureMetadataLoaded = useCallback(async () => {
@@ -38,10 +40,10 @@ export const useProductCreation = () => {
         console.error('Error fetching product metadata:', error);
       }
     }
-  }, [fetchProductMetadata]); // Remove productMetadata.length from dependencies
+  }, [fetchProductMetadata]);
 
   // Step navigation
-  const goToStep = useCallback((step: ProductCreationStep) => {
+  const goToStep = useCallback((step: BuyerRequestCreationStep) => {
     setState(prev => ({
       ...prev,
       currentStep: step,
@@ -51,7 +53,13 @@ export const useProductCreation = () => {
 
   const goToNextStep = useCallback(() => {
     setState(prev => {
-      const stepOrder: ProductCreationStep[] = ['product-selection', 'specifications', 'location-confirmation'];
+      const stepOrder: BuyerRequestCreationStep[] = [
+        'product-selection', 
+        'quantity-price', 
+        'product-specifications', 
+        'location-confirmation',
+        'submit'
+      ];
       const currentIndex = stepOrder.indexOf(prev.currentStep);
       const nextStep = stepOrder[currentIndex + 1];
       
@@ -65,7 +73,13 @@ export const useProductCreation = () => {
 
   const goToPreviousStep = useCallback(() => {
     setState(prev => {
-      const stepOrder: ProductCreationStep[] = ['product-selection', 'specifications', 'location-confirmation'];
+      const stepOrder: BuyerRequestCreationStep[] = [
+        'product-selection', 
+        'quantity-price', 
+        'product-specifications', 
+        'location-confirmation',
+        'submit'
+      ];
       const currentIndex = stepOrder.indexOf(prev.currentStep);
       const previousStep = stepOrder[currentIndex - 1];
       
@@ -87,14 +101,34 @@ export const useProductCreation = () => {
       },
       error: null,
     }));
-  }, []);
 
-  const updateSpecifications = useCallback((specifications: ProductSpecifications) => {
+    // Update onboarding store for compatibility
+    onboardingStore.setSelectedProducts([productData.id]);
+    onboardingStore.setSelectedProductsMetadata([productData]);
+  }, [onboardingStore]);
+
+  const updateBuyerSpecifications = useCallback((specifications: BuyerSpecifications) => {
     setState(prev => ({
       ...prev,
       data: {
         ...prev.data,
-        specifications,
+        buyerSpecifications: specifications,
+      },
+      error: null,
+    }));
+
+    // Update onboarding store for compatibility
+    if (specifications.productId) {
+      onboardingStore.updateBuyerSpecification(specifications.productId, specifications);
+    }
+  }, [onboardingStore]);
+
+  const updateProductSpecifications = useCallback((specifications: ProductSpecifications) => {
+    setState(prev => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        productSpecifications: specifications,
       },
       error: null,
     }));
@@ -138,23 +172,30 @@ export const useProductCreation = () => {
   // Reset flow
   const resetFlow = useCallback(() => {
     setState(initialState);
-  }, []);
+    // Reset onboarding store data as well
+    onboardingStore.setSelectedProducts([]);
+    onboardingStore.setSelectedProductsMetadata([]);
+    // Clear buyer specifications
+    Object.keys(onboardingStore.buyerSpecifications || {}).forEach(productId => {
+      onboardingStore.updateBuyerSpecification(productId, {});
+    });
+  }, [onboardingStore]);
 
   // Validate data for submission
   const validateData = useCallback((): boolean => {
-    const { productData, specifications, location } = state.data;
+    const { productData, buyerSpecifications, location } = state.data;
 
     if (!productData) {
       setError('Product selection is required');
       return false;
     }
 
-    if (!specifications) {
-      setError('Product specifications are required');
+    if (!buyerSpecifications) {
+      setError('Buyer specifications are required');
       return false;
     }
 
-    if (!specifications.quantity || specifications.quantity <= 0) {
+    if (!buyerSpecifications.quantity || buyerSpecifications.quantity <= 0) {
       setError('Valid quantity is required');
       return false;
     }
@@ -172,61 +213,66 @@ export const useProductCreation = () => {
     return true;
   }, [state.data, setError]);
 
-  // Submit product creation
-  const submitProduct = useCallback(async (): Promise<boolean> => {
+  // Submit buyer request creation
+  const submitBuyerRequest = useCallback(async (): Promise<boolean> => {
     if (!validateData()) {
       return false;
     }
 
-    const { productData, specifications, location } = state.data;
+    const { productData, buyerSpecifications, productSpecifications, location } = state.data;
 
     try {
       setLoading(true);
       clearError();
 
+      // Merge buyer specifications with product specifications
+      const mergedSpecifications = {
+        ...buyerSpecifications,
+        ...productSpecifications,
+      };
+
       // Prepare the data for backend
-      const createListingDto: CreateListingDto = {
+      const createRequestDto: CreateBuyerRequestDto = {
         productId: productData!.id,
-        quantity: specifications!.quantity,
-        unit: specifications!.unit || 'ton',
-        specifications: specifications!.specifications || {},
-        location: {
+        quantity: buyerSpecifications!.quantity,
+        unit: buyerSpecifications!.unit || 'ton',
+        maxPricePerUnit: buyerSpecifications!.maxPricePerUnit,
+        neededBy: buyerSpecifications!.neededBy,
+        specifications: productSpecifications || {},
+        deliveryAddress: {
           address: location!.address,
           city: location!.city,
-          region: location!.region || location!.region,
+          region: location!.region || '',
           country: location!.country,
           latitude: location!.latitude,
           longitude: location!.longitude,
         },
+        notes: buyerSpecifications!.notes,
         status: 'active',
-        offerType: 'listing', // Changed from 'STANDARD' to match backend enum
       };
 
       // Send to backend
-      const response = await apiClient.post('/seller/listings', createListingDto);
+      const response = await apiClient.post('/buyer/listings', createRequestDto);
 
-      if (response?.data?.success) {
-        // Refresh the products list
-        await refreshProducts();
-        
+      if (response?.data?.success || response?.data) {
         // Reset the flow
         resetFlow();
         
-        Alert.alert('Success', 'Product listing created successfully!');
+        Alert.alert('Success', 'Buyer request created successfully!');
         return true;
       } else {
-        throw new Error(response?.data?.message || 'Failed to create product listing');
+        throw new Error(response?.data?.message || 'Failed to create buyer request');
       }
     } catch (error: any) {
-      console.error('Error creating product:', error);
-      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to create product listing';
+      console.error('Error creating buyer request:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to create buyer request';
       setError(errorMessage);
       Alert.alert('Error', errorMessage);
       return false;
     } finally {
       setLoading(false);
     }
-  }, [validateData, state.data, setLoading, clearError, setError, refreshProducts, resetFlow]);
+  }, [validateData, state.data, setLoading, clearError, setError, resetFlow]);
 
   // Get product image from metadata
   const getProductImage = useCallback((productName: string, category: string): string => {
@@ -252,14 +298,18 @@ export const useProductCreation = () => {
   }, [productMetadata]);
 
   // Check if step is completed
-  const isStepCompleted = useCallback((step: ProductCreationStep): boolean => {
+  const isStepCompleted = useCallback((step: BuyerRequestCreationStep): boolean => {
     switch (step) {
       case 'product-selection':
         return !!state.data.productData;
-      case 'specifications':
-        return !!state.data.specifications;
+      case 'quantity-price':
+        return !!state.data.buyerSpecifications;
+      case 'product-specifications':
+        return !!state.data.productSpecifications;
       case 'location-confirmation':
         return !!state.data.location;
+      case 'submit':
+        return true; // Submit step doesn't need to be "completed"
       default:
         return false;
     }
@@ -285,7 +335,8 @@ export const useProductCreation = () => {
 
     // Data updates
     updateProductData,
-    updateSpecifications,
+    updateBuyerSpecifications,
+    updateProductSpecifications,
     updateLocation,
 
     // Error handling
@@ -293,7 +344,7 @@ export const useProductCreation = () => {
     clearError,
 
     // Actions
-    submitProduct,
+    submitBuyerRequest,
     resetFlow,
     ensureMetadataLoaded,
 

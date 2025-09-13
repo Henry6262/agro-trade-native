@@ -216,27 +216,29 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
               className="border border-neutral-700 rounded-lg p-4 mb-3"
             >
               {/* Header */}
-              <View className="flex-row items-center justify-between mb-3">
-                <View className="flex-row items-center flex-1">
-                  <View className="w-10 h-10 bg-gradient-to-br from-green-500/30 to-green-600/10 rounded-lg items-center justify-center border border-green-500/30">
-                    <Package size={20} color="#34D399" />
-                  </View>
-                  <View className="ml-3 flex-1">
-                    <Text className="font-bold text-white">{job.product}</Text>
-                    <View className="flex-row flex-wrap mt-1">
-                      {job.tags.map((tag, index) => (
-                        <Badge
-                          key={index}
-                          variant="outline"
-                          className="mr-1 mb-1 text-xs border-neutral-600"
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
+              <View className="mb-3">
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center flex-1 mr-2">
+                    <View className="w-10 h-10 bg-gradient-to-br from-green-500/30 to-green-600/10 rounded-lg items-center justify-center border border-green-500/30">
+                      <Package size={20} color="#34D399" />
+                    </View>
+                    <View className="ml-3 flex-1">
+                      <Text className="font-bold text-white">{job.product}</Text>
+                      <View className="flex-row flex-wrap mt-1">
+                        {job.tags.map((tag, index) => (
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="mr-1 mb-1 text-xs border-neutral-600"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </View>
                     </View>
                   </View>
                 </View>
-                <View className="flex-row items-center">
+                <View className="flex-row items-center justify-end mt-2">
                   <Badge
                     variant={job.priority === "urgent" ? "destructive" : job.priority === "high" ? "default" : "secondary"}
                     className="mr-2"

@@ -29,8 +29,6 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
   mode = 'single',
   selectedProducts = [],
 }) => {
-  console.log('ProductSelectionDrawerSimple render, visible:', visible);
-  
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>(selectedProducts);
   
   // Ensure products is always an array, handle both direct array and response object
@@ -41,12 +39,16 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
 
   useEffect(() => {
     // Fetch products only when drawer opens and products aren't loaded
-    if (visible && products.length === 0 && !isLoadingProducts) {
-      fetchAllData().catch((error) => {
-        console.error('Error fetching products:', error);
-      });
+    if (visible && !isLoadingProducts) {
+      // Check if we need to fetch products
+      const currentProducts = Array.isArray(productsRaw) ? productsRaw : (productsRaw?.data || []);
+      if (currentProducts.length === 0) {
+        fetchAllData().catch((error) => {
+          console.error('Error fetching products:', error);
+        });
+      }
     }
-  }, [visible]);
+  }, [visible, isLoadingProducts]); // Depend on visible and isLoadingProducts only
 
   useEffect(() => {
     setSelectedProductIds(selectedProducts);

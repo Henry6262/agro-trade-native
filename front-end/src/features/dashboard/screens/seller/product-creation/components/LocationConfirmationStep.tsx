@@ -1,5 +1,5 @@
 import React from 'react';
-import { EnhancedLocationConfirmation } from '../../../../../shared/components/EnhancedLocationConfirmation';
+import { EnhancedLocationConfirmation } from '@shared/components/EnhancedLocationConfirmation';
 import { LocationConfirmationStepProps } from '../types';
 
 export const LocationConfirmationStep: React.FC<LocationConfirmationStepProps> = ({
