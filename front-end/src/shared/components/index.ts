@@ -2,6 +2,7 @@
 export { Button } from './Button';
 export { Input } from './Input';
 export { LoadingSpinner } from './LoadingSpinner';
+export { LocationMapPicker } from './LocationMapPicker';
 export { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from './Card';
 export { Badge } from './Badge';
 export { EmptyState } from './EmptyState';

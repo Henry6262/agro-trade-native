@@ -26,6 +26,24 @@ export default function App() {
       }
     }
     
+    // DEV ONLY: Set authentication for testing
+    if (__DEV__) {
+      const devToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbWY5c3B1eXAwMDAwNW5xc3B3cmJ3ZWVyIiwiaWF0IjoxNzU3NjEwNzY5LCJleHAiOjE3NTgyMTU1Njl9.L-Y6NnLz_amguhs9PcwURUws2AgQciTzScGu9ungpig';
+      const devUser = {
+        id: 'cmf9spuyp00005nqspwrbweer',
+        email: 'enriquemiloslavov10@gmail.com',
+        name: 'Estoica chondo',
+        role: 'BUYER',
+        onboardingComplete: true,
+      };
+      useAuthStore.setState({
+        token: devToken,
+        user: devUser,
+        isAuthenticated: true,
+      });
+      console.log('DEV: Auth set for testing');
+    }
+    
     // Initialize auth state
     const checkAuthState = async () => {
       try {

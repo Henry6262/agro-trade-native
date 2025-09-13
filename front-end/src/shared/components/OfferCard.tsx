@@ -18,7 +18,6 @@ import {
   Check,
   X,
   MessageSquare,
-  Eye,
 } from 'lucide-react-native';
 
 import { Offer, SpecificationMatch, MatchType } from '../types';
@@ -29,7 +28,6 @@ interface OfferCardProps {
   onAccept: (offerId: string) => void;
   onReject: (offerId: string) => void;
   onNegotiate: (offerId: string) => void;
-  onViewDetails: (offerId: string) => void;
   isLoading?: boolean;
 }
 
@@ -39,7 +37,6 @@ export const OfferCard: React.FC<OfferCardProps> = ({
   onAccept,
   onReject,
   onNegotiate,
-  onViewDetails,
   isLoading = false,
 }) => {
   const [expanded, setExpanded] = useState(false);
@@ -365,56 +362,59 @@ export const OfferCard: React.FC<OfferCardProps> = ({
           </View>
         )}
 
-        {/* Action Buttons */}
-        <View className="p-4 flex-row justify-between gap-3">
+        {/* Action Buttons - Improved Layout */}
+        <View className="p-5 flex-row gap-4">
           <TouchableOpacity
-            onPress={() => onViewDetails(offer.id)}
+            onPress={() => onReject(offer.id)}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
-            className="flex-1 bg-neutral-700/50 border border-neutral-600/50 rounded-lg py-3 flex-row items-center justify-center"
+            className="flex-1 bg-gradient-to-br from-red-500/15 to-red-600/10 border border-red-500/40 rounded-xl py-4 flex-row items-center justify-center"
             disabled={isLoading}
+            style={{
+              shadowColor: '#EF4444',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 1,
+            }}
           >
-            <Eye size={16} color="#9CA3AF" />
-            <Text className="text-neutral-300 text-sm font-medium ml-2">Details</Text>
+            <X size={18} color="#EF4444" />
+            <Text className="text-red-400 text-sm font-semibold ml-2">Reject</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => onNegotiate(offer.id)}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
-            className="flex-1 bg-blue-500/20 border border-blue-500/50 rounded-lg py-3 flex-row items-center justify-center"
+            className="flex-1 bg-gradient-to-br from-blue-500/20 to-indigo-500/15 border border-blue-500/50 rounded-xl py-4 flex-row items-center justify-center"
             disabled={isLoading}
+            style={{
+              shadowColor: '#3B82F6',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 3,
+              elevation: 2,
+            }}
           >
-            <MessageSquare size={16} color="#3B82F6" />
-            <Text className="text-blue-400 text-sm font-medium ml-2">Negotiate</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => onReject(offer.id)}
-            onPressIn={handlePressIn}
-            onPressOut={handlePressOut}
-            className="flex-1 bg-red-500/10 border border-red-500/30 rounded-lg py-3 flex-row items-center justify-center"
-            disabled={isLoading}
-          >
-            <X size={16} color="#EF4444" />
-            <Text className="text-red-400 text-sm font-medium ml-2">Reject</Text>
+            <MessageSquare size={18} color="#3B82F6" />
+            <Text className="text-blue-400 text-sm font-semibold ml-2">Negotiate</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={() => onAccept(offer.id)}
             onPressIn={handlePressIn}
             onPressOut={handlePressOut}
-            className="flex-1 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/50 rounded-lg py-3 flex-row items-center justify-center"
+            className="flex-1 bg-gradient-to-br from-green-500/20 to-emerald-600/15 border border-green-500/50 rounded-xl py-4 flex-row items-center justify-center"
             disabled={isLoading}
             style={{
               shadowColor: '#10B981',
-              shadowOffset: { width: 0, height: 2 },
+              shadowOffset: { width: 0, height: 3 },
               shadowOpacity: 0.2,
-              shadowRadius: 4,
-              elevation: 2,
+              shadowRadius: 5,
+              elevation: 3,
             }}
           >
-            <Check size={16} color="#10B981" />
+            <Check size={18} color="#10B981" />
             <Text className="text-green-400 text-sm font-bold ml-2">Accept</Text>
           </TouchableOpacity>
         </View>
