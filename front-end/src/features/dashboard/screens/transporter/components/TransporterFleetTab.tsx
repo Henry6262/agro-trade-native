@@ -8,31 +8,18 @@ import {
   Plus,
   User,
   MapPin,
+  Users,
 } from 'lucide-react-native';
 import { Button } from '@shared/components/Button';
 import { Badge } from '@shared/components/Badge';
-import { Input } from '@shared/components/Input';
-import { Modal } from '@shared/components/Modal';
 import { MetricCard } from '../../components/MetricCard';
 import { BaseComponentProps } from '@shared/types';
+import { FleetCreationFlow } from '../fleet-creation';
 
 interface TransporterFleetTabProps extends BaseComponentProps {
   id?: string;
 }
 
-interface TruckData {
-  licensePlate: string;
-  model: string;
-  capacity: string;
-  year: string;
-}
-
-interface DriverData {
-  name: string;
-  license: string;
-  phone: string;
-  experience: string;
-}
 
 interface FleetTruck {
   id: string;
@@ -61,20 +48,9 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
   testID,
   accessibilityLabel,
 }) => {
-  const [showAddTruck, setShowAddTruck] = useState(false);
-  const [showAddDriver, setShowAddDriver] = useState(false);
-  const [newTruckData, setNewTruckData] = useState<TruckData>({
-    licensePlate: '',
-    model: '',
-    capacity: '',
-    year: '',
-  });
-  const [newDriverData, setNewDriverData] = useState<DriverData>({
-    name: '',
-    license: '',
-    phone: '',
-    experience: '',
-  });
+  const [showFleetCreation, setShowFleetCreation] = useState(false);
+  const [truckTab, setTruckTab] = useState<'available' | 'in_transit'>('available');
+  const [driverTab, setDriverTab] = useState<'available' | 'assigned'>('available');
 
   const mockTrucks: FleetTruck[] = [
     {
@@ -148,6 +124,30 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
     },
   ];
 
+  // Filter trucks based on selected tab
+  const filteredTrucks = mockTrucks.filter(truck => {
+    if (truckTab === 'available') {
+      return truck.status === 'available';
+    } else {
+      return truck.status === 'assigned';
+    }
+  });
+
+  // Filter drivers based on selected tab
+  const filteredDrivers = mockDrivers.filter(driver => {
+    if (driverTab === 'available') {
+      return driver.status === 'available';
+    } else {
+      return driver.status === 'assigned';
+    }
+  });
+
+  // Count calculations
+  const availableTrucksCount = mockTrucks.filter(t => t.status === 'available').length;
+  const inTransitTrucksCount = mockTrucks.filter(t => t.status === 'assigned').length;
+  const availableDriversCount = mockDrivers.filter(d => d.status === 'available').length;
+  const assignedDriversCount = mockDrivers.filter(d => d.status === 'assigned').length;
+
   return (
     <ScrollView
       className="flex-1 bg-black"
@@ -204,38 +204,59 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
           </View>
         </View>
 
-        {/* Action Buttons */}
-        <View className="flex-row">
+        {/* Action Button - Single Entry Point */}
+        <View className="mb-4">
           <Button
             variant="gradient"
-            className="bg-gradient-to-r from-green-600 to-green-700 mr-2 flex-1"
-            onPress={() => setShowAddTruck(true)}
+            className="bg-gradient-to-r from-purple-600 to-purple-700 w-full"
+            onPress={() => setShowFleetCreation(true)}
           >
-            <View className="flex-row items-center">
-              <Plus size={16} color="#FFFFFF" />
-              <Text className="ml-2 text-white font-semibold">ADD NEW TRUCK</Text>
-            </View>
-          </Button>
-          <Button
-            variant="gradient"
-            className="bg-gradient-to-r from-blue-600 to-blue-700 flex-1"
-            onPress={() => setShowAddDriver(true)}
-          >
-            <View className="flex-row items-center">
-              <Plus size={16} color="#FFFFFF" />
-              <Text className="ml-2 text-white font-semibold">ADD NEW DRIVER</Text>
+            <View className="flex-row items-center justify-center">
+              <Users size={20} color="#FFFFFF" />
+              <Text className="ml-2 text-white font-semibold text-base">ADD TO FLEET</Text>
             </View>
           </Button>
         </View>
 
         {/* Fleet List Section */}
         <View className="mt-4">
-          <View className="flex-row items-center mb-3">
-            <Truck size={20} color="#34D399" />
-            <Text className="text-lg font-semibold text-green-400 ml-2">MY FLEET</Text>
+          <View className="flex-row items-center justify-between mb-3">
+            <View className="flex-row items-center">
+              <Truck size={20} color="#34D399" />
+              <Text className="text-lg font-semibold text-green-400 ml-2">MY FLEET</Text>
+            </View>
           </View>
 
-          {mockTrucks.map((truck) => (
+          {/* Truck Tab Selector */}
+          <View className="flex-row bg-neutral-800 rounded-lg p-1 mb-4">
+            <TouchableOpacity
+              onPress={() => setTruckTab('available')}
+              className={`flex-1 py-2 px-4 rounded-md ${
+                truckTab === 'available' ? 'bg-green-500' : 'bg-transparent'
+              }`}
+            >
+              <Text className={`text-center font-semibold ${
+                truckTab === 'available' ? 'text-white' : 'text-neutral-400'
+              }`}>
+                Available ({availableTrucksCount})
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setTruckTab('in_transit')}
+              className={`flex-1 py-2 px-4 rounded-md ${
+                truckTab === 'in_transit' ? 'bg-yellow-500' : 'bg-transparent'
+              }`}
+            >
+              <Text className={`text-center font-semibold ${
+                truckTab === 'in_transit' ? 'text-white' : 'text-neutral-400'
+              }`}>
+                In Transit ({inTransitTrucksCount})
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {filteredTrucks.length > 0 ? (
+            filteredTrucks.map((truck) => (
             <View
               key={truck.id}
               className="border border-neutral-700 rounded-lg p-4 mb-3"
@@ -291,17 +312,54 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
                 </Button>
               </View>
             </View>
-          ))}
+          ))
+          ) : (
+            <View className="border border-neutral-700 rounded-lg p-8 items-center">
+              <Truck size={48} color="#6B7280" />
+              <Text className="text-neutral-400 mt-4 text-center">
+                No {truckTab === 'available' ? 'available' : 'in transit'} trucks
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Drivers List Section */}
         <View className="mt-4">
           <View className="flex-row items-center mb-3">
             <User size={20} color="#60A5FA" />
-            <Text className="text-lg font-semibold text-blue-400 ml-2">AVAILABLE DRIVERS</Text>
+            <Text className="text-lg font-semibold text-blue-400 ml-2">DRIVERS</Text>
           </View>
 
-          {mockDrivers.map((driver) => (
+          {/* Driver Tab Selector */}
+          <View className="flex-row bg-neutral-800 rounded-lg p-1 mb-4">
+            <TouchableOpacity
+              onPress={() => setDriverTab('available')}
+              className={`flex-1 py-2 px-4 rounded-md ${
+                driverTab === 'available' ? 'bg-blue-500' : 'bg-transparent'
+              }`}
+            >
+              <Text className={`text-center font-semibold ${
+                driverTab === 'available' ? 'text-white' : 'text-neutral-400'
+              }`}>
+                Available ({availableDriversCount})
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setDriverTab('assigned')}
+              className={`flex-1 py-2 px-4 rounded-md ${
+                driverTab === 'assigned' ? 'bg-orange-500' : 'bg-transparent'
+              }`}
+            >
+              <Text className={`text-center font-semibold ${
+                driverTab === 'assigned' ? 'text-white' : 'text-neutral-400'
+              }`}>
+                Assigned ({assignedDriversCount})
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {filteredDrivers.length > 0 ? (
+            filteredDrivers.map((driver) => (
             <View
               key={driver.id}
               className="border border-neutral-700 rounded-lg p-4 mb-3"
@@ -329,132 +387,31 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
                 </View>
               </View>
             </View>
-          ))}
+          ))
+          ) : (
+            <View className="border border-neutral-700 rounded-lg p-8 items-center">
+              <User size={48} color="#6B7280" />
+              <Text className="text-neutral-400 mt-4 text-center">
+                No {driverTab === 'available' ? 'available' : 'assigned'} drivers
+              </Text>
+            </View>
+          )}
         </View>
       </View>
 
-      {/* Add Truck Modal */}
-      <Modal
-        visible={showAddTruck}
-        onClose={() => setShowAddTruck(false)}
-        title="Add New Truck"
-      >
-        <View className="space-y-4">
-          <View>
-            <Text className="text-sm text-neutral-400 mb-1">License Plate *</Text>
-            <Input
-              placeholder="ABC-1234"
-              value={newTruckData.licensePlate}
-              onChangeText={(text) => setNewTruckData({ ...newTruckData, licensePlate: text })}
-              className="bg-neutral-800 border-neutral-600"
-            />
-          </View>
-          <View>
-            <Text className="text-sm text-neutral-400 mb-1">Model</Text>
-            <Input
-              placeholder="Volvo FH16"
-              value={newTruckData.model}
-              onChangeText={(text) => setNewTruckData({ ...newTruckData, model: text })}
-              className="bg-neutral-800 border-neutral-600"
-            />
-          </View>
-          <View className="flex-row">
-            <View className="flex-1 mr-2">
-              <Text className="text-sm text-neutral-400 mb-1">Capacity (tons)</Text>
-              <Input
-                placeholder="40"
-                value={newTruckData.capacity}
-                onChangeText={(text) => setNewTruckData({ ...newTruckData, capacity: text })}
-                keyboardType="numeric"
-                className="bg-neutral-800 border-neutral-600"
-              />
-            </View>
-            <View className="flex-1 ml-2">
-              <Text className="text-sm text-neutral-400 mb-1">Year</Text>
-              <Input
-                placeholder="2022"
-                value={newTruckData.year}
-                onChangeText={(text) => setNewTruckData({ ...newTruckData, year: text })}
-                keyboardType="numeric"
-                className="bg-neutral-800 border-neutral-600"
-              />
-            </View>
-          </View>
-          <Button
-            variant="gradient"
-            className="bg-gradient-to-r from-green-600 to-green-700 w-full"
-            onPress={() => {
-              setShowAddTruck(false);
-              console.log('Submit for verification');
-            }}
-          >
-            <View className="flex-row items-center">
-              <Shield size={16} color="#FFFFFF" />
-              <Text className="ml-2 text-white font-semibold">SUBMIT FOR VERIFICATION</Text>
-            </View>
-          </Button>
-        </View>
-      </Modal>
-
-      {/* Add Driver Modal */}
-      <Modal
-        visible={showAddDriver}
-        onClose={() => setShowAddDriver(false)}
-        title="Add New Driver"
-      >
-        <View className="space-y-4">
-          <View>
-            <Text className="text-sm text-neutral-400 mb-1">Driver Name</Text>
-            <Input
-              placeholder="John Smith"
-              value={newDriverData.name}
-              onChangeText={(text) => setNewDriverData({ ...newDriverData, name: text })}
-              className="bg-neutral-800 border-neutral-600"
-            />
-          </View>
-          <View>
-            <Text className="text-sm text-neutral-400 mb-1">License Number</Text>
-            <Input
-              placeholder="CDL123456789"
-              value={newDriverData.license}
-              onChangeText={(text) => setNewDriverData({ ...newDriverData, license: text })}
-              className="bg-neutral-800 border-neutral-600"
-            />
-          </View>
-          <View>
-            <Text className="text-sm text-neutral-400 mb-1">Phone Number</Text>
-            <Input
-              placeholder="+1 (555) 123-4567"
-              value={newDriverData.phone}
-              onChangeText={(text) => setNewDriverData({ ...newDriverData, phone: text })}
-              keyboardType="phone-pad"
-              className="bg-neutral-800 border-neutral-600"
-            />
-          </View>
-          <View>
-            <Text className="text-sm text-neutral-400 mb-1">Experience</Text>
-            <Input
-              placeholder="8 years"
-              value={newDriverData.experience}
-              onChangeText={(text) => setNewDriverData({ ...newDriverData, experience: text })}
-              className="bg-neutral-800 border-neutral-600"
-            />
-          </View>
-          <Button
-            variant="gradient"
-            className="bg-gradient-to-r from-blue-600 to-blue-700 w-full"
-            onPress={() => {
-              setShowAddDriver(false);
-              console.log('Add driver');
-            }}
-          >
-            <View className="flex-row items-center">
-              <User size={16} color="#FFFFFF" />
-              <Text className="ml-2 text-white font-semibold">ADD DRIVER</Text>
-            </View>
-          </Button>
-        </View>
-      </Modal>
+      {/* Fleet Creation Flow */}
+      <FleetCreationFlow
+        visible={showFleetCreation}
+        onClose={() => setShowFleetCreation(false)}
+        onSuccess={(data) => {
+          console.log('Fleet item added:', data);
+          // TODO: Refresh fleet data
+          // Don't need to set false here as onClose will be called
+        }}
+        onError={(error) => {
+          console.error('Fleet creation error:', error);
+        }}
+      />
     </ScrollView>
   );
 };

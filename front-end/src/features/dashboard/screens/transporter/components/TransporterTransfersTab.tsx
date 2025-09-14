@@ -1,22 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import {
-  Package,
   Truck,
   DollarSign,
   CheckCircle,
   Star,
-  Timer,
-  AlertTriangle,
   Weight,
   MapPin,
-  Calendar,
-  Navigation,
   Route,
   Clock,
   Pause,
   Play,
   User,
+  Calendar,
 } from 'lucide-react-native';
 import { Button } from '@shared/components/Button';
 import { Badge } from '@shared/components/Badge';
@@ -28,25 +24,6 @@ interface TransporterTransfersTabProps extends BaseComponentProps {
   id?: string;
 }
 
-interface IncomingOffer {
-  id: string;
-  product: string;
-  quantity: string;
-  from: string;
-  fromFlag: string;
-  to: string;
-  toFlag: string;
-  distance: string;
-  userDistance: string;
-  deadline: string;
-  offeredPrice: string;
-  estimatedFuel: string;
-  estimatedProfit: string;
-  priority: 'low' | 'medium' | 'high';
-  timeToRespond: string;
-  tags: string[];
-  adminNote: string;
-}
 
 interface ActiveTransfer {
   id: string;
@@ -66,46 +43,6 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
   testID,
   accessibilityLabel,
 }) => {
-  const mockOffers: IncomingOffer[] = [
-    {
-      id: "IO001",
-      product: "Premium Wheat",
-      quantity: "30 tons",
-      from: "Iowa Premium Farms",
-      fromFlag: "🇺🇸",
-      to: "Chicago Grain Terminal",
-      toFlag: "🇺🇸",
-      distance: "195 mi",
-      userDistance: "52 mi",
-      deadline: "Oct 5",
-      offeredPrice: "$3,800",
-      estimatedFuel: "$485",
-      estimatedProfit: "$1,200",
-      priority: "high",
-      timeToRespond: "2d 14h",
-      tags: ["Non-GMO", "Premium Grade"],
-      adminNote: "Preferred transporter for this route",
-    },
-    {
-      id: "IO002",
-      product: "Organic Soybeans",
-      quantity: "22 tons",
-      from: "Nebraska Organic Co.",
-      fromFlag: "🇺🇸",
-      to: "Kansas Processing Hub",
-      toFlag: "🇺🇸",
-      distance: "165 mi",
-      userDistance: "38 mi",
-      deadline: "Oct 8",
-      offeredPrice: "$2,950",
-      estimatedFuel: "$380",
-      estimatedProfit: "$890",
-      priority: "medium",
-      timeToRespond: "4d 8h",
-      tags: ["Organic", "Export Quality"],
-      adminNote: "Long-term partnership opportunity",
-    },
-  ];
 
   const mockTransfers: ActiveTransfer[] = [
     {
@@ -209,139 +146,6 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
           </View>
         </View>
 
-        {/* Incoming Offers Section */}
-        <View className="mt-4">
-          <View className="flex-row items-center mb-3">
-            <Package size={20} color="#FCD34D" />
-            <Text className="text-lg font-semibold text-yellow-400 ml-2">INCOMING OFFERS</Text>
-          </View>
-
-          {mockOffers.map((offer) => (
-            <View
-              key={offer.id}
-              className="bg-gradient-to-r from-yellow-500/10 to-orange-500/5 border border-yellow-500/30 rounded-lg p-4 mb-3"
-            >
-              {/* Header */}
-              <View className="mb-3">
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center flex-1 mr-2">
-                    <View className="w-10 h-10 bg-gradient-to-br from-yellow-500/30 to-yellow-600/10 rounded-lg items-center justify-center border border-yellow-500/30">
-                      <Package size={20} color="#FCD34D" />
-                    </View>
-                    <View className="ml-3 flex-1">
-                      <Text className="font-bold text-white">{offer.product}</Text>
-                      <View className="flex-row flex-wrap mt-1">
-                        {offer.tags.map((tag, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="mr-1 mb-1 text-xs border-yellow-500/50"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                      </View>
-                    </View>
-                  </View>
-                </View>
-                <View className="flex-row items-center justify-end mt-2">
-                  <Badge variant={offer.priority === "high" ? "destructive" : "secondary"} className="mr-2">
-                    {offer.priority === "high" && <AlertTriangle size={12} color="#FFFFFF" />}
-                    <Text className="text-xs ml-1">DIRECT OFFER</Text>
-                  </Badge>
-                  <Badge variant="outline" className="border-yellow-500/50">
-                    <Timer size={12} color="#FCD34D" />
-                    <Text className="text-xs ml-1 text-yellow-400">{offer.timeToRespond}</Text>
-                  </Badge>
-                </View>
-              </View>
-
-              {/* Admin Note */}
-              <View className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-3">
-                <Text className="text-sm text-yellow-300 italic">"{offer.adminNote}"</Text>
-              </View>
-
-              {/* Route */}
-              <View className="flex-row items-center mb-3">
-                <Text className="text-base">{offer.fromFlag}</Text>
-                <Text className="text-neutral-300 mx-2" numberOfLines={1} ellipsizeMode="tail">{offer.from}</Text>
-                <Text className="text-neutral-500">→</Text>
-                <Text className="text-base mx-2">{offer.toFlag}</Text>
-                <Text className="text-neutral-300" numberOfLines={1} ellipsizeMode="tail">{offer.to}</Text>
-              </View>
-
-              {/* Details */}
-              <View className="flex-row items-center mb-4">
-                <View className="flex-row items-center mr-4">
-                  <Weight size={16} color="#60A5FA" />
-                  <Text className="text-neutral-300 ml-1">{offer.quantity}</Text>
-                </View>
-                <View className="flex-row items-center mr-4">
-                  <MapPin size={16} color="#34D399" />
-                  <Text className="text-neutral-300 ml-1">{offer.distance}</Text>
-                </View>
-                <View className="flex-row items-center">
-                  <Calendar size={16} color="#FCD34D" />
-                  <Text className="text-neutral-300 ml-1">{offer.deadline}</Text>
-                </View>
-              </View>
-
-              {/* Financial Breakdown */}
-              <View className="flex-row mb-4">
-                <View className="flex-1 bg-green-500/10 border border-green-500/20 rounded-lg p-3 mr-2">
-                  <Text className="text-xs text-green-400 mb-1">OFFERED PRICE</Text>
-                  <Text className="text-lg font-bold text-green-400">{offer.offeredPrice}</Text>
-                </View>
-                <View className="flex-1 bg-red-500/10 border border-red-500/20 rounded-lg p-3 mr-2">
-                  <Text className="text-xs text-red-400 mb-1">EST. FUEL</Text>
-                  <Text className="text-lg font-bold text-red-400">{offer.estimatedFuel}</Text>
-                </View>
-                <View className="flex-1 bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
-                  <Text className="text-xs text-blue-400 mb-1">EST. PROFIT</Text>
-                  <Text className="text-lg font-bold text-blue-400">{offer.estimatedProfit}</Text>
-                </View>
-              </View>
-
-              {/* Distance Info & Actions */}
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center">
-                  <Navigation size={16} color="#60A5FA" />
-                  <Text className="text-sm text-neutral-400 ml-2">
-                    Distance from you: <Text className="text-blue-400 font-medium">{offer.userDistance}</Text>
-                  </Text>
-                </View>
-
-                <View className="flex-row items-center">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-red-500/50 mr-2"
-                    onPress={() => console.log('Decline')}
-                  >
-                    <Text className="text-red-400">DECLINE</Text>
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="border-yellow-500/50 mr-2"
-                    onPress={() => console.log('Counter')}
-                  >
-                    <Text className="text-yellow-400">COUNTER</Text>
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="gradient"
-                    className="bg-gradient-to-r from-green-600 to-green-700"
-                    onPress={() => console.log('Accept')}
-                  >
-                    <CheckCircle size={14} color="#FFFFFF" />
-                    <Text className="ml-1 text-white">ACCEPT</Text>
-                  </Button>
-                </View>
-              </View>
-            </View>
-          ))}
-        </View>
 
         {/* Active Transfers Section */}
         <View className="mt-4">
