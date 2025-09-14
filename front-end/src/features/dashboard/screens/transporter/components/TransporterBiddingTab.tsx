@@ -21,6 +21,8 @@ import { Badge } from '@shared/components/Badge';
 import { Input } from '@shared/components/Input';
 import { MetricCard } from '../../components/MetricCard';
 import { BaseComponentProps } from '@shared/types';
+import { MapDrawer } from '../maps/components/MapDrawer';
+import { MapOffer } from '../maps/types';
 
 interface TransporterBiddingTabProps extends BaseComponentProps {
   id?: string;
@@ -43,7 +45,6 @@ interface JobListing {
   priority: 'low' | 'medium' | 'high' | 'urgent';
   fuelCost: string;
   profitMargin: string;
-  tags: string[];
 }
 
 export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
@@ -54,12 +55,61 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
   const [selectedBid, setSelectedBid] = useState<string | null>(null);
   const [bidAmount, setBidAmount] = useState('');
   const [isVerified, setIsVerified] = useState(false);
+  const [selectedOffer, setSelectedOffer] = useState<MapOffer | null>(null);
+  const [isMapDrawerOpen, setIsMapDrawerOpen] = useState(false);
 
   const handleVerifyToBid = () => {
     setIsVerified(true);
     setTimeout(() => {
       console.log('Verification complete! You can now place bids.');
     }, 1500);
+  };
+
+  const handleViewRoute = (job: JobListing) => {
+    console.log('handleViewRoute called with job:', job.id);
+    // Convert JobListing to MapOffer format
+    const mapOffer: MapOffer = {
+      id: job.id,
+      quantity: parseInt(job.quantity), // Convert "25 tons" to 25
+      pickup: {
+        coordinates: { 
+          latitude: 25.2744 + Math.random() * 0.05, // Mock coordinates
+          longitude: 51.5111 + Math.random() * 0.05 
+        },
+        address: {
+          street: 'Farm Road',
+          city: job.from.split(' ')[0],
+          state: 'State',
+          country: 'USA',
+        },
+        name: job.from,
+        type: 'pickup',
+      },
+      delivery: {
+        coordinates: { 
+          latitude: 25.2854 + Math.random() * 0.05, // Mock coordinates
+          longitude: 51.5310 + Math.random() * 0.05 
+        },
+        address: {
+          city: job.to.split(' ')[0],
+          state: 'State',
+          country: 'USA',
+        },
+        name: job.to,
+        type: 'delivery',
+      },
+      deadline: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours from now
+      status: 'pending',
+      estimatedValue: parseFloat(job.currentBid.replace(/[$,]/g, '')),
+      productType: job.product.includes('Wheat') ? 'grains' : 
+                   job.product.includes('Corn') ? 'grains' :
+                   job.product.includes('Soybean') ? 'vegetables' : 'other',
+    };
+    
+    console.log('Setting mapOffer:', mapOffer);
+    setSelectedOffer(mapOffer);
+    console.log('Setting isMapDrawerOpen to true');
+    setIsMapDrawerOpen(true);
   };
 
   const mockJobs: JobListing[] = [
@@ -80,7 +130,6 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
       priority: "high",
       fuelCost: "$420",
       profitMargin: "28%",
-      tags: ["Non-GMO", "Premium Grade"],
     },
     {
       id: "T002",
@@ -99,7 +148,6 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
       priority: "medium",
       fuelCost: "$580",
       profitMargin: "22%",
-      tags: ["Organic", "Grade A"],
     },
     {
       id: "T003",
@@ -118,11 +166,11 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
       priority: "urgent",
       fuelCost: "$320",
       profitMargin: "35%",
-      tags: ["Export Quality", "Premium"],
     },
   ];
 
   return (
+    <>
     <ScrollView
       className="flex-1 bg-black"
       showsVerticalScrollIndicator={false}
@@ -213,83 +261,60 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
           {mockJobs.map((job) => (
             <View
               key={job.id}
-              className="border border-neutral-700 rounded-lg p-4 mb-3"
+              className="border border-neutral-700 rounded-lg p-6 mb-3 mx-2"
             >
-              {/* Header */}
+              {/* Header - Product and Metrics */}
               <View className="mb-3">
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center flex-1 mr-2">
-                    <View className="w-10 h-10 bg-gradient-to-br from-green-500/30 to-green-600/10 rounded-lg items-center justify-center border border-green-500/30">
-                      <Package size={20} color="#34D399" />
-                    </View>
-                    <View className="ml-3 flex-1">
-                      <Text className="font-bold text-white">{job.product}</Text>
-                      <View className="flex-row flex-wrap mt-1">
-                        {job.tags.map((tag, index) => (
-                          <Badge
-                            key={index}
-                            variant="outline"
-                            className="mr-1 mb-1 text-xs border-neutral-600"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
+                <View className="flex-row items-start mb-3">
+                  {/* Product Image */}
+                  <View className="w-12 h-12 bg-gradient-to-br from-green-500/30 to-green-600/10 rounded-lg items-center justify-center border border-green-500/30">
+                    <Text className="text-xl">{job.product.split(' ')[0]}</Text>
+                  </View>
+                  
+                  {/* Product Name and Metrics Stacked */}
+                  <View className="ml-3 flex-1">
+                    {/* Product Name */}
+                    <Text className="font-bold text-white mb-2">{job.product.split(' ').slice(1).join(' ')}</Text>
+                    
+                    {/* Metrics Row - Gray Color */}
+                    <View className="flex-row items-center space-x-4">
+                      <View className="flex-row items-center">
+                        <Weight size={14} color="#9CA3AF" />
+                        <Text className="text-gray-400 text-sm ml-1">{job.quantity}</Text>
+                      </View>
+                      <View className="flex-row items-center">
+                        <MapPin size={14} color="#9CA3AF" />
+                        <Text className="text-gray-400 text-sm ml-1">{job.distance}</Text>
+                      </View>
+                      <View className="flex-row items-center">
+                        <Calendar size={14} color="#9CA3AF" />
+                        <Text className="text-gray-400 text-sm ml-1">{job.deadline}</Text>
                       </View>
                     </View>
                   </View>
                 </View>
-                <View className="flex-row items-center justify-end mt-2">
-                  <Badge
-                    variant={job.priority === "urgent" ? "destructive" : job.priority === "high" ? "default" : "secondary"}
-                    className="mr-2"
-                  >
-                    {job.priority === "urgent" && <AlertTriangle size={12} color="#FFFFFF" />}
-                    <Text className="text-xs ml-1">{job.priority.toUpperCase()}</Text>
-                  </Badge>
-                  <Badge variant="outline" className="border-neutral-600">
-                    <Timer size={12} color="#9CA3AF" />
-                    <Text className="text-xs ml-1 text-neutral-400">{job.timeLeft}</Text>
-                  </Badge>
+
+                {/* Route Information - Single Line */}
+                <View className="flex-row items-center mb-3" style={{ minHeight: 24 }}>
+                  <Text className="text-base">{job.fromFlag}</Text>
+                  <Text className="text-white font-bold mx-1" numberOfLines={1} style={{ maxWidth: '35%' }}>
+                    {job.from.split(' ')[0]}
+                  </Text>
+                  <Text className="text-neutral-500 mx-1">→</Text>
+                  <Text className="text-base">{job.toFlag}</Text>
+                  <Text className="text-white font-bold mx-1 flex-1" numberOfLines={1}>
+                    {job.to.split(' ')[0]}
+                  </Text>
                 </View>
               </View>
 
-              {/* Route */}
-              <View className="flex-row items-center mb-3">
-                <Text className="text-base">{job.fromFlag}</Text>
-                <Text className="text-neutral-300 mx-2" numberOfLines={1} ellipsizeMode="tail">{job.from}</Text>
-                <Text className="text-neutral-500">→</Text>
-                <Text className="text-base mx-2">{job.toFlag}</Text>
-                <Text className="text-neutral-300" numberOfLines={1} ellipsizeMode="tail">{job.to}</Text>
-              </View>
 
-              {/* Details */}
-              <View className="flex-row items-center mb-3">
-                <View className="flex-row items-center mr-4">
-                  <Weight size={16} color="#60A5FA" />
-                  <Text className="text-neutral-300 ml-1">{job.quantity}</Text>
-                </View>
-                <View className="flex-row items-center mr-4">
-                  <MapPin size={16} color="#34D399" />
-                  <Text className="text-neutral-300 ml-1">{job.distance}</Text>
-                </View>
-                <View className="flex-row items-center">
-                  <Calendar size={16} color="#FCD34D" />
-                  <Text className="text-neutral-300 ml-1">{job.deadline}</Text>
-                </View>
-              </View>
-
-              {/* Distance & Fuel */}
+              {/* Driver Distance Info */}
               <View className="flex-row justify-between mb-3">
                 <View className="flex-1 mr-4">
                   <View className="flex-row items-center mb-2">
-                    <Navigation size={16} color="#60A5FA" />
-                    <Text className="text-neutral-400 ml-2">Distance from you:</Text>
-                    <Text className="font-semibold text-blue-400 ml-2">{job.userDistance}</Text>
-                  </View>
-                  <View className="flex-row items-center">
-                    <Fuel size={16} color="#EF4444" />
-                    <Text className="text-neutral-400 ml-2">Est. Fuel:</Text>
-                    <Text className="font-semibold text-red-400 ml-2">{job.fuelCost}</Text>
+                    <Navigation size={16} color="#9CA3AF" />
+                    <Text className="text-neutral-400 ml-2">Nearest driver: <Text className="text-gray-400 font-medium">{job.userDistance} away</Text></Text>
                   </View>
                 </View>
 
@@ -306,54 +331,81 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                 </View>
               </View>
 
-              {/* Bid Actions */}
-              <View className="flex-row justify-end items-center">
-                {selectedBid === job.id ? (
-                  <View className="flex-row items-center">
-                    <View className="relative mr-2">
-                      <DollarSign size={14} color="#9CA3AF" style={{ position: 'absolute', left: 8, top: 10, zIndex: 10 }} />
-                      <Input
-                        placeholder="2800"
-                        value={bidAmount}
-                        onChangeText={setBidAmount}
-                        keyboardType="numeric"
-                        className="w-20 h-8 pl-6 bg-neutral-700 border-neutral-600 text-white text-sm"
-                      />
+              {/* Action Buttons */}
+              <View className="space-y-2">
+                {/* View Route Button */}
+                <View className="flex-row items-center justify-center">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="border-blue-500/50 flex-1"
+                    onPress={() => handleViewRoute(job)}
+                  >
+                    <MapPin size={14} color="#60A5FA" />
+                    <Text className="text-blue-400 ml-1">View Route</Text>
+                  </Button>
+                </View>
+
+                {/* Bid Actions */}
+                <View className="flex-row justify-center items-center">
+                  {selectedBid === job.id ? (
+                    <View className="flex-row items-center w-full">
+                      <View className="relative mr-2 flex-1">
+                        <DollarSign size={14} color="#9CA3AF" style={{ position: 'absolute', left: 8, top: 10, zIndex: 10 }} />
+                        <Input
+                          placeholder="2800"
+                          value={bidAmount}
+                          onChangeText={setBidAmount}
+                          keyboardType="numeric"
+                          className="w-full h-8 pl-6 bg-neutral-700 border-neutral-600 text-white text-sm"
+                        />
+                      </View>
+                      <Button
+                        size="sm"
+                        variant="gradient"
+                        className="bg-gradient-to-r from-green-600 to-green-700 mr-2"
+                        disabled={!isVerified}
+                        onPress={() => console.log('Place bid')}
+                      >
+                        <Zap size={14} color="#FFFFFF" />
+                        <Text className="ml-1 text-white font-semibold">BID</Text>
+                      </Button>
+                      <TouchableOpacity
+                        onPress={() => setSelectedBid(null)}
+                        className="px-2 py-1"
+                      >
+                        <Text className="text-neutral-400">✕</Text>
+                      </TouchableOpacity>
                     </View>
+                  ) : (
                     <Button
                       size="sm"
                       variant="gradient"
-                      className="bg-gradient-to-r from-green-600 to-green-700 mr-2"
+                      className="bg-gradient-to-r from-blue-600 to-blue-700 flex-1"
+                      onPress={() => setSelectedBid(job.id)}
                       disabled={!isVerified}
-                      onPress={() => console.log('Place bid')}
                     >
-                      <Zap size={14} color="#FFFFFF" />
-                      <Text className="ml-1 text-white font-semibold">BID</Text>
+                      <Target size={14} color="#FFFFFF" />
+                      <Text className="ml-1 text-white font-semibold">PLACE BID</Text>
                     </Button>
-                    <TouchableOpacity
-                      onPress={() => setSelectedBid(null)}
-                      className="px-2 py-1"
-                    >
-                      <Text className="text-neutral-400">✕</Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <Button
-                    size="sm"
-                    variant="gradient"
-                    className="bg-gradient-to-r from-blue-600 to-blue-700"
-                    onPress={() => setSelectedBid(job.id)}
-                    disabled={!isVerified}
-                  >
-                    <Target size={14} color="#FFFFFF" />
-                    <Text className="ml-1 text-white font-semibold">PLACE BID</Text>
-                  </Button>
-                )}
+                  )}
+                </View>
               </View>
             </View>
           ))}
         </View>
       </View>
     </ScrollView>
+    
+    {/* Map Drawer - Outside ScrollView for fixed positioning */}
+    <MapDrawer
+      isOpen={isMapDrawerOpen}
+      offer={selectedOffer}
+      onClose={() => {
+        setIsMapDrawerOpen(false);
+        setSelectedOffer(null);
+      }}
+    />
+    </>
   );
 };

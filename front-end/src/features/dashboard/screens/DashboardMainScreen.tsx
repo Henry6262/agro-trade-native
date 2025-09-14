@@ -11,7 +11,6 @@ import {
   Dimensions,
 } from 'react-native';
 import {
-  ChevronRight,
   BarChart3,
   Users,
   Package,
@@ -21,8 +20,6 @@ import {
   Wheat,
   ShoppingCart,
   Truck,
-  Menu,
-  Link,
   User,
   LayoutGrid,
 } from 'lucide-react-native';
@@ -37,7 +34,9 @@ import IntelligenceScreen from './shared/IntelligenceScreen';
 import SellerDashboardScreen from './seller/SellerDashboardScreen';
 import BuyerDashboardScreen from './buyer/BuyerDashboardScreen';
 import TransporterDashboardScreen from './transporter/TransporterDashboardScreen';
+import { InspectorDashboard } from './inspector/InspectorDashboard';
 import { ProfileDrawer } from '../components/ProfileDrawer';
+import { BottomNavigation } from '../components/BottomNavigation';
 import { useAuthStore } from '../../../stores/auth.store';
 import { AdminPricingZonesScreen } from '../../admin/screens/AdminPricingZonesScreen';
 import { Container } from '../../../shared/components';
@@ -65,9 +64,8 @@ export default function DashboardMainScreen() {
   const { user, isAuthenticated } = useAuthStore();
   
   const [activeSection, setActiveSection] = useState('overview');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false); // Start expanded on desktop
   // State for testing different dashboards
-  const [testRole, setTestRole] = useState<'admin' | 'seller' | 'buyer' | 'transporter' | null>(null);
+  const [testRole, setTestRole] = useState<'admin' | 'seller' | 'buyer' | 'transporter' | 'inspector' | null>(null);
   
   // Normalize user role to lowercase for consistency
   // Note: Backend uses 'FARMER' instead of 'SELLER'
@@ -83,7 +81,7 @@ export default function DashboardMainScreen() {
     if (normalizedRole === 'farmer') {
       return 'seller' as const;
     }
-    return normalizedRole as 'admin' | 'seller' | 'buyer' | 'transporter';
+    return normalizedRole as 'admin' | 'seller' | 'buyer' | 'transporter' | 'inspector';
   }, [user?.role, route.params?.userRole, testRole]);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
@@ -126,6 +124,9 @@ export default function DashboardMainScreen() {
       case 'transporter': 
         setActiveSection('bidding');
         break;
+      case 'inspector':
+        setActiveSection('active');
+        break;
       default: 
         setActiveSection('overview');
     }
@@ -150,9 +151,16 @@ export default function DashboardMainScreen() {
     if (userRole === 'transporter') {
       return [
         { id: 'bidding', icon: Package, label: 'BIDDING' },
+        { id: 'offers', icon: Bell, label: 'INCOMING OFFERS' },
         { id: 'transfers', icon: Truck, label: 'MY TRANSFERS' },
         { id: 'fleet', icon: Users, label: 'MY FLEET' },
         { id: 'intelligence', icon: TrendingUp, label: 'MARKET INTEL' },
+      ];
+    }
+    if (userRole === 'inspector') {
+      return [
+        { id: 'active', icon: Package, label: 'ACTIVE JOB' },
+        { id: 'available', icon: LayoutGrid, label: 'AVAILABLE JOBS' },
       ];
     }
     // Admin navigation (default)
@@ -197,6 +205,10 @@ export default function DashboardMainScreen() {
       }
       return <TransporterDashboardScreen activeTab={activeSection} />;
     }
+    if (userRole === 'inspector') {
+      // Inspector doesn't need activeTab - it handles its own tabs internally
+      return <InspectorDashboard />;
+    }
     // Admin content
     if (activeSection === 'overview') return <CommandCenterScreen />;
     if (activeSection === 'agents') return <AgentNetworkScreen />;
@@ -211,6 +223,7 @@ export default function DashboardMainScreen() {
     { value: 'seller', label: 'Seller', icon: Wheat },
     { value: 'buyer', label: 'Buyer', icon: ShoppingCart },
     { value: 'transporter', label: 'Transporter', icon: Truck },
+    { value: 'inspector', label: 'Inspector', icon: User },
   ];
 
   return (
@@ -218,203 +231,14 @@ export default function DashboardMainScreen() {
       <StatusBar backgroundColor="#000000" barStyle="light-content" />
       
       <View className="flex-1">
-        {/* Desktop Sidebar - Always shown on desktop/tablet */}
-        {screenWidth >= 768 && (
-          <View
-            style={{ position: 'absolute', left: 0, top: 0, bottom: 0, zIndex: 50 }}
-            className={`${
-              sidebarCollapsed ? 'w-16' : 'w-70'
-            } bg-neutral-900 border-r border-neutral-700`}
-          >
-            <View className="p-4">
-              <View className="flex-row items-center justify-between mb-8">
-                <View className={`${sidebarCollapsed ? 'hidden' : 'flex'}`}>
-                  <Text className="text-green-500 font-bold text-lg tracking-wider">
-                    AGRI TRADE
-                  </Text>
-                  <Text className="text-neutral-500 text-xs">v1.0.0 PLATFORM</Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => setSidebarCollapsed(!sidebarCollapsed)}
-                  className="p-2"
-                >
-                  <ChevronRight
-                    color="#9CA3AF"
-                    size={20}
-                    style={{
-                      transform: [{ rotate: sidebarCollapsed ? '0deg' : '180deg' }],
-                    }}
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <View className="space-y-2">
-                {navigationItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <TouchableOpacity
-                      key={item.id}
-                      onPress={() => {
-                        console.log('Desktop nav clicked:', item.id);
-                        setActiveSection(item.id);
-                      }}
-                      className={`w-full flex-row items-center gap-3 p-3 rounded ${
-                        activeSection === item.id
-                          ? 'bg-green-500'
-                          : 'bg-transparent'
-                      }`}
-                    >
-                      <Icon
-                        color={activeSection === item.id ? '#ffffff' : '#9CA3AF'}
-                        size={24}
-                      />
-                      {!sidebarCollapsed && (
-                        <Text
-                          className={`text-sm font-medium ${
-                            activeSection === item.id ? 'text-white' : 'text-neutral-400'
-                          }`}
-                        >
-                          {item.label}
-                        </Text>
-                      )}
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-
-              {!sidebarCollapsed && (
-                <View className="mt-8 p-4 bg-neutral-800 border border-neutral-700 rounded">
-                  <View className="flex-row items-center gap-2 mb-2">
-                    <View className="w-2 h-2 bg-green-400 rounded-full" />
-                    <Text className="text-xs text-white">PLATFORM ONLINE</Text>
-                  </View>
-                  <View>
-                    <Text className="text-neutral-500 text-xs">UPTIME: 99.8%</Text>
-                    <Text className="text-neutral-500 text-xs">ACTIVE TRADES: 47</Text>
-                    <Text className="text-neutral-500 text-xs">MATCHES TODAY: 12</Text>
-                  </View>
-                </View>
-              )}
-            </View>
-          </View>
-        )}
-
-        {/* Mobile Sidebar Overlay - Only shown on mobile when menu is opened */}
-        {screenWidth < 768 && !sidebarCollapsed && (
-          <>
-            {/* Overlay backdrop */}
-            <TouchableOpacity
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                zIndex: 60,
-              }}
-              onPress={() => setSidebarCollapsed(true)}
-            />
-            
-            {/* Mobile sidebar */}
-            <View
-              style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: 280,
-                zIndex: 70,
-              }}
-              className="bg-neutral-900 border-r border-neutral-700"
-            >
-              <View className="p-4">
-                <View className="flex-row items-center justify-between mb-8">
-                  <View>
-                    <Text className="text-green-500 font-bold text-lg tracking-wider">
-                      AGRI TRADE
-                    </Text>
-                    <Text className="text-neutral-500 text-xs">v1.0.0 PLATFORM</Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() => setSidebarCollapsed(true)}
-                    className="p-2"
-                  >
-                    <ChevronRight
-                      color="#9CA3AF"
-                      size={20}
-                      style={{
-                        transform: [{ rotate: '180deg' }],
-                      }}
-                    />
-                  </TouchableOpacity>
-                </View>
-
-                <View className="space-y-2">
-                  {navigationItems.map((item) => {
-                    const Icon = item.icon;
-                    return (
-                      <TouchableOpacity
-                        key={item.id}
-                        onPress={() => {
-                          console.log('Mobile nav clicked:', item.id);
-                          setActiveSection(item.id);
-                          setSidebarCollapsed(true); // Close mobile sidebar after selection
-                        }}
-                        className={`w-full flex-row items-center gap-3 p-3 rounded ${
-                          activeSection === item.id
-                            ? 'bg-green-500'
-                            : 'bg-transparent'
-                        }`}
-                      >
-                        <Icon
-                          color={activeSection === item.id ? '#ffffff' : '#9CA3AF'}
-                          size={24}
-                        />
-                        <Text
-                          className={`text-sm font-medium ${
-                            activeSection === item.id ? 'text-white' : 'text-neutral-400'
-                          }`}
-                        >
-                          {item.label}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-
-                <View className="mt-8 p-4 bg-neutral-800 border border-neutral-700 rounded">
-                  <View className="flex-row items-center gap-2 mb-2">
-                    <View className="w-2 h-2 bg-green-400 rounded-full" />
-                    <Text className="text-xs text-white">PLATFORM ONLINE</Text>
-                  </View>
-                  <View>
-                    <Text className="text-neutral-500 text-xs">UPTIME: 99.8%</Text>
-                    <Text className="text-neutral-500 text-xs">ACTIVE TRADES: 47</Text>
-                    <Text className="text-neutral-500 text-xs">MATCHES TODAY: 12</Text>
-                  </View>
-                </View>
-              </View>
-            </View>
-          </>
-        )}
-
         {/* Main Content */}
-        <View 
-          className="flex-1"
-          style={{
-            marginLeft: screenWidth >= 768 ? (sidebarCollapsed ? 64 : 280) : 0,
-          }}
-        >
+        <View className="flex-1">
           {/* Top Toolbar */}
           <View className="h-16 bg-neutral-800 border-b border-neutral-700 flex-row items-center justify-between px-6">
             <View className="flex-row items-center gap-4">
-              <TouchableOpacity
-                onPress={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="p-2"
-              >
-                <Menu color="#9CA3AF" size={20} />
-              </TouchableOpacity>
+              <Text className="text-green-500 font-bold text-lg tracking-wider">
+                AGRI TRADE
+              </Text>
             </View>
             <View className="flex-row items-center gap-4">
               {/* Dashboard Switcher Button */}
@@ -503,6 +327,20 @@ export default function DashboardMainScreen() {
                 <View className="w-2 h-2 bg-purple-500 rounded-full mr-2" />
                 <Text className="text-white">Admin Dashboard</Text>
               </TouchableOpacity>
+              
+              <TouchableOpacity
+                onPress={() => {
+                  setShowDashboardSwitcher(false);
+                  setTestRole('inspector');
+                  setActiveSection('active');
+                }}
+                className={`flex-row items-center px-3 py-2 rounded ${
+                  userRole === 'inspector' ? 'bg-neutral-800' : ''
+                }`}
+              >
+                <View className="w-2 h-2 bg-green-500 rounded-full mr-2" />
+                <Text className="text-white">Inspector Dashboard</Text>
+              </TouchableOpacity>
             </View>
           )}
 
@@ -511,7 +349,13 @@ export default function DashboardMainScreen() {
             {renderContent()}
           </View>
         </View>
-
+        
+        {/* Bottom Navigation */}
+        <BottomNavigation
+          items={navigationItems}
+          activeSection={activeSection}
+          onSectionChange={setActiveSection}
+        />
       </View>
 
       
