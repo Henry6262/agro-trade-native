@@ -4,3 +4,5 @@ export { authService } from './authService';
 export { onboardingService } from './onboardingService';
 export { orderService } from './orderService';
 export { productService } from './productService';
+export { tradeOperationService } from './tradeOperationService';
+export { negotiationService } from './negotiationService';

@@ -20,7 +20,12 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e": "jest --config ./jest.e2e.config.js --runInBand --forceExit",
+    "test:e2e:watch": "jest --config ./jest.e2e.config.js --watch",
+    "test:e2e:coverage": "jest --config ./jest.e2e.config.js --coverage",
+    "test:integration": "npm run test:e2e",
+    "test:api": "ts-node test/api/test-runner.ts",
+    "test:api:watch": "nodemon --watch test --exec ts-node test/api/test-runner.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
@@ -72,6 +77,7 @@
     "stripe": "^14.5.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^10.0.0",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/schematics": "^10.0.0",
     "@nestjs/testing": "^10.0.0",

@@ -29,7 +29,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { DashboardStackParamList } from '../../../navigation/types';
 import CommandCenterScreen from './admin/CommandCenterScreen';
 import AgentNetworkScreen from './admin/AgentNetworkScreen';
-import OperationsScreen from './admin/OperationsScreen';
+import OperationsScreen from './admin/OperationsScreenRefactored';
 import IntelligenceScreen from './shared/IntelligenceScreen';
 import SellerDashboardScreen from './seller/SellerDashboardScreen';
 import BuyerDashboardScreen from './buyer/BuyerDashboardScreen';

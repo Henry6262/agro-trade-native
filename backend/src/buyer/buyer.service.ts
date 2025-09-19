@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBuyListingDto } from './dto/create-buy-listing.dto';
-import { RequestStatus, Prisma } from '@prisma/client';
+import { RequestStatus, Prisma, TradeStatus } from '@prisma/client';
 
 @Injectable()
 export class BuyerService {
@@ -67,7 +67,11 @@ export class BuyerService {
             },
           },
           deliveryAddress: true,
-          specifications: true,
+          specifications: {
+          include: {
+            specificationType: true,
+          },
+        },
         },
       });
 
@@ -171,6 +175,49 @@ export class BuyerService {
     }
   }
 
+  // Get ALL buy listings (for admin trade operations)
+  async getAllBuyListings() {
+    // First get all active buy listings
+    const buyListings = await this.prisma.buyListing.findMany({
+      where: {
+        status: RequestStatus.ACTIVE,
+      },
+      include: {
+        product: true,
+        buyer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            company: true,
+          },
+        },
+        deliveryAddress: true,
+        specifications: {
+          include: {
+            specificationType: true,
+          }
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Get buy listing IDs that have active trade operations
+    const activeTradeOps = await this.prisma.tradeOperation.findMany({
+      where: {
+        status: TradeStatus.ACTIVE,
+      },
+      select: {
+        buyListingId: true,
+      },
+    });
+
+    const usedBuyListingIds = new Set(activeTradeOps.map(op => op.buyListingId).filter(Boolean));
+
+    // Filter out buy listings that already have active trade operations
+    return buyListings.filter(listing => !usedBuyListingIds.has(listing.id));
+  }
+
   async getBuyerListings(userId: string) {
     return this.prisma.buyListing.findMany({
       where: { buyerId: userId },
@@ -217,7 +264,11 @@ export class BuyerService {
           },
         },
         deliveryAddress: true,
-        specifications: true,
+        specifications: {
+          include: {
+            specificationType: true,
+          },
+        },
         offers: {
           include: {
             saleListing: {
@@ -373,7 +424,11 @@ export class BuyerService {
       include: {
         product: true,
         deliveryAddress: true,
-        specifications: true,
+        specifications: {
+          include: {
+            specificationType: true,
+          },
+        },
       },
     });
   }
@@ -466,7 +521,11 @@ export class BuyerService {
           },
         },
         deliveryAddress: true,
-        specifications: true,
+        specifications: {
+          include: {
+            specificationType: true,
+          },
+        },
       },
     });
   }

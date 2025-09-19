@@ -1,0 +1,588 @@
+{
+  "info": {
+    "name": "Agro-Trade Profit API",
+    "description": "API collection for testing Agro-Trade's profit-based trading intermediary endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "your-jwt-token-here",
+      "type": "string"
+    },
+    {
+      "key": "tradeOperationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "negotiationId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Trade Operations",
+      "item": [
+        {
+          "name": "Create Trade Operation",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('tradeOperationId', jsonData.id);",
+                  "    ",
+                  "    pm.test('Trade operation created', () => {",
+                  "        pm.expect(jsonData).to.have.property('id');",
+                  "        pm.expect(jsonData.status).to.equal('PENDING');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"buyListingId\": \"buy-listing-123\",\n    \"targetProfitMargin\": 7.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trade-operations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trade-operations"]
+            }
+          }
+        },
+        {
+          "name": "Find Matching Sellers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trade-operations/{{tradeOperationId}}/find-sellers?maxDistance=100&minQuantity=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trade-operations", "{{tradeOperationId}}", "find-sellers"],
+              "query": [
+                {
+                  "key": "maxDistance",
+                  "value": "100"
+                },
+                {
+                  "key": "minQuantity",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Select Sellers",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"sellers\": [\n        {\n            \"sellerId\": \"seller-001\",\n            \"requestedQuantity\": 50\n        },\n        {\n            \"sellerId\": \"seller-002\",\n            \"requestedQuantity\": 50\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trade-operations/{{tradeOperationId}}/select-sellers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trade-operations", "{{tradeOperationId}}", "select-sellers"]
+            }
+          }
+        },
+        {
+          "name": "Optimize Transport",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"algorithm\": \"TSP_NEAREST\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/trade-operations/{{tradeOperationId}}/optimize-transport",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trade-operations", "{{tradeOperationId}}", "optimize-transport"]
+            }
+          }
+        },
+        {
+          "name": "List Trade Operations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/trade-operations?status=PENDING&sortBy=profitMargin&order=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "trade-operations"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "PENDING"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "profitMargin"
+                },
+                {
+                  "key": "order",
+                  "value": "desc"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profit Calculations",
+      "item": [
+        {
+          "name": "Calculate Profit",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Profit calculation successful', () => {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('profit');",
+                  "    pm.expect(jsonData.profit).to.have.property('profitMargin');",
+                  "    ",
+                  "    // Check minimum margin",
+                  "    const margin = jsonData.profit.profitMargin;",
+                  "    pm.test('Profit margin >= 5%', () => {",
+                  "        pm.expect(margin).to.be.at.least(5);",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/profit/{{tradeOperationId}}/calculate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profit", "{{tradeOperationId}}", "calculate"]
+            }
+          }
+        },
+        {
+          "name": "Calculate Profit Impact",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"newPrice\": 375,\n    \"quantity\": 100,\n    \"offerType\": \"BUYER\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profit/{{tradeOperationId}}/impact",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profit", "{{tradeOperationId}}", "impact"]
+            }
+          }
+        },
+        {
+          "name": "Optimize Profit",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"targetMargin\": 8,\n    \"constraints\": {\n        \"maxBuyerPrice\": 380,\n        \"minSellerPrice\": 340,\n        \"maxTransportCost\": 15\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profit/{{tradeOperationId}}/optimize",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profit", "{{tradeOperationId}}", "optimize"]
+            }
+          }
+        },
+        {
+          "name": "Validate Margins",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"operations\": [\n        {\n            \"tradeOperationId\": \"{{tradeOperationId}}\",\n            \"sellingPrice\": 375,\n            \"purchasePrice\": 350,\n            \"transportCost\": 10,\n            \"quantity\": 100\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profit/validate-margins",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profit", "validate-margins"]
+            }
+          }
+        },
+        {
+          "name": "Get Profit Benchmarks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/profit/benchmarks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profit", "benchmarks"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transport",
+      "item": [
+        {
+          "name": "Calculate Transport Cost",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"origin\": {\n        \"lat\": 42.6977,\n        \"lng\": 23.3219\n    },\n    \"destination\": {\n        \"lat\": 42.1354,\n        \"lng\": 24.7453\n    },\n    \"quantity\": 100,\n    \"vehicleType\": \"TRUCK\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transport/calculate-cost",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transport", "calculate-cost"]
+            }
+          }
+        },
+        {
+          "name": "Optimize Route",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"origin\": {\n        \"lat\": 42.6977,\n        \"lng\": 23.3219\n    },\n    \"destinations\": [\n        {\n            \"lat\": 42.1354,\n            \"lng\": 24.7453,\n            \"quantity\": 50\n        },\n        {\n            \"lat\": 43.2141,\n            \"lng\": 27.9147,\n            \"quantity\": 50\n        }\n    ],\n    \"algorithm\": \"TSP_2OPT\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transport/optimize-route",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transport", "optimize-route"]
+            }
+          }
+        },
+        {
+          "name": "Get Transport Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/transport/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transport", "settings"]
+            }
+          }
+        },
+        {
+          "name": "Update Transport Settings",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"baseCostPerKm\": 2.5,\n    \"fuelSurchargePercent\": 15,\n    \"loadingTimeMinutes\": 45,\n    \"unloadingTimeMinutes\": 30,\n    \"averageSpeedKmh\": 60\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/transport/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "transport", "settings"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Negotiations",
+      "item": [
+        {
+          "name": "Submit Buyer Offer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('negotiationId', jsonData.negotiationId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tradeOperationId\": \"{{tradeOperationId}}\",\n    \"price\": 375,\n    \"quantity\": 100,\n    \"terms\": \"Payment on delivery, quality inspection required\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/negotiations/buyer-offer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "negotiations", "buyer-offer"]
+            }
+          }
+        },
+        {
+          "name": "Submit Seller Offer",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tradeSellerId\": \"trade-seller-001\",\n    \"price\": 345,\n    \"quantity\": 50,\n    \"response\": \"COUNTER\",\n    \"responseNote\": \"Can accept 350 per unit for immediate payment\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/negotiations/seller-offer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "negotiations", "seller-offer"]
+            }
+          }
+        },
+        {
+          "name": "Bulk Negotiate",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tradeOperationId\": \"{{tradeOperationId}}\",\n    \"buyerOffer\": {\n        \"price\": 375,\n        \"quantity\": 100\n    },\n    \"sellerOffers\": [\n        {\n            \"tradeSellerId\": \"seller-001\",\n            \"price\": 345,\n            \"quantity\": 50\n        },\n        {\n            \"tradeSellerId\": \"seller-002\",\n            \"price\": 348,\n            \"quantity\": 50\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/negotiations/bulk-negotiate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "negotiations", "bulk-negotiate"]
+            }
+          }
+        },
+        {
+          "name": "Get Price Suggestions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/negotiations/trade/{{tradeOperationId}}/suggest-prices",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "negotiations", "trade", "{{tradeOperationId}}", "suggest-prices"]
+            }
+          }
+        },
+        {
+          "name": "Track Profit Impact",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/negotiations/{{negotiationId}}/profit-impact",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "negotiations", "{{negotiationId}}", "profit-impact"]
+            }
+          }
+        },
+        {
+          "name": "Get Negotiation Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/negotiations/trade/{{tradeOperationId}}/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "negotiations", "trade", "{{tradeOperationId}}", "summary"]
+            }
+          }
+        },
+        {
+          "name": "Validate Negotiation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"newPrice\": 372\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/negotiations/{{negotiationId}}/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "negotiations", "{{negotiationId}}", "validate"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Scenarios",
+      "item": [
+        {
+          "name": "Create Scenario",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Best Case Scenario\",\n    \"assumptions\": {\n        \"buyerPrice\": 380,\n        \"sellerPrices\": [340, 342],\n        \"transportCost\": 10\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/scenarios/{{tradeOperationId}}/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scenarios", "{{tradeOperationId}}", "create"]
+            }
+          }
+        },
+        {
+          "name": "Compare Scenarios",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"scenarios\": [\n        {\n            \"name\": \"Conservative\",\n            \"buyerPrice\": 370,\n            \"avgSellerPrice\": 350,\n            \"transportCost\": 12\n        },\n        {\n            \"name\": \"Optimistic\",\n            \"buyerPrice\": 380,\n            \"avgSellerPrice\": 345,\n            \"transportCost\": 10\n        },\n        {\n            \"name\": \"Realistic\",\n            \"buyerPrice\": 375,\n            \"avgSellerPrice\": 348,\n            \"transportCost\": 11\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/scenarios/{{tradeOperationId}}/compare",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scenarios", "{{tradeOperationId}}", "compare"]
+            }
+          }
+        },
+        {
+          "name": "Monte Carlo Simulation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"iterations\": 1000,\n    \"priceRanges\": {\n        \"buyer\": {\n            \"min\": 365,\n            \"max\": 385\n        },\n        \"seller\": {\n            \"min\": 340,\n            \"max\": 355\n        },\n        \"transport\": {\n            \"min\": 8,\n            \"max\": 15\n        }\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/scenarios/{{tradeOperationId}}/monte-carlo",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scenarios", "{{tradeOperationId}}", "monte-carlo"]
+            }
+          }
+        },
+        {
+          "name": "Get Risk Assessment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/scenarios/{{tradeOperationId}}/risk-assessment",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scenarios", "{{tradeOperationId}}", "risk-assessment"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

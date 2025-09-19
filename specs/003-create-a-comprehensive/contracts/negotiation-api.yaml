@@ -1,0 +1,208 @@
+openapi: 3.0.0
+info:
+  title: Offer Negotiation API
+  description: Endpoints for managing offer negotiations
+  version: 1.0.0
+
+paths:
+  /api/negotiations/create:
+    post:
+      summary: Create new offer negotiation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tradeOperationId
+                - sellerId
+                - saleListingId
+                - offerPrice
+                - quantity
+              properties:
+                tradeOperationId:
+                  type: string
+                sellerId:
+                  type: string
+                saleListingId:
+                  type: string
+                offerPrice:
+                  type: number
+                  minimum: 0
+                quantity:
+                  type: number
+                  minimum: 0
+                terms:
+                  type: string
+                  maxLength: 1000
+                message:
+                  type: string
+                  maxLength: 1000
+                expiresInHours:
+                  type: integer
+                  minimum: 1
+                  maximum: 168
+                  default: 48
+      responses:
+        '201':
+          description: Negotiation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferNegotiation'
+
+  /api/negotiations/{id}/respond:
+    post:
+      summary: Respond to offer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - response
+              properties:
+                response:
+                  type: string
+                  enum: [ACCEPTED, REJECTED, COUNTERED]
+                counterPrice:
+                  type: number
+                  description: Required if response is COUNTERED
+                counterQuantity:
+                  type: number
+                  description: Required if response is COUNTERED
+                message:
+                  type: string
+                  maxLength: 1000
+      responses:
+        '200':
+          description: Response recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfferRound'
+
+  /api/negotiations/trade/{tradeOperationId}:
+    get:
+      summary: Get all negotiations for a trade operation
+      parameters:
+        - name: tradeOperationId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, AGREED, FAILED, EXPIRED]
+      responses:
+        '200':
+          description: List of negotiations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negotiations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OfferNegotiation'
+
+  /api/negotiations/{id}/history:
+    get:
+      summary: Get negotiation history
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Negotiation with full history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  negotiation:
+                    $ref: '#/components/schemas/OfferNegotiation'
+                  rounds:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OfferRound'
+
+components:
+  schemas:
+    OfferNegotiation:
+      type: object
+      properties:
+        id:
+          type: string
+        tradeOperationId:
+          type: string
+        buyerId:
+          type: string
+        sellerId:
+          type: string
+        sellerName:
+          type: string
+        product:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, AGREED, FAILED, EXPIRED]
+        initialOffer:
+          type: number
+        currentOffer:
+          type: number
+        finalPrice:
+          type: number
+          nullable: true
+        quantity:
+          type: number
+        expiresAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    OfferRound:
+      type: object
+      properties:
+        id:
+          type: string
+        negotiationId:
+          type: string
+        roundNumber:
+          type: integer
+        offeredBy:
+          type: string
+          enum: [BUYER, SELLER, PLATFORM]
+        price:
+          type: number
+        quantity:
+          type: number
+        message:
+          type: string
+        response:
+          type: string
+          enum: [ACCEPTED, REJECTED, COUNTERED]
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        respondedAt:
+          type: string
+          format: date-time
+          nullable: true

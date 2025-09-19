@@ -11,13 +11,15 @@ Agro-Trade is a React Native agricultural trading platform connecting buyers, se
 - Maps: Google Maps via react-native-maps
 
 ## Active Development
-Currently implementing: Inspector/Verifier Profile (Branch: 002-inspector-verifier-profile)
-- Real-time location tracking for field inspectors
-- Verification job management with priority system
-- Map integration with custom markers and routes
-- Seller listing lock after verification
+Currently implementing: Trade Operation Management Hub (Branch: 004-trade-operation-management)
+- Centralized Active Operations tab for all trade operations
+- Negotiation management with counter-offer handling
+- Request-based updates (no polling/WebSocket)
+- 48-hour offer expiration with visual indicators
+- Potential sellers list with one-click offer sending
+- Reuses existing OfferModal and drawer patterns
 
-Previous: Google Maps for transporter offers (Branch: 001-add-google-maps)
+Previous: Trade Operation Creation Flow (Branch: 003-create-a-comprehensive)
 
 ## Development Rules
 
@@ -134,10 +136,20 @@ interface ApiResponse<T> {
 
 ## Remember
 - Mobile-first always
-- Four actors: Buyer, Seller, Transporter, Inspector
+- Four actors: Buyer, Seller, Transporter, Inspector, Admin
 - Mock data first, real API second
 - Test-first for new features
 - Reuse existing components
+
+## Trade Operation Patterns
+- Creation: Trade operation created in Step 1 when setting margin
+- Negotiations: Managed in centralized Active Operations tab
+- Updates: Request-based (no polling), refresh on navigation
+- Offer expiry: 48 hours automatic with visual countdown
+- Counter-offers: Inline display with Accept/Reject/Counter actions
+- Status indicators: Pending (blue), Accepted (green), Countered (orange), Expired (gray)
+- Progress: Shows quantity secured vs needed as percentage
+- Commission: 2.5% seller, 1.5% buyer
 
 ## Inspector Feature Patterns
 - Location tracking: expo-location with 10s intervals
