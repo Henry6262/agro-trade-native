@@ -188,7 +188,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       <View className="flex-1 bg-black/50 justify-center items-center">
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          className="w-full max-h-[90%] px-4"
+          className="w-full h-[95%] px-4"
         >
           <View className="bg-white rounded-2xl h-full w-full">
             {/* Header */}

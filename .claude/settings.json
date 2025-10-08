@@ -1,38 +1,6 @@
-{
-    "$schema": "https://json.schemastore.org/claude-code-settings.json",
-    "permissions": {
-      "allow": [
-        "mcp__ide__getDiagnostics",
-        "Bash(mkdir:*)",
-        "Bash(npm run migration:run:*)",
-        "Bash(npm run load:wallets:*)",
-        "Bash(npm run test:grpc:*)",
-        "Bash(npm run start:dev:*)",
-        "Bash(timeout 30 npm run start:dev)",
-        "Bash(npm run dev:*)",
-        "Bash",
-        "Read",
-        "Edit",
-        "Write",
-        "WebFetch",
-        "Grep",
-        "Glob",
-        "LS",
-        "MultiEdit",
-        "NotebookRead",
-        "NotebookEdit",
-        "TodoRead",
-        "TodoWrite",
-        "WebSearch",
-        "Bash(git remote add:*)",
-        "Bash(npm install:*)",
-        "Bash(npm run update-context:*)",
-        "Bash(npm run validate:*)",
-        "Bash(git commit:*)",
-        "Bash(git reset:*)",
-        "Bash(java:*)",
-        "mcp__ide__executeCode"
-      ],
-      "deny": []
-    }
-  }
+id,name,base_hacker,base_stealth,base_recon,passive,rare_perk,rarity_common,rarity_uncommon,rarity_rare,rarity_epic
+netrunner,Netrunner,40,10,10,"+10% weight to Access Breach.","First Firewall Trigger in a mission has 50% reduced penalty.",55,30,12,3
+social_engineer,Social Engineer,20,35,15,"+10% weight to Silent Exit; -1 Trace on successful mission.","Selling data grants +5% extra Credits.",55,30,12,3
+recon_osint,Recon (OSINT),10,15,40,"Reveal 1 obstacle before locking loadout.","+10% weight to Loot Cache.",55,30,12,3
+access_broker,Access Broker,15,30,20,"Mission fee -10%.","First Firewall Trigger becomes a soft fail (half Trace, half durability loss).",55,30,12,3
+forger_keysmith,Forger (Keysmith),30,15,25,"25% chance to upgrade Low→Medium data on success.","+1 flat weight to Critical Discovery if Trace < 20.",55,30,12,3

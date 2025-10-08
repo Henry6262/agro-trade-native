@@ -182,7 +182,7 @@ export class TradeOperationService {
         productId: matchParams.productId,
         status: 'ACTIVE',
         quantity: { gt: 0 },
-        askingPrice: { lte: matchParams.maxPricePerUnit * 0.85 }, // Max 85% of buyer price for profit
+        askingPrice: { lte: matchParams.maxPricePerUnit * 0.95 }, // Max 95% of buyer price for profit margin
       },
       include: {
         seller: {
@@ -379,6 +379,61 @@ export class TradeOperationService {
         profitMargin: profitCalc.profit.profitMargin,
       },
     });
+  }
+
+  /**
+   * Update the phase of a trade operation
+   */
+  async updateTradePhase(tradeOperationId: string, newPhase: TradePhase): Promise<TradeOperation> {
+    // Validate the trade operation exists
+    const existingTrade = await this.prisma.tradeOperation.findUnique({
+      where: { id: tradeOperationId },
+    });
+
+    if (!existingTrade) {
+      throw new NotFoundException('Trade operation not found');
+    }
+
+    // Validate phase transition is allowed
+    const validTransitions = this.getValidPhaseTransitions(existingTrade.phase);
+    if (!validTransitions.includes(newPhase)) {
+      throw new BadRequestException(
+        `Invalid phase transition from ${existingTrade.phase} to ${newPhase}. Valid transitions: ${validTransitions.join(', ')}`,
+      );
+    }
+
+    // Update the phase
+    const updatedTrade = await this.prisma.tradeOperation.update({
+      where: { id: tradeOperationId },
+      data: {
+        phase: newPhase,
+        updatedAt: new Date(),
+      },
+    });
+
+    this.logger.log(`Trade operation ${tradeOperationId} phase updated from ${existingTrade.phase} to ${newPhase}`);
+    
+    return updatedTrade;
+  }
+
+  /**
+   * Get valid phase transitions from current phase
+   */
+  private getValidPhaseTransitions(currentPhase: TradePhase): TradePhase[] {
+    const transitions: Record<TradePhase, TradePhase[]> = {
+      [TradePhase.INITIATION]: [TradePhase.SELLER_MATCHING, TradePhase.CANCELLED],
+      [TradePhase.SELLER_MATCHING]: [TradePhase.SELLER_NEGOTIATION, TradePhase.CANCELLED],
+      [TradePhase.SELLER_NEGOTIATION]: [TradePhase.INSPECTION_PENDING, TradePhase.TRANSPORT_MATCHING, TradePhase.CANCELLED],
+      [TradePhase.INSPECTION_PENDING]: [TradePhase.TRANSPORT_MATCHING, TradePhase.CANCELLED],
+      [TradePhase.TRANSPORT_MATCHING]: [TradePhase.TRANSPORT_BIDDING, TradePhase.IN_TRANSIT, TradePhase.CANCELLED],
+      [TradePhase.TRANSPORT_BIDDING]: [TradePhase.IN_TRANSIT, TradePhase.CANCELLED],
+      [TradePhase.IN_TRANSIT]: [TradePhase.DELIVERED, TradePhase.CANCELLED],
+      [TradePhase.DELIVERED]: [TradePhase.COMPLETED, TradePhase.CANCELLED],
+      [TradePhase.COMPLETED]: [], // Final phase
+      [TradePhase.CANCELLED]: [], // Final phase
+    };
+
+    return transitions[currentPhase] || [];
   }
 
   /**
@@ -777,5 +832,66 @@ export class TradeOperationService {
       successRate: trades.length > 0 ? (completed.length / trades.length) * 100 : 0,
       marginDistribution,
     };
+  }
+
+  /**
+   * Request inspections for selected sellers
+   */
+  async requestInspections(
+    tradeOperationId: string,
+    sellerIds: string[],
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' = 'MEDIUM',
+  ): Promise<any[]> {
+    const trade = await this.prisma.tradeOperation.findUnique({
+      where: { id: tradeOperationId },
+      include: {
+        sellers: {
+          where: {
+            sellerId: { in: sellerIds },
+          },
+          include: {
+            saleListing: true,
+          },
+        },
+      },
+    });
+
+    if (!trade) {
+      throw new NotFoundException('Trade operation not found');
+    }
+
+    const inspectionRequests = [];
+
+    for (const seller of trade.sellers) {
+      if (!seller.saleListingId) continue;
+
+      // Create inspection request
+      const inspection = await this.prisma.inspectionRequest.create({
+        data: {
+          tradeOperationId,
+          saleListingId: seller.saleListingId,
+          priority: priority as any,
+          requestedDate: new Date(),
+          status: 'PENDING',
+          latitude: 42.6977, // Default or from seller location
+          longitude: 23.3219,
+          address: 'To be determined',
+          photos: [],
+        },
+        include: {
+          saleListing: {
+            include: {
+              seller: true,
+              product: true,
+            },
+          },
+        },
+      });
+
+      inspectionRequests.push(inspection);
+      this.logger.log(`Created inspection request ${inspection.id} for seller ${seller.sellerId}`);
+    }
+
+    return inspectionRequests;
   }
 }

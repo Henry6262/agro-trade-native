@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+  Alert,
 } from 'react-native';
 import {
   MapPin,
@@ -22,6 +25,8 @@ import {
 
 import { Card, CardContent } from '../../../../shared/components/Card';
 import { Badge } from '../../../../shared/components/Badge';
+import buyerService from '../../../../services/buyerService';
+import { format } from 'date-fns';
 
 interface BuyerOrdersTabProps {
   id?: string;
@@ -29,54 +34,110 @@ interface BuyerOrdersTabProps {
 
 export default function BuyerOrdersTab({ id }: BuyerOrdersTabProps = {}) {
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [tradeOperations, setTradeOperations] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [statistics, setStatistics] = useState<any>(null);
 
-  const buyerStats = {
-    totalSpent: 245600,
-    monthlySpent: 42300,
-    completedOrders: 32,
-    averagePerOrder: 7675,
-    topProduct: 'Premium Wheat',
-    savingsRate: 15.2,
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [operations, stats] = await Promise.all([
+        buyerService.getMyTradeOperations(),
+        buyerService.getMyStatistics(),
+      ]);
+      setTradeOperations(operations);
+      setStatistics(stats);
+    } catch (error) {
+      console.error('Failed to load buyer data:', error);
+      Alert.alert('Error', 'Failed to load your orders');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const activeOrders = [
-    {
-      id: 'O001',
-      product: 'Premium Wheat',
-      quantity: 35,
-      maxPricePerTon: 290,
-      seller: 'GreenFields Farm',
-      sellerLocation: 'Iowa, USA',
-      sellerFlag: '🇺🇸',
-      transporter: 'FastHaul Logistics',
-      transporterTrucks: 2,
-      licensePlate: 'TRK-4521',
-      status: 'In Transit',
-      deliveryDate: '2025-01-28',
-      estimatedArrival: '2025-01-27 14:00',
-      totalCost: 10150,
-      currentStage: 2,
-      qualityRequirements: ['Organic', 'Non-GMO', 'Protein 15%+'],
-    },
-    {
-      id: 'O002',
-      product: 'Soybeans',
-      quantity: 50,
-      maxPricePerTon: 360,
-      seller: 'Prairie Harvest Co',
-      sellerLocation: 'Illinois, USA',
-      sellerFlag: '🇺🇸',
-      transporter: 'AgriTransport',
-      transporterTrucks: 3,
-      licensePlate: 'AGR-7834',
-      status: 'Scheduled',
-      deliveryDate: '2025-02-02',
-      estimatedArrival: null,
-      totalCost: 18000,
-      currentStage: 0,
-      qualityRequirements: ['Organic', 'Protein 18%'],
-    },
-  ];
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  };
+
+  const buyerStats = statistics || {
+    totalSpent: 0,
+    monthlySpent: 0,
+    completedOrders: 0,
+    averagePerOrder: 0,
+    topProduct: 'N/A',
+    savingsRate: 0,
+  };
+
+  // Map trade operations to the display format
+  const activeOrders = tradeOperations.map((op) => ({
+    id: op.id,
+    operationNumber: op.operationNumber,
+    product: op.buyListing?.product?.name || 'Unknown Product',
+    quantity: op.targetQuantity,
+    maxPricePerTon: op.buyListing?.maxPricePerUnit || 0,
+    phase: op.phase,
+    status: getPhaseStatus(op.phase),
+    totalCost: op.targetQuantity * (op.buyListing?.maxPricePerUnit || 0),
+    currentStage: getPhaseStage(op.phase),
+    qualityRequirements: op.buyListing?.qualityRequirements || [],
+    securedQuantity: op.securedQuantity,
+    estimatedProfit: op.estimatedProfit,
+    profitMargin: op.profitMargin,
+    sellers: op.sellers || [],
+    transportRequest: op.transportRequest,
+    transportJob: op.transportJob,
+    createdAt: op.createdAt,
+    updatedAt: op.updatedAt,
+  }));
+
+  function getPhaseStatus(phase: string): string {
+    switch (phase) {
+      case 'INITIATION':
+        return 'Pending';
+      case 'SELLER_NEGOTIATION':
+        return 'Negotiating';
+      case 'TRANSPORT_MATCHING':
+        return 'Finding Transport';
+      case 'IN_TRANSIT':
+        return 'In Transit';
+      case 'DELIVERY':
+        return 'Delivering';
+      case 'PAYMENT':
+        return 'Payment';
+      case 'COMPLETED':
+        return 'Delivered';
+      default:
+        return phase;
+    }
+  }
+
+  function getPhaseStage(phase: string): number {
+    switch (phase) {
+      case 'INITIATION':
+        return 0;
+      case 'SELLER_NEGOTIATION':
+        return 0;
+      case 'TRANSPORT_MATCHING':
+        return 1;
+      case 'IN_TRANSIT':
+        return 2;
+      case 'DELIVERY':
+        return 3;
+      case 'PAYMENT':
+        return 3;
+      case 'COMPLETED':
+        return 4;
+      default:
+        return 0;
+    }
+  }
 
   const incomingOffers = [
     {
@@ -213,11 +274,27 @@ export default function BuyerOrdersTab({ id }: BuyerOrdersTabProps = {}) {
     );
   };
 
+  if (loading && !refreshing) {
+    return (
+      <View className="flex-1 bg-black items-center justify-center">
+        <ActivityIndicator size="large" color="#60A5FA" />
+        <Text className="text-gray-400 mt-4">Loading your orders...</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView 
       className="flex-1 bg-black"
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior="automatic"
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          tintColor="#60A5FA"
+        />
+      }
     >
       <View className="p-6 space-y-6">
         <View>
@@ -353,24 +430,42 @@ export default function BuyerOrdersTab({ id }: BuyerOrdersTabProps = {}) {
 
           {/* Active Orders - Now full width since incoming offers are hidden */}
           <View className="flex-1 space-y-4">
-            <Text className="text-xl font-semibold text-white">Active Orders</Text>
-            {activeOrders.map((order) => (
+            <View className="flex-row justify-between items-center">
+              <Text className="text-xl font-semibold text-white">Active Trade Operations</Text>
+              <Badge variant="outline" className="text-xs border-blue-400 text-blue-300">
+                {activeOrders.length} Active
+              </Badge>
+            </View>
+            
+            {activeOrders.length === 0 ? (
+              <Card className="bg-neutral-900 border-neutral-700">
+                <CardContent className="p-12 text-center">
+                  <Package color="#6B7280" size={48} style={{ alignSelf: 'center', marginBottom: 12 }} />
+                  <Text className="text-gray-400 text-lg mb-2">No Active Operations</Text>
+                  <Text className="text-gray-500 text-sm">Your trade operations will appear here</Text>
+                </CardContent>
+              </Card>
+            ) : (
+              activeOrders.map((order) => (
               <Card key={order.id} className="bg-neutral-900 border-neutral-700">
                 <CardContent className="p-6">
                   <View className="flex-row justify-between items-start mb-6">
-                    <View>
-                      <Text className="text-lg font-semibold text-white">{order.product}</Text>
+                    <View className="flex-1">
+                      <View className="flex-row items-center gap-2 mb-1">
+                        <Text className="text-lg font-semibold text-white">{order.product}</Text>
+                        <Text className="text-gray-500 text-sm">#{order.operationNumber}</Text>
+                      </View>
                       <View className="flex-row items-center gap-4 mt-2">
                         <View className="flex-row items-center gap-1 bg-neutral-800/50 px-2 py-1 rounded">
                           <Weight color="#60a5fa" size={16} />
                           <Text className="text-white font-medium text-sm">{order.quantity} tons</Text>
                         </View>
                         <View className="flex-row items-center gap-1 bg-neutral-800/50 px-2 py-1 rounded">
-                          <DollarSign color="#60a5fa" size={16} />
-                          <Text className="text-white font-medium text-sm">${order.maxPricePerTon}/ton max</Text>
+                          <Package color="#34D399" size={16} />
+                          <Text className="text-green-400 font-medium text-sm">{order.securedQuantity || 0} secured</Text>
                         </View>
                         <View className="flex-row items-center gap-1 bg-blue-500/20 px-2 py-1 rounded">
-                          <Text className="text-blue-300 text-xs">Total:</Text>
+                          <Text className="text-blue-300 text-xs">Budget:</Text>
                           <Text className="text-blue-400 font-bold">${order.totalCost.toLocaleString()}</Text>
                         </View>
                       </View>
@@ -387,26 +482,41 @@ export default function BuyerOrdersTab({ id }: BuyerOrdersTabProps = {}) {
                   {renderStageIndicator(order.currentStage)}
 
                   <View className="space-y-2">
-                    <View>
-                      <Text className="text-sm text-neutral-400">Seller:</Text>
-                      <Text className="text-white font-medium">{order.seller}</Text>
-                      <View className="flex-row items-center gap-1">
-                        <MapPin color="#9CA3AF" size={12} />
-                        <Text className="text-neutral-400 text-sm">{order.sellerFlag} {order.sellerLocation}</Text>
+                    {order.sellers && order.sellers.length > 0 && (
+                      <View>
+                        <Text className="text-sm text-neutral-400">Sellers ({order.sellers.length}):</Text>
+                        {order.sellers.slice(0, 2).map((seller: any, index: number) => (
+                          <View key={index} className="mt-1">
+                            <Text className="text-white font-medium">{seller.seller?.name || 'Pending'}</Text>
+                            {seller.agreedQuantity && (
+                              <Text className="text-green-400 text-sm">{seller.agreedQuantity} tons confirmed</Text>
+                            )}
+                          </View>
+                        ))}
                       </View>
-                    </View>
-                    <View>
-                      <Text className="text-sm text-neutral-400">Transporter:</Text>
-                      <Text className="text-white font-medium">{order.transporter}</Text>
-                      <View className="flex-row items-center gap-2 text-neutral-400">
-                        <Truck color="#9CA3AF" size={12} />
-                        <Text className="text-neutral-400 text-sm">{order.transporterTrucks} trucks</Text>
-                        <View className="flex-row items-center gap-1">
-                          <Star color="#eab308" size={16} />
-                          <Text className="text-neutral-400 text-sm">4.8</Text>
+                    )}
+                    
+                    {order.transportJob ? (
+                      <View>
+                        <Text className="text-sm text-neutral-400">Transport:</Text>
+                        <Text className="text-white font-medium">{order.transportJob.transporter?.name || 'Assigned'}</Text>
+                        <View className="flex-row items-center gap-2 text-neutral-400">
+                          <Truck color="#9CA3AF" size={12} />
+                          <Text className="text-neutral-400 text-sm">Job #{order.transportJob.jobNumber}</Text>
                         </View>
                       </View>
-                    </View>
+                    ) : order.transportRequest ? (
+                      <View>
+                        <Text className="text-sm text-neutral-400">Transport:</Text>
+                        <Text className="text-yellow-400 font-medium">Finding transporters...</Text>
+                        <Text className="text-neutral-400 text-sm">{order.transportRequest.bidsCount || 0} bids received</Text>
+                      </View>
+                    ) : (
+                      <View>
+                        <Text className="text-sm text-neutral-400">Transport:</Text>
+                        <Text className="text-neutral-500">Not yet arranged</Text>
+                      </View>
+                    )}
                   </View>
 
                   <View className="mt-4 flex justify-center">
@@ -438,15 +548,21 @@ export default function BuyerOrdersTab({ id }: BuyerOrdersTabProps = {}) {
                         <Text className="text-sm font-medium text-white">Order Summary</Text>
                         <View className="text-sm space-y-1 mt-2">
                           <View className="flex-row justify-between">
-                            <Text className="text-neutral-400">Delivery Date:</Text>
-                            <Text className="text-white">{new Date(order.deliveryDate).toLocaleDateString()}</Text>
+                            <Text className="text-neutral-400">Created:</Text>
+                            <Text className="text-white">{format(new Date(order.createdAt), 'MMM dd, yyyy')}</Text>
                           </View>
                           <View className="flex-row justify-between">
-                            <Text className="text-neutral-400">License Plate:</Text>
-                            <Text className="text-white font-mono">{order.licensePlate}</Text>
+                            <Text className="text-neutral-400">Progress:</Text>
+                            <Text className="text-white">{Math.round((order.securedQuantity / order.quantity) * 100)}%</Text>
                           </View>
+                          {order.estimatedProfit && (
+                            <View className="flex-row justify-between">
+                              <Text className="text-neutral-400">Est. Savings:</Text>
+                              <Text className="text-green-400">€{order.estimatedProfit.toLocaleString()}</Text>
+                            </View>
+                          )}
                           <View className="flex-row justify-between font-medium">
-                            <Text className="text-neutral-400">Total Cost:</Text>
+                            <Text className="text-neutral-400">Budget:</Text>
                             <Text className="text-blue-400">${order.totalCost.toLocaleString()}</Text>
                           </View>
                         </View>
@@ -455,7 +571,8 @@ export default function BuyerOrdersTab({ id }: BuyerOrdersTabProps = {}) {
                   )}
                 </CardContent>
               </Card>
-            ))}
+            )))
+            }
           </View>
         </View>
       </View>

@@ -342,6 +342,16 @@ export const ActiveOperationsTab: React.FC<Props> = ({
           )}
         </View>
 
+        {/* Verification Status */}
+        {operation.sellers && operation.sellers.length > 0 && (
+          <View className="flex-row items-center mb-2">
+            <CheckCircle size={14} color="#16A34A" />
+            <Text className="text-xs text-gray-600 ml-1">
+              {operation.sellers.filter(s => s.isVerified).length}/{operation.sellers.length} sellers verified
+            </Text>
+          </View>
+        )}
+
         {/* Sellers without negotiations */}
         {operation.sellers?.filter(s => !operation.negotiations?.find(n => n.tradeSellerId === s.id))?.length > 0 && (
           <View className="bg-blue-50 rounded-lg p-2 mb-2">

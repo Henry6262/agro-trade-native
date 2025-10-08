@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { setupSwagger } from './swagger';
 
 let cachedApp: NestExpressApplication;
 
@@ -73,6 +74,10 @@ async function bootstrap() {
     
     // Global prefix
     app.setGlobalPrefix('api');
+
+    if (process.env.ENABLE_SWAGGER !== 'false') {
+      setupSwagger(app);
+    }
     
     await app.init();
     cachedApp = app;

@@ -1,1 +1,0 @@
-ConfigError: The expected package.json path: /Users/henry/agro-trade/package.json does not exist

@@ -72,9 +72,22 @@ export class FleetVehicleDto {
 }
 
 export class TransporterOnboardingDto {
+  // Company association options
   @IsOptional()
   @IsString()
-  companyName?: string;
+  transportCompanyId?: string; // Join existing company
+
+  @IsOptional()
+  @IsString()
+  companyInviteCode?: string; // Join via invite code
+
+  @IsOptional()
+  @IsBoolean()
+  isIndependent?: boolean; // Register as independent transporter
+
+  @IsOptional()
+  @IsString()
+  companyName?: string; // For independent transporters
 
   @IsOptional()
   @IsString()

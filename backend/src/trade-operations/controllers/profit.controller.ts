@@ -28,6 +28,11 @@ import {
   ProfitCalculationResponseDto,
   ProfitEstimationResponseDto,
   ProfitComparisonDto,
+  ProfitHistoryEntryDto,
+  ProfitScenarioComparisonDto,
+  ProfitImpactResponseDto,
+  ProfitValidationDto,
+  SellerPriceDto,
 } from '../dto/profit-calculation.dto';
 
 @ApiTags('Profit Calculations')
@@ -125,24 +130,25 @@ export class ProfitController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'List of profit estimations',
-    type: 'array',
+    type: ProfitHistoryEntryDto,
+    isArray: true,
   })
   async getProfitHistory(
     @Param('id') tradeOperationId: string,
-  ): Promise<any[]> {
+  ): Promise<ProfitHistoryEntryDto[]> {
     const history = await this.profitCalculationService.trackProfitHistory(
       tradeOperationId,
     );
 
-    return history.map(estimation => ({
+    return history.map((estimation) => ({
       id: estimation.id,
-      buyerPrice: estimation.proposedBuyerPrice?.toNumber(),
-      sellerPrices: estimation.proposedSellerPrices,
-      estimatedRevenue: estimation.estimatedRevenue?.toNumber(),
-      estimatedCosts: estimation.estimatedPurchaseCost?.toNumber(),
-      estimatedProfit: estimation.estimatedProfit?.toNumber(),
+      buyerPrice: estimation.proposedBuyerPrice?.toNumber() ?? 0,
+      sellerPrices: this.parseSellerPrices(estimation.proposedSellerPrices),
+      estimatedRevenue: estimation.estimatedRevenue?.toNumber() ?? 0,
+      estimatedCosts: estimation.estimatedPurchaseCost?.toNumber() ?? 0,
+      estimatedProfit: estimation.estimatedProfit?.toNumber() ?? 0,
       profitMargin: estimation.profitMargin,
-      createdBy: estimation.createdBy,
+      createdBy: estimation.createdBy || undefined,
       createdAt: estimation.createdAt,
     }));
   }
@@ -211,10 +217,11 @@ export class ProfitController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Scenario comparison results',
+    type: ProfitScenarioComparisonDto,
   })
   async compareScenarios(
     @Body() scenarios: ProfitEstimationResponseDto[],
-  ): Promise<any> {
+  ): Promise<ProfitScenarioComparisonDto> {
     const comparison = this.profitCalculationService.compareScenarios(scenarios);
 
     return {
@@ -231,6 +238,7 @@ export class ProfitController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Profit impact analysis',
+    type: ProfitImpactResponseDto,
   })
   async calculateOfferImpact(
     @Param('id') tradeOperationId: string,
@@ -238,7 +246,7 @@ export class ProfitController {
     @Query('offerPrice') offerPrice: string,
     @Query('offerQuantity') offerQuantity: string,
     @Query('offerType') offerType: 'BUYER' | 'SELLER',
-  ): Promise<any> {
+  ): Promise<ProfitImpactResponseDto> {
     if (!offerPrice || !offerQuantity || !offerType) {
       throw new BadRequestException(
         'offerPrice, offerQuantity, and offerType are required',
@@ -269,10 +277,11 @@ export class ProfitController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Profit validation results',
+    type: ProfitValidationDto,
   })
   async validateProfit(
     @Param('id') tradeOperationId: string,
-  ): Promise<any> {
+  ): Promise<ProfitValidationDto> {
     const profitCalc = await this.profitCalculationService.calculateProfit(
       tradeOperationId,
     );
@@ -411,6 +420,18 @@ export class ProfitController {
     }
 
     return 'Most scenarios have low margins. Review cost structure and pricing strategy.';
+  }
+
+  private parseSellerPrices(raw: unknown): SellerPriceDto[] {
+    if (!Array.isArray(raw)) {
+      return [];
+    }
+
+    return (raw as any[]).map((entry) => ({
+      sellerId: entry?.sellerId || entry?.seller_id || 'unknown-seller',
+      price: Number(entry?.price ?? 0),
+      quantity: Number(entry?.quantity ?? 0),
+    }));
   }
 
   /**

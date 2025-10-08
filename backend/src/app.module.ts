@@ -11,6 +11,10 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { TradeOperationsModule } from './trade-operations/trade-operations.module';
 import { TransportModule } from './transport/transport.module';
 import { NegotiationsModule } from './negotiations/negotiations.module';
+import { InspectionModule } from './inspections/inspection.module';
+import { NotificationModule } from './notifications/notification.module';
+import { TransportCompanyModule } from './transport-company/transport-company.module';
+import { SimulationModule } from './simulation/simulation.module';
 
 @Module({
   imports: [
@@ -26,7 +30,11 @@ import { NegotiationsModule } from './negotiations/negotiations.module';
     BuyerModule,
     TradeOperationsModule,
     TransportModule,
+    TransportCompanyModule,
     NegotiationsModule,
+    InspectionModule,
+    NotificationModule,
+    SimulationModule,
   ],
   providers: [
     // Temporarily disabled for testing

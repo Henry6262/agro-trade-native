@@ -59,9 +59,25 @@ export class AuthService {
     };
 
     const hasProfile = await this.checkProfileCompletion(user);
+    
+    // Generate both access and refresh tokens
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d', // Refresh token expires in 7 days
+    });
+
+    // Store refresh token in database (optional but recommended)
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        lastLogin: new Date(),
+        // You could store the refresh token hash here if you add a field to the User model
+      },
+    });
 
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: accessToken,
+      refresh_token: refreshToken,
       user: {
         id: user.id,
         email: user.email,
@@ -71,6 +87,38 @@ export class AuthService {
         hasProfile,
       },
     };
+  }
+  
+  async refreshToken(refreshToken: string) {
+    try {
+      // Verify the refresh token
+      const payload = this.jwtService.verify(refreshToken) as JwtPayload;
+      
+      // Get the user
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
+      
+      if (!user || !user.isActive) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+      
+      // Generate new access token
+      const newPayload: JwtPayload = {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+      };
+      
+      const accessToken = this.jwtService.sign(newPayload);
+      
+      return {
+        access_token: accessToken,
+        refresh_token: refreshToken, // Return same refresh token
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
   }
 
   async validateUser(email: string, password: string): Promise<User | null> {

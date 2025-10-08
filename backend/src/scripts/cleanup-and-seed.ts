@@ -7,6 +7,31 @@ async function cleanup() {
   
   try {
     // Delete in correct order to respect foreign key constraints
+    // Skip transport tables if they don't exist yet
+    try {
+      console.log('Removing transport jobs...');
+      await prisma.transportJob.deleteMany({});
+    } catch (e) {
+      console.log('Skipping transport jobs (table may not exist)');
+    }
+    
+    try {
+      console.log('Removing transport bids...');
+      await prisma.transportBid.deleteMany({});
+    } catch (e) {
+      console.log('Skipping transport bids (table may not exist)');
+    }
+    
+    try {
+      console.log('Removing transport requests...');
+      await prisma.transportRequest.deleteMany({});
+    } catch (e) {
+      console.log('Skipping transport requests (table may not exist)');
+    }
+    
+    console.log('Removing offer negotiations...');
+    await prisma.offerNegotiation.deleteMany({});
+    
     console.log('Removing trade sellers...');
     await prisma.tradeSeller.deleteMany({});
     
@@ -40,7 +65,7 @@ async function seedFreshData() {
     });
     
     const sellers = await prisma.user.findMany({
-      where: { role: UserRole.SELLER },
+      where: { role: UserRole.FARMER },
       take: 10,
     });
     
@@ -55,15 +80,15 @@ async function seedFreshData() {
       if (products.length === 0) {
         console.log('Creating products...');
         const productData = [
-          { name: 'Organic Wheat', displayName: 'Organic Wheat', category: 'GRAINS', defaultUnit: ProductUnit.TON, description: 'Premium organic wheat' },
-          { name: 'Corn', displayName: 'Corn', category: 'GRAINS', defaultUnit: ProductUnit.TON, description: 'Fresh yellow corn' },
-          { name: 'Tomatoes', displayName: 'Tomatoes', category: 'VEGETABLES', defaultUnit: ProductUnit.KG, description: 'Fresh ripe tomatoes' },
-          { name: 'Potatoes', displayName: 'Potatoes', category: 'VEGETABLES', defaultUnit: ProductUnit.TON, description: 'Quality potatoes' },
-          { name: 'Apples', displayName: 'Apples', category: 'FRUITS', defaultUnit: ProductUnit.KG, description: 'Fresh red apples' },
+          { name: 'Organic Wheat', displayName: 'Organic Wheat', category: 'GRAINS', defaultUnit: ProductUnit.TON },
+          { name: 'Corn', displayName: 'Corn', category: 'GRAINS', defaultUnit: ProductUnit.TON },
+          { name: 'Tomatoes', displayName: 'Tomatoes', category: 'VEGETABLES', defaultUnit: ProductUnit.KG },
+          { name: 'Potatoes', displayName: 'Potatoes', category: 'VEGETABLES', defaultUnit: ProductUnit.TON },
+          { name: 'Apples', displayName: 'Apples', category: 'FRUITS', defaultUnit: ProductUnit.KG },
         ];
         
         for (const product of productData) {
-          await prisma.product.create({ data: product });
+          await prisma.product.create({ data: { ...product, category: product.category as any } });
         }
         products.push(...await prisma.product.findMany());
       }
@@ -93,7 +118,7 @@ async function seedFreshData() {
             data: {
               email: `seller${i}@test.com`,
               name: `Test Seller ${i}`,
-              role: UserRole.SELLER,
+              role: UserRole.FARMER,
               isEmailVerified: true,
               onboardingCompleted: true,
             },
@@ -120,7 +145,7 @@ async function seedFreshData() {
           quantity: 50 + Math.floor(Math.random() * 100), // 50-150 units
           unit: product.defaultUnit,
           maxPricePerUnit: 350 + Math.floor(Math.random() * 50), // 350-400
-          preferredDeliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
+          // deliveryDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Field may not exist
           status: 'ACTIVE',
         },
       });
@@ -160,7 +185,7 @@ async function seedFreshData() {
             status: 'ACTIVE',
             qualityGrade: 'STANDARD',
             harvestDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-            description: `Fresh ${product.name} from ${city.name} region`,
+            // notes: `Fresh ${product.name} from ${city.name} region`, // Field may not exist
           },
         });
         

@@ -9,6 +9,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
   onCancel,
 }) => {
   const [verifiedSpecs, setVerifiedSpecs] = useState<Record<string, string>>({});
+  const [correctedSpecs, setCorrectedSpecs] = useState<Record<string, any>>({});
   const [testMethods, setTestMethods] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState('');
   const [evidence, setEvidence] = useState<any[]>([]);
@@ -16,6 +17,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
     VerificationStatus.VERIFIED
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showCorrections, setShowCorrections] = useState(false);
 
   const specKeys = Object.keys(job.productDetails.claimedSpecs);
 
@@ -95,9 +97,15 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
         standardUsed: 'ISO Standards',
       })),
       evidence,
-      notes,
+      notes: notes + (correctedSpecs.notes ? `\n\nCorrections: ${correctedSpecs.notes}` : ''),
       verificationStatus,
       verifiedAt: new Date(),
+      // Include product specification corrections if provided
+      productSpecifications: Object.keys(correctedSpecs).length > 0 ? {
+        variety: correctedSpecs.variety || job.productDetails.claimedSpecs.variety,
+        grade: correctedSpecs.grade || job.productDetails.claimedSpecs.grade,
+        origin: correctedSpecs.origin || job.productDetails.claimedSpecs.origin,
+      } : undefined,
     };
 
     onSubmit(result);
@@ -147,6 +155,59 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
               )}
             </View>
           ))}
+        </View>
+
+        {/* Product Specification Corrections */}
+        <View className="mb-4">
+          <TouchableOpacity
+            onPress={() => setShowCorrections(!showCorrections)}
+            className="flex-row items-center justify-between bg-amber-50 p-3 rounded-lg"
+          >
+            <Text className="text-sm font-semibold text-amber-800">
+              Product Specification Corrections
+            </Text>
+            <Text className="text-amber-600">
+              {showCorrections ? '▼' : '▶'}
+            </Text>
+          </TouchableOpacity>
+          
+          {showCorrections && (
+            <View className="mt-2 bg-amber-50 p-3 rounded-lg">
+              <Text className="text-xs text-amber-700 mb-2">
+                If seller-provided specifications are incorrect, enter corrected values:
+              </Text>
+              
+              <TextInput
+                placeholder="Product variety (if different)"
+                value={correctedSpecs.variety || ''}
+                onChangeText={(value) => setCorrectedSpecs(prev => ({ ...prev, variety: value }))}
+                className="bg-white border border-amber-300 rounded px-3 py-2 mb-2"
+              />
+              
+              <TextInput
+                placeholder="Grade (if different)"
+                value={correctedSpecs.grade || ''}
+                onChangeText={(value) => setCorrectedSpecs(prev => ({ ...prev, grade: value }))}
+                className="bg-white border border-amber-300 rounded px-3 py-2 mb-2"
+              />
+              
+              <TextInput
+                placeholder="Origin (if different)"
+                value={correctedSpecs.origin || ''}
+                onChangeText={(value) => setCorrectedSpecs(prev => ({ ...prev, origin: value }))}
+                className="bg-white border border-amber-300 rounded px-3 py-2 mb-2"
+              />
+              
+              <TextInput
+                placeholder="Additional corrections notes"
+                value={correctedSpecs.notes || ''}
+                onChangeText={(value) => setCorrectedSpecs(prev => ({ ...prev, notes: value }))}
+                className="bg-white border border-amber-300 rounded px-3 py-2"
+                multiline
+                numberOfLines={2}
+              />
+            </View>
+          )}
         </View>
 
         {/* Verification Status */}

@@ -1,7 +1,35 @@
-import { Controller, Post, Get, Patch, Body, Param, UseGuards, Request } from '@nestjs/common';
-import { SellerService } from './seller.service';
-import { CreateListingDto, ListingStatus } from './dto/create-listing.dto';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
+  BadRequestException,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { plainToInstance } from 'class-transformer';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { SellerService } from './seller.service';
+import {
+  CreateListingDto,
+  ListingStatus,
+} from './dto/create-listing.dto';
+import {
+  SellerCreateListingResponseDto,
+  SellerListingResponseDto,
+  SellerOffersResponseDto,
+  SellerProductListingDto,
+  SellerStatsDto,
+} from './dto/seller-response.dto';
 
 interface AuthRequest {
   user: {
@@ -11,62 +39,212 @@ interface AuthRequest {
   };
 }
 
-@Controller('seller')
+@ApiTags('Seller')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
+@Controller('seller')
 export class SellerController {
   constructor(private readonly sellerService: SellerService) {}
 
   @Post('listings')
+  @ApiOperation({ summary: 'Create a sale listing' })
+  @ApiBody({ type: CreateListingDto })
+  @ApiOkResponse({
+    description: 'Created listing',
+    type: SellerCreateListingResponseDto,
+  })
   async createListing(
     @Body() createListingDto: CreateListingDto,
     @Request() req: AuthRequest,
   ) {
-    return this.sellerService.createListing(createListingDto, req.user.id);
+    const result = await this.sellerService.createListing(
+      createListingDto,
+      req.user.id,
+    );
+
+    return plainToInstance(
+      SellerCreateListingResponseDto,
+      {
+        success: result.success,
+        message: result.message,
+        data: this.serializeListing(result.data),
+      },
+      { excludeExtraneousValues: false },
+    );
   }
 
   @Get('listings')
+  @ApiOperation({ summary: 'Get seller listings' })
+  @ApiOkResponse({
+    description: 'Seller listings',
+    type: SellerListingResponseDto,
+    isArray: true,
+  })
   async getMyListings(@Request() req: AuthRequest) {
-    return this.sellerService.getSellerListings(req.user.id);
+    const listings = await this.sellerService.getSellerListings(req.user.id);
+    return listings.map((listing) => this.serializeListing(listing));
   }
 
   @Get('listings/:id')
+  @ApiOperation({ summary: 'Get listing by id' })
+  @ApiOkResponse({
+    description: 'Seller listing detail',
+    type: SellerListingResponseDto,
+  })
   async getListingById(
     @Param('id') id: string,
     @Request() req: AuthRequest,
   ) {
-    return this.sellerService.getListingById(id, req.user.id);
+    const listing = await this.sellerService.getListingById(id, req.user.id);
+    return this.serializeListing(listing);
   }
 
-  // Alias endpoint for frontend compatibility - returns listings formatted as products
   @Get('products')
+  @ApiOperation({ summary: 'Get seller products view' })
+  @ApiOkResponse({
+    description: 'Seller products',
+    type: SellerProductListingDto,
+    isArray: true,
+  })
   async getMyProducts(@Request() req: AuthRequest) {
-    return this.sellerService.getSellerProducts(req.user.id);
+    const products = await this.sellerService.getSellerProducts(req.user.id);
+    return products.map((product) =>
+      plainToInstance(SellerProductListingDto, product, {
+        excludeExtraneousValues: false,
+      }),
+    );
   }
 
-  // Get seller offers (incoming purchase requests)
   @Get('offers')
+  @ApiOperation({ summary: 'Get offers for seller' })
+  @ApiOkResponse({
+    description: 'Seller offers and stats',
+    type: SellerOffersResponseDto,
+  })
   async getMyOffers(@Request() req: AuthRequest) {
-    return this.sellerService.getSellerOffers(req.user.id);
+    const offers = await this.sellerService.getSellerOffers(req.user.id);
+    return plainToInstance(SellerOffersResponseDto, offers, {
+      excludeExtraneousValues: false,
+    });
   }
 
-  // Get seller trades (active transactions)
   @Get('trades')
+  @ApiOperation({ summary: 'Get active trades for seller' })
+  @ApiOkResponse({
+    description: 'Seller trades',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: true,
+      },
+    },
+  })
   async getMyTrades(@Request() req: AuthRequest) {
     return this.sellerService.getSellerTrades(req.user.id);
   }
 
-  // Get seller statistics
   @Get('stats')
+  @ApiOperation({ summary: 'Get seller statistics' })
+  @ApiOkResponse({
+    description: 'Seller stats',
+    type: SellerStatsDto,
+  })
   async getMyStats(@Request() req: AuthRequest) {
-    return this.sellerService.getSellerStats(req.user.id);
+    const stats = await this.sellerService.getSellerStats(req.user.id);
+    return plainToInstance(SellerStatsDto, stats, {
+      excludeExtraneousValues: false,
+    });
   }
 
   @Patch('listings/:id/status')
+  @ApiOperation({ summary: 'Update listing status' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        status: {
+          type: 'string',
+          enum: Object.values(ListingStatus),
+        },
+      },
+      required: ['status'],
+    },
+  })
+  @ApiOkResponse({
+    description: 'Updated listing',
+    type: SellerListingResponseDto,
+  })
   async updateListingStatus(
     @Param('id') id: string,
     @Body('status') status: ListingStatus,
     @Request() req: AuthRequest,
   ) {
-    return this.sellerService.updateListingStatus(id, status, req.user.id);
+    const listing = await this.sellerService.updateListingStatus(
+      id,
+      status,
+      req.user.id,
+    );
+
+    return this.serializeListing(listing);
+  }
+
+  private serializeListing(entity: any): SellerListingResponseDto {
+    if (!entity) {
+      throw new BadRequestException('Invalid listing payload');
+    }
+
+    const product = entity.product
+      ? {
+          id: entity.product.id,
+          name: entity.product.name,
+          category: entity.product.category,
+          description: entity.product.description,
+        }
+      : null;
+
+    const address = entity.address
+      ? {
+          id: entity.address.id,
+          street: entity.address.street,
+          city: entity.address.city?.name ?? entity.address.city,
+          country: entity.address.country,
+          latitude: entity.address.latitude
+            ? Number(entity.address.latitude)
+            : null,
+          longitude: entity.address.longitude
+            ? Number(entity.address.longitude)
+            : null,
+        }
+      : null;
+
+    const specifications = entity.specifications
+      ? entity.specifications.map((spec: any) => ({
+          id: spec.id,
+          specTypeId: spec.specTypeId,
+          valueText: spec.valueText,
+          valueNumber: spec.valueNumber ? Number(spec.valueNumber) : null,
+          valueBool: spec.valueBool,
+        }))
+      : null;
+
+    return plainToInstance(
+      SellerListingResponseDto,
+      {
+        id: entity.id,
+        sellerId: entity.sellerId,
+        productId: entity.productId,
+        quantity: Number(entity.quantity),
+        unit: entity.unit,
+        askingPrice: entity.askingPrice ? Number(entity.askingPrice) : null,
+        status: (entity.status ?? 'PENDING').toString().toLowerCase() as ListingStatus,
+        product,
+        address,
+        specifications,
+        createdAt: entity.createdAt?.toISOString?.() ?? new Date().toISOString(),
+        updatedAt: entity.updatedAt?.toISOString?.() ?? new Date().toISOString(),
+      },
+      { excludeExtraneousValues: false },
+    );
   }
 }

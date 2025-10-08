@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -25,7 +26,7 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
-import { UserRole, TradePhase, TradeStatus } from '@prisma/client';
+import { UserRole, TradePhase, TradeStatus, ProductUnit, SellerStatus } from '@prisma/client';
 import { TradeOperationService } from '../services/trade-operation.service';
 import { ProfitCalculationService } from '../services/profit-calculation.service';
 import {
@@ -41,6 +42,13 @@ import {
   TradeOperationListResponseDto,
   TradeAnalyticsDto,
 } from '../dto/trade-operation-response.dto';
+import {
+  AddSellersResponseDto,
+  OptimizeTransportResponseDto,
+  FinalizeTradeResponseDto,
+  TradeProfitResponseDto,
+  TradeSellerDto,
+} from '../dto/operations-extra.dto';
 
 @ApiTags('Trade Operations')
 @ApiBearerAuth()
@@ -68,8 +76,8 @@ export class TradeOperationController {
     @Body() createDto: CreateTradeOperationDto,
     @Request() req: any,
   ): Promise<TradeOperationResponseDto> {
-    // Temporarily use a default admin ID for testing
-    const adminId = req.user?.id || 'cmfjihj4d0000shesv3bkdd5r'; // Use first admin from DB
+    // Use default admin ID if no user is authenticated
+    const adminId = req.user?.id || 'cmfoabr5f000012bsx2kj92w2'; // Default admin from DB
     const tradeOperation = await this.tradeOperationService.createTradeOperation(
       createDto,
       adminId,
@@ -182,6 +190,42 @@ export class TradeOperationController {
     return this.mapToResponseDto(summary);
   }
 
+  @Get(':id/profit')
+  // @Roles(UserRole.ADMIN) // Temporarily disabled for testing
+  @ApiOperation({ summary: 'Get profit data for a trade operation' })
+  @ApiParam({ name: 'id', description: 'Trade operation ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Trade operation profit data',
+    type: TradeProfitResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Trade operation not found',
+  })
+  async getProfit(@Param('id') id: string): Promise<TradeProfitResponseDto> {
+    try {
+      const tradeOperation = await this.tradeOperationService.getTradeOperationSummary(id);
+      
+      if (!tradeOperation) {
+        throw new NotFoundException('Trade operation not found');
+      }
+
+      // Calculate profit using the existing service
+      const profitData = await this.profitCalculationService.calculateProfit(id);
+      
+      return {
+        success: true,
+        data: profitData,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(`Failed to calculate profit: ${error.message}`);
+    }
+  }
+
   @Put(':id')
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Update a trade operation' })
@@ -199,6 +243,48 @@ export class TradeOperationController {
     throw new BadRequestException('Update method not yet implemented');
   }
 
+  @Patch(':id/phase')
+  // @Roles(UserRole.ADMIN) // Temporarily disabled for testing
+  @ApiOperation({ summary: 'Update the phase of a trade operation' })
+  @ApiParam({ name: 'id', description: 'Trade operation ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Trade operation phase updated successfully',
+    type: TradeOperationResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Trade operation not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid phase transition',
+  })
+  async updatePhase(
+    @Param('id') id: string,
+    @Body() body: { phase: TradePhase },
+  ): Promise<TradeOperationResponseDto> {
+    try {
+      // Validate that the trade operation exists
+      const existingTrade = await this.tradeOperationService.getTradeOperationSummary(id);
+      if (!existingTrade) {
+        throw new NotFoundException('Trade operation not found');
+      }
+
+      // Update the phase using the service
+      const updatedTrade = await this.tradeOperationService.updateTradePhase(id, body.phase);
+      
+      // Return the updated trade operation
+      const summary = await this.tradeOperationService.getTradeOperationSummary(id);
+      return this.mapToResponseDto(summary);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new BadRequestException(`Failed to update phase: ${error.message}`);
+    }
+  }
+
   @Post(':id/sellers')
   // @Roles(UserRole.ADMIN) // Temporarily disabled for testing
   @ApiOperation({ summary: 'Add sellers to a trade operation' })
@@ -206,11 +292,12 @@ export class TradeOperationController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Sellers added successfully',
+    type: AddSellersResponseDto,
   })
   async addSellers(
     @Param('id') id: string,
     @Body() addSellersDto: AddSellersDto,
-  ): Promise<{ message: string; sellersAdded: any[] }> {
+  ): Promise<AddSellersResponseDto> {
     const sellers = await this.tradeOperationService.addSellersToTrade(
       id,
       addSellersDto.sellers,
@@ -218,7 +305,7 @@ export class TradeOperationController {
 
     return {
       message: 'Sellers added successfully',
-      sellersAdded: sellers, // Return the actual TradeSeller records
+      sellersAdded: sellers.map((seller) => this.mapTradeSeller(seller)),
     };
   }
 
@@ -289,7 +376,7 @@ export class TradeOperationController {
     status: HttpStatus.OK,
     description: 'Transport route optimized',
   })
-  async optimizeTransport(@Param('id') id: string): Promise<any> {
+  async optimizeTransport(@Param('id') id: string): Promise<OptimizeTransportResponseDto> {
     const result = await this.tradeOperationService.optimizeTransport(id);
 
     return {
@@ -314,7 +401,7 @@ export class TradeOperationController {
   async finalize(
     @Param('id') id: string,
     @Body() finalizeDto?: FinalizeTradeDto,
-  ): Promise<any> {
+  ): Promise<FinalizeTradeResponseDto> {
     const result = await this.tradeOperationService.finalizeTrade(id);
 
     if (!result.success) {
@@ -347,7 +434,7 @@ export class TradeOperationController {
       phase: summary.phase,
       status: summary.status,
       buyer: summary.buyer,
-      sellers: summary.sellers,
+      sellers: summary.sellers.map((seller: any) => this.mapTradeSeller(seller)),
       profit: summary.profit,
       transport: summary.transport,
       createdAt: summary.timeline.created,
@@ -355,6 +442,50 @@ export class TradeOperationController {
       expectedDeliveryDate: summary.timeline.expectedCompletion,
       confirmedAt: summary.confirmedAt,
       completedAt: summary.completedAt,
+    };
+  }
+
+  private mapTradeSeller(tradeSeller: any): TradeSellerDto {
+    return {
+      id: tradeSeller.id,
+      sellerId: tradeSeller.sellerId || tradeSeller.seller?.id,
+      name: tradeSeller.name || tradeSeller.seller?.name,
+      saleListingId: tradeSeller.saleListingId,
+      requestedQuantity: Number(tradeSeller.requestedQuantity ?? tradeSeller.quantity ?? 0),
+      offeredQuantity: Number(tradeSeller.offeredQuantity ?? 0),
+      agreedQuantity: tradeSeller.agreedQuantity
+        ? Number(tradeSeller.agreedQuantity)
+        : undefined,
+      unit: (tradeSeller.unit as ProductUnit) || ProductUnit.TON,
+      price: tradeSeller.price ? Number(tradeSeller.price) : undefined,
+      status: tradeSeller.status as SellerStatus,
+    };
+  }
+
+  @Post(':id/request-inspections')
+  // @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Request inspections for selected sellers' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Inspection requests created',
+  })
+  async requestInspections(
+    @Param('id') tradeOperationId: string,
+    @Body() data: {
+      sellerIds: string[];
+      priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+    },
+  ) {
+    const inspections = await this.tradeOperationService.requestInspections(
+      tradeOperationId,
+      data.sellerIds,
+      data.priority,
+    );
+
+    return {
+      success: true,
+      count: inspections.length,
+      inspections,
     };
   }
 }

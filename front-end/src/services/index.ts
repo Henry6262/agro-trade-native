@@ -6,3 +6,4 @@ export { orderService } from './orderService';
 export { productService } from './productService';
 export { tradeOperationService } from './tradeOperationService';
 export { negotiationService } from './negotiationService';
+export { sellerOfferService } from './sellerOfferService';

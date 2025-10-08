@@ -225,9 +225,9 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
       <View className="flex-1 bg-black/50 justify-center items-center">
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          className="w-full max-h-[90%] px-4"
+          className="w-full h-[95%] px-4"
         >
-          <View className="bg-white rounded-2xl max-h-full">
+          <View className="bg-white rounded-2xl h-full w-full">
             {/* Header */}
             <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
               <View className="flex-1">

@@ -26,20 +26,102 @@ import {
   ExtendExpiryDto,
   BulkWithdrawDto,
 } from '../dto/negotiation.dto';
+import {
+  NegotiationSummaryWrapperDto,
+  NegotiationResponseWrapperDto,
+  NegotiationBatchResponseDto,
+  ExtendExpiryResponseDto,
+  ExpiringNegotiationsResponseDto,
+  NegotiationMetricsResponseDto,
+  NegotiationWithDetailsDto,
+  NegotiationSummaryDto,
+  BatchOffersResultDto,
+  BatchOfferErrorDto,
+  ExtendExpiryResultDto,
+  ExpiringNegotiationsDataDto,
+  ExpiringNegotiationItemDto,
+  ExpiringSummaryDto,
+  NegotiationMetricsDataDto,
+  NegotiationTradeSellerDto,
+  NegotiationSellerDto,
+  NegotiationSaleListingDto,
+  OfferSnapshotDto,
+  ProfitImpactDto,
+} from '../dto/negotiation-response.dto';
+import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth, ApiParam, ApiQuery, ApiExtraModels } from '@nestjs/swagger';
 
-@Controller()
+@ApiTags('Negotiations')
+@ApiBearerAuth()
+@ApiExtraModels(
+  NegotiationSummaryWrapperDto,
+  NegotiationResponseWrapperDto,
+  NegotiationBatchResponseDto,
+  ExtendExpiryResponseDto,
+  ExpiringNegotiationsResponseDto,
+  NegotiationMetricsResponseDto,
+  NegotiationWithDetailsDto,
+  NegotiationSummaryDto,
+  BatchOffersResultDto,
+  BatchOfferErrorDto,
+  ExtendExpiryResultDto,
+  ExpiringNegotiationsDataDto,
+  ExpiringNegotiationItemDto,
+  ExpiringSummaryDto,
+  NegotiationMetricsDataDto,
+  NegotiationTradeSellerDto,
+  NegotiationSellerDto,
+  NegotiationSaleListingDto,
+  OfferSnapshotDto,
+  ProfitImpactDto,
+)
+@Controller('negotiations')
 export class NegotiationController {
   constructor(private readonly negotiationService: NegotiationService) {}
+
+  /**
+   * Get all negotiations for a trade operation (frontend expected route)
+   */
+  @Get('trade-operation/:tradeOperationId')
+  @ApiOperation({ summary: 'Get negotiations for a trade operation (frontend route)' })
+  @ApiParam({ name: 'tradeOperationId', description: 'Trade operation ID' })
+  @ApiQuery({ name: 'status', required: false, description: 'Filter by status or comma-separated statuses' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Max number of records', example: 100 })
+  @ApiQuery({ name: 'offset', required: false, description: 'Skip number of records', example: 0 })
+  @ApiResponse({ status: HttpStatus.OK, type: NegotiationSummaryWrapperDto })
+  async getNegotiationsByTradeOperation(
+    @Param('tradeOperationId') tradeOperationId: string,
+    @Query('status') status?: string,
+    @Query('limit', new DefaultValuePipe(100), ParseIntPipe) limit?: number,
+    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset?: number,
+  ): Promise<NegotiationSummaryWrapperDto> {
+    return this.getNegotiations(tradeOperationId, status, limit, offset);
+  }
+
+  /**
+   * Create new negotiation/offer (frontend expected route)
+   */
+  @Post('trade-operation/:tradeOperationId')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create negotiation (frontend route)' })
+  @ApiResponse({ status: HttpStatus.CREATED, type: NegotiationResponseWrapperDto })
+  async createNegotiation(
+    @Param('tradeOperationId') tradeOperationId: string,
+    @Body(ValidationPipe) dto: CreateOfferDto,
+  ): Promise<NegotiationResponseWrapperDto> {
+    return this.sendOffer(tradeOperationId, dto);
+  }
 
   /**
    * Send offer to seller
    */
   @Post('trade-operations/:tradeOperationId/offers')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Send offer to seller' })
+  @ApiResponse({ status: HttpStatus.CREATED, type: NegotiationResponseWrapperDto })
   async sendOffer(
     @Param('tradeOperationId') tradeOperationId: string,
     @Body(ValidationPipe) dto: CreateOfferDto,
-  ) {
+  ): Promise<NegotiationResponseWrapperDto> {
     try {
       const negotiation = await this.negotiationService.sendOffer(
         tradeOperationId,
@@ -47,7 +129,7 @@ export class NegotiationController {
       );
       return {
         success: true,
-        data: negotiation,
+        data: negotiation as any,
       };
     } catch (error) {
       return {
@@ -65,10 +147,12 @@ export class NegotiationController {
    */
   @Post('trade-operations/:tradeOperationId/offers/batch')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Send batch offers to multiple sellers' })
+  @ApiResponse({ status: HttpStatus.CREATED, type: NegotiationBatchResponseDto })
   async sendBatchOffers(
     @Param('tradeOperationId') tradeOperationId: string,
     @Body(ValidationPipe) dto: BatchOfferDto,
-  ) {
+  ): Promise<NegotiationBatchResponseDto> {
     try {
       const result = await this.negotiationService.sendBatchOffers(
         tradeOperationId,
@@ -76,7 +160,12 @@ export class NegotiationController {
       );
       return {
         success: true,
-        data: result,
+        data: {
+          created: result.created,
+          failed: result.failed,
+          negotiations: result.negotiations as any,
+          errors: result.errors,
+        },
       };
     } catch (error) {
       return {
@@ -93,12 +182,18 @@ export class NegotiationController {
    * Get all negotiations for a trade operation
    */
   @Get('trade-operations/:tradeOperationId/negotiations')
+  @ApiOperation({ summary: 'Get negotiations for a trade operation' })
+  @ApiParam({ name: 'tradeOperationId', description: 'Trade operation ID' })
+  @ApiQuery({ name: 'status', required: false })
+  @ApiQuery({ name: 'limit', required: false, example: 100 })
+  @ApiQuery({ name: 'offset', required: false, example: 0 })
+  @ApiResponse({ status: HttpStatus.OK, type: NegotiationSummaryWrapperDto })
   async getNegotiations(
     @Param('tradeOperationId') tradeOperationId: string,
     @Query('status') status?: string,
     @Query('limit', new DefaultValuePipe(100), ParseIntPipe) limit?: number,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset?: number,
-  ) {
+  ): Promise<NegotiationSummaryWrapperDto> {
     try {
       // Parse status if provided
       let statusFilter: NegotiationStatus | NegotiationStatus[] | undefined;
@@ -144,7 +239,7 @@ export class NegotiationController {
 
       return {
         success: true,
-        data: summary,
+        data: summary as any,
       };
     } catch (error) {
       return {
@@ -161,14 +256,17 @@ export class NegotiationController {
    * Get single negotiation details
    */
   @Get('negotiations/:negotiationId')
-  async getNegotiationById(@Param('negotiationId') negotiationId: string) {
+  @ApiOperation({ summary: 'Get single negotiation details' })
+  @ApiParam({ name: 'negotiationId', description: 'Negotiation ID' })
+  @ApiResponse({ status: HttpStatus.OK, type: NegotiationResponseWrapperDto })
+  async getNegotiationById(@Param('negotiationId') negotiationId: string): Promise<NegotiationResponseWrapperDto> {
     try {
       const negotiation = await this.negotiationService.getNegotiationById(
         negotiationId,
       );
       return {
         success: true,
-        data: negotiation,
+        data: negotiation as any,
       };
     } catch (error) {
       return {
@@ -186,11 +284,14 @@ export class NegotiationController {
    */
   @Post('negotiations/:negotiationId/counter')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Counter an offer' })
+  @ApiParam({ name: 'negotiationId', description: 'Negotiation ID' })
+  @ApiResponse({ status: HttpStatus.CREATED, type: NegotiationResponseWrapperDto })
   async counterOffer(
     @Param('negotiationId') negotiationId: string,
     @Body(ValidationPipe) dto: CounterOfferDto,
     @Request() req?: any,
-  ) {
+  ): Promise<NegotiationResponseWrapperDto> {
     try {
       const negotiation = await this.negotiationService.counterOffer(
         negotiationId,
@@ -199,7 +300,7 @@ export class NegotiationController {
       );
       return {
         success: true,
-        data: negotiation,
+        data: negotiation as any,
       };
     } catch (error) {
       const code = error.message.includes('expired') 
@@ -219,11 +320,14 @@ export class NegotiationController {
    * Accept an offer
    */
   @Post('negotiations/:negotiationId/accept')
+  @ApiOperation({ summary: 'Accept an offer' })
+  @ApiParam({ name: 'negotiationId', description: 'Negotiation ID' })
+  @ApiResponse({ status: HttpStatus.OK, type: NegotiationResponseWrapperDto })
   async acceptOffer(
     @Param('negotiationId') negotiationId: string,
     @Body(ValidationPipe) dto: AcceptOfferDto,
     @Request() req?: any,
-  ) {
+  ): Promise<NegotiationResponseWrapperDto> {
     try {
       const negotiation = await this.negotiationService.acceptOffer(
         negotiationId,
@@ -232,7 +336,7 @@ export class NegotiationController {
       );
       return {
         success: true,
-        data: negotiation,
+        data: negotiation as any,
       };
     } catch (error) {
       return {
@@ -249,11 +353,14 @@ export class NegotiationController {
    * Reject an offer
    */
   @Post('negotiations/:negotiationId/reject')
+  @ApiOperation({ summary: 'Reject an offer' })
+  @ApiParam({ name: 'negotiationId', description: 'Negotiation ID' })
+  @ApiResponse({ status: HttpStatus.OK, type: NegotiationResponseWrapperDto })
   async rejectOffer(
     @Param('negotiationId') negotiationId: string,
     @Body(ValidationPipe) dto: RejectOfferDto,
     @Request() req?: any,
-  ) {
+  ): Promise<NegotiationResponseWrapperDto> {
     try {
       const negotiation = await this.negotiationService.rejectOffer(
         negotiationId,
@@ -269,7 +376,7 @@ export class NegotiationController {
 
       return {
         success: true,
-        data: negotiation,
+        data: negotiation as any,
       };
     } catch (error) {
       return {
@@ -286,11 +393,14 @@ export class NegotiationController {
    * Withdraw an offer (admin only)
    */
   @Post('negotiations/:negotiationId/withdraw')
+  @ApiOperation({ summary: 'Withdraw an offer' })
+  @ApiParam({ name: 'negotiationId', description: 'Negotiation ID' })
+  @ApiResponse({ status: HttpStatus.OK, type: NegotiationResponseWrapperDto })
   async withdrawOffer(
     @Param('negotiationId') negotiationId: string,
     @Body(ValidationPipe) dto: WithdrawOfferDto,
     @Request() req?: any,
-  ) {
+  ): Promise<NegotiationResponseWrapperDto> {
     try {
       const negotiation = await this.negotiationService.withdrawOffer(
         negotiationId,
@@ -299,7 +409,7 @@ export class NegotiationController {
       );
       return {
         success: true,
-        data: negotiation,
+        data: negotiation as any,
       };
     } catch (error) {
       return {
@@ -316,10 +426,13 @@ export class NegotiationController {
    * Extend negotiation expiry
    */
   @Post('negotiations/:negotiationId/extend')
+  @ApiOperation({ summary: 'Extend negotiation expiry' })
+  @ApiParam({ name: 'negotiationId', description: 'Negotiation ID' })
+  @ApiResponse({ status: HttpStatus.OK, type: ExtendExpiryResponseDto })
   async extendExpiry(
     @Param('negotiationId') negotiationId: string,
     @Body(ValidationPipe) dto: ExtendExpiryDto,
-  ) {
+  ): Promise<ExtendExpiryResponseDto> {
     try {
       const negotiation = await this.negotiationService.extendExpiry(
         negotiationId,
@@ -354,10 +467,14 @@ export class NegotiationController {
    * Get expiring negotiations
    */
   @Get('trade-operations/:tradeOperationId/negotiations/expiring')
+  @ApiOperation({ summary: 'Get expiring negotiations' })
+  @ApiParam({ name: 'tradeOperationId', description: 'Trade operation ID' })
+  @ApiQuery({ name: 'hours', required: false, example: 24 })
+  @ApiResponse({ status: HttpStatus.OK, type: ExpiringNegotiationsResponseDto })
   async getExpiringNegotiations(
     @Param('tradeOperationId') tradeOperationId: string,
     @Query('hours', new DefaultValuePipe(24), ParseIntPipe) hours?: number,
-  ) {
+  ): Promise<ExpiringNegotiationsResponseDto> {
     try {
       const negotiations = await this.negotiationService.getNegotiations(
         tradeOperationId,
@@ -367,7 +484,7 @@ export class NegotiationController {
       );
 
       const now = new Date();
-      const expiringThreshold = now.getTime() + hours * 60 * 60 * 1000;
+      const expiringThreshold = now.getTime() + (hours || 24) * 60 * 60 * 1000;
 
       const expiringSoon = negotiations.negotiations.filter(n => {
         const expiresAt = new Date(n.expiresAt).getTime();
@@ -409,6 +526,9 @@ export class NegotiationController {
    * Get negotiation metrics
    */
   @Get('trade-operations/:tradeOperationId/negotiations/metrics')
+  @ApiOperation({ summary: 'Get negotiation metrics' })
+  @ApiParam({ name: 'tradeOperationId', description: 'Trade operation ID' })
+  @ApiResponse({ status: HttpStatus.OK, type: NegotiationMetricsResponseDto })
   async getNegotiationMetrics(@Param('tradeOperationId') tradeOperationId: string) {
     try {
       const negotiations = await this.negotiationService.getNegotiations(

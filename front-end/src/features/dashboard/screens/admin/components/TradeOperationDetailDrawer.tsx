@@ -37,6 +37,7 @@ import {
 } from '../../../../../types/trade-operations';
 import { tradeOperationService } from '../../../../../services/tradeOperationService';
 import { negotiationService, Negotiation } from '../../../../../services/negotiationService';
+import { inspectionService, InspectionRequest } from '../../../../../services/inspectionService';
 
 interface TradeOperationDetailDrawerProps {
   visible: boolean;
@@ -53,6 +54,7 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
 }) => {
   const [operation, setOperation] = useState<TradeOperation | null>(null);
   const [negotiations, setNegotiations] = useState<Negotiation[]>([]);
+  const [inspections, setInspections] = useState<InspectionRequest[]>([]);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -71,6 +73,10 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
       // Fetch negotiations
       const negotiationsData = await negotiationService.getTradeNegotiations(operationId);
       setNegotiations(negotiationsData);
+      
+      // Fetch inspections
+      const inspectionsData = await inspectionService.getInspectionsByTradeOperation(operationId);
+      setInspections(inspectionsData);
       
       // TODO: Fetch timeline events
       // const timelineData = await tradeOperationService.getTimeline(operationId);
@@ -269,6 +275,69 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
           </View>
         )}
 
+        {/* Inspection Status */}
+        {inspections.length > 0 && (
+          <View className="bg-yellow-50 rounded-lg p-4 mb-4">
+            <View className="flex-row items-center mb-2">
+              <CheckCircle size={18} color="#EAB308" />
+              <Text className="text-yellow-800 font-bold ml-2">Quality Inspections</Text>
+            </View>
+            <View className="space-y-2">
+              {inspections.map((inspection) => (
+                <View key={inspection.id} className="flex-row justify-between items-center">
+                  <Text className="text-yellow-700 text-sm">
+                    {inspection.saleListing?.seller?.name || 'Seller'}
+                  </Text>
+                  <View className={`px-2 py-1 rounded ${
+                    inspection.status === 'COMPLETED' ? 'bg-green-100' :
+                    inspection.status === 'IN_PROGRESS' ? 'bg-blue-100' :
+                    inspection.status === 'SCHEDULED' ? 'bg-purple-100' :
+                    'bg-yellow-100'
+                  }`}>
+                    <Text className={`text-xs font-medium ${
+                      inspection.status === 'COMPLETED' ? 'text-green-800' :
+                      inspection.status === 'IN_PROGRESS' ? 'text-blue-800' :
+                      inspection.status === 'SCHEDULED' ? 'text-purple-800' :
+                      'text-yellow-800'
+                    }`}>
+                      {inspection.status}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+            <TouchableOpacity
+              onPress={async () => {
+                if (!operation) return;
+                const unverifiedSellers = operation.sellers.filter(s => s.status === 'ACCEPTED' && !s.isVerified);
+                if (unverifiedSellers.length === 0) {
+                  Alert.alert('Info', 'All accepted sellers already have inspection requests');
+                  return;
+                }
+                
+                try {
+                  const saleListingIds = unverifiedSellers.map(s => s.saleListingId);
+                  await inspectionService.requestInspectionsForTrade(
+                    operation.id,
+                    saleListingIds,
+                    'MEDIUM'
+                  );
+                  Alert.alert('Success', `Requested inspections for ${unverifiedSellers.length} sellers`);
+                  fetchOperationDetails();
+                } catch (error) {
+                  Alert.alert('Error', 'Failed to request inspections');
+                }
+              }}
+              className="mt-3 bg-yellow-500 py-2 rounded flex-row items-center justify-center"
+            >
+              <CheckCircle size={14} color="white" />
+              <Text className="text-white text-sm font-medium ml-1">
+                Request All Inspections
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Action Buttons */}
         <View className="space-y-3">
           {operation.phase === TradePhase.SELLER_NEGOTIATION && (
@@ -338,19 +407,52 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
                   Agreed Price: €{seller.finalPrice}/unit
                 </Text>
               )}
+              {seller.isVerified && (
+                <View className="flex-row items-center mt-1">
+                  <CheckCircle size={14} color="#16A34A" />
+                  <Text className="text-green-600 text-sm ml-1">Verified</Text>
+                </View>
+              )}
             </View>
 
-            {seller.status === 'INVITED' && (
-              <TouchableOpacity
-                onPress={() => Alert.alert('Info', 'Opening negotiation modal...')}
-                className="mt-3 bg-blue-500 py-2 rounded flex-row items-center justify-center"
-              >
-                <MessageSquare size={14} color="white" />
-                <Text className="text-white text-sm font-medium ml-1">
-                  Send Offer
-                </Text>
-              </TouchableOpacity>
-            )}
+            <View className="flex-row space-x-2 mt-3">
+              {seller.status === 'INVITED' && (
+                <TouchableOpacity
+                  onPress={() => Alert.alert('Info', 'Opening negotiation modal...')}
+                  className="flex-1 bg-blue-500 py-2 rounded flex-row items-center justify-center"
+                >
+                  <MessageSquare size={14} color="white" />
+                  <Text className="text-white text-sm font-medium ml-1">
+                    Send Offer
+                  </Text>
+                </TouchableOpacity>
+              )}
+              
+              {seller.status === 'ACCEPTED' && !seller.isVerified && (
+                <TouchableOpacity
+                  onPress={async () => {
+                    try {
+                      await inspectionService.createInspectionRequest({
+                        tradeOperationId: operation!.id,
+                        saleListingId: seller.saleListingId,
+                        priority: 'MEDIUM',
+                        notes: `Inspection requested for ${seller.seller?.name}`,
+                      });
+                      Alert.alert('Success', 'Inspection requested successfully');
+                      fetchOperationDetails();
+                    } catch (error) {
+                      Alert.alert('Error', 'Failed to request inspection');
+                    }
+                  }}
+                  className="flex-1 bg-green-500 py-2 rounded flex-row items-center justify-center"
+                >
+                  <CheckCircle size={14} color="white" />
+                  <Text className="text-white text-sm font-medium ml-1">
+                    Request Inspection
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         ))}
 

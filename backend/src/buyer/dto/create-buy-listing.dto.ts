@@ -1,6 +1,17 @@
-import { IsNotEmpty, IsString, IsNumber, IsEnum, IsOptional, IsObject, ValidateNested, Min, IsDateString } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  Min,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ProductUnit, RequestStatus } from '@prisma/client';
+import { PartialType } from '@nestjs/swagger';
 
 class LocationDto {
   @IsNumber()
@@ -71,3 +82,5 @@ export class CreateBuyListingDto {
   @IsEnum(RequestStatus)
   status?: RequestStatus;
 }
+
+export class UpdateBuyListingDto extends PartialType(CreateBuyListingDto) {}

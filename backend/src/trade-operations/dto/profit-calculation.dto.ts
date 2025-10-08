@@ -289,3 +289,120 @@ export class ProfitComparisonDto {
   @ApiProperty({ example: 'INCREASE', enum: ['INCREASE', 'DECREASE', 'NO_CHANGE'] })
   trend: 'INCREASE' | 'DECREASE' | 'NO_CHANGE';
 }
+
+export class ProfitHistoryEntryDto {
+  @ApiProperty({ example: 'hist_123' })
+  id: string;
+
+  @ApiProperty({ example: 380 })
+  buyerPrice: number;
+
+  @ApiProperty({ type: [SellerPriceDto] })
+  sellerPrices: SellerPriceDto[];
+
+  @ApiProperty({ example: 38000 })
+  estimatedRevenue: number;
+
+  @ApiProperty({ example: 35200 })
+  estimatedCosts: number;
+
+  @ApiProperty({ example: 2800 })
+  estimatedProfit: number;
+
+  @ApiProperty({ example: 7.4 })
+  profitMargin: number;
+
+  @ApiPropertyOptional({ example: 'admin@agrotrade.test' })
+  createdBy?: string;
+
+  @ApiProperty({ example: '2024-01-15T12:30:00Z' })
+  createdAt: Date;
+}
+
+export class ProfitScenarioComparisonDto {
+  @ApiProperty({ type: ProfitEstimationResponseDto })
+  best: ProfitEstimationResponseDto;
+
+  @ApiProperty({ type: ProfitEstimationResponseDto })
+  worst: ProfitEstimationResponseDto;
+
+  @ApiProperty({ example: 6.5 })
+  average: number;
+
+  @ApiProperty({ example: 3 })
+  viableCount: number;
+
+  @ApiProperty({ example: 'Proceed with scenario A (highest margin > 7%)' })
+  recommendation: string;
+}
+
+export class ProfitImpactResponseDto {
+  @ApiProperty({ example: 'offer_123' })
+  offerId: string;
+
+  @ApiProperty({ example: 'BUYER', enum: ['BUYER', 'SELLER'] })
+  offerType: 'BUYER' | 'SELLER';
+
+  @ApiProperty({ example: 385 })
+  offerPrice: number;
+
+  @ApiProperty({ example: 40 })
+  offerQuantity: number;
+
+  @ApiProperty({ example: 2600 })
+  estimatedProfit: number;
+
+  @ApiProperty({ example: 6.8 })
+  profitMargin: number;
+
+  @ApiProperty({ example: 120 })
+  profitChange: number;
+
+  @ApiPropertyOptional({ example: 5200 })
+  cumulativeProfit?: number;
+
+  @ApiPropertyOptional({ example: 340 })
+  averagePurchasePrice?: number;
+
+  @ApiPropertyOptional({ example: 'Profit margin 4.9% is below minimum 5%' })
+  warning?: string;
+
+  @ApiProperty({ example: 'ACCEPT' })
+  recommendation: string;
+}
+
+export class ProfitValidationDto {
+  @ApiProperty({ example: true })
+  isValid: boolean;
+
+  @ApiProperty({ example: 7.1 })
+  currentMargin: number;
+
+  @ApiProperty({ example: 5 })
+  minimumMargin: number;
+
+  @ApiProperty({ example: 7 })
+  targetMargin: number;
+
+  @ApiProperty({ type: [String], example: [] })
+  warnings: string[];
+
+  @ApiProperty({ type: [String], example: ['Negotiate higher selling price'] })
+  recommendations: string[];
+
+  @ApiProperty({
+    type: 'object',
+    properties: {
+      revenue: { type: 'number' },
+      purchaseCosts: { type: 'number' },
+      transportCosts: { type: 'number' },
+      netProfit: { type: 'number' },
+    },
+  })
+  breakdown: {
+    revenue: number;
+    purchaseCosts: number;
+    transportCosts: number;
+    netProfit: number;
+  };
+}

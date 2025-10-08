@@ -278,11 +278,203 @@ export class SellerService {
     }
   }
 
-  // Get offers for seller's products (placeholder - implement when offer system is ready)
+  // Get offers for seller's products - fetch real negotiations
   async getSellerOffers(userId: string) {
-    // TODO: Implement proper offer fetching from database
-    // For now, return empty array to prevent frontend errors
-    return [];
+    try {
+      // Get all negotiations where this seller is involved
+      const negotiations = await this.prisma.offerNegotiation.findMany({
+        where: {
+          tradeSeller: {
+            sellerId: userId,
+          },
+        },
+        include: {
+          tradeSeller: {
+            include: {
+              seller: true,
+              saleListing: {
+                include: {
+                  product: true,
+                  address: true,
+                },
+              },
+            },
+          },
+          tradeOperation: {
+            include: {
+              admin: true,
+              buyListing: {
+                include: {
+                  product: true,
+                  buyer: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Transform negotiations to match the frontend interface
+      const offers = negotiations.map((negotiation: any) => {
+        const tradeOperation = negotiation.tradeOperation;
+        const buyer = tradeOperation.buyListing?.buyer;
+        const buyListing = tradeOperation.buyListing;
+        const product = buyListing?.product || negotiation.tradeSeller.saleListing?.product;
+        
+        // Calculate hours until expiry
+        const expiryDate = new Date(negotiation.expiresAt);
+        const now = new Date();
+        const hoursUntilExpiry = Math.max(0, Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60)));
+        const isExpiringSoon = hoursUntilExpiry <= 24;
+
+        // Calculate estimated profit based on offer vs listing price
+        const currentPrice = negotiation.currentOffer?.price || 0;
+        const listingPrice = negotiation.tradeSeller.saleListing?.askingPrice || 0;
+        const quantity = negotiation.currentOffer?.quantity || 0;
+        const estimatedProfit = (currentPrice - listingPrice) * quantity;
+
+        // Get buyer location info
+        const buyerLocation = buyListing?.address?.city ? 
+          `${buyListing.address.city.name}, ${buyListing.address.city.region?.name || 'Unknown'}` : 
+          'Location not specified';
+
+        // Get quality requirements from buy listing or trade operation
+        const qualityRequirements = this.extractQualityRequirements(buyListing);
+
+        // Format for frontend
+        return {
+          id: negotiation.id,
+          product: product?.name || 'Unknown Product',
+          quantity: negotiation.currentOffer?.quantity || 0,
+          offeredPricePerTon: negotiation.currentOffer?.price || 0,
+          totalValue: (negotiation.currentOffer?.price || 0) * (negotiation.currentOffer?.quantity || 0),
+          buyer: buyer?.name || 'Unknown Buyer',
+          buyerLocation,
+          buyerFlag: this.getCountryFlag(buyListing?.address?.country),
+          adminNote: negotiation.currentOffer?.terms || 'No additional notes provided.',
+          deadline: negotiation.expiresAt,
+          responseTime: `${hoursUntilExpiry} hours`,
+          estimatedProfit: Math.max(0, estimatedProfit),
+          qualityRequirements,
+          status: negotiation.status.toLowerCase(),
+          negotiationId: negotiation.id,
+          tradeOperationId: negotiation.tradeOperationId,
+          isExpiringSoon,
+          hoursUntilExpiry,
+          counterOffer: negotiation.counterOffer,
+          offerHistory: negotiation.offerHistory || [],
+          createdAt: negotiation.createdAt,
+          updatedAt: negotiation.updatedAt,
+        };
+      });
+
+      // Calculate summary statistics
+      const stats = {
+        totalOffers: offers.length,
+        pendingOffers: offers.filter((o: any) => o.status === 'pending').length,
+        acceptedThisMonth: offers.filter((o: any) => {
+          const offerDate = new Date(o.createdAt);
+          const now = new Date();
+          const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+          return o.status === 'accepted' && offerDate >= firstDayOfMonth;
+        }).length,
+        averageOfferValue: offers.length > 0 ? 
+          offers.reduce((sum: number, o: any) => sum + o.totalValue, 0) / offers.length : 0,
+        topRequestedProduct: this.getTopRequestedProduct(offers),
+        conversionRate: this.calculateConversionRate(offers),
+      };
+
+      return {
+        success: true,
+        data: {
+          offers,
+          stats,
+        },
+      };
+    } catch (error) {
+      console.error('Error fetching seller offers:', error);
+      throw new BadRequestException('Failed to fetch offers. Please try again.');
+    }
+  }
+
+  private extractQualityRequirements(buyListing: any): string[] {
+    const requirements = [];
+    
+    if (buyListing?.specifications) {
+      buyListing.specifications.forEach((spec: any) => {
+        if (spec.specificationType) {
+          const { name } = spec.specificationType;
+          let value = '';
+          
+          if (spec.valueText) value = spec.valueText;
+          else if (spec.valueNumber !== null) value = spec.valueNumber.toString();
+          else if (spec.valueBool !== null) value = spec.valueBool ? 'Yes' : 'No';
+          
+          if (value && value !== 'No') {
+            if (name.toLowerCase().includes('organic') && spec.valueBool) {
+              requirements.push('Organic');
+            } else if (name.toLowerCase().includes('gmo') && !spec.valueBool) {
+              requirements.push('Non-GMO');
+            } else if (name.toLowerCase().includes('protein') && spec.valueNumber) {
+              requirements.push(`Protein ${spec.valueNumber}%+`);
+            } else if (name.toLowerCase().includes('grade')) {
+              requirements.push(`Grade ${value}`);
+            } else {
+              requirements.push(`${name}: ${value}`);
+            }
+          }
+        }
+      });
+    }
+    
+    // Default requirements if none specified
+    if (requirements.length === 0) {
+      requirements.push('Standard Quality');
+    }
+    
+    return requirements;
+  }
+
+  private getCountryFlag(country: string | null | undefined): string {
+    const flagMap: { [key: string]: string } = {
+      'United States': '🇺🇸',
+      'USA': '🇺🇸',
+      'US': '🇺🇸',
+      'Canada': '🇨🇦',
+      'Germany': '🇩🇪',
+      'France': '🇫🇷',
+      'United Kingdom': '🇬🇧',
+      'UK': '🇬🇧',
+      'Singapore': '🇸🇬',
+      'Japan': '🇯🇵',
+      'China': '🇨🇳',
+      'Brazil': '🇧🇷',
+      'Argentina': '🇦🇷',
+      'Australia': '🇦🇺',
+      'Netherlands': '🇳🇱',
+    };
+    
+    return flagMap[country || ''] || '🌍';
+  }
+
+  private getTopRequestedProduct(offers: any[]): string {
+    const productCounts: { [key: string]: number } = {};
+    
+    offers.forEach(offer => {
+      productCounts[offer.product] = (productCounts[offer.product] || 0) + 1;
+    });
+    
+    const topProduct = Object.entries(productCounts)
+      .sort(([,a], [,b]) => b - a)[0];
+    
+    return topProduct ? topProduct[0] : 'N/A';
+  }
+
+  private calculateConversionRate(offers: any[]): number {
+    if (offers.length === 0) return 0;
+    
+    const acceptedOffers = offers.filter(o => o.status === 'accepted').length;
+    return (acceptedOffers / offers.length) * 100;
   }
 
   // Get active trades for seller (placeholder - implement when trade system is ready)
