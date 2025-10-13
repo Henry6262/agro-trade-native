@@ -29,9 +29,13 @@ import { Roles } from '../../auth/decorators/roles.decorator';
 import { UserRole, TradePhase, TradeStatus, ProductUnit, SellerStatus } from '@prisma/client';
 import { TradeOperationService } from '../services/trade-operation.service';
 import { ProfitCalculationService } from '../services/profit-calculation.service';
+import { TransportCostService } from '../../transport/services/transport-cost.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { NegotiationService } from '../../negotiations/services/negotiation.service';
 import {
   CreateTradeOperationDto,
   AddSellersDto,
+  CreateTradeOperationWithOffersDto,
 } from '../dto/create-trade-operation.dto';
 import {
   UpdateTradeOperationDto,
@@ -48,6 +52,8 @@ import {
   FinalizeTradeResponseDto,
   TradeProfitResponseDto,
   TradeSellerDto,
+  CalculateTransportRequestDto,
+  CalculateTransportResponseDto,
 } from '../dto/operations-extra.dto';
 
 @ApiTags('Trade Operations')
@@ -58,36 +64,105 @@ export class TradeOperationController {
   constructor(
     private readonly tradeOperationService: TradeOperationService,
     private readonly profitCalculationService: ProfitCalculationService,
+    private readonly transportCostService: TransportCostService,
+    private readonly prisma: PrismaService,
+    private readonly negotiationService: NegotiationService,
   ) {}
 
   @Post()
   // @Roles(UserRole.ADMIN) // Temporarily disabled for testing
-  @ApiOperation({ summary: 'Create a new trade operation' })
+  @ApiOperation({
+    summary: 'Create a new trade operation with initial offers to sellers',
+    description: 'Creates a trade operation, adds sellers, and sends initial negotiation offers with 48-hour expiry'
+  })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Trade operation created successfully',
-    type: TradeOperationResponseDto,
+    description: 'Trade operation created successfully with negotiations',
+    schema: {
+      example: {
+        tradeOperationId: 'clxyz123',
+        operationNumber: 'OP-1234567890-ABC',
+        negotiations: [
+          {
+            id: 'nego123',
+            sellerId: 'seller1',
+            status: 'PENDING',
+            offerPrice: 340,
+            quantity: 100,
+            expiresAt: '2025-10-13T12:00:00Z',
+            hoursUntilExpiry: 48
+          }
+        ]
+      }
+    }
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Invalid input data',
   })
   async create(
-    @Body() createDto: CreateTradeOperationDto,
+    @Body() createDto: CreateTradeOperationWithOffersDto,
     @Request() req: any,
-  ): Promise<TradeOperationResponseDto> {
+  ): Promise<any> {
     // Use default admin ID if no user is authenticated
     const adminId = req.user?.id || 'cmfoabr5f000012bsx2kj92w2'; // Default admin from DB
-    const tradeOperation = await this.tradeOperationService.createTradeOperation(
-      createDto,
-      adminId,
-    );
 
-    const summary = await this.tradeOperationService.getTradeOperationSummary(
+    // Validate buy listing exists
+    const buyListing = await this.prisma.buyListing.findUnique({
+      where: { id: createDto.buyListingId },
+      include: {
+        buyer: true,
+        product: true,
+      },
+    });
+
+    if (!buyListing) {
+      throw new NotFoundException('Buy listing not found');
+    }
+
+    if (buyListing.status !== 'ACTIVE') {
+      throw new BadRequestException('Buy listing is not active');
+    }
+
+    // Generate unique operation number
+    const operationNumber = `OP-${Date.now()}`;
+
+    // Create trade operation
+    const tradeOperation = await this.prisma.tradeOperation.create({
+      data: {
+        operationNumber,
+        buyListingId: createDto.buyListingId,
+        adminId,
+        phase: 'SELLER_NEGOTIATION',
+        status: 'ACTIVE',
+        sellingPrice: buyListing.maxPricePerUnit,
+        currency: 'EUR',
+      },
+    });
+
+    // Create trade sellers and negotiations
+    const { tradeSellers, negotiations } = await this.negotiationService.createTradeSellersWithOffers(
       tradeOperation.id,
+      createDto.sellers,
     );
 
-    return this.mapToResponseDto(summary);
+    return {
+      tradeOperationId: tradeOperation.id,
+      operationNumber: tradeOperation.operationNumber,
+      phase: tradeOperation.phase,
+      status: tradeOperation.status,
+      negotiations: negotiations.map(n => ({
+        id: n.id,
+        tradeSellerId: n.tradeSellerId,
+        sellerId: n.tradeSeller.seller.id,
+        sellerName: n.tradeSeller.seller.name,
+        status: n.status,
+        offerPrice: n.currentOffer?.price,
+        quantity: n.currentOffer?.quantity,
+        expiresAt: n.expiresAt,
+        hoursUntilExpiry: n.hoursUntilExpiry,
+      })),
+    };
   }
 
   @Get()
@@ -100,8 +175,41 @@ export class TradeOperationController {
   @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'List of trade operations',
-    type: TradeOperationListResponseDto,
+    description: 'List of trade operations with full details',
+    schema: {
+      example: {
+        data: [
+          {
+            id: 'trade123',
+            operationNumber: 'OP-1234567890',
+            phase: 'SELLER_NEGOTIATION',
+            status: 'ACTIVE',
+            buyListing: {
+              id: 'buy123',
+              quantity: 500,
+              buyer: { id: 'buyer1', name: 'Buyer Name' }
+            },
+            sellers: [
+              {
+                id: 'ts1',
+                sellerId: 'seller1',
+                status: 'NEGOTIATING'
+              }
+            ],
+            negotiations: [
+              {
+                id: 'nego1',
+                status: 'PENDING',
+                expiresAt: '2025-10-13T12:00:00Z'
+              }
+            ]
+          }
+        ],
+        total: 1,
+        page: 1,
+        limit: 10
+      }
+    }
   })
   async findAll(
     @Query('phase') phase?: TradePhase,
@@ -110,33 +218,90 @@ export class TradeOperationController {
     @Query('page') page = '1',
     @Query('limit') limit = '10',
     @Request() req?: any,
-  ): Promise<TradeOperationListResponseDto> {
-    const filters = {
-      phase,
-      status,
-      minProfitMargin: minProfitMargin ? parseFloat(minProfitMargin) : undefined,
-      // Temporarily disable admin filtering when auth is disabled
-      adminId: req?.user?.role === UserRole.ADMIN ? undefined : req?.user?.id,
-    };
-
-    const trades = await this.tradeOperationService.getActiveTrades(filters);
+  ): Promise<any> {
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
-    const start = (pageNum - 1) * limitNum;
-    const paginatedTrades = trades.slice(start, start + limitNum);
+    const skip = (pageNum - 1) * limitNum;
 
-    const responseDtos = await Promise.all(
-      paginatedTrades.map(async (trade) => {
-        const summary = await this.tradeOperationService.getTradeOperationSummary(
-          trade.id,
-        );
-        return this.mapToResponseDto(summary);
+    // Build where clause
+    const where: any = {};
+
+    if (phase) {
+      where.phase = phase;
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    // Get trade operations with all related data
+    const [operations, total] = await Promise.all([
+      this.prisma.tradeOperation.findMany({
+        where,
+        include: {
+          buyListing: {
+            include: {
+              buyer: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  displayName: true,
+                },
+              },
+            },
+          },
+          sellers: {
+            include: {
+              seller: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                },
+              },
+              saleListing: {
+                select: {
+                  id: true,
+                  quantity: true,
+                  askingPrice: true,
+                },
+              },
+            },
+          },
+          negotiations: {
+            include: {
+              tradeSeller: {
+                include: {
+                  seller: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limitNum,
       }),
-    );
+      this.prisma.tradeOperation.count({ where }),
+    ]);
 
     return {
-      data: responseDtos,
-      total: trades.length,
+      data: operations,
+      total,
       page: pageNum,
       limit: limitNum,
     };
@@ -367,6 +532,100 @@ export class TradeOperationController {
     };
   }
 
+  @Get(':id/verification-status')
+  @ApiOperation({ summary: 'Get verification status for a trade operation' })
+  @ApiParam({ name: 'id', description: 'Trade operation ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Verification status retrieved',
+    schema: {
+      example: {
+        totalSellers: 3,
+        verifiedSellers: 2,
+        allVerified: false,
+        pendingInspections: [
+          {
+            id: 'insp123',
+            saleListingId: 'sale123',
+            sellerId: 'seller123',
+            sellerName: 'John Doe Farm',
+            status: 'PENDING',
+            priority: 'HIGH',
+            requestedDate: '2025-10-11T10:00:00Z'
+          }
+        ]
+      }
+    }
+  })
+  async getVerificationStatus(@Param('id') id: string) {
+    // Get trade operation with sellers
+    const tradeOp = await this.prisma.tradeOperation.findUnique({
+      where: { id },
+      include: {
+        sellers: {
+          where: {
+            status: { in: ['ACCEPTED', 'CONFIRMED'] }
+          },
+          include: {
+            seller: {
+              select: {
+                id: true,
+                name: true,
+              }
+            },
+            saleListing: true,
+          }
+        },
+        inspections: {
+          where: {
+            status: { notIn: ['COMPLETED', 'CANCELLED'] }
+          },
+          include: {
+            saleListing: {
+              include: {
+                seller: {
+                  select: {
+                    id: true,
+                    name: true,
+                  }
+                }
+              }
+            }
+          },
+          orderBy: {
+            priority: 'desc'
+          }
+        }
+      }
+    });
+
+    if (!tradeOp) {
+      throw new NotFoundException('Trade operation not found');
+    }
+
+    const totalSellers = tradeOp.sellers.length;
+    const verifiedSellers = tradeOp.sellers.filter(s => s.isVerified).length;
+    const allVerified = totalSellers > 0 && verifiedSellers === totalSellers;
+
+    const pendingInspections = tradeOp.inspections.map(inspection => ({
+      id: inspection.id,
+      saleListingId: inspection.saleListingId,
+      sellerId: inspection.saleListing.sellerId,
+      sellerName: inspection.saleListing.seller.name || 'Unknown',
+      status: inspection.status,
+      priority: inspection.priority,
+      requestedDate: inspection.requestedDate,
+      scheduledDate: inspection.scheduledDate,
+    }));
+
+    return {
+      totalSellers,
+      verifiedSellers,
+      allVerified,
+      pendingInspections,
+    };
+  }
+
   @Post(':id/optimize-transport')
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
@@ -487,5 +746,77 @@ export class TradeOperationController {
       count: inspections.length,
       inspections,
     };
+  }
+
+  @Post('calculate-transport')
+  // @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Calculate transport costs for selected sellers to buyer address' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Transport costs calculated',
+    type: CalculateTransportResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid request data or addresses not found',
+  })
+  async calculateTransport(
+    @Body() data: CalculateTransportRequestDto,
+  ): Promise<CalculateTransportResponseDto> {
+    try {
+      // Fetch seller addresses with lat/lng
+      const sellers = await this.prisma.saleListing.findMany({
+        where: {
+          sellerId: { in: data.sellerIds }
+        },
+        include: {
+          address: true,
+        },
+      });
+
+      // Fetch buyer address with lat/lng
+      const buyerAddress = await this.prisma.address.findUnique({
+        where: { id: data.buyerAddressId },
+      });
+
+      if (!buyerAddress || !buyerAddress.latitude || !buyerAddress.longitude) {
+        throw new BadRequestException('Buyer address not found or missing coordinates');
+      }
+
+      // Prepare seller addresses with coordinates
+      const sellerAddresses = sellers
+        .filter(s => s.address && s.address.latitude && s.address.longitude)
+        .map(s => ({
+          id: s.sellerId,
+          lat: s.address!.latitude!,
+          lng: s.address!.longitude!,
+        }));
+
+      if (sellerAddresses.length === 0) {
+        throw new BadRequestException('No sellers found with valid addresses');
+      }
+
+      // Calculate transport costs
+      const results = await this.transportCostService.calculateTransportCosts(
+        sellerAddresses,
+        { lat: buyerAddress.latitude, lng: buyerAddress.longitude },
+      );
+
+      // Calculate total cost
+      const totalCost = results.reduce((sum, r) => sum + r.transportCost, 0);
+
+      return {
+        success: true,
+        results,
+        totalCost: Math.round(totalCost * 100) / 100,
+        currency: 'EUR',
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(`Failed to calculate transport costs: ${error.message}`);
+    }
   }
 }

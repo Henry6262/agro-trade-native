@@ -36,8 +36,6 @@ interface AuthRequest {
 }
 
 @ApiTags('Buyer')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('buyer')
 export class BuyerController {
   constructor(private readonly buyerService: BuyerService) {}
@@ -68,12 +66,8 @@ export class BuyerController {
     type: BuyListingResponseDto,
     isArray: true,
   })
-  async getMyBuyListings(@Request() req: AuthRequest) {
-    const listings =
-      req.user.role === UserRole.ADMIN
-        ? await this.buyerService.getAllBuyListings()
-        : await this.buyerService.getBuyerListings(req.user.id);
-
+  async getMyBuyListings(@Request() req?: AuthRequest) {
+    const listings = await this.buyerService.getAllBuyListings();
     return listings.map((listing) => this.serializeBuyListing(listing));
   }
 

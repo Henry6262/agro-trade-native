@@ -1,18 +1,22 @@
-import { 
-  Injectable, 
-  Logger, 
+import {
+  Injectable,
+  Logger,
   BadRequestException,
   NotFoundException,
   ForbiddenException,
-  ConflictException 
+  ConflictException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ProfitCalculationService } from '../../trade-operations/services/profit-calculation.service';
+import { InspectionService } from '../../inspections/inspection.service';
 import {
   NegotiationStatus,
   TradeStatus,
   SellerStatus,
   Prisma,
+  InspectionPriority,
 } from '@prisma/client';
 import { CreateOfferDto, CounterOfferDto } from '../dto/negotiation.dto';
 
@@ -93,6 +97,8 @@ export class NegotiationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly profitCalculationService: ProfitCalculationService,
+    @Inject(forwardRef(() => InspectionService))
+    private readonly inspectionService: InspectionService,
   ) {}
 
   /**
@@ -227,6 +233,131 @@ export class NegotiationService {
     }
 
     return results;
+  }
+
+  /**
+   * Create trade sellers and send batch offers in one transaction
+   * Used when creating a new trade operation with sellers
+   */
+  async createTradeSellersWithOffers(
+    tradeOperationId: string,
+    sellerOffers: Array<{
+      saleListingId: string;
+      sellerId: string;
+      quantity: number;
+      offerPrice: number;
+    }>,
+  ): Promise<{
+    tradeSellers: any[];
+    negotiations: NegotiationWithDetails[];
+  }> {
+    const tradeSellers = [];
+    const negotiations = [];
+
+    // Validate trade operation exists
+    const trade = await this.prisma.tradeOperation.findUnique({
+      where: { id: tradeOperationId },
+      include: {
+        buyListing: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+
+    if (!trade) {
+      throw new NotFoundException('Trade operation not found');
+    }
+
+    // Create each trade seller and negotiation
+    for (const offer of sellerOffers) {
+      // Validate sale listing
+      const saleListing = await this.prisma.saleListing.findUnique({
+        where: { id: offer.saleListingId },
+        include: {
+          seller: true,
+        },
+      });
+
+      if (!saleListing) {
+        throw new BadRequestException(`Sale listing ${offer.saleListingId} not found`);
+      }
+
+      if (saleListing.sellerId !== offer.sellerId) {
+        throw new BadRequestException(`Sale listing ${offer.saleListingId} does not belong to seller ${offer.sellerId}`);
+      }
+
+      if (saleListing.productId !== trade.buyListing.productId) {
+        throw new BadRequestException(`Sale listing ${offer.saleListingId} product mismatch`);
+      }
+
+      // Create trade seller
+      const tradeSeller = await this.prisma.tradeSeller.create({
+        data: {
+          tradeOperationId,
+          sellerId: offer.sellerId,
+          saleListingId: offer.saleListingId,
+          requestedQuantity: offer.quantity,
+          offeredQuantity: Number(saleListing.quantity),
+          unit: saleListing.unit,
+          status: 'INVITED',
+        },
+        include: {
+          seller: true,
+          saleListing: true,
+        },
+      });
+
+      tradeSellers.push(tradeSeller);
+
+      // Create negotiation with 48-hour expiry
+      const offerData = {
+        price: offer.offerPrice,
+        quantity: offer.quantity,
+        terms: 'Standard terms',
+        createdAt: new Date().toISOString(),
+      };
+
+      const negotiation = await this.prisma.offerNegotiation.create({
+        data: {
+          tradeOperationId,
+          tradeSellerId: tradeSeller.id,
+          status: NegotiationStatus.PENDING,
+          currentOffer: offerData,
+          offerHistory: [offerData],
+          expiresAt: new Date(Date.now() + this.DEFAULT_EXPIRY_HOURS * 60 * 60 * 1000),
+        },
+        include: {
+          tradeSeller: {
+            include: {
+              seller: true,
+              saleListing: true,
+            },
+          },
+        },
+      });
+
+      // Update trade seller status to NEGOTIATING
+      await this.prisma.tradeSeller.update({
+        where: { id: tradeSeller.id },
+        data: { status: SellerStatus.NEGOTIATING },
+      });
+
+      // Calculate profit impact
+      const profitImpact = await this.calculateProfitImpact(
+        trade,
+        offer.offerPrice,
+        offer.quantity,
+      );
+
+      negotiations.push(this.formatNegotiationWithDetails(negotiation, profitImpact));
+    }
+
+    return {
+      tradeSellers,
+      negotiations,
+    };
   }
 
   /**
@@ -551,6 +682,12 @@ export class NegotiationService {
 
     // Update trade operation totals
     await this.updateTradeOperationTotals(negotiation.tradeOperationId);
+
+    // Auto-create inspection request for this accepted seller
+    await this.autoCreateInspection(
+      negotiation.tradeOperationId,
+      negotiation.tradeSeller.saleListingId,
+    );
 
     // Check if all sellers accepted
     const updatedWithRelations = updated as any;
@@ -1044,5 +1181,104 @@ export class NegotiationService {
       return negotiation.counterOffer?.offeredBy === 'SELLER' ? 'BUYER' : 'SELLER';
     }
     return 'BUYER';
+  }
+
+  /**
+   * Auto-create inspection request when offer is accepted
+   */
+  private async autoCreateInspection(
+    tradeOperationId: string,
+    saleListingId: string,
+  ): Promise<void> {
+    try {
+      // Check if sale listing is already verified
+      const saleListing = await this.prisma.saleListing.findUnique({
+        where: { id: saleListingId },
+      });
+
+      if (!saleListing) {
+        this.logger.warn(`Sale listing ${saleListingId} not found for inspection`);
+        return;
+      }
+
+      // If already verified (has qualityScore and qualityGrade), skip
+      if (saleListing.qualityScore && saleListing.qualityGrade) {
+        this.logger.log(
+          `Sale listing ${saleListingId} already verified. Skipping inspection creation.`
+        );
+
+        // Mark trade seller as verified
+        await this.prisma.tradeSeller.updateMany({
+          where: {
+            tradeOperationId,
+            saleListingId,
+          },
+          data: {
+            isVerified: true,
+          },
+        });
+
+        return;
+      }
+
+      // Check if inspection already exists
+      const existingInspection = await this.prisma.inspectionRequest.findFirst({
+        where: {
+          tradeOperationId,
+          saleListingId,
+        },
+      });
+
+      if (existingInspection) {
+        this.logger.log(
+          `Inspection already exists for sale listing ${saleListingId} in trade ${tradeOperationId}`
+        );
+        return;
+      }
+
+      // Determine priority based on trade operation urgency
+      const tradeOp = await this.prisma.tradeOperation.findUnique({
+        where: { id: tradeOperationId },
+        include: {
+          buyListing: true,
+        },
+      });
+
+      let priority: InspectionPriority = InspectionPriority.MEDIUM;
+
+      if (tradeOp?.buyListing?.neededBy) {
+        const daysUntilNeeded = Math.floor(
+          (new Date(tradeOp.buyListing.neededBy).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        );
+
+        if (daysUntilNeeded <= 3) {
+          priority = InspectionPriority.HIGH;
+        } else if (daysUntilNeeded <= 7) {
+          priority = InspectionPriority.MEDIUM;
+        } else {
+          priority = InspectionPriority.LOW;
+        }
+      }
+
+      // Create inspection request
+      const inspection = await this.inspectionService.createInspectionRequest({
+        tradeOperationId,
+        saleListingId,
+        priority,
+        requestedDate: new Date(),
+        notes: 'Auto-created after offer acceptance',
+      });
+
+      this.logger.log(
+        `✅ Auto-created inspection request ${inspection.id} for sale listing ${saleListingId} ` +
+        `in trade operation ${tradeOperationId} with priority ${priority}`
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to auto-create inspection for sale listing ${saleListingId}: ${error.message}`,
+        error.stack,
+      );
+      // Don't throw - inspection creation failure shouldn't block offer acceptance
+    }
   }
 }

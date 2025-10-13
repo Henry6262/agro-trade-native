@@ -134,6 +134,12 @@ export class CreateTransportBidDto {
   @Min(1)
   bidAmount: number;
 
+  @ApiProperty({ description: 'Number of trucks for this bid' })
+  @IsNumber()
+  @Min(1)
+  @Max(10)
+  truckCount: number;
+
   @ApiProperty({ description: 'Estimated duration in hours' })
   @IsNumber()
   @Min(1)
@@ -144,7 +150,7 @@ export class CreateTransportBidDto {
   @IsEnum(TruckType)
   vehicleType: TruckType;
 
-  @ApiProperty({ description: 'Vehicle capacity in tons' })
+  @ApiProperty({ description: 'Vehicle capacity in tons (per truck)' })
   @IsNumber()
   @Min(1)
   vehicleCapacity: number;

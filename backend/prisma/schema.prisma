@@ -677,6 +677,8 @@ model TradeOperation {
   @@index([buyListingId])
   @@index([phase])
   @@index([status])
+  @@index([status, phase]) // Composite index for filtered queries
+  @@index([createdAt]) // For sorting by creation date
   @@map("trade_operations")
 }
 
@@ -794,6 +796,8 @@ model OfferNegotiation {
   @@index([tradeSellerId])
   @@index([status])
   @@index([expiresAt])
+  @@index([tradeOperationId, status]) // Composite index for fetching by trade op
+  @@index([status, expiresAt]) // For expiry checking queries
   @@map("offer_negotiations")
 }
 
@@ -847,6 +851,7 @@ model InspectionRequest {
   // Results
   status             InspectionStatus @default(PENDING)
   qualityScore       Int?             @map("quality_score")
+  qualityGrade       String?          @map("quality_grade")
   verificationResult Json?            @map("verification_result")
   notes              String?          @db.Text
   photos             String[]
@@ -859,6 +864,9 @@ model InspectionRequest {
   @@index([inspectorId])
   @@index([status])
   @@index([priority])
+  @@index([status, priority]) // Composite index for filtered queries
+  @@index([tradeOperationId, status]) // For fetching inspections by trade op
+  @@index([createdAt]) // For sorting
   @@map("inspection_requests")
 }
 
@@ -906,6 +914,9 @@ model TransportRequest {
   @@index([status])
   @@index([urgencyLevel])
   @@index([biddingDeadline])
+  @@index([tradeOperationId]) // For fetching by trade op
+  @@index([status, urgencyLevel]) // Composite for filtered queries
+  @@index([createdAt]) // For sorting
   @@map("transport_requests")
 }
 
@@ -958,6 +969,9 @@ model TransportBid {
   @@index([tradeOperationId])
   @@index([transporterId])
   @@index([status])
+  @@index([transportRequestId, status]) // Composite for fetching bids
+  @@index([transporterId, status]) // For transporter queries
+  @@index([submittedAt]) // For sorting
   @@map("transport_bids")
 }
 

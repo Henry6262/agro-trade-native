@@ -140,9 +140,77 @@ export class InspectionService {
     });
 
     // Sort by least active assignments
-    return inspectors.sort((a, b) => 
+    return inspectors.sort((a, b) =>
       a._count.inspectionAssignments - b._count.inspectionAssignments
     );
+  }
+
+  /**
+   * Get all inspections with optional filters and pagination
+   */
+  async getAllInspections(filters?: {
+    status?: InspectionStatus;
+    priority?: InspectionPriority;
+    skip?: number;
+    take?: number;
+  }) {
+    const where: any = {};
+
+    if (filters?.status) {
+      where.status = filters.status;
+    }
+
+    if (filters?.priority) {
+      where.priority = filters.priority;
+    }
+
+    return await this.prisma.inspectionRequest.findMany({
+      where,
+      skip: filters?.skip,
+      take: filters?.take,
+      orderBy: [
+        { priority: 'desc' },
+        { requestedDate: 'asc' },
+      ],
+      include: {
+        saleListing: {
+          include: {
+            seller: true,
+            product: true,
+          },
+        },
+        inspector: true,
+        tradeOperation: {
+          include: {
+            buyListing: {
+              include: {
+                buyer: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Count inspections matching filters
+   */
+  async countInspections(filters?: {
+    status?: InspectionStatus;
+    priority?: InspectionPriority;
+  }): Promise<number> {
+    const where: any = {};
+
+    if (filters?.status) {
+      where.status = filters.status;
+    }
+
+    if (filters?.priority) {
+      where.priority = filters.priority;
+    }
+
+    return await this.prisma.inspectionRequest.count({ where });
   }
 
   /**
@@ -461,6 +529,155 @@ export class InspectionService {
     this.logger.log(`Created ${inspections.length} inspection requests for trade operation ${tradeOperationId}`);
 
     return inspections;
+  }
+
+  /**
+   * Update inspection request (PATCH endpoint)
+   */
+  async updateInspection(
+    inspectionId: string,
+    data: {
+      status?: InspectionStatus;
+      qualityScore?: number;
+      qualityGrade?: string;
+      notes?: string;
+      photos?: string[];
+    },
+  ) {
+    const inspection = await this.prisma.inspectionRequest.findUnique({
+      where: { id: inspectionId },
+      include: {
+        saleListing: true,
+        tradeOperation: {
+          include: {
+            sellers: {
+              where: {
+                status: { in: ['ACCEPTED', 'CONFIRMED'] }
+              }
+            }
+          }
+        }
+      },
+    });
+
+    if (!inspection) {
+      throw new NotFoundException('Inspection request not found');
+    }
+
+    const updateData: any = {};
+
+    // Update fields if provided
+    if (data.status !== undefined) {
+      updateData.status = data.status;
+
+      if (data.status === InspectionStatus.COMPLETED) {
+        updateData.completedDate = new Date();
+      }
+    }
+
+    if (data.qualityScore !== undefined) {
+      updateData.qualityScore = data.qualityScore;
+    }
+
+    if (data.qualityGrade !== undefined) {
+      updateData.qualityGrade = data.qualityGrade;
+    }
+
+    if (data.notes !== undefined) {
+      updateData.notes = data.notes;
+    }
+
+    if (data.photos !== undefined) {
+      updateData.photos = data.photos;
+    }
+
+    // Update inspection
+    const updatedInspection = await this.prisma.inspectionRequest.update({
+      where: { id: inspectionId },
+      data: updateData,
+      include: {
+        saleListing: {
+          include: {
+            seller: true,
+            product: true,
+          },
+        },
+        inspector: true,
+        tradeOperation: {
+          include: {
+            buyListing: {
+              include: {
+                buyer: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // If status is COMPLETED, cascade quality data to SaleListing
+    if (data.status === InspectionStatus.COMPLETED) {
+      const saleListingUpdate: any = {};
+
+      if (data.qualityScore !== undefined) {
+        saleListingUpdate.qualityScore = data.qualityScore;
+      }
+
+      if (data.qualityGrade !== undefined) {
+        saleListingUpdate.qualityGrade = data.qualityGrade;
+      }
+
+      if (Object.keys(saleListingUpdate).length > 0) {
+        await this.prisma.saleListing.update({
+          where: { id: inspection.saleListingId },
+          data: saleListingUpdate,
+        });
+      }
+
+      // If linked to TradeOperation, update TradeSeller verification
+      if (inspection.tradeOperationId) {
+        const tradeSellers = await this.prisma.tradeSeller.findMany({
+          where: {
+            tradeOperationId: inspection.tradeOperationId,
+            saleListingId: inspection.saleListingId,
+          },
+        });
+
+        for (const tradeSeller of tradeSellers) {
+          await this.prisma.tradeSeller.update({
+            where: { id: tradeSeller.id },
+            data: { isVerified: true },
+          });
+        }
+
+        // Check if ALL sellers are now verified
+        const allSellers = await this.prisma.tradeSeller.findMany({
+          where: {
+            tradeOperationId: inspection.tradeOperationId,
+            status: { in: ['ACCEPTED', 'CONFIRMED'] }
+          },
+        });
+
+        const allVerified = allSellers.every(s => s.isVerified);
+
+        if (allVerified && allSellers.length > 0) {
+          // Update trade operation phase to TRANSPORT_MATCHING
+          await this.prisma.tradeOperation.update({
+            where: { id: inspection.tradeOperationId },
+            data: {
+              phase: 'TRANSPORT_MATCHING',
+            },
+          });
+
+          this.logger.log(
+            `✅ All sellers verified for trade operation ${inspection.tradeOperationId}. ` +
+            `Phase updated to TRANSPORT_MATCHING`
+          );
+        }
+      }
+    }
+
+    return updatedInspection;
   }
 
   /**

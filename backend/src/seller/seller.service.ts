@@ -155,6 +155,25 @@ export class SellerService {
     }
   }
 
+  async getAllSellerListings() {
+    const listings = await this.prisma.saleListing.findMany({
+      include: {
+        product: true,
+        address: {
+          include: {
+            city: true,
+          },
+        },
+        specifications: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return listings;
+  }
+
   async getSellerListings(userId: string) {
     const listings = await this.prisma.saleListing.findMany({
       where: { sellerId: userId },

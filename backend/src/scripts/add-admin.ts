@@ -1,4 +1,5 @@
 import { PrismaClient, UserRole } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -18,13 +19,15 @@ async function addAdmin() {
       console.log(`   Email: ${admin.email}`);
     } else {
       console.log('Creating new admin user...');
-      
+
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+
       admin = await prisma.user.create({
         data: {
           email: 'admin@agrotrade.com',
           name: 'System Admin',
           role: UserRole.ADMIN,
-          password: 'admin123',
+          password: hashedPassword,
           isEmailVerified: true,
           onboardingCompleted: true,
           isActive: true,

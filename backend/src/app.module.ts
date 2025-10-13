@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { PrismaModule } from './prisma/prisma.module';
@@ -15,6 +15,9 @@ import { InspectionModule } from './inspections/inspection.module';
 import { NotificationModule } from './notifications/notification.module';
 import { TransportCompanyModule } from './transport-company/transport-company.module';
 import { SimulationModule } from './simulation/simulation.module';
+import { RegionsModule } from './regions/regions.module';
+import { CacheModule } from './cache/cache.module';
+import { ResponseTimeMiddleware } from './common/middleware/response-time.middleware';
 
 @Module({
   imports: [
@@ -22,6 +25,7 @@ import { SimulationModule } from './simulation/simulation.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    CacheModule, // Add cache module for performance
     PrismaModule,
     AuthModule,
     OnboardingModule,
@@ -35,6 +39,7 @@ import { SimulationModule } from './simulation/simulation.module';
     InspectionModule,
     NotificationModule,
     SimulationModule,
+    RegionsModule,
   ],
   providers: [
     // Temporarily disabled for testing
@@ -44,4 +49,11 @@ import { SimulationModule } from './simulation/simulation.module';
     // },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Apply response time logging to all routes
+    consumer
+      .apply(ResponseTimeMiddleware)
+      .forRoutes('*');
+  }
+}

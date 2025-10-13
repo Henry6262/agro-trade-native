@@ -7,7 +7,7 @@ import {
   profitService
 } from '../services/api';
 import TransportManagement from './TransportManagement';
-import ReplacementSellerFinder from './ReplacementSellerFinder';
+// import ReplacementSellerFinder from './ReplacementSellerFinder'; // Disabled - not part of Phase 1
 import { 
   X,
   RefreshCw,
@@ -555,8 +555,8 @@ export const TradeDetails: React.FC<Props> = ({ operation, onClose, onUpdate }) 
         />
       )}
       
-      {/* Replacement Seller Finder Modal */}
-      {showReplacementFinder && (
+      {/* Replacement Seller Finder Modal - Disabled (not part of Phase 1) */}
+      {/* {showReplacementFinder && (
         <ReplacementSellerFinder
           tradeOperation={operation}
           failedSeller={showReplacementFinder}
@@ -567,7 +567,7 @@ export const TradeDetails: React.FC<Props> = ({ operation, onClose, onUpdate }) 
           }}
           onClose={() => setShowReplacementFinder(null)}
         />
-      )}
+      )} */}
     </div>
   );
 };

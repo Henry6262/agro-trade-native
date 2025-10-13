@@ -7,6 +7,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Delete,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,7 +18,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole, TruckType, BidStatus, TransportJobStatus, InspectionStatus } from '@prisma/client';
 import { SimulationService } from './simulation.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTestUserDto } from './dto/create-test-user.dto';
@@ -271,9 +272,9 @@ export class SimulationController {
         tradeOperationId: request.tradeOperationId,
         bidAmount: dto.bidAmount,
         estimatedDuration: dto.estimatedDuration,
-        vehicleType: dto.vehicleType || 'FLATBED',
+        vehicleType: (dto.vehicleType as TruckType) || TruckType.FLATBED,
         vehicleCapacity: dto.vehicleCapacity || 20,
-        status: 'PENDING',
+        status: BidStatus.PENDING,
         submittedAt: new Date(),
         expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
       },
@@ -310,7 +311,7 @@ export class SimulationController {
     await this.prisma.transportJob.update({
       where: { id: dto.jobId },
       data: {
-        status: 'IN_PROGRESS',
+        status: TransportJobStatus.IN_TRANSIT,
         startedAt: new Date(),
       },
     });
@@ -385,7 +386,7 @@ export class SimulationController {
       where: { id: dto.inspectionId },
       data: {
         inspectorId: userId,
-        status: 'ASSIGNED',
+        status: InspectionStatus.SCHEDULED,
       },
     });
 
@@ -493,7 +494,15 @@ export class SimulationController {
       longitude?: number;
     }
   ) {
-    return this.simulationService.createFarmerSaleListing(farmerId, dto);
+    try {
+      console.log('[Controller] createFarmerSaleListing called with:', { farmerId, dto });
+      const result = await this.simulationService.createFarmerSaleListing(farmerId, dto);
+      console.log('[Controller] createFarmerSaleListing success:', result);
+      return result;
+    } catch (error) {
+      console.error('[Controller] createFarmerSaleListing ERROR:', error);
+      throw error;
+    }
   }
 
   @Post('admin/create-trade-operation')
@@ -627,5 +636,12 @@ export class SimulationController {
       newPrice: dto.newPrice,
       reason: dto.reason,
     });
+  }
+
+  @Delete('admin/cleanup-test-data')
+  @ApiOperation({ summary: 'Delete all test users and related data' })
+  @HttpCode(HttpStatus.OK)
+  async cleanupTestData() {
+    return this.simulationService.cleanupTestData();
   }
 }

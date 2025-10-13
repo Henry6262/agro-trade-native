@@ -84,3 +84,53 @@ export class AddSellersDto {
   @Type(() => SellerToAddDto)
   sellers: SellerToAddDto[];
 }
+
+export class SellerOfferDto {
+  @ApiProperty({
+    description: 'Sale listing ID',
+    example: 'cmf89d7s80008md43r3njqt4p'
+  })
+  @IsString()
+  saleListingId: string;
+
+  @ApiProperty({
+    description: 'Seller user ID',
+    example: 'cmf899npe003mmd437u4ojxe2'
+  })
+  @IsString()
+  sellerId: string;
+
+  @ApiProperty({
+    description: 'Quantity to offer',
+    example: 100
+  })
+  @IsNumber()
+  @Min(0)
+  quantity: number;
+
+  @ApiProperty({
+    description: 'Offer price per unit',
+    example: 340
+  })
+  @IsNumber()
+  @Min(0)
+  offerPrice: number;
+}
+
+export class CreateTradeOperationWithOffersDto {
+  @ApiProperty({
+    description: 'ID of the buy listing to create a trade operation for',
+    example: 'cmfk0hzzh0004bfffxe82z2jz',
+  })
+  @IsString()
+  buyListingId: string;
+
+  @ApiProperty({
+    description: 'List of sellers to send initial offers to',
+    type: [SellerOfferDto],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SellerOfferDto)
+  sellers: SellerOfferDto[];
+}

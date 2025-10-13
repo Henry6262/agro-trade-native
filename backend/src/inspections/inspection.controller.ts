@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -32,9 +33,10 @@ import {
   InspectorMissionDto,
   SubmitInspectionResultsDto,
   UpdateInspectionStatusDto,
+  UpdateInspectionDto,
 } from './dto/inspection.dto';
 import { InspectionService } from './inspection.service';
-import { InspectionStatus } from '@prisma/client';
+import { InspectionStatus, InspectionPriority } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 interface AuthenticatedRequest {
@@ -107,6 +109,57 @@ export class InspectionController {
     );
 
     return this.serializeInspection(inspection);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all inspection requests with filters and pagination' })
+  @ApiQuery({ name: 'status', enum: InspectionStatus, required: false })
+  @ApiQuery({ name: 'priority', enum: InspectionPriority, required: false })
+  @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
+  @ApiQuery({ name: 'limit', type: Number, required: false, example: 20 })
+  @ApiOkResponse({
+    description: 'List of inspections with pagination',
+    schema: {
+      example: {
+        data: [],
+        pagination: {
+          page: 1,
+          limit: 20,
+          total: 100,
+          totalPages: 5
+        }
+      }
+    }
+  })
+  async getAllInspections(
+    @Query('status') status?: InspectionStatus,
+    @Query('priority') priority?: InspectionPriority,
+    @Query('page') page = '1',
+    @Query('limit') limit = '20',
+  ) {
+    const pageNum = parseInt(page);
+    const limitNum = Math.min(parseInt(limit), 100); // Max 100 per page
+    const skip = (pageNum - 1) * limitNum;
+
+    const [inspections, total] = await Promise.all([
+      this.inspectionService.getAllInspections({
+        status,
+        priority,
+        skip,
+        take: limitNum,
+      }),
+      this.inspectionService.countInspections({ status, priority }),
+    ]);
+
+    return {
+      data: inspections.map((inspection) => this.serializeInspection(inspection)),
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+      },
+    };
   }
 
   @Get('inspectors')
@@ -236,6 +289,25 @@ export class InspectionController {
   })
   async getStats() {
     return this.inspectionService.getInspectionStats();
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update inspection (for completion)' })
+  @ApiBody({ type: UpdateInspectionDto })
+  @ApiOkResponse({
+    description: 'Inspection updated',
+    type: InspectionResponseDto,
+  })
+  async updateInspection(
+    @Param('id') inspectionId: string,
+    @Body() payload: UpdateInspectionDto,
+  ) {
+    const inspection = await this.inspectionService.updateInspection(
+      inspectionId,
+      payload,
+    );
+
+    return this.serializeInspection(inspection);
   }
 
   private serializeInspection(entity: any): InspectionResponseDto {

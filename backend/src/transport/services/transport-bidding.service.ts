@@ -1,14 +1,14 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { 
-  TransportRequestStatus, 
-  BidStatus, 
+import {
+  TransportRequestStatus,
+  BidStatus,
   TransportJobStatus,
   UrgencyLevel,
   TradePhase,
   Prisma
 } from '@prisma/client';
-import { 
+import {
   CreateTransportRequestDto,
   CreateTransportBidDto,
   UpdateTransportJobStatusDto,
@@ -18,12 +18,71 @@ import {
   GetTransportBidsQueryDto,
   GetTransportJobsQueryDto
 } from '../dto/transport-bidding.dto';
+import { TransportCostService } from './transport-cost.service';
 
 @Injectable()
 export class TransportBiddingService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(TransportBiddingService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private transportCostService: TransportCostService
+  ) {}
 
   // ==================== TRANSPORT REQUESTS ====================
+
+  /**
+   * Auto-create transport request when all sellers are verified
+   * This is called internally when trade operation phase changes to TRANSPORT_MATCHING
+   */
+  async autoCreateTransportRequestForTrade(tradeOperationId: string): Promise<any> {
+    this.logger.log(`Auto-creating transport request for trade operation: ${tradeOperationId}`);
+
+    // Get trade operation to calculate total weight
+    const tradeOperation = await this.prisma.tradeOperation.findUnique({
+      where: { id: tradeOperationId },
+      include: {
+        sellers: {
+          where: { status: 'ACCEPTED', isVerified: true }
+        }
+      }
+    });
+
+    if (!tradeOperation) {
+      throw new NotFoundException('Trade operation not found');
+    }
+
+    // Calculate total weight from all accepted sellers
+    const totalWeight = tradeOperation.sellers.reduce(
+      (sum, seller) => sum + Number(seller.agreedQuantity || seller.requestedQuantity),
+      0
+    );
+
+    if (totalWeight === 0) {
+      this.logger.warn(`No weight to transport for trade operation ${tradeOperationId}`);
+      return null;
+    }
+
+    // Set bidding deadline to 48 hours from now
+    const biddingDeadline = new Date();
+    biddingDeadline.setHours(biddingDeadline.getHours() + 48);
+
+    // Set delivery deadline to 7 days from now (can be adjusted)
+    const deliveryDeadline = new Date();
+    deliveryDeadline.setDate(deliveryDeadline.getDate() + 7);
+
+    const dto: CreateTransportRequestDto = {
+      tradeOperationId,
+      totalWeight,
+      requiredVehicleType: undefined, // Let transporters decide
+      specialRequirements: [],
+      urgencyLevel: UrgencyLevel.STANDARD,
+      biddingDeadline: biddingDeadline.toISOString(),
+      deliveryDeadline: deliveryDeadline.toISOString()
+    };
+
+    return this.createTransportRequest(dto);
+  }
 
   async createTransportRequest(dto: CreateTransportRequestDto) {
     // Get trade operation with sellers and buyer info
@@ -45,6 +104,9 @@ export class TransportBiddingService {
                 address: true
               }
             }
+          },
+          where: {
+            status: 'ACCEPTED'
           }
         }
       }
@@ -54,31 +116,76 @@ export class TransportBiddingService {
       throw new NotFoundException('Trade operation not found');
     }
 
+    if (tradeOperation.sellers.length === 0) {
+      throw new BadRequestException('No accepted sellers in this trade operation');
+    }
+
+    // Check if delivery address has coordinates
+    if (!tradeOperation.buyListing.deliveryAddress?.latitude ||
+        !tradeOperation.buyListing.deliveryAddress?.longitude) {
+      throw new BadRequestException('Buyer delivery address must have valid coordinates');
+    }
+
     // Create pickup points from accepted sellers
-    const pickupPoints = tradeOperation.sellers
-      .filter(s => s.status === 'ACCEPTED')
-      .map(s => ({
+    const pickupPoints = tradeOperation.sellers.map(s => {
+      if (!s.saleListing.address?.latitude || !s.saleListing.address?.longitude) {
+        this.logger.warn(`Seller ${s.sellerId} has no valid coordinates`);
+      }
+      return {
         sellerId: s.sellerId,
+        saleListingId: s.saleListingId,
         sellerName: s.seller.name,
         location: {
           lat: s.saleListing.address?.latitude || 0,
           lng: s.saleListing.address?.longitude || 0,
           address: s.saleListing.address?.street || 'Unknown'
         },
-        quantity: s.agreedQuantity || s.requestedQuantity,
+        quantity: Number(s.agreedQuantity || s.requestedQuantity),
         unit: s.unit
-      }));
+      };
+    });
 
     // Create delivery point from buyer
     const deliveryPoint = {
       buyerId: tradeOperation.buyListing.buyerId,
       buyerName: tradeOperation.buyListing.buyer.name,
       location: {
-        lat: tradeOperation.buyListing.deliveryAddress?.latitude || 0,
-        lng: tradeOperation.buyListing.deliveryAddress?.longitude || 0,
-        address: tradeOperation.buyListing.deliveryAddress?.street || 'Unknown'
+        lat: tradeOperation.buyListing.deliveryAddress.latitude,
+        lng: tradeOperation.buyListing.deliveryAddress.longitude,
+        address: tradeOperation.buyListing.deliveryAddress.street || 'Unknown'
       }
     };
+
+    // Calculate distance and estimated cost using TransportCostService
+    let estimatedDistance = 0;
+    let estimatedCost = 0;
+
+    try {
+      const estimation = await this.transportCostService.estimateCost(
+        pickupPoints.map(p => ({
+          lat: p.location.lat,
+          lng: p.location.lng,
+          quantity: p.quantity,
+          id: p.sellerId
+        })),
+        {
+          lat: deliveryPoint.location.lat,
+          lng: deliveryPoint.location.lng
+        },
+        {
+          vehicleType: dto.requiredVehicleType,
+          urgency: dto.urgencyLevel === UrgencyLevel.EXPRESS ? 'EXPRESS' : 'NORMAL'
+        }
+      );
+
+      estimatedDistance = estimation.totalDistance;
+      estimatedCost = estimation.totalCost;
+
+      this.logger.log(`Transport estimation: ${estimatedDistance}km, €${estimatedCost}`);
+    } catch (error) {
+      this.logger.error('Failed to calculate transport cost', error);
+      // Continue with request creation even if estimation fails
+    }
 
     // Generate request number
     const requestNumber = `TR-${Date.now().toString(36).toUpperCase()}`;
@@ -93,20 +200,25 @@ export class TransportBiddingService {
         specialRequirements: dto.specialRequirements || [],
         pickupPoints,
         deliveryPoint,
+        estimatedDistance: estimatedDistance > 0 ? estimatedDistance : undefined,
         pickupWindowStart: dto.pickupWindowStart ? new Date(dto.pickupWindowStart) : undefined,
         pickupWindowEnd: dto.pickupWindowEnd ? new Date(dto.pickupWindowEnd) : undefined,
         deliveryDeadline: dto.deliveryDeadline ? new Date(dto.deliveryDeadline) : undefined,
         urgencyLevel: dto.urgencyLevel || UrgencyLevel.STANDARD,
         status: TransportRequestStatus.OPEN,
         biddingDeadline: new Date(dto.biddingDeadline),
-        maxBudget: dto.maxBudget
+        maxBudget: dto.maxBudget || (estimatedCost > 0 ? new Prisma.Decimal(estimatedCost * 1.3) : undefined)
       }
     });
 
-    // Update trade operation phase to TRANSPORT_MATCHING
+    // Update trade operation phase and estimated transport cost
     await this.prisma.tradeOperation.update({
       where: { id: dto.tradeOperationId },
-      data: { phase: TradePhase.TRANSPORT_MATCHING }
+      data: {
+        phase: TradePhase.TRANSPORT_MATCHING,
+        estimatedTransportCost: estimatedCost > 0 ? new Prisma.Decimal(estimatedCost) : undefined,
+        totalDistanceKm: estimatedDistance > 0 ? estimatedDistance : undefined
+      }
     });
 
     return transportRequest;
@@ -206,7 +318,9 @@ export class TransportBiddingService {
         bids: {
           include: {
             transporter: true,
-            },
+            assignedTruck: true,
+            transportCompany: true
+          },
           orderBy: {
             bidAmount: 'asc'
           }
@@ -218,7 +332,62 @@ export class TransportBiddingService {
       throw new NotFoundException('Transport request not found');
     }
 
-    return request;
+    // Calculate truck tracking logic
+    const totalWeight = request.totalWeight;
+    const TRUCK_CAPACITY = 20; // Assume 1 truck = 20 tons capacity
+    const trucksNeeded = Math.ceil(totalWeight / TRUCK_CAPACITY);
+
+    // Count accepted bids' truck counts
+    const acceptedBids = request.bids.filter(b => b.status === BidStatus.ACCEPTED);
+    const trucksReserved = acceptedBids.reduce((sum, bid) => {
+      // If bid has truckCount metadata in proposedRoute, use it
+      // Otherwise calculate from vehicle capacity
+      const truckCount = (bid.proposedRoute as any)?.truckCount || Math.ceil(bid.vehicleCapacity / TRUCK_CAPACITY);
+      return sum + truckCount;
+    }, 0);
+
+    const trucksRemaining = Math.max(0, trucksNeeded - trucksReserved);
+    const fulfillmentPercentage = trucksNeeded > 0 ? Math.round((trucksReserved / trucksNeeded) * 100) : 0;
+
+    // Also include estimated cost from platform
+    let estimatedCostFromPlatform = null;
+    if (request.estimatedDistance) {
+      try {
+        const estimation = await this.transportCostService.estimateCost(
+          (request.pickupPoints as any[]).map(p => ({
+            lat: p.location.lat,
+            lng: p.location.lng,
+            quantity: p.quantity,
+            id: p.sellerId
+          })),
+          {
+            lat: (request.deliveryPoint as any).location.lat,
+            lng: (request.deliveryPoint as any).location.lng
+          },
+          {
+            vehicleType: request.requiredVehicleType || undefined,
+            urgency: request.urgencyLevel === UrgencyLevel.EXPRESS ? 'EXPRESS' : 'NORMAL'
+          }
+        );
+        estimatedCostFromPlatform = estimation.totalCost;
+      } catch (error) {
+        this.logger.error('Failed to recalculate transport cost', error);
+      }
+    }
+
+    return {
+      ...request,
+      estimatedCostFromPlatform,
+      truckTracking: {
+        totalWeight,
+        truckCapacity: TRUCK_CAPACITY,
+        trucksNeeded,
+        trucksReserved,
+        trucksRemaining,
+        fulfillmentPercentage,
+        isFullyAssigned: trucksRemaining === 0
+      }
+    };
   }
 
   // ==================== TRANSPORT BIDS ====================
@@ -254,7 +423,12 @@ export class TransportBiddingService {
       throw new BadRequestException('You already have an active bid for this request');
     }
 
-    // Create bid
+    // Create bid with truckCount metadata in proposedRoute
+    const proposedRoute = dto.proposedRoute || {};
+    if (dto.truckCount) {
+      (proposedRoute as any).truckCount = dto.truckCount;
+    }
+
     const bid = await this.prisma.transportBid.create({
       data: {
         transportRequestId: dto.transportRequestId,
@@ -267,7 +441,7 @@ export class TransportBiddingService {
         assignedTruckId: dto.assignedTruckId,
         specialEquipment: dto.specialEquipment || [],
         insuranceCoverage: dto.insuranceCoverage,
-        proposedRoute: dto.proposedRoute,
+        proposedRoute,
         pickupSchedule: dto.pickupSchedule,
         status: BidStatus.PENDING,
         submittedAt: new Date(),

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { simulationApi } from '../services/simulationApi';
+import { simulationApi, scenarioContext } from '../services/simulationApi';
 import type { UserRole, SimulationUser } from '../services/simulationApi';
+import type { ScenarioStep } from '../types/scenario';
 import {
   getHappyPathScenario,
   getInspectionFailureScenario,
@@ -14,18 +15,9 @@ import {
 import { ProgressDashboard } from './ProgressDashboard';
 import { EnhancedStepCard } from './EnhancedStepCard';
 import { MetricsSidebar } from './MetricsSidebar';
-
-interface ScenarioStep {
-  step: number;
-  description: string;
-  actor: UserRole | 'ADMIN';
-  action: string;
-  payload?: any;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed';
-  result?: any;
-  error?: string;
-  duration?: number;
-}
+import { TradeFlowDiagram } from './TradeFlowDiagram';
+import { DatabaseStatePanel } from './DatabaseStatePanel';
+import { ScenarioBuilder } from './ScenarioBuilder';
 
 // Tracked entity state
 interface ScenarioState {
@@ -57,6 +49,9 @@ export const ScenarioOrchestrator: React.FC = () => {
   const [scenarioSteps, setScenarioSteps] = useState<ScenarioStep[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [totalDuration, setTotalDuration] = useState(0);
+  const [breakpoints, setBreakpoints] = useState<Set<number>>(new Set());
+  const [autoRunSpeed, setAutoRunSpeed] = useState(1000); // milliseconds between steps
+  const [activeView, setActiveView] = useState<'execution' | 'flow' | 'database' | 'builder'>('execution');
 
   // Scenario state tracking
   const [scenarioState, setScenarioState] = useState<ScenarioState>({
@@ -111,6 +106,10 @@ export const ScenarioOrchestrator: React.FC = () => {
       ]);
 
       setUsers({ buyers, farmers, transporters, inspectors });
+
+      // Sync with scenarioContext
+      scenarioContext.setUsers({ buyers, farmers, transporters, inspectors });
+      console.log('[ScenarioOrchestrator] Synced users with context:', scenarioContext.getStats());
     } catch (error) {
       console.error('Failed to load users:', error);
     }
@@ -734,14 +733,40 @@ export const ScenarioOrchestrator: React.FC = () => {
     }
   };
 
-  // Auto-run all steps
+  // Auto-run all steps with breakpoint support
   const autoRunScenario = async () => {
     setIsRunning(true);
-    for (let i = 0; i < scenarioSteps.length; i++) {
+    for (let i = currentStep; i < scenarioSteps.length; i++) {
+      // Check if breakpoint is set at this step
+      if (breakpoints.has(i) && i > currentStep) {
+        alert(`⏸️ Breakpoint hit at step ${i + 1}`);
+        setIsRunning(false);
+        setCurrentStep(i);
+        return;
+      }
+
       await executeStep(i);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay between steps
+      await new Promise((resolve) => setTimeout(resolve, autoRunSpeed));
     }
     setIsRunning(false);
+  };
+
+  // Toggle breakpoint
+  const toggleBreakpoint = (stepIndex: number) => {
+    const newBreakpoints = new Set(breakpoints);
+    if (newBreakpoints.has(stepIndex)) {
+      newBreakpoints.delete(stepIndex);
+    } else {
+      newBreakpoints.add(stepIndex);
+    }
+    setBreakpoints(newBreakpoints);
+  };
+
+  // Jump to specific step
+  const jumpToStep = (stepIndex: number) => {
+    if (stepIndex >= 0 && stepIndex < scenarioSteps.length) {
+      setCurrentStep(stepIndex);
+    }
   };
 
   // Login screen
@@ -896,8 +921,29 @@ export const ScenarioOrchestrator: React.FC = () => {
                 </div>
               </div>
 
+              {/* Debug Controls */}
+              {executionMode === 'auto' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Auto-Run Speed
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min="200"
+                      max="5000"
+                      step="200"
+                      value={autoRunSpeed}
+                      onChange={(e) => setAutoRunSpeed(Number(e.target.value))}
+                      className="flex-1"
+                    />
+                    <span className="text-sm text-gray-600">{(autoRunSpeed / 1000).toFixed(1)}s</span>
+                  </div>
+                </div>
+              )}
+
               {/* Advanced Controls */}
-              <div className="flex gap-3 items-center">
+              <div className="flex gap-3 items-center flex-wrap">
                 <button
                   onClick={() => {
                     const json = JSON.stringify({ scenarioName: selectedScenario, steps: scenarioSteps, totalDuration }, null, 2);
@@ -955,8 +1001,56 @@ export const ScenarioOrchestrator: React.FC = () => {
           )}
         </div>
 
-        {/* Main Content Area with Sidebar */}
+        {/* View Tabs */}
         {scenarioSteps.length > 0 && (
+          <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div className="flex gap-2 border-b border-gray-200">
+              <button
+                onClick={() => setActiveView('execution')}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                  activeView === 'execution'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                📊 Execution
+              </button>
+              <button
+                onClick={() => setActiveView('flow')}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                  activeView === 'flow'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                🔄 Flow Diagram
+              </button>
+              <button
+                onClick={() => setActiveView('database')}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                  activeView === 'database'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                🗄️ Database
+              </button>
+              <button
+                onClick={() => setActiveView('builder')}
+                className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                  activeView === 'builder'
+                    ? 'border-blue-600 text-blue-600'
+                    : 'border-transparent text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                🛠️ Builder
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content Area */}
+        {scenarioSteps.length > 0 && activeView === 'execution' && (
           <div className="grid grid-cols-3 gap-6">
             {/* Left Column - Steps */}
             <div className="col-span-2 space-y-6">
@@ -998,7 +1092,19 @@ export const ScenarioOrchestrator: React.FC = () => {
 
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {scenarioSteps.map((step, index) => (
-                    <EnhancedStepCard key={index} step={step} index={index} />
+                    <div key={index} className="relative">
+                      {/* Breakpoint indicator */}
+                      <button
+                        onClick={() => toggleBreakpoint(index)}
+                        className={`absolute -left-6 top-3 w-4 h-4 rounded-full border-2 ${
+                          breakpoints.has(index)
+                            ? 'bg-red-500 border-red-600'
+                            : 'bg-white border-gray-300 hover:border-red-400'
+                        }`}
+                        title={breakpoints.has(index) ? 'Remove breakpoint' : 'Add breakpoint'}
+                      />
+                      <EnhancedStepCard step={step} index={index} />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -1009,6 +1115,26 @@ export const ScenarioOrchestrator: React.FC = () => {
               <MetricsSidebar steps={scenarioSteps} totalDuration={totalDuration} />
             </div>
           </div>
+        )}
+
+        {/* Flow Diagram View */}
+        {scenarioSteps.length > 0 && activeView === 'flow' && (
+          <TradeFlowDiagram scenarioState={scenarioState} currentPhase="" />
+        )}
+
+        {/* Database State View */}
+        {scenarioSteps.length > 0 && activeView === 'database' && (
+          <DatabaseStatePanel scenarioState={scenarioState} onRefresh={loadUsers} />
+        )}
+
+        {/* Scenario Builder View */}
+        {activeView === 'builder' && (
+          <ScenarioBuilder
+            onSaveScenario={(name, steps) => {
+              console.log('Saved scenario:', name, steps);
+              // TODO: Implement scenario persistence
+            }}
+          />
         )}
 
         {/* Users Overview */}

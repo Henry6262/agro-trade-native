@@ -6,6 +6,9 @@ module.exports = {
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(@faker-js)/)',
+  ],
   collectCoverageFrom: [
     'src/**/*.(t|j)s',
     '!src/main.ts',
@@ -18,5 +21,10 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/test/setup/jest.setup.ts'],
   moduleNameMapper: {
     '^src/(.*)$': '<rootDir>/src/$1',
+  },
+  globals: {
+    'ts-jest': {
+      isolatedModules: true,
+    },
   },
 };

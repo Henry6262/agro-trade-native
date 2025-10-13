@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsArray, IsNotEmpty, IsString, ArrayMinSize } from 'class-validator';
 import { ProductUnit, SellerStatus } from '@prisma/client';
 
 export class TradeSellerDto {
@@ -75,4 +76,49 @@ export class TradeProfitResponseDto {
 
   @ApiProperty({ type: 'object' })
   data: Record<string, any>;
+}
+
+export class CalculateTransportRequestDto {
+  @ApiProperty({
+    description: 'Array of seller IDs to calculate transport from',
+    example: ['seller_123', 'seller_456'],
+    type: [String]
+  })
+  @IsArray()
+  @ArrayMinSize(1, { message: 'At least one seller ID is required' })
+  @IsString({ each: true })
+  sellerIds: string[];
+
+  @ApiProperty({
+    description: 'Buyer address ID to calculate transport to',
+    example: 'addr_789'
+  })
+  @IsNotEmpty({ message: 'Buyer address ID is required' })
+  @IsString()
+  buyerAddressId: string;
+}
+
+export class TransportCostResultDto {
+  @ApiProperty({ example: 'seller_123' })
+  sellerId: string;
+
+  @ApiProperty({ example: 145.3, description: 'Distance in kilometers' })
+  distance: number;
+
+  @ApiProperty({ example: 21.8, description: 'Transport cost in EUR' })
+  transportCost: number;
+}
+
+export class CalculateTransportResponseDto {
+  @ApiProperty({ example: true })
+  success: boolean;
+
+  @ApiProperty({ type: [TransportCostResultDto] })
+  results: TransportCostResultDto[];
+
+  @ApiProperty({ example: 145.6, description: 'Total transport cost for all sellers' })
+  totalCost: number;
+
+  @ApiProperty({ example: 'EUR' })
+  currency: string;
 }

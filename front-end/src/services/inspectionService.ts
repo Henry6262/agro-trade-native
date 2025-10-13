@@ -1,4 +1,4 @@
-import { api } from '@shared/utils/api';
+import { apiClient } from './api';
 
 export interface InspectionRequest {
   id: string;
@@ -16,6 +16,7 @@ export interface InspectionRequest {
   notes?: string;
   photos: string[];
   qualityScore?: number;
+  qualityGrade?: string;
   verificationResult?: any;
   inspector?: {
     id: string;
@@ -58,6 +59,7 @@ export interface CreateInspectionRequestDto {
 
 export interface SubmitInspectionResultsDto {
   qualityScore: number;
+  qualityGrade?: string;
   verificationResult: {
     actualQuantity?: number;
     actualQuality?: string;
@@ -66,6 +68,8 @@ export interface SubmitInspectionResultsDto {
     brokenGrains?: number;
     discoloration?: boolean;
     pestDamage?: boolean;
+    pestInfestation?: boolean;
+    storageConditions?: string;
     productSpecifications?: {
       variety?: string;
       grade?: string;
@@ -90,7 +94,7 @@ export interface InspectionStats {
 export const inspectionService = {
   // Create an inspection request
   async createInspectionRequest(data: CreateInspectionRequestDto): Promise<InspectionRequest> {
-    const response = await api.post('/inspections', data);
+    const response = await apiClient.post('/inspections', data);
     return response.data;
   },
 
@@ -100,7 +104,7 @@ export const inspectionService = {
     saleListingIds: string[],
     priority: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM'
   ): Promise<InspectionRequest[]> {
-    const response = await api.post(`/inspections/batch`, {
+    const response = await apiClient.post(`/inspections/batch`, {
       tradeOperationId,
       saleListingIds,
       priority,
@@ -114,28 +118,47 @@ export const inspectionService = {
     saleListingIds: string[],
     priority: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM'
   ): Promise<InspectionRequest[]> {
-    const response = await api.post(`/trade-operations/${tradeOperationId}/request-inspections`, {
+    const response = await apiClient.post(`/trade-operations/${tradeOperationId}/request-inspections`, {
       saleListingIds,
       priority,
     });
     return response.data;
   },
 
+  // Get all inspections with pagination and filters
+  async getAllInspections(params?: {
+    status?: 'PENDING' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+    priority?: 'LOW' | 'MEDIUM' | 'HIGH';
+    page?: number;
+    limit?: number;
+  }): Promise<{
+    data: InspectionRequest[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      totalPages: number;
+    };
+  }> {
+    const response = await apiClient.get('/inspections', { params });
+    return response.data;
+  },
+
   // Get all inspections for a trade operation
   async getInspectionsByTradeOperation(tradeOperationId: string): Promise<InspectionRequest[]> {
-    const response = await api.get(`/inspections/trade-operation/${tradeOperationId}`);
+    const response = await apiClient.get(`/inspections/trade-operation/${tradeOperationId}`);
     return response.data;
   },
 
   // Get available inspectors
   async getAvailableInspectors(): Promise<any[]> {
-    const response = await api.get('/inspections/inspectors/available');
+    const response = await apiClient.get('/inspections/inspectors');
     return response.data;
   },
 
   // Assign an inspector to an inspection
   async assignInspector(inspectionId: string, inspectorId: string): Promise<InspectionRequest> {
-    const response = await api.patch(`/inspections/${inspectionId}/assign`, { inspectorId });
+    const response = await apiClient.put(`/inspections/${inspectionId}/assign`, { inspectorId });
     return response.data;
   },
 
@@ -144,7 +167,16 @@ export const inspectionService = {
     inspectionId: string,
     status: 'PENDING' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
   ): Promise<InspectionRequest> {
-    const response = await api.patch(`/inspections/${inspectionId}/status`, { status });
+    const response = await apiClient.put(`/inspections/${inspectionId}/status`, { status });
+    return response.data;
+  },
+
+  // Complete inspection with results (PATCH endpoint for backward compatibility)
+  async completeInspection(
+    inspectionId: string,
+    data: SubmitInspectionResultsDto
+  ): Promise<InspectionRequest> {
+    const response = await apiClient.patch(`/inspections/${inspectionId}`, data);
     return response.data;
   },
 
@@ -153,7 +185,7 @@ export const inspectionService = {
     inspectionId: string,
     data: SubmitInspectionResultsDto
   ): Promise<InspectionRequest> {
-    const response = await api.post(`/inspections/${inspectionId}/results`, data);
+    const response = await apiClient.post(`/inspections/${inspectionId}/results`, data);
     return response.data;
   },
 
@@ -163,19 +195,19 @@ export const inspectionService = {
     status?: 'PENDING' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED'
   ): Promise<InspectionRequest[]> {
     const params = status ? { status } : {};
-    const response = await api.get(`/inspections/inspector/${inspectorId}`, { params });
+    const response = await apiClient.get(`/inspections/inspector/${inspectorId}`, { params });
     return response.data;
   },
 
   // Get single inspection details
   async getInspection(inspectionId: string): Promise<InspectionRequest> {
-    const response = await api.get(`/inspections/${inspectionId}`);
+    const response = await apiClient.get(`/inspections/${inspectionId}`);
     return response.data;
   },
 
   // Get inspection statistics
   async getInspectionStats(): Promise<InspectionStats> {
-    const response = await api.get('/inspections/stats');
+    const response = await apiClient.get('/inspections/stats');
     return response.data;
   },
 };

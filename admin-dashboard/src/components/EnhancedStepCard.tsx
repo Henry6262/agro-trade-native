@@ -1,16 +1,5 @@
 import React from 'react';
-
-interface ScenarioStep {
-  step: number;
-  description: string;
-  actor: string;
-  action: string;
-  payload?: any;
-  status: 'pending' | 'in_progress' | 'completed' | 'failed';
-  result?: any;
-  error?: string;
-  duration?: number;
-}
+import type { ScenarioStep } from '../types/scenario';
 
 interface EnhancedStepCardProps {
   step: ScenarioStep;

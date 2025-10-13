@@ -313,20 +313,68 @@ export class TransportCostService {
   }
 
   /**
+   * Calculate distance between two coordinates (public method for controllers)
+   */
+  calculateDistanceBetweenCoordinates(
+    lat1: number,
+    lng1: number,
+    lat2: number,
+    lng2: number,
+  ): number {
+    return this.haversineDistance({ lat: lat1, lng: lng1 }, { lat: lat2, lng: lng2 });
+  }
+
+  /**
+   * Calculate transport costs for multiple seller addresses to a buyer address
+   */
+  async calculateTransportCosts(
+    sellerAddresses: Array<{ id: string; lat: number; lng: number }>,
+    buyerAddress: { lat: number; lng: number },
+  ): Promise<Array<{ sellerId: string; distance: number; transportCost: number }>> {
+    const results = [];
+    const settings = await this.getActiveSettings();
+    const costPerKm = Number(settings.baseRatePerKm) || 0.15;
+
+    for (const seller of sellerAddresses) {
+      const distance = this.haversineDistance(
+        { lat: seller.lat, lng: seller.lng },
+        buyerAddress,
+      );
+      const transportCost = distance * costPerKm;
+
+      results.push({
+        sellerId: seller.id,
+        distance: Math.round(distance * 10) / 10,
+        transportCost: Math.round(transportCost * 100) / 100,
+      });
+    }
+
+    return results;
+  }
+
+  /**
    * Calculate distance between two points using Haversine formula
+   * Public method for external use
+   */
+  public calculateDistance(point1: Location, point2: Location): number {
+    return this.haversineDistance(point1, point2);
+  }
+
+  /**
+   * Calculate distance between two points using Haversine formula (internal)
    */
   private haversineDistance(point1: Location, point2: Location): number {
     const R = 6371; // Earth's radius in km
     const dLat = this.toRad(point2.lat - point1.lat);
     const dLng = this.toRad(point2.lng - point1.lng);
-    
+
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRad(point1.lat)) *
       Math.cos(this.toRad(point2.lat)) *
       Math.sin(dLng / 2) *
       Math.sin(dLng / 2);
-    
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   }

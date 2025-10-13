@@ -40,8 +40,6 @@ interface AuthRequest {
 }
 
 @ApiTags('Seller')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
 @Controller('seller')
 export class SellerController {
   constructor(private readonly sellerService: SellerService) {}
@@ -80,8 +78,8 @@ export class SellerController {
     type: SellerListingResponseDto,
     isArray: true,
   })
-  async getMyListings(@Request() req: AuthRequest) {
-    const listings = await this.sellerService.getSellerListings(req.user.id);
+  async getMyListings(@Request() req?: AuthRequest) {
+    const listings = await this.sellerService.getAllSellerListings();
     return listings.map((listing) => this.serializeListing(listing));
   }
 

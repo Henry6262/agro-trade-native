@@ -1,6 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_URL } from '../config/api';
-import { useAuthStore } from '@stores/auth.store';
+import { apiClient } from './api';
 
 export interface TransportPickupPoint {
   lat: number;
@@ -139,168 +137,88 @@ export interface TransporterPerformance {
   recentJobs: TransportJob[];
 }
 
-interface ApiResponse<T> {
-  data: T;
-  error?: { code: string; message: string };
-}
-
-class TransportService {
-  private getHeaders = async () => {
-    let token = useAuthStore.getState().token;
-
-    if (!token) {
-      const persisted = await AsyncStorage.getItem('auth-storage');
-      if (persisted) {
-        try {
-          const parsed = JSON.parse(persisted);
-          token = parsed?.state?.token ?? null;
-        } catch (error) {
-          console.warn('Failed to parse persisted auth storage', error);
-        }
-      }
-    }
-
-    return {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-    };
-  };
-
-  // Get available transport requests (for bidding)
-  async getAvailableRequests(): Promise<TransportRequest[]> {
+export const transportService = {
+  // Get all transport requests (with optional filters)
+  async getTransportRequests(params?: {
+    status?: string;
+    urgencyLevel?: string;
+  }): Promise<TransportRequest[]> {
     try {
-      const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/transport/requests/available`, {
-        method: 'GET',
-        headers,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch transport requests');
-      }
-
-      const data: ApiResponse<TransportRequest[]> = await response.json();
-      return data.data || [];
+      const response = await apiClient.get('/transport/requests', { params });
+      return response.data;
     } catch (error) {
       console.error('Error fetching transport requests:', error);
       throw error;
     }
-  }
+  },
 
   // Get transport request by ID
   async getRequestById(requestId: string): Promise<TransportRequest> {
     try {
-      const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/transport/requests/${requestId}`, {
-        method: 'GET',
-        headers,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch transport request');
-      }
-
-      const data: ApiResponse<TransportRequest> = await response.json();
-      return data.data;
+      const response = await apiClient.get(`/transport/requests/${requestId}`);
+      return response.data;
     } catch (error) {
       console.error('Error fetching transport request:', error);
       throw error;
     }
-  }
+  },
 
   // Submit a bid for a transport request
   async submitBid(bidData: {
     transportRequestId: string;
+    tradeOperationId: string;
     bidAmount: number;
     estimatedDuration: number;
-    vehicleType: string;
+    vehicleType?: string;
     vehicleCapacity?: number;
     expiresAt?: string;
   }): Promise<TransportBid> {
     try {
-      const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/transport/bids`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(bidData),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to submit bid');
-      }
-
-      const data: ApiResponse<TransportBid> = await response.json();
-      return data.data;
+      const response = await apiClient.post('/transport/bids', bidData);
+      return response.data;
     } catch (error) {
       console.error('Error submitting bid:', error);
       throw error;
     }
-  }
+  },
 
-  // Get my bids
-  async getMyBids(): Promise<TransportBid[]> {
+  // Get transport bids (for transporter - filtered by their ID automatically)
+  async getMyBids(params?: {
+    transportRequestId?: string;
+    status?: string;
+  }): Promise<TransportBid[]> {
     try {
-      const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/transport/my-bids`, {
-        method: 'GET',
-        headers,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch bids');
-      }
-
-      const data: ApiResponse<TransportBid[]> = await response.json();
-      return data.data || [];
+      const response = await apiClient.get('/transport/bids', { params });
+      return response.data;
     } catch (error) {
       console.error('Error fetching bids:', error);
       throw error;
     }
-  }
+  },
 
-  // Get my transport jobs
-  async getMyJobs(): Promise<TransportJob[]> {
+  // Get transport jobs (for transporter - filtered by their ID automatically)
+  async getMyJobs(params?: {
+    status?: string;
+  }): Promise<TransportJob[]> {
     try {
-      const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/transport/my-jobs`, {
-        method: 'GET',
-        headers,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch jobs');
-      }
-
-      const data: ApiResponse<TransportJob[]> = await response.json();
-      return data.data || [];
+      const response = await apiClient.get('/transport/jobs', { params });
+      return response.data;
     } catch (error) {
       console.error('Error fetching jobs:', error);
       throw error;
     }
-  }
+  },
 
   // Start a transport job
   async startJob(jobId: string, payload?: { actualPickupTime?: string; notes?: string }): Promise<TransportJob> {
     try {
-      const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/transport/jobs/${jobId}/start`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(payload ?? {}),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to start job');
-      }
-
-      const data: ApiResponse<TransportJob> = await response.json();
-      return data.data;
+      const response = await apiClient.post(`/transport/jobs/${jobId}/start`, payload ?? {});
+      return response.data;
     } catch (error) {
       console.error('Error starting job:', error);
       throw error;
     }
-  }
+  },
 
   // Update job status
   async updateJobStatus(jobId: string, statusData: {
@@ -310,24 +228,13 @@ class TransportService {
     notes?: string;
   }): Promise<TransportJob> {
     try {
-      const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/transport/jobs/${jobId}/status`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(statusData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update job status');
-      }
-
-      const data: ApiResponse<TransportJob> = await response.json();
-      return data.data;
+      const response = await apiClient.put(`/transport/jobs/${jobId}/status`, statusData);
+      return response.data;
     } catch (error) {
       console.error('Error updating job status:', error);
       throw error;
     }
-  }
+  },
 
   // Complete pickup
   async completePickup(jobId: string, pickupData: {
@@ -336,24 +243,13 @@ class TransportService {
     pickupPhotos?: string[];
   }): Promise<TransportJob> {
     try {
-      const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/transport/jobs/${jobId}/pickup`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(pickupData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to complete pickup');
-      }
-
-      const data: ApiResponse<TransportJob> = await response.json();
-      return data.data;
+      const response = await apiClient.post(`/transport/jobs/${jobId}/pickup`, pickupData);
+      return response.data;
     } catch (error) {
       console.error('Error completing pickup:', error);
       throw error;
     }
-  }
+  },
 
   // Complete delivery
   async completeDelivery(jobId: string, deliveryData: {
@@ -363,44 +259,24 @@ class TransportService {
     recipientSignature?: string;
   }): Promise<TransportJob> {
     try {
-      const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/transport/jobs/${jobId}/deliver`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(deliveryData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to complete delivery');
-      }
-
-      const data: ApiResponse<TransportJob> = await response.json();
-      return data.data;
+      const response = await apiClient.post(`/transport/jobs/${jobId}/delivery`, deliveryData);
+      return response.data;
     } catch (error) {
       console.error('Error completing delivery:', error);
       throw error;
     }
-  }
+  },
 
+  // Get transporter performance metrics
   async getTransporterPerformance(transporterId: string): Promise<TransporterPerformance> {
     try {
-      const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/transport/analytics/transporter-performance/${transporterId}`, {
-        method: 'GET',
-        headers,
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch transporter performance');
-      }
-
-      const data: ApiResponse<TransporterPerformance> = await response.json();
-      return data.data;
+      const response = await apiClient.get(`/transport/analytics/transporter-performance/${transporterId}`);
+      return response.data;
     } catch (error) {
       console.error('Error fetching transporter performance:', error);
       throw error;
     }
-  }
-}
+  },
+};
 
-export default new TransportService();
+export default transportService;

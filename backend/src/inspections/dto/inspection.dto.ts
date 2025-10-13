@@ -72,6 +72,34 @@ export class UpdateInspectionStatusDto {
   status: InspectionStatus;
 }
 
+export class UpdateInspectionDto {
+  @ApiPropertyOptional({ enum: InspectionStatus })
+  @IsOptional()
+  @IsEnum(InspectionStatus)
+  status?: InspectionStatus;
+
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @IsNumber()
+  qualityScore?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  qualityGrade?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
+  @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  photos?: string[];
+}
+
 export class InspectionProductSummaryDto {
   @ApiProperty()
   id: string;

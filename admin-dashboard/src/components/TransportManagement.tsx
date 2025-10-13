@@ -353,7 +353,9 @@ export default function TransportManagement({ tradeOperation, onUpdate }: Transp
             id: seller.id,
             sellerId: seller.sellerId,
             sellerName: seller.seller?.name || `Seller ${index + 1}`,
-            location: seller.seller?.location || 'Unknown Location',
+            location: typeof seller.seller?.location === 'object'
+              ? seller.seller.location.address || 'Unknown Location'
+              : seller.seller?.location || 'Unknown Location',
             coordinates: {
               lat: 42.5 + (Math.random() - 0.5) * 1.5,
               lng: 23.0 + (Math.random() - 0.5) * 2,

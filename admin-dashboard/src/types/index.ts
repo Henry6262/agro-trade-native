@@ -35,6 +35,11 @@ export interface User {
   phoneNumber?: string;
   city?: string;
   region?: string;
+  location?: {
+    lat: number;
+    lng: number;
+    address?: string;
+  };
 }
 
 export interface Product {
@@ -44,6 +49,7 @@ export interface Product {
   category: string;
   description?: string;
   specifications?: Record<string, any>;
+  quality?: string;
 }
 
 export interface BuyListing {
@@ -100,10 +106,12 @@ export interface TradeSeller {
   tradeOperationId: string;
   sellerId: string;
   saleListingId: string;
-  status: 'INVITED' | 'NEGOTIATING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
+  status: 'INVITED' | 'NEGOTIATING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN' | 'FAILED_INSPECTION';
   requestedQuantity: number;
   unit: string;
   finalPrice?: number;
+  agreedPrice?: number;
+  agreedQuantity?: number;
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;
@@ -123,6 +131,7 @@ export interface TradeOperation {
   totalPurchaseCost?: number;
   estimatedTransportCost?: number;
   finalRevenue?: number;
+  metadata?: Record<string, any>;
   createdAt: string;
   updatedAt: string;
   buyListing?: BuyListing;

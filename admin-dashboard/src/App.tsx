@@ -2,11 +2,15 @@ import React, { useState } from 'react';
 import { TradeOperationsTable } from './components/TradeOperationsTable';
 import { TradeCreationWizard } from './components/TradeCreationWizard';
 import { TradeDetails } from './components/TradeDetails';
-import { ScenarioOrchestrator } from './components/ScenarioOrchestrator';
+import { ProfessionalScenarioRunner } from './components/ProfessionalScenarioRunner';
+import { MatchingDashboard } from './components/MatchingDashboard/MatchingDashboard';
+import { TransportManagement } from './components/TransportManagement/TransportManagement';
 import * as Types from './types';
-import { Package, FlaskConical } from 'lucide-react';
+import { Package, FlaskConical, Map, ClipboardCheck, Truck } from 'lucide-react';
+import { InspectorPortal } from './components/InspectorPortal/InspectorPortal';
+import AutoLogin from './components/AutoLogin';
 
-type View = 'operations' | 'scenarios';
+type View = 'operations' | 'scenarios' | 'matching' | 'inspections' | 'transport';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('operations');
@@ -19,6 +23,7 @@ function App() {
   };
 
   return (
+    <AutoLogin>
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
@@ -31,6 +36,17 @@ function App() {
               </h1>
               <div className="ml-4 flex gap-2">
                 <button
+                  onClick={() => setCurrentView('matching')}
+                  className={`px-3 py-1 text-xs font-semibold rounded-full flex items-center gap-1 ${
+                    currentView === 'matching'
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <Map className="w-3 h-3" />
+                  Map Matching
+                </button>
+                <button
                   onClick={() => setCurrentView('operations')}
                   className={`px-3 py-1 text-xs font-semibold rounded-full ${
                     currentView === 'operations'
@@ -39,6 +55,28 @@ function App() {
                   }`}
                 >
                   Trade Operations
+                </button>
+                <button
+                  onClick={() => setCurrentView('inspections')}
+                  className={`px-3 py-1 text-xs font-semibold rounded-full flex items-center gap-1 ${
+                    currentView === 'inspections'
+                      ? 'bg-teal-100 text-teal-800'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <ClipboardCheck className="w-3 h-3" />
+                  Inspections
+                </button>
+                <button
+                  onClick={() => setCurrentView('transport')}
+                  className={`px-3 py-1 text-xs font-semibold rounded-full flex items-center gap-1 ${
+                    currentView === 'transport'
+                      ? 'bg-orange-100 text-orange-800'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  <Truck className="w-3 h-3" />
+                  Transport
                 </button>
                 <button
                   onClick={() => setCurrentView('scenarios')}
@@ -61,17 +99,23 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {currentView === 'operations' ? (
+      {currentView === 'matching' ? (
+        <MatchingDashboard />
+      ) : currentView === 'scenarios' ? (
+        <ProfessionalScenarioRunner />
+      ) : currentView === 'inspections' ? (
+        <InspectorPortal />
+      ) : currentView === 'transport' ? (
+        <TransportManagement />
+      ) : (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <TradeOperationsTable
             key={refreshKey}
             onSelectOperation={setSelectedOperation}
             onCreateNew={() => setShowCreation(true)}
           />
-        ) : (
-          <ScenarioOrchestrator />
-        )}
-      </main>
+        </main>
+      )}
 
       {/* Modals */}
       {showCreation && (
@@ -92,6 +136,7 @@ function App() {
         />
       )}
     </div>
+    </AutoLogin>
   );
 }
 

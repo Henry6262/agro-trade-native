@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserRole } from '@prisma/client';
+import { UserRole, TransportRequestStatus } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -76,7 +76,7 @@ export class SimulationService {
             },
           },
         },
-        transportRequests: {
+        transportRequest: {
           include: {
             bids: {
               include: {
@@ -92,7 +92,7 @@ export class SimulationService {
             transportJob: true,
           },
         },
-        inspectionRequests: {
+        inspections: {
           include: {
             inspector: {
               select: {
@@ -131,9 +131,10 @@ export class SimulationService {
       (n) => n.status === 'PENDING'
     ).length;
 
-    const activeTransport = operation.transportRequests.find(
-      (r) => r.status === 'ACCEPTED' || r.status === 'IN_PROGRESS'
-    );
+    const activeTransport = operation.transportRequest &&
+      (operation.transportRequest.status === TransportRequestStatus.ASSIGNED || operation.transportRequest.status === TransportRequestStatus.IN_PROGRESS)
+      ? operation.transportRequest
+      : null;
 
     return {
       operation,
@@ -155,18 +156,18 @@ export class SimulationService {
             }
           : null,
         inspections: {
-          total: operation.inspectionRequests.length,
-          pending: operation.inspectionRequests.filter(
+          total: operation.inspections.length,
+          pending: operation.inspections.filter(
             (i) => i.status === 'PENDING'
           ).length,
-          completed: operation.inspectionRequests.filter(
+          completed: operation.inspections.filter(
             (i) => i.status === 'COMPLETED'
           ).length,
         },
       },
       actors: {
         buyer: operation.buyListing.buyer,
-        sellers: operation.sellers.map((s) => ({
+        sellers: operation.sellers.map((s: any) => ({
           id: s.seller.id,
           name: s.seller.name,
           email: s.seller.email,
@@ -175,7 +176,7 @@ export class SimulationService {
           offeredQuantity: Number(s.offeredQuantity),
         })),
         transporters: activeTransport
-          ? activeTransport.bids.map((b) => ({
+          ? activeTransport.bids.map((b: any) => ({
               id: b.transporter.id,
               name: b.transporter.name,
               email: b.transporter.email,
@@ -183,11 +184,11 @@ export class SimulationService {
               bidStatus: b.status,
             }))
           : [],
-        inspectors: operation.inspectionRequests.map((i) => ({
+        inspectors: (operation as any).inspectionRequests?.map((i: any) => ({
           inspector: i.inspector,
           inspectionStatus: i.status,
           verificationResult: i.verificationResult,
-        })),
+        })) || [],
       },
     };
   }
@@ -202,40 +203,51 @@ export class SimulationService {
     latitude?: number;
     longitude?: number;
   }) {
-    // Get or create product
-    let product = await this.prisma.product.findFirst({
-      where: { category: data.productCategory as any },
-    });
+    try {
+      console.log('[createFarmerSaleListing] Input:', { farmerId, data });
 
-    if (!product) {
-      // Create a basic product if it doesn't exist
-      product = await this.prisma.product.create({
-        data: {
-          category: data.productCategory as any,
-          name: data.productCategory.toLowerCase(),
-          displayName: data.productCategory,
-        },
+      // Get or create product
+      let product = await this.prisma.product.findFirst({
+        where: { category: data.productCategory as any },
       });
-    }
 
-    // Create sale listing
-    const saleListing = await this.prisma.saleListing.create({
-      data: {
+      console.log('[createFarmerSaleListing] Found product:', product);
+
+      if (!product) {
+        // Create a basic product if it doesn't exist
+        product = await this.prisma.product.create({
+          data: {
+            category: data.productCategory as any,
+            name: data.productCategory.toLowerCase(),
+            displayName: data.productCategory,
+          },
+        });
+        console.log('[createFarmerSaleListing] Created product:', product);
+      }
+
+      // Create sale listing
+      const saleListingData = {
         sellerId: farmerId,
         productId: product.id,
         quantity: data.quantity,
-        unit: 'TON',
-        pricePerUnit: data.pricePerUnit,
-        quality: 'PREMIUM',
-        status: 'ACTIVE',
-        availableFrom: new Date(),
-        availableUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000), // 90 days
-        latitude: data.latitude || 40.7128, // Default NYC
-        longitude: data.longitude || -74.0060,
-      },
-    });
+        unit: 'TON' as any,
+        askingPrice: data.pricePerUnit,
+        qualityGrade: 'Premium',
+        status: 'ACTIVE' as any,
+      };
 
-    return saleListing;
+      console.log('[createFarmerSaleListing] Creating sale listing with data:', saleListingData);
+
+      const saleListing = await this.prisma.saleListing.create({
+        data: saleListingData,
+      });
+
+      console.log('[createFarmerSaleListing] Created sale listing:', saleListing);
+      return saleListing;
+    } catch (error) {
+      console.error('[createFarmerSaleListing] ERROR:', error);
+      throw error;
+    }
   }
 
   /**
@@ -255,15 +267,24 @@ export class SimulationService {
       throw new Error('Buy listing not found');
     }
 
+    // Get an admin user (in simulation, use the first admin found)
+    const admin = await this.prisma.user.findFirst({
+      where: { role: 'ADMIN' },
+    });
+
+    if (!admin) {
+      throw new Error('No admin user found');
+    }
+
     // Create trade operation
+    const operationNumber = `OP-${Date.now()}`;
     const tradeOp = await this.prisma.tradeOperation.create({
       data: {
+        operationNumber,
+        adminId: admin.id,
         buyListingId,
         phase: 'SELLER_MATCHING',
-        status: 'IN_PROGRESS',
-        adminMargin: data.adminMargin,
-        buyerCommission: data.buyerCommission,
-        sellerCommission: data.sellerCommission,
+        status: 'ACTIVE',
       },
     });
 
@@ -295,16 +316,18 @@ export class SimulationService {
         },
       });
 
-      // Create OfferNegotiation
+      // Create OfferNegotiation (expires in 48 hours)
       const negotiation = await this.prisma.offerNegotiation.create({
         data: {
           tradeSellerId: tradeSeller.id,
+          tradeOperationId,
           status: 'PENDING',
           currentOffer: {
             price: offer.offeredPrice,
             quantity: offer.requestedQuantity,
             timestamp: new Date().toISOString(),
           },
+          expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
         },
       });
 
@@ -344,7 +367,7 @@ export class SimulationService {
       data: {
         status: 'ACCEPTED',
         agreedQuantity: counterOffer?.quantity || negotiation.tradeSeller.requestedQuantity,
-        finalPrice: counterOffer?.price,
+        agreedPrice: counterOffer?.price,
       },
     });
 
@@ -372,8 +395,11 @@ export class SimulationService {
           saleListingId: ts.saleListingId,
           tradeOperationId,
           inspectorId,
-          status: 'ASSIGNED',
+          status: 'SCHEDULED',
           scheduledDate: new Date(),
+          latitude: 24.4539, // Default Abu Dhabi coordinates for simulation
+          longitude: 54.3773,
+          address: 'Farm Location',
         },
       });
 
@@ -407,16 +433,36 @@ export class SimulationService {
       Math.pow((data.deliveryLng - data.pickupLng) * 111, 2)
     );
 
-    // Create transport request
+    // Get trade operation to calculate total weight
+    const tradeOp = await this.prisma.tradeOperation.findUnique({
+      where: { id: tradeOperationId },
+      include: {
+        buyListing: true,
+        sellers: {
+          where: { status: 'ACCEPTED' }
+        }
+      }
+    });
+
+    if (!tradeOp) {
+      throw new Error('Trade operation not found');
+    }
+
+    const totalWeight = tradeOp.sellers.reduce((sum, s) => sum + Number(s.agreedQuantity || 0), 0);
+
+    // Create transport request using correct schema
+    const requestNumber = `TR-${Date.now()}`;
     const transportRequest = await this.prisma.transportRequest.create({
       data: {
+        requestNumber,
         tradeOperationId,
-        pickupLatitude: data.pickupLat,
-        pickupLongitude: data.pickupLng,
-        deliveryLatitude: data.deliveryLat,
-        deliveryLongitude: data.deliveryLng,
-        status: 'PENDING',
-        requiredBy: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        totalWeight,
+        pickupPoints: [{ lat: data.pickupLat, lng: data.pickupLng, address: 'Farm Location' }],
+        deliveryPoint: { lat: data.deliveryLat, lng: data.deliveryLng, address: 'Buyer Location' },
+        estimatedDistance: distanceKm,
+        status: 'OPEN',
+        biddingDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000),
+        deliveryDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
 
@@ -430,36 +476,39 @@ export class SimulationService {
         estimatedDuration: data.estimatedDuration,
         vehicleType: 'FLATBED',
         vehicleCapacity: 30,
-        status: 'ACCEPTED', // Directly accept for simulation
-        submittedAt: new Date(),
+        status: 'ACCEPTED',
         expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
+        acceptedAt: new Date(),
+        evaluatedAt: new Date(),
       },
     });
 
     // Create transport job
+    const jobNumber = `JOB-${Date.now()}`;
     const transportJob = await this.prisma.transportJob.create({
       data: {
+        jobNumber,
         transportRequestId: transportRequest.id,
+        transportBidId: transportBid.id,
         transporterId: data.transporterId,
         tradeOperationId,
         status: 'ASSIGNED',
-        pickupLocation: `${data.pickupLat},${data.pickupLng}`,
-        deliveryLocation: `${data.deliveryLat},${data.deliveryLng}`,
-        estimatedDistance: distanceKm,
-        agreedPrice: data.bidAmount,
       },
     });
 
-    // Update transport request
+    // Update transport request to ASSIGNED
     await this.prisma.transportRequest.update({
       where: { id: transportRequest.id },
-      data: { status: 'ACCEPTED' },
+      data: {
+        status: 'ASSIGNED',
+        selectedBidId: transportBid.id,
+      },
     });
 
-    // Update trade operation
+    // Update trade operation to IN_TRANSIT
     await this.prisma.tradeOperation.update({
       where: { id: tradeOperationId },
-      data: { phase: 'TRANSPORT_IN_PROGRESS' },
+      data: { phase: 'IN_TRANSIT' },
     });
 
     return { transportRequest, transportBid, transportJob, distanceKm };
@@ -496,15 +545,34 @@ export class SimulationService {
       Math.pow((data.deliveryLng - data.pickupLng) * 111, 2)
     );
 
+    // Get trade operation to calculate total weight
+    const tradeOp = await this.prisma.tradeOperation.findUnique({
+      where: { id: tradeOperationId },
+      include: {
+        sellers: {
+          where: { status: 'ACCEPTED' }
+        }
+      }
+    });
+
+    if (!tradeOp) {
+      throw new Error('Trade operation not found');
+    }
+
+    const totalWeight = tradeOp.sellers.reduce((sum, s) => sum + Number(s.agreedQuantity || 0), 0);
+
+    const requestNumber = `TR-${Date.now()}`;
     const transportRequest = await this.prisma.transportRequest.create({
       data: {
+        requestNumber,
         tradeOperationId,
-        pickupLatitude: data.pickupLat,
-        pickupLongitude: data.pickupLng,
-        deliveryLatitude: data.deliveryLat,
-        deliveryLongitude: data.deliveryLng,
-        status: 'PENDING',
-        requiredBy: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        totalWeight,
+        pickupPoints: [{ lat: data.pickupLat, lng: data.pickupLng, address: 'Farm Location' }],
+        deliveryPoint: { lat: data.deliveryLat, lng: data.deliveryLng, address: 'Buyer Location' },
+        estimatedDistance: distanceKm,
+        status: 'OPEN',
+        biddingDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000),
+        deliveryDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
     });
 
@@ -529,10 +597,9 @@ export class SimulationService {
         tradeOperationId: data.tradeOperationId,
         bidAmount: data.bidAmount,
         estimatedDuration: data.estimatedDuration,
-        vehicleType: data.vehicleType || 'FLATBED',
+        vehicleType: (data.vehicleType || 'FLATBED') as any,
         vehicleCapacity: 30,
         status: 'PENDING',
-        submittedAt: new Date(),
         expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
       },
     });
@@ -557,7 +624,11 @@ export class SimulationService {
     // Update bid status
     await this.prisma.transportBid.update({
       where: { id: bidId },
-      data: { status: 'ACCEPTED' },
+      data: {
+        status: 'ACCEPTED',
+        acceptedAt: new Date(),
+        evaluatedAt: new Date(),
+      },
     });
 
     // Reject other bids
@@ -567,36 +638,38 @@ export class SimulationService {
         id: { not: bidId },
         status: 'PENDING',
       },
-      data: { status: 'REJECTED' },
+      data: {
+        status: 'REJECTED',
+        evaluatedAt: new Date(),
+      },
     });
 
     // Create transport job
+    const jobNumber = `JOB-${Date.now()}`;
     const transportJob = await this.prisma.transportJob.create({
       data: {
+        jobNumber,
         transportRequestId,
+        transportBidId: bidId,
         transporterId: winningBid.transporterId,
         tradeOperationId: winningBid.tradeOperationId,
         status: 'ASSIGNED',
-        pickupLocation: `${winningBid.transportRequest.pickupLatitude},${winningBid.transportRequest.pickupLongitude}`,
-        deliveryLocation: `${winningBid.transportRequest.deliveryLatitude},${winningBid.transportRequest.deliveryLongitude}`,
-        estimatedDistance: Math.sqrt(
-          Math.pow((winningBid.transportRequest.deliveryLatitude - winningBid.transportRequest.pickupLatitude) * 111, 2) +
-          Math.pow((winningBid.transportRequest.deliveryLongitude - winningBid.transportRequest.pickupLongitude) * 111, 2)
-        ),
-        agreedPrice: winningBid.bidAmount,
       },
     });
 
     // Update transport request
     await this.prisma.transportRequest.update({
       where: { id: transportRequestId },
-      data: { status: 'ACCEPTED' },
+      data: {
+        status: 'ASSIGNED',
+        selectedBidId: bidId,
+      },
     });
 
     // Update trade operation phase
     await this.prisma.tradeOperation.update({
       where: { id: winningBid.tradeOperationId },
-      data: { phase: 'TRANSPORT_IN_PROGRESS' },
+      data: { phase: 'IN_TRANSIT' },
     });
 
     return { transportJob, winningBid, message: `Selected bid from transporter for €${winningBid.bidAmount}` };
@@ -708,5 +781,85 @@ export class SimulationService {
     });
 
     return createdUser;
+  }
+
+  /**
+   * Cleanup all test data (users with test- emails and their related data)
+   */
+  async cleanupTestData() {
+    try {
+      // Find all test users
+      const testUsers = await this.prisma.user.findMany({
+        where: {
+          email: {
+            startsWith: 'test-',
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+        },
+      });
+
+      if (testUsers.length === 0) {
+        return {
+          success: true,
+          message: 'No test users found to clean up',
+          deletedCount: 0,
+        };
+      }
+
+      const userIds = testUsers.map((u) => u.id);
+
+      // Delete in correct order to respect foreign key constraints
+      // Note: Cascade deletes should handle most of this, but being explicit
+
+      // Delete related data first
+      await this.prisma.transportBid.deleteMany({
+        where: { transporterId: { in: userIds } },
+      });
+
+      await this.prisma.transportJob.deleteMany({
+        where: { transporterId: { in: userIds } },
+      });
+
+      await this.prisma.inspectionRequest.deleteMany({
+        where: { inspectorId: { in: userIds } },
+      });
+
+      await this.prisma.tradeSeller.deleteMany({
+        where: { sellerId: { in: userIds } },
+      });
+
+      await this.prisma.tradeTransporter.deleteMany({
+        where: { transporterId: { in: userIds } },
+      });
+
+      // Delete listings
+      await this.prisma.saleListing.deleteMany({
+        where: { sellerId: { in: userIds } },
+      });
+
+      await this.prisma.buyListing.deleteMany({
+        where: { buyerId: { in: userIds } },
+      });
+
+      // Delete users (cascade should handle companies and addresses)
+      const deleteResult = await this.prisma.user.deleteMany({
+        where: {
+          id: { in: userIds },
+        },
+      });
+
+      return {
+        success: true,
+        message: `Successfully cleaned up ${deleteResult.count} test users and their related data`,
+        deletedCount: deleteResult.count,
+        emails: testUsers.map((u) => u.email),
+      };
+    } catch (error) {
+      console.error('Cleanup test data error:', error);
+      throw new Error(`Failed to cleanup test data: ${error.message}`);
+    }
   }
 }
