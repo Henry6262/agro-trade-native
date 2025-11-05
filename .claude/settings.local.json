@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "SlashCommand(/daily)",
+      "SlashCommand(/verify)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

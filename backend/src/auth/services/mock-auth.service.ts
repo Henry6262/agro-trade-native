@@ -16,10 +16,11 @@ export class MockAuthService {
       role,
       name: 'Test User',
       iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour expiry
+      // Note: exp field removed - let JwtService handle expiration
     };
 
-    return this.jwtService.sign(payload);
+    // Specify expiresIn option instead of including exp in payload
+    return this.jwtService.sign(payload, { expiresIn: '1h' });
   }
 
   /**

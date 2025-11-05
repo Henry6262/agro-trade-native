@@ -48,7 +48,7 @@ export interface Product {
   type: string;
   category: string;
   description?: string;
-  specifications?: Record<string, any>;
+  specifications?: Record<string, string | number | boolean>;
   quality?: string;
 }
 
@@ -131,12 +131,21 @@ export interface TradeOperation {
   totalPurchaseCost?: number;
   estimatedTransportCost?: number;
   finalRevenue?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, string | number | boolean | null>;
   createdAt: string;
   updatedAt: string;
   buyListing?: BuyListing;
   sellers?: TradeSeller[];
   admin?: User;
+}
+
+export interface VerificationResult {
+  passed: boolean;
+  qualityScore: number;
+  moistureContent?: number;
+  proteinLevel?: number;
+  notes?: string;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface InspectionRequest {
@@ -155,20 +164,61 @@ export interface InspectionRequest {
   notes?: string;
   photos: string[];
   qualityScore?: number;
-  verificationResult?: any;
+  verificationResult?: VerificationResult;
   inspector?: User;
   saleListing?: SaleListing;
 }
 
+export interface CalculateTransportRequest {
+  sellerIds: string[];
+  buyerAddressId: string;
+}
+
+export interface TransportCostResult {
+  sellerId: string;
+  distance: number;
+  transportCost: number;
+}
+
+export interface CalculateTransportResponse {
+  success?: boolean;
+  results: TransportCostResult[];
+  totalCost?: number;
+  currency?: string;
+  warnings?: string[];
+}
+
 // Request DTOs
+export interface CreateTradeSellerInput {
+  sellerId: string;
+  saleListingId: string;
+  quantity: number;
+  offerPrice: number;
+}
+
 export interface CreateTradeOperationDto {
   buyListingId: string;
-  sellers: Array<{
-    sellerId: string;
-    saleListingId: string;
-    requestedQuantity: number;
-    unit: string;
-  }>;
+  sellers: CreateTradeSellerInput[];
+}
+
+export interface NegotiationSummary {
+  id: string;
+  tradeSellerId: string;
+  sellerId: string;
+  sellerName: string;
+  status: string;
+  offerPrice?: number;
+  quantity?: number;
+  expiresAt?: string;
+  hoursUntilExpiry?: number;
+}
+
+export interface CreateTradeOperationResponse {
+  tradeOperationId: string;
+  operationNumber: string;
+  phase: string;
+  status: string;
+  negotiations: NegotiationSummary[];
 }
 
 export interface CreateNegotiationDto {
@@ -192,5 +242,5 @@ export interface TimelineEvent {
   type: string;
   description: string;
   user?: string;
-  data?: any;
+  data?: Record<string, string | number | boolean | null>;
 }

@@ -195,7 +195,10 @@ export class BuyerController {
       ? {
           id: entity.product.id,
           name: entity.product.name,
+          displayName: entity.product.displayName,
           category: entity.product.category,
+          description: entity.product.description,
+          image: entity.product.image,
         }
       : null;
 
@@ -204,6 +207,7 @@ export class BuyerController {
           id: entity.buyer.id,
           name: entity.buyer.name,
           email: entity.buyer.email,
+          businessName: entity.buyer.company?.legalName || entity.buyer.name,
           company: entity.buyer.company
             ? {
                 id: entity.buyer.company.id,
@@ -221,7 +225,9 @@ export class BuyerController {
           id: entity.deliveryAddress.id,
           street: entity.deliveryAddress.street,
           city: entity.deliveryAddress.city?.name ?? entity.deliveryAddress.city,
+          region: entity.deliveryAddress.city?.region?.name ?? null,
           country: entity.deliveryAddress.country,
+          address: entity.deliveryAddress.street,
           latitude: entity.deliveryAddress.latitude
             ? Number(entity.deliveryAddress.latitude)
             : null,
@@ -238,6 +244,13 @@ export class BuyerController {
           valueText: spec.valueText,
           valueNumber: spec.valueNumber ? Number(spec.valueNumber) : null,
           valueBool: spec.valueBool,
+          specificationType: spec.specificationType ? {
+            id: spec.specificationType.id,
+            code: spec.specificationType.code,
+            name: spec.specificationType.name,
+            unit: spec.specificationType.unit,
+            dataType: spec.specificationType.dataType,
+          } : null,
         }))
       : null;
 

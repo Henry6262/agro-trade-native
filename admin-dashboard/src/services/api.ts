@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as Types from '../types';
+import { API_ENDPOINTS } from '../config/api';
 
 // Configure axios defaults
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4001/api';
@@ -40,42 +41,64 @@ api.interceptors.request.use((config) => {
 // Trade Operations Service
 export const tradeOperationService = {
   async getAll(): Promise<Types.TradeOperation[]> {
-    const response = await api.get('/trade-operations');
+    const response = await api.get(API_ENDPOINTS.tradeOperations.base);
     return response.data.data || response.data || [];
   },
 
   async getById(id: string): Promise<Types.TradeOperation> {
-    const { data } = await api.get(`/trade-operations/${id}`);
+    const { data } = await api.get(API_ENDPOINTS.tradeOperations.byId(id));
     return data;
   },
 
-  async create(dto: Types.CreateTradeOperationDto): Promise<Types.TradeOperation> {
-    const { data } = await api.post('/trade-operations', dto);
+  async create(
+    dto: Types.CreateTradeOperationDto,
+  ): Promise<Types.CreateTradeOperationResponse> {
+    const { data } = await api.post(API_ENDPOINTS.tradeOperations.base, dto);
+    return data;
+  },
+  async calculateTransport(
+    payload: Types.CalculateTransportRequest,
+  ): Promise<Types.CalculateTransportResponse> {
+    const { data } = await api.post(
+      API_ENDPOINTS.tradeOperations.calculateTransport,
+      payload,
+    );
     return data;
   },
 
   async updatePhase(id: string, phase: string): Promise<Types.TradeOperation> {
-    const { data } = await api.patch(`/trade-operations/${id}/phase`, { phase });
+    const { data } = await api.patch(
+      `${API_ENDPOINTS.tradeOperations.byId(id)}/phase`,
+      { phase },
+    );
     return data;
   },
 
   async updateStatus(id: string, status: string): Promise<Types.TradeOperation> {
-    const { data } = await api.patch(`/trade-operations/${id}/status`, { status });
+    const { data } = await api.patch(
+      `${API_ENDPOINTS.tradeOperations.byId(id)}/status`,
+      { status },
+    );
     return data;
   },
 
   async addSellers(id: string, sellers: Types.TradeSeller[]): Promise<Types.TradeOperation> {
-    const { data } = await api.post(`/trade-operations/${id}/sellers`, { sellers });
+    const { data } = await api.post(
+      API_ENDPOINTS.tradeOperations.addSellers(id),
+      { sellers },
+    );
     return data;
   },
 
   async removeSeller(id: string, sellerId: string): Promise<Types.TradeOperation> {
-    const { data } = await api.delete(`/trade-operations/${id}/sellers/${sellerId}`);
+    const { data } = await api.delete(
+      `${API_ENDPOINTS.tradeOperations.addSellers(id)}/${sellerId}`,
+    );
     return data;
   },
 
   async delete(id: string): Promise<void> {
-    await api.delete(`/trade-operations/${id}`);
+    await api.delete(API_ENDPOINTS.tradeOperations.byId(id));
   },
 };
 
@@ -103,8 +126,12 @@ export const negotiationService = {
   },
 
   async bulkCreate(tradeOperationId: string, offers: Types.CreateNegotiationDto[]): Promise<Types.Negotiation[]> {
-    const promises = offers.map(offer => this.create(tradeOperationId, offer));
-    return Promise.all(promises);
+    // Use the dedicated batch endpoint for better performance and transactionality
+    const { data } = await api.post(
+      `/negotiations/trade-operations/${tradeOperationId}/offers/batch`,
+      { offers }
+    );
+    return data?.data || data || [];
   },
 };
 

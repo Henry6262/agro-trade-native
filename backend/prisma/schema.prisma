@@ -510,7 +510,7 @@ enum UserRole {
   FARMER
   BUYER
   TRANSPORTER
-  COMPANY_ADMIN  // Transport company administrators
+  COMPANY_ADMIN // Transport company administrators
   INSPECTOR
 }
 

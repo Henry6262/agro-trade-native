@@ -105,7 +105,7 @@ export class TradeOperationController {
     @Request() req: any,
   ): Promise<any> {
     // Use default admin ID if no user is authenticated
-    const adminId = req.user?.id || 'cmfoabr5f000012bsx2kj92w2'; // Default admin from DB
+    const adminId = req.user?.id || 'cmhhfgc1u0000g1rqjcd4y1lx'; // Default admin from DB (admin@test.com)
 
     // Validate buy listing exists
     const buyListing = await this.prisma.buyListing.findUnique({
@@ -124,21 +124,26 @@ export class TradeOperationController {
       throw new BadRequestException('Buy listing is not active');
     }
 
-    // Generate unique operation number
-    const operationNumber = `OP-${Date.now()}`;
-
-    // Create trade operation
-    const tradeOperation = await this.prisma.tradeOperation.create({
-      data: {
-        operationNumber,
-        buyListingId: createDto.buyListingId,
-        adminId,
-        phase: 'SELLER_NEGOTIATION',
-        status: 'ACTIVE',
-        sellingPrice: buyListing.maxPricePerUnit,
-        currency: 'EUR',
-      },
+    // Check if trade operation already exists for this buy listing
+    let tradeOperation = await this.prisma.tradeOperation.findUnique({
+      where: { buyListingId: createDto.buyListingId },
     });
+
+    // If not exists, create new trade operation
+    if (!tradeOperation) {
+      const operationNumber = `OP-${Date.now()}`;
+      tradeOperation = await this.prisma.tradeOperation.create({
+        data: {
+          operationNumber,
+          buyListingId: createDto.buyListingId,
+          adminId,
+          phase: 'SELLER_NEGOTIATION',
+          status: 'ACTIVE',
+          sellingPrice: buyListing.maxPricePerUnit,
+          currency: 'EUR',
+        },
+      });
+    }
 
     // Create trade sellers and negotiations
     const { tradeSellers, negotiations } = await this.negotiationService.createTradeSellersWithOffers(
@@ -154,6 +159,7 @@ export class TradeOperationController {
       negotiations: negotiations.map(n => ({
         id: n.id,
         tradeSellerId: n.tradeSellerId,
+        saleListingId: n.tradeSeller.saleListing.id,
         sellerId: n.tradeSeller.seller.id,
         sellerName: n.tradeSeller.seller.name,
         status: n.status,
@@ -765,6 +771,9 @@ export class TradeOperationController {
     @Body() data: CalculateTransportRequestDto,
   ): Promise<CalculateTransportResponseDto> {
     try {
+      const warnings: string[] = [];
+      const fallbackBuyerLocation = { lat: 42.6977, lng: 23.3219 }; // Sofia city centre fallback
+
       // Fetch seller addresses with lat/lng
       const sellers = await this.prisma.saleListing.findMany({
         where: {
@@ -776,16 +785,28 @@ export class TradeOperationController {
       });
 
       // Fetch buyer address with lat/lng
-      const buyerAddress = await this.prisma.address.findUnique({
-        where: { id: data.buyerAddressId },
-      });
+      let buyerAddressCoordinates: { lat: number; lng: number } | null = null;
+      if (data.buyerAddressId) {
+        const buyerAddress = await this.prisma.address.findUnique({
+          where: { id: data.buyerAddressId },
+        });
 
-      if (!buyerAddress || !buyerAddress.latitude || !buyerAddress.longitude) {
-        throw new BadRequestException('Buyer address not found or missing coordinates');
+        if (buyerAddress?.latitude !== null && buyerAddress?.latitude !== undefined &&
+            buyerAddress?.longitude !== null && buyerAddress?.longitude !== undefined) {
+          buyerAddressCoordinates = {
+            lat: buyerAddress.latitude,
+            lng: buyerAddress.longitude,
+          };
+        }
+      }
+
+      if (!buyerAddressCoordinates) {
+        warnings.push('Buyer delivery address missing coordinates. Using central fallback.');
+        buyerAddressCoordinates = fallbackBuyerLocation;
       }
 
       // Prepare seller addresses with coordinates
-      const sellerAddresses = sellers
+      const sellersWithCoordinates = sellers
         .filter(s => s.address && s.address.latitude && s.address.longitude)
         .map(s => ({
           id: s.sellerId,
@@ -793,14 +814,31 @@ export class TradeOperationController {
           lng: s.address!.longitude!,
         }));
 
-      if (sellerAddresses.length === 0) {
-        throw new BadRequestException('No sellers found with valid addresses');
+      const missingSellerCoords = sellers
+        .filter(s => !s.address || !s.address.latitude || !s.address.longitude)
+        .map(s => s.sellerId);
+
+      if (missingSellerCoords.length > 0) {
+        warnings.push(
+          `Skipped ${missingSellerCoords.length} seller(s) without coordinates.`,
+        );
+      }
+
+      if (sellersWithCoordinates.length === 0) {
+        warnings.push('No sellers with coordinates available for transport estimate.');
+        return {
+          success: true,
+          results: [],
+          totalCost: 0,
+          currency: 'EUR',
+          warnings,
+        };
       }
 
       // Calculate transport costs
       const results = await this.transportCostService.calculateTransportCosts(
-        sellerAddresses,
-        { lat: buyerAddress.latitude, lng: buyerAddress.longitude },
+        sellersWithCoordinates,
+        buyerAddressCoordinates,
       );
 
       // Calculate total cost
@@ -811,6 +849,7 @@ export class TradeOperationController {
         results,
         totalCost: Math.round(totalCost * 100) / 100,
         currency: 'EUR',
+        warnings: warnings.length ? warnings : undefined,
       };
     } catch (error) {
       if (error instanceof BadRequestException) {

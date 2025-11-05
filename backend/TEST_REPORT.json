@@ -1,398 +1,506 @@
 {
-  "timestamp": "2025-10-12T18:58:00.000Z",
-  "reportVersion": "3.0",
-  "testType": "COMPREHENSIVE_ADMIN_DASHBOARD_INTEGRATION_TESTING",
+  "timestamp": "2025-10-15T00:00:00.000Z",
+  "reportVersion": "5.0",
+  "testType": "POST_BUG_FIX_E2E_INTEGRATION_VERIFICATION",
   "testEnvironment": {
     "platform": "darwin",
     "nodeVersion": "v18.x",
     "nestVersion": "^10.0.0",
     "prismaVersion": "^5.6.0",
     "jestVersion": "^29.5.0",
-    "testDatabase": "PostgreSQL 14",
+    "testDatabase": "PostgreSQL 15",
     "branch": "004-trade-operation-management",
     "backend": "http://localhost:4001",
-    "adminDashboard": "http://localhost:4173"
+    "databaseStatus": "SYNCED_WITH_SCHEMA_CHANGES"
   },
-  "overallStatus": "PARTIAL_PASS",
-  "testSuites": {
-    "contractValidation": {
-      "status": "PASS",
-      "duration": "2m 30s",
-      "details": {
-        "apiContracts": {
-          "tested": 45,
-          "passed": 45,
-          "failed": 0
-        },
-        "eventContracts": {
-          "tested": 0,
-          "passed": 0,
-          "failed": 0,
-          "note": "WebSocket events not yet implemented"
-        },
-        "databaseSchema": {
-          "tested": 23,
-          "passed": 23,
-          "failed": 0
-        }
-      },
-      "failures": []
+  "testExecutionSummary": {
+    "executionDate": "2025-10-15",
+    "totalDuration": "5.183s",
+    "totalSuites": 11,
+    "passedSuites": 1,
+    "failedSuites": 10,
+    "totalTests": 125,
+    "passedTests": 12,
+    "failedTests": 113,
+    "testPassRate": "9.6%"
+  },
+  "comparisonWithPreviousRun": {
+    "previousDate": "2025-10-13",
+    "previousPassRate": {
+      "unit": "61.5%",
+      "e2e": "0%",
+      "overall": "33%"
     },
-    "endToEndFlows": {
-      "status": "PASS",
-      "duration": "8m 15s",
-      "tests": {
-        "userOnboarding": {
-          "status": "PASS",
-          "duration": "1.2s",
-          "notes": "User registration, login, and profile creation working"
-        },
-        "tradeLifecycle": {
-          "status": "PASS",
-          "duration": "3.5s",
-          "notes": "Complete workflow from creation to transport assignment"
-        },
-        "inspectionFlow": {
-          "status": "PASS",
-          "duration": "2.1s",
-          "notes": "Inspector accepts job, performs inspection, submits results"
-        },
-        "transportFlow": {
-          "status": "PASS",
-          "duration": "1.8s",
-          "notes": "Transporter bids, wins job, completes delivery"
-        },
-        "negotiationFlow": {
-          "status": "PASS",
-          "duration": "1.5s",
-          "notes": "Counter-offers and acceptance working correctly"
-        }
-      }
+    "currentPassRate": {
+      "unit": "100%",
+      "e2e": "9.6%",
+      "overall": "9.6%"
     },
-    "crossPlatform": {
-      "status": "PASS",
-      "duration": "3m 45s",
-      "mobileApiCalls": {
-        "tested": 67,
-        "passed": 67,
-        "note": "Mobile app API integration verified via manual testing"
-      },
-      "adminApiCalls": {
-        "tested": 89,
-        "passed": 89,
-        "failed": 0
-      },
-      "webSocketEvents": {
-        "tested": 0,
-        "passed": 0,
-        "note": "WebSocket events not yet implemented"
-      },
-      "databaseConstraints": {
-        "tested": 34,
-        "passed": 34
-      }
+    "improvement": {
+      "unitTests": "+38.5% (100% pass rate achieved)",
+      "e2eTests": "+9.6% (from 0% to 9.6%)",
+      "overallTrend": "REGRESSION - New blocker discovered"
     },
-    "performance": {
-      "status": "PASS",
-      "duration": "1m 30s",
-      "apiResponseTime": {
-        "average": "245ms",
-        "max": "480ms",
-        "threshold": "500ms",
-        "notes": "All API endpoints under 500ms threshold"
-      },
-      "mobileAppLoad": {
-        "average": "1.4s",
-        "threshold": "2s",
-        "notes": "Mobile app loads quickly on test devices"
-      },
-      "memoryLeaks": {
-        "detected": false,
-        "notes": "No memory leaks detected during extended testing"
-      }
+    "previousBlockers": {
+      "p0Blockers": 5,
+      "resolved": 5,
+      "details": [
+        "TEST-FAIL-001: Prisma client regeneration - RESOLVED",
+        "TEST-FAIL-002: Type conversion errors - RESOLVED",
+        "TEST-FAIL-003: Profit controller routes - RESOLVED",
+        "TEST-FAIL-004: Inspector controller routes - RESOLVED",
+        "TEST-FAIL-005: JWT token generation - RESOLVED"
+      ]
     },
-    "dataIntegrity": {
-      "status": "PASS",
-      "duration": "2m 10s",
-      "profitCalculations": {
-        "tested": 50,
-        "passed": 50,
-        "formula": "(sellerPrice - buyerPrice) * quantity"
-      },
-      "commissionCalculations": {
-        "tested": 50,
-        "passed": 50,
-        "sellerCommission": "2.5%",
-        "buyerCommission": "1.5%"
-      },
-      "offerExpiry": {
-        "tested": 20,
-        "passed": 20,
-        "failed": 0,
-        "expiryPeriod": "48 hours"
-      },
-      "statusTransitions": {
-        "tested": 30,
-        "passed": 30,
-        "notes": "All phase transitions working correctly"
-      },
-      "foreignKeys": {
-        "tested": 45,
-        "passed": 45,
-        "notes": "All foreign key relationships intact"
-      },
-      "failures": []
+    "newBlockers": {
+      "p0Blockers": 1,
+      "details": [
+        "TEST-FAIL-006: Address model schema change requires addressType field"
+      ]
     }
   },
-  "adminDashboardFeatures": {
-    "scenarioOrchestrator": {
+  "overallStatus": "CRITICAL_FAILURE",
+  "testSuites": {
+    "unitTests": {
       "status": "PASS",
-      "tested": true,
-      "testCount": 12,
-      "passed": 12,
-      "features": {
-        "completeHappyPath": "PASS",
-        "counterOfferHandling": "PASS",
-        "offerExpiryEnforcement": "PASS",
-        "phaseTransitions": "PASS",
-        "contextManagement": "PASS",
-        "scenarioExecution": "PASS"
+      "duration": "N/A",
+      "details": {
+        "totalSuites": 4,
+        "passedSuites": 4,
+        "failedSuites": 0,
+        "totalTests": 39,
+        "passedTests": 39,
+        "failedTests": 0,
+        "skippedTests": 0
       },
-      "notes": "Full trade operation simulation works end-to-end with context management"
+      "passedSuites": [
+        {
+          "name": "transport-bidding.service.spec.ts",
+          "status": "PASS",
+          "tests": 12,
+          "passed": 12,
+          "failed": 0
+        },
+        {
+          "name": "transport-cost.service.spec.ts",
+          "status": "PASS",
+          "tests": 12,
+          "passed": 12,
+          "failed": 0
+        },
+        {
+          "name": "trade-operation.controller.spec.ts",
+          "status": "PASS",
+          "tests": 6,
+          "passed": 6,
+          "failed": 0,
+          "note": "Previously failing - now fixed"
+        },
+        {
+          "name": "profit.controller.spec.ts",
+          "status": "PASS",
+          "tests": 9,
+          "passed": 9,
+          "failed": 0,
+          "note": "Previously failing - now fixed"
+        }
+      ],
+      "failedSuites": []
     },
-    "tradeOperationsManagement": {
-      "status": "PASS",
-      "tested": true,
-      "testCount": 8,
-      "passed": 8,
-      "features": {
-        "listOperations": "PASS",
-        "getOperationDetails": "PASS",
-        "createOperation": "PASS",
-        "updatePhase": "PASS",
-        "addSellers": "PASS",
-        "removeSeller": "PASS"
+    "e2eIntegrationTests": {
+      "status": "CRITICAL_FAILURE",
+      "duration": "5.183s",
+      "details": {
+        "totalSuites": 11,
+        "passedSuites": 1,
+        "failedSuites": 10,
+        "totalTests": 125,
+        "passedTests": 12,
+        "failedTests": 113
       },
-      "notes": "CRUD operations functional, API contracts validated"
-    },
-    "mapBasedMatching": {
-      "status": "PASS",
-      "tested": true,
-      "testCount": 10,
-      "passed": 10,
-      "features": {
-        "transportCostCalculation": "PASS",
-        "regionsData": "PASS",
-        "citiesData": "PASS",
-        "multiSellerOperations": "PASS",
-        "distanceCalculation": "PASS",
-        "bulgariaMapRendering": "PASS",
-        "sellerSelection": "PASS",
-        "offerTracking": "PASS"
-      },
-      "notes": "Haversine formula working, transport costs calculated correctly, offer tracking operational"
-    },
-    "inspectorPortal": {
-      "status": "PASS",
-      "tested": true,
-      "testCount": 9,
-      "passed": 9,
-      "features": {
-        "listPendingInspections": "PASS",
-        "filterByStatus": "PASS",
-        "filterByPriority": "PASS",
-        "completeInspection": "PASS",
-        "qualityDataSubmission": "PASS",
-        "autoRefresh": "PASS"
-      },
-      "notes": "Quality scores cascade to sale listings correctly, filters working"
-    },
-    "transportManagement": {
-      "status": "PASS",
-      "tested": true,
-      "testCount": 11,
-      "passed": 11,
-      "features": {
-        "listTransportRequests": "PASS",
-        "createBid": "PASS",
-        "acceptBid": "PASS",
-        "rejectBid": "PASS",
-        "jobCreation": "PASS",
-        "truckTracking": "PASS",
-        "routeVisualization": "PASS",
-        "bidReview": "PASS"
-      },
-      "notes": "Complete transport workflow from request to bid acceptance with route visualization"
-    },
-    "tradeFlowVisualization": {
-      "status": "PASS",
-      "tested": true,
-      "testCount": 5,
-      "passed": 5,
-      "features": {
-        "fullStateRetrieval": "PASS",
-        "phaseTracking": "PASS",
-        "realTimeUpdates": "PASS",
-        "reactFlowRendering": "PASS"
-      },
-      "notes": "React Flow integration working, state visualization accurate"
-    },
-    "databaseStatePanel": {
-      "status": "PASS",
-      "tested": true,
-      "testCount": 4,
-      "passed": 4,
-      "features": {
-        "getUsersByRole": "PASS",
-        "cleanupTestData": "PASS",
-        "browseData": "PASS"
-      },
-      "notes": "Data browsing and cleanup functional"
-    },
-    "progressDashboard": {
-      "status": "PASS",
-      "tested": true,
-      "testCount": 3,
-      "passed": 3,
-      "features": {
-        "metricsTracking": "PASS",
-        "operationCounting": "PASS",
-        "progressVisualization": "PASS"
-      },
-      "notes": "Progress metrics display correctly"
+      "passedSuites": [
+        {
+          "name": "location-data.e2e-spec.ts",
+          "status": "PASS",
+          "tests": 12,
+          "passed": 12,
+          "failed": 0,
+          "note": "Location/address endpoints working correctly"
+        }
+      ],
+      "failedSuites": [
+        {
+          "name": "admin-dashboard-features.e2e-spec.ts",
+          "status": "FAIL",
+          "tests": 24,
+          "passed": 0,
+          "failed": 24,
+          "rootCause": "Missing addressType field in Address creation",
+          "errorPattern": "404 Not Found or PrismaClientValidationError"
+        },
+        {
+          "name": "calculate-transport.e2e-spec.ts",
+          "status": "FAIL",
+          "tests": 9,
+          "passed": 0,
+          "failed": 9,
+          "rootCause": "Missing addressType field in Address creation",
+          "errorPattern": "PrismaClientValidationError: Argument `addressType` is missing"
+        },
+        {
+          "name": "offer-negotiation.e2e-spec.ts",
+          "status": "FAIL",
+          "tests": 14,
+          "passed": 0,
+          "failed": 14,
+          "rootCause": "Missing addressType field in Address creation"
+        },
+        {
+          "name": "buyer.e2e-spec.ts",
+          "status": "FAIL",
+          "tests": 9,
+          "passed": 0,
+          "failed": 9,
+          "rootCause": "Missing addressType field in Address creation"
+        },
+        {
+          "name": "seller.e2e-spec.ts",
+          "status": "FAIL",
+          "tests": 17,
+          "passed": 0,
+          "failed": 17,
+          "rootCause": "Missing addressType field in Address creation"
+        },
+        {
+          "name": "inspector.e2e-spec.ts",
+          "status": "FAIL",
+          "tests": 10,
+          "passed": 0,
+          "failed": 10,
+          "rootCause": "Missing addressType field in Address creation"
+        },
+        {
+          "name": "simulation.e2e-spec.ts",
+          "status": "FAIL",
+          "tests": 16,
+          "passed": 0,
+          "failed": 16,
+          "rootCause": "Missing addressType field in Address creation"
+        },
+        {
+          "name": "trade-operation.e2e-spec.ts",
+          "status": "FAIL",
+          "tests": 14,
+          "passed": 0,
+          "failed": 14,
+          "rootCause": "Missing addressType field in Address creation"
+        },
+        {
+          "name": "transport.e2e-spec.ts",
+          "status": "FAIL",
+          "tests": 5,
+          "passed": 0,
+          "failed": 5,
+          "rootCause": "Missing addressType field in Address creation"
+        },
+        {
+          "name": "transporter.e2e-spec.ts",
+          "status": "FAIL",
+          "tests": 7,
+          "passed": 0,
+          "failed": 7,
+          "rootCause": "Missing addressType field in Address creation"
+        }
+      ]
     }
   },
   "blockers": [
     {
-      "id": "TEST-INFRA-001",
-      "priority": "P1",
-      "testSuite": "testInfrastructure",
-      "test": "Jest configuration for ES modules",
-      "issue": "Jest cannot parse @faker-js/faker ES module imports",
-      "expectedBehavior": "Tests should run without module import errors",
-      "actualBehavior": "Jest fails to parse ES module syntax in @faker-js/faker",
+      "id": "TEST-FAIL-006",
+      "priority": "P0",
+      "severity": "CRITICAL",
+      "testSuite": "e2eIntegrationTests",
+      "test": "All E2E tests requiring Address creation",
+      "issue": "Prisma schema change added required addressType field to Address model, but E2E tests not updated",
+      "expectedBehavior": "Address records should be created with addressType field specified",
+      "actualBehavior": "PrismaClientValidationError: Argument `addressType` is missing",
       "affectedPlatforms": ["backend"],
+      "affectedTests": {
+        "total": 113,
+        "suites": [
+          "admin-dashboard-features.e2e-spec.ts",
+          "calculate-transport.e2e-spec.ts",
+          "offer-negotiation.e2e-spec.ts",
+          "buyer.e2e-spec.ts",
+          "seller.e2e-spec.ts",
+          "inspector.e2e-spec.ts",
+          "simulation.e2e-spec.ts",
+          "trade-operation.e2e-spec.ts",
+          "transport.e2e-spec.ts",
+          "transporter.e2e-spec.ts"
+        ]
+      },
       "assignedTo": "backend-lead",
       "stepsToReproduce": [
         "Run npm run test:e2e",
-        "Observe SyntaxError: Cannot use import statement outside a module",
-        "Error occurs when importing faker in test-data-factory.ts"
+        "Any test that creates Address records fails",
+        "Error: Invalid `prisma.address.create()` invocation - Argument `addressType` is missing"
       ],
-      "resolution": "Update jest.e2e.config.js to add transformIgnorePatterns for @faker-js or use require() instead of import"
+      "rootCause": "Schema evolution: Address model was updated to require addressType enum field (BILLING, SHIPPING, FARM, WAREHOUSE, OFFICE, PICKUP, DELIVERY, OTHER), but test data creation code was not updated to include this field",
+      "impact": {
+        "severity": "CRITICAL",
+        "affectedFeatures": [
+          "Trade operation creation",
+          "Seller/buyer onboarding",
+          "Transport cost calculations",
+          "Inspection workflows",
+          "All address-related operations"
+        ],
+        "testCoverage": "90% of E2E tests blocked",
+        "deploymentStatus": "BLOCKED"
+      },
+      "suggestedFix": "Update all E2E test files that create Address records to include addressType field. Need to update:\n1. test/calculate-transport.e2e-spec.ts - Add addressType: 'FARM' or 'DELIVERY'\n2. test/integration/admin-dashboard-features.e2e-spec.ts - Update TestDataFactory\n3. test/helpers/test-data-factory.ts - Central fix location\n4. All other E2E test setup functions that create addresses\n\nRecommended addressType values:\n- Seller addresses: 'FARM' or 'WAREHOUSE'\n- Buyer addresses: 'DELIVERY' or 'WAREHOUSE'\n- User addresses: 'OFFICE' or 'OTHER'",
+      "estimatedFixTime": "30 minutes",
+      "priority": "IMMEDIATE"
     }
   ],
-  "canCompleteDay": true,
-  "canDeploy": true,
+  "resolvedBlockersFromPreviousRun": [
+    {
+      "id": "TEST-FAIL-001",
+      "issue": "Prisma client not regenerated after schema changes",
+      "resolution": "RESOLVED - npx prisma generate executed successfully",
+      "resolvedDate": "Between 2025-10-13 and 2025-10-15"
+    },
+    {
+      "id": "TEST-FAIL-002",
+      "issue": "Type conversion errors with Prisma Decimal in trade operation service",
+      "resolution": "RESOLVED - Decimal type handling fixed in TradeOperationService",
+      "resolvedDate": "Between 2025-10-13 and 2025-10-15"
+    },
+    {
+      "id": "TEST-FAIL-003",
+      "issue": "Profit controller routes not registered",
+      "resolution": "RESOLVED - ProfitController properly registered in AppModule",
+      "resolvedDate": "Between 2025-10-13 and 2025-10-15"
+    },
+    {
+      "id": "TEST-FAIL-004",
+      "issue": "Inspector controller routes not registered",
+      "resolution": "RESOLVED - InspectorModule properly registered in AppModule",
+      "resolvedDate": "Between 2025-10-13 and 2025-10-15"
+    },
+    {
+      "id": "TEST-FAIL-005",
+      "issue": "JWT token generation conflicts in mock auth",
+      "resolution": "RESOLVED - MockAuthService JWT generation fixed",
+      "resolvedDate": "Between 2025-10-13 and 2025-10-15"
+    }
+  ],
+  "canCompleteDay": false,
+  "canDeploy": false,
+  "systemHealthAssessment": {
+    "overall": "CRITICAL",
+    "unitTestHealth": "EXCELLENT - 100% pass rate",
+    "e2eTestHealth": "CRITICAL - 90% failure due to schema migration issue",
+    "databaseHealth": "GOOD - Schema synced, single field addition needed in tests",
+    "apiRoutingHealth": "GOOD - All routes properly registered (improvement from Oct 13)",
+    "businessLogicHealth": "UNKNOWN - Blocked by E2E test failures",
+    "deploymentReadiness": "BLOCKED - Cannot deploy with 90% E2E test failure",
+    "riskAssessment": {
+      "level": "HIGH",
+      "factors": [
+        "Single blocker affects 90% of E2E tests",
+        "Schema change not propagated to test suites",
+        "Business logic validation blocked by test infrastructure issue",
+        "All P0 blockers from Oct 13 resolved (positive)",
+        "Unit tests at 100% (positive)",
+        "Issue is isolated and fixable within 30 minutes (positive)"
+      ]
+    }
+  },
   "recommendations": [
-    "Fix P1 Jest/faker configuration issue for automated test runs",
-    "All admin dashboard features are functional and manually tested",
-    "Consider adding WebSocket event testing in future iterations",
-    "Add more edge case testing for offer expiry boundary conditions",
-    "System is production-ready despite test infrastructure issue"
+    "IMMEDIATE P0: Update all E2E test files to include addressType field when creating Address records",
+    "IMMEDIATE: Focus on test/helpers/test-data-factory.ts as central location for fix",
+    "IMMEDIATE: After fix, re-run full E2E suite to validate business logic",
+    "HIGH PRIORITY: Add pre-commit hook or CI check to detect Prisma schema changes that require test updates",
+    "HIGH PRIORITY: Document schema evolution process to prevent similar issues",
+    "MEDIUM: Consider creating a schema migration checklist that includes test updates",
+    "MEDIUM: Add TypeScript type checking for test data factories to catch schema mismatches",
+    "POSITIVE: Celebrate resolution of all 5 P0 blockers from Oct 13 - excellent progress!",
+    "POSITIVE: Unit test coverage at 100% - maintain this standard",
+    "STRATEGIC: Once E2E tests pass, validate all business logic requirements before deployment"
   ],
-  "summary": {
-    "totalTests": 62,
-    "passed": 62,
-    "failed": 0,
-    "skipped": 0,
-    "duration": "18m 10s",
-    "testCoveragePercentage": 85,
-    "manualTestsPassed": true,
-    "automatedTestsBlocked": false,
-    "featuresTestCoverage": {
-      "scenarioOrchestrator": "100%",
-      "tradeOperationsManagement": "100%",
-      "mapBasedMatching": "100%",
-      "inspectorPortal": "100%",
-      "transportManagement": "100%",
-      "tradeFlowVisualization": "100%",
-      "databaseStatePanel": "100%",
-      "progressDashboard": "100%"
-    }
-  },
-  "testInfrastructure": {
-    "status": "COMPLETE",
-    "jestConfiguration": "Updated for ES modules",
-    "testHelpers": "Complete (TestDataFactory, DatabaseCleaner, ApiClient)",
-    "testSuites": "Complete (admin-dashboard-features.e2e-spec.ts with 62 tests, happy-path-trade-operation.e2e-spec.ts)",
-    "testRunner": "Complete (run-integration-tests.sh)",
-    "reportGenerator": "Complete (generate-test-report.js)",
-    "documentation": "Complete (INTEGRATION_TESTING_README.md)"
-  },
-  "integrationPoints": {
-    "adminDashboardToBackend": {
-      "status": "SYNCED",
-      "lastVerified": "2025-10-12T18:00:00Z",
-      "notes": "All API endpoints working, contracts validated"
+  "detailedFailureAnalysis": {
+    "primaryRootCause": "Schema Evolution Without Test Update",
+    "cascadingEffect": "Single schema field addition (addressType) caused 90% of E2E tests to fail during setup phase",
+    "failurePattern": {
+      "stage": "Test Setup (beforeAll/beforeEach)",
+      "operation": "prisma.address.create()",
+      "error": "PrismaClientValidationError: Argument `addressType` is missing",
+      "frequency": "113 out of 125 tests affected"
     },
-    "mobileToBackend": {
-      "status": "SYNCED",
-      "lastVerified": "2025-10-11T20:00:00Z",
-      "notes": "Mobile API services aligned with backend endpoints"
+    "schemaChange": {
+      "model": "Address",
+      "field": "addressType",
+      "type": "AddressType enum",
+      "required": true,
+      "allowedValues": ["BILLING", "SHIPPING", "FARM", "WAREHOUSE", "OFFICE", "PICKUP", "DELIVERY", "OTHER"],
+      "migrationDate": "Unknown - between Oct 13 and Oct 15",
+      "testUpdateStatus": "NOT_UPDATED"
     },
-    "backendToDatabase": {
-      "status": "SYNCED",
-      "lastVerified": "2025-10-12T18:00:00Z",
-      "notes": "Prisma schema matches database, all migrations applied"
+    "affectedCodeLocations": [
+      "/Users/henry/agro-trade/backend/test/calculate-transport.e2e-spec.ts:46-56 (buyer address)",
+      "/Users/henry/agro-trade/backend/test/calculate-transport.e2e-spec.ts:83-94 (seller1 address)",
+      "/Users/henry/agro-trade/backend/test/calculate-transport.e2e-spec.ts:96-107 (seller2 address)",
+      "/Users/henry/agro-trade/backend/test/helpers/test-data-factory.ts (central location)",
+      "All E2E test files with address creation in setup"
+    ],
+    "fixStrategy": {
+      "approach": "Centralized Fix + Individual Updates",
+      "steps": [
+        "1. Update TestDataFactory.createFullTradeScenario() to add addressType to all address creations",
+        "2. Update individual E2E test setup functions (calculate-transport, etc.)",
+        "3. Add default addressType logic based on context (FARM for sellers, DELIVERY for buyers)",
+        "4. Run tests incrementally to verify fixes",
+        "5. Add validation to prevent future schema/test mismatches"
+      ],
+      "estimatedEffort": "30 minutes",
+      "riskLevel": "LOW - Simple field addition, no business logic changes"
     }
   },
   "businessLogicValidation": {
     "offerExpiry48Hours": {
-      "status": "VALIDATED",
-      "tested": true,
-      "notes": "Offers expire exactly 48 hours after creation"
+      "status": "BLOCKED",
+      "tested": false,
+      "notes": "Cannot test until E2E infrastructure fixed"
     },
     "commissionCalculations": {
-      "status": "VALIDATED",
-      "tested": true,
+      "status": "BLOCKED",
+      "tested": false,
       "sellerCommission": "2.5%",
       "buyerCommission": "1.5%",
-      "notes": "Commission calculations accurate"
+      "notes": "Cannot test until E2E infrastructure fixed"
     },
     "profitCalculations": {
-      "status": "VALIDATED",
-      "tested": true,
+      "status": "BLOCKED",
+      "tested": false,
       "formula": "(sellerPrice - buyerPrice) * quantity",
-      "notes": "Profit calculations match expected values"
+      "notes": "Cannot test until E2E infrastructure fixed"
     },
     "phaseTransitions": {
-      "status": "VALIDATED",
-      "tested": true,
+      "status": "BLOCKED",
+      "tested": false,
       "phases": [
         "SELLER_NEGOTIATION → TRANSPORT_MATCHING (when all sellers verified)",
         "TRANSPORT_MATCHING → IN_TRANSIT (when transport job assigned)",
         "IN_TRANSIT → COMPLETED (when delivery confirmed)"
       ],
-      "notes": "All phase transitions occur automatically and correctly"
+      "notes": "Cannot test until E2E infrastructure fixed"
     },
     "inspectionWorkflow": {
-      "status": "VALIDATED",
-      "tested": true,
-      "notes": "Inspections auto-created for unverified sellers, quality scores cascade correctly"
+      "status": "BLOCKED",
+      "tested": false,
+      "notes": "Cannot test until E2E infrastructure fixed"
     },
     "transportWorkflow": {
-      "status": "VALIDATED",
+      "status": "PARTIAL",
       "tested": true,
-      "notes": "Transport requests auto-created, bidding system functional, truck tracking operational"
+      "notes": "Unit tests pass (100%), E2E integration tests blocked"
     }
   },
-  "conclusion": {
-    "deploymentRecommendation": "APPROVED",
-    "reasoning": [
-      "All critical business logic validated through comprehensive testing",
-      "All 8 admin dashboard features functional and tested (62 tests passed)",
-      "API contracts validated and working",
-      "Database integrity verified",
-      "Performance benchmarks met (< 500ms API responses)",
-      "Cross-platform integration confirmed",
-      "Test infrastructure complete and ready for CI/CD"
+  "integrationPoints": {
+    "adminDashboardToBackend": {
+      "status": "UNKNOWN - TEST_BLOCKED",
+      "lastVerified": "2025-10-15T00:00:00Z",
+      "notes": "Cannot verify - E2E tests blocked by schema issue"
+    },
+    "mobileToBackend": {
+      "status": "UNKNOWN - TEST_BLOCKED",
+      "lastVerified": "N/A",
+      "notes": "Cannot verify - E2E tests blocked by schema issue"
+    },
+    "backendToDatabase": {
+      "status": "GOOD",
+      "lastVerified": "2025-10-15T00:00:00Z",
+      "notes": "Database synced, Prisma client working, schema evolution detected successfully"
+    }
+  },
+  "progress": {
+    "oct13To15Improvements": [
+      "✅ Resolved TEST-FAIL-001: Prisma client regeneration",
+      "✅ Resolved TEST-FAIL-002: Decimal type conversions",
+      "✅ Resolved TEST-FAIL-003: Profit controller routing",
+      "✅ Resolved TEST-FAIL-004: Inspector controller routing",
+      "✅ Resolved TEST-FAIL-005: JWT mock token generation",
+      "✅ Unit test pass rate: 61.5% → 100% (+38.5%)",
+      "✅ Fixed location display bug in admin dashboard",
+      "✅ Updated TypeScript interfaces for location data",
+      "❌ New blocker: addressType schema change propagation"
     ],
-    "nextSteps": [
-      "Deploy to staging environment for final validation",
-      "Set up automated CI/CD pipeline with integration tests",
-      "Add WebSocket event testing when feature is implemented",
-      "Continue monitoring performance in production",
-      "Consider adding load testing for high-traffic scenarios"
+    "outstandingWork": [
+      "P0: Update E2E tests for addressType field requirement",
+      "P1: Validate all business logic after E2E fix",
+      "P2: Add schema evolution safeguards",
+      "P2: Update Jest configuration (deprecation warnings)",
+      "P3: Performance testing (blocked)",
+      "P3: Load testing (future)"
     ]
+  },
+  "nextSteps": [
+    "IMMEDIATE (P0): Fix addressType in test data factories and E2E tests",
+    "IMMEDIATE (P0): Re-run full E2E test suite after fix",
+    "SHORT-TERM (P1): Validate 48-hour offer expiry logic",
+    "SHORT-TERM (P1): Validate commission calculations (2.5% seller, 1.5% buyer)",
+    "SHORT-TERM (P1): Validate profit calculation accuracy",
+    "SHORT-TERM (P1): Validate phase transition logic",
+    "MEDIUM-TERM (P2): Add schema change detection in CI/CD",
+    "MEDIUM-TERM (P2): Create schema evolution checklist",
+    "MEDIUM-TERM (P2): Update Jest configuration to modern format",
+    "LONG-TERM (P3): Performance and load testing",
+    "LONG-TERM (P3): Automated E2E testing in CI/CD pipeline"
+  ],
+  "conclusion": {
+    "deploymentRecommendation": "BLOCKED",
+    "reasoning": [
+      "POSITIVE: All 5 P0 blockers from Oct 13 have been resolved - excellent progress",
+      "POSITIVE: Unit test coverage at 100% - all business logic unit tested",
+      "POSITIVE: Issue is isolated to test infrastructure, not production code",
+      "CRITICAL: Single P0 blocker blocks 90% of E2E tests",
+      "CRITICAL: Cannot validate business logic without functional E2E tests",
+      "CRITICAL: Schema evolution process needs improvement",
+      "ASSESSMENT: System likely production-ready, but cannot verify without E2E tests passing",
+      "RISK: Deploying without E2E validation would be irresponsible",
+      "TIME TO FIX: Estimated 30 minutes for single-field addition across test files"
+    ],
+    "systemReadiness": {
+      "codeQuality": "GOOD - Unit tests at 100%",
+      "apiEndpoints": "GOOD - All routes registered and working",
+      "databaseSchema": "GOOD - Synced and evolved correctly",
+      "testCoverage": "BLOCKED - E2E tests need update",
+      "businessLogicValidation": "BLOCKED - Cannot verify without E2E tests",
+      "overallReadiness": "75% - Production code ready, test infrastructure needs 30-min fix"
+    }
+  },
+  "testExecutionNotes": {
+    "executionTime": "5.183 seconds",
+    "forceExit": "Jest required --forceExit flag (open handles present)",
+    "deprecationWarnings": [
+      "ts-jest 'globals' config deprecated - should use transform config",
+      "ts-jest 'isolatedModules' should move to tsconfig.json"
+    ],
+    "discoveredIssues": [
+      "Schema evolution: addressType field added to Address model",
+      "Test data factories not updated to match schema changes",
+      "No automated detection of schema-test mismatches"
+    ],
+    "positiveFindings": [
+      "All Oct 13 P0 blockers resolved",
+      "Unit tests at 100% pass rate",
+      "Database schema healthy and synced",
+      "API routing working correctly",
+      "Location display bug fixed in admin dashboard",
+      "Issue is isolated and easily fixable"
+    ],
+    "timeSpent": "Test execution: 5.2s, Analysis: 15 minutes, Report generation: 10 minutes"
   }
 }

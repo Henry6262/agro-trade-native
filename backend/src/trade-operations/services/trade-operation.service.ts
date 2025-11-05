@@ -473,11 +473,18 @@ export class TradeOperationService {
     // Prepare pickup points
     const pickupPoints = (trade.sellers || []).map((ts: any) => {
       const sellerAddress = ts.seller?.addresses?.[0];
+      // Handle Prisma Decimal type conversion safely
+      const quantity = ts.requestedQuantity
+        ? (typeof ts.requestedQuantity === 'object' && 'toNumber' in ts.requestedQuantity
+            ? ts.requestedQuantity.toNumber()
+            : Number(ts.requestedQuantity))
+        : 0;
+
       return {
         id: ts.sellerId,
         lat: sellerAddress?.latitude || 0,
         lng: sellerAddress?.longitude || 0,
-        quantity: ts.requestedQuantity?.toNumber() || 0,
+        quantity,
       };
     });
 

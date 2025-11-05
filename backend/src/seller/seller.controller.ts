@@ -196,8 +196,29 @@ export class SellerController {
       ? {
           id: entity.product.id,
           name: entity.product.name,
+          displayName: entity.product.displayName,
           category: entity.product.category,
           description: entity.product.description,
+          image: entity.product.image,
+        }
+      : null;
+
+    const seller = entity.seller
+      ? {
+          id: entity.seller.id,
+          name: entity.seller.name,
+          email: entity.seller.email,
+          businessName: entity.seller.company?.legalName || entity.seller.name,
+          verificationStatus: entity.seller.verificationStatus,
+          company: entity.seller.company
+            ? {
+                id: entity.seller.company.id,
+                legalName: entity.seller.company.legalName,
+                registrationNumber: entity.seller.company.registrationNumber,
+                phoneNumber: entity.seller.company.phoneNumber,
+                email: entity.seller.company.email,
+              }
+            : null,
         }
       : null;
 
@@ -206,7 +227,9 @@ export class SellerController {
           id: entity.address.id,
           street: entity.address.street,
           city: entity.address.city?.name ?? entity.address.city,
+          region: entity.address.city?.region?.name ?? null,
           country: entity.address.country,
+          address: entity.address.street,
           latitude: entity.address.latitude
             ? Number(entity.address.latitude)
             : null,
@@ -223,6 +246,13 @@ export class SellerController {
           valueText: spec.valueText,
           valueNumber: spec.valueNumber ? Number(spec.valueNumber) : null,
           valueBool: spec.valueBool,
+          specificationType: spec.specificationType ? {
+            id: spec.specificationType.id,
+            code: spec.specificationType.code,
+            name: spec.specificationType.name,
+            unit: spec.specificationType.unit,
+            dataType: spec.specificationType.dataType,
+          } : null,
         }))
       : null;
 
@@ -237,6 +267,7 @@ export class SellerController {
         askingPrice: entity.askingPrice ? Number(entity.askingPrice) : null,
         status: (entity.status ?? 'PENDING').toString().toLowerCase() as ListingStatus,
         product,
+        seller,
         address,
         specifications,
         createdAt: entity.createdAt?.toISOString?.() ?? new Date().toISOString(),

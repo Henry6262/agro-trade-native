@@ -183,20 +183,66 @@ export class BuyerService {
         status: RequestStatus.ACTIVE,
       },
       include: {
-        product: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            displayName: true,
+            category: true,
+            description: true,
+            image: true,
+          },
+        },
         buyer: {
           select: {
             id: true,
             name: true,
             email: true,
-            company: true,
+            company: {
+              select: {
+                id: true,
+                legalName: true,
+                registrationNumber: true,
+                phoneNumber: true,
+                email: true,
+              },
+            },
           },
         },
-        deliveryAddress: true,
+        deliveryAddress: {
+          select: {
+            id: true,
+            street: true,
+            country: true,
+            latitude: true,
+            longitude: true,
+            city: {
+              select: {
+                id: true,
+                name: true,
+                region: {
+                  select: {
+                    id: true,
+                    name: true,
+                    country: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         specifications: {
           include: {
-            specificationType: true,
-          }
+            specificationType: {
+              select: {
+                id: true,
+                code: true,
+                name: true,
+                unit: true,
+                dataType: true,
+              },
+            },
+          },
         },
       },
       orderBy: { createdAt: 'desc' },

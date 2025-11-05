@@ -121,4 +121,10 @@ export class CalculateTransportResponseDto {
 
   @ApiProperty({ example: 'EUR' })
   currency: string;
+
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Optional warnings when using fallback locations or missing data',
+  })
+  warnings?: string[];
 }

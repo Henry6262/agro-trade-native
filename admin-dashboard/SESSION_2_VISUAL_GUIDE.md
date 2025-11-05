@@ -1,0 +1,360 @@
+# Session 2: Replacement Seller Finder - Visual Guide
+
+## User Journey
+
+### Step 1: Identify Quantity Gap
+When viewing a Trade Operation with a quantity gap, the Quantity Tracking Panel shows:
+```
+┌────────────────────────────────────────────────────────────────┐
+│ 📊 Quantity Tracking                            ⚠️ GAP EXISTS  │
+│ Monitor fulfillment progress and gaps                          │
+├────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ Progress Bar:                                                   │
+│ 150.0/500.0 kg                                      30.0%      │
+│ ┌──────────────────────────────────────────────────────────┐  │
+│ │██████████ Accepted              │ (green, 30%)            │  │
+│ │           ███ Pending            │ (yellow, 10%)           │  │
+│ │                    (gray gap)    │                          │  │
+│ └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│ Breakdown:                                                      │
+│ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐                  │
+│ │ ACCEPTED│ │ PENDING│ │REJECTED│ │  GAP   │                  │
+│ │  150.0  │ │  50.0  │ │  20.0  │ │ 350.0  │                  │
+│ │   kg    │ │   kg   │ │   kg   │ │   kg   │                  │
+│ └────────┘ └────────┘ └────────┘ └────────┘                  │
+│                                                                 │
+│ ⚠️ Quantity Gap Detected                                       │
+│ You need 350.0 more kg to fulfill the buyer's requirement.    │
+│ 50.0 kg are pending seller acceptance.                        │
+│                                         [🔍 Find Replacement   │
+│                                              Sellers]          │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Step 2: Click "Find Replacement Sellers"
+The button opens the ReplacementSellerFinder modal
+
+### Step 3: View Available Sellers
+The modal displays matching sellers in a grid:
+```
+┌────────────────────────────────────────────────────────────────┐
+│ Find Replacement Sellers                               [X]     │
+│ Select sellers to send offers for 350.0 kg                     │
+├────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ [Select All]  Selected: 0 sellers    Total: 0.0 / 350.0 kg   │
+│                                                                 │
+├────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐  │
+│ │ ☐ John's Farm   │ │ ☐ Maria's Farm  │ │ ☐ Peter's Farm  │  │
+│ │ 📍 Sofia        │ │ 📍 Plovdiv      │ │ 📍 Varna        │  │
+│ │                 │ │                 │ │                 │  │
+│ │ Available:      │ │ Available:      │ │ Available:      │  │
+│ │ 200.0 kg        │ │ 150.0 kg        │ │ 100.0 kg        │  │
+│ │                 │ │                 │ │                 │  │
+│ │ Asking Price:   │ │ Asking Price:   │ │ Asking Price:   │  │
+│ │ €340.00/kg      │ │ €335.00/kg      │ │ €350.00/kg      │  │
+│ │                 │ │                 │ │                 │  │
+│ │ Distance:       │ │ Distance:       │ │ Distance:       │  │
+│ │ 45.2 km         │ │ 67.8 km         │ │ 120.5 km        │  │
+│ │                 │ │                 │ │                 │  │
+│ │ [Quality: 92]   │ │ [Quality: 85]   │ │ [Quality: 78]   │  │
+│ │ (green)         │ │ (blue)          │ │ (yellow)        │  │
+│ │                 │ │                 │ │                 │  │
+│ │   [Match: 88%]  │ │   [Match: 82%]  │ │   [Match: 71%]  │  │
+│ │   (large green) │ │   (large green) │ │   (large yellow)│  │
+│ └─────────────────┘ └─────────────────┘ └─────────────────┘  │
+│                                                                 │
+│ ┌─────────────────┐ ┌─────────────────┐                       │
+│ │ ☐ Ana's Farm    │ │ ☐ Ivan's Farm   │                       │
+│ │ 📍 Burgas       │ │ 📍 Ruse         │                       │
+│ │ ... (same info) │ │ ... (same info) │                       │
+│ └─────────────────┘ └─────────────────┘                       │
+│                                                                 │
+├────────────────────────────────────────────────────────────────┤
+│                                        [Cancel] [Send Offers]  │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Step 4: Select Sellers
+User clicks checkboxes to select sellers:
+```
+┌────────────────────────────────────────────────────────────────┐
+│ Find Replacement Sellers                               [X]     │
+│ Select sellers to send offers for 350.0 kg                     │
+├────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ [Deselect All]  Selected: 2 sellers   Total: 350.0 / 350.0 kg│
+│                                              (green, no gap)   │
+│                                                                 │
+├────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐  │
+│ │ ☑ John's Farm   │ │ ☑ Maria's Farm  │ │ ☐ Peter's Farm  │  │
+│ │ (orange ring    │ │ (orange ring    │ │ (normal)        │  │
+│ │  orange bg)     │ │  orange bg)     │ │                 │  │
+│ │ 📍 Sofia        │ │ 📍 Plovdiv      │ │ 📍 Varna        │  │
+│ │ [Details...]    │ │ [Details...]    │ │ [Details...]    │  │
+│ └─────────────────┘ └─────────────────┘ └─────────────────┘  │
+│                                                                 │
+├────────────────────────────────────────────────────────────────┤
+│                                        [Cancel] [Send 2 Offers]│
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Step 5: Gap Warning (if needed)
+If selected quantity is less than needed:
+```
+┌────────────────────────────────────────────────────────────────┐
+│ Selected: 1 sellers    Total: 200.0 / 350.0 kg (orange, gap)  │
+│                                                                 │
+│ ⚠️ Warning: Selected quantity (200.0 kg) is less than needed  │
+│           (350.0 kg)                                           │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Step 6: Send Offers
+User clicks "Send Offers" button:
+```
+┌────────────────────────────────────────────────────────────────┐
+│                            [Cancel] [⏳ Sending Offers...]     │
+│                                      (disabled, spinning)      │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### Step 7: Success
+Toast notification appears and modal closes:
+```
+┌────────────────────────────────┐
+│ ✅ Offers Sent Successfully    │
+│ Sent 2 offer(s) to replacement │
+│ sellers                         │
+└────────────────────────────────┘
+```
+
+### Step 8: Updated Quantity Tracking
+Back on Trade Operation page, Quantity Tracking Panel refreshes:
+```
+┌────────────────────────────────────────────────────────────────┐
+│ 📊 Quantity Tracking                         ⏳ IN PROGRESS    │
+├────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│ 150.0/500.0 kg                                      30.0%      │
+│ ┌──────────────────────────────────────────────────────────┐  │
+│ │██████████ Accepted   │████████████████ Pending │          │  │
+│ │ (30%)                │ (70% - includes new offers)        │  │
+│ └──────────────────────────────────────────────────────────┘  │
+│                                                                 │
+│ ┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐                  │
+│ │ACCEPTED│ │ PENDING│ │REJECTED│ │  GAP   │                  │
+│ │ 150.0  │ │ 400.0  │ │  20.0  │ │  0.0   │                  │
+│ │  kg    │ │  kg    │ │   kg   │ │   kg   │                  │
+│ └────────┘ └────────┘ └────────┘ └────────┘                  │
+│                        (now includes new sellers)              │
+│                                                                 │
+│ ⚠️ Quantity Gap: 0.0 kg (pending sellers need to accept)      │
+└────────────────────────────────────────────────────────────────┘
+```
+
+## Empty State
+When no matching sellers are found:
+```
+┌────────────────────────────────────────────────────────────────┐
+│ Find Replacement Sellers                               [X]     │
+│ Select sellers to send offers for 350.0 kg                     │
+├────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│                                                                 │
+│                           🔍                                    │
+│                      (large, faded)                            │
+│                                                                 │
+│              No matching sellers available                     │
+│                                                                 │
+│      No sellers with matching products were found              │
+│      at this time. Please check back later.                    │
+│                                                                 │
+│                                                                 │
+├────────────────────────────────────────────────────────────────┤
+│                                                 [Cancel]        │
+└────────────────────────────────────────────────────────────────┘
+```
+
+## Error State
+When API fails:
+```
+┌────────────────────────────────────────────────────────────────┐
+│ Find Replacement Sellers                               [X]     │
+│ Select sellers to send offers for 350.0 kg                     │
+├────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│                          ⚠️                                     │
+│                      (large, red)                              │
+│                                                                 │
+│            Failed to load matching sellers                     │
+│                                                                 │
+│                        [Retry]                                 │
+│                                                                 │
+├────────────────────────────────────────────────────────────────┤
+│                                                 [Cancel]        │
+└────────────────────────────────────────────────────────────────┘
+```
+
+## Loading State
+While fetching sellers:
+```
+┌────────────────────────────────────────────────────────────────┐
+│ Find Replacement Sellers                               [X]     │
+│ Select sellers to send offers for 350.0 kg                     │
+├────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│                          ⏳                                     │
+│                    (spinning loader)                           │
+│                                                                 │
+│              Finding matching sellers...                       │
+│                                                                 │
+│                                                                 │
+├────────────────────────────────────────────────────────────────┤
+│                                                 [Cancel]        │
+└────────────────────────────────────────────────────────────────┘
+```
+
+## Interaction States
+
+### Seller Card States
+
+**Default (not selected)**:
+```
+┌─────────────────────┐
+│ ☐ John's Farm       │ ← Unchecked checkbox
+│ 📍 Sofia            │
+│ Border: gray-300    │
+│ Background: white   │
+│ Hover: shadow-lg    │
+│ Hover border: orange│
+└─────────────────────┘
+```
+
+**Selected**:
+```
+┌─────────────────────┐
+│ ☑ John's Farm       │ ← Checked checkbox
+│ 📍 Sofia            │
+│ Ring: orange-500    │
+│ Background: orange-50│
+│ Border: orange-300  │
+└─────────────────────┘
+```
+
+**Hover (not selected)**:
+```
+┌─────────────────────┐
+│ ☐ John's Farm       │
+│ 📍 Sofia            │
+│ Shadow: large       │
+│ Border: orange-300  │
+│ Cursor: pointer     │
+└─────────────────────┘
+```
+
+### Button States
+
+**Send Offers - Enabled**:
+```
+[Send 2 Offers]
+Background: orange-600
+Hover: orange-700
+Text: white
+Cursor: pointer
+```
+
+**Send Offers - Disabled (no selection)**:
+```
+[Send Offers]
+Background: gray-300
+Text: gray-500
+Cursor: not-allowed
+Opacity: 0.5
+```
+
+**Send Offers - Loading**:
+```
+[⏳ Sending Offers...]
+Background: orange-600
+Disabled: true
+Spinner: rotating
+```
+
+## Color Coding Reference
+
+### Match Score Badges
+- **Green (>80%)**: Excellent match
+- **Yellow (60-80%)**: Good match
+- **Red (<60%)**: Poor match
+
+### Quality Badges
+- **Green (>90)**: Premium quality
+- **Blue (75-90)**: High quality
+- **Yellow (60-75)**: Standard quality
+- **Red (<60)**: Economy quality
+
+### Quantity Tracking
+- **Green bar**: Accepted offers (confirmed)
+- **Yellow bar**: Pending offers (awaiting response)
+- **Gray space**: Unfulfilled gap
+- **Orange alert**: Gap warning
+
+### Selection Feedback
+- **Orange ring**: Selected card
+- **Orange background**: Selected card
+- **Green total**: No gap remaining
+- **Orange total**: Gap still exists
+
+## Responsive Breakpoints
+
+### Mobile (default)
+- 1 column grid
+- Full-width cards
+- Stacked controls
+- Full-screen modal
+
+### Tablet (md: 768px)
+- 2 column grid
+- Side-by-side controls
+- Max-width modal
+
+### Desktop (lg: 1024px)
+- 3 column grid
+- Horizontal controls
+- Large modal (max-w-6xl)
+
+## Accessibility Features
+
+### Keyboard Navigation
+- Tab through all interactive elements
+- Space/Enter to toggle checkboxes
+- Escape to close modal
+- Focus indicators on all controls
+
+### Screen Reader Support
+- Checkbox labels read correctly
+- Badge values announced
+- Loading states announced
+- Error messages announced
+- Modal title and description
+
+### Visual Indicators
+- High contrast text
+- Color + text for status
+- Loading spinners
+- Focus outlines
+- Hover states
+
+---
+
+**Visual Fidelity**: All UI elements use shadcn/ui components with consistent Tailwind styling
+**Color Scheme**: Orange primary, green success, yellow warning, red error
+**Typography**: Inter font family, responsive sizing
+**Spacing**: Consistent padding/margins throughout

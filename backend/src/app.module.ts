@@ -12,6 +12,7 @@ import { TradeOperationsModule } from './trade-operations/trade-operations.modul
 import { TransportModule } from './transport/transport.module';
 import { NegotiationsModule } from './negotiations/negotiations.module';
 import { InspectionModule } from './inspections/inspection.module';
+import { InspectorModule } from './modules/inspector/inspector.module';
 import { NotificationModule } from './notifications/notification.module';
 import { TransportCompanyModule } from './transport-company/transport-company.module';
 import { SimulationModule } from './simulation/simulation.module';
@@ -37,6 +38,7 @@ import { ResponseTimeMiddleware } from './common/middleware/response-time.middle
     TransportCompanyModule,
     NegotiationsModule,
     InspectionModule,
+    InspectorModule,
     NotificationModule,
     SimulationModule,
     RegionsModule,

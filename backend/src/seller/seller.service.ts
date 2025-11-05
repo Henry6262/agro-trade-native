@@ -158,13 +158,67 @@ export class SellerService {
   async getAllSellerListings() {
     const listings = await this.prisma.saleListing.findMany({
       include: {
-        product: true,
-        address: {
-          include: {
-            city: true,
+        product: {
+          select: {
+            id: true,
+            name: true,
+            displayName: true,
+            category: true,
+            description: true,
+            image: true,
           },
         },
-        specifications: true,
+        seller: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            company: {
+              select: {
+                id: true,
+                legalName: true,
+                registrationNumber: true,
+                phoneNumber: true,
+                email: true,
+              },
+            },
+          },
+        },
+        address: {
+          select: {
+            id: true,
+            street: true,
+            country: true,
+            latitude: true,
+            longitude: true,
+            city: {
+              select: {
+                id: true,
+                name: true,
+                region: {
+                  select: {
+                    id: true,
+                    name: true,
+                    country: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        specifications: {
+          include: {
+            specificationType: {
+              select: {
+                id: true,
+                code: true,
+                name: true,
+                unit: true,
+                dataType: true,
+              },
+            },
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -512,17 +566,73 @@ export class SellerService {
     const activeListings = listings.filter(l => l.status === 'ACTIVE').length;
     const totalProducts = listings.length;
 
-    // TODO: Implement proper statistics calculation
+    // Count actual offers from negotiations
+    const negotiations = await this.prisma.offerNegotiation.findMany({
+      where: {
+        tradeSeller: {
+          sellerId: userId,
+        },
+      },
+    });
+
+    const totalOffers = negotiations.length;
+    const pendingOffers = negotiations.filter(n => n.status === 'PENDING').length;
+
+    // Count trades (TradeSeller represents seller participation in trades)
+    const trades = await this.prisma.tradeSeller.findMany({
+      where: { sellerId: userId },
+      include: {
+        tradeOperation: true,
+      },
+    });
+
+    const totalTrades = trades.length;
+    const completedTrades = trades.filter(t =>
+      t.tradeOperation.status === 'COMPLETED'
+    ).length;
+
+    // Calculate revenue from completed trades
+    const completedTradeOperations = trades.filter(t =>
+      t.tradeOperation.status === 'COMPLETED'
+    );
+
+    const totalRevenue = completedTradeOperations.reduce((sum, trade) => {
+      const quantity = trade.agreedQuantity?.toNumber() || 0;
+      const price = trade.agreedPrice?.toNumber() || 0;
+      return sum + (quantity * price);
+    }, 0);
+
+    // Calculate monthly revenue (current month)
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const monthlyTradeOperations = trades.filter(t =>
+      t.tradeOperation.status === 'COMPLETED' &&
+      t.tradeOperation.completedAt &&
+      t.tradeOperation.completedAt >= firstDayOfMonth
+    );
+
+    const monthlyRevenue = monthlyTradeOperations.reduce((sum, trade) => {
+      const quantity = trade.agreedQuantity?.toNumber() || 0;
+      const price = trade.agreedPrice?.toNumber() || 0;
+      return sum + (quantity * price);
+    }, 0);
+
+    // Calculate average rating from completed trades with feedback
+    // Note: The database doesn't have a rating field on TradeSeller or TradeOperation yet
+    // So we'll return 0 for now. When rating system is added, update this calculation.
+    const averageRating = 0; // Placeholder until rating system is implemented in schema
+
     return {
       totalProducts,
       activeListings,
-      totalOffers: 0, // TODO: Count actual offers
-      pendingOffers: 0, // TODO: Count pending offers
-      totalTrades: 0, // TODO: Count completed trades
-      completedTrades: 0, // TODO: Count completed trades
-      totalRevenue: 0, // TODO: Calculate actual revenue
-      monthlyRevenue: 0, // TODO: Calculate monthly revenue
-      averageRating: 0, // TODO: Calculate average rating
+      totalOffers,
+      pendingOffers,
+      totalTrades,
+      completedTrades,
+      totalRevenue: Math.round(totalRevenue * 100) / 100, // Round to 2 decimals
+      monthlyRevenue: Math.round(monthlyRevenue * 100) / 100, // Round to 2 decimals
+      averageRating,
     };
   }
 

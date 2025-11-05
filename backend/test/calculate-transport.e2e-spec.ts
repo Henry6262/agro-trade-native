@@ -53,6 +53,7 @@ describe('Calculate Transport (e2e)', () => {
         postalCode: '1000',
         latitude: 42.6977,
         longitude: 23.3219,
+        addressType: 'DELIVERY',
       },
     });
 
@@ -90,6 +91,7 @@ describe('Calculate Transport (e2e)', () => {
         postalCode: '4000',
         latitude: 42.1354,
         longitude: 24.7453,
+        addressType: 'FARM',
       },
     });
 
@@ -103,6 +105,7 @@ describe('Calculate Transport (e2e)', () => {
         postalCode: '9000',
         latitude: 43.2141,
         longitude: 27.9147,
+        addressType: 'FARM',
       },
     });
 
