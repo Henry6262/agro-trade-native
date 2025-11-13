@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsNotEmpty, IsString, ArrayMinSize } from 'class-validator';
 import { ProductUnit, SellerStatus } from '@prisma/client';
+import { SellerInspectionSummaryDto } from './trade-operation-response.dto';
 
 export class TradeSellerDto {
   @ApiProperty({ example: 'ts_123' })
@@ -32,6 +33,9 @@ export class TradeSellerDto {
 
   @ApiProperty({ enum: SellerStatus, example: SellerStatus.NEGOTIATING })
   status: SellerStatus;
+
+  @ApiPropertyOptional({ type: SellerInspectionSummaryDto })
+  inspection?: SellerInspectionSummaryDto;
 }
 
 export class AddSellersResponseDto {

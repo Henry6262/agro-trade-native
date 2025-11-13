@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import type { User, SaleListing, BuyListing, TradeOperation, Negotiation, InspectionRequest } from '../../../../types';
-import type { TransportRequest, TransportBid } from '../../../../types/transport';
+import type {
+  User,
+  SaleListing,
+  BuyListing,
+  TradeOperation,
+  Negotiation,
+  InspectionRequest,
+  TransportRequestListItem,
+  TransportBidSummary,
+} from '../../../../types';
 import { simulationApi } from '../../../../services/simulationApi';
 
 interface TransportJob {
@@ -9,7 +17,16 @@ interface TransportJob {
   [key: string]: unknown;
 }
 
-type EntityType = User | SaleListing | BuyListing | TradeOperation | Negotiation | InspectionRequest | TransportRequest | TransportBid | TransportJob;
+type EntityType =
+  | User
+  | SaleListing
+  | BuyListing
+  | TradeOperation
+  | Negotiation
+  | InspectionRequest
+  | TransportRequestListItem
+  | TransportBidSummary
+  | TransportJob;
 
 interface DatabaseStatePanelProps {
   scenarioState: {
@@ -24,8 +41,8 @@ interface DatabaseStatePanelProps {
     tradeOperations: TradeOperation[];
     negotiations: Negotiation[];
     inspections: InspectionRequest[];
-    transportRequests: TransportRequest[];
-    transportBids: TransportBid[];
+    transportRequests: TransportRequestListItem[];
+    transportBids: TransportBidSummary[];
     transportJobs: TransportJob[];
   };
   onRefresh: () => void;

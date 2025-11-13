@@ -155,8 +155,59 @@ export class SellerService {
     }
   }
 
-  async getAllSellerListings() {
+  async getAllSellerListings(
+    buyListingId?: string,
+    tradeOperationId?: string,
+  ) {
+    const tradeOperation = tradeOperationId
+      ? await this.prisma.tradeOperation.findUnique({
+          where: { id: tradeOperationId },
+          include: {
+            buyListing: true,
+            sellers: {
+              include: {
+                negotiation: true,
+              },
+            },
+          },
+        })
+      : buyListingId
+      ? await this.prisma.tradeOperation.findUnique({
+          where: { buyListingId },
+          include: {
+            buyListing: true,
+            sellers: {
+              include: {
+                negotiation: true,
+              },
+            },
+          },
+        })
+      : null;
+
+    const buyListing = buyListingId
+      ? await this.prisma.buyListing.findUnique({
+          where: { id: buyListingId },
+        })
+      : tradeOperation?.buyListing || null;
+
+    const where: any = {};
+    if (buyListing) {
+      where.productId = buyListing.productId;
+      where.status = 'ACTIVE';
+      where.quantity = {
+        gt: 0,
+      };
+
+      if (buyListing.maxPricePerUnit) {
+        where.askingPrice = {
+          lte: buyListing.maxPricePerUnit,
+        };
+      }
+    }
+
     const listings = await this.prisma.saleListing.findMany({
+      where: Object.keys(where).length > 0 ? where : undefined,
       include: {
         product: {
           select: {
@@ -225,7 +276,35 @@ export class SellerService {
       },
     });
 
-    return listings;
+    const tradeSellerMap = new Map<
+      string,
+      {
+        status: string;
+        negotiationStatus?: string;
+      }
+    >();
+
+    if (tradeOperation?.sellers) {
+      tradeOperation.sellers.forEach((seller) => {
+        tradeSellerMap.set(seller.saleListingId, {
+          status: seller.status,
+          negotiationStatus: seller.negotiation?.status,
+        });
+      });
+    }
+
+    return listings.map((listing) => {
+      const tradeContext = tradeSellerMap.get(listing.id);
+      if (!tradeContext) {
+        return listing;
+      }
+
+      return {
+        ...listing,
+        tradeSellerStatus: tradeContext.status,
+        negotiationStatus: tradeContext.negotiationStatus,
+      };
+    });
   }
 
   async getSellerListings(userId: string) {

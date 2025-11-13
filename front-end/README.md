@@ -44,9 +44,9 @@ src/
 
 - Node.js (v18 or later)
 - npm or yarn
-- Expo CLI
-- iOS Simulator (for iOS development)
-- Android Studio (for Android development)
+- Expo CLI + `eas-cli` (to build the dev client)
+- iOS Simulator (Xcode) and/or Android Studio emulators
+- A local Expo development client (`npm run ios` / `npm run android`); Expo Go is not supported because we rely on native modules like Reanimated and Google Sign-In.
 
 ### Installation
 
@@ -62,9 +62,12 @@ src/
    ```
 
 3. **Set up environment variables**:
-   Create a `.env` file in the root directory:
+   Copy `.env.example` to `.env` and fill in the required values:
    ```env
-   EXPO_PUBLIC_API_URL=http://localhost:3000/api
+   EXPO_PUBLIC_API_URL=http://localhost:4000/api
+   EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=<maps-api-key>
+   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=<google-oauth-web-client-id>
+   EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=<google-oauth-ios-client-id>
    ```
 
 4. **Start the development server**:
@@ -72,7 +75,7 @@ src/
    npm start
    ```
 
-5. **Run on specific platforms**:
+5. **Run on specific platforms (uses the local dev client)**:
    ```bash
    # iOS
    npm run ios

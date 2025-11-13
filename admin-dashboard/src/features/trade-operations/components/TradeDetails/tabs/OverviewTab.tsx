@@ -1,6 +1,7 @@
 import React from 'react';
 import * as Types from '../../../../../types';
 import { Users, MessageSquare, TrendingUp, ChevronRight } from 'lucide-react';
+import { TradeTimeline } from '../components/TradeTimeline';
 
 interface ProfitData {
   estimatedProfit?: number;
@@ -11,6 +12,8 @@ interface ProfitData {
 interface OverviewTabProps {
   operation: Types.TradeOperation;
   negotiations: Types.Negotiation[];
+  inspections: Types.InspectionRequest[];
+  transport?: Types.TransportSummary;
   profitData: ProfitData | null;
   loading: boolean;
   onPhaseChange: (newPhase: Types.TradePhase) => void;
@@ -20,6 +23,8 @@ interface OverviewTabProps {
 export const OverviewTab: React.FC<OverviewTabProps> = ({
   operation,
   negotiations,
+  inspections,
+  transport,
   profitData,
   loading,
   onPhaseChange,
@@ -113,6 +118,14 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({
           </div>
         )}
       </div>
+
+      {/* Workflow Timeline */}
+      <TradeTimeline
+        operation={operation}
+        inspections={inspections}
+        transport={transport}
+        negotiations={negotiations}
+      />
 
       {/* Buy Listing Info */}
       <div className="bg-white p-6 rounded-lg border border-gray-200">

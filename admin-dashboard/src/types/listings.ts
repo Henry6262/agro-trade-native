@@ -50,6 +50,36 @@ export interface SaleListing {
   address?: Address;
 }
 
+export interface SellerInspectionStatus {
+  id: string;
+  status: 'PENDING' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  requestedDate?: string | null;
+  scheduledDate?: string | null;
+  completedDate?: string | null;
+  inspector?: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+  } | null;
+}
+
+export interface TradeSellerSummary {
+  id: string;
+  sellerId: string;
+  saleListingId: string;
+  name: string;
+  requestedQuantity: number;
+  offeredQuantity: number;
+  agreedQuantity?: number | null;
+  unit?: string;
+  price?: number;
+  status: string;
+  inspection?: SellerInspectionStatus;
+  seller?: User;
+  saleListing?: SaleListing;
+}
+
 export interface BuyListing {
   id: string;
   buyerId: string;
@@ -97,7 +127,7 @@ export interface TradeOperation {
   createdAt: string;
   updatedAt?: string;
   buyListing?: BuyListing;
-  sellers?: SaleListing[];
+  sellers?: TradeSellerSummary[];
   offers?: Offer[];
 }
 
@@ -143,17 +173,22 @@ export interface TransportRequest {
   tradeOperationId: string;
   totalWeight: number;
   pickupPoints: Array<{
-    lat: number;
-    lng: number;
-    sellerId: string;
-    quantity: number;
-    address: string;
+    lat?: number;
+    lng?: number;
+    sellerId?: string;
+    saleListingId?: string;
+    sellerName?: string;
+    quantity?: number;
+    unit?: string;
+    address?: string;
   }>;
   deliveryPoint: {
-    lat: number;
-    lng: number;
-    addressId: string;
-    address: string;
+    lat?: number;
+    lng?: number;
+    addressId?: string;
+    address?: string;
+    buyerId?: string;
+    buyerName?: string;
   };
   deliveryDeadline: string;
   status: 'OPEN' | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';

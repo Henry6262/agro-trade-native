@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import api from '../../../../services/api';
-import type { SaleListing } from '../../../../types/listings';
+import type { SaleListing, SellerInspectionStatus } from '../../../../types/listings';
 import type { Negotiation } from '../../../../types';
 import { formatLocation } from '../../../../utils/locationHelpers';
 import { LoadingState, ErrorState, EmptyState, MetricBadge } from '../../../../components/common';
@@ -12,6 +12,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 import { getSellerUnitPrice } from '../../../../utils/pricing';
 import type { TransportCostResult } from '../../../../types';
 import type { AutoOfferPlanOffer, AutoOfferSkip } from '../../utils/autoOffer';
@@ -20,6 +22,7 @@ interface SellerCardsPanelProps {
   filterProduct?: string;
   selectedSellerIds: string[];
   onSellerToggle: (seller: SaleListing) => void;
+  onOfferClick?: (seller: SaleListing) => void;
   highlightedSellerId?: string;
   onSellersLoaded?: (sellers: SaleListing[]) => void;
   transportCosts?: Record<string, TransportCostResult>;
@@ -30,12 +33,21 @@ interface SellerCardsPanelProps {
   recommendationDetails?: Record<string, AutoOfferPlanOffer>;
   recommendationReasons?: Record<string, AutoOfferSkip>;
   negotiationBySaleListingId?: Map<string, Negotiation>;
+  buyListingId?: string | null;
+  tradeOperationId?: string | null;
+  sellerStatusByListingId?: Map<
+    string,
+    { status: string; source: 'tradeSeller' | 'negotiation'; negotiationId?: string }
+  >;
+  inspectionStatusByListingId?: Map<string, SellerInspectionStatus>;
+  onAcceptOffer?: (negotiationId: string) => Promise<void>;
 }
 
 const SellerCardsPanel: React.FC<SellerCardsPanelProps> = ({
   filterProduct,
   selectedSellerIds,
   onSellerToggle,
+  onOfferClick,
   highlightedSellerId,
   onSellersLoaded,
   transportCosts = {},
@@ -46,6 +58,11 @@ const SellerCardsPanel: React.FC<SellerCardsPanelProps> = ({
   recommendationDetails = {},
   recommendationReasons = {},
   negotiationBySaleListingId,
+  buyListingId,
+  tradeOperationId,
+  sellerStatusByListingId,
+  inspectionStatusByListingId,
+  onAcceptOffer,
 }) => {
   const [sellers, setSellers] = useState<SaleListing[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,12 +74,17 @@ const SellerCardsPanel: React.FC<SellerCardsPanelProps> = ({
 
   useEffect(() => {
     fetchSellers();
-  }, [filterProduct]);
+  }, [filterProduct, buyListingId, tradeOperationId]);
 
   const fetchSellers = async () => {
     try {
       setLoading(true);
-      const response = await api.get(API_ENDPOINTS.seller.listings);
+      const response = await api.get(API_ENDPOINTS.seller.listings, {
+        params: {
+          buyListingId: buyListingId || undefined,
+          tradeOperationId: tradeOperationId || undefined,
+        },
+      });
       let filtered = response.data;
 
       if (filterProduct) {
@@ -294,9 +316,13 @@ const SellerCardsPanel: React.FC<SellerCardsPanelProps> = ({
                     isSelected={selectedSellerIds.includes(seller.id)}
                     isHighlighted={highlightedSellerId === seller.id}
                     onToggle={onSellerToggle}
+                    onOfferClick={onOfferClick}
                     transportEstimate={transportCosts[seller.sellerId]}
                     recommendation={recommendationDetails[seller.id]}
                     negotiation={negotiationBySaleListingId?.get(seller.id)}
+                    statusInfo={sellerStatusByListingId?.get(seller.id)}
+                    inspection={inspectionStatusByListingId?.get(seller.id)}
+                    onAcceptOffer={onAcceptOffer}
                   />
                 ))}
               </div>
@@ -321,9 +347,13 @@ const SellerCardsPanel: React.FC<SellerCardsPanelProps> = ({
                     isSelected={selectedSellerIds.includes(seller.id)}
                     isHighlighted={highlightedSellerId === seller.id}
                     onToggle={onSellerToggle}
+                    onOfferClick={onOfferClick}
                     transportEstimate={transportCosts[seller.sellerId]}
                     reason={recommendationReasons[seller.id]}
                     negotiation={negotiationBySaleListingId?.get(seller.id)}
+                    statusInfo={sellerStatusByListingId?.get(seller.id)}
+                    inspection={inspectionStatusByListingId?.get(seller.id)}
+                    onAcceptOffer={onAcceptOffer}
                   />
                 ))}
               </div>
@@ -340,10 +370,14 @@ interface SellerCardProps {
   isSelected: boolean;
   isHighlighted: boolean;
   onToggle: (seller: SaleListing) => void;
+  onOfferClick?: (seller: SaleListing) => void;
   transportEstimate?: TransportCostResult;
   recommendation?: AutoOfferPlanOffer;
   reason?: AutoOfferSkip;
   negotiation?: Negotiation;
+  statusInfo?: { status: string; source: 'tradeSeller' | 'negotiation'; negotiationId?: string };
+  inspection?: SellerInspectionStatus;
+  onAcceptOffer?: (negotiationId: string) => Promise<void>;
 }
 
 const SellerCard: React.FC<SellerCardProps> = ({
@@ -355,6 +389,10 @@ const SellerCard: React.FC<SellerCardProps> = ({
   recommendation,
   negotiation,
   reason,
+  statusInfo,
+  inspection,
+  onAcceptOffer,
+  onOfferClick,
 }) => {
   const productTheme = getProductTheme(seller.product?.name || '');
   const gradeTheme = seller.qualityGrade
@@ -362,6 +400,146 @@ const SellerCard: React.FC<SellerCardProps> = ({
     : null;
   const unitPrice = getSellerUnitPrice(seller);
   const isGolden = Boolean(recommendation);
+  const derivedStatus = negotiation?.status || statusInfo?.status;
+  const [accepting, setAccepting] = useState(false);
+
+  const visualStatus = useMemo(() => {
+    if (
+      derivedStatus === 'PENDING' &&
+      negotiation?.expiresAt &&
+      new Date(negotiation.expiresAt).getTime() - Date.now() <= 0
+    ) {
+      return 'EXPIRED';
+    }
+    return derivedStatus;
+  }, [derivedStatus, negotiation?.expiresAt]);
+
+  const statusMeta = useMemo(() => {
+    if (!visualStatus) {
+      if (statusInfo?.status) {
+        return {
+          label: statusInfo.status,
+          className: 'bg-slate-100 text-slate-700 border border-slate-200',
+        };
+      }
+      return null;
+    }
+
+    const base = {
+      label: visualStatus,
+      className: 'bg-slate-100 text-slate-700 border border-slate-200',
+    };
+
+    switch (visualStatus) {
+      case 'PENDING': {
+        if (negotiation?.expiresAt) {
+          const now = Date.now();
+          const diffMs = new Date(negotiation.expiresAt).getTime() - now;
+          const dayMs = 24 * 60 * 60 * 1000;
+          const token =
+            diffMs > dayMs
+              ? `${Math.ceil(diffMs / dayMs)}d`
+              : `${Math.ceil(diffMs / (60 * 60 * 1000))}h`;
+          return {
+            label: `Pending (${token})`,
+            className:
+              diffMs <= 12 * 60 * 60 * 1000
+                ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                : 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+          };
+        }
+        return {
+          label: 'Pending',
+          className: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+        };
+      }
+      case 'COUNTERED':
+        return {
+          label: 'Counter Offer',
+          className: 'bg-orange-100 text-orange-800 border border-orange-200',
+        };
+      case 'ACCEPTED':
+        return {
+          label: 'Accepted',
+          className: 'bg-green-100 text-green-800 border border-green-200',
+        };
+      case 'REJECTED':
+        return {
+          label: 'Declined',
+          className: 'bg-red-100 text-red-700 border border-red-200',
+        };
+      case 'FAILED_INSPECTION':
+        return {
+          label: 'Failed Inspection',
+          className: 'bg-red-100 text-red-700 border border-red-200',
+        };
+      case 'EXPIRED':
+        return {
+          label: 'Expired',
+          className: 'bg-red-100 text-red-700 border border-red-200',
+        };
+      default:
+        return base;
+    }
+  }, [derivedStatus, negotiation?.expiresAt, statusInfo]);
+
+  const inspectionMeta = useMemo(() => {
+    if (!inspection) return null;
+    const priorityToken = inspection.priority ? inspection.priority.charAt(0) : '';
+    const suffix = priorityToken ? ` (${priorityToken})` : '';
+
+    switch (inspection.status) {
+      case 'PENDING':
+        return {
+          label: `Inspection pending${suffix}`,
+          className: 'bg-amber-50 text-amber-700 border border-amber-200',
+        };
+      case 'SCHEDULED':
+        return {
+          label: inspection.inspector?.name
+            ? `Inspection scheduled • ${inspection.inspector.name}`
+            : `Inspection scheduled${suffix}`,
+          className: 'bg-blue-50 text-blue-700 border border-blue-200',
+        };
+      case 'IN_PROGRESS':
+        return {
+          label: 'Inspection in progress',
+          className: 'bg-indigo-50 text-indigo-700 border border-indigo-200',
+        };
+      case 'COMPLETED':
+        return {
+          label: 'Inspection completed',
+          className: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+        };
+      case 'CANCELLED':
+      default:
+        return {
+          label: 'Inspection cancelled',
+          className: 'bg-slate-50 text-slate-600 border border-slate-200',
+        };
+    }
+  }, [inspection]);
+
+  const canAcceptOffer =
+    Boolean(
+      onAcceptOffer &&
+        negotiation &&
+        (negotiation.status === 'PENDING' || negotiation.status === 'COUNTERED'),
+    );
+
+  const handleAcceptOffer = async (event: React.MouseEvent) => {
+    event.stopPropagation();
+    if (!onAcceptOffer || !negotiation || accepting) {
+      return;
+    }
+
+    try {
+      setAccepting(true);
+      await onAcceptOffer(negotiation.id);
+    } finally {
+      setAccepting(false);
+    }
+  };
 
   return (
     <Card
@@ -369,13 +547,15 @@ const SellerCard: React.FC<SellerCardProps> = ({
       className={`
         relative cursor-pointer transition-all
         ${
-          negotiation?.status === 'PENDING'
+          visualStatus === 'PENDING'
             ? 'bg-yellow-50/50 border-yellow-400 border-2 shadow-md'
-            : negotiation?.status === 'ACCEPTED'
+            : visualStatus === 'ACCEPTED'
             ? 'bg-green-50/50 border-green-400 border-2 shadow-md'
-            : negotiation?.status === 'REJECTED'
-            ? 'bg-red-50/30 border-red-300 border-2 opacity-70'
-            : negotiation?.status === 'COUNTERED'
+            : visualStatus === 'REJECTED' ||
+              visualStatus === 'EXPIRED' ||
+              visualStatus === 'FAILED_INSPECTION'
+            ? 'bg-red-50/50 border-red-400 border-2 shadow-md'
+            : visualStatus === 'COUNTERED'
             ? 'bg-orange-50/50 border-orange-400 border-2 shadow-md'
             : isSelected
             ? 'border-primary shadow-md'
@@ -419,45 +599,64 @@ const SellerCard: React.FC<SellerCardProps> = ({
                     100% Match
                   </span>
                 )}
-                {negotiation && (
-                  <>
-                    {negotiation.status === 'PENDING' && (
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded font-semibold border border-yellow-300">
-                        🕐 Offer Pending
-                      </span>
-                    )}
-                    {negotiation.status === 'ACCEPTED' && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded font-semibold border border-green-300">
-                        ✓ Offer Accepted
-                      </span>
-                    )}
-                    {negotiation.status === 'REJECTED' && (
-                      <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded font-semibold border border-red-300">
-                        ✗ Offer Declined
-                      </span>
-                    )}
-                    {negotiation.status === 'COUNTERED' && (
-                      <span className="text-xs bg-orange-100 text-orange-800 px-2 py-0.5 rounded font-semibold border border-orange-300">
-                        ⇄ Counter Offer
-                      </span>
-                    )}
-                  </>
+              </div>
+              {(statusMeta || inspectionMeta) && (
+                <div className="mb-2 flex flex-col gap-1">
+                  {statusMeta && (
+                    <span
+                      className={`text-xs font-semibold px-2 py-0.5 rounded-full ${statusMeta.className}`}
+                    >
+                      {statusMeta.label}
+                    </span>
+                  )}
+                  {inspectionMeta && (
+                    <span
+                      className={`text-xs font-semibold px-2 py-0.5 rounded-full ${inspectionMeta.className}`}
+                    >
+                      {inspectionMeta.label}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <p className="text-sm text-text-secondary flex items-center gap-1">
+                  <span>📍</span>
+                  {(() => {
+                    const { city, region } = formatLocation(seller.address);
+                    return (
+                      <>
+                        <span>{city}</span>
+                        <span>•</span>
+                        <span>{region}</span>
+                      </>
+                    );
+                  })()}
+                </p>
+
+                {seller.specifications && seller.specifications.length > 0 && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 transition-colors">
+                          <Info className="w-3.5 h-3.5" />
+                          <span>Specs</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-xs p-3 bg-white border border-gray-200">
+                        <div className="space-y-2">
+                          <p className="text-xs font-semibold text-gray-700 mb-2">Product Specifications</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {seller.specifications.map((spec) => (
+                              <SpecificationBadge key={spec.id} spec={spec} variant="compact" />
+                            ))}
+                          </div>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
-
-              <p className="text-sm text-text-secondary flex items-center gap-1 mb-3">
-                <span>📍</span>
-                {(() => {
-                  const { city, region } = formatLocation(seller.address);
-                  return (
-                    <>
-                      <span>{city}</span>
-                      <span>•</span>
-                      <span>{region}</span>
-                    </>
-                  );
-                })()}
-              </p>
 
               <div className="flex items-center gap-2 flex-wrap mb-2">
                 <MetricBadge icon="📦" value={seller.quantity} unit={seller.unit} />
@@ -479,14 +678,6 @@ const SellerCard: React.FC<SellerCardProps> = ({
                       : undefined
                   }
                 />
-                {isGolden && recommendation && (
-                  <MetricBadge
-                    icon="🧮"
-                    value={`€${recommendation.totalCostPerTon.toFixed(2)}`}
-                    unit={`/${seller.unit}`}
-                    variant="success"
-                  />
-                )}
                 {gradeTheme && (
                   <MetricBadge
                     icon={gradeTheme.emoji}
@@ -495,14 +686,6 @@ const SellerCard: React.FC<SellerCardProps> = ({
                   />
                 )}
               </div>
-
-              {seller.specifications && seller.specifications.length > 0 && (
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  {seller.specifications.map((spec) => (
-                    <SpecificationBadge key={spec.id} spec={spec} variant="compact" />
-                  ))}
-                </div>
-              )}
 
               {isGolden && recommendation && (
                 <p className="text-[0.65rem] text-emerald-700 font-semibold mt-1">
@@ -518,12 +701,39 @@ const SellerCard: React.FC<SellerCardProps> = ({
             </div>
 
             {isSelected && (
-              <div className="flex-shrink-0">
-                <span className="text-primary text-xl">✓</span>
+              <div className="flex-shrink-0 text-primary">
+                <Checkbox checked readOnly className="w-5 h-5 border-primary" />
               </div>
             )}
           </div>
         </div>
+
+        {(onOfferClick || canAcceptOffer) && (
+          <div className="mt-4 flex flex-wrap justify-end gap-2">
+            {canAcceptOffer && (
+              <Button
+                size="sm"
+                className="bg-green-600 hover:bg-green-700 text-white"
+                disabled={accepting}
+                onClick={handleAcceptOffer}
+              >
+                {accepting ? 'Accepting...' : 'Accept Offer'}
+              </Button>
+            )}
+            {onOfferClick && (
+              <Button
+                size="sm"
+                variant={derivedStatus ? 'outline' : 'default'}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onOfferClick(seller);
+                }}
+              >
+                {derivedStatus ? 'Update Offer' : 'Send Offer'}
+              </Button>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

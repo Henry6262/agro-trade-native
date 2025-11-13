@@ -4,20 +4,21 @@
 
 The native Google Sign-In SDK for React Native now forces account selection by:
 
-1. **Calling `GoogleSignin.signOut()` before `signIn()`** - This ensures any cached session is cleared
-2. **Fresh authentication each time** - Users will see the Google account picker
+1. **Calling `GoogleSignin.signOut()` before `signIn()`** - This ensures any cached session is cleared.
+2. **Fresh authentication each time** - Users will see the Google account picker.
+3. **Central configuration** - `src/config/googleSignIn.ts` runs during app bootstrap so every screen shares the same setup and env-driven client IDs.
 
 ## Setup Requirements
 
 ### 1. Environment Variables
 
-Add these to your `.env` file:
+Add these to your `.env` file (see `.env.example` for reference):
 
 ```env
 # Google OAuth Web Client ID (from Google Console)
 EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
 
-# iOS Client ID (if different from web)
+# iOS Client ID (optional; falls back to the web client ID if omitted)
 EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=your-ios-client-id.apps.googleusercontent.com
 ```
 
@@ -66,9 +67,9 @@ POST /api/auth/google/native
 
 ## Testing
 
-1. For Android: Test on real device or emulator with Google Play Services
-2. For iOS: Test on real device (simulator doesn't have Google Play Services)
-3. For Web: OAuth redirect flow is used instead
+1. For Android/iOS: run a dev client (`npm run android` / `npm run ios`). Expo Go is not sufficient because it lacks the native Google module.
+2. Sign in with Account A, log out, then sign in again. The account picker should appear each time.
+3. For Web: the OAuth redirect flow (`/auth/google`) is used instead; make sure `prompt=select_account` is appended as documented in the onboarding components.
 
 ## Troubleshooting
 

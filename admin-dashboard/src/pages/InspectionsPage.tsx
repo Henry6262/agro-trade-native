@@ -1,6 +1,10 @@
-import { InspectorPortal } from '../features/inspections/components/InspectorPortal/InspectorPortal';
+import { AppLayout } from '../components/layout';
+import { InspectorOverview } from '../features/inspections/components/InspectorOverview/InspectorOverview';
 
 export function InspectionsPage() {
-  // Inspector portal is full-width, doesn't use AppLayout
-  return <InspectorPortal />;
+  return (
+    <AppLayout fullWidth>
+      <InspectorOverview />
+    </AppLayout>
+  );
 }

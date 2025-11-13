@@ -20,6 +20,7 @@ import { useAuthStore } from '../../../../stores/auth.store';
 import { UserRole } from '../../../../shared/types';
 import { ENV } from '../../../../shared/utils/environment';
 import { apiClient } from '../../../../services/api';
+import configureGoogleSignIn from '../../../../config/googleSignIn';
 
 interface GoogleAuthNativeProps {
   onComplete: () => void;
@@ -44,6 +45,10 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
   const { login } = useAuthStore();
   const onboardingStore = useOnboardingStore();
   const { selectedRole } = onboardingStore;
+
+  useEffect(() => {
+    configureGoogleSignIn();
+  }, []);
 
   // Handle successful profile creation animation
   const showProfileCreatedAnimation = () => {
@@ -95,6 +100,12 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
 
     try {
       setIsLoading(true);
+
+      try {
+        await GoogleSignin.signOut();
+      } catch {
+        // ignore when no cached session exists
+      }
       
       // Check if Google Play Services are available (Android only)
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });

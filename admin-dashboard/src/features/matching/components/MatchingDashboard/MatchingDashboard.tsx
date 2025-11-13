@@ -1,9 +1,14 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import type { BuyListing, SaleListing } from '../../../../types/listings';
-import type { TransportCostResult, Negotiation, NegotiationStatus } from '../../../../types';
+import type {
+  BuyListing,
+  SaleListing,
+  TradeOperation,
+  SellerInspectionStatus,
+} from '../../../../types/listings';
+import type { TransportCostResult, Negotiation, InspectorAssignee } from '../../../../types';
 import { formatLocationString } from '../../../../utils/locationHelpers';
 import { getBuyerTargetPrice, getSellerUnitPrice } from '../../../../utils/pricing';
-import { tradeOperationService, negotiationService } from '../../../../services/api';
+import { tradeOperationService, negotiationService, inspectionService, transportAdminService } from '../../../../services/api';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -16,6 +21,15 @@ import BulgariaMap from './BulgariaMap';
 import BuyerOrdersPanel from './BuyerOrdersPanel';
 import SellerCardsPanel from './SellerCardsPanel';
 import PricingModal from './PricingModal';
+import SingleOfferModal from './SingleOfferModal';
+import InspectionQueuePanel, { InspectionQueueItem } from './InspectionQueuePanel';
+import AssignInspectorModal from './AssignInspectorModal';
+import CompleteInspectionModal from '../../inspections/components/CompleteInspectionModal';
+import {
+  InspectionCompletionContext,
+  InspectionCompletionMode,
+} from '../../inspections/types';
+import TransportStatusCard from './TransportStatusCard';
 
 interface SellerAllocation {
   seller: SaleListing;
@@ -35,7 +49,16 @@ export const MatchingDashboard: React.FC = () => {
   const [sendingAutoOffers, setSendingAutoOffers] = useState(false);
   const [createdTradeOperationId, setCreatedTradeOperationId] = useState<string | null>(null);
   const [negotiations, setNegotiations] = useState<Negotiation[]>([]);
-  const [negotiationsLoading, setNegotiationsLoading] = useState(false);
+  const [tradeOperations, setTradeOperations] = useState<TradeOperation[]>([]);
+  const [tradeOperationDetails, setTradeOperationDetails] = useState<TradeOperation | null>(null);
+  const [singleOfferSeller, setSingleOfferSeller] = useState<SaleListing | null>(null);
+  const [inspectors, setInspectors] = useState<InspectorAssignee[]>([]);
+  const [inspectorsLoading, setInspectorsLoading] = useState(false);
+  const [assignModalInspection, setAssignModalInspection] = useState<InspectionQueueItem | null>(null);
+  const [completionContext, setCompletionContext] = useState<InspectionCompletionContext | null>(null);
+  const [completionMode, setCompletionMode] = useState<InspectionCompletionMode>('PASS');
+  const [completingInspection, setCompletingInspection] = useState(false);
+  const [creatingTransportRequest, setCreatingTransportRequest] = useState(false);
 
   // Calculate total selected quantity (smart allocation)
   const selectedQuantity = useMemo(() => {
@@ -96,6 +119,134 @@ export const MatchingDashboard: React.FC = () => {
 
     return map;
   }, [negotiations]);
+
+  const sellerStatusByListingId = useMemo(() => {
+    const map = new Map<
+      string,
+      { status: string; source: 'tradeSeller' | 'negotiation'; negotiationId?: string }
+    >();
+
+    if (tradeOperationDetails?.sellers) {
+      tradeOperationDetails.sellers.forEach((seller: any) => {
+        const saleListingId =
+          seller?.saleListingId ||
+          seller?.saleListing?.id ||
+          seller?.saleListing?.saleListingId;
+
+        if (saleListingId) {
+          map.set(saleListingId, {
+            status: seller.status,
+            source: 'tradeSeller',
+          });
+        }
+      });
+    }
+
+    negotiations.forEach((neg) => {
+      const saleListingId =
+        (neg as any).saleListingId ||
+        neg.tradeSeller?.saleListingId ||
+        (neg as any).saleListing?.id;
+
+      if (saleListingId) {
+        map.set(saleListingId, {
+          status: neg.status,
+          source: 'negotiation',
+          negotiationId: neg.id,
+        });
+      }
+    });
+
+    if (map.size > 0) {
+      console.debug('[MatchingDashboard] Seller status map', {
+        entries: Array.from(map.entries()).slice(0, 10),
+        total: map.size,
+      });
+    }
+
+    return map;
+  }, [tradeOperationDetails, negotiations]);
+
+  const saleListingById = useMemo(() => {
+    const map = new Map<string, SaleListing>();
+    availableSellers.forEach((seller) => {
+      map.set(seller.id, seller);
+    });
+    return map;
+  }, [availableSellers]);
+
+  const inspectionStatusByListingId = useMemo(() => {
+    const map = new Map<string, SellerInspectionStatus>();
+
+    if (tradeOperationDetails?.sellers) {
+      tradeOperationDetails.sellers.forEach((seller: any) => {
+        const saleListingId =
+          seller?.saleListingId ||
+          seller?.saleListing?.id ||
+          seller?.saleListing?.saleListingId;
+
+        if (saleListingId && seller.inspection) {
+          map.set(saleListingId, seller.inspection);
+        }
+      });
+    }
+
+    return map;
+  }, [tradeOperationDetails]);
+
+  const inspectionQueueItems: InspectionQueueItem[] = useMemo(() => {
+    if (!tradeOperationDetails?.sellers) {
+      return [];
+    }
+
+    return tradeOperationDetails.sellers
+      .map((seller) => {
+        if (!seller.inspection) {
+          return null;
+        }
+
+        const saleListing = saleListingById.get(seller.saleListingId);
+        const address = saleListing?.address;
+        const addressLine = address
+          ? [address.street, address.city, address.region].filter(Boolean).join(', ')
+          : undefined;
+
+        return {
+          inspectionId: seller.inspection.id,
+          tradeSellerId: seller.id,
+          sellerName: seller.name || saleListing?.seller?.name || 'Unknown Seller',
+          productName: saleListing?.product?.displayName || saleListing?.product?.name,
+          status: seller.inspection.status,
+          priority: seller.inspection.priority,
+          inspectorName: seller.inspection.inspector?.name || null,
+          requestedDate: seller.inspection.requestedDate || undefined,
+          city: address?.city,
+          region: address?.region,
+          latitude: address?.latitude ?? null,
+          longitude: address?.longitude ?? null,
+          quantity: saleListing?.quantity,
+          unit: saleListing?.unit,
+          address: addressLine,
+        } as InspectionQueueItem;
+      })
+      .filter((item): item is InspectionQueueItem => Boolean(item));
+  }, [saleListingById, tradeOperationDetails]);
+
+  const transportSummary = tradeOperationDetails?.transport;
+
+  const existingTradeSellerForModal = useMemo(() => {
+    if (!singleOfferSeller || !tradeOperationDetails?.sellers) {
+      return null;
+    }
+
+    return tradeOperationDetails.sellers.find((seller: any) => {
+      const saleListingId =
+        seller?.saleListingId ||
+        seller?.saleListing?.id ||
+        seller?.saleListing?.saleListingId;
+      return saleListingId === singleOfferSeller.id;
+    }) as TradeOperation['sellers'][number] | null;
+  }, [singleOfferSeller, tradeOperationDetails]);
 
   const autoOfferPlan: AutoOfferPlan | null = useMemo(() => {
     if (!selectedOrder) return null;
@@ -213,6 +364,7 @@ export const MatchingDashboard: React.FC = () => {
 
       // Step 2: Save trade operation ID to trigger polling
       setCreatedTradeOperationId(tradeOpId);
+      refreshTradeOperationsSnapshot();
 
       // Step 3: Parse negotiations from response and update UI immediately
       const freshNegotiations = response.negotiations || [];
@@ -350,78 +502,297 @@ export const MatchingDashboard: React.FC = () => {
     };
   }, [selectedOrderId, buyerAddressId, availableSellers]);
 
+  const refreshTradeOperationsSnapshot = useCallback(async () => {
+    try {
+      const ops = await tradeOperationService.getAll({
+        page: 1,
+        limit: 200,
+      });
+      setTradeOperations(ops);
+      console.debug('[MatchingDashboard] Trade operations snapshot loaded', {
+        count: ops.length,
+      });
+    } catch (error) {
+      console.error('Failed to load trade operations snapshot:', error);
+    }
+  }, []);
+
+  // Snapshot of trade operations for quick lookup
+  useEffect(() => {
+    refreshTradeOperationsSnapshot();
+  }, [refreshTradeOperationsSnapshot]);
+
   // Fetch and poll negotiations for the created trade operation
+  const fetchNegotiations = useCallback(async () => {
+    if (!createdTradeOperationId) {
+      setNegotiations([]);
+      return;
+    }
+
+    try {
+      const negs = await negotiationService.getByTradeOperation(createdTradeOperationId);
+      setNegotiations(negs);
+    } catch (error) {
+      console.error('Failed to fetch negotiations:', error);
+      setNegotiations([]);
+    }
+  }, [createdTradeOperationId]);
+
+  const fetchInspectors = useCallback(async () => {
+    setInspectorsLoading(true);
+    try {
+      const list = await inspectionService.getInspectors();
+      setInspectors(list);
+    } catch (error) {
+      console.error('Failed to fetch inspectors:', error);
+      setInspectors([]);
+    } finally {
+      setInspectorsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!createdTradeOperationId) {
       setNegotiations([]);
       return;
     }
 
-    let ignore = false;
     let pollInterval: NodeJS.Timeout | null = null;
 
-    const fetchNegotiations = async () => {
-      try {
-        setNegotiationsLoading(true);
-        const negs = await negotiationService.getByTradeOperation(createdTradeOperationId);
-        if (!ignore) {
-          setNegotiations(negs);
-        }
-      } catch (error) {
-        console.error('Failed to fetch negotiations:', error);
-        if (!ignore) {
-          setNegotiations([]);
-        }
-      } finally {
-        if (!ignore) {
-          setNegotiationsLoading(false);
-        }
-      }
-    };
-
-    // Initial fetch
     fetchNegotiations();
-
-    // Poll every 30 seconds
     pollInterval = setInterval(() => {
       fetchNegotiations();
     }, 30000);
 
     return () => {
-      ignore = true;
       if (pollInterval) {
         clearInterval(pollInterval);
       }
     };
-  }, [createdTradeOperationId]);
+  }, [createdTradeOperationId, fetchNegotiations]);
+
+  // Fetch trade operation details (sellers, metadata)
+  const loadTradeOperationDetails = useCallback(async (tradeOpId: string) => {
+    try {
+      const details = await tradeOperationService.getById(tradeOpId);
+      setTradeOperationDetails(details);
+      console.debug('[MatchingDashboard] Trade operation details loaded', {
+        tradeOperationId: tradeOpId,
+        sellers: details?.sellers?.length ?? 0,
+      });
+    } catch (error) {
+      console.error('Failed to fetch trade operation details:', error);
+      setTradeOperationDetails(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!createdTradeOperationId) {
+      setTradeOperationDetails(null);
+      return;
+    }
+    loadTradeOperationDetails(createdTradeOperationId);
+  }, [createdTradeOperationId, loadTradeOperationDetails]);
+
+  useEffect(() => {
+    if (!createdTradeOperationId) {
+      setInspectors([]);
+      return;
+    }
+    fetchInspectors();
+  }, [createdTradeOperationId, fetchInspectors]);
+
+  const handleAcceptNegotiation = useCallback(
+    async (negotiationId: string) => {
+      try {
+        await negotiationService.respond(negotiationId, { status: 'ACCEPTED' });
+        toast.success('Offer accepted');
+        await fetchNegotiations();
+        if (createdTradeOperationId) {
+          await loadTradeOperationDetails(createdTradeOperationId);
+        }
+      } catch (error) {
+        console.error('Failed to accept negotiation:', error);
+        toast.error('Failed to accept offer. Please try again.');
+      }
+    },
+    [fetchNegotiations, createdTradeOperationId, loadTradeOperationDetails],
+  );
+
+  const handleQueueAssignClick = useCallback(
+    (item: InspectionQueueItem) => {
+      if (inspectors.length === 0) {
+        fetchInspectors();
+      }
+      setAssignModalInspection(item);
+    },
+    [fetchInspectors, inspectors.length],
+  );
+
+  const handleQueueCompleteRequest = useCallback(
+    (item: InspectionQueueItem, mode: InspectionCompletionMode) => {
+      setCompletionMode(mode);
+      setCompletionContext({
+        inspectionId: item.inspectionId,
+        sellerName: item.sellerName,
+        productName: item.productName,
+        address: item.address,
+        quantity: item.quantity,
+        unit: item.unit,
+      });
+    },
+    [],
+  );
+
+  const handleAssignInspectorSubmit = useCallback(
+    async (inspectorId: string) => {
+      if (!assignModalInspection) {
+        return;
+      }
+      try {
+        await inspectionService.assignInspector(assignModalInspection.inspectionId, inspectorId);
+        toast.success('Inspector assigned');
+        if (createdTradeOperationId) {
+          await loadTradeOperationDetails(createdTradeOperationId);
+        }
+        await fetchNegotiations();
+        await fetchInspectors();
+      } catch (error) {
+        console.error('Failed to assign inspector:', error);
+        toast.error('Failed to assign inspector. Please try again.');
+        throw error;
+      }
+    },
+    [
+      assignModalInspection,
+      createdTradeOperationId,
+      fetchInspectors,
+      fetchNegotiations,
+      loadTradeOperationDetails,
+    ],
+  );
+
+  const handleCreateTransportRequest = useCallback(async () => {
+    if (!createdTradeOperationId) {
+      return;
+    }
+    try {
+      setCreatingTransportRequest(true);
+      await transportAdminService.autoCreateRequest(createdTradeOperationId);
+      toast.success('Transport request created');
+      await loadTradeOperationDetails(createdTradeOperationId);
+    } catch (error) {
+      console.error('Failed to create transport request:', error);
+      toast.error('Unable to create transport request. Please try again.');
+    } finally {
+      setCreatingTransportRequest(false);
+    }
+  }, [createdTradeOperationId, loadTradeOperationDetails]);
+
+  const handleCompletionSubmit = useCallback(
+    async (values: {
+      qualityScore: number;
+      actualQuantity?: number;
+      moistureContent?: number;
+      notes: string;
+      recommendVerification: boolean;
+    }) => {
+      if (!completionContext) return;
+      try {
+        setCompletingInspection(true);
+        await inspectionService.submitResult(completionContext.inspectionId, {
+          qualityScore: values.qualityScore,
+          verificationResult: {
+            actualQuantity: values.actualQuantity,
+            moistureContent: values.moistureContent,
+            actualQuality:
+              completionMode === 'PASS'
+                ? 'Verified quality meets requirements'
+                : 'Inspection failed. Quality below threshold',
+          },
+          notes: values.notes,
+          photos: [],
+          recommendVerification: values.recommendVerification,
+        });
+        toast.success(
+          completionMode === 'PASS'
+            ? 'Inspection marked as passed'
+            : 'Inspection marked as failed',
+        );
+        setCompletionContext(null);
+        if (createdTradeOperationId) {
+          await loadTradeOperationDetails(createdTradeOperationId);
+        }
+        await fetchNegotiations();
+        await fetchInspectors();
+      } catch (error) {
+        console.error('Failed to submit inspection results:', error);
+        toast.error('Failed to submit inspection results. Please try again.');
+      } finally {
+        setCompletingInspection(false);
+      }
+    },
+    [
+      completionContext,
+      completionMode,
+      createdTradeOperationId,
+      fetchInspectors,
+      fetchNegotiations,
+      loadTradeOperationDetails,
+    ],
+  );
 
   // Handle buyer order selection
-  const handleOrderSelect = useCallback(async (order: BuyListing) => {
+  const handleOrderSelect = useCallback((order: BuyListing) => {
     setSelectedOrder(order);
     setSelectedSellers([]); // Clear seller selections when changing order
     setAvailableSellers([]);
     setTransportWarnings([]);
-
-    // Fetch existing trade operations for this buy listing
-    try {
-      const allTradeOps = await tradeOperationService.getAll();
-      const matchingTradeOps = allTradeOps.filter(op => op.buyListingId === order.id);
-
-      // Get the most recent trade operation
-      if (matchingTradeOps.length > 0) {
-        const mostRecent = matchingTradeOps.sort((a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        )[0];
-
-        setCreatedTradeOperationId(mostRecent.id);
-      } else {
-        setCreatedTradeOperationId(null);
-      }
-    } catch (error) {
-      console.error('Failed to fetch trade operations for buyer:', error);
-      setCreatedTradeOperationId(null);
-    }
+    setSingleOfferSeller(null);
   }, []);
+
+  const handleOfferClick = useCallback((seller: SaleListing) => {
+    setSingleOfferSeller(seller);
+  }, []);
+
+  const handleCloseOfferModal = useCallback(() => {
+    setSingleOfferSeller(null);
+  }, []);
+
+  const handleOfferSent = useCallback(() => {
+    refreshTradeOperationsSnapshot();
+    if (createdTradeOperationId) {
+      loadTradeOperationDetails(createdTradeOperationId);
+    }
+  }, [refreshTradeOperationsSnapshot, createdTradeOperationId, loadTradeOperationDetails]);
+
+  // Resolve trade operation ID whenever selection or snapshot changes
+  useEffect(() => {
+    if (!selectedOrder) {
+      setCreatedTradeOperationId(null);
+      return;
+    }
+
+    const match = tradeOperations.find((op) => op.buyListingId === selectedOrder.id);
+    if (match) {
+      if (createdTradeOperationId !== match.id) {
+        console.debug('[MatchingDashboard] Resolved trade operation from snapshot', {
+          buyListingId: selectedOrder.id,
+          tradeOperationId: match.id,
+        });
+        setCreatedTradeOperationId(match.id);
+      }
+      return;
+    }
+
+    // No trade operation yet for this buyer
+    if (createdTradeOperationId !== null) {
+      console.debug('[MatchingDashboard] No trade operation found for buyer', {
+        buyListingId: selectedOrder.id,
+      });
+    }
+    setCreatedTradeOperationId(null);
+  }, [selectedOrder, tradeOperations, createdTradeOperationId]);
 
   // Handle seller toggle with smart quantity allocation
   const handleSellerToggle = (seller: SaleListing) => {
@@ -487,6 +858,9 @@ export const MatchingDashboard: React.FC = () => {
   // Determine if Create Offers button should be enabled
   const canCreateOffers =
     selectedOrder && selectedQuantity > 0 && selectedQuantity >= selectedOrder.quantity;
+
+  const inspectionQueueLoading = Boolean(createdTradeOperationId) && !tradeOperationDetails;
+  const showInspectionPanel = inspectionQueueLoading || inspectionQueueItems.length > 0;
 
   return (
     <div className="h-screen flex flex-col bg-white">
@@ -750,12 +1124,13 @@ export const MatchingDashboard: React.FC = () => {
             />
           </div>
 
-          {/* Right Panel: Seller Cards */}
-          <div className="w-1/2 overflow-hidden">
+          {/* Right Panel: Seller Cards + Inspection Queue */}
+          <div className="w-1/2 overflow-hidden flex flex-col gap-4">
             <SellerCardsPanel
               filterProduct={selectedOrder?.product?.name}
               selectedSellerIds={selectedSellers.map((allocation) => allocation.seller.id)}
               onSellerToggle={handleSellerToggle}
+              onOfferClick={handleOfferClick}
               highlightedSellerId={highlightedSellerId}
               onSellersLoaded={handleSellersLoaded}
               transportCosts={transportEstimates}
@@ -766,7 +1141,29 @@ export const MatchingDashboard: React.FC = () => {
               recommendationDetails={recommendedOffersByListing}
               recommendationReasons={skipReasonsByListing}
               negotiationBySaleListingId={negotiationBySaleListingId}
+              buyListingId={selectedOrder?.id}
+              tradeOperationId={createdTradeOperationId}
+              sellerStatusByListingId={sellerStatusByListingId}
+              inspectionStatusByListingId={inspectionStatusByListingId}
+              onAcceptOffer={handleAcceptNegotiation}
             />
+
+            {showInspectionPanel && (
+              <InspectionQueuePanel
+                items={inspectionQueueItems}
+                loading={inspectionQueueLoading || inspectorsLoading}
+                onAssignClick={handleQueueAssignClick}
+                onCompleteRequest={handleQueueCompleteRequest}
+              />
+            )}
+
+            {createdTradeOperationId && (
+              <TransportStatusCard
+                transport={transportSummary}
+                onCreateRequest={handleCreateTransportRequest}
+                creating={creatingTransportRequest}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -813,6 +1210,39 @@ export const MatchingDashboard: React.FC = () => {
           }}
         />
       )}
+
+      {selectedOrder && singleOfferSeller && (
+        <SingleOfferModal
+          open={Boolean(singleOfferSeller)}
+          onClose={handleCloseOfferModal}
+          buyerOrder={selectedOrder}
+          seller={singleOfferSeller}
+          tradeOperationId={createdTradeOperationId}
+          existingTradeSeller={existingTradeSellerForModal}
+          sellerStatus={sellerStatusByListingId.get(singleOfferSeller.id)}
+          onOfferSent={() => {
+            handleOfferSent();
+            handleCloseOfferModal();
+          }}
+        />
+      )}
+
+      <AssignInspectorModal
+        open={Boolean(assignModalInspection)}
+        inspection={assignModalInspection}
+        inspectors={inspectors}
+        onClose={() => setAssignModalInspection(null)}
+        onSubmit={handleAssignInspectorSubmit}
+      />
+
+      <CompleteInspectionModal
+        open={Boolean(completionContext)}
+        inspection={completionContext}
+        mode={completionMode}
+        loading={completingInspection}
+        onClose={() => setCompletionContext(null)}
+        onSubmit={handleCompletionSubmit}
+      />
     </div>
   );
 };

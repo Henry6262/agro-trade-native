@@ -1,61 +1,41 @@
 # Android Google Authentication Fix
 
-## The Problem
-The native Google Sign-In SDK on Android doesn't properly support forcing account selection. Even when calling `GoogleSignin.signOut()` before `signIn()`, Android will often auto-select the last used account.
+## Current Approach
+We now rely **exclusively** on the native `@react-native-google-signin/google-signin` SDK on Android and iOS. To force the account picker every time, we clear any cached session with `GoogleSignin.signOut()` immediately before `GoogleSignin.signIn()`. This keeps the flow inside the app (no browser redirect) while still letting users pick a different Google account on each attempt.
 
-## The Solution
-Use the web OAuth flow for ALL mobile platforms (Android and iOS) to ensure consistent behavior.
+## Implementation Checklist
+1. **Environment variables**
+   ```env
+   EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=<OAuth web client id>
+   EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID=<iOS client id - optional, falls back to web id>
+   ```
+   These values are read by `src/config/googleSignIn.ts` when we configure the SDK.
 
-## Implementation
+2. **Central configuration**
+   - `configureGoogleSignIn()` is executed once at app start (`App.tsx`) and safely reused across screens.
+   - The helper warns if the client IDs are missing so we can catch misconfigured builds early.
 
-### Frontend Changes
-1. **Removed native SDK usage** for authentication
-2. **Use web OAuth flow** with these parameters:
-   - `prompt=select_account` - Forces Google to show account chooser
-   - `access_type=online` - Don't request refresh token for every sign-in
-   - `approval_prompt=force` - Forces re-consent (optional but ensures fresh session)
+3. **Force account selection**
+   - Before calling `GoogleSignin.signIn()` we always attempt `GoogleSignin.signOut()` (errors ignored) to wipe any cached session.
+   - Android-specific: we still call `GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true })` to ensure Google Play Services are up-to-date.
 
-3. **Open in system browser** using `Linking.openURL()`
-   - This ensures the user sees Google's actual account selector
-   - Works consistently across Android and iOS
+4. **Backend endpoint**
+   - Mobile clients post the returned `idToken` to `/auth/google/native`, along with the selected AgroTrade role. The backend validates the token with Google, creates/updates the user, and returns our JWTs.
 
-### Backend Requirements
-Your backend OAuth endpoint needs to pass these parameters to Google:
+## Development & Testing
+- **Expo Go will not work.** Gesture Handler, Reanimated, Maps, and the Google SDK all require native modules, so always use the dev client:
+  ```bash
+  npm run ios     # wraps `npx expo run:ios`
+  npm run android # wraps `npx expo run:android`
+  ```
+- If you prefer EAS builds:
+  ```bash
+  npm install -g eas-cli
+  eas build --profile development --platform android --local
+  ```
+- When testing, sign in with Account A, log out, and sign in again—you should see the account chooser every time. If not, confirm that `configureGoogleSignIn` ran and that we call `signOut()` before `signIn()`.
 
-```javascript
-// In your backend Google OAuth strategy
-const googleAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-googleAuthUrl.searchParams.append('prompt', 'select_account');
-googleAuthUrl.searchParams.append('access_type', 'online');
-googleAuthUrl.searchParams.append('approval_prompt', 'force');
-```
-
-### User Flow
-1. User taps "Sign in with Google"
-2. App shows alert explaining browser redirect
-3. User taps "Continue"
-4. System browser opens with Google sign-in
-5. **User sees account chooser (can select different account or add new)**
-6. User completes authentication
-7. Browser redirects back to app
-8. App handles the OAuth callback
-
-## Why This Works
-- Browser-based OAuth respects the `prompt=select_account` parameter
-- Each sign-in is treated as a fresh session
-- No cached credentials from the native SDK
-- Consistent behavior across all platforms
-
-## Testing
-1. Sign in with Account A
-2. Complete onboarding
-3. Log out
-4. Try to sign in again
-5. ✅ You should see the account chooser
-6. ✅ You can select Account B or add a new account
-
-## Alternative (Not Recommended)
-If you absolutely must use the native SDK, you would need to:
-1. Call `GoogleSignin.revokeAccess()` instead of just `signOut()`
-2. This removes the app's access completely
-3. But this is poor UX as it requires re-granting permissions every time
+## Troubleshooting
+- **`PLAY_SERVICES_NOT_AVAILABLE`**: update Google Play Services on the emulator/device.
+- **`SIGN_IN_CANCELLED`**: user closed the picker—surface a friendly message and let them retry.
+- **Missing account picker**: check that the env vars are set, rebuild the dev client, and confirm the `signOut()` call runs before each `signIn()`.

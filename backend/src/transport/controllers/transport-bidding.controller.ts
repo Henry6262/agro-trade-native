@@ -11,6 +11,7 @@ import {
   Request,
   HttpStatus,
   HttpCode,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -61,6 +62,21 @@ export class TransportBiddingController {
   })
   async createTransportRequest(@Body() dto: CreateTransportRequestDto) {
     return await this.transportBiddingService.createTransportRequest(dto);
+  }
+
+  @Post('requests/auto')
+  @ApiOperation({ summary: 'Automatically create a transport request for a trade operation' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Transport request created successfully',
+  })
+  async autoCreateTransportRequest(@Body() body: { tradeOperationId: string }) {
+    if (!body?.tradeOperationId) {
+      throw new BadRequestException('tradeOperationId is required');
+    }
+    return await this.transportBiddingService.autoCreateTransportRequestForTrade(
+      body.tradeOperationId,
+    );
   }
 
   @Get('requests')
@@ -300,14 +316,8 @@ export class TransportBiddingController {
   async getTransportForTradeOperation(
     @Param('tradeOperationId') tradeOperationId: string
   ) {
-    const requests = await this.transportBiddingService.getTransportRequests({
-      // Filter by trade operation
-      status: undefined,
-      limit: 100
-    });
-
-    return requests.data.filter(
-      (req: any) => req.tradeOperationId === tradeOperationId
+    return await this.transportBiddingService.getTransportDataForTradeOperation(
+      tradeOperationId,
     );
   }
 }

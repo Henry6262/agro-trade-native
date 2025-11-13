@@ -5,6 +5,7 @@ import { InspectionModule } from '../inspections/inspection.module';
 
 // Services
 import { NegotiationService } from './services/negotiation.service';
+import { NegotiationExpiryService } from './services/negotiation-expiry.service';
 
 // Controllers
 import { NegotiationController } from './controllers/negotiation.controller';
@@ -15,7 +16,7 @@ import { NegotiationController } from './controllers/negotiation.controller';
     forwardRef(() => TradeOperationsModule), // Import for ProfitCalculationService
     forwardRef(() => InspectionModule), // Import for InspectionService
   ],
-  providers: [NegotiationService],
+  providers: [NegotiationService, NegotiationExpiryService],
   controllers: [NegotiationController],
   exports: [NegotiationService],
 })

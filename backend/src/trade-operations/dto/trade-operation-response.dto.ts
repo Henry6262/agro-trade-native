@@ -1,12 +1,59 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { TradePhase, TradeStatus } from '@prisma/client';
 
+export class SellerInspectionSummaryDto {
+  @ApiProperty({ example: 'insp_123' })
+  id: string;
+
+  @ApiProperty({ example: 'PENDING' })
+  status: string;
+
+  @ApiProperty({ example: 'MEDIUM' })
+  priority: string;
+
+  @ApiPropertyOptional({ example: '2025-11-05T14:44:52.510Z' })
+  requestedDate?: Date;
+
+  @ApiPropertyOptional({ example: '2025-11-06T09:00:00.000Z' })
+  scheduledDate?: Date;
+
+  @ApiPropertyOptional({ example: '2025-11-06T15:30:00.000Z' })
+  completedDate?: Date;
+
+  @ApiPropertyOptional({
+    example: { id: 'user_123', name: 'Ivan Petrov', email: 'inspector@agro.bg' },
+  })
+  inspector?: {
+    id: string;
+    name: string | null;
+    email?: string | null;
+  } | null;
+}
+
 export class SellerSummaryDto {
   @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
   id: string;
 
+  @ApiProperty({ example: 'seller_123' })
+  sellerId: string;
+
+  @ApiProperty({ example: 'listing_456' })
+  saleListingId: string;
+
   @ApiProperty({ example: 'John Farm' })
   name: string;
+
+  @ApiProperty({ example: 50 })
+  requestedQuantity: number;
+
+  @ApiProperty({ example: 60 })
+  offeredQuantity: number;
+
+  @ApiPropertyOptional({ example: 48 })
+  agreedQuantity?: number | null;
+
+  @ApiPropertyOptional({ example: 'TON' })
+  unit?: string;
 
   @ApiProperty({ example: 50 })
   quantity: number;
@@ -22,6 +69,9 @@ export class SellerSummaryDto {
 
   @ApiPropertyOptional({ example: 120 })
   distance?: number;
+
+  @ApiPropertyOptional({ type: SellerInspectionSummaryDto })
+  inspection?: SellerInspectionSummaryDto;
 }
 
 export class BuyerSummaryDto {
@@ -58,6 +108,139 @@ export class ProfitSummaryDto {
   actualMargin?: number;
 }
 
+export class TransportPickupPointDto {
+  @ApiPropertyOptional()
+  sellerId?: string;
+
+  @ApiPropertyOptional()
+  saleListingId?: string;
+
+  @ApiPropertyOptional()
+  sellerName?: string;
+
+  @ApiPropertyOptional()
+  quantity?: number;
+
+  @ApiPropertyOptional()
+  unit?: string;
+
+  @ApiPropertyOptional()
+  address?: string;
+
+  @ApiPropertyOptional()
+  lat?: number;
+
+  @ApiPropertyOptional()
+  lng?: number;
+}
+
+export class TransportDeliveryPointDetailsDto {
+  @ApiPropertyOptional()
+  buyerId?: string;
+
+  @ApiPropertyOptional()
+  buyerName?: string;
+
+  @ApiPropertyOptional()
+  address?: string;
+
+  @ApiPropertyOptional()
+  lat?: number;
+
+  @ApiPropertyOptional()
+  lng?: number;
+}
+
+export class TransportBidSummaryDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  status: string;
+
+  @ApiPropertyOptional()
+  bidAmount?: number;
+
+  @ApiPropertyOptional()
+  transporterId?: string;
+
+  @ApiPropertyOptional()
+  transporterName?: string;
+
+  @ApiPropertyOptional()
+  transportCompanyName?: string;
+
+  @ApiPropertyOptional()
+  vehicleType?: string;
+
+  @ApiPropertyOptional()
+  vehicleCapacity?: number;
+
+  @ApiPropertyOptional()
+  estimatedDuration?: number;
+
+  @ApiPropertyOptional()
+  submittedAt?: Date;
+}
+
+export class TransportJobSummaryDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  jobNumber: string;
+
+  @ApiProperty()
+  status: string;
+
+  @ApiPropertyOptional()
+  startedAt?: Date;
+
+  @ApiPropertyOptional()
+  estimatedArrival?: Date;
+
+  @ApiPropertyOptional()
+  actualDelivery?: Date;
+
+  @ApiPropertyOptional()
+  progress?: number;
+}
+
+export class TransportRequestDetailsDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  requestNumber: string;
+
+  @ApiProperty()
+  status: string;
+
+  @ApiProperty()
+  totalWeight: number;
+
+  @ApiPropertyOptional()
+  biddingDeadline?: Date;
+
+  @ApiPropertyOptional()
+  deliveryDeadline?: Date;
+
+  @ApiPropertyOptional()
+  urgencyLevel?: string;
+
+  @ApiProperty({ type: [TransportPickupPointDto] })
+  pickupPoints: TransportPickupPointDto[];
+
+  @ApiPropertyOptional({ type: TransportDeliveryPointDetailsDto })
+  deliveryPoint?: TransportDeliveryPointDetailsDto;
+
+  @ApiProperty({ type: [TransportBidSummaryDto] })
+  bids: TransportBidSummaryDto[];
+
+  @ApiPropertyOptional({ type: TransportJobSummaryDto })
+  job?: TransportJobSummaryDto;
+}
+
 export class TransportSummaryDto {
   @ApiProperty({ example: 150 })
   estimatedCost: number;
@@ -73,6 +256,9 @@ export class TransportSummaryDto {
 
   @ApiPropertyOptional({ example: 155.50 })
   actualCost?: number;
+
+  @ApiPropertyOptional({ type: () => TransportRequestDetailsDto })
+  request?: TransportRequestDetailsDto;
 }
 
 export class TradeOperationResponseDto {

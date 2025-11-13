@@ -1,6 +1,10 @@
+import { AppLayout } from '../components/layout';
 import { ProfessionalScenarioRunner } from '../features/scenarios/components/ProfessionalScenarioRunner';
 
 export function ScenariosPage() {
-  // Scenario runner is full-width, doesn't use AppLayout
-  return <ProfessionalScenarioRunner />;
+  return (
+    <AppLayout fullWidth>
+      <ProfessionalScenarioRunner />
+    </AppLayout>
+  );
 }

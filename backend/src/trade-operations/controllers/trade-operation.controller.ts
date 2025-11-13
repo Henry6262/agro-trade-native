@@ -177,6 +177,7 @@ export class TradeOperationController {
   @ApiQuery({ name: 'phase', enum: TradePhase, required: false })
   @ApiQuery({ name: 'status', enum: TradeStatus, required: false })
   @ApiQuery({ name: 'minProfitMargin', type: Number, required: false })
+  @ApiQuery({ name: 'buyListingId', type: String, required: false, description: 'Filter operations by buy listing' })
   @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
   @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
   @ApiResponse({
@@ -223,6 +224,7 @@ export class TradeOperationController {
     @Query('minProfitMargin') minProfitMargin?: string,
     @Query('page') page = '1',
     @Query('limit') limit = '10',
+    @Query('buyListingId') buyListingId?: string,
     @Request() req?: any,
   ): Promise<any> {
     const pageNum = parseInt(page);
@@ -238,6 +240,10 @@ export class TradeOperationController {
 
     if (status) {
       where.status = status;
+    }
+
+    if (buyListingId) {
+      where.buyListingId = buyListingId;
     }
 
     // Get trade operations with all related data
@@ -310,6 +316,27 @@ export class TradeOperationController {
       total,
       page: pageNum,
       limit: limitNum,
+    };
+  }
+
+  @Get('buy-listing/:buyListingId/latest')
+  @ApiOperation({ summary: 'Get the latest trade operation for a buy listing' })
+  @ApiParam({ name: 'buyListingId', description: 'Buy listing ID' })
+  async getLatestByBuyListing(
+    @Param('buyListingId') buyListingId: string,
+  ): Promise<any> {
+    const tradeOperation = await this.tradeOperationService.getLatestByBuyListingId(
+      buyListingId,
+    );
+
+    if (!tradeOperation) {
+      return {
+        data: null,
+      };
+    }
+
+    return {
+      data: tradeOperation,
     };
   }
 
@@ -714,16 +741,36 @@ export class TradeOperationController {
     return {
       id: tradeSeller.id,
       sellerId: tradeSeller.sellerId || tradeSeller.seller?.id,
-      name: tradeSeller.name || tradeSeller.seller?.name,
       saleListingId: tradeSeller.saleListingId,
-      requestedQuantity: Number(tradeSeller.requestedQuantity ?? tradeSeller.quantity ?? 0),
+      name: tradeSeller.name || tradeSeller.seller?.name,
+      requestedQuantity: Number(
+        tradeSeller.requestedQuantity ?? tradeSeller.quantity ?? 0,
+      ),
       offeredQuantity: Number(tradeSeller.offeredQuantity ?? 0),
-      agreedQuantity: tradeSeller.agreedQuantity
-        ? Number(tradeSeller.agreedQuantity)
-        : undefined,
+      agreedQuantity:
+        tradeSeller.agreedQuantity !== undefined && tradeSeller.agreedQuantity !== null
+          ? Number(tradeSeller.agreedQuantity)
+          : undefined,
       unit: (tradeSeller.unit as ProductUnit) || ProductUnit.TON,
       price: tradeSeller.price ? Number(tradeSeller.price) : undefined,
       status: tradeSeller.status as SellerStatus,
+      inspection: tradeSeller.inspection
+        ? {
+            id: tradeSeller.inspection.id,
+            status: tradeSeller.inspection.status,
+            priority: tradeSeller.inspection.priority,
+            requestedDate: tradeSeller.inspection.requestedDate,
+            scheduledDate: tradeSeller.inspection.scheduledDate,
+            completedDate: tradeSeller.inspection.completedDate,
+            inspector: tradeSeller.inspection.inspector
+              ? {
+                  id: tradeSeller.inspection.inspector.id,
+                  name: tradeSeller.inspection.inspector.name,
+                  email: tradeSeller.inspection.inspector.email,
+                }
+              : null,
+          }
+        : undefined,
     };
   }
 

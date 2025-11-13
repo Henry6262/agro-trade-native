@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import api from '../../../../services/api';
 import { API_ENDPOINTS } from '../../../../config/api';
+import { transportAdminService } from '../../../../services/api';
 import { useToast } from '@/hooks/use-toast';
 import type { TransportData, TransportBid } from '../../../../types/listings';
 import { formatLocationString } from '../../../../utils/locationHelpers';
@@ -49,17 +50,13 @@ export const TransportManagementPanel: React.FC<TransportManagementPanelProps> =
   const fetchTransportData = async () => {
     try {
       setLoading(true);
-      const response = await api.get(API_ENDPOINTS.transport.byTradeOperation(tradeOperationId));
-      setTransportData(response.data);
+      const response = await transportAdminService.getByTradeOperation(tradeOperationId);
+      setTransportData(response);
       setError(null);
     } catch (err: any) {
       console.error('Error fetching transport data:', err);
-      // If no transport data exists yet (404), that's expected - not an error
-      if (err.response?.status !== 404) {
-        setError('Failed to load transport information');
-      } else {
-        setTransportData(null);
-      }
+      setError('Failed to load transport information');
+      setTransportData(null);
     } finally {
       setLoading(false);
     }
@@ -69,22 +66,7 @@ export const TransportManagementPanel: React.FC<TransportManagementPanelProps> =
     try {
       setCreatingRequest(true);
 
-      // In a real implementation, this data would come from the trade operation
-      // For now, we'll create a placeholder request
-      await api.post(API_ENDPOINTS.transport.requests, {
-        tradeOperationId,
-        totalWeight: 100, // This should be calculated from accepted offers
-        pickupPoints: [], // Should be populated from accepted sellers
-        deliveryPoint: {
-          lat: 42.6977,
-          lng: 23.3219,
-          addressId: 'placeholder',
-          address: 'Sofia, Bulgaria',
-        },
-        deliveryDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        requiredVehicleType: 'FLATBED',
-        urgencyLevel: 'STANDARD',
-      });
+      await transportAdminService.autoCreateRequest(tradeOperationId);
 
       toast({
         title: 'Transport Request Created',
@@ -108,7 +90,7 @@ export const TransportManagementPanel: React.FC<TransportManagementPanelProps> =
     try {
       setProcessingBid(bidId);
 
-      await api.put(API_ENDPOINTS.transport.approveBid(bidId));
+      await transportAdminService.approveBid(bidId);
 
       toast({
         title: 'Transport Approved',
@@ -133,7 +115,7 @@ export const TransportManagementPanel: React.FC<TransportManagementPanelProps> =
     try {
       setProcessingBid(bidId);
 
-      await api.put(API_ENDPOINTS.transport.rejectBid(bidId));
+      await transportAdminService.rejectBid(bidId);
 
       toast({
         title: 'Transport Rejected',

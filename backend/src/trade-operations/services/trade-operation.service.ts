@@ -12,6 +12,8 @@ import {
   BuyListing,
   SaleListing,
   TradeSeller,
+  InspectionPriority,
+  InspectionStatus,
   Prisma,
 } from '@prisma/client';
 
@@ -28,10 +30,29 @@ export interface TradeOperationSummary {
   };
   sellers: Array<{
     id: string;
+    sellerId: string;
+    saleListingId: string;
     name: string;
+    requestedQuantity: number;
+    offeredQuantity: number;
+    agreedQuantity?: number | null;
+    unit?: string;
     quantity: number;
     price: number;
     status: string;
+    inspection?: {
+      id: string;
+      status: InspectionStatus;
+      priority: InspectionPriority;
+      requestedDate?: Date | null;
+      scheduledDate?: Date | null;
+      completedDate?: Date | null;
+      inspector?: {
+        id: string;
+        name: string | null;
+        email?: string | null;
+      } | null;
+    };
   }>;
   profit: {
     estimated: number;
@@ -42,12 +63,65 @@ export interface TradeOperationSummary {
     estimatedCost: number;
     distance: number;
     optimized: boolean;
+    request?: TransportRequestSummary | null;
   };
   timeline: {
     created: Date;
     lastUpdated: Date;
     expectedCompletion?: Date;
   };
+}
+
+export interface TransportRequestSummary {
+  id: string;
+  requestNumber: string;
+  status: string;
+  totalWeight: number;
+  biddingDeadline?: Date | null;
+  deliveryDeadline?: Date | null;
+  urgencyLevel?: string;
+  pickupPoints: Array<{
+    sellerId?: string;
+    saleListingId?: string;
+    sellerName?: string;
+    quantity?: number;
+    unit?: string;
+    address?: string;
+    lat?: number;
+    lng?: number;
+  }>;
+  deliveryPoint?: {
+    buyerId?: string;
+    buyerName?: string;
+    address?: string;
+    lat?: number;
+    lng?: number;
+  } | null;
+  bids: TransportBidSummary[];
+  job?: TransportJobSummary | null;
+}
+
+export interface TransportBidSummary {
+  id: string;
+  status: string;
+  bidAmount?: number;
+  transporterId?: string;
+  transporterName?: string;
+  transportCompanyName?: string;
+  vehicleType?: string;
+  vehicleCapacity?: number;
+  estimatedDuration?: number;
+  submittedAt?: Date;
+}
+
+export interface TransportJobSummary {
+  id: string;
+  jobNumber: string;
+  status: string;
+  startedAt?: Date;
+  estimatedArrival?: Date;
+  actualDelivery?: Date;
+  progress?: number;
 }
 
 export interface SellerMatchingParams {
@@ -631,7 +705,38 @@ export class TradeOperationService {
           include: { buyer: true },
         },
         sellers: {
-          include: { seller: true },
+          include: {
+            seller: true,
+            saleListing: {
+              include: {
+                seller: true,
+              },
+            },
+          },
+        },
+        inspections: {
+          include: {
+            inspector: true,
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+        transportRequest: {
+          include: {
+            bids: {
+              include: {
+                transporter: {
+                  include: {
+                    company: true,
+                  },
+                },
+                transportCompany: true,
+              },
+              orderBy: { submittedAt: 'asc' },
+            },
+            transportJob: true,
+          },
         },
       },
     });
@@ -644,6 +749,16 @@ export class TradeOperationService {
       tradeOperationId,
     );
 
+    const inspectionBySaleListing = new Map<string, (typeof trade.inspections)[number]>();
+    trade.inspections?.forEach((inspection) => {
+      if (!inspection?.saleListingId) return;
+      if (!inspectionBySaleListing.has(inspection.saleListingId)) {
+        inspectionBySaleListing.set(inspection.saleListingId, inspection);
+      }
+    });
+
+    const transportRequest = this.mapTransportRequest(trade.transportRequest);
+
     return {
       id: trade.id,
       phase: trade.phase,
@@ -654,14 +769,43 @@ export class TradeOperationService {
         requestedQuantity: trade.buyListing.quantity.toNumber(),
         maxPrice: trade.buyListing.maxPricePerUnit?.toNumber() || 0,
       },
-      sellers: trade.sellers.map(ts => ({
-        id: ts.id,  // TradeSeller ID (needed for negotiations)
-        sellerId: ts.sellerId,  // Actual seller ID
-        name: ts.seller.name || 'Unknown Seller',
-        quantity: ts.agreedQuantity?.toNumber() || ts.requestedQuantity?.toNumber() || 0,
-        price: ts.agreedPrice?.toNumber() || 0,
-        status: ts.status,
-      })),
+      sellers: trade.sellers.map(ts => {
+        const requestedQuantity = ts.requestedQuantity ? Number(ts.requestedQuantity) : 0;
+        const offeredQuantity = ts.offeredQuantity ? Number(ts.offeredQuantity) : 0;
+        const agreedQuantity = ts.agreedQuantity ? Number(ts.agreedQuantity) : null;
+        const inspection = inspectionBySaleListing.get(ts.saleListingId);
+
+        return {
+          id: ts.id,  // TradeSeller ID (needed for negotiations)
+          sellerId: ts.sellerId,  // Actual seller ID
+          saleListingId: ts.saleListingId,
+          name: ts.saleListing?.seller?.name || 'Unknown Seller',
+          requestedQuantity,
+          offeredQuantity,
+          agreedQuantity,
+          unit: ts.unit,
+          quantity: agreedQuantity ?? requestedQuantity ?? 0,
+          price: ts.agreedPrice?.toNumber?.() || ts.saleListing?.askingPrice?.toNumber?.() || 0,
+          status: ts.status,
+          inspection: inspection
+            ? {
+                id: inspection.id,
+                status: inspection.status,
+                priority: inspection.priority,
+                requestedDate: inspection.requestedDate,
+                scheduledDate: inspection.scheduledDate,
+                completedDate: inspection.completedDate,
+                inspector: inspection.inspector
+                  ? {
+                      id: inspection.inspector.id,
+                      name: inspection.inspector.name,
+                      email: inspection.inspector.email,
+                    }
+                  : null,
+              }
+            : undefined,
+        };
+      }),
       profit: {
         estimated: profitCalc.profit.netProfit,
         margin: profitCalc.profit.profitMargin,
@@ -671,6 +815,7 @@ export class TradeOperationService {
         estimatedCost: profitCalc.costs.transport.estimatedCost,
         distance: trade.totalDistanceKm || 0,
         optimized: false, // transportOptimized field doesn't exist
+        request: transportRequest,
       },
       timeline: {
         created: trade.createdAt,
@@ -678,6 +823,93 @@ export class TradeOperationService {
         expectedCompletion: undefined, // expectedDeliveryDate doesn't exist
       },
     };
+  }
+
+  private mapTransportRequest(request?: any): TransportRequestSummary | null {
+    if (!request) {
+      return null;
+    }
+
+    const pickupPointsRaw = Array.isArray(request.pickupPoints)
+      ? request.pickupPoints
+      : [];
+    const deliveryPointRaw =
+      request.deliveryPoint && typeof request.deliveryPoint === 'object'
+        ? (request.deliveryPoint as Record<string, any>)
+        : null;
+
+    const pickupPoints = pickupPointsRaw.map((point: any) => ({
+      sellerId: point?.sellerId,
+      saleListingId: point?.saleListingId,
+      sellerName: point?.sellerName,
+      quantity: point?.quantity,
+      unit: point?.unit,
+      address: point?.location?.address,
+      lat: point?.location?.lat,
+      lng: point?.location?.lng,
+    }));
+
+    const bids: TransportBidSummary[] = (request.bids || []).map((bid: any) => ({
+      id: bid.id,
+      status: bid.status,
+      bidAmount: bid.bidAmount?.toNumber?.() ?? bid.bidAmount ?? null,
+      transporterId: bid.transporterId,
+      transporterName: bid.transporter?.name,
+      transportCompanyName:
+        bid.transportCompany?.companyName || bid.transporter?.company?.legalName,
+      vehicleType: bid.vehicleType,
+      vehicleCapacity: bid.vehicleCapacity,
+      estimatedDuration: bid.estimatedDuration,
+      submittedAt: bid.submittedAt,
+    }));
+
+    const job: TransportJobSummary | null = request.transportJob
+      ? {
+          id: request.transportJob.id,
+          jobNumber: request.transportJob.jobNumber,
+          status: request.transportJob.status,
+          startedAt: request.transportJob.startedAt,
+          estimatedArrival: request.transportJob.estimatedArrival,
+          actualDelivery: request.transportJob.actualDelivery,
+          progress: request.transportJob.progress,
+        }
+      : null;
+
+    return {
+      id: request.id,
+      requestNumber: request.requestNumber,
+      status: request.status,
+      totalWeight: request.totalWeight,
+      biddingDeadline: request.biddingDeadline,
+      deliveryDeadline: request.deliveryDeadline,
+      urgencyLevel: request.urgencyLevel,
+      pickupPoints,
+      deliveryPoint: deliveryPointRaw
+        ? {
+            buyerId: deliveryPointRaw.buyerId,
+            buyerName: deliveryPointRaw.buyerName,
+            address: deliveryPointRaw.location?.address,
+            lat: deliveryPointRaw.location?.lat,
+            lng: deliveryPointRaw.location?.lng,
+          }
+        : null,
+      bids,
+      job,
+    };
+  }
+
+  async getLatestByBuyListingId(buyListingId: string) {
+    return this.prisma.tradeOperation.findFirst({
+      where: { buyListingId },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        buyListing: true,
+        sellers: true,
+        negotiations: true,
+      },
+    });
   }
 
   /**

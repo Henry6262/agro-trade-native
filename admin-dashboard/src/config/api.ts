@@ -63,6 +63,7 @@ export const API_ENDPOINTS = {
   transport: {
     estimate: '/transport/estimate',
     requests: '/transport/requests',
+    autoRequest: '/transport/requests/auto',
     byTradeOperation: (id: string) => `/transport/trade-operations/${id}/transport`,
     requestById: (id: string) => `/transport/requests/${id}`,
     approveBid: (id: string) => `/transport/bids/${id}/accept`,

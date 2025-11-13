@@ -33,6 +33,7 @@ export interface TransportSummary {
   hasRequest: boolean;
   hasAssignedTransport: boolean;
   isComplete: boolean;
+  hasDeliveryProof: boolean;
   status?: string;
   progress?: number;
 }
@@ -75,13 +76,15 @@ export const validateWorkflowComplete = (
   }
 
   // Check transport
-  const transportComplete = transportSummary.isComplete;
+  const transportComplete = transportSummary.isComplete && transportSummary.hasDeliveryProof;
   if (!transportSummary.hasRequest) {
     blockers.push('Transport request not created');
   } else if (!transportSummary.hasAssignedTransport) {
     warnings.push('Transport not yet assigned');
   } else if (!transportSummary.isComplete) {
     blockers.push('Transport delivery not complete');
+  } else if (!transportSummary.hasDeliveryProof) {
+    blockers.push('Proof of delivery not uploaded');
   }
 
   // Check quantity fulfillment
@@ -167,17 +170,28 @@ export const calculateTransportSummary = (transportData: any | null): TransportS
       hasRequest: false,
       hasAssignedTransport: false,
       isComplete: false,
+      hasDeliveryProof: false,
     };
   }
 
   const hasRequest = !!transportData.request;
   const hasAssignedTransport = !!transportData.job;
-  const isComplete = transportData.job?.status === 'COMPLETED';
+  const job = transportData.job;
+  const isComplete = job?.status === 'COMPLETED';
+  const hasDeliveryProof = Boolean(
+    job?.proofOfDelivery ||
+      (Array.isArray(job?.deliveryPhotos) && job.deliveryPhotos.length > 0) ||
+      (Array.isArray(job?.documents) &&
+        job.documents.some((doc: any) =>
+          typeof doc?.type === 'string' && doc.type.toLowerCase().includes('proof')
+        ))
+  );
 
   return {
     hasRequest,
     hasAssignedTransport,
     isComplete,
+    hasDeliveryProof,
     status: transportData.job?.status || transportData.request?.status,
     progress: transportData.job?.progress,
   };

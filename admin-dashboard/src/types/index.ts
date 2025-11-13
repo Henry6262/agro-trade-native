@@ -117,6 +117,21 @@ export interface TradeSeller {
   updatedAt: string;
   seller?: User;
   saleListing?: SaleListing;
+  inspection?: SellerInspectionStatus;
+}
+
+export interface SellerInspectionStatus {
+  id: string;
+  status: 'PENDING' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+  requestedDate?: string | null;
+  scheduledDate?: string | null;
+  completedDate?: string | null;
+  inspector?: {
+    id: string;
+    name?: string | null;
+    email?: string | null;
+  } | null;
 }
 
 export interface TradeOperation {
@@ -137,6 +152,7 @@ export interface TradeOperation {
   buyListing?: BuyListing;
   sellers?: TradeSeller[];
   admin?: User;
+  transport?: TransportSummary;
 }
 
 export interface VerificationResult {
@@ -169,6 +185,40 @@ export interface InspectionRequest {
   saleListing?: SaleListing;
 }
 
+export interface InspectorAssignee {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  activeAssignments?: number;
+  latitude?: number;
+  longitude?: number;
+  city?: string | null;
+  region?: string | null;
+  lastSeenAt?: string;
+}
+
+export interface SubmitInspectionResultPayload {
+  qualityScore: number;
+  verificationResult: {
+    actualQuantity?: number;
+    actualQuality?: string;
+    moistureContent?: number;
+    foreignMatter?: number;
+    brokenGrains?: number;
+    discoloration?: boolean;
+    pestDamage?: boolean;
+    productSpecifications?: {
+      variety?: string;
+      grade?: string;
+      origin?: string;
+      harvestDate?: string;
+    };
+  };
+  notes?: string;
+  photos?: string[];
+  recommendVerification: boolean;
+}
+
 export interface CalculateTransportRequest {
   sellerIds: string[];
   buyerAddressId: string;
@@ -186,6 +236,101 @@ export interface CalculateTransportResponse {
   totalCost?: number;
   currency?: string;
   warnings?: string[];
+}
+
+export interface TransportSummary {
+  estimatedCost: number;
+  distance: number;
+  optimized: boolean;
+  request?: TransportRequestSummary | null;
+}
+
+export interface TransportRequestSummary {
+  id: string;
+  requestNumber: string;
+  status: string;
+  totalWeight: number;
+  biddingDeadline?: string | null;
+  deliveryDeadline?: string | null;
+  urgencyLevel?: string;
+  tradeOperation?: {
+    id?: string;
+    operationNumber?: string;
+    buyListing?: {
+      buyer?: User;
+      product?: Product;
+    };
+  };
+  pickupPoints: Array<{
+    sellerId?: string;
+    saleListingId?: string;
+    sellerName?: string;
+    quantity?: number;
+    unit?: string;
+    address?: string;
+    lat?: number;
+    lng?: number;
+  }>;
+  deliveryPoint?: {
+    buyerId?: string;
+    buyerName?: string;
+    address?: string;
+    lat?: number;
+    lng?: number;
+  } | null;
+  bids: TransportBidSummary[];
+  job?: TransportJobSummary | null;
+}
+
+export interface TransportBidSummary {
+  id: string;
+  status: string;
+  bidAmount?: number;
+  transporterId?: string;
+  transporterName?: string;
+  transportCompanyName?: string;
+  vehicleType?: string;
+  vehicleCapacity?: number;
+  estimatedDuration?: number;
+  submittedAt?: string;
+}
+
+export interface TransportJobSummary {
+  id: string;
+  jobNumber: string;
+  status: string;
+  startedAt?: string;
+  estimatedArrival?: string;
+  actualDelivery?: string;
+  progress?: number;
+}
+
+export interface TransportData {
+  request: TransportRequestSummary | null;
+  bids: TransportBidSummary[];
+  job: TransportJobSummary | null;
+}
+
+export interface TransportRequestListItem extends Omit<TransportRequestSummary, 'bids'> {
+  bids?: TransportBidSummary[];
+  tradeOperation?: {
+    id?: string;
+    operationNumber?: string;
+    buyListing?: {
+      product?: Product;
+      buyer?: User;
+    };
+  };
+  bidsCount?: number;
+  lowestBid?: number;
+  averageBid?: number;
+}
+
+export interface TransportRequestsResponse {
+  data: TransportRequestListItem[];
+  total: number;
+  page: number;
+  limit: number;
 }
 
 // Request DTOs

@@ -38,6 +38,15 @@ export class TransportBiddingService {
   async autoCreateTransportRequestForTrade(tradeOperationId: string): Promise<any> {
     this.logger.log(`Auto-creating transport request for trade operation: ${tradeOperationId}`);
 
+    const existing = await this.prisma.transportRequest.findUnique({
+      where: { tradeOperationId },
+    });
+
+    if (existing) {
+      this.logger.log(`Transport request already exists for trade ${tradeOperationId}. Skipping auto-create.`);
+      return existing;
+    }
+
     // Get trade operation to calculate total weight
     const tradeOperation = await this.prisma.tradeOperation.findUnique({
       where: { id: tradeOperationId },
@@ -845,5 +854,29 @@ export class TransportBiddingService {
     });
 
     return result;
+  }
+
+  async getTransportDataForTradeOperation(tradeOperationId: string) {
+    const request = await this.prisma.transportRequest.findUnique({
+      where: { tradeOperationId },
+      include: {
+        bids: {
+          include: {
+            transporter: {
+              include: { company: true },
+            },
+            transportCompany: true,
+          },
+          orderBy: { submittedAt: 'asc' },
+        },
+        transportJob: true,
+      },
+    });
+
+    return {
+      request,
+      bids: request?.bids ?? [],
+      job: request?.transportJob ?? null,
+    };
   }
 }

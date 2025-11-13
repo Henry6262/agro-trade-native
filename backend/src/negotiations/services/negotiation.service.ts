@@ -24,6 +24,7 @@ export interface NegotiationWithDetails {
   id: string;
   tradeOperationId: string;
   tradeSellerId: string;
+  saleListingId?: string;
   status: NegotiationStatus;
   currentOffer: any;
   counterOffer?: any;
@@ -982,6 +983,7 @@ export class NegotiationService {
       id: negotiation.id,
       tradeOperationId: negotiation.tradeOperationId,
       tradeSellerId: negotiation.tradeSellerId,
+      saleListingId: negotiation.tradeSeller?.saleListing?.id || negotiation.tradeSeller?.saleListingId,
       status: negotiation.status,
       currentOffer: negotiation.currentOffer,
       counterOffer: negotiation.counterOffer,

@@ -8,7 +8,6 @@ import { Users, ShoppingBag, Truck, LogIn } from 'lucide-react-native';
 import { useOnboardingStore } from '../../../stores/onboarding.store';
 import { useAuthStore } from '../../../stores/auth.store';
 import { AnimatedRoleCard } from '../components/AnimatedRoleCard';
-import { GoogleAuthNative } from '../components/shared/GoogleAuthNative';
 import { AuthGuard } from '../../../shared/components/AuthGuard';
 import {
   GoogleSignin,
@@ -17,6 +16,7 @@ import {
   isSuccessResponse,
 } from '@react-native-google-signin/google-signin';
 import { apiClient } from '../../../services/api';
+import configureGoogleSignIn from '../../../config/googleSignIn';
 
 type RoleSelectionScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -29,7 +29,6 @@ export const RoleSelectionScreen: React.FC = () => {
   const { setTokens, setUser, isAuthenticated, user } = useAuthStore();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'buyer' | 'seller' | 'transport' | null>(null);
-  const [showGoogleAuth, setShowGoogleAuth] = useState(false);
 
   // Redirect to main app if already authenticated
   useEffect(() => {
@@ -101,7 +100,15 @@ export const RoleSelectionScreen: React.FC = () => {
         const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000/api';
         window.location.href = `${apiUrl.replace('/api', '')}/api/auth/google`;
       } else {
+        // Ensure Google Sign-In SDK is configured
+        configureGoogleSignIn();
+
         // Mobile platform - use native Google Sign-In SDK
+        try {
+          await GoogleSignin.signOut();
+        } catch {
+          // ignore if no previous session
+        }
         await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
         const response = await GoogleSignin.signIn();
         
@@ -171,15 +178,7 @@ export const RoleSelectionScreen: React.FC = () => {
 
   // Initialize Google Sign-In on component mount
   useEffect(() => {
-    if (Platform.OS !== 'web') {
-      // Configure Google Sign-In for mobile platforms
-      GoogleSignin.configure({
-        webClientId: '1008767127587-47m9aht5dh71pe8kre41hhmlogmgp9in.apps.googleusercontent.com',
-        offlineAccess: true,
-        forceCodeForRefreshToken: true,
-        scopes: ['profile', 'email'],
-      });
-    }
+    configureGoogleSignIn();
   }, []);
 
   return (

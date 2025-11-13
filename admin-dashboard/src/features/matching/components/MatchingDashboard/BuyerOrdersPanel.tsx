@@ -10,6 +10,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getBuyerTargetPrice } from '../../../../utils/pricing';
+import { format } from 'date-fns';
 
 interface AutoOfferSummaryProps {
   hasBuyerPrice: boolean;
@@ -43,7 +44,9 @@ export const BuyerOrdersPanel: React.FC<BuyerOrdersPanelProps> = ({
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await api.get(API_ENDPOINTS.buyer.listings);
+      const response = await api.get(API_ENDPOINTS.buyer.listings, {
+        params: { includeTradeOps: true },
+      });
       setOrders(response.data);
       setError(null);
     } catch (err) {
@@ -146,15 +149,28 @@ export const BuyerOrdersPanel: React.FC<BuyerOrdersPanelProps> = ({
                       <div className="flex-1 flex items-start justify-between gap-3 min-w-0">
                         <div className="flex-1">
                           {/* Product Header */}
-                          <div className="flex items-center gap-2 mb-2">
-                            <h5 className="font-bold text-base text-text-primary">
-                              {order.product?.name || 'Unknown Product'}
-                            </h5>
-                            {isSelected && (
-                              <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs font-semibold border border-blue-300">
-                                SELECTED
-                              </span>
-                            )}
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-2">
+                              <h5 className="font-bold text-base text-text-primary">
+                                {order.product?.name || 'Unknown Product'}
+                              </h5>
+                              {isSelected && (
+                                <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs font-semibold border border-blue-300">
+                                  SELECTED
+                                </span>
+                              )}
+                            </div>
+                            {(() => {
+                              const dueInfo = getDueInfo(order.neededBy);
+                              if (!dueInfo) return null;
+                              return (
+                                <span
+                                  className={`text-xs font-semibold px-2 py-0.5 rounded-full ${dueInfo.className}`}
+                                >
+                                  📅 {dueInfo.label}
+                                </span>
+                              );
+                            })()}
                           </div>
 
                           {/* Location */}
@@ -239,3 +255,40 @@ export const BuyerOrdersPanel: React.FC<BuyerOrdersPanelProps> = ({
 };
 
 export default BuyerOrdersPanel;
+const getDueInfo = (neededBy?: string | null) => {
+  if (!neededBy) return null;
+  const dueDate = new Date(neededBy);
+  if (Number.isNaN(dueDate.getTime())) return null;
+
+  const now = new Date();
+  const diffMs = dueDate.getTime() - now.getTime();
+  const dayMs = 24 * 60 * 60 * 1000;
+
+  if (diffMs <= 0) {
+    return {
+      label: 'Past due',
+      className: 'bg-red-100 text-red-700 border border-red-200',
+    };
+  }
+
+  if (diffMs <= dayMs) {
+    return {
+      label: 'Due today',
+      className: 'bg-amber-100 text-amber-800 border border-amber-200',
+    };
+  }
+
+  const diffDays = Math.ceil(diffMs / dayMs);
+
+  if (diffDays <= 3) {
+    return {
+      label: `Due in ${diffDays}d`,
+      className: 'bg-amber-50 text-amber-700 border border-amber-100',
+    };
+  }
+
+  return {
+    label: `Due ${format(dueDate, 'MMM d')}`,
+    className: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
+  };
+};

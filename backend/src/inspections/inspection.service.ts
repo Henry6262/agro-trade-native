@@ -11,6 +11,7 @@ import {
   UserRole,
 } from '@prisma/client';
 import { NotificationService } from '../notifications/notification.service';
+import { TransportBiddingService } from '../transport/services/transport-bidding.service';
 
 @Injectable()
 export class InspectionService {
@@ -19,6 +20,7 @@ export class InspectionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
+    private readonly transportBiddingService: TransportBiddingService,
   ) {}
 
   /**
@@ -125,6 +127,22 @@ export class InspectionService {
         isActive: true,
       },
       include: {
+        addresses: {
+          where: {
+            isDefault: true,
+          },
+          orderBy: {
+            updatedAt: 'desc',
+          },
+          take: 1,
+          include: {
+            city: {
+              include: {
+                region: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             inspectionAssignments: {
@@ -137,12 +155,35 @@ export class InspectionService {
           },
         },
       },
+      orderBy: [
+        {
+          updatedAt: 'desc',
+        },
+      ],
     });
 
-    // Sort by least active assignments
-    return inspectors.sort((a, b) =>
-      a._count.inspectionAssignments - b._count.inspectionAssignments
-    );
+    const defaultLat = 42.6977;
+    const defaultLng = 23.3219;
+
+    return inspectors
+      .map((inspector) => {
+        const address = inspector.addresses?.[0];
+        const city = address?.city;
+        const region = city?.region;
+
+        return {
+          id: inspector.id,
+          name: inspector.name,
+          email: inspector.email,
+          activeAssignments: inspector._count?.inspectionAssignments ?? 0,
+          latitude: address?.latitude ?? defaultLat,
+          longitude: address?.longitude ?? defaultLng,
+          city: city?.name,
+          region: region?.name,
+          lastSeenAt: inspector.updatedAt,
+        };
+      })
+      .sort((a, b) => (a.activeAssignments ?? 0) - (b.activeAssignments ?? 0));
   }
 
   /**
@@ -673,6 +714,8 @@ export class InspectionService {
             `✅ All sellers verified for trade operation ${inspection.tradeOperationId}. ` +
             `Phase updated to TRANSPORT_MATCHING`
           );
+
+          await this.ensureTransportRequest(inspection.tradeOperationId);
         }
       }
     }
@@ -708,5 +751,34 @@ export class InspectionService {
       completed,
       avgQualityScore: avgQualityScore._avg.qualityScore || 0,
     };
+  }
+
+  private async ensureTransportRequest(tradeOperationId: string | null) {
+    if (!tradeOperationId) {
+      return null;
+    }
+
+    const existing = await this.prisma.transportRequest.findUnique({
+      where: { tradeOperationId },
+    });
+
+    if (existing) {
+      return existing;
+    }
+
+    try {
+      this.logger.log(
+        `🔄 No transport request found for trade ${tradeOperationId}. Auto-creating one now.`,
+      );
+      return await this.transportBiddingService.autoCreateTransportRequestForTrade(
+        tradeOperationId,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to auto-create transport request for trade ${tradeOperationId}: ${error.message}`,
+        error.stack,
+      );
+      return null;
+    }
   }
 }

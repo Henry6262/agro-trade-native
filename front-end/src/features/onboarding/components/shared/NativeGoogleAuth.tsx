@@ -18,6 +18,7 @@ import { useAuthStore } from '../../../../stores/auth.store';
 import { authService } from '../../../../services/authService';
 import { UserRole } from '../../../../shared/types';
 import { ENV } from '../../../../shared/utils/environment';
+import configureGoogleSignIn from '../../../../config/googleSignIn';
 
 interface NativeGoogleAuthProps {
   onClose: () => void;
@@ -39,16 +40,6 @@ export const NativeGoogleAuth: React.FC<NativeGoogleAuthProps> = ({
     // Configure Google Sign-In when component mounts
     configureGoogleSignIn();
   }, []);
-
-  const configureGoogleSignIn = () => {
-    GoogleSignin.configure({
-      webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '', // Your web client ID from Google Console
-      offlineAccess: true,
-      forceCodeForRefreshToken: true,
-      iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID, // iOS client ID if different
-      scopes: ['profile', 'email'],
-    });
-  };
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);

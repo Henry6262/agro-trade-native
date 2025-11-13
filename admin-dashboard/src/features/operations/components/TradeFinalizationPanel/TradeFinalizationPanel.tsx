@@ -74,6 +74,20 @@ export const TradeFinalizationPanel: React.FC<TradeFinalizationPanelProps> = ({
     transportData?.request?.estimatedCost || 0
   );
 
+  const transportRequest = transportData?.request ?? null;
+  const transportJob = transportData?.job ?? null;
+  const transportBidsCount =
+    transportRequest?.bids?.length ??
+    transportData?.bids?.length ??
+    0;
+  const transportStatusLabel = transportSummary.status
+    ? transportSummary.status.replace(/_/g, ' ')
+    : null;
+  const proofReference = transportJob?.proofOfDelivery || null;
+  const deliveryPhotosCount = Array.isArray(transportJob?.deliveryPhotos)
+    ? transportJob.deliveryPhotos.length
+    : 0;
+
   // Determine overall progress
   const progressSteps = [
     { label: 'Offers Accepted', completed: validation.hasAcceptedOffers },
@@ -293,6 +307,84 @@ export const TradeFinalizationPanel: React.FC<TradeFinalizationPanelProps> = ({
                 </div>
               </div>
             )}
+
+            {/* Transport Status */}
+            <div className="bg-slate-50 border-2 border-slate-200 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-slate-900">TRANSPORT STATUS</h3>
+                {transportStatusLabel && (
+                  <Badge variant="outline" className="uppercase tracking-wide text-xs">
+                    {transportStatusLabel}
+                  </Badge>
+                )}
+              </div>
+              {!transportRequest ? (
+                <p className="text-sm text-slate-600">
+                  Transport request has not been created yet. Create a request from the transport tab to continue.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-xs text-slate-500 mb-1">Request</p>
+                    <p className="font-semibold text-slate-900">
+                      #{transportRequest.requestNumber || '—'}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {(transportRequest.status || 'UNKNOWN').replace(/_/g, ' ')}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 mb-1">Bids Received</p>
+                    <p className="font-semibold text-slate-900">{transportBidsCount}</p>
+                    {transportRequest.status === 'OPEN' && transportBidsCount === 0 && (
+                      <p className="text-xs text-amber-600 mt-1">Awaiting transporter bids</p>
+                    )}
+                  </div>
+                  {transportJob ? (
+                    <>
+                      <div>
+                        <p className="text-xs text-slate-500 mb-1">Job</p>
+                        <p className="font-semibold text-slate-900">
+                          #{transportJob.jobNumber || '—'}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          {(transportJob.status || 'UNKNOWN').replace(/_/g, ' ')}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500 mb-1">Proof of Delivery</p>
+                        <p
+                          className={`font-semibold ${
+                            transportSummary.hasDeliveryProof ? 'text-emerald-600' : 'text-rose-600'
+                          }`}
+                        >
+                          {transportSummary.hasDeliveryProof ? 'Uploaded' : 'Missing'}
+                        </p>
+                        {proofReference && (
+                          <p className="text-xs text-slate-500 truncate">
+                            Ref: {proofReference}
+                          </p>
+                        )}
+                        {!transportSummary.hasDeliveryProof && transportSummary.isComplete && (
+                          <p className="text-xs text-rose-500 mt-1">
+                            Upload signature or delivery photos to unblock finalization.
+                          </p>
+                        )}
+                        {deliveryPhotosCount > 0 && (
+                          <p className="text-xs text-slate-500">
+                            {deliveryPhotosCount} delivery photo{deliveryPhotosCount === 1 ? '' : 's'}
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="col-span-2 text-xs text-slate-500">
+                      Assign a transporter and generate a transport job to capture delivery proof.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Blockers */}
             {validation.blockers.length > 0 && (

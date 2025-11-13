@@ -363,6 +363,21 @@ export class InspectionAssigneeDto {
 
   @ApiPropertyOptional({ type: Number })
   activeAssignments?: number;
+
+  @ApiPropertyOptional({ type: Number, description: 'Last known latitude' })
+  latitude?: number;
+
+  @ApiPropertyOptional({ type: Number, description: 'Last known longitude' })
+  longitude?: number;
+
+  @ApiPropertyOptional()
+  city?: string | null;
+
+  @ApiPropertyOptional()
+  region?: string | null;
+
+  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  lastSeenAt?: Date;
 }
 
 export class InspectorMissionDto extends InspectionResponseDto {}

@@ -2,6 +2,7 @@ import React from 'react';
 import * as Types from '../../../../../types';
 import { RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
+import ExpiryBadge from '../../../../../components/common/ExpiryBadge';
 
 interface NegotiationsTabProps {
   negotiations: Types.Negotiation[];
@@ -44,6 +45,9 @@ export const NegotiationsTab: React.FC<NegotiationsTabProps> = ({
                 >
                   {negotiation.status}
                 </span>
+                {negotiation.status === Types.NegotiationStatus.PENDING && negotiation.expiresAt && (
+                  <ExpiryBadge expiresAt={negotiation.expiresAt} />
+                )}
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>

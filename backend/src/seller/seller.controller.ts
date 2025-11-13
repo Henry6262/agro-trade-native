@@ -8,6 +8,7 @@ import {
   Request,
   UseGuards,
   BadRequestException,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -78,8 +79,15 @@ export class SellerController {
     type: SellerListingResponseDto,
     isArray: true,
   })
-  async getMyListings(@Request() req?: AuthRequest) {
-    const listings = await this.sellerService.getAllSellerListings();
+  async getMyListings(
+    @Request() req?: AuthRequest,
+    @Query('buyListingId') buyListingId?: string,
+    @Query('tradeOperationId') tradeOperationId?: string,
+  ) {
+    const listings = await this.sellerService.getAllSellerListings(
+      buyListingId,
+      tradeOperationId,
+    );
     return listings.map((listing) => this.serializeListing(listing));
   }
 
