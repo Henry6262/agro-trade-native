@@ -29,3 +29,5 @@ Agro-trade project workspace
 - Complete tasks fully without stopping for approval at each step
 - Handle errors and edge cases proactively
 - Optimize code and fix issues as they're discovered
+- After every batch of RN changes, run `npm run lint` and keep the project lint-clean (fix or log any failures before continuing).
+- Before working on the mobile app, open `rules/README.md` and every file under `rules/frontend/` (structure, components, logic-and-data, state-and-store, design-system, docs) so the plan and implementation follow the enforced architecture.

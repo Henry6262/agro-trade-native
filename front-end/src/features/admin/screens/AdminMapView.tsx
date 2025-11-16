@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,60 +7,60 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Dimensions,
-} from 'react-native'
-import { useNavigation } from '@react-navigation/native'
-import { Ionicons } from '@expo/vector-icons'
-import MapView, { Marker, Circle, PROVIDER_GOOGLE } from 'react-native-maps'
-import axios from 'axios'
-import { API_URL } from '../../../config/api'
-import { useAuthStore } from '../../../stores/auth.store'
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
+import MapView, { Marker, Circle, PROVIDER_GOOGLE } from 'react-native-maps';
+import axios from 'axios';
+import { API_URL } from '../../../config/api';
+import { useAuthStore } from '../../../stores/auth.store';
 
 interface MapZone {
-  id: string
-  name: string
-  color: string
+  id: string;
+  name: string;
+  color: string;
   cities: Array<{
-    id: string
-    name: string
-    latitude: number
-    longitude: number
-    country: string
-    countryCode: string
-    flagEmoji: string
-    isDefault: boolean
-  }>
+    id: string;
+    name: string;
+    latitude: number;
+    longitude: number;
+    country: string;
+    countryCode: string;
+    flagEmoji: string;
+    isDefault: boolean;
+  }>;
   samplePrices: Array<{
-    productName: string
-    range: string
-    unit: string
-  }>
+    productName: string;
+    range: string;
+    unit: string;
+  }>;
 }
 
 export function AdminMapView() {
-  const navigation = useNavigation()
-  const { token } = useAuthStore()
-  const [zones, setZones] = useState<MapZone[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedZone, setSelectedZone] = useState<MapZone | null>(null)
-  const { width, height } = Dimensions.get('window')
+  const navigation = useNavigation();
+  const { token } = useAuthStore();
+  const [zones, setZones] = useState<MapZone[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedZone, setSelectedZone] = useState<MapZone | null>(null);
+  const { width, height } = Dimensions.get('window');
 
   useEffect(() => {
-    fetchMapData()
-  }, [])
+    fetchMapData();
+  }, []);
 
   const fetchMapData = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await axios.get(`${API_URL}/admin/analytics/map-data`, {
         headers: { Authorization: `Bearer ${token}` },
-      })
-      setZones(response.data.data)
+      });
+      setZones(response.data.data);
     } catch (error) {
-      console.error('Failed to fetch map data:', error)
+      console.error('Failed to fetch map data:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const getInitialRegion = () => {
     // Center on Bulgaria and Greece
@@ -69,12 +69,12 @@ export function AdminMapView() {
       longitude: 23.5,
       latitudeDelta: 8,
       longitudeDelta: 8,
-    }
-  }
+    };
+  };
 
   const handleMarkerPress = (zone: MapZone) => {
-    setSelectedZone(zone)
-  }
+    setSelectedZone(zone);
+  };
 
   if (loading) {
     return (
@@ -82,7 +82,7 @@ export function AdminMapView() {
         <ActivityIndicator size="large" color="#3B82F6" />
         <Text className="text-white mt-4">Loading map data...</Text>
       </SafeAreaView>
-    )
+    );
   }
 
   return (
@@ -171,10 +171,7 @@ export function AdminMapView() {
                   {selectedZone.cities.length} cities in zone
                 </Text>
               </View>
-              <TouchableOpacity
-                onPress={() => setSelectedZone(null)}
-                className="p-2"
-              >
+              <TouchableOpacity onPress={() => setSelectedZone(null)} className="p-2">
                 <Ionicons name="close" size={20} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
@@ -182,10 +179,7 @@ export function AdminMapView() {
             {/* Cities List */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3">
               {selectedZone.cities.map((city) => (
-                <View
-                  key={city.id}
-                  className="bg-gray-800 rounded-lg px-3 py-2 mr-2"
-                >
+                <View key={city.id} className="bg-gray-800 rounded-lg px-3 py-2 mr-2">
                   <Text className="text-white text-sm">
                     {city.flagEmoji} {city.name}
                   </Text>
@@ -200,9 +194,7 @@ export function AdminMapView() {
                 <View className="flex-row flex-wrap">
                   {selectedZone.samplePrices.map((price, index) => (
                     <View key={index} className="bg-gray-800 rounded-lg px-3 py-2 mr-2 mb-2">
-                      <Text className="text-white text-sm font-medium">
-                        {price.productName}
-                      </Text>
+                      <Text className="text-white text-sm font-medium">{price.productName}</Text>
                       <Text className="text-green-400 text-xs">
                         {price.range}/{price.unit}
                       </Text>
@@ -238,5 +230,5 @@ export function AdminMapView() {
         ))}
       </View>
     </SafeAreaView>
-  )
+  );
 }

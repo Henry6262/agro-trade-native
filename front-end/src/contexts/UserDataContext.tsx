@@ -93,31 +93,31 @@ interface UserDataContextValue {
   sellerOffers: SellerOffer[];
   sellerTrades: SellerTrade[];
   sellerStats: SellerStats | null;
-  
+
   // Loading states
   isLoadingProducts: boolean;
   isLoadingOffers: boolean;
   isLoadingTrades: boolean;
   isLoadingStats: boolean;
-  
+
   // Error states
   productsError: string | null;
   offersError: string | null;
   tradesError: string | null;
   statsError: string | null;
-  
+
   // Actions
   refreshProducts: () => Promise<void>;
   refreshOffers: () => Promise<void>;
   refreshTrades: () => Promise<void>;
   refreshStats: () => Promise<void>;
   refreshAll: () => Promise<void>;
-  
+
   // Product actions
   createProduct: (product: Partial<SellerProduct>) => Promise<SellerProduct>;
   updateProduct: (id: string, updates: Partial<SellerProduct>) => Promise<SellerProduct>;
   deleteProduct: (id: string) => Promise<void>;
-  
+
   // Offer actions
   acceptOffer: (offerId: string) => Promise<void>;
   rejectOffer: (offerId: string) => Promise<void>;
@@ -125,6 +125,9 @@ interface UserDataContextValue {
 }
 
 const UserDataContext = createContext<UserDataContextValue | undefined>(undefined);
+
+const getErrorMessage = (error: unknown, fallback: string) =>
+  error instanceof Error ? error.message : fallback;
 
 export const useUserData = () => {
   const context = useContext(UserDataContext);
@@ -137,20 +140,19 @@ export const useUserData = () => {
 export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const token = useAuthStore((state) => state.token);
-  
+
   // Seller data states
   const [sellerProducts, setSellerProducts] = useState<SellerProduct[]>([]);
   const [sellerOffers, setSellerOffers] = useState<SellerOffer[]>([]);
   const [sellerTrades, setSellerTrades] = useState<SellerTrade[]>([]);
   const [sellerStats, setSellerStats] = useState<SellerStats | null>(null);
-  
+
   // Loading states
   const [isLoadingProducts, setIsLoadingProducts] = useState(false);
   const [isLoadingOffers, setIsLoadingOffers] = useState(false);
   const [isLoadingTrades, setIsLoadingTrades] = useState(false);
   const [isLoadingStats, setIsLoadingStats] = useState(false);
-  
+
   // Error states
   const [productsError, setProductsError] = useState<string | null>(null);
   const [offersError, setOffersError] = useState<string | null>(null);
@@ -160,18 +162,18 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Fetch seller products
   const fetchSellerProducts = useCallback(async () => {
     if (!isAuthenticated || !user) return;
-    
+
     setIsLoadingProducts(true);
     setProductsError(null);
-    
+
     try {
       const response = await apiClient.get<SellerProduct[]>('/seller/products');
       // Set the actual data from the backend
       setSellerProducts(response.data || []);
       setProductsError(null); // Clear any previous errors
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching seller products:', error);
-      setProductsError(error.message || 'Failed to fetch products');
+      setProductsError(getErrorMessage(error, 'Failed to fetch products'));
       // Don't use mock data - let the UI show the actual state (empty or error)
     } finally {
       setIsLoadingProducts(false);
@@ -181,17 +183,17 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Fetch seller offers
   const fetchSellerOffers = useCallback(async () => {
     if (!isAuthenticated || !user) return;
-    
+
     setIsLoadingOffers(true);
     setOffersError(null);
-    
+
     try {
       const response = await apiClient.get<SellerOffer[]>('/seller/offers');
       setSellerOffers(response.data || []);
       setOffersError(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching seller offers:', error);
-      setOffersError(error.message || 'Failed to fetch offers');
+      setOffersError(getErrorMessage(error, 'Failed to fetch offers'));
     } finally {
       setIsLoadingOffers(false);
     }
@@ -200,17 +202,17 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Fetch seller trades
   const fetchSellerTrades = useCallback(async () => {
     if (!isAuthenticated || !user) return;
-    
+
     setIsLoadingTrades(true);
     setTradesError(null);
-    
+
     try {
       const response = await apiClient.get<SellerTrade[]>('/seller/trades');
       setSellerTrades(response.data || []);
       setTradesError(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching seller trades:', error);
-      setTradesError(error.message || 'Failed to fetch trades');
+      setTradesError(getErrorMessage(error, 'Failed to fetch trades'));
     } finally {
       setIsLoadingTrades(false);
     }
@@ -219,52 +221,58 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Fetch seller stats
   const fetchSellerStats = useCallback(async () => {
     if (!isAuthenticated || !user) return;
-    
+
     setIsLoadingStats(true);
     setStatsError(null);
-    
+
     try {
       const response = await apiClient.get<SellerStats>('/seller/stats');
       setSellerStats(response.data);
       setStatsError(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error fetching seller stats:', error);
-      setStatsError(error.message || 'Failed to fetch stats');
+      setStatsError(getErrorMessage(error, 'Failed to fetch stats'));
     } finally {
       setIsLoadingStats(false);
     }
   }, [isAuthenticated, user]);
 
   // Product actions
-  const createProduct = useCallback(async (product: Partial<SellerProduct>): Promise<SellerProduct> => {
-    try {
-      const response = await apiClient.post<SellerProduct>('/seller/products', product);
-      const newProduct = response.data;
-      setSellerProducts(prev => [...prev, newProduct]);
-      return newProduct;
-    } catch (error: any) {
-      console.error('Error creating product:', error);
-      throw error;
-    }
-  }, []);
+  const createProduct = useCallback(
+    async (product: Partial<SellerProduct>): Promise<SellerProduct> => {
+      try {
+        const response = await apiClient.post<SellerProduct>('/seller/products', product);
+        const newProduct = response.data;
+        setSellerProducts((prev) => [...prev, newProduct]);
+        return newProduct;
+      } catch (error: unknown) {
+        console.error('Error creating product:', error);
+        throw error;
+      }
+    },
+    []
+  );
 
-  const updateProduct = useCallback(async (id: string, updates: Partial<SellerProduct>): Promise<SellerProduct> => {
-    try {
-      const response = await apiClient.patch<SellerProduct>(`/seller/products/${id}`, updates);
-      const updatedProduct = response.data;
-      setSellerProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
-      return updatedProduct;
-    } catch (error: any) {
-      console.error('Error updating product:', error);
-      throw error;
-    }
-  }, []);
+  const updateProduct = useCallback(
+    async (id: string, updates: Partial<SellerProduct>): Promise<SellerProduct> => {
+      try {
+        const response = await apiClient.patch<SellerProduct>(`/seller/products/${id}`, updates);
+        const updatedProduct = response.data;
+        setSellerProducts((prev) => prev.map((p) => (p.id === id ? updatedProduct : p)));
+        return updatedProduct;
+      } catch (error: unknown) {
+        console.error('Error updating product:', error);
+        throw error;
+      }
+    },
+    []
+  );
 
   const deleteProduct = useCallback(async (id: string): Promise<void> => {
     try {
       await apiClient.delete(`/seller/products/${id}`);
-      setSellerProducts(prev => prev.filter(p => p.id !== id));
-    } catch (error: any) {
+      setSellerProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (error: unknown) {
       console.error('Error deleting product:', error);
       throw error;
     }
@@ -274,10 +282,10 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const acceptOffer = useCallback(async (offerId: string): Promise<void> => {
     try {
       await apiClient.post(`/seller/offers/${offerId}/accept`);
-      setSellerOffers(prev => prev.map(o => 
-        o.id === offerId ? { ...o, status: 'accepted' as const } : o
-      ));
-    } catch (error: any) {
+      setSellerOffers((prev) =>
+        prev.map((o) => (o.id === offerId ? { ...o, status: 'accepted' as const } : o))
+      );
+    } catch (error: unknown) {
       console.error('Error accepting offer:', error);
       throw error;
     }
@@ -286,33 +294,36 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const rejectOffer = useCallback(async (offerId: string): Promise<void> => {
     try {
       await apiClient.post(`/seller/offers/${offerId}/reject`);
-      setSellerOffers(prev => prev.map(o => 
-        o.id === offerId ? { ...o, status: 'rejected' as const } : o
-      ));
-    } catch (error: any) {
+      setSellerOffers((prev) =>
+        prev.map((o) => (o.id === offerId ? { ...o, status: 'rejected' as const } : o))
+      );
+    } catch (error: unknown) {
       console.error('Error rejecting offer:', error);
       throw error;
     }
   }, []);
 
-  const negotiateOffer = useCallback(async (offerId: string, counterPrice: number): Promise<void> => {
-    try {
-      await apiClient.post(`/seller/offers/${offerId}/negotiate`, { counterPrice });
-      setSellerOffers(prev => prev.map(o => 
-        o.id === offerId ? { ...o, status: 'negotiating' as const } : o
-      ));
-    } catch (error: any) {
-      console.error('Error negotiating offer:', error);
-      throw error;
-    }
-  }, []);
+  const negotiateOffer = useCallback(
+    async (offerId: string, counterPrice: number): Promise<void> => {
+      try {
+        await apiClient.post(`/seller/offers/${offerId}/negotiate`, { counterPrice });
+        setSellerOffers((prev) =>
+          prev.map((o) => (o.id === offerId ? { ...o, status: 'negotiating' as const } : o))
+        );
+      } catch (error: unknown) {
+        console.error('Error negotiating offer:', error);
+        throw error;
+      }
+    },
+    []
+  );
 
   // Refresh functions
   const refreshProducts = useCallback(() => fetchSellerProducts(), [fetchSellerProducts]);
   const refreshOffers = useCallback(() => fetchSellerOffers(), [fetchSellerOffers]);
   const refreshTrades = useCallback(() => fetchSellerTrades(), [fetchSellerTrades]);
   const refreshStats = useCallback(() => fetchSellerStats(), [fetchSellerStats]);
-  
+
   const refreshAll = useCallback(async () => {
     await Promise.all([
       fetchSellerProducts(),
@@ -326,7 +337,7 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     if (isAuthenticated && user) {
       const userRole = user.role?.toLowerCase();
-      
+
       // Map FARMER to seller
       if (userRole === 'farmer' || userRole === 'seller') {
         // Fetch seller-specific data
@@ -337,7 +348,14 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
       // Add other role checks here (buyer, transporter, admin)
     }
-  }, [isAuthenticated, user, fetchSellerProducts, fetchSellerOffers, fetchSellerTrades, fetchSellerStats]);
+  }, [
+    isAuthenticated,
+    user,
+    fetchSellerProducts,
+    fetchSellerOffers,
+    fetchSellerTrades,
+    fetchSellerStats,
+  ]);
 
   const value: UserDataContextValue = {
     // Seller data
@@ -345,40 +363,36 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     sellerOffers,
     sellerTrades,
     sellerStats,
-    
+
     // Loading states
     isLoadingProducts,
     isLoadingOffers,
     isLoadingTrades,
     isLoadingStats,
-    
+
     // Error states
     productsError,
     offersError,
     tradesError,
     statsError,
-    
+
     // Actions
     refreshProducts,
     refreshOffers,
     refreshTrades,
     refreshStats,
     refreshAll,
-    
+
     // Product actions
     createProduct,
     updateProduct,
     deleteProduct,
-    
+
     // Offer actions
     acceptOffer,
     rejectOffer,
     negotiateOffer,
   };
 
-  return (
-    <UserDataContext.Provider value={value}>
-      {children}
-    </UserDataContext.Provider>
-  );
+  return <UserDataContext.Provider value={value}>{children}</UserDataContext.Provider>;
 };

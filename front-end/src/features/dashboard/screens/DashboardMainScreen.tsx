@@ -31,8 +31,8 @@ import CommandCenterScreen from './admin/CommandCenterScreen';
 import AgentNetworkScreen from './admin/AgentNetworkScreen';
 import OperationsScreen from './admin/OperationsScreenRefactored';
 import IntelligenceScreen from './shared/IntelligenceScreen';
-import SellerDashboardScreen from './seller/SellerDashboardScreen';
-import BuyerDashboardScreen from './buyer/BuyerDashboardScreen';
+import SellerDashboardSection from '../../../pages/Dashboard/sections/Seller';
+import BuyerDashboardSection from '../../../pages/Dashboard/sections/Buyer';
 import TransporterDashboardScreen from './transporter/TransporterDashboardScreen';
 import { InspectorDashboard } from './inspector/InspectorDashboard';
 import { ProfileDrawer } from '../components/ProfileDrawer';
@@ -190,14 +190,14 @@ export default function DashboardMainScreen() {
       if (activeSection === 'intelligence') {
         return <IntelligenceScreen />;
       }
-      // Pass all seller tabs to SellerDashboardScreen (products, offers, trades)
-      return <SellerDashboardScreen activeTab={activeSection} />;
+      // Pass all seller tabs to SellerDashboardSection (products, offers, trades)
+      return <SellerDashboardSection activeTab={activeSection as 'products' | 'offers' | 'trades'} />;
     }
     if (userRole === 'buyer') {
       if (activeSection === 'intelligence') {
         return <IntelligenceScreen />;
       }
-      return <BuyerDashboardScreen activeTab={activeSection} />;
+      return <BuyerDashboardSection activeTab={activeSection as 'orders' | 'requests'} />;
     }
     if (userRole === 'transporter') {
       if (activeSection === 'intelligence') {

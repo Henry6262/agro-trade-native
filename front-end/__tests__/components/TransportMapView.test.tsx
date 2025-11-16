@@ -1,30 +1,23 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { TransportMapView } from '../../src/features/dashboard/screens/admin/components/TransportMapView';
+import { View } from 'react-native';
+import {
+  TransportMapView,
+  type TransportMapViewProps,
+} from '../../src/features/dashboard/screens/admin/components/TransportMapView';
 
 // Mock react-native-maps
-jest.mock('react-native-maps', () => {
-  const { View } = require('react-native');
-  const MockMapView = (props: any) => {
-    return <View testID="mock-map-view">{props.children}</View>;
-  };
-  const MockMarker = (props: any) => {
-    return <View testID="mock-marker">{props.children}</View>;
-  };
-  const MockPolyline = (props: any) => {
-    return <View testID="mock-polyline" />;
-  };
+type MockProps = React.PropsWithChildren<Record<string, unknown>>;
 
-  return {
-    __esModule: true,
-    default: MockMapView,
-    Marker: MockMarker,
-    Polyline: MockPolyline,
-    PROVIDER_GOOGLE: 'google',
-  };
-});
+jest.mock('react-native-maps', () => ({
+  __esModule: true,
+  default: (props: MockProps) => <View testID="mock-map-view">{props.children}</View>,
+  Marker: (props: MockProps) => <View testID="mock-marker">{props.children}</View>,
+  Polyline: () => <View testID="mock-polyline" />,
+  PROVIDER_GOOGLE: 'google',
+}));
 
-const mockRoute = {
+const mockRoute: TransportMapViewProps['route'] = {
   origin: {
     latitude: 42.0,
     longitude: -93.0,
@@ -62,17 +55,13 @@ const mockRoute = {
 
 describe('TransportMapView', () => {
   it('should render the transport map with route', () => {
-    const { getByTestId } = render(
-      <TransportMapView route={mockRoute} height={400} />
-    );
+    const { getByTestId } = render(<TransportMapView route={mockRoute} height={400} />);
 
     expect(getByTestId('mock-map-view')).toBeTruthy();
   });
 
   it('should render origin, pickup, and destination markers', () => {
-    const { getAllByTestId } = render(
-      <TransportMapView route={mockRoute} height={400} />
-    );
+    const { getAllByTestId } = render(<TransportMapView route={mockRoute} height={400} />);
 
     const markers = getAllByTestId('mock-marker');
     // Origin + 2 pickups + destination = 4 markers
@@ -80,17 +69,13 @@ describe('TransportMapView', () => {
   });
 
   it('should render polyline for route', () => {
-    const { getByTestId } = render(
-      <TransportMapView route={mockRoute} height={400} />
-    );
+    const { getByTestId } = render(<TransportMapView route={mockRoute} height={400} />);
 
     expect(getByTestId('mock-polyline')).toBeTruthy();
   });
 
   it('should display route info when showDetails is true', () => {
-    const { getByText } = render(
-      <TransportMapView route={mockRoute} showDetails={true} />
-    );
+    const { getByText } = render(<TransportMapView route={mockRoute} showDetails={true} />);
 
     expect(getByText('Transport Route')).toBeTruthy();
     expect(getByText('350 km')).toBeTruthy();
@@ -113,10 +98,7 @@ describe('TransportMapView', () => {
   it('should handle marker press events', () => {
     const onMarkerPress = jest.fn();
     const { getAllByTestId } = render(
-      <TransportMapView 
-        route={mockRoute} 
-        onMarkerPress={onMarkerPress}
-      />
+      <TransportMapView route={mockRoute} onMarkerPress={onMarkerPress} />
     );
 
     // Note: Testing marker press would require more sophisticated mocking

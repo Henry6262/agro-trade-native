@@ -30,7 +30,7 @@ import {
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
 import { useAuthStore } from '@stores/auth.store';
-import { getApiUrl } from '../../../shared/utils/environment';
+import { getApiUrl } from '../../@pages/Onboarding/components/shared/utils/environment';
 import { InlineAuth } from './shared/InlineAuth';
 
 interface ProductDetailDrawerProps {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
 
@@ -15,13 +16,13 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
       type: 'sourceFile',
     };
   }
-  
+
   // Default resolution for other modules
   return context.resolveRequest(context, moduleName, platform);
 };
 
 // Enable NativeWind without CSS file import
-module.exports = withNativeWind(config, { 
+module.exports = withNativeWind(config, {
   input: './src/styles/global.css',
-  inlineRem: false 
+  inlineRem: false,
 });

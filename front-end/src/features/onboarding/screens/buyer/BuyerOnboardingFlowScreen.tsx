@@ -3,8 +3,8 @@ import { View, StatusBar, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../../navigation/types';
-import { BuyerOnboarding } from '../../components/buyer/BuyerOnboarding';
-import { AuthModal } from '../../components/shared/AuthModal';
+import { AuthModal } from '@pages/Onboarding/components/shared/AuthModal';
+import { BuyerOnboarding } from '@pages/Onboarding/sections/Buyer/components/BuyerOnboarding';
 import { useOnboardingStore } from '../../../../stores/onboarding.store';
 
 type BuyerOnboardingFlowScreenNavigationProp = NativeStackNavigationProp<

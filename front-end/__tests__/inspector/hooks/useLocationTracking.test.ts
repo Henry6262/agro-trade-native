@@ -34,7 +34,7 @@ describe('useLocationTracking', () => {
 
   it('should request location permissions on mount', async () => {
     renderHook(() => useLocationTracking());
-    
+
     await waitFor(() => {
       expect(Location.requestForegroundPermissionsAsync).toHaveBeenCalled();
       expect(Location.requestBackgroundPermissionsAsync).toHaveBeenCalled();
@@ -43,7 +43,7 @@ describe('useLocationTracking', () => {
 
   it('should get current location', async () => {
     const { result } = renderHook(() => useLocationTracking());
-    
+
     await waitFor(() => {
       expect(result.current.currentLocation).toEqual({
         latitude: mockLocation.coords.latitude,
@@ -57,11 +57,11 @@ describe('useLocationTracking', () => {
 
   it('should start tracking location', async () => {
     const { result } = renderHook(() => useLocationTracking());
-    
+
     await act(async () => {
       await result.current.startTracking();
     });
-    
+
     expect(result.current.isTracking).toBe(true);
     expect(Location.watchPositionAsync).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -75,24 +75,24 @@ describe('useLocationTracking', () => {
 
   it('should stop tracking location', async () => {
     const mockRemove = jest.fn();
-    (Location.watchPositionAsync as jest.Mock).mockResolvedValue({ 
-      remove: mockRemove 
+    (Location.watchPositionAsync as jest.Mock).mockResolvedValue({
+      remove: mockRemove,
     });
-    
+
     const { result } = renderHook(() => useLocationTracking());
-    
+
     await act(async () => {
       await result.current.startTracking();
       await result.current.stopTracking();
     });
-    
+
     expect(result.current.isTracking).toBe(false);
     expect(mockRemove).toHaveBeenCalled();
   });
 
   it('should update location on position change', async () => {
     const { result } = renderHook(() => useLocationTracking());
-    
+
     const newLocation = {
       coords: {
         latitude: 42.7077,
@@ -104,16 +104,16 @@ describe('useLocationTracking', () => {
       },
       timestamp: Date.now(),
     };
-    
+
     await act(async () => {
       await result.current.startTracking();
     });
-    
+
     act(() => {
       const callback = (Location.watchPositionAsync as jest.Mock).mock.calls[0][1];
       callback(newLocation);
     });
-    
+
     expect(result.current.currentLocation).toEqual({
       latitude: newLocation.coords.latitude,
       longitude: newLocation.coords.longitude,
@@ -127,9 +127,9 @@ describe('useLocationTracking', () => {
     (Location.requestForegroundPermissionsAsync as jest.Mock).mockResolvedValue({
       status: 'denied',
     });
-    
+
     const { result } = renderHook(() => useLocationTracking());
-    
+
     await waitFor(() => {
       expect(result.current.permissionStatus).toBe('denied');
       expect(result.current.currentLocation).toBeNull();
@@ -138,21 +138,23 @@ describe('useLocationTracking', () => {
 
   it('should calculate distance between two points', () => {
     const { result } = renderHook(() => useLocationTracking());
-    
+
     const distance = result.current.calculateDistance(
-      42.6977, 23.3219, // Point 1
-      42.7077, 23.3319  // Point 2
+      42.6977,
+      23.3219, // Point 1
+      42.7077,
+      23.3319 // Point 2
     );
-    
+
     expect(distance).toBeCloseTo(1.41, 1); // ~1.41 km
   });
 
   it('should handle location errors', async () => {
     const mockError = new Error('Location unavailable');
     (Location.getCurrentPositionAsync as jest.Mock).mockRejectedValue(mockError);
-    
+
     const { result } = renderHook(() => useLocationTracking());
-    
+
     await waitFor(() => {
       expect(result.current.error).toBe('Location unavailable');
       expect(result.current.currentLocation).toBeNull();
@@ -160,14 +162,16 @@ describe('useLocationTracking', () => {
   });
 
   it('should enable background tracking for active job', async () => {
-    const { result } = renderHook(() => useLocationTracking({ 
-      enableBackground: true 
-    }));
-    
+    const { result } = renderHook(() =>
+      useLocationTracking({
+        enableBackground: true,
+      })
+    );
+
     await act(async () => {
       await result.current.startTracking();
     });
-    
+
     expect(Location.watchPositionAsync).toHaveBeenCalledWith(
       expect.objectContaining({
         mayShowUserSettingsDialog: true,
@@ -182,18 +186,18 @@ describe('useLocationTracking', () => {
 
   it('should clean up on unmount', async () => {
     const mockRemove = jest.fn();
-    (Location.watchPositionAsync as jest.Mock).mockResolvedValue({ 
-      remove: mockRemove 
+    (Location.watchPositionAsync as jest.Mock).mockResolvedValue({
+      remove: mockRemove,
     });
-    
+
     const { result, unmount } = renderHook(() => useLocationTracking());
-    
+
     await act(async () => {
       await result.current.startTracking();
     });
-    
+
     unmount();
-    
+
     expect(mockRemove).toHaveBeenCalled();
   });
 });
