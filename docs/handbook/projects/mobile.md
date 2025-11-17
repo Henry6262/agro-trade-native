@@ -149,6 +149,17 @@ Detailed guides archived in:
   - Hook state tracks requests, bids, transporter performance metrics, bid form selections, and map drawer visibility.
   - No Zustand store is needed yet; once filters/preferences must persist, add a feature-level store consistent with the rulebook.
 
+### Offers Feature
+- **Location**: `front-end/src/pages/Dashboard/sections/Transporter/features/Offers/`
+- **Purpose**: List incoming transport offers and allow transporters to view routes or place bids while keeping API calls inside `service.ts`.
+- **Data Flow**:
+  1. `transporterOffersService` (`service.ts`) fetches available requests and the transporter’s existing bids.
+  2. `useTransporterOffers` manages loading/refresh state, derives the summary, and exposes `submitBid`, `refresh`, and `viewRoute`.
+  3. `OffersSummaryGrid` + `OffersList` render the UI; `MapDrawer` opens via the hook-controlled `selectedMapOffer`.
+- **State**:
+  - Hook state stores the raw request list, bids, `selectedMapOffer`, and which request is currently submitting.
+  - Components receive callbacks/props only—no direct calls to `transportService`.
+
 ### Fleet Feature
 - **Location**: `front-end/src/pages/Dashboard/sections/Transporter/features/Fleet/`
 - **Purpose**: Show truck/driver availability with the same separation-of-concerns model. API calls stay in `service.ts`, filtering logic in the hook, and presentation in `components/`.
@@ -159,6 +170,15 @@ Detailed guides archived in:
 - **State**:
   - Hook state tracks the fleet summary plus the filtered truck/driver lists. Components receive props only and never call services directly.
   - `FleetCreationFlow` remains as the modal entry point and is triggered via the hook’s `showFleetCreation` flag.
+
+### Transfers Feature
+- **Location**: `front-end/src/pages/Dashboard/sections/Transporter/features/Transfers/`
+- **Purpose**: Display in-progress/completed jobs, stage progress, and allow route previews via MapDrawer.
+- **Data Flow**:
+  1. `transporterTransfersService` (`service.ts`) fetches `getMyJobs` + performance (future expansion).
+  2. `useTransporterTransfers` maps jobs into presentation-friendly objects (`types.ts`) using helpers in `utils/index.ts`.
+  3. `TransfersStatsGrid`, `TransfersList`, and `TransferJobCard` render stats and cards; route buttons simply call the hook’s `openMap`, which drives the shared MapDrawer.
+- **State**: Hook state manages job summaries, derived views, refresh state, and the currently-selected map offer; components remain stateless.
 
 ## Inspector Dashboard
 
@@ -172,6 +192,47 @@ Detailed guides archived in:
 - **State**:
   - Hook state keeps the job snapshot, the inspector’s current location, and whether the verification form is visible.
   - Verification form keeps its own local field state; submission pushes structured data through the hook which forwards it to the service.
+
+### Available Jobs Feature
+- **Location**: `front-end/src/pages/Dashboard/sections/Inspector/features/AvailableJobs/`
+- **Purpose**: List nearby verification assignments, allow filtering/sorting, and render list/map views using the shared JobList/JobMap components while keeping data fetching in `service.ts`.
+- **Data Flow**:
+  1. `inspectorAvailableJobsService` (`service.ts`) fetches inspector missions (fallbacks to mock data when unauthenticated) and maps them into the `VerificationJob` shape expected by the shared components.
+  2. `useInspectorAvailableJobs` (`hooks/useInspectorAvailableJobs.ts`) manages loading/refresh state plus view toggles (`viewMode`, `priorityFilter`, `sortBy`) and derives the list passed to the UI.
+  3. `index.tsx` renders the control bar + list/map views, delegating user actions to the hook.
+- **State**:
+  - Hook owns filtering/sorting state and the derived job list; components remain presentation-only and reuse `JobListView`/`JobMapView` from the shared inspector components folder.
+
+## Buyer Dashboard
+
+### Orders Feature
+- **Location**: `front-end/src/pages/Dashboard/sections/Buyer/features/Orders/`
+- **Purpose**: Show buyer order performance (stats, in-flight trade operations, incoming offers) while keeping `buyerService` calls in `service.ts` and UI in small components.
+- **Data Flow**:
+  1. `buyerOrdersService` wraps `buyerService.getMyTradeOperations()` and `getMyStatistics()`.
+  2. `useBuyerOrders` (`hooks/useBuyerOrders.ts`) maps operations into simplified `BuyerOrder` models (`types.ts` via `utils.ts`), manages loading/refresh/expanded-card state, and exposes mock incoming offers until backend endpoints exist.
+  3. `components/OrdersStatsGrid`, `ActiveOrdersList`, `IncomingOffersList`, and `OrderStageIndicator` render the cards using shared primitives.
+- **State**:
+  - Hook state keeps the fetched orders, stats, incoming offers, `expandedOrderId`, and loading/refresh flags.
+  - Components receive data + callbacks and never call services directly.
+
+### Requests Feature
+- **Location**: `front-end/src/pages/Dashboard/sections/Buyer/features/Requests/`
+- **Purpose**: Manage open purchase requests and associated offers using the same structured approach as Orders.
+- **Data Flow**:
+  1. `buyerRequestsService` (`service.ts`) wraps `/buyer/listings`.
+  2. `useBuyerRequests` (`hooks/useBuyerRequests.ts`) normalizes listings (`utils.ts`), handles loading/error/refresh state, and manages the request creation + offers drawer toggles.
+  3. `components/RequestsList.tsx` plus shared drawers (`BuyerRequestCreationFlow`, `UnifiedOffersDrawer`) render the UI.
+- **State**: Hook state owns the request list, creation/offers modal flags, and the selected request’s raw data so the drawer can show detailed offers.
+
+### Request Creation Flow
+- **Location**: `front-end/src/pages/Dashboard/sections/Buyer/features/RequestCreation/`
+- **Purpose**: Wizard for crafting new buyer listings. Logic now lives in `hooks/useBuyerRequestCreation.ts` (reduced below 200 lines) backed by `service.ts`, `state.ts`, and `utils.ts`.
+- **Data Flow**:
+  1. `buyerRequestCreationService.submitRequest` posts the payload to `/buyer/listings`.
+  2. `state.ts` defines the reducer/initial state; the hook uses `useReducer` for navigation + data updates while syncing with the onboarding store for compatibility.
+  3. `resolveProductImage` in `utils.ts` centralizes image lookup.
+- **State**: Reducer tracks current step, captured data, loading/error flags. Hook exposes actions for navigation, data updates, and submission plus helpers (`isStepCompleted`, `canProceedToNext`).
 
 ---
 

@@ -10,6 +10,7 @@
 
 ## Available Rule Sets
 - `rules/frontend/` – React Native mobile application (Expo) rules.
-- _More stacks coming soon (backend, admin dashboard)._
+- `rules/backend/` – NestJS + Prisma backend service rules.
+- _More stacks coming soon (admin dashboard)._
 
 Always keep these documents in sync with architectural decisions (handbook, blueprints, status tracker).

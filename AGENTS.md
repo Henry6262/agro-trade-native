@@ -16,7 +16,7 @@ This file is the mandatory entry point for any fresh session. Follow it sequenti
      - Admin dashboard → `docs/handbook/projects/admin-dashboard.md`  
      - Mobile app → `docs/handbook/projects/mobile.md`
 3. **Review the runbooks/standards** – `docs/runbooks/session-start.md`, `docs/runbooks/plan-mode.md`, `docs/standards/ai-collaboration.md`.
-4. **Load coding rules** – open `rules/README.md`, then the stack-specific folder you’ll touch (e.g., `rules/frontend/` for the mobile app) and read every linked rule file (`structure.md`, `components.md`, `logic-and-data.md`, `design-system.md`, `state-and-store.md`, `docs.md`) before planning or coding.
+4. **Load coding rules** – open `rules/README.md`, then the stack-specific folder you’ll touch (e.g., `rules/frontend/` for the mobile app or `rules/backend/` for the Nest API) and read every linked rule file (`structure.md`, `components.md`, `logic-and-data.md`, `design-system.md`, `state-and-store.md`, `docs.md`) before planning or coding.
 5. **Check coordination docs** – `docs/coordination/automated-workflow-initiative.md` for initiative status and `docs/coordination/implementation-status.md` for story progress (update them as you work).
 6. **Lint early and often** – after each batch of changes in any app, run the relevant lint command (`npm run lint` in the touched package) and capture/fix failures so issues don’t pile up.
 

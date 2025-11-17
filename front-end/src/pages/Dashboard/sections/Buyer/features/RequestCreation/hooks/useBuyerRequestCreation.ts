@@ -1,10 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useReducer, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { apiClient } from '../../../../../../../services/api';
 import { useProductStore } from '../../../../../../../stores/product.store';
 import { useOnboardingStore } from '../../../../../../../stores/onboarding.store';
 import type {
-  BuyerRequestCreationState,
   BuyerRequestCreationStep,
   ProductData,
   BuyerSpecifications,
@@ -12,98 +10,39 @@ import type {
   LocationData,
   CreateBuyerRequestDto,
 } from '../types';
-
-const initialState: BuyerRequestCreationState = {
-  currentStep: 'product-selection',
-  data: {
-    productData: null,
-    buyerSpecifications: null,
-    productSpecifications: null,
-    location: null,
-  },
-  isLoading: false,
-  error: null,
-};
+import { buyerRequestCreationReducer, initialState, isStepComplete } from '../state';
+import { buyerRequestCreationService } from '../service';
+import { resolveProductImage } from '../utils';
 
 export const useBuyerRequestCreation = () => {
-  const [state, setState] = useState<BuyerRequestCreationState>(initialState);
-  const productMetadata = useProductStore((state) => state.products) || [];
-  const fetchProductMetadata = useProductStore((state) => state.fetchAllData);
+  const [state, dispatch] = useReducer(buyerRequestCreationReducer, initialState);
+  const productMetadata = useProductStore((store) => store.products) || [];
+  const fetchProductMetadata = useProductStore((store) => store.fetchAllData);
   const onboardingStore = useOnboardingStore();
 
-  // Ensure product metadata is loaded
   const ensureMetadataLoaded = useCallback(async () => {
-    if (productMetadata.length === 0) {
+    if (!productMetadata.length) {
       try {
         await fetchProductMetadata();
-      } catch (error) {
-        console.error('Error fetching product metadata:', error);
+      } catch (err) {
+        console.error('Error fetching product metadata', err);
       }
     }
   }, [fetchProductMetadata, productMetadata.length]);
 
-  // Step navigation
   const goToStep = useCallback((step: BuyerRequestCreationStep) => {
-    setState((prev) => ({
-      ...prev,
-      currentStep: step,
-      error: null,
-    }));
+    dispatch({ type: 'SET_STEP', step });
   }, []);
-
   const goToNextStep = useCallback(() => {
-    setState((prev) => {
-      const stepOrder: BuyerRequestCreationStep[] = [
-        'product-selection',
-        'quantity-price',
-        'product-specifications',
-        'location-confirmation',
-        'submit',
-      ];
-      const currentIndex = stepOrder.indexOf(prev.currentStep);
-      const nextStep = stepOrder[currentIndex + 1];
-
-      return {
-        ...prev,
-        currentStep: nextStep || prev.currentStep,
-        error: null,
-      };
-    });
+    dispatch({ type: 'NEXT_STEP' });
   }, []);
-
   const goToPreviousStep = useCallback(() => {
-    setState((prev) => {
-      const stepOrder: BuyerRequestCreationStep[] = [
-        'product-selection',
-        'quantity-price',
-        'product-specifications',
-        'location-confirmation',
-        'submit',
-      ];
-      const currentIndex = stepOrder.indexOf(prev.currentStep);
-      const previousStep = stepOrder[currentIndex - 1];
-
-      return {
-        ...prev,
-        currentStep: previousStep || prev.currentStep,
-        error: null,
-      };
-    });
+    dispatch({ type: 'PREVIOUS_STEP' });
   }, []);
 
-  // Data updates
   const updateProductData = useCallback(
     (productData: ProductData) => {
-      setState((prev) => ({
-        ...prev,
-        data: {
-          ...prev.data,
-          productData,
-        },
-        error: null,
-      }));
-
-      // Update onboarding store for compatibility
+      dispatch({ type: 'SET_PRODUCT_DATA', payload: productData });
       onboardingStore.setSelectedProducts([productData.id]);
       onboardingStore.setSelectedProductsMetadata([productData]);
     },
@@ -112,16 +51,7 @@ export const useBuyerRequestCreation = () => {
 
   const updateBuyerSpecifications = useCallback(
     (specifications: BuyerSpecifications) => {
-      setState((prev) => ({
-        ...prev,
-        data: {
-          ...prev.data,
-          buyerSpecifications: specifications,
-        },
-        error: null,
-      }));
-
-      // Update onboarding store for compatibility
+      dispatch({ type: 'SET_BUYER_SPECS', payload: specifications });
       if (specifications.productId) {
         onboardingStore.updateBuyerSpecification(specifications.productId, specifications);
       }
@@ -129,66 +59,37 @@ export const useBuyerRequestCreation = () => {
     [onboardingStore]
   );
 
-  const updateProductSpecifications = useCallback((specifications: ProductSpecifications) => {
-    setState((prev) => ({
-      ...prev,
-      data: {
-        ...prev.data,
-        productSpecifications: specifications,
-      },
-      error: null,
-    }));
+  const updateProductSpecifications = useCallback((specs: ProductSpecifications) => {
+    dispatch({ type: 'SET_PRODUCT_SPECS', payload: specs });
   }, []);
 
   const updateLocation = useCallback((location: LocationData) => {
-    setState((prev) => ({
-      ...prev,
-      data: {
-        ...prev.data,
-        location,
-      },
-      error: null,
-    }));
+    dispatch({ type: 'SET_LOCATION', payload: location });
   }, []);
 
-  // Error handling
-  const setError = useCallback((error: string) => {
-    setState((prev) => ({
-      ...prev,
-      error,
-      isLoading: false,
-    }));
+  const setError = useCallback((message: string) => {
+    dispatch({ type: 'SET_ERROR', message });
+    dispatch({ type: 'SET_LOADING', value: false });
   }, []);
 
   const clearError = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      error: null,
-    }));
+    dispatch({ type: 'SET_ERROR', message: null });
   }, []);
 
-  // Loading state
-  const setLoading = useCallback((isLoading: boolean) => {
-    setState((prev) => ({
-      ...prev,
-      isLoading,
-    }));
+  const setLoading = useCallback((value: boolean) => {
+    dispatch({ type: 'SET_LOADING', value });
   }, []);
 
-  // Reset flow
   const resetFlow = useCallback(() => {
-    setState(initialState);
-    // Reset onboarding store data as well
+    dispatch({ type: 'RESET' });
     onboardingStore.setSelectedProducts([]);
     onboardingStore.setSelectedProductsMetadata([]);
-    // Clear buyer specifications
     Object.keys(onboardingStore.buyerSpecifications || {}).forEach((productId) => {
       onboardingStore.updateBuyerSpecification(productId, {});
     });
   }, [onboardingStore]);
 
-  // Validate data for submission
-  const validateData = useCallback((): boolean => {
+  const validateData = useCallback(() => {
     const { productData, buyerSpecifications, location } = state.data;
 
     if (!productData) {
@@ -206,12 +107,7 @@ export const useBuyerRequestCreation = () => {
       return false;
     }
 
-    if (!location) {
-      setError('Location information is required');
-      return false;
-    }
-
-    if (!location.address || !location.city || !location.country) {
+    if (!location || !location.address || !location.city || !location.country) {
       setError('Complete location information is required');
       return false;
     }
@@ -219,7 +115,6 @@ export const useBuyerRequestCreation = () => {
     return true;
   }, [state.data, setError]);
 
-  // Submit buyer request creation
   const submitBuyerRequest = useCallback(async (): Promise<boolean> => {
     if (!validateData()) {
       return false;
@@ -227,44 +122,34 @@ export const useBuyerRequestCreation = () => {
 
     const { productData, buyerSpecifications, productSpecifications, location } = state.data;
 
+    const payload: CreateBuyerRequestDto = {
+      productId: productData?.id ?? '',
+      quantity: buyerSpecifications?.quantity ?? 0,
+      unit: buyerSpecifications?.unit || 'ton',
+      maxPricePerUnit: buyerSpecifications?.maxPricePerUnit,
+      neededBy: buyerSpecifications?.neededBy,
+      specifications: productSpecifications || {},
+      deliveryAddress: {
+        address: location?.address ?? '',
+        city: location?.city ?? '',
+        region: location?.region || '',
+        country: location?.country ?? '',
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+      },
+      notes: buyerSpecifications?.notes,
+      status: 'active',
+    };
+
     try {
       setLoading(true);
       clearError();
-
-      // Prepare the data for backend
-      const createRequestDto: CreateBuyerRequestDto = {
-        productId: productData?.id ?? '',
-        quantity: buyerSpecifications?.quantity ?? 0,
-        unit: buyerSpecifications?.unit || 'ton',
-        maxPricePerUnit: buyerSpecifications?.maxPricePerUnit,
-        neededBy: buyerSpecifications?.neededBy,
-        specifications: productSpecifications || {},
-        deliveryAddress: {
-          address: location?.address ?? '',
-          city: location?.city ?? '',
-          region: location?.region || '',
-          country: location?.country ?? '',
-          latitude: location?.latitude,
-          longitude: location?.longitude,
-        },
-        notes: buyerSpecifications?.notes,
-        status: 'active',
-      };
-
-      // Send to backend
-      const response = await apiClient.post('/buyer/listings', createRequestDto);
-
-      if (response?.data?.success || response?.data) {
-        // Reset the flow
-        resetFlow();
-
-        Alert.alert('Success', 'Buyer request created successfully!');
-        return true;
-      } else {
-        throw new Error(response?.data?.message || 'Failed to create buyer request');
-      }
-    } catch (error: unknown) {
-      console.error('Error creating buyer request:', error);
+      await buyerRequestCreationService.submitRequest(payload);
+      resetFlow();
+      Alert.alert('Success', 'Buyer request created successfully!');
+      return true;
+    } catch (error) {
+      console.error('Error creating buyer request', error);
       const message =
         (error && typeof error === 'object' && 'response' in error
           ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
@@ -277,91 +162,36 @@ export const useBuyerRequestCreation = () => {
     } finally {
       setLoading(false);
     }
-  }, [validateData, state.data, setLoading, clearError, setError, resetFlow]);
+  }, [state.data, validateData, clearError, resetFlow, setError, setLoading]);
 
-  // Get product image from metadata
   const getProductImage = useCallback(
-    (productName: string, category: string): string => {
-      // Try to find product in metadata
-      const metaProduct = productMetadata?.find?.(
-        (p) => p.name === productName || p.displayName === productName || p.category === category
-      );
-
-      if (metaProduct?.image) {
-        return metaProduct.image;
-      }
-
-      // Fallback image based on category
-      const categoryImages: Record<string, string> = {
-        SOFT_WHEAT: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400',
-        HARD_WHEAT: 'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=400',
-        CORN: 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=400',
-        SOYBEANS: 'https://images.unsplash.com/photo-1639843906836-85fc9fa11584?w=400',
-        RICE: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400',
-      };
-
-      return (
-        categoryImages[category] || 'https://via.placeholder.com/400x400/10B981/FFFFFF?text=Product'
-      );
-    },
+    (productName: string, category: string) => resolveProductImage(productMetadata, productName, category),
     [productMetadata]
   );
 
-  // Check if step is completed
   const isStepCompleted = useCallback(
-    (step: BuyerRequestCreationStep): boolean => {
-      switch (step) {
-        case 'product-selection':
-          return !!state.data.productData;
-        case 'quantity-price':
-          return !!state.data.buyerSpecifications;
-        case 'product-specifications':
-          return !!state.data.productSpecifications;
-        case 'location-confirmation':
-          return !!state.data.location;
-        case 'submit':
-          return true; // Submit step doesn't need to be "completed"
-        default:
-          return false;
-      }
-    },
-    [state.data]
+    (step: BuyerRequestCreationStep) => isStepComplete(state, step),
+    [state]
   );
-
-  // Check if can proceed to next step
-  const canProceedToNext = useCallback((): boolean => {
-    return isStepCompleted(state.currentStep);
-  }, [state.currentStep, isStepCompleted]);
-
+  const canProceedToNext = useCallback(() => isStepComplete(state, state.currentStep), [state]);
   return {
-    // State
     currentStep: state.currentStep,
     data: state.data,
     isLoading: state.isLoading,
     error: state.error,
     productMetadata,
-
-    // Navigation
     goToStep,
     goToNextStep,
     goToPreviousStep,
-
-    // Data updates
     updateProductData,
     updateBuyerSpecifications,
     updateProductSpecifications,
     updateLocation,
-
-    // Error handling
     setError,
     clearError,
-
-    // Actions
     submitBuyerRequest,
     resetFlow,
     ensureMetadataLoaded,
-
-    // Utilities
     getProductImage,
     isStepCompleted,
     canProceedToNext,

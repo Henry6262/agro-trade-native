@@ -310,6 +310,7 @@ function checkCommand(args) {
     process.exitCode = 1;
   }
 
+  runBackendRuleCheck();
   runFrontendRuleCheck();
 }
 
@@ -581,6 +582,20 @@ function enforceDocDiscipline(files) {
   }
 
   return issues;
+}
+
+function runBackendRuleCheck() {
+  const scriptPath = path.join(REPO_ROOT, "scripts/check-backend-rules.mjs");
+  if (!fs.existsSync(scriptPath)) {
+    return;
+  }
+  try {
+    console.log("\nRunning backend rule checks...");
+    execSync(`node ${scriptPath}`, { stdio: "inherit" });
+  } catch (error) {
+    console.error("Backend rule checks failed.");
+    process.exitCode = 1;
+  }
 }
 
 function runFrontendRuleCheck() {

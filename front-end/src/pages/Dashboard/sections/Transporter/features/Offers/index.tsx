@@ -19,18 +19,18 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
     summary,
     selectedMapOffer,
     setSelectedMapOffer,
-    loading,
-    refreshing,
+    isLoading,
+    isRefreshing,
     submittingBid,
-    handleRefresh,
+    refresh,
     hasBidOnRequest,
-    handleSubmitBid,
-    handleViewRoute,
+    submitBid,
+    viewRoute,
   } = useTransporterOffers();
 
   return (
     <View className="flex-1 bg-black">
-      {loading ? (
+      {isLoading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#60A5FA" />
           <Text className="text-white mt-4">Loading transport requests...</Text>
@@ -44,13 +44,13 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
         >
           <View className="p-4 space-y-4">
             <TouchableOpacity
-              onPress={handleRefresh}
-              disabled={refreshing}
+              onPress={refresh}
+              disabled={isRefreshing}
               className="flex-row items-center justify-center bg-gray-800/50 border border-gray-700 rounded-lg p-3"
             >
-              <RefreshCw size={18} color={refreshing ? '#6B7280' : '#60A5FA'} />
-              <Text className={`ml-2 ${refreshing ? 'text-gray-500' : 'text-blue-400'}`}>
-                {refreshing ? 'Refreshing...' : 'Refresh Requests'}
+              <RefreshCw size={18} color={isRefreshing ? '#6B7280' : '#60A5FA'} />
+              <Text className={`ml-2 ${isRefreshing ? 'text-gray-500' : 'text-blue-400'}`}>
+                {isRefreshing ? 'Refreshing...' : 'Refresh Requests'}
               </Text>
             </TouchableOpacity>
             <OffersSummaryGrid summary={summary} />
@@ -58,18 +58,14 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
               requests={requests}
               hasBidOnRequest={hasBidOnRequest}
               submittingBid={submittingBid}
-              onSubmitBid={(id) => handleSubmitBid(id, 3500)}
-              onViewRoute={handleViewRoute}
+              onSubmitBid={(id) => submitBid(id, 3500)}
+              onViewRoute={viewRoute}
             />
           </View>
         </ScrollView>
       )}
 
-      <MapDrawer
-        visible={Boolean(selectedMapOffer)}
-        onClose={() => setSelectedMapOffer(null)}
-        offer={selectedMapOffer}
-      />
+      <MapDrawer isOpen={Boolean(selectedMapOffer)} offer={selectedMapOffer} onClose={() => setSelectedMapOffer(null)} />
     </View>
   );
 };

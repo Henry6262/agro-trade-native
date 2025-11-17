@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,10 +13,8 @@ import {
 } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { X, MapPin, Truck, Clock, Route, Package, Flag, Navigation } from 'lucide-react-native';
-import { MapOffer, Fleet, RouteData } from '../types';
-import { fetchAvailableFleet } from '../api/fleetApi';
-import { calculateMultipleRoutes } from '../api/routeApi';
-import { getOfferMapData } from '../api/offerApi';
+import { MapOffer } from '../types';
+import { useTransporterMapDrawer } from '../hooks';
 
 interface MapDrawerProps {
   isOpen: boolean;
@@ -31,11 +29,7 @@ const DRAWER_HEIGHT = SCREEN_HEIGHT * 0.9; // Increased from 0.75 to 0.9
  * Map drawer component with route visualization
  */
 export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) => {
-  console.log('MapDrawer rendered - isOpen:', isOpen, 'offer:', offer);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [fleet, setFleet] = useState<Fleet | null>(null);
-  const [routes, setRoutes] = useState<RouteData[]>([]);
+  const { isLoading, error, fleet, routes, loadMapData } = useTransporterMapDrawer();
   const translateY = useRef(new Animated.Value(DRAWER_HEIGHT)).current;
   
   const trucksRequired = offer ? Math.ceil(offer.quantity / 40) : 0;
@@ -69,11 +63,11 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
   useEffect(() => {
     if (isOpen && offer) {
       openDrawer();
-      loadMapData();
+      loadMapData(offer);
     } else {
       closeDrawer();
     }
-  }, [isOpen, offer]);
+  }, [isOpen, offer, loadMapData]);
   
   const openDrawer = () => {
     Animated.spring(translateY, {
@@ -92,47 +86,6 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
     }).start(() => {
       onClose();
     });
-  };
-  
-  const loadMapData = async () => {
-    if (!offer) return;
-    
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // Fetch offer map data
-      const offerData = await getOfferMapData(offer.id);
-      
-      // Fetch available fleet
-      const fleetData = await fetchAvailableFleet('transporter-001');
-      setFleet(fleetData);
-      
-      // Select trucks based on quantity needed
-      const availableTrucks = fleetData.trucks
-        .filter(truck => truck.status === 'available')
-        .slice(0, trucksRequired)
-        .map((truck, index) => ({
-          id: truck.id,
-          label: `T${index + 1}`,
-          location: truck.currentLocation,
-        }));
-      
-      if (availableTrucks.length > 0) {
-        // Calculate routes for selected trucks
-        const calculatedRoutes = await calculateMultipleRoutes(
-          availableTrucks,
-          offerData.pickup,
-          offerData.delivery
-        );
-        setRoutes(calculatedRoutes);
-      }
-    } catch (err) {
-      setError('Failed to load map data');
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
   };
   
   const calculateTotalDistance = () => {

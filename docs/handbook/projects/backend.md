@@ -10,6 +10,7 @@
 - Handles trade operations, negotiations, inspections, and transport bidding.
 - Tech stack: NestJS, Prisma ORM, PostgreSQL, Redis, Bull queues (where applicable).
 - External boundaries: Admin dashboard (REST), Mobile app (REST), Background jobs (Bull/cron).
+- **Rulebook**: Read `rules/backend/README.md` (and linked files) before planning backend work. `node scripts/atctl.mjs check --auto` now runs `scripts/check-backend-rules.mjs` to enforce module structure + Prisma presence.
 
 ---
 

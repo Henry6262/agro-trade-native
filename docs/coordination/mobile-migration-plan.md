@@ -40,6 +40,7 @@ hooks/, providers/, services/, screens/, utils/, types/
 ### Phase 0 – Prep (Done)
 - Define architecture rules (`docs/rules/mobile-architecture.md`).
 - Update handbook guide and blueprint (MOB-001).
+- Create backend rulebook + enforcement script (`rules/backend/*`, `scripts/check-backend-rules.mjs`) so backend work mirrors the mobile structure rules.
 
 ### Phase 1 – Scaffolding (To Do)
 1. **Create Base Directories**
@@ -81,6 +82,12 @@ hooks/, providers/, services/, screens/, utils/, types/
    - ✅ `pages/Dashboard/sections/Transporter/features/Jobs/` now conforms to the structure with dedicated `service.ts`, `hooks/useTransporterJobs.ts`, derived metrics in `utils/`, and presentation components (`JobCard`, `JobList`, `JobsSummaryGrid`, `RefreshButton`). Use this as the reference when migrating the remaining transporter/inspector modules.
    - ✅ `pages/Dashboard/sections/Transporter/features/Bidding/` refactored with `service.ts`, `types.ts`, `utils/index.ts`, hook-driven logic (`useTransporterBidding`), and presentation-only components (`SummaryGrid`, `RequestsList`, `RequestCard`, `VerificationBanner`). Bidding now reuses the shared Map Drawer and keeps API interactions in the hook/service layers.
    - ✅ `pages/Dashboard/sections/Transporter/features/Fleet/` now mirrors the rulebook with `types.ts`, `service.ts`, `hooks/useTransporterFleet.ts`, and presentation components (`FleetStatsGrid`, `FleetCreationCard`, `FleetTrucksSection`, `FleetDriversSection`). `FleetCreationFlow` is triggered via hook state rather than inline logic.
+   - ✅ `pages/Dashboard/sections/Transporter/features/Offers/` now uses `service.ts`, `hooks/useTransporterOffers.ts`, and updated components (`OffersSummaryGrid`, `OffersList`) so network calls and bid submissions are handled outside the UI; MapDrawer selection is controlled via hook state.
+   - ✅ `pages/Dashboard/sections/Transporter/features/Transfers/` refactored with `types.ts`, `service.ts`, `hooks/useTransporterTransfers.ts`, helper `utils/`, and presentation components (`TransfersStatsGrid`, `TransfersList`, `TransferJobCard`, `TransfersRefreshButton`). Legacy logic now lives entirely in hook/service layers.
+   - ✅ `pages/Dashboard/sections/Inspector/features/AvailableJobs/` now mirrors Active Job structure with `types.ts`, `service.ts`, `hooks/useInspectorAvailableJobs.ts`, and reuses shared `JobListView`/`JobMapView` components for presentation.
+   - ✅ `pages/Dashboard/sections/Buyer/features/Orders/` now follows the same structure (`types.ts`, `service.ts`, `hooks/useBuyerOrders.ts`, component folder) so buyer dashboards no longer fetch data inside components.
+   - ✅ `pages/Dashboard/sections/Buyer/features/Requests/` uses `service.ts`, `utils.ts`, `hooks/useBuyerRequests.ts`, and a `components/RequestsList.tsx` so listings + drawers are managed via hooks/services.
+   - ✅ `pages/Dashboard/sections/Buyer/features/RequestCreation/` now relies on a reducer-backed hook (<200 lines) with supporting `service.ts`, `state.ts`, and `utils.ts`.
    - ✅ `pages/Dashboard/sections/Inspector/features/ActiveJob/` now uses its own `service.ts`, `hooks/useInspectorActiveJob.ts`, and `components/` (`ActiveJobContent`, `VerificationForm`) so verification flows no longer fetch inside components. Available Jobs remains to be migrated next.
 
 ### Phase 3 – Cleanup & Enforcement
