@@ -1,22 +1,22 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { UserRole } from '@prisma/client';
+import { Injectable, Logger } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { UserRole } from "@prisma/client";
 
 export enum NotificationType {
-  INSPECTION_FAILED = 'INSPECTION_FAILED',
-  SELLER_REPLACEMENT_NEEDED = 'SELLER_REPLACEMENT_NEEDED',
-  TRADE_OPERATION_UPDATE = 'TRADE_OPERATION_UPDATE',
-  NEW_OFFER_RECEIVED = 'NEW_OFFER_RECEIVED',
-  TRANSPORT_BID_RECEIVED = 'TRANSPORT_BID_RECEIVED',
-  PAYMENT_RECEIVED = 'PAYMENT_RECEIVED',
-  DELIVERY_COMPLETED = 'DELIVERY_COMPLETED',
+  INSPECTION_FAILED = "INSPECTION_FAILED",
+  SELLER_REPLACEMENT_NEEDED = "SELLER_REPLACEMENT_NEEDED",
+  TRADE_OPERATION_UPDATE = "TRADE_OPERATION_UPDATE",
+  NEW_OFFER_RECEIVED = "NEW_OFFER_RECEIVED",
+  TRANSPORT_BID_RECEIVED = "TRANSPORT_BID_RECEIVED",
+  PAYMENT_RECEIVED = "PAYMENT_RECEIVED",
+  DELIVERY_COMPLETED = "DELIVERY_COMPLETED",
 }
 
 export enum NotificationPriority {
-  LOW = 'LOW',
-  MEDIUM = 'MEDIUM',
-  HIGH = 'HIGH',
-  URGENT = 'URGENT',
+  LOW = "LOW",
+  MEDIUM = "MEDIUM",
+  HIGH = "HIGH",
+  URGENT = "URGENT",
 }
 
 export interface NotificationPayload {
@@ -34,10 +34,8 @@ export interface NotificationPayload {
 @Injectable()
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
-  
-  constructor(
-    private readonly prisma: PrismaService,
-  ) {}
+
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * Send notification for inspection failure
@@ -53,8 +51,10 @@ export class NotificationService {
   }) {
     const notification: NotificationPayload = {
       type: NotificationType.INSPECTION_FAILED,
-      priority: data.criticalFailure ? NotificationPriority.URGENT : NotificationPriority.HIGH,
-      title: '⚠️ Quality Inspection Failed',
+      priority: data.criticalFailure
+        ? NotificationPriority.URGENT
+        : NotificationPriority.HIGH,
+      title: "⚠️ Quality Inspection Failed",
       message: `${data.sellerName} failed quality inspection with score ${data.qualityScore}%. ${data.quantityLost} tons need replacement.`,
       recipientRole: UserRole.ADMIN,
       tradeOperationId: data.tradeOperationId,
@@ -69,7 +69,7 @@ export class NotificationService {
     };
 
     await this.sendNotification(notification);
-    
+
     // Also notify about need for replacement
     if (data.quantityLost > 0) {
       await this.notifyReplacementNeeded({
@@ -91,7 +91,7 @@ export class NotificationService {
     const notification: NotificationPayload = {
       type: NotificationType.SELLER_REPLACEMENT_NEEDED,
       priority: NotificationPriority.URGENT,
-      title: '🔄 Replacement Seller Needed',
+      title: "🔄 Replacement Seller Needed",
       message: `${data.quantityNeeded} tons need replacement. Reason: ${data.reason}`,
       recipientRole: UserRole.ADMIN,
       tradeOperationId: data.tradeOperationId,
@@ -154,9 +154,8 @@ export class NotificationService {
       // - Send emails for urgent notifications
       // - Send SMS for critical failures
       // - Update dashboard notification bell/counter
-      
     } catch (error) {
-      this.logger.error('Failed to send notification:', error);
+      this.logger.error("Failed to send notification:", error);
     }
   }
 
@@ -169,24 +168,24 @@ export class NotificationService {
       // we'll store it in the TradeNote table as a workaround
       if (notification.tradeOperationId) {
         const notificationDetails = JSON.stringify({
-          type: 'notification',
+          type: "notification",
           notificationType: notification.type,
           priority: notification.priority,
           title: notification.title,
           actionUrl: notification.actionUrl,
           ...notification.metadata,
         });
-        
+
         await this.prisma.tradeNote.create({
           data: {
             tradeOperationId: notification.tradeOperationId,
             content: `[${notification.priority}] ${notification.title}: ${notification.message} | Details: ${notificationDetails}`,
-            authorId: 'system', // System-generated note
+            authorId: "system", // System-generated note
           },
         });
       }
     } catch (error) {
-      this.logger.error('Failed to store notification in database:', error);
+      this.logger.error("Failed to store notification in database:", error);
     }
   }
 
@@ -202,9 +201,9 @@ export class NotificationService {
     const { userId, role, tradeOperationId, limit = 20 } = params;
 
     const where: any = {
-      authorId: 'system',
+      authorId: "system",
       content: {
-        contains: '[notification]',
+        contains: "[notification]",
       },
     };
 
@@ -214,7 +213,7 @@ export class NotificationService {
 
     const notifications = await this.prisma.tradeNote.findMany({
       where,
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: limit,
       include: {
         tradeOperation: {
@@ -226,7 +225,7 @@ export class NotificationService {
       },
     });
 
-    return notifications.map(note => {
+    return notifications.map((note) => {
       // Try to extract notification details from content
       let notificationData: any = {};
       try {
@@ -237,13 +236,13 @@ export class NotificationService {
       } catch (e) {
         // Ignore parsing errors
       }
-      
+
       return {
         id: note.id,
-        type: notificationData.notificationType || 'TRADE_OPERATION_UPDATE',
-        priority: notificationData.priority || 'MEDIUM',
-        title: notificationData.title || 'Notification',
-        message: note.content.split(' | Details:')[0],
+        type: notificationData.notificationType || "TRADE_OPERATION_UPDATE",
+        priority: notificationData.priority || "MEDIUM",
+        title: notificationData.title || "Notification",
+        message: note.content.split(" | Details:")[0],
         actionUrl: notificationData.actionUrl,
         metadata: notificationData,
         createdAt: note.createdAt,

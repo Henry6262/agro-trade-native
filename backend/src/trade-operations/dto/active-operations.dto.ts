@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { TradePhase, TradeStatus, NegotiationStatus } from '@prisma/client';
+import { ApiProperty } from "@nestjs/swagger";
+import { TradePhase, TradeStatus, NegotiationStatus } from "@prisma/client";
 
 /**
  * Active Operations Hub DTOs
@@ -59,7 +59,7 @@ export class ActiveOperationSummaryDto {
   lastUpdated: Date;
 
   @ApiProperty({ required: false })
-  urgency?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  urgency?: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 
   @ApiProperty({ required: false })
   nextAction?: string;
@@ -234,7 +234,15 @@ export class PotentialSellersResponseDto {
 }
 
 export class OperationActionDto {
-  @ApiProperty({ enum: ['SEND_OFFERS', 'FOLLOW_UP', 'EXTEND_EXPIRY', 'FIND_REPLACEMENT', 'TRANSITION_PHASE'] })
+  @ApiProperty({
+    enum: [
+      "SEND_OFFERS",
+      "FOLLOW_UP",
+      "EXTEND_EXPIRY",
+      "FIND_REPLACEMENT",
+      "TRANSITION_PHASE",
+    ],
+  })
   action: string;
 
   @ApiProperty()
@@ -291,7 +299,7 @@ export class OperationMetricsDto {
     initial: number;
     current: number;
     projected: number;
-    trend: 'IMPROVING' | 'STABLE' | 'DECLINING';
+    trend: "IMPROVING" | "STABLE" | "DECLINING";
   };
 
   @ApiProperty()

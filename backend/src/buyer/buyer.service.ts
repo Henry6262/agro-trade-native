@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateBuyListingDto } from './dto/create-buy-listing.dto';
-import { RequestStatus, Prisma, TradeStatus } from '@prisma/client';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { CreateBuyListingDto } from "./dto/create-buy-listing.dto";
+import { RequestStatus, Prisma, TradeStatus } from "@prisma/client";
 
 @Injectable()
 export class BuyerService {
@@ -10,34 +14,34 @@ export class BuyerService {
   async createBuyListing(dto: CreateBuyListingDto, userId: string) {
     try {
       // WORKAROUND: Allow any authenticated user to create buyer listings
-      console.log('Creating buyer listing for user:', userId);
-      console.log('DTO received:', JSON.stringify(dto, null, 2));
-      
+      console.log("Creating buyer listing for user:", userId);
+      console.log("DTO received:", JSON.stringify(dto, null, 2));
+
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
         include: { company: true },
       });
 
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new UnauthorizedException("User not found");
       }
-      
+
       // Skip role check - allow any authenticated user to create buyer listings
-      console.log('User role:', user.role, '- allowing buyer listing creation');
+      console.log("User role:", user.role, "- allowing buyer listing creation");
 
       // Create or find delivery address
       let deliveryAddressId = null;
       if (dto.deliveryLocation) {
         const address = await this.prisma.address.create({
           data: {
-            street: dto.deliveryLocation.address || '',
+            street: dto.deliveryLocation.address || "",
             // city is a relation field in Prisma, not a string
             // For now, skip city relation
             // Note: 'state' field doesn't exist in Address model
-            country: dto.deliveryLocation.country || '',
+            country: dto.deliveryLocation.country || "",
             latitude: dto.deliveryLocation.latitude,
             longitude: dto.deliveryLocation.longitude,
-            addressType: 'DELIVERY',
+            addressType: "DELIVERY",
             userId: userId,
           },
         });
@@ -51,7 +55,9 @@ export class BuyerService {
           buyerId: userId,
           quantity: new Prisma.Decimal(dto.quantity),
           unit: dto.unit,
-          maxPricePerUnit: dto.maxPricePerUnit ? new Prisma.Decimal(dto.maxPricePerUnit) : null,
+          maxPricePerUnit: dto.maxPricePerUnit
+            ? new Prisma.Decimal(dto.maxPricePerUnit)
+            : null,
           neededBy: dto.neededBy ? new Date(dto.neededBy) : null,
           deliveryAddressId,
           status: dto.status || RequestStatus.ACTIVE,
@@ -68,81 +74,97 @@ export class BuyerService {
           },
           deliveryAddress: true,
           specifications: {
-          include: {
-            specificationType: true,
+            include: {
+              specificationType: true,
+            },
           },
-        },
         },
       });
 
       // Add specifications if provided
       if (dto.specifications && Object.keys(dto.specifications).length > 0) {
-        console.log('Processing specifications:', dto.specifications);
-        
+        console.log("Processing specifications:", dto.specifications);
+
         // Fields that are NOT specifications (they're core BuyListing fields)
-        const coreFields = ['productId', 'quantity', 'unit', 'pricePerKilo', 
-                           'maxPrice', 'deliveryDeadline', 'notes', 'neededBy'];
-        
+        const coreFields = [
+          "productId",
+          "quantity",
+          "unit",
+          "pricePerKilo",
+          "maxPrice",
+          "deliveryDeadline",
+          "notes",
+          "neededBy",
+        ];
+
         // First, get or create specification types for each spec
         const specEntries = [];
-        
+
         for (const [key, value] of Object.entries(dto.specifications)) {
           // Skip core fields and empty values
-          if (coreFields.includes(key) || value === null || value === undefined || value === '') continue;
-          
+          if (
+            coreFields.includes(key) ||
+            value === null ||
+            value === undefined ||
+            value === ""
+          )
+            continue;
+
           // Skip if the value looks like an ID (cuid pattern)
-          if (typeof value === 'string' && value.match(/^c[a-z0-9]{24,}$/)) {
+          if (typeof value === "string" && value.match(/^c[a-z0-9]{24,}$/)) {
             console.log(`Skipping ${key} with ID-like value: ${value}`);
             continue;
           }
-          
+
           // Try to find existing specification type or create a generic one
           let specType = await this.prisma.specificationType.findFirst({
-            where: { 
-              OR: [
-                { name: key },
-                { code: key.toUpperCase() }
-              ]
-            }
+            where: {
+              OR: [{ name: key }, { code: key.toUpperCase() }],
+            },
           });
-          
+
           // If not found, create a new specification type
           if (!specType) {
             specType = await this.prisma.specificationType.create({
               data: {
-                name: key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim(),
-                code: key.toUpperCase().replace(/\s+/g, '_'),
-                dataType: typeof value === 'number' ? 'NUMBER' : 'TEXT',
-                unit: typeof value === 'number' ? 'UNIT' : null,
-              }
+                name:
+                  key.charAt(0).toUpperCase() +
+                  key
+                    .slice(1)
+                    .replace(/([A-Z])/g, " $1")
+                    .trim(),
+                code: key.toUpperCase().replace(/\s+/g, "_"),
+                dataType: typeof value === "number" ? "NUMBER" : "TEXT",
+                unit: typeof value === "number" ? "UNIT" : null,
+              },
             });
           }
-          
+
           // Prepare the specification entry (no listingType field in schema)
           const specEntry: any = {
             buyListingId: buyListing.id,
             specTypeId: specType.id,
           };
-          
+
           // Set value based on data type
-          if (typeof value === 'number') {
+          if (typeof value === "number") {
             specEntry.valueNumber = value; // Float type, not Decimal
           } else {
             specEntry.valueText = String(value);
           }
-          
+
           specEntries.push(specEntry);
         }
 
         // Create all specifications
         if (specEntries.length > 0) {
-          console.log('Creating specification entries:', specEntries);
+          console.log("Creating specification entries:", specEntries);
           await this.prisma.listingSpec.createMany({
             data: specEntries,
           });
-          console.log('Specifications created successfully');
+          console.log("Specifications created successfully");
         } else {
-          console.log('No specification entries to create');
+          console.log("No specification entries to create");
         }
 
         // Fetch the listing again with specifications
@@ -162,7 +184,7 @@ export class BuyerService {
             specifications: {
               include: {
                 specificationType: true,
-              }
+              },
             },
           },
         });
@@ -170,7 +192,7 @@ export class BuyerService {
 
       return buyListing;
     } catch (error) {
-      console.error('Error creating buy listing:', error);
+      console.error("Error creating buy listing:", error);
       throw error;
     }
   }
@@ -245,7 +267,7 @@ export class BuyerService {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     // Get buy listing IDs that have active trade operations
@@ -262,10 +284,12 @@ export class BuyerService {
       return buyListings;
     }
 
-    const usedBuyListingIds = new Set(activeTradeOps.map(op => op.buyListingId).filter(Boolean));
+    const usedBuyListingIds = new Set(
+      activeTradeOps.map((op) => op.buyListingId).filter(Boolean),
+    );
 
     // Filter out buy listings that already have active trade operations
-    return buyListings.filter(listing => !usedBuyListingIds.has(listing.id));
+    return buyListings.filter((listing) => !usedBuyListingIds.has(listing.id));
   }
 
   async getBuyerListings(userId: string) {
@@ -277,7 +301,7 @@ export class BuyerService {
         specifications: {
           include: {
             specificationType: true,
-          }
+          },
         },
         offers: {
           include: {
@@ -296,7 +320,7 @@ export class BuyerService {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -339,12 +363,12 @@ export class BuyerService {
     });
 
     if (!listing) {
-      throw new NotFoundException('Buy listing not found');
+      throw new NotFoundException("Buy listing not found");
     }
 
     // Check if the user owns this listing
     if (listing.buyerId !== userId) {
-      throw new UnauthorizedException('You do not have access to this listing');
+      throw new UnauthorizedException("You do not have access to this listing");
     }
 
     return listing;
@@ -357,7 +381,7 @@ export class BuyerService {
       select: { id: true },
     });
 
-    const listingIds = buyListings.map(l => l.id);
+    const listingIds = buyListings.map((l) => l.id);
 
     return this.prisma.offer.findMany({
       where: {
@@ -382,7 +406,7 @@ export class BuyerService {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -393,12 +417,12 @@ export class BuyerService {
       select: { id: true },
     });
 
-    const listingIds = buyListings.map(l => l.id);
+    const listingIds = buyListings.map((l) => l.id);
 
     return this.prisma.offer.findMany({
       where: {
         buyListingId: { in: listingIds },
-        status: 'ACCEPTED',
+        status: "ACCEPTED",
       },
       include: {
         saleListing: {
@@ -420,31 +444,32 @@ export class BuyerService {
           },
         },
       },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { updatedAt: "desc" },
     });
   }
 
   async getBuyerStats(userId: string) {
-    const [totalListings, activeListings, totalOffers, acceptedOffers] = await Promise.all([
-      this.prisma.buyListing.count({ where: { buyerId: userId } }),
-      this.prisma.buyListing.count({ 
-        where: { 
-          buyerId: userId,
-          status: RequestStatus.ACTIVE,
-        },
-      }),
-      this.prisma.offer.count({
-        where: {
-          buyListing: { buyerId: userId },
-        },
-      }),
-      this.prisma.offer.count({
-        where: {
-          buyListing: { buyerId: userId },
-          status: 'ACCEPTED',
-        },
-      }),
-    ]);
+    const [totalListings, activeListings, totalOffers, acceptedOffers] =
+      await Promise.all([
+        this.prisma.buyListing.count({ where: { buyerId: userId } }),
+        this.prisma.buyListing.count({
+          where: {
+            buyerId: userId,
+            status: RequestStatus.ACTIVE,
+          },
+        }),
+        this.prisma.offer.count({
+          where: {
+            buyListing: { buyerId: userId },
+          },
+        }),
+        this.prisma.offer.count({
+          where: {
+            buyListing: { buyerId: userId },
+            status: "ACCEPTED",
+          },
+        }),
+      ]);
 
     return {
       totalListings,
@@ -461,11 +486,11 @@ export class BuyerService {
     });
 
     if (!listing) {
-      throw new NotFoundException('Buy listing not found');
+      throw new NotFoundException("Buy listing not found");
     }
 
     if (listing.buyerId !== userId) {
-      throw new UnauthorizedException('You do not have access to this listing');
+      throw new UnauthorizedException("You do not have access to this listing");
     }
 
     return this.prisma.buyListing.update({
@@ -483,23 +508,27 @@ export class BuyerService {
     });
   }
 
-  async updateBuyListing(id: string, dto: Partial<CreateBuyListingDto>, userId: string) {
+  async updateBuyListing(
+    id: string,
+    dto: Partial<CreateBuyListingDto>,
+    userId: string,
+  ) {
     // WORKAROUND: Allow any authenticated user to update their buyer listings
     const listing = await this.prisma.buyListing.findUnique({
       where: { id },
     });
 
     if (!listing) {
-      throw new NotFoundException('Buy listing not found');
+      throw new NotFoundException("Buy listing not found");
     }
 
     if (listing.buyerId !== userId) {
-      throw new UnauthorizedException('You do not have access to this listing');
+      throw new UnauthorizedException("You do not have access to this listing");
     }
 
     // Build update data
     const updateData: any = {};
-    
+
     if (dto.quantity !== undefined) {
       updateData.quantity = new Prisma.Decimal(dto.quantity);
     }
@@ -587,11 +616,11 @@ export class BuyerService {
     });
 
     if (!listing) {
-      throw new NotFoundException('Buy listing not found');
+      throw new NotFoundException("Buy listing not found");
     }
 
     if (listing.buyerId !== userId) {
-      throw new UnauthorizedException('You do not have access to this listing');
+      throw new UnauthorizedException("You do not have access to this listing");
     }
 
     // Delete related data first

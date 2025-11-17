@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { UserRole } from '@prisma/client';
+import { Injectable } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { UserRole } from "@prisma/client";
 
 @Injectable()
 export class MockAuthService {
@@ -11,16 +11,16 @@ export class MockAuthService {
    */
   generateMockToken(role: UserRole = UserRole.ADMIN): string {
     const payload = {
-      sub: 'test-user-123',
-      email: 'test@agrotrade.com',
+      sub: "test-user-123",
+      email: "test@agrotrade.com",
       role,
-      name: 'Test User',
+      name: "Test User",
       iat: Math.floor(Date.now() / 1000),
       // Note: exp field removed - let JwtService handle expiration
     };
 
     // Specify expiresIn option instead of including exp in payload
-    return this.jwtService.sign(payload, { expiresIn: '1h' });
+    return this.jwtService.sign(payload, { expiresIn: "1h" });
   }
 
   /**
@@ -40,9 +40,9 @@ export class MockAuthService {
    */
   getMockUser(role: UserRole = UserRole.ADMIN) {
     return {
-      id: 'test-user-123',
-      email: 'test@agrotrade.com',
-      name: 'Test User',
+      id: "test-user-123",
+      email: "test@agrotrade.com",
+      name: "Test User",
       role,
       isActive: true,
       isEmailVerified: true,

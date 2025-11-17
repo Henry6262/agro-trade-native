@@ -1,27 +1,31 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TradePhase, TradeStatus } from '@prisma/client';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { TradePhase, TradeStatus } from "@prisma/client";
 
 export class SellerInspectionSummaryDto {
-  @ApiProperty({ example: 'insp_123' })
+  @ApiProperty({ example: "insp_123" })
   id: string;
 
-  @ApiProperty({ example: 'PENDING' })
+  @ApiProperty({ example: "PENDING" })
   status: string;
 
-  @ApiProperty({ example: 'MEDIUM' })
+  @ApiProperty({ example: "MEDIUM" })
   priority: string;
 
-  @ApiPropertyOptional({ example: '2025-11-05T14:44:52.510Z' })
+  @ApiPropertyOptional({ example: "2025-11-05T14:44:52.510Z" })
   requestedDate?: Date;
 
-  @ApiPropertyOptional({ example: '2025-11-06T09:00:00.000Z' })
+  @ApiPropertyOptional({ example: "2025-11-06T09:00:00.000Z" })
   scheduledDate?: Date;
 
-  @ApiPropertyOptional({ example: '2025-11-06T15:30:00.000Z' })
+  @ApiPropertyOptional({ example: "2025-11-06T15:30:00.000Z" })
   completedDate?: Date;
 
   @ApiPropertyOptional({
-    example: { id: 'user_123', name: 'Ivan Petrov', email: 'inspector@agro.bg' },
+    example: {
+      id: "user_123",
+      name: "Ivan Petrov",
+      email: "inspector@agro.bg",
+    },
   })
   inspector?: {
     id: string;
@@ -31,16 +35,16 @@ export class SellerInspectionSummaryDto {
 }
 
 export class SellerSummaryDto {
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000" })
   id: string;
 
-  @ApiProperty({ example: 'seller_123' })
+  @ApiProperty({ example: "seller_123" })
   sellerId: string;
 
-  @ApiProperty({ example: 'listing_456' })
+  @ApiProperty({ example: "listing_456" })
   saleListingId: string;
 
-  @ApiProperty({ example: 'John Farm' })
+  @ApiProperty({ example: "John Farm" })
   name: string;
 
   @ApiProperty({ example: 50 })
@@ -52,7 +56,7 @@ export class SellerSummaryDto {
   @ApiPropertyOptional({ example: 48 })
   agreedQuantity?: number | null;
 
-  @ApiPropertyOptional({ example: 'TON' })
+  @ApiPropertyOptional({ example: "TON" })
   unit?: string;
 
   @ApiProperty({ example: 50 })
@@ -61,10 +65,10 @@ export class SellerSummaryDto {
   @ApiProperty({ example: 350 })
   price: number;
 
-  @ApiProperty({ example: 'ACCEPTED' })
+  @ApiProperty({ example: "ACCEPTED" })
   status: string;
 
-  @ApiPropertyOptional({ example: 'STANDARD' })
+  @ApiPropertyOptional({ example: "STANDARD" })
   quality?: string;
 
   @ApiPropertyOptional({ example: 120 })
@@ -75,10 +79,10 @@ export class SellerSummaryDto {
 }
 
 export class BuyerSummaryDto {
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000" })
   id: string;
 
-  @ApiProperty({ example: 'ABC Distributors' })
+  @ApiProperty({ example: "ABC Distributors" })
   name: string;
 
   @ApiProperty({ example: 100 })
@@ -87,7 +91,7 @@ export class BuyerSummaryDto {
   @ApiProperty({ example: 380 })
   maxPrice: number;
 
-  @ApiPropertyOptional({ example: 'Sofia, Bulgaria' })
+  @ApiPropertyOptional({ example: "Sofia, Bulgaria" })
   location?: string;
 }
 
@@ -251,10 +255,10 @@ export class TransportSummaryDto {
   @ApiProperty({ example: true })
   optimized: boolean;
 
-  @ApiPropertyOptional({ example: 'FLATBED' })
+  @ApiPropertyOptional({ example: "FLATBED" })
   vehicleType?: string;
 
-  @ApiPropertyOptional({ example: 155.50 })
+  @ApiPropertyOptional({ example: 155.5 })
   actualCost?: number;
 
   @ApiPropertyOptional({ type: () => TransportRequestDetailsDto })
@@ -262,13 +266,13 @@ export class TransportSummaryDto {
 }
 
 export class TradeOperationResponseDto {
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000" })
   id: string;
 
-  @ApiProperty({ enum: TradePhase, example: 'NEGOTIATION' })
+  @ApiProperty({ enum: TradePhase, example: "NEGOTIATION" })
   phase: TradePhase;
 
-  @ApiProperty({ enum: TradeStatus, example: 'ACTIVE' })
+  @ApiProperty({ enum: TradeStatus, example: "ACTIVE" })
   status: TradeStatus;
 
   @ApiProperty({ type: BuyerSummaryDto })
@@ -283,19 +287,19 @@ export class TradeOperationResponseDto {
   @ApiProperty({ type: TransportSummaryDto })
   transport: TransportSummaryDto;
 
-  @ApiProperty({ example: '2024-01-15T10:30:00Z' })
+  @ApiProperty({ example: "2024-01-15T10:30:00Z" })
   createdAt: Date;
 
-  @ApiProperty({ example: '2024-01-15T14:45:00Z' })
+  @ApiProperty({ example: "2024-01-15T14:45:00Z" })
   updatedAt: Date;
 
-  @ApiPropertyOptional({ example: '2024-01-20T12:00:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-20T12:00:00Z" })
   expectedDeliveryDate?: Date;
 
-  @ApiPropertyOptional({ example: '2024-01-18T16:30:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-18T16:30:00Z" })
   confirmedAt?: Date;
 
-  @ApiPropertyOptional({ example: '2024-01-20T14:30:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-20T14:30:00Z" })
   completedAt?: Date;
 }
 
@@ -328,17 +332,17 @@ export class TradeAnalyticsDto {
 
   @ApiProperty({
     example: {
-      'Below 5%': 5,
-      '5-7%': 35,
-      '7-10%': 45,
-      'Above 10%': 15,
+      "Below 5%": 5,
+      "5-7%": 35,
+      "7-10%": 45,
+      "Above 10%": 15,
     },
   })
   marginDistribution: Record<string, number>;
 
-  @ApiPropertyOptional({ example: '2024-01-01T00:00:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-01T00:00:00Z" })
   periodStart?: Date;
 
-  @ApiPropertyOptional({ example: '2024-12-31T23:59:59Z' })
+  @ApiPropertyOptional({ example: "2024-12-31T23:59:59Z" })
   periodEnd?: Date;
 }

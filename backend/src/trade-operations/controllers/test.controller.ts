@@ -1,19 +1,19 @@
-import { Controller, Get, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ProfitCalculationService } from '../services/profit-calculation.service';
+import { Controller, Get, HttpStatus } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { ProfitCalculationService } from "../services/profit-calculation.service";
 
-@ApiTags('Test Endpoints')
-@Controller('test')
+@ApiTags("Test Endpoints")
+@Controller("test")
 export class TestController {
   constructor(
     private readonly profitCalculationService: ProfitCalculationService,
   ) {}
 
-  @Get('profit-demo')
-  @ApiOperation({ summary: 'Demo profit calculation without authentication' })
+  @Get("profit-demo")
+  @ApiOperation({ summary: "Demo profit calculation without authentication" })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Profit calculation demo',
+    description: "Profit calculation demo",
   })
   async profitDemo() {
     // Demo calculation
@@ -26,7 +26,10 @@ export class TestController {
       transportCost: 1000, // €1000 total transport
     };
 
-    const totalQuantity = mockTrade.sellerPrices.reduce((sum, s) => sum + s.quantity, 0);
+    const totalQuantity = mockTrade.sellerPrices.reduce(
+      (sum, s) => sum + s.quantity,
+      0,
+    );
     const totalRevenue = mockTrade.buyerPrice * totalQuantity;
     const totalPurchaseCost = mockTrade.sellerPrices.reduce(
       (sum, s) => sum + s.price * s.quantity,
@@ -37,16 +40,16 @@ export class TestController {
     const profitMargin = (profit / totalRevenue) * 100;
 
     return {
-      message: 'Agro-Trade Profit Calculation Demo',
-      businessModel: 'Trading Intermediary (Buy & Resell)',
-      formula: 'PROFIT = Selling Price - (Purchase Price + Transport Costs)',
+      message: "Agro-Trade Profit Calculation Demo",
+      businessModel: "Trading Intermediary (Buy & Resell)",
+      formula: "PROFIT = Selling Price - (Purchase Price + Transport Costs)",
       example: mockTrade,
       calculation: {
         revenue: {
           sellingPrice: mockTrade.buyerPrice,
           quantity: totalQuantity,
           totalRevenue,
-          currency: 'EUR',
+          currency: "EUR",
         },
         costs: {
           purchases: {
@@ -63,7 +66,12 @@ export class TestController {
           netProfit: profit,
           profitMargin: Math.round(profitMargin * 100) / 100,
           meetsMinimumMargin: profitMargin >= 5,
-          viability: profitMargin >= 7 ? 'GOOD' : profitMargin >= 5 ? 'ACCEPTABLE' : 'UNVIABLE',
+          viability:
+            profitMargin >= 7
+              ? "GOOD"
+              : profitMargin >= 5
+                ? "ACCEPTABLE"
+                : "UNVIABLE",
         },
       },
       targets: {
@@ -72,32 +80,32 @@ export class TestController {
         optimalMargin: 10,
       },
       endpoints: {
-        tradeOperations: '/api/trade-operations',
-        profitCalculation: '/api/profit/:tradeOperationId/calculate',
-        transportOptimization: '/api/transport/optimize-route',
-        negotiations: '/api/negotiations/buyer-offer',
-        scenarios: '/api/scenarios/generate',
+        tradeOperations: "/api/trade-operations",
+        profitCalculation: "/api/profit/:tradeOperationId/calculate",
+        transportOptimization: "/api/transport/optimize-route",
+        negotiations: "/api/negotiations/buyer-offer",
+        scenarios: "/api/scenarios/generate",
       },
     };
   }
 
-  @Get('health')
-  @ApiOperation({ summary: 'Health check endpoint' })
+  @Get("health")
+  @ApiOperation({ summary: "Health check endpoint" })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Service is healthy',
+    description: "Service is healthy",
   })
   async health() {
     return {
-      status: 'healthy',
-      service: 'Agro-Trade Profit API',
+      status: "healthy",
+      service: "Agro-Trade Profit API",
       timestamp: new Date().toISOString(),
       features: [
-        'Trade Operations Management',
-        'Real-time Profit Calculations',
-        'Transport Cost Optimization',
-        'Price Negotiations',
-        'Scenario Analysis',
+        "Trade Operations Management",
+        "Real-time Profit Calculations",
+        "Transport Cost Optimization",
+        "Price Negotiations",
+        "Scenario Analysis",
       ],
     };
   }

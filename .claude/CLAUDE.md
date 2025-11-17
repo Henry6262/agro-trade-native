@@ -30,7 +30,7 @@ Agro-trade project workspace
 - Handle errors and edge cases proactively
 - Optimize code and fix issues as they're discovered
 - After each batch of edits, run the relevant `npm run lint` (frontend/backend) and address failures so lint debt never accumulates.
-- Before planning or coding, open `rules/README.md` plus the stack-specific folder (e.g., `rules/frontend/`) and review every linked rule file so work stays within the enforced architecture/design system.
+- Before planning or coding, open `rules/README.md` plus the stack-specific folder (e.g., `rules/frontend/` for mobile, `rules/backend/` for Nest) and review every linked rule file so work stays within the enforced architecture/design system.
 
 ## Proactive Agent Suggestions
 

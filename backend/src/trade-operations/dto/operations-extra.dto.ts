@@ -1,19 +1,19 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsNotEmpty, IsString, ArrayMinSize } from 'class-validator';
-import { ProductUnit, SellerStatus } from '@prisma/client';
-import { SellerInspectionSummaryDto } from './trade-operation-response.dto';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsArray, IsNotEmpty, IsString, ArrayMinSize } from "class-validator";
+import { ProductUnit, SellerStatus } from "@prisma/client";
+import { SellerInspectionSummaryDto } from "./trade-operation-response.dto";
 
 export class TradeSellerDto {
-  @ApiProperty({ example: 'ts_123' })
+  @ApiProperty({ example: "ts_123" })
   id: string;
 
-  @ApiProperty({ example: 'seller_123' })
+  @ApiProperty({ example: "seller_123" })
   sellerId: string;
 
-  @ApiPropertyOptional({ example: 'Acme Farms Ltd' })
+  @ApiPropertyOptional({ example: "Acme Farms Ltd" })
   name?: string;
 
-  @ApiProperty({ example: 'listing_456' })
+  @ApiProperty({ example: "listing_456" })
   saleListingId: string;
 
   @ApiProperty({ example: 40 })
@@ -39,7 +39,7 @@ export class TradeSellerDto {
 }
 
 export class AddSellersResponseDto {
-  @ApiProperty({ example: 'Sellers added successfully' })
+  @ApiProperty({ example: "Sellers added successfully" })
   message: string;
 
   @ApiProperty({ type: [TradeSellerDto] })
@@ -47,10 +47,13 @@ export class AddSellersResponseDto {
 }
 
 export class OptimizeTransportResponseDto {
-  @ApiProperty({ example: 'Transport route optimized successfully' })
+  @ApiProperty({ example: "Transport route optimized successfully" })
   message: string;
 
-  @ApiProperty({ description: 'Optimized route data', example: { sequence: [] } })
+  @ApiProperty({
+    description: "Optimized route data",
+    example: { sequence: [] },
+  })
   optimizedRoute: Record<string, any>;
 
   @ApiProperty({ example: 320.5 })
@@ -70,7 +73,9 @@ export class FinalizeTradeResponseDto {
   @ApiProperty({ example: 7.3 })
   profitMargin: number;
 
-  @ApiProperty({ example: 'Trade finalized successfully with 7.30% profit margin' })
+  @ApiProperty({
+    example: "Trade finalized successfully with 7.30% profit margin",
+  })
   message: string;
 }
 
@@ -78,38 +83,38 @@ export class TradeProfitResponseDto {
   @ApiProperty({ example: true })
   success: boolean;
 
-  @ApiProperty({ type: 'object' })
+  @ApiProperty({ type: "object" })
   data: Record<string, any>;
 }
 
 export class CalculateTransportRequestDto {
   @ApiProperty({
-    description: 'Array of seller IDs to calculate transport from',
-    example: ['seller_123', 'seller_456'],
-    type: [String]
+    description: "Array of seller IDs to calculate transport from",
+    example: ["seller_123", "seller_456"],
+    type: [String],
   })
   @IsArray()
-  @ArrayMinSize(1, { message: 'At least one seller ID is required' })
+  @ArrayMinSize(1, { message: "At least one seller ID is required" })
   @IsString({ each: true })
   sellerIds: string[];
 
   @ApiProperty({
-    description: 'Buyer address ID to calculate transport to',
-    example: 'addr_789'
+    description: "Buyer address ID to calculate transport to",
+    example: "addr_789",
   })
-  @IsNotEmpty({ message: 'Buyer address ID is required' })
+  @IsNotEmpty({ message: "Buyer address ID is required" })
   @IsString()
   buyerAddressId: string;
 }
 
 export class TransportCostResultDto {
-  @ApiProperty({ example: 'seller_123' })
+  @ApiProperty({ example: "seller_123" })
   sellerId: string;
 
-  @ApiProperty({ example: 145.3, description: 'Distance in kilometers' })
+  @ApiProperty({ example: 145.3, description: "Distance in kilometers" })
   distance: number;
 
-  @ApiProperty({ example: 21.8, description: 'Transport cost in EUR' })
+  @ApiProperty({ example: 21.8, description: "Transport cost in EUR" })
   transportCost: number;
 }
 
@@ -120,15 +125,19 @@ export class CalculateTransportResponseDto {
   @ApiProperty({ type: [TransportCostResultDto] })
   results: TransportCostResultDto[];
 
-  @ApiProperty({ example: 145.6, description: 'Total transport cost for all sellers' })
+  @ApiProperty({
+    example: 145.6,
+    description: "Total transport cost for all sellers",
+  })
   totalCost: number;
 
-  @ApiProperty({ example: 'EUR' })
+  @ApiProperty({ example: "EUR" })
   currency: string;
 
   @ApiPropertyOptional({
     type: [String],
-    description: 'Optional warnings when using fallback locations or missing data',
+    description:
+      "Optional warnings when using fallback locations or missing data",
   })
   warnings?: string[];
 }

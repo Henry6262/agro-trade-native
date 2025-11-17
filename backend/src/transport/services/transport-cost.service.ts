@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { TransportCostSettings, TruckType, Prisma } from '@prisma/client';
+import { Injectable, Logger } from "@nestjs/common";
+import { PrismaService } from "../../prisma/prisma.service";
+import { TransportCostSettings, TruckType, Prisma } from "@prisma/client";
 
 export interface Location {
   lat: number;
@@ -53,7 +53,7 @@ export interface TransportEstimation {
 
 export interface TransportOptions {
   vehicleType?: TruckType;
-  urgency?: 'NORMAL' | 'EXPRESS';
+  urgency?: "NORMAL" | "EXPRESS";
   includeAlternatives?: boolean;
 }
 
@@ -80,7 +80,11 @@ export class TransportCostService {
     options: TransportOptions = {},
   ): Promise<TransportEstimation> {
     // Check cache
-    const cacheKey = this.generateCacheKey(pickupPoints, deliveryPoint, options);
+    const cacheKey = this.generateCacheKey(
+      pickupPoints,
+      deliveryPoint,
+      options,
+    );
     const cached = this.getFromCache(cacheKey);
     if (cached) {
       return { ...cached, cached: true };
@@ -88,15 +92,21 @@ export class TransportCostService {
 
     // Get active transport settings
     const settings = await this.getActiveSettings();
-    
+
     // Calculate total distance (simplified - in production would use actual routing API)
-    const totalDistance = await this.calculateTotalDistance(pickupPoints, deliveryPoint);
-    
+    const totalDistance = await this.calculateTotalDistance(
+      pickupPoints,
+      deliveryPoint,
+    );
+
     // Calculate total quantity
-    const totalQuantity = pickupPoints.reduce((sum, point) => sum + point.quantity, 0);
-    
+    const totalQuantity = pickupPoints.reduce(
+      (sum, point) => sum + point.quantity,
+      0,
+    );
+
     // Simple flat-rate calculation (0.15 EUR per km unless overridden in settings)
-    const vehicleType = options.vehicleType || 'FLATBED';
+    const vehicleType = options.vehicleType || "FLATBED";
     const ratePerKm = Number(settings.baseRatePerKm) || 0.15;
     const distanceCost = totalDistance * ratePerKm;
     const totalCost = Math.round(distanceCost * 100) / 100;
@@ -104,7 +114,7 @@ export class TransportCostService {
     const estimation: TransportEstimation = {
       totalDistance,
       totalCost,
-      currency: 'EUR',
+      currency: "EUR",
       breakdown: {
         distanceCost,
         loadingCosts: 0,
@@ -138,21 +148,24 @@ export class TransportCostService {
   ): Promise<number> {
     // In production, this would use a real routing API or PostGIS
     // For now, use simplified calculation
-    
+
     let totalDistance = 0;
-    
+
     // Assume starting from a central warehouse at (42.6977, 23.3219) - Sofia
     const warehouse = { lat: 42.6977, lng: 23.3219 };
-    
+
     // Distance from warehouse to first pickup
     if (pickupPoints.length > 0) {
       totalDistance += this.haversineDistance(warehouse, pickupPoints[0]);
-      
+
       // Distance between pickups
       for (let i = 0; i < pickupPoints.length - 1; i++) {
-        totalDistance += this.haversineDistance(pickupPoints[i], pickupPoints[i + 1]);
+        totalDistance += this.haversineDistance(
+          pickupPoints[i],
+          pickupPoints[i + 1],
+        );
       }
-      
+
       // Distance from last pickup to delivery
       totalDistance += this.haversineDistance(
         pickupPoints[pickupPoints.length - 1],
@@ -175,7 +188,10 @@ export class TransportCostService {
     lat2: number,
     lng2: number,
   ): number {
-    return this.haversineDistance({ lat: lat1, lng: lng1 }, { lat: lat2, lng: lng2 });
+    return this.haversineDistance(
+      { lat: lat1, lng: lng1 },
+      { lat: lat2, lng: lng2 },
+    );
   }
 
   /**
@@ -184,7 +200,9 @@ export class TransportCostService {
   async calculateTransportCosts(
     sellerAddresses: Array<{ id: string; lat: number; lng: number }>,
     buyerAddress: { lat: number; lng: number },
-  ): Promise<Array<{ sellerId: string; distance: number; transportCost: number }>> {
+  ): Promise<
+    Array<{ sellerId: string; distance: number; transportCost: number }>
+  > {
     const results = [];
     const settings = await this.getActiveSettings();
     const costPerKm = Number(settings.baseRatePerKm) || 0.15;
@@ -225,9 +243,9 @@ export class TransportCostService {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRad(point1.lat)) *
-      Math.cos(this.toRad(point2.lat)) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
+        Math.cos(this.toRad(point2.lat)) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
@@ -245,12 +263,13 @@ export class TransportCostService {
     totalDistance: number,
   ): Array<PickupPoint & { distanceToNext: number }> {
     const sequence: Array<PickupPoint & { distanceToNext: number }> = [];
-    
+
     for (let i = 0; i < pickupPoints.length; i++) {
-      const distanceToNext = i < pickupPoints.length - 1
-        ? this.haversineDistance(pickupPoints[i], pickupPoints[i + 1])
-        : 0;
-      
+      const distanceToNext =
+        i < pickupPoints.length - 1
+          ? this.haversineDistance(pickupPoints[i], pickupPoints[i + 1])
+          : 0;
+
       sequence.push({
         ...pickupPoints[i],
         distanceToNext: Math.round(distanceToNext * 10) / 10,
@@ -266,13 +285,13 @@ export class TransportCostService {
   private async getActiveSettings(): Promise<TransportCostSettings> {
     const settings = await this.prisma.transportCostSettings.findFirst({
       where: { isActive: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     if (!settings) {
       // Return default settings if none found
       return {
-        id: 'default',
+        id: "default",
         baseRatePerKm: new Prisma.Decimal(0.15),
         flatbedMultiplier: 1.0,
         refrigeratedMultiplier: 1.3,
@@ -305,11 +324,11 @@ export class TransportCostService {
     options: TransportOptions,
   ): string {
     const pickups = pickupPoints
-      .map(p => `${p.lat},${p.lng},${p.quantity}`)
+      .map((p) => `${p.lat},${p.lng},${p.quantity}`)
       .sort()
-      .join('|');
+      .join("|");
     const delivery = `${deliveryPoint.lat},${deliveryPoint.lng}`;
-    const opts = `${options.vehicleType || 'FLATBED'}-${options.urgency || 'NORMAL'}`;
+    const opts = `${options.vehicleType || "FLATBED"}-${options.urgency || "NORMAL"}`;
     return `${pickups}-${delivery}-${opts}`;
   }
 
@@ -344,6 +363,6 @@ export class TransportCostService {
    */
   clearCache(): void {
     this.cache.clear();
-    this.logger.debug('Transport cost cache cleared');
+    this.logger.debug("Transport cost cache cleared");
   }
 }

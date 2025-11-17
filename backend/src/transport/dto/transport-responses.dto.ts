@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
   TransportRequestStatus,
   BidStatus,
@@ -7,13 +7,13 @@ import {
   TradePhase,
   TradeStatus,
   ProductUnit,
-} from '@prisma/client';
+} from "@prisma/client";
 
 export class TransportErrorDto {
-  @ApiProperty({ example: 'FORBIDDEN' })
+  @ApiProperty({ example: "FORBIDDEN" })
   code: string;
 
-  @ApiProperty({ example: 'Only transporters can view transport requests' })
+  @ApiProperty({ example: "Only transporters can view transport requests" })
   message: string;
 }
 
@@ -24,19 +24,19 @@ export class TransportPickupPointDto {
   @ApiProperty({ example: 23.3219 })
   lng: number;
 
-  @ApiPropertyOptional({ example: '123 Farm Lane, Sofia' })
+  @ApiPropertyOptional({ example: "123 Farm Lane, Sofia" })
   address?: string;
 
   @ApiPropertyOptional({ example: 80 })
   quantity?: number;
 
-  @ApiPropertyOptional({ example: 'seller_123' })
+  @ApiPropertyOptional({ example: "seller_123" })
   sellerId?: string;
 
-  @ApiPropertyOptional({ example: 'Fresh Farms Ltd' })
+  @ApiPropertyOptional({ example: "Fresh Farms Ltd" })
   sellerName?: string;
 
-  @ApiPropertyOptional({ example: 'Pickup complete' })
+  @ApiPropertyOptional({ example: "Pickup complete" })
   notes?: string;
 }
 
@@ -47,10 +47,10 @@ export class TransportDeliveryPointDto {
   @ApiProperty({ example: 27.9147 })
   lng: number;
 
-  @ApiPropertyOptional({ example: 'Warehouse 5, Varna' })
+  @ApiPropertyOptional({ example: "Warehouse 5, Varna" })
   address?: string;
 
-  @ApiPropertyOptional({ example: 'addr_456' })
+  @ApiPropertyOptional({ example: "addr_456" })
   addressId?: string;
 }
 
@@ -125,16 +125,19 @@ export class TransportCompanySummaryDto {
 }
 
 class TransportRequestSummaryBaseDto {
-  @ApiProperty({ example: 'req_123' })
+  @ApiProperty({ example: "req_123" })
   id: string;
 
-  @ApiProperty({ example: 'TR-ABC123' })
+  @ApiProperty({ example: "TR-ABC123" })
   requestNumber: string;
 
-  @ApiProperty({ enum: TransportRequestStatus, example: TransportRequestStatus.OPEN })
+  @ApiProperty({
+    enum: TransportRequestStatus,
+    example: TransportRequestStatus.OPEN,
+  })
   status: TransportRequestStatus;
 
-  @ApiProperty({ example: 'trade_123' })
+  @ApiProperty({ example: "trade_123" })
   tradeOperationId: string;
 
   @ApiProperty({ example: 120 })
@@ -152,19 +155,19 @@ class TransportRequestSummaryBaseDto {
   @ApiPropertyOptional({ example: 320 })
   estimatedDistance?: number;
 
-  @ApiPropertyOptional({ example: 'STANDARD' })
+  @ApiPropertyOptional({ example: "STANDARD" })
   urgencyLevel?: string;
 
-  @ApiProperty({ example: '2024-01-18T09:00:00Z' })
+  @ApiProperty({ example: "2024-01-18T09:00:00Z" })
   biddingDeadline: string;
 
   @ApiPropertyOptional({ example: 4500 })
   maxBudget?: number;
 
-  @ApiPropertyOptional({ example: '2024-01-15T10:00:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-15T10:00:00Z" })
   createdAt?: string;
 
-  @ApiPropertyOptional({ example: '2024-01-16T11:45:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-16T11:45:00Z" })
   updatedAt?: string;
 
   @ApiPropertyOptional({ example: 5 })
@@ -197,16 +200,16 @@ export class TransportBidTransporterSummaryDto {
 }
 
 export class TransportBidDto {
-  @ApiProperty({ example: 'bid_123' })
+  @ApiProperty({ example: "bid_123" })
   id: string;
 
-  @ApiProperty({ example: 'req_123' })
+  @ApiProperty({ example: "req_123" })
   transportRequestId: string;
 
-  @ApiProperty({ example: 'trade_123' })
+  @ApiProperty({ example: "trade_123" })
   tradeOperationId: string;
 
-  @ApiProperty({ example: 'transporter_456' })
+  @ApiProperty({ example: "transporter_456" })
   transporterId: string;
 
   @ApiProperty({ example: 3400 })
@@ -224,10 +227,10 @@ export class TransportBidDto {
   @ApiProperty({ enum: BidStatus, example: BidStatus.PENDING })
   status: BidStatus;
 
-  @ApiPropertyOptional({ example: '2024-01-19T12:00:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-19T12:00:00Z" })
   submittedAt?: string;
 
-  @ApiPropertyOptional({ example: '2024-01-20T12:00:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-20T12:00:00Z" })
   expiresAt?: string;
 
   @ApiPropertyOptional({ type: () => TransportBidTransporterSummaryDto })
@@ -244,47 +247,50 @@ export class TransportJobLocationDto {
   @ApiProperty({ example: 23.3 })
   lng: number;
 
-  @ApiPropertyOptional({ example: 'Highway A1 KM 25' })
+  @ApiPropertyOptional({ example: "Highway A1 KM 25" })
   address?: string;
 
-  @ApiPropertyOptional({ example: '2024-01-17T10:03:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-17T10:03:00Z" })
   timestamp?: string;
 }
 
 export class TransportPickupRecordDto {
-  @ApiPropertyOptional({ example: 'seller_123' })
+  @ApiPropertyOptional({ example: "seller_123" })
   sellerId?: string;
 
   @ApiPropertyOptional({ example: 60 })
   quantity?: number;
 
-  @ApiPropertyOptional({ example: 'Pickup completed with no issues' })
+  @ApiPropertyOptional({ example: "Pickup completed with no issues" })
   notes?: string;
 
-  @ApiPropertyOptional({ example: '2024-01-17T09:20:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-17T09:20:00Z" })
   completedAt?: string;
 }
 
 export class TransportJobDto {
-  @ApiProperty({ example: 'job_123' })
+  @ApiProperty({ example: "job_123" })
   id: string;
 
-  @ApiProperty({ example: 'TRJ-2024-001' })
+  @ApiProperty({ example: "TRJ-2024-001" })
   jobNumber: string;
 
-  @ApiProperty({ example: 'req_123' })
+  @ApiProperty({ example: "req_123" })
   transportRequestId: string;
 
-  @ApiProperty({ enum: TransportJobStatus, example: TransportJobStatus.IN_TRANSIT })
+  @ApiProperty({
+    enum: TransportJobStatus,
+    example: TransportJobStatus.IN_TRANSIT,
+  })
   status: TransportJobStatus;
 
-  @ApiPropertyOptional({ example: 'transporter_456' })
+  @ApiPropertyOptional({ example: "transporter_456" })
   transporterId?: string;
 
   @ApiPropertyOptional({ type: () => TransportJobLocationDto })
   currentLocation?: TransportJobLocationDto;
 
-  @ApiPropertyOptional({ example: '2024-01-21T08:00:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-21T08:00:00Z" })
   estimatedArrival?: string;
 
   @ApiPropertyOptional({ type: () => [TransportPickupRecordDto] })
@@ -293,16 +299,16 @@ export class TransportJobDto {
   @ApiPropertyOptional({ example: true })
   allPickupsComplete?: boolean;
 
-  @ApiPropertyOptional({ example: '2024-01-17T07:30:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-17T07:30:00Z" })
   startedAt?: string;
 
-  @ApiPropertyOptional({ example: '2024-01-18T18:00:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-18T18:00:00Z" })
   completedAt?: string;
 
-  @ApiPropertyOptional({ example: '2024-01-16T06:00:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-16T06:00:00Z" })
   createdAt?: string;
 
-  @ApiPropertyOptional({ example: '2024-01-17T12:30:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-17T12:30:00Z" })
   updatedAt?: string;
 
   @ApiPropertyOptional({ type: [String] })
@@ -311,7 +317,7 @@ export class TransportJobDto {
   @ApiPropertyOptional({ type: [String] })
   deliveryPhotos?: string[];
 
-  @ApiPropertyOptional({ example: 'https://files.example.com/pod.pdf' })
+  @ApiPropertyOptional({ example: "https://files.example.com/pod.pdf" })
   proofOfDelivery?: string;
 
   @ApiPropertyOptional()
@@ -330,7 +336,7 @@ export class TransportRequestDto extends TransportRequestSummaryBaseDto {
 }
 
 export class TransportBidComparisonRequestDto {
-  @ApiProperty({ example: 'req_123' })
+  @ApiProperty({ example: "req_123" })
   id: string;
 
   @ApiPropertyOptional({ example: 245 })
@@ -341,7 +347,7 @@ export class TransportBidComparisonRequestDto {
 }
 
 export class TransportBidComparisonItemDto {
-  @ApiProperty({ example: 'bid_123' })
+  @ApiProperty({ example: "bid_123" })
   bidId: string;
 
   @ApiProperty({ type: () => TransportBidTransporterSummaryDto })
@@ -389,7 +395,7 @@ export class TransportBidComparisonDto {
 }
 
 export class TransporterPerformanceDto {
-  @ApiProperty({ example: 'transporter_456' })
+  @ApiProperty({ example: "transporter_456" })
   transporterId: string;
 
   @ApiProperty({ example: 45 })

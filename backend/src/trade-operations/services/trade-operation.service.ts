@@ -1,13 +1,18 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ProfitCalculationService } from './profit-calculation.service';
-import { PriceScenarioService } from './price-scenario.service';
-import { TransportCostService } from '../../transport/services/transport-cost.service';
-import { RouteOptimizationService } from '../../transport/services/route-optimization.service';
-import { CreateTradeOperationDto } from '../dto/create-trade-operation.dto';
-import { 
-  TradeOperation, 
-  TradePhase, 
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+} from "@nestjs/common";
+import { PrismaService } from "../../prisma/prisma.service";
+import { ProfitCalculationService } from "./profit-calculation.service";
+import { PriceScenarioService } from "./price-scenario.service";
+import { TransportCostService } from "../../transport/services/transport-cost.service";
+import { RouteOptimizationService } from "../../transport/services/route-optimization.service";
+import { CreateTradeOperationDto } from "../dto/create-trade-operation.dto";
+import {
+  TradeOperation,
+  TradePhase,
   TradeStatus,
   BuyListing,
   SaleListing,
@@ -15,8 +20,7 @@ import {
   InspectionPriority,
   InspectionStatus,
   Prisma,
-} from '@prisma/client';
-
+} from "@prisma/client";
 
 export interface TradeOperationSummary {
   id: string;
@@ -129,7 +133,7 @@ export interface SellerMatchingParams {
   requiredQuantity: number;
   maxPricePerUnit: number;
   location?: { lat: number; lng: number };
-  qualityPreference?: 'PREMIUM' | 'STANDARD' | 'ECONOMY' | 'ANY';
+  qualityPreference?: "PREMIUM" | "STANDARD" | "ECONOMY" | "ANY";
 }
 
 export interface MatchedSeller {
@@ -140,8 +144,8 @@ export interface MatchedSeller {
   availability?: number; // For frontend compatibility
   askingPrice: number;
   quality: string;
-  location: { 
-    lat: number; 
+  location: {
+    lat: number;
     lng: number;
     city?: string;
     address?: string;
@@ -182,30 +186,31 @@ export class TradeOperationService {
     });
 
     if (!buyListing) {
-      throw new NotFoundException('Buy listing not found');
+      throw new NotFoundException("Buy listing not found");
     }
 
-    if (buyListing.status !== 'ACTIVE') {
-      throw new BadRequestException('Buy listing is not active');
+    if (buyListing.status !== "ACTIVE") {
+      throw new BadRequestException("Buy listing is not active");
     }
 
     // Generate unique operation number
     const operationNumber = `OP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-    
+
     // Create trade operation
     const tradeOperation = await this.prisma.tradeOperation.create({
       data: {
         operationNumber,
         buyListingId: dto.buyListingId,
         adminId,
-        phase: 'INITIATION',
-        status: 'ACTIVE',
+        phase: "INITIATION",
+        status: "ACTIVE",
         profitMargin: dto.targetProfitMargin || this.TARGET_PROFIT_MARGIN,
         sellingPrice: buyListing.maxPricePerUnit,
-        totalRevenue: buyListing.maxPricePerUnit?.toNumber() 
-          ? buyListing.maxPricePerUnit.toNumber() * buyListing.quantity.toNumber() 
+        totalRevenue: buyListing.maxPricePerUnit?.toNumber()
+          ? buyListing.maxPricePerUnit.toNumber() *
+            buyListing.quantity.toNumber()
           : 0,
-        currency: 'EUR',
+        currency: "EUR",
       },
     });
 
@@ -239,7 +244,7 @@ export class TradeOperationService {
     });
 
     if (!trade) {
-      throw new NotFoundException('Trade operation not found');
+      throw new NotFoundException("Trade operation not found");
     }
 
     const matchParams: SellerMatchingParams = {
@@ -247,14 +252,14 @@ export class TradeOperationService {
       requiredQuantity: trade.buyListing.quantity.toNumber(),
       maxPricePerUnit: trade.buyListing.maxPricePerUnit?.toNumber() || 0,
       location: params?.location || { lat: 42.6977, lng: 23.3219 }, // Default: Sofia
-      qualityPreference: params?.qualityPreference || 'ANY',
+      qualityPreference: params?.qualityPreference || "ANY",
     };
 
     // Find available sellers
     const saleListings = await this.prisma.saleListing.findMany({
       where: {
         productId: matchParams.productId,
-        status: 'ACTIVE',
+        status: "ACTIVE",
         quantity: { gt: 0 },
         askingPrice: { lte: matchParams.maxPricePerUnit * 0.95 }, // Max 95% of buyer price for profit margin
       },
@@ -269,14 +274,14 @@ export class TradeOperationService {
     });
 
     // Score and rank sellers
-    const scoredSellers = saleListings.map(listing => {
+    const scoredSellers = saleListings.map((listing) => {
       const seller = listing.seller;
       // Use listing address or first seller address
       const address = listing.address || seller.addresses?.[0];
-      const sellerLocation = address 
+      const sellerLocation = address
         ? { lat: address.latitude || 0, lng: address.longitude || 0 }
         : { lat: 0, lng: 0 };
-      
+
       // Calculate distance
       const distance = this.calculateDistance(
         matchParams.location!,
@@ -287,7 +292,8 @@ export class TradeOperationService {
       let score = 0;
 
       // Price score (lower is better)
-      const priceRatio = listing.askingPrice?.toNumber() || 0 / matchParams.maxPricePerUnit;
+      const priceRatio =
+        listing.askingPrice?.toNumber() || 0 / matchParams.maxPricePerUnit;
       score += (1 - priceRatio) * 40;
 
       // Distance score (closer is better)
@@ -297,7 +303,7 @@ export class TradeOperationService {
 
       // Quality score
       const qualityScore = this.getQualityScore(
-        'STANDARD', // quality field doesn't exist on listing
+        "STANDARD", // quality field doesn't exist on listing
         matchParams.qualityPreference!,
       );
       score += qualityScore * 20;
@@ -311,8 +317,8 @@ export class TradeOperationService {
 
       // Extract city from address street field (stored as "{City} Region")
       const cityMatch = address?.street?.match(/^(.+)\s+Region$/);
-      const city = cityMatch ? cityMatch[1] : 'Unknown Location';
-      
+      const city = cityMatch ? cityMatch[1] : "Unknown Location";
+
       return {
         sellerId: seller.id,
         sellerName: seller.name || `Seller ${seller.id.slice(-4)}`,
@@ -320,12 +326,12 @@ export class TradeOperationService {
         availableQuantity: listing.quantity.toNumber(),
         availability: listing.quantity.toNumber(), // Add for frontend compatibility
         askingPrice: listing.askingPrice?.toNumber() || 0,
-        quality: 'STANDARD', // quality field doesn't exist
+        quality: "STANDARD", // quality field doesn't exist
         location: {
           lat: sellerLocation.lat,
           lng: sellerLocation.lng,
           city: city,
-          address: address?.street || 'Location not specified',
+          address: address?.street || "Location not specified",
           displayName: `${city} • ${Math.round(distance)}km`,
         },
         distance: Math.round(distance),
@@ -357,7 +363,7 @@ export class TradeOperationService {
     });
 
     if (!trade) {
-      throw new NotFoundException('Trade operation not found');
+      throw new NotFoundException("Trade operation not found");
     }
 
     // Validate total quantity
@@ -365,32 +371,41 @@ export class TradeOperationService {
       (sum, s) => sum + (s.requestedQuantity?.toNumber() || 0),
       0,
     );
-    const newQuantity = sellers.reduce((sum, s) => sum + s.requestedQuantity, 0);
+    const newQuantity = sellers.reduce(
+      (sum, s) => sum + s.requestedQuantity,
+      0,
+    );
     const totalQuantity = currentQuantity + newQuantity;
 
     // Allow exact match - frontend already calculates partial quantities
     const buyerRequirement = trade.buyListing.quantity.toNumber();
-    
+
     // Log for debugging
-    this.logger.log(`Adding sellers: Total quantity ${totalQuantity} vs buyer requirement ${buyerRequirement}`);
-    
+    this.logger.log(
+      `Adding sellers: Total quantity ${totalQuantity} vs buyer requirement ${buyerRequirement}`,
+    );
+
     // We allow exact match since frontend calculates partial quantities
     // The totalQuantity should already be adjusted by frontend
     if (totalQuantity > buyerRequirement) {
-      this.logger.warn(`Total quantity ${totalQuantity} exceeds buyer requirement ${buyerRequirement}`);
+      this.logger.warn(
+        `Total quantity ${totalQuantity} exceeds buyer requirement ${buyerRequirement}`,
+      );
       // Don't throw error, just log warning since frontend handles partial quantities
     }
 
     // Add sellers
     const tradeSellers: TradeSeller[] = [];
-    
+
     for (const seller of sellers) {
       const saleListing = await this.prisma.saleListing.findUnique({
         where: { id: seller.saleListingId },
       });
 
       if (!saleListing) {
-        throw new NotFoundException(`Sale listing ${seller.saleListingId} not found`);
+        throw new NotFoundException(
+          `Sale listing ${seller.saleListingId} not found`,
+        );
       }
 
       const tradeSeller = await this.prisma.tradeSeller.create({
@@ -401,10 +416,10 @@ export class TradeOperationService {
           requestedQuantity: seller.requestedQuantity,
           offeredQuantity: saleListing.quantity, // Use listing quantity as offered
           unit: saleListing.unit,
-          status: 'INVITED',
+          status: "INVITED",
         },
       });
-      
+
       this.logger.log(
         `Added seller ${seller.sellerId}: Requesting ${seller.requestedQuantity} of ${saleListing.quantity.toNumber()} available`,
       );
@@ -417,7 +432,7 @@ export class TradeOperationService {
       // Exact match or very close
       await this.prisma.tradeOperation.update({
         where: { id: tradeOperationId },
-        data: { phase: 'SELLER_NEGOTIATION' },
+        data: { phase: "SELLER_NEGOTIATION" },
       });
       this.logger.log(
         `Trade ${tradeOperationId}: Exact quantity match achieved (${totalQuantity}/${trade.buyListing.quantity.toNumber()})`,
@@ -425,7 +440,7 @@ export class TradeOperationService {
     } else if (totalQuantity >= trade.buyListing.quantity.toNumber() * 0.8) {
       await this.prisma.tradeOperation.update({
         where: { id: tradeOperationId },
-        data: { phase: 'SELLER_NEGOTIATION' },
+        data: { phase: "SELLER_NEGOTIATION" },
       });
     }
 
@@ -439,9 +454,8 @@ export class TradeOperationService {
    * Update profit calculation for trade
    */
   async updateProfitCalculation(tradeOperationId: string): Promise<void> {
-    const profitCalc = await this.profitCalculationService.calculateProfit(
-      tradeOperationId,
-    );
+    const profitCalc =
+      await this.profitCalculationService.calculateProfit(tradeOperationId);
 
     await this.prisma.tradeOperation.update({
       where: { id: tradeOperationId },
@@ -458,21 +472,24 @@ export class TradeOperationService {
   /**
    * Update the phase of a trade operation
    */
-  async updateTradePhase(tradeOperationId: string, newPhase: TradePhase): Promise<TradeOperation> {
+  async updateTradePhase(
+    tradeOperationId: string,
+    newPhase: TradePhase,
+  ): Promise<TradeOperation> {
     // Validate the trade operation exists
     const existingTrade = await this.prisma.tradeOperation.findUnique({
       where: { id: tradeOperationId },
     });
 
     if (!existingTrade) {
-      throw new NotFoundException('Trade operation not found');
+      throw new NotFoundException("Trade operation not found");
     }
 
     // Validate phase transition is allowed
     const validTransitions = this.getValidPhaseTransitions(existingTrade.phase);
     if (!validTransitions.includes(newPhase)) {
       throw new BadRequestException(
-        `Invalid phase transition from ${existingTrade.phase} to ${newPhase}. Valid transitions: ${validTransitions.join(', ')}`,
+        `Invalid phase transition from ${existingTrade.phase} to ${newPhase}. Valid transitions: ${validTransitions.join(", ")}`,
       );
     }
 
@@ -485,8 +502,10 @@ export class TradeOperationService {
       },
     });
 
-    this.logger.log(`Trade operation ${tradeOperationId} phase updated from ${existingTrade.phase} to ${newPhase}`);
-    
+    this.logger.log(
+      `Trade operation ${tradeOperationId} phase updated from ${existingTrade.phase} to ${newPhase}`,
+    );
+
     return updatedTrade;
   }
 
@@ -495,12 +514,32 @@ export class TradeOperationService {
    */
   private getValidPhaseTransitions(currentPhase: TradePhase): TradePhase[] {
     const transitions: Record<TradePhase, TradePhase[]> = {
-      [TradePhase.INITIATION]: [TradePhase.SELLER_MATCHING, TradePhase.CANCELLED],
-      [TradePhase.SELLER_MATCHING]: [TradePhase.SELLER_NEGOTIATION, TradePhase.CANCELLED],
-      [TradePhase.SELLER_NEGOTIATION]: [TradePhase.INSPECTION_PENDING, TradePhase.TRANSPORT_MATCHING, TradePhase.CANCELLED],
-      [TradePhase.INSPECTION_PENDING]: [TradePhase.TRANSPORT_MATCHING, TradePhase.CANCELLED],
-      [TradePhase.TRANSPORT_MATCHING]: [TradePhase.TRANSPORT_BIDDING, TradePhase.IN_TRANSIT, TradePhase.CANCELLED],
-      [TradePhase.TRANSPORT_BIDDING]: [TradePhase.IN_TRANSIT, TradePhase.CANCELLED],
+      [TradePhase.INITIATION]: [
+        TradePhase.SELLER_MATCHING,
+        TradePhase.CANCELLED,
+      ],
+      [TradePhase.SELLER_MATCHING]: [
+        TradePhase.SELLER_NEGOTIATION,
+        TradePhase.CANCELLED,
+      ],
+      [TradePhase.SELLER_NEGOTIATION]: [
+        TradePhase.INSPECTION_PENDING,
+        TradePhase.TRANSPORT_MATCHING,
+        TradePhase.CANCELLED,
+      ],
+      [TradePhase.INSPECTION_PENDING]: [
+        TradePhase.TRANSPORT_MATCHING,
+        TradePhase.CANCELLED,
+      ],
+      [TradePhase.TRANSPORT_MATCHING]: [
+        TradePhase.TRANSPORT_BIDDING,
+        TradePhase.IN_TRANSIT,
+        TradePhase.CANCELLED,
+      ],
+      [TradePhase.TRANSPORT_BIDDING]: [
+        TradePhase.IN_TRANSIT,
+        TradePhase.CANCELLED,
+      ],
       [TradePhase.IN_TRANSIT]: [TradePhase.DELIVERED, TradePhase.CANCELLED],
       [TradePhase.DELIVERED]: [TradePhase.COMPLETED, TradePhase.CANCELLED],
       [TradePhase.COMPLETED]: [], // Final phase
@@ -513,9 +552,7 @@ export class TradeOperationService {
   /**
    * Optimize transport for trade operation
    */
-  async optimizeTransport(
-    tradeOperationId: string,
-  ): Promise<{
+  async optimizeTransport(tradeOperationId: string): Promise<{
     optimizedRoute: any;
     estimatedCost: number;
     distanceSaved: number;
@@ -541,7 +578,7 @@ export class TradeOperationService {
     });
 
     if (!trade) {
-      throw new NotFoundException('Trade operation not found');
+      throw new NotFoundException("Trade operation not found");
     }
 
     // Prepare pickup points
@@ -549,9 +586,10 @@ export class TradeOperationService {
       const sellerAddress = ts.seller?.addresses?.[0];
       // Handle Prisma Decimal type conversion safely
       const quantity = ts.requestedQuantity
-        ? (typeof ts.requestedQuantity === 'object' && 'toNumber' in ts.requestedQuantity
-            ? ts.requestedQuantity.toNumber()
-            : Number(ts.requestedQuantity))
+        ? typeof ts.requestedQuantity === "object" &&
+          "toNumber" in ts.requestedQuantity
+          ? ts.requestedQuantity.toNumber()
+          : Number(ts.requestedQuantity)
         : 0;
 
       return {
@@ -577,14 +615,14 @@ export class TradeOperationService {
       warehouseLocation,
       pickupPoints,
       deliveryLocation,
-      'tsp_2opt',
+      "tsp_2opt",
     );
 
     // Calculate transport cost
     const transportEstimation = await this.transportCostService.estimateCost(
       pickupPoints,
       deliveryLocation,
-      { vehicleType: 'FLATBED' },
+      { vehicleType: "FLATBED" },
     );
 
     // Update trade operation
@@ -607,9 +645,7 @@ export class TradeOperationService {
   /**
    * Finalize trade operation
    */
-  async finalizeTrade(
-    tradeOperationId: string,
-  ): Promise<{
+  async finalizeTrade(tradeOperationId: string): Promise<{
     success: boolean;
     finalProfit: number;
     profitMargin: number;
@@ -624,19 +660,18 @@ export class TradeOperationService {
     });
 
     if (!trade) {
-      throw new NotFoundException('Trade operation not found');
+      throw new NotFoundException("Trade operation not found");
     }
 
     // Validate all sellers have agreed
-    const allAgreed = trade.sellers.every(s => s.status === 'ACCEPTED');
+    const allAgreed = trade.sellers.every((s) => s.status === "ACCEPTED");
     if (!allAgreed) {
-      throw new BadRequestException('Not all sellers have agreed to terms');
+      throw new BadRequestException("Not all sellers have agreed to terms");
     }
 
     // Calculate final profit
-    const profitCalc = await this.profitCalculationService.calculateProfit(
-      tradeOperationId,
-    );
+    const profitCalc =
+      await this.profitCalculationService.calculateProfit(tradeOperationId);
 
     // Validate minimum margin
     if (profitCalc.profit.profitMargin < this.MIN_PROFIT_MARGIN) {
@@ -652,8 +687,8 @@ export class TradeOperationService {
     await this.prisma.tradeOperation.update({
       where: { id: tradeOperationId },
       data: {
-        phase: 'IN_TRANSIT', // Use IN_TRANSIT instead of EXECUTION
-        status: 'ACTIVE', // Use ACTIVE instead of CONFIRMED
+        phase: "IN_TRANSIT", // Use IN_TRANSIT instead of EXECUTION
+        status: "ACTIVE", // Use ACTIVE instead of CONFIRMED
         actualProfit: profitCalc.profit.netProfit,
         profitMargin: profitCalc.profit.profitMargin, // Use profitMargin not actualProfitMargin
         // confirmedAt field doesn't exist
@@ -663,7 +698,7 @@ export class TradeOperationService {
     // Update buy listing status
     await this.prisma.buyListing.update({
       where: { id: trade.buyListingId },
-      data: { status: 'FULFILLED' },
+      data: { status: "FULFILLED" },
     });
 
     // Update sale listings
@@ -719,7 +754,7 @@ export class TradeOperationService {
             inspector: true,
           },
           orderBy: {
-            createdAt: 'desc',
+            createdAt: "desc",
           },
         },
         transportRequest: {
@@ -733,7 +768,7 @@ export class TradeOperationService {
                 },
                 transportCompany: true,
               },
-              orderBy: { submittedAt: 'asc' },
+              orderBy: { submittedAt: "asc" },
             },
             transportJob: true,
           },
@@ -742,14 +777,16 @@ export class TradeOperationService {
     });
 
     if (!trade) {
-      throw new NotFoundException('Trade operation not found');
+      throw new NotFoundException("Trade operation not found");
     }
 
-    const profitCalc = await this.profitCalculationService.calculateProfit(
-      tradeOperationId,
-    );
+    const profitCalc =
+      await this.profitCalculationService.calculateProfit(tradeOperationId);
 
-    const inspectionBySaleListing = new Map<string, (typeof trade.inspections)[number]>();
+    const inspectionBySaleListing = new Map<
+      string,
+      (typeof trade.inspections)[number]
+    >();
     trade.inspections?.forEach((inspection) => {
       if (!inspection?.saleListingId) return;
       if (!inspectionBySaleListing.has(inspection.saleListingId)) {
@@ -765,27 +802,36 @@ export class TradeOperationService {
       status: trade.status,
       buyer: {
         id: trade.buyListing.buyer.id,
-        name: trade.buyListing.buyer.name || 'Unknown Buyer',
+        name: trade.buyListing.buyer.name || "Unknown Buyer",
         requestedQuantity: trade.buyListing.quantity.toNumber(),
         maxPrice: trade.buyListing.maxPricePerUnit?.toNumber() || 0,
       },
-      sellers: trade.sellers.map(ts => {
-        const requestedQuantity = ts.requestedQuantity ? Number(ts.requestedQuantity) : 0;
-        const offeredQuantity = ts.offeredQuantity ? Number(ts.offeredQuantity) : 0;
-        const agreedQuantity = ts.agreedQuantity ? Number(ts.agreedQuantity) : null;
+      sellers: trade.sellers.map((ts) => {
+        const requestedQuantity = ts.requestedQuantity
+          ? Number(ts.requestedQuantity)
+          : 0;
+        const offeredQuantity = ts.offeredQuantity
+          ? Number(ts.offeredQuantity)
+          : 0;
+        const agreedQuantity = ts.agreedQuantity
+          ? Number(ts.agreedQuantity)
+          : null;
         const inspection = inspectionBySaleListing.get(ts.saleListingId);
 
         return {
-          id: ts.id,  // TradeSeller ID (needed for negotiations)
-          sellerId: ts.sellerId,  // Actual seller ID
+          id: ts.id, // TradeSeller ID (needed for negotiations)
+          sellerId: ts.sellerId, // Actual seller ID
           saleListingId: ts.saleListingId,
-          name: ts.saleListing?.seller?.name || 'Unknown Seller',
+          name: ts.saleListing?.seller?.name || "Unknown Seller",
           requestedQuantity,
           offeredQuantity,
           agreedQuantity,
           unit: ts.unit,
           quantity: agreedQuantity ?? requestedQuantity ?? 0,
-          price: ts.agreedPrice?.toNumber?.() || ts.saleListing?.askingPrice?.toNumber?.() || 0,
+          price:
+            ts.agreedPrice?.toNumber?.() ||
+            ts.saleListing?.askingPrice?.toNumber?.() ||
+            0,
           status: ts.status,
           inspection: inspection
             ? {
@@ -834,7 +880,7 @@ export class TradeOperationService {
       ? request.pickupPoints
       : [];
     const deliveryPointRaw =
-      request.deliveryPoint && typeof request.deliveryPoint === 'object'
+      request.deliveryPoint && typeof request.deliveryPoint === "object"
         ? (request.deliveryPoint as Record<string, any>)
         : null;
 
@@ -849,19 +895,22 @@ export class TradeOperationService {
       lng: point?.location?.lng,
     }));
 
-    const bids: TransportBidSummary[] = (request.bids || []).map((bid: any) => ({
-      id: bid.id,
-      status: bid.status,
-      bidAmount: bid.bidAmount?.toNumber?.() ?? bid.bidAmount ?? null,
-      transporterId: bid.transporterId,
-      transporterName: bid.transporter?.name,
-      transportCompanyName:
-        bid.transportCompany?.companyName || bid.transporter?.company?.legalName,
-      vehicleType: bid.vehicleType,
-      vehicleCapacity: bid.vehicleCapacity,
-      estimatedDuration: bid.estimatedDuration,
-      submittedAt: bid.submittedAt,
-    }));
+    const bids: TransportBidSummary[] = (request.bids || []).map(
+      (bid: any) => ({
+        id: bid.id,
+        status: bid.status,
+        bidAmount: bid.bidAmount?.toNumber?.() ?? bid.bidAmount ?? null,
+        transporterId: bid.transporterId,
+        transporterName: bid.transporter?.name,
+        transportCompanyName:
+          bid.transportCompany?.companyName ||
+          bid.transporter?.company?.legalName,
+        vehicleType: bid.vehicleType,
+        vehicleCapacity: bid.vehicleCapacity,
+        estimatedDuration: bid.estimatedDuration,
+        submittedAt: bid.submittedAt,
+      }),
+    );
 
     const job: TransportJobSummary | null = request.transportJob
       ? {
@@ -902,7 +951,7 @@ export class TradeOperationService {
     return this.prisma.tradeOperation.findFirst({
       where: { buyListingId },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
       include: {
         buyListing: true,
@@ -915,7 +964,9 @@ export class TradeOperationService {
   /**
    * Generate initial price scenarios
    */
-  private async generateInitialScenarios(tradeOperationId: string): Promise<void> {
+  private async generateInitialScenarios(
+    tradeOperationId: string,
+  ): Promise<void> {
     try {
       const scenarios = await this.priceScenarioService.generateScenarios({
         tradeOperationId,
@@ -931,14 +982,17 @@ export class TradeOperationService {
         );
       }
     } catch (error) {
-      this.logger.error('Failed to generate initial scenarios', error);
+      this.logger.error("Failed to generate initial scenarios", error);
     }
   }
 
   /**
    * Calculate distance between two points
    */
-  private calculateDistance(point1: { lat: number; lng: number }, point2: { lat: number; lng: number }): number {
+  private calculateDistance(
+    point1: { lat: number; lng: number },
+    point2: { lat: number; lng: number },
+  ): number {
     const R = 6371; // Earth's radius in km
     const dLat = this.toRad(point2.lat - point1.lat);
     const dLng = this.toRad(point2.lng - point1.lng);
@@ -946,9 +1000,9 @@ export class TradeOperationService {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRad(point1.lat)) *
-      Math.cos(this.toRad(point2.lat)) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
+        Math.cos(this.toRad(point2.lat)) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
@@ -961,11 +1015,8 @@ export class TradeOperationService {
   /**
    * Get quality score for matching
    */
-  private getQualityScore(
-    sellerQuality: string,
-    preference: string,
-  ): number {
-    if (preference === 'ANY') return 0.5;
+  private getQualityScore(sellerQuality: string, preference: string): number {
+    if (preference === "ANY") return 0.5;
 
     const qualityMap: Record<string, number> = {
       PREMIUM: 3,
@@ -984,15 +1035,13 @@ export class TradeOperationService {
   /**
    * Monitor active trades
    */
-  async getActiveTrades(
-    filters?: {
-      phase?: TradePhase;
-      minProfitMargin?: number;
-      adminId?: string;
-    },
-  ): Promise<TradeOperation[]> {
+  async getActiveTrades(filters?: {
+    phase?: TradePhase;
+    minProfitMargin?: number;
+    adminId?: string;
+  }): Promise<TradeOperation[]> {
     const where: Prisma.TradeOperationWhereInput = {
-      status: 'ACTIVE',
+      status: "ACTIVE",
       ...(filters?.phase && { phase: filters.phase }),
       ...(filters?.minProfitMargin && {
         profitMargin: { gte: filters.minProfitMargin },
@@ -1010,16 +1059,14 @@ export class TradeOperationService {
           include: { seller: true },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
   /**
    * Get profit analytics
    */
-  async getProfitAnalytics(
-    dateRange?: { start: Date; end: Date },
-  ): Promise<{
+  async getProfitAnalytics(dateRange?: { start: Date; end: Date }): Promise<{
     totalTrades: number;
     averageMargin: number;
     totalProfit: number;
@@ -1037,7 +1084,7 @@ export class TradeOperationService {
 
     const trades = await this.prisma.tradeOperation.findMany({ where });
 
-    const completed = trades.filter(t => t.phase === 'COMPLETED');
+    const completed = trades.filter((t) => t.phase === "COMPLETED");
     const totalProfit = completed.reduce(
       (sum, t) => sum + (t.actualProfit?.toNumber() || 0),
       0,
@@ -1050,25 +1097,26 @@ export class TradeOperationService {
 
     // Margin distribution
     const marginDistribution: Record<string, number> = {
-      'Below 5%': 0,
-      '5-7%': 0,
-      '7-10%': 0,
-      'Above 10%': 0,
+      "Below 5%": 0,
+      "5-7%": 0,
+      "7-10%": 0,
+      "Above 10%": 0,
     };
 
-    completed.forEach(t => {
+    completed.forEach((t) => {
       const margin = t.profitMargin || 0;
-      if (margin < 5) marginDistribution['Below 5%']++;
-      else if (margin < 7) marginDistribution['5-7%']++;
-      else if (margin < 10) marginDistribution['7-10%']++;
-      else marginDistribution['Above 10%']++;
+      if (margin < 5) marginDistribution["Below 5%"]++;
+      else if (margin < 7) marginDistribution["5-7%"]++;
+      else if (margin < 10) marginDistribution["7-10%"]++;
+      else marginDistribution["Above 10%"]++;
     });
 
     return {
       totalTrades: trades.length,
       averageMargin: Math.round(averageMargin * 100) / 100,
       totalProfit: Math.round(totalProfit * 100) / 100,
-      successRate: trades.length > 0 ? (completed.length / trades.length) * 100 : 0,
+      successRate:
+        trades.length > 0 ? (completed.length / trades.length) * 100 : 0,
       marginDistribution,
     };
   }
@@ -1079,7 +1127,7 @@ export class TradeOperationService {
   async requestInspections(
     tradeOperationId: string,
     sellerIds: string[],
-    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT' = 'MEDIUM',
+    priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM",
   ): Promise<any[]> {
     const trade = await this.prisma.tradeOperation.findUnique({
       where: { id: tradeOperationId },
@@ -1096,7 +1144,7 @@ export class TradeOperationService {
     });
 
     if (!trade) {
-      throw new NotFoundException('Trade operation not found');
+      throw new NotFoundException("Trade operation not found");
     }
 
     const inspectionRequests = [];
@@ -1111,10 +1159,10 @@ export class TradeOperationService {
           saleListingId: seller.saleListingId,
           priority: priority as any,
           requestedDate: new Date(),
-          status: 'PENDING',
+          status: "PENDING",
           latitude: 42.6977, // Default or from seller location
           longitude: 23.3219,
-          address: 'To be determined',
+          address: "To be determined",
           photos: [],
         },
         include: {
@@ -1128,7 +1176,9 @@ export class TradeOperationService {
       });
 
       inspectionRequests.push(inspection);
-      this.logger.log(`Created inspection request ${inspection.id} for seller ${seller.sellerId}`);
+      this.logger.log(
+        `Created inspection request ${inspection.id} for seller ${seller.sellerId}`,
+      );
     }
 
     return inspectionRequests;

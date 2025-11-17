@@ -1,16 +1,25 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, IsUUID, Min, Max, IsEnum } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsBoolean,
+  IsUUID,
+  Min,
+  Max,
+  IsEnum,
+} from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class ScenarioGenerationRequestDto {
   @ApiProperty({
-    description: 'Trade operation ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: "Trade operation ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @IsUUID()
   tradeOperationId: string;
 
   @ApiPropertyOptional({
-    description: 'Price variance percentage (0.1 = 10%)',
+    description: "Price variance percentage (0.1 = 10%)",
     example: 0.1,
     minimum: 0,
     maximum: 0.5,
@@ -22,7 +31,7 @@ export class ScenarioGenerationRequestDto {
   priceVariance?: number;
 
   @ApiPropertyOptional({
-    description: 'Number of scenarios to generate',
+    description: "Number of scenarios to generate",
     example: 10,
     minimum: 1,
     maximum: 100,
@@ -34,7 +43,7 @@ export class ScenarioGenerationRequestDto {
   scenarioCount?: number;
 
   @ApiPropertyOptional({
-    description: 'Include quality factors in scenarios',
+    description: "Include quality factors in scenarios",
     example: true,
   })
   @IsOptional()
@@ -42,7 +51,7 @@ export class ScenarioGenerationRequestDto {
   includeQualityFactors?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Include transport cost variations',
+    description: "Include transport cost variations",
     example: true,
   })
   @IsOptional()
@@ -50,7 +59,7 @@ export class ScenarioGenerationRequestDto {
   includeTransportVariations?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Minimum acceptable profit margin',
+    description: "Minimum acceptable profit margin",
     example: 5,
     minimum: 0,
     maximum: 20,
@@ -63,10 +72,10 @@ export class ScenarioGenerationRequestDto {
 }
 
 export class SellerPriceScenarioDto {
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000" })
   sellerId: string;
 
-  @ApiProperty({ example: 'John Farm' })
+  @ApiProperty({ example: "John Farm" })
   sellerName: string;
 
   @ApiProperty({ example: 345 })
@@ -75,12 +84,12 @@ export class SellerPriceScenarioDto {
   @ApiProperty({ example: 50 })
   quantity: number;
 
-  @ApiProperty({ example: 'STANDARD' })
+  @ApiProperty({ example: "STANDARD" })
   quality: string;
 }
 
 export class PriceScenarioDto {
-  @ApiProperty({ example: 'scenario_1' })
+  @ApiProperty({ example: "scenario_1" })
   id: string;
 
   @ApiProperty({ example: 378 })
@@ -104,11 +113,11 @@ export class PriceScenarioDto {
   @ApiProperty({ example: 35350 })
   totalCosts: number;
 
-  @ApiProperty({ 
-    enum: ['HIGH', 'MEDIUM', 'LOW', 'UNVIABLE'],
-    example: 'MEDIUM' 
+  @ApiProperty({
+    enum: ["HIGH", "MEDIUM", "LOW", "UNVIABLE"],
+    example: "MEDIUM",
   })
-  viability: 'HIGH' | 'MEDIUM' | 'LOW' | 'UNVIABLE';
+  viability: "HIGH" | "MEDIUM" | "LOW" | "UNVIABLE";
 
   @ApiProperty({ example: 75.5 })
   acceptanceProbability: number;
@@ -136,11 +145,11 @@ export class ScenarioStatisticsDto {
   @ApiProperty({ example: -500 })
   minProfit: number;
 
-  @ApiProperty({ 
-    enum: ['LOW', 'MEDIUM', 'HIGH'],
-    example: 'LOW' 
+  @ApiProperty({
+    enum: ["LOW", "MEDIUM", "HIGH"],
+    example: "LOW",
   })
-  riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+  riskLevel: "LOW" | "MEDIUM" | "HIGH";
 }
 
 export class ScenarioAnalysisResponseDto {
@@ -154,11 +163,11 @@ export class ScenarioAnalysisResponseDto {
   statistics: ScenarioStatisticsDto;
 
   @ApiProperty({
-    type: 'array',
-    items: { type: 'string' },
+    type: "array",
+    items: { type: "string" },
     example: [
-      'Average margin 7.2% meets target 7%',
-      'Optimal scenario offers 7.5% margin with 82% acceptance probability',
+      "Average margin 7.2% meets target 7%",
+      "Optimal scenario offers 7.5% margin with 82% acceptance probability",
     ],
   })
   recommendations: string[];
@@ -166,21 +175,21 @@ export class ScenarioAnalysisResponseDto {
 
 export class SensitivityAnalysisRequestDto {
   @ApiProperty({
-    description: 'Trade operation ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: "Trade operation ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @IsUUID()
   tradeOperationId: string;
 
   @ApiProperty({
-    description: 'Base seller prices for analysis',
-    type: 'array',
+    description: "Base seller prices for analysis",
+    type: "array",
     items: {
-      type: 'object',
+      type: "object",
       properties: {
-        sellerId: { type: 'string' },
-        price: { type: 'number' },
-        quantity: { type: 'number' },
+        sellerId: { type: "string" },
+        price: { type: "number" },
+        quantity: { type: "number" },
       },
     },
   })
@@ -191,7 +200,7 @@ export class SensitivityAnalysisRequestDto {
   }>;
 
   @ApiPropertyOptional({
-    description: 'Number of price points to analyze',
+    description: "Number of price points to analyze",
     example: 20,
     minimum: 5,
     maximum: 50,
@@ -231,23 +240,23 @@ export class SensitivityAnalysisResponseDto {
   elasticity: number;
 
   @ApiPropertyOptional({
-    type: 'object',
+    type: "object",
     properties: {
       optimalRange: {
-        type: 'object',
+        type: "object",
         properties: {
-          min: { type: 'number' },
-          max: { type: 'number' },
+          min: { type: "number" },
+          max: { type: "number" },
         },
       },
       riskZones: {
-        type: 'array',
+        type: "array",
         items: {
-          type: 'object',
+          type: "object",
           properties: {
-            range: { type: 'string' },
-            risk: { type: 'string' },
-            description: { type: 'string' },
+            range: { type: "string" },
+            risk: { type: "string" },
+            description: { type: "string" },
           },
         },
       },
@@ -260,7 +269,7 @@ export class SensitivityAnalysisResponseDto {
     };
     riskZones: Array<{
       range: string;
-      risk: 'LOW' | 'MEDIUM' | 'HIGH';
+      risk: "LOW" | "MEDIUM" | "HIGH";
       description: string;
     }>;
   };
@@ -268,20 +277,20 @@ export class SensitivityAnalysisResponseDto {
 
 export class StrategyComparisonRequestDto {
   @ApiProperty({
-    description: 'Trade operation ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: "Trade operation ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @IsUUID()
   tradeOperationId: string;
 
   @ApiProperty({
-    description: 'Strategies to compare',
-    type: 'array',
+    description: "Strategies to compare",
+    type: "array",
     items: {
-      type: 'object',
+      type: "object",
       properties: {
-        name: { type: 'string' },
-        params: { type: 'object' },
+        name: { type: "string" },
+        params: { type: "object" },
       },
     },
   })
@@ -292,7 +301,7 @@ export class StrategyComparisonRequestDto {
 }
 
 export class StrategyResultDto {
-  @ApiProperty({ example: 'Conservative' })
+  @ApiProperty({ example: "Conservative" })
   strategy: string;
 
   @ApiProperty({ type: PriceScenarioDto })
@@ -309,15 +318,15 @@ export class StrategyComparisonResponseDto {
   @ApiProperty({ type: [StrategyResultDto] })
   comparison: StrategyResultDto[];
 
-  @ApiProperty({ example: 'Balanced' })
+  @ApiProperty({ example: "Balanced" })
   winner: string;
 
   @ApiPropertyOptional({
-    type: 'object',
+    type: "object",
     properties: {
-      bestForProfit: { type: 'string' },
-      bestForRisk: { type: 'string' },
-      bestForAcceptance: { type: 'string' },
+      bestForProfit: { type: "string" },
+      bestForRisk: { type: "string" },
+      bestForAcceptance: { type: "string" },
     },
   })
   insights?: {
@@ -329,14 +338,14 @@ export class StrategyComparisonResponseDto {
 
 export class QuickEstimateDto {
   @ApiProperty({
-    description: 'Product ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: "Product ID",
+    example: "123e4567-e89b-12d3-a456-426614174000",
   })
   @IsUUID()
   productId: string;
 
   @ApiProperty({
-    description: 'Buyer price per unit',
+    description: "Buyer price per unit",
     example: 380,
   })
   @IsNumber()
@@ -344,7 +353,7 @@ export class QuickEstimateDto {
   buyerPrice: number;
 
   @ApiProperty({
-    description: 'Average seller price per unit',
+    description: "Average seller price per unit",
     example: 350,
   })
   @IsNumber()
@@ -352,7 +361,7 @@ export class QuickEstimateDto {
   avgSellerPrice: number;
 
   @ApiProperty({
-    description: 'Quantity in tons',
+    description: "Quantity in tons",
     example: 100,
   })
   @IsNumber()
@@ -360,7 +369,7 @@ export class QuickEstimateDto {
   quantity: number;
 
   @ApiPropertyOptional({
-    description: 'Estimated transport distance in km',
+    description: "Estimated transport distance in km",
     example: 250,
   })
   @IsOptional()
@@ -389,11 +398,11 @@ export class QuickEstimateResponseDto {
   isViable: boolean;
 
   @ApiProperty({
-    type: 'object',
+    type: "object",
     properties: {
-      minSellerPrice: { type: 'number' },
-      maxSellerPrice: { type: 'number' },
-      targetSellerPrice: { type: 'number' },
+      minSellerPrice: { type: "number" },
+      maxSellerPrice: { type: "number" },
+      targetSellerPrice: { type: "number" },
     },
   })
   priceGuidance: {

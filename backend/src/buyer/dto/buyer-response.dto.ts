@@ -1,6 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ProductUnit, RequestStatus } from '@prisma/client';
-import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ProductUnit, RequestStatus } from "@prisma/client";
+import { Type } from "class-transformer";
 
 export class BuyerCompanySummaryDto {
   @ApiProperty()
@@ -101,7 +101,7 @@ export class BuyListingResponseDto {
   @ApiPropertyOptional({ type: Number })
   maxPricePerUnit?: number | null;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({ type: String, format: "date-time" })
   neededBy?: string | null;
 
   @ApiProperty({ enum: RequestStatus })
@@ -126,10 +126,10 @@ export class BuyListingResponseDto {
   @Type(() => BuyerListingSpecificationDto)
   specifications?: BuyerListingSpecificationDto[] | null;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   createdAt: string;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   updatedAt: string;
 }
 
@@ -178,10 +178,10 @@ export class BuyerOfferSummaryDto {
   @Type(() => BuyerProductSummaryDto)
   product?: BuyerProductSummaryDto | null;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({ type: String, format: "date-time" })
   createdAt?: string | null;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({ type: String, format: "date-time" })
   updatedAt?: string | null;
 }
 

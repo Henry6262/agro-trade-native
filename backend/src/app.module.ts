@@ -1,31 +1,31 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
-import { ScheduleModule } from '@nestjs/schedule';
-import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
-import { OnboardingModule } from './onboarding/onboarding.module';
-import { ProductsModule } from './products/products.module';
-import { SellerModule } from './seller/seller.module';
-import { BuyerModule } from './buyer/buyer.module';
-import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
-import { TradeOperationsModule } from './trade-operations/trade-operations.module';
-import { TransportModule } from './transport/transport.module';
-import { NegotiationsModule } from './negotiations/negotiations.module';
-import { InspectionModule } from './inspections/inspection.module';
-import { InspectorModule } from './modules/inspector/inspector.module';
-import { NotificationModule } from './notifications/notification.module';
-import { TransportCompanyModule } from './transport-company/transport-company.module';
-import { SimulationModule } from './simulation/simulation.module';
-import { RegionsModule } from './regions/regions.module';
-import { CacheModule } from './cache/cache.module';
-import { ResponseTimeMiddleware } from './common/middleware/response-time.middleware';
+import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { APP_GUARD } from "@nestjs/core";
+import { ScheduleModule } from "@nestjs/schedule";
+import { PrismaModule } from "./prisma/prisma.module";
+import { AuthModule } from "./auth/auth.module";
+import { OnboardingModule } from "./onboarding/onboarding.module";
+import { ProductsModule } from "./products/products.module";
+import { SellerModule } from "./seller/seller.module";
+import { BuyerModule } from "./buyer/buyer.module";
+import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
+import { TradeOperationsModule } from "./trade-operations/trade-operations.module";
+import { TransportModule } from "./transport/transport.module";
+import { NegotiationsModule } from "./negotiations/negotiations.module";
+import { InspectionModule } from "./inspections/inspection.module";
+import { InspectorModule } from "./modules/inspector/inspector.module";
+import { NotificationModule } from "./notifications/notification.module";
+import { TransportCompanyModule } from "./transport-company/transport-company.module";
+import { SimulationModule } from "./simulation/simulation.module";
+import { RegionsModule } from "./regions/regions.module";
+import { CacheModule } from "./cache/cache.module";
+import { ResponseTimeMiddleware } from "./common/middleware/response-time.middleware";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ".env",
     }),
     ScheduleModule.forRoot(),
     CacheModule, // Add cache module for performance
@@ -56,8 +56,6 @@ import { ResponseTimeMiddleware } from './common/middleware/response-time.middle
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     // Apply response time logging to all routes
-    consumer
-      .apply(ResponseTimeMiddleware)
-      .forRoutes('*');
+    consumer.apply(ResponseTimeMiddleware).forRoutes("*");
   }
 }

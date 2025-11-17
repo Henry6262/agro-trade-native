@@ -13,7 +13,7 @@ import {
   BadRequestException,
   ForbiddenException,
   NotFoundException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
@@ -22,11 +22,16 @@ import {
   ApiExtraModels,
   ApiParam,
   ApiQuery,
-} from '@nestjs/swagger';
-import { TransportService } from '../services/transport-main.service';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import { User, UserRole, TransportRequestStatus, BidStatus } from '@prisma/client';
+} from "@nestjs/swagger";
+import { TransportService } from "../services/transport-main.service";
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
+import { CurrentUser } from "../../auth/decorators/current-user.decorator";
+import {
+  User,
+  UserRole,
+  TransportRequestStatus,
+  BidStatus,
+} from "@prisma/client";
 import {
   TransportRequestDto,
   TransportRequestSummaryDto,
@@ -50,10 +55,10 @@ import {
   TransportBidTransporterSummaryDto,
   TransportJobLocationDto,
   TransportPickupRecordDto,
-} from '../dto/transport-responses.dto';
+} from "../dto/transport-responses.dto";
 
-@ApiTags('Transport')
-@Controller('transport')
+@ApiTags("Transport")
+@Controller("transport")
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @ApiExtraModels(
@@ -78,24 +83,31 @@ export class TransportController {
 
   // ========== TRANSPORTER ENDPOINTS ==========
 
-  @Get('requests/available')
-  @ApiOperation({ summary: 'Get available transport requests for bidding' })
-  @ApiQuery({ name: 'radius', required: false, description: 'Search radius in km', example: 50 })
-  @ApiQuery({ name: 'minWeight', required: false, example: 10 })
-  @ApiQuery({ name: 'maxWeight', required: false, example: 100 })
+  @Get("requests/available")
+  @ApiOperation({ summary: "Get available transport requests for bidding" })
+  @ApiQuery({
+    name: "radius",
+    required: false,
+    description: "Search radius in km",
+    example: 50,
+  })
+  @ApiQuery({ name: "minWeight", required: false, example: 10 })
+  @ApiQuery({ name: "maxWeight", required: false, example: 100 })
   @ApiResponse({
     status: HttpStatus.OK,
     type: TransportRequestListResponseDto,
   })
   async getAvailableRequests(
     @CurrentUser() user: User,
-    @Query('radius') radius?: number, // km from transporter's base
-    @Query('minWeight') minWeight?: number,
-    @Query('maxWeight') maxWeight?: number,
+    @Query("radius") radius?: number, // km from transporter's base
+    @Query("minWeight") minWeight?: number,
+    @Query("maxWeight") maxWeight?: number,
   ): Promise<TransportRequestListResponseDto> {
     // Only transporters can view available requests
     if (user.role !== UserRole.TRANSPORTER) {
-      throw new ForbiddenException('Only transporters can view transport requests');
+      throw new ForbiddenException(
+        "Only transporters can view transport requests",
+      );
     }
 
     const requests = await this.transportService.getAvailableRequests({
@@ -110,21 +122,24 @@ export class TransportController {
     };
   }
 
-  @Get('requests/:id')
-  @ApiOperation({ summary: 'Get transport request details' })
-  @ApiParam({ name: 'id', description: 'Transport request ID' })
+  @Get("requests/:id")
+  @ApiOperation({ summary: "Get transport request details" })
+  @ApiParam({ name: "id", description: "Transport request ID" })
   @ApiResponse({ status: HttpStatus.OK, type: TransportRequestResponseDto })
   async getRequestDetails(
-    @Param('id') requestId: string,
+    @Param("id") requestId: string,
     @CurrentUser() user: User,
   ): Promise<TransportRequestResponseDto> {
     const request = await this.transportService.getRequestById(requestId);
-    
+
     // Transporters can only see OPEN requests or ones they've bid on
     if (user.role === UserRole.TRANSPORTER) {
-      const hasBid = await this.transportService.userHasBidOnRequest(user.id, requestId);
+      const hasBid = await this.transportService.userHasBidOnRequest(
+        user.id,
+        requestId,
+      );
       if (request.status !== TransportRequestStatus.OPEN && !hasBid) {
-        throw new ForbiddenException('Cannot view this transport request');
+        throw new ForbiddenException("Cannot view this transport request");
       }
     }
 
@@ -133,12 +148,13 @@ export class TransportController {
     };
   }
 
-  @Post('bids')
-  @ApiOperation({ summary: 'Submit a bid for transport request' })
+  @Post("bids")
+  @ApiOperation({ summary: "Submit a bid for transport request" })
   @ApiResponse({ status: HttpStatus.CREATED, type: TransportBidResponseDto })
   async submitBid(
     @CurrentUser() user: User,
-    @Body() bidData: {
+    @Body()
+    bidData: {
       transportRequestId: string;
       bidAmount: number;
       estimatedDuration: number; // hours
@@ -147,7 +163,7 @@ export class TransportController {
     },
   ): Promise<TransportBidResponseDto> {
     if (user.role !== UserRole.TRANSPORTER) {
-      throw new ForbiddenException('Only transporters can submit bids');
+      throw new ForbiddenException("Only transporters can submit bids");
     }
 
     const bid = await this.transportService.submitBid({
@@ -160,39 +176,44 @@ export class TransportController {
     };
   }
 
-  @Put('bids/:id')
-  @ApiOperation({ summary: 'Update an existing bid' })
-  @ApiParam({ name: 'id', description: 'Bid ID' })
+  @Put("bids/:id")
+  @ApiOperation({ summary: "Update an existing bid" })
+  @ApiParam({ name: "id", description: "Bid ID" })
   @ApiResponse({ status: HttpStatus.OK, type: TransportBidResponseDto })
   async updateBid(
-    @Param('id') bidId: string,
+    @Param("id") bidId: string,
     @CurrentUser() user: User,
-    @Body() updateData: {
+    @Body()
+    updateData: {
       bidAmount?: number;
       estimatedDuration?: number;
       notes?: string;
     },
   ): Promise<TransportBidResponseDto> {
     if (user.role !== UserRole.TRANSPORTER) {
-      throw new ForbiddenException('Only transporters can update bids');
+      throw new ForbiddenException("Only transporters can update bids");
     }
 
-    const bid = await this.transportService.updateBid(bidId, user.id, updateData);
+    const bid = await this.transportService.updateBid(
+      bidId,
+      user.id,
+      updateData,
+    );
     return {
       data: this.mapTransportBid(bid),
     };
   }
 
-  @Put('bids/:id/withdraw')
-  @ApiOperation({ summary: 'Withdraw a bid' })
-  @ApiParam({ name: 'id', description: 'Bid ID' })
+  @Put("bids/:id/withdraw")
+  @ApiOperation({ summary: "Withdraw a bid" })
+  @ApiParam({ name: "id", description: "Bid ID" })
   @ApiResponse({ status: HttpStatus.OK, type: TransportBidResponseDto })
   async withdrawBid(
-    @Param('id') bidId: string,
+    @Param("id") bidId: string,
     @CurrentUser() user: User,
   ): Promise<TransportBidResponseDto> {
     if (user.role !== UserRole.TRANSPORTER) {
-      throw new ForbiddenException('Only transporters can withdraw bids');
+      throw new ForbiddenException("Only transporters can withdraw bids");
     }
 
     const bid = await this.transportService.withdrawBid(bidId, user.id);
@@ -201,37 +222,43 @@ export class TransportController {
     };
   }
 
-  @Get('my-bids')
-  @ApiOperation({ summary: 'Get transporter\'s own bids' })
-  @ApiQuery({ name: 'status', required: false })
+  @Get("my-bids")
+  @ApiOperation({ summary: "Get transporter's own bids" })
+  @ApiQuery({ name: "status", required: false })
   @ApiResponse({ status: HttpStatus.OK, type: TransportBidListResponseDto })
   async getMyBids(
     @CurrentUser() user: User,
-    @Query('status') status?: BidStatus,
+    @Query("status") status?: BidStatus,
   ): Promise<TransportBidListResponseDto> {
     if (user.role !== UserRole.TRANSPORTER) {
-      throw new ForbiddenException('Only transporters can view their bids');
+      throw new ForbiddenException("Only transporters can view their bids");
     }
 
-    const bids = await this.transportService.getTransporterBids(user.id, status);
+    const bids = await this.transportService.getTransporterBids(
+      user.id,
+      status,
+    );
     return {
       data: bids.map((bid) => this.mapTransportBid(bid)),
     };
   }
 
-  @Get('my-jobs')
-  @ApiOperation({ summary: 'Get transporter\'s assigned jobs' })
-  @ApiQuery({ name: 'status', required: false })
+  @Get("my-jobs")
+  @ApiOperation({ summary: "Get transporter's assigned jobs" })
+  @ApiQuery({ name: "status", required: false })
   @ApiResponse({ status: HttpStatus.OK, type: TransportJobListResponseDto })
   async getMyJobs(
     @CurrentUser() user: User,
-    @Query('status') status?: string,
+    @Query("status") status?: string,
   ): Promise<TransportJobListResponseDto> {
     if (user.role !== UserRole.TRANSPORTER) {
-      throw new ForbiddenException('Only transporters can view their jobs');
+      throw new ForbiddenException("Only transporters can view their jobs");
     }
 
-    const jobs = await this.transportService.getTransporterJobs(user.id, status);
+    const jobs = await this.transportService.getTransporterJobs(
+      user.id,
+      status,
+    );
     return {
       data: jobs.map((job) => this.mapTransportJob(job)),
     };
@@ -239,32 +266,39 @@ export class TransportController {
 
   // ========== ADMIN ENDPOINTS ==========
 
-  @Get('requests')
-  @ApiOperation({ summary: 'Get all transport requests (Admin)' })
-  @ApiQuery({ name: 'status', required: false })
-  @ApiQuery({ name: 'tradeOperationId', required: false })
+  @Get("requests")
+  @ApiOperation({ summary: "Get all transport requests (Admin)" })
+  @ApiQuery({ name: "status", required: false })
+  @ApiQuery({ name: "tradeOperationId", required: false })
   @ApiResponse({ status: HttpStatus.OK, type: TransportRequestListResponseDto })
   async getAllRequests(
     @CurrentUser() user: User,
-    @Query('status') status?: TransportRequestStatus,
-    @Query('tradeOperationId') tradeOperationId?: string,
+    @Query("status") status?: TransportRequestStatus,
+    @Query("tradeOperationId") tradeOperationId?: string,
   ): Promise<TransportRequestListResponseDto> {
     if (user.role !== UserRole.ADMIN) {
-      throw new ForbiddenException('Only admins can view all requests');
+      throw new ForbiddenException("Only admins can view all requests");
     }
 
-    const requests = await this.transportService.getAllRequests({ status, tradeOperationId });
+    const requests = await this.transportService.getAllRequests({
+      status,
+      tradeOperationId,
+    });
     return {
       data: requests.map((request) => this.mapTransportRequest(request)),
     };
   }
 
-  @Post('requests')
-  @ApiOperation({ summary: 'Create transport request (Admin)' })
-  @ApiResponse({ status: HttpStatus.CREATED, type: TransportRequestResponseDto })
+  @Post("requests")
+  @ApiOperation({ summary: "Create transport request (Admin)" })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    type: TransportRequestResponseDto,
+  })
   async createRequest(
     @CurrentUser() user: User,
-    @Body() requestData: {
+    @Body()
+    requestData: {
       tradeOperationId: string;
       pickupLocation: string;
       pickupLatitude: number;
@@ -281,25 +315,26 @@ export class TransportController {
     },
   ): Promise<TransportRequestResponseDto> {
     if (user.role !== UserRole.ADMIN) {
-      throw new ForbiddenException('Only admins can create transport requests');
+      throw new ForbiddenException("Only admins can create transport requests");
     }
 
-    const request = await this.transportService.createTransportRequest(requestData);
+    const request =
+      await this.transportService.createTransportRequest(requestData);
     return {
       data: this.mapTransportRequest(request),
     };
   }
 
-  @Get('requests/:id/bids')
-  @ApiOperation({ summary: 'Get all bids for a transport request (Admin)' })
-  @ApiParam({ name: 'id', description: 'Transport request ID' })
+  @Get("requests/:id/bids")
+  @ApiOperation({ summary: "Get all bids for a transport request (Admin)" })
+  @ApiParam({ name: "id", description: "Transport request ID" })
   @ApiResponse({ status: HttpStatus.OK, type: TransportBidListResponseDto })
   async getRequestBids(
-    @Param('id') requestId: string,
+    @Param("id") requestId: string,
     @CurrentUser() user: User,
   ): Promise<TransportBidListResponseDto> {
     if (user.role !== UserRole.ADMIN) {
-      throw new ForbiddenException('Only admins can view all bids');
+      throw new ForbiddenException("Only admins can view all bids");
     }
 
     const bids = await this.transportService.getRequestBids(requestId);
@@ -308,16 +343,16 @@ export class TransportController {
     };
   }
 
-  @Put('bids/:id/accept')
-  @ApiOperation({ summary: 'Accept a bid (Admin)' })
-  @ApiParam({ name: 'id', description: 'Bid ID' })
+  @Put("bids/:id/accept")
+  @ApiOperation({ summary: "Accept a bid (Admin)" })
+  @ApiParam({ name: "id", description: "Bid ID" })
   @ApiResponse({ status: HttpStatus.OK, type: TransportJobResponseDto })
   async acceptBid(
-    @Param('id') bidId: string,
+    @Param("id") bidId: string,
     @CurrentUser() user: User,
   ): Promise<TransportJobResponseDto> {
     if (user.role !== UserRole.ADMIN) {
-      throw new ForbiddenException('Only admins can accept bids');
+      throw new ForbiddenException("Only admins can accept bids");
     }
 
     const job = await this.transportService.acceptBid(bidId);
@@ -326,17 +361,17 @@ export class TransportController {
     };
   }
 
-  @Put('bids/:id/reject')
-  @ApiOperation({ summary: 'Reject a bid (Admin)' })
-  @ApiParam({ name: 'id', description: 'Bid ID' })
+  @Put("bids/:id/reject")
+  @ApiOperation({ summary: "Reject a bid (Admin)" })
+  @ApiParam({ name: "id", description: "Bid ID" })
   @ApiResponse({ status: HttpStatus.OK, type: TransportBidResponseDto })
   async rejectBid(
-    @Param('id') bidId: string,
+    @Param("id") bidId: string,
     @CurrentUser() user: User,
-    @Body('reason') reason?: string,
+    @Body("reason") reason?: string,
   ): Promise<TransportBidResponseDto> {
     if (user.role !== UserRole.ADMIN) {
-      throw new ForbiddenException('Only admins can reject bids');
+      throw new ForbiddenException("Only admins can reject bids");
     }
 
     const bid = await this.transportService.rejectBid(bidId, reason);
@@ -347,14 +382,15 @@ export class TransportController {
 
   // ========== JOB MANAGEMENT ==========
 
-  @Put('jobs/:id/start')
-  @ApiOperation({ summary: 'Start a transport job' })
-  @ApiParam({ name: 'id', description: 'Transport job ID' })
+  @Put("jobs/:id/start")
+  @ApiOperation({ summary: "Start a transport job" })
+  @ApiParam({ name: "id", description: "Transport job ID" })
   @ApiResponse({ status: HttpStatus.OK, type: TransportJobResponseDto })
   async startJob(
-    @Param('id') jobId: string,
+    @Param("id") jobId: string,
     @CurrentUser() user: User,
-    @Body() data: {
+    @Body()
+    data: {
       actualPickupTime?: Date;
       notes?: string;
     },
@@ -365,14 +401,15 @@ export class TransportController {
     };
   }
 
-  @Put('jobs/:id/pickup')
-  @ApiOperation({ summary: 'Confirm pickup' })
-  @ApiParam({ name: 'id', description: 'Transport job ID' })
+  @Put("jobs/:id/pickup")
+  @ApiOperation({ summary: "Confirm pickup" })
+  @ApiParam({ name: "id", description: "Transport job ID" })
   @ApiResponse({ status: HttpStatus.OK, type: TransportJobResponseDto })
   async confirmPickup(
-    @Param('id') jobId: string,
+    @Param("id") jobId: string,
     @CurrentUser() user: User,
-    @Body() data: {
+    @Body()
+    data: {
       pickupPhotos?: string[];
       pickupNotes?: string;
       actualWeight?: number;
@@ -384,40 +421,50 @@ export class TransportController {
     };
   }
 
-  @Put('jobs/:id/deliver')
-  @ApiOperation({ summary: 'Confirm delivery' })
-  @ApiParam({ name: 'id', description: 'Transport job ID' })
+  @Put("jobs/:id/deliver")
+  @ApiOperation({ summary: "Confirm delivery" })
+  @ApiParam({ name: "id", description: "Transport job ID" })
   @ApiResponse({ status: HttpStatus.OK, type: TransportJobResponseDto })
   async confirmDelivery(
-    @Param('id') jobId: string,
+    @Param("id") jobId: string,
     @CurrentUser() user: User,
-    @Body() data: {
+    @Body()
+    data: {
       deliveryPhotos: string[];
       deliveryNotes?: string;
       recipientName: string;
       recipientSignature?: string;
     },
   ): Promise<TransportJobResponseDto> {
-    const job = await this.transportService.confirmDelivery(jobId, user.id, data);
+    const job = await this.transportService.confirmDelivery(
+      jobId,
+      user.id,
+      data,
+    );
     return {
       data: this.mapTransportJob(job),
     };
   }
 
-  @Put('jobs/:id/location')
-  @ApiOperation({ summary: 'Update current location' })
-  @ApiParam({ name: 'id', description: 'Transport job ID' })
+  @Put("jobs/:id/location")
+  @ApiOperation({ summary: "Update current location" })
+  @ApiParam({ name: "id", description: "Transport job ID" })
   @ApiResponse({ status: HttpStatus.OK, type: TransportJobResponseDto })
   async updateLocation(
-    @Param('id') jobId: string,
+    @Param("id") jobId: string,
     @CurrentUser() user: User,
-    @Body() data: {
+    @Body()
+    data: {
       latitude: number;
       longitude: number;
       timestamp?: Date;
     },
   ): Promise<TransportJobResponseDto> {
-    const job = await this.transportService.updateJobLocation(jobId, user.id, data);
+    const job = await this.transportService.updateJobLocation(
+      jobId,
+      user.id,
+      data,
+    );
     return {
       data: this.mapTransportJob(job),
     };
@@ -425,16 +472,19 @@ export class TransportController {
 
   // ========== ANALYTICS ==========
 
-  @Get('analytics/bid-comparison/:requestId')
-  @ApiOperation({ summary: 'Compare bids for a request (Admin)' })
-  @ApiParam({ name: 'requestId', description: 'Transport request ID' })
-  @ApiResponse({ status: HttpStatus.OK, type: TransportBidComparisonResponseDto })
+  @Get("analytics/bid-comparison/:requestId")
+  @ApiOperation({ summary: "Compare bids for a request (Admin)" })
+  @ApiParam({ name: "requestId", description: "Transport request ID" })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: TransportBidComparisonResponseDto,
+  })
   async compareBids(
-    @Param('requestId') requestId: string,
+    @Param("requestId") requestId: string,
     @CurrentUser() user: User,
   ): Promise<TransportBidComparisonResponseDto> {
     if (user.role !== UserRole.ADMIN) {
-      throw new ForbiddenException('Only admins can compare bids');
+      throw new ForbiddenException("Only admins can compare bids");
     }
 
     const result = await this.transportService.compareBids(requestId);
@@ -443,20 +493,24 @@ export class TransportController {
     };
   }
 
-  @Get('analytics/transporter-performance/:transporterId')
-  @ApiOperation({ summary: 'Get transporter performance metrics' })
-  @ApiParam({ name: 'transporterId', description: 'Transporter ID' })
-  @ApiResponse({ status: HttpStatus.OK, type: TransporterPerformanceResponseDto })
+  @Get("analytics/transporter-performance/:transporterId")
+  @ApiOperation({ summary: "Get transporter performance metrics" })
+  @ApiParam({ name: "transporterId", description: "Transporter ID" })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: TransporterPerformanceResponseDto,
+  })
   async getTransporterPerformance(
-    @Param('transporterId') transporterId: string,
+    @Param("transporterId") transporterId: string,
     @CurrentUser() user: User,
   ): Promise<TransporterPerformanceResponseDto> {
     // Admins can see any, transporters can see their own
     if (user.role === UserRole.TRANSPORTER && user.id !== transporterId) {
-      throw new ForbiddenException('Cannot view other transporter performance');
+      throw new ForbiddenException("Cannot view other transporter performance");
     }
 
-    const performance = await this.transportService.getTransporterPerformance(transporterId);
+    const performance =
+      await this.transportService.getTransporterPerformance(transporterId);
     return {
       data: this.mapTransporterPerformance(performance),
     };
@@ -469,7 +523,7 @@ export class TransportController {
     options: { includeBids?: boolean; includeJob?: boolean } = {},
   ): TransportRequestDto {
     if (!request) {
-      throw new BadRequestException('Invalid transport request payload');
+      throw new BadRequestException("Invalid transport request payload");
     }
 
     const { includeBids = true, includeJob = true } = options;
@@ -491,9 +545,13 @@ export class TransportController {
           })
         : undefined;
 
-    const bidAmounts = (bids
-      ?.map((bid: TransportBidDto) => bid.bidAmount)
-      .filter((value: number | undefined): value is number => typeof value === 'number')) ?? [];
+    const bidAmounts =
+      bids
+        ?.map((bid: TransportBidDto) => bid.bidAmount)
+        .filter(
+          (value: number | undefined): value is number =>
+            typeof value === "number",
+        ) ?? [];
 
     const dto: TransportRequestDto = {
       id: request.id,
@@ -533,7 +591,7 @@ export class TransportController {
     options: { includeRequest?: boolean } = {},
   ): TransportBidDto {
     if (!bid) {
-      throw new BadRequestException('Invalid transport bid payload');
+      throw new BadRequestException("Invalid transport bid payload");
     }
 
     const { includeRequest = true } = options;
@@ -569,7 +627,7 @@ export class TransportController {
     options: { includeRequest?: boolean } = {},
   ): TransportJobDto {
     if (!job) {
-      throw new BadRequestException('Invalid transport job payload');
+      throw new BadRequestException("Invalid transport job payload");
     }
 
     const { includeRequest = true } = options;
@@ -599,7 +657,9 @@ export class TransportController {
       completedAt: this.toISOString(job.completedAt),
       createdAt: this.toISOString(job.createdAt),
       updatedAt: this.toISOString(job.updatedAt),
-      pickupPhotos: Array.isArray(job.pickupPhotos) ? job.pickupPhotos : undefined,
+      pickupPhotos: Array.isArray(job.pickupPhotos)
+        ? job.pickupPhotos
+        : undefined,
       deliveryPhotos: Array.isArray(job.deliveryPhotos)
         ? job.deliveryPhotos
         : undefined,
@@ -621,11 +681,11 @@ export class TransportController {
         transporter:
           this.mapBidTransporter(bid.transporter) ??
           ({
-            id: bid.transporter?.id ?? 'unknown',
+            id: bid.transporter?.id ?? "unknown",
             name: bid.transporter?.name,
             company: bid.transporter?.company
               ? {
-                  id: bid.transporter.company?.id ?? 'unknown',
+                  id: bid.transporter.company?.id ?? "unknown",
                   legalName: bid.transporter.company,
                 }
               : undefined,
@@ -645,7 +705,9 @@ export class TransportController {
     };
   }
 
-  private mapTransporterPerformance(performance: any): TransporterPerformanceDto {
+  private mapTransporterPerformance(
+    performance: any,
+  ): TransporterPerformanceDto {
     const recentJobs = (performance.recentJobs || []).map((job: any) =>
       this.mapTransportJob(job, { includeRequest: true }),
     );
@@ -721,7 +783,9 @@ export class TransportController {
     };
   }
 
-  private mapBidTransporter(transporter: any): TransportBidTransporterSummaryDto | undefined {
+  private mapBidTransporter(
+    transporter: any,
+  ): TransportBidTransporterSummaryDto | undefined {
     if (!transporter) {
       return undefined;
     }
@@ -733,12 +797,12 @@ export class TransportController {
           registrationNumber: transporter.company.registrationNumber,
         }
       : transporter.companyName
-      ? {
-          id: transporter.companyId ?? 'external-company',
-          legalName: transporter.companyName,
-          registrationNumber: undefined,
-        }
-      : undefined;
+        ? {
+            id: transporter.companyId ?? "external-company",
+            legalName: transporter.companyName,
+            registrationNumber: undefined,
+          }
+        : undefined;
 
     return {
       id: transporter.id,
@@ -775,14 +839,14 @@ export class TransportController {
     if (value === null || value === undefined) {
       return undefined;
     }
-    if (typeof value === 'number') {
+    if (typeof value === "number") {
       return value;
     }
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       const parsed = Number(value);
       return Number.isNaN(parsed) ? undefined : parsed;
     }
-    if (typeof value === 'object' && typeof value.toNumber === 'function') {
+    if (typeof value === "object" && typeof value.toNumber === "function") {
       return value.toNumber();
     }
     return undefined;
@@ -806,7 +870,7 @@ export class TransportController {
     if (Array.isArray(value)) {
       return value;
     }
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       try {
         const parsed = JSON.parse(value);
         return Array.isArray(parsed) ? parsed : [];
@@ -814,7 +878,7 @@ export class TransportController {
         return [];
       }
     }
-    if (typeof value === 'object' && value !== null) {
+    if (typeof value === "object" && value !== null) {
       return Array.isArray(value) ? value : [];
     }
     return [];
@@ -824,15 +888,15 @@ export class TransportController {
     if (!value) {
       return {};
     }
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       try {
         const parsed = JSON.parse(value);
-        return typeof parsed === 'object' && parsed !== null ? parsed : {};
+        return typeof parsed === "object" && parsed !== null ? parsed : {};
       } catch (error) {
         return {};
       }
     }
-    if (typeof value === 'object') {
+    if (typeof value === "object") {
       return value ?? {};
     }
     return {};

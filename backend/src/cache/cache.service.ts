@@ -1,6 +1,6 @@
-import { Injectable, Inject, Logger } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { Injectable, Inject, Logger } from "@nestjs/common";
+import { CACHE_MANAGER } from "@nestjs/cache-manager";
+import { Cache } from "cache-manager";
 
 @Injectable()
 export class CacheService {
@@ -32,7 +32,9 @@ export class CacheService {
   async set(key: string, value: any, ttl?: number): Promise<void> {
     try {
       await this.cacheManager.set(key, value, ttl);
-      this.logger.debug(`Cache set for key: ${key}${ttl ? ` (TTL: ${ttl}s)` : ''}`);
+      this.logger.debug(
+        `Cache set for key: ${key}${ttl ? ` (TTL: ${ttl}s)` : ""}`,
+      );
     } catch (error) {
       this.logger.error(`Error setting cache: ${error.message}`);
     }
@@ -56,7 +58,7 @@ export class CacheService {
   async reset(): Promise<void> {
     try {
       await this.cacheManager.reset();
-      this.logger.log('Cache completely cleared');
+      this.logger.log("Cache completely cleared");
     } catch (error) {
       this.logger.error(`Error resetting cache: ${error.message}`);
     }
@@ -88,6 +90,8 @@ export class CacheService {
     // Note: In-memory cache doesn't support pattern matching
     // For production with Redis, implement proper pattern-based invalidation
     // For now, log the intention
-    this.logger.warn('Pattern-based invalidation requires Redis implementation');
+    this.logger.warn(
+      "Pattern-based invalidation requires Redis implementation",
+    );
   }
 }

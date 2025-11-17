@@ -1,19 +1,19 @@
-import { Module } from '@nestjs/common';
-import { PrismaModule } from '../prisma/prisma.module';
-import { AuthModule } from '../auth/auth.module';
+import { Module } from "@nestjs/common";
+import { PrismaModule } from "../prisma/prisma.module";
+import { AuthModule } from "../auth/auth.module";
 
 // Services
-import { TransportCostService } from './services/transport-cost.service';
-import { RouteOptimizationService } from './services/route-optimization.service';
-import { TransportCostSettingsService } from './services/transport-settings.service';
-import { TransportSettingsAdapterService } from './services/transport-settings-adapter.service';
-import { TransportBiddingService } from './services/transport-bidding.service';
-import { TransportService } from './services/transport-main.service';
+import { TransportCostService } from "./services/transport-cost.service";
+import { RouteOptimizationService } from "./services/route-optimization.service";
+import { TransportCostSettingsService } from "./services/transport-settings.service";
+import { TransportSettingsAdapterService } from "./services/transport-settings-adapter.service";
+import { TransportBiddingService } from "./services/transport-bidding.service";
+import { TransportService } from "./services/transport-main.service";
 
 // Controllers
-import { TransportController } from './controllers/transport.controller';
-import { TransportBiddingController } from './controllers/transport-bidding.controller';
-import { TransportController as TransportMainController } from './controllers/transport-main.controller';
+import { TransportController } from "./controllers/transport.controller";
+import { TransportBiddingController } from "./controllers/transport-bidding.controller";
+import { TransportController as TransportMainController } from "./controllers/transport-main.controller";
 
 @Module({
   imports: [PrismaModule, AuthModule],
@@ -25,7 +25,11 @@ import { TransportController as TransportMainController } from './controllers/tr
     TransportBiddingService,
     TransportService,
   ],
-  controllers: [TransportController, TransportBiddingController, TransportMainController],
+  controllers: [
+    TransportController,
+    TransportBiddingController,
+    TransportMainController,
+  ],
   exports: [
     TransportCostService,
     RouteOptimizationService,

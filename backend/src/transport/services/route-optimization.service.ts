@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from "@nestjs/common";
 
 export interface Location {
   lat: number;
@@ -8,11 +8,11 @@ export interface Location {
 export interface Pickup extends Location {
   id: string;
   quantity: number;
-  priority?: 'HIGH' | 'MEDIUM' | 'LOW';
+  priority?: "HIGH" | "MEDIUM" | "LOW";
 }
 
 export interface RoutePoint {
-  type: 'warehouse' | 'pickup' | 'delivery';
+  type: "warehouse" | "pickup" | "delivery";
   id?: string;
   location: Location;
   quantity?: number;
@@ -26,7 +26,7 @@ export interface OptimizedRoute {
   sequence: RoutePoint[];
   totalDistance: number;
   totalDuration: number; // in minutes
-  algorithm: 'nearest_neighbor' | 'tsp_2opt' | 'genetic';
+  algorithm: "nearest_neighbor" | "tsp_2opt" | "genetic";
 }
 
 export interface RouteComparison {
@@ -66,7 +66,7 @@ export class RouteOptimizationService {
     warehouseLocation: Location,
     pickups: Pickup[],
     deliveryLocation: Location,
-    algorithm: 'nearest_neighbor' | 'tsp_2opt' | 'genetic' = 'tsp_2opt',
+    algorithm: "nearest_neighbor" | "tsp_2opt" | "genetic" = "tsp_2opt",
     constraints?: RouteConstraints,
   ): Promise<{
     optimizedRoute: OptimizedRoute;
@@ -80,16 +80,25 @@ export class RouteOptimizationService {
     const startTime = Date.now();
 
     // Check cache
-    const cacheKey = this.generateCacheKey(warehouseLocation, pickups, deliveryLocation);
+    const cacheKey = this.generateCacheKey(
+      warehouseLocation,
+      pickups,
+      deliveryLocation,
+    );
     const cached = this.getFromCache(cacheKey);
     if (cached) {
       return {
         optimizedRoute: cached,
-        comparison: this.calculateComparison(warehouseLocation, pickups, deliveryLocation, cached),
+        comparison: this.calculateComparison(
+          warehouseLocation,
+          pickups,
+          deliveryLocation,
+          cached,
+        ),
         metrics: {
           computationTime: 0,
           numberOfPermutations: 0,
-          optimizationLevel: 'cached',
+          optimizationLevel: "cached",
         },
       };
     }
@@ -104,19 +113,35 @@ export class RouteOptimizationService {
     let permutations = 0;
 
     switch (algorithm) {
-      case 'nearest_neighbor':
-        optimizedSequence = this.nearestNeighbor(warehouseLocation, pickups, deliveryLocation);
+      case "nearest_neighbor":
+        optimizedSequence = this.nearestNeighbor(
+          warehouseLocation,
+          pickups,
+          deliveryLocation,
+        );
         permutations = pickups.length;
         break;
-      case 'tsp_2opt':
-        const nn = this.nearestNeighbor(warehouseLocation, pickups, deliveryLocation);
-        const result = this.twoOptImprovement(warehouseLocation, nn, deliveryLocation);
+      case "tsp_2opt":
+        const nn = this.nearestNeighbor(
+          warehouseLocation,
+          pickups,
+          deliveryLocation,
+        );
+        const result = this.twoOptImprovement(
+          warehouseLocation,
+          nn,
+          deliveryLocation,
+        );
         optimizedSequence = result.sequence;
         permutations = result.permutations;
         break;
-      case 'genetic':
+      case "genetic":
         // Simplified genetic algorithm for demonstration
-        optimizedSequence = this.geneticAlgorithm(warehouseLocation, pickups, deliveryLocation);
+        optimizedSequence = this.geneticAlgorithm(
+          warehouseLocation,
+          pickups,
+          deliveryLocation,
+        );
         permutations = pickups.length * 100; // Approximate
         break;
       default:
@@ -131,7 +156,8 @@ export class RouteOptimizationService {
     );
 
     // Calculate total distance and duration
-    const totalDistance = routePoints[routePoints.length - 1].cumulativeDistance;
+    const totalDistance =
+      routePoints[routePoints.length - 1].cumulativeDistance;
     const totalDuration = this.estimateDuration(totalDistance);
 
     const optimizedRoute: OptimizedRoute = {
@@ -285,7 +311,7 @@ export class RouteOptimizationService {
     // Evolve
     for (let gen = 0; gen < generations; gen++) {
       // Evaluate fitness (inverse of distance)
-      const fitness = population.map(seq => {
+      const fitness = population.map((seq) => {
         const distance = this.calculateTotalDistance(start, seq, end);
         return 1 / (distance + 1);
       });
@@ -296,7 +322,9 @@ export class RouteOptimizationService {
         .sort((a, b) => b.fitness - a.fitness);
 
       // Keep top 50%
-      const survivors = sorted.slice(0, populationSize / 2).map(item => item.seq);
+      const survivors = sorted
+        .slice(0, populationSize / 2)
+        .map((item) => item.seq);
 
       // Create new generation
       population = [...survivors];
@@ -304,12 +332,12 @@ export class RouteOptimizationService {
         const parent1 = survivors[Math.floor(Math.random() * survivors.length)];
         const parent2 = survivors[Math.floor(Math.random() * survivors.length)];
         const child = this.crossover(parent1, parent2);
-        
+
         // Mutation
         if (Math.random() < mutationRate) {
           this.mutate(child);
         }
-        
+
         population.push(child);
       }
     }
@@ -379,7 +407,7 @@ export class RouteOptimizationService {
 
     // Add warehouse
     points.push({
-      type: 'warehouse',
+      type: "warehouse",
       location: warehouse,
       distanceFromPrevious: 0,
       cumulativeDistance: 0,
@@ -391,7 +419,7 @@ export class RouteOptimizationService {
       cumulativeDistance += distance;
 
       points.push({
-        type: 'pickup',
+        type: "pickup",
         id: pickup.id,
         location: pickup,
         quantity: pickup.quantity,
@@ -407,7 +435,7 @@ export class RouteOptimizationService {
     cumulativeDistance += finalDistance;
 
     points.push({
-      type: 'delivery',
+      type: "delivery",
       location: delivery,
       distanceFromPrevious: finalDistance,
       cumulativeDistance,
@@ -426,7 +454,11 @@ export class RouteOptimizationService {
     optimizedRoute: OptimizedRoute,
   ): RouteComparison {
     // Calculate original distance (in order given)
-    const originalDistance = this.calculateTotalDistance(warehouse, originalPickups, delivery);
+    const originalDistance = this.calculateTotalDistance(
+      warehouse,
+      originalPickups,
+      delivery,
+    );
     const optimizedDistance = optimizedRoute.totalDistance;
     const distanceSaved = originalDistance - optimizedDistance;
     const percentageSaved = (distanceSaved / originalDistance) * 100;
@@ -499,9 +531,9 @@ export class RouteOptimizationService {
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
       Math.cos(this.toRad(point1.lat)) *
-      Math.cos(this.toRad(point2.lat)) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
+        Math.cos(this.toRad(point2.lat)) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
@@ -525,8 +557,8 @@ export class RouteOptimizationService {
   private sortByPriority(pickups: Pickup[]): Pickup[] {
     const priorityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 };
     return [...pickups].sort((a, b) => {
-      const aPriority = priorityOrder[a.priority || 'LOW'];
-      const bPriority = priorityOrder[b.priority || 'LOW'];
+      const aPriority = priorityOrder[a.priority || "LOW"];
+      const bPriority = priorityOrder[b.priority || "LOW"];
       return aPriority - bPriority;
     });
   }
@@ -552,9 +584,9 @@ export class RouteOptimizationService {
     delivery: Location,
   ): string {
     const pickupKey = pickups
-      .map(p => `${p.id}-${p.lat}-${p.lng}`)
+      .map((p) => `${p.id}-${p.lat}-${p.lng}`)
       .sort()
-      .join('|');
+      .join("|");
     return `${warehouse.lat},${warehouse.lng}-${pickupKey}-${delivery.lat},${delivery.lng}`;
   }
 
@@ -597,11 +629,11 @@ export class RouteOptimizationService {
     }
 
     const requiredTrips = Math.ceil(totalQuantity / vehicleCapacity);
-    const trips: MultiTripSuggestion['trips'] = [];
+    const trips: MultiTripSuggestion["trips"] = [];
 
     // Simple bin packing algorithm
     const sortedPickups = [...pickups].sort((a, b) => b.quantity - a.quantity);
-    
+
     for (let tripNum = 1; tripNum <= requiredTrips; tripNum++) {
       const tripPickups: Pickup[] = [];
       let currentCapacity = 0;

@@ -1,4 +1,12 @@
-import { IsEmail, IsString, IsOptional, IsArray, MinLength, Matches, IsPhoneNumber } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  IsOptional,
+  IsArray,
+  MinLength,
+  Matches,
+  IsPhoneNumber,
+} from "class-validator";
 
 export class RegisterCompanyDto {
   // Company Details
@@ -8,14 +16,14 @@ export class RegisterCompanyDto {
 
   @IsString()
   @Matches(/^[A-Z0-9]{6,20}$/, {
-    message: 'Registration number must be 6-20 characters, alphanumeric only',
+    message: "Registration number must be 6-20 characters, alphanumeric only",
   })
   registrationNumber: string;
 
   @IsString()
   @IsOptional()
   @Matches(/^[A-Z]{2}[0-9]{8,12}$/, {
-    message: 'VAT number must start with 2 letters followed by 8-12 digits',
+    message: "VAT number must start with 2 letters followed by 8-12 digits",
   })
   vatNumber?: string;
 
@@ -25,7 +33,7 @@ export class RegisterCompanyDto {
 
   @IsString()
   @Matches(/^\+?[1-9]\d{1,14}$/, {
-    message: 'Please provide a valid phone number',
+    message: "Please provide a valid phone number",
   })
   mainPhone: string;
 
@@ -54,7 +62,8 @@ export class RegisterCompanyDto {
   @IsString()
   @MinLength(8)
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
-    message: 'Password must contain uppercase, lowercase, number and special character',
+    message:
+      "Password must contain uppercase, lowercase, number and special character",
   })
   adminPassword: string;
 

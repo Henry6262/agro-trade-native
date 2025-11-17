@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ProfitCalculationService } from './profit-calculation.service';
-import { TransportCostService } from '../../transport/services/transport-cost.service';
-import { TradeOperation, BuyListing, SaleListing } from '@prisma/client';
+import { Injectable, Logger } from "@nestjs/common";
+import { PrismaService } from "../../prisma/prisma.service";
+import { ProfitCalculationService } from "./profit-calculation.service";
+import { TransportCostService } from "../../transport/services/transport-cost.service";
+import { TradeOperation, BuyListing, SaleListing } from "@prisma/client";
 
 export interface PriceScenario {
   id: string;
@@ -19,7 +19,7 @@ export interface PriceScenario {
   profitMargin: number;
   totalRevenue: number;
   totalCosts: number;
-  viability: 'HIGH' | 'MEDIUM' | 'LOW' | 'UNVIABLE';
+  viability: "HIGH" | "MEDIUM" | "LOW" | "UNVIABLE";
   acceptanceProbability: number;
   rank: number;
 }
@@ -43,7 +43,7 @@ export interface ScenarioAnalysis {
     unviableCount: number;
     maxProfit: number;
     minProfit: number;
-    riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+    riskLevel: "LOW" | "MEDIUM" | "HIGH";
   };
   recommendations: string[];
 }
@@ -74,9 +74,9 @@ export class PriceScenarioService {
   private readonly MAX_PROFIT_MARGIN = 15;
 
   private readonly QUALITY_MULTIPLIERS: QualityPriceMatrix[] = [
-    { quality: 'PREMIUM', priceMultiplier: 1.15, acceptanceRate: 0.7 },
-    { quality: 'STANDARD', priceMultiplier: 1.0, acceptanceRate: 0.85 },
-    { quality: 'ECONOMY', priceMultiplier: 0.85, acceptanceRate: 0.95 },
+    { quality: "PREMIUM", priceMultiplier: 1.15, acceptanceRate: 0.7 },
+    { quality: "STANDARD", priceMultiplier: 1.0, acceptanceRate: 0.85 },
+    { quality: "ECONOMY", priceMultiplier: 0.85, acceptanceRate: 0.95 },
   ];
 
   constructor(
@@ -111,7 +111,7 @@ export class PriceScenarioService {
 
     // Generate scenarios
     const scenarios: PriceScenario[] = [];
-    
+
     for (let i = 0; i < scenarioCount; i++) {
       const scenario = await this.generateSingleScenario(
         trade,
@@ -153,7 +153,11 @@ export class PriceScenarioService {
    */
   async performSensitivityAnalysis(
     tradeOperationId: string,
-    baseSellerPrices: Array<{ sellerId: string; price: number; quantity: number }>,
+    baseSellerPrices: Array<{
+      sellerId: string;
+      price: number;
+      quantity: number;
+    }>,
   ): Promise<SensitivityAnalysis> {
     const trade = await this.getTradeOperation(tradeOperationId);
     if (!trade) {
@@ -161,8 +165,9 @@ export class PriceScenarioService {
     }
 
     const quantity = trade.buyListing.quantity.toNumber();
-    const transportCost = trade.estimatedTransportCost?.toNumber() || quantity * 1.5;
-    
+    const transportCost =
+      trade.estimatedTransportCost?.toNumber() || quantity * 1.5;
+
     // Calculate total purchase cost
     const totalPurchaseCost = baseSellerPrices.reduce(
       (sum, s) => sum + s.price * s.quantity,
@@ -170,7 +175,7 @@ export class PriceScenarioService {
     );
 
     // Generate price points for analysis
-    const pricePoints: SensitivityAnalysis['pricePoints'] = [];
+    const pricePoints: SensitivityAnalysis["pricePoints"] = [];
     const minPrice = trade.buyListing.minPricePerUnit?.toNumber() || 300;
     const maxPrice = trade.buyListing.maxPricePerUnit.toNumber();
     const step = (maxPrice - minPrice) / 20;
@@ -179,7 +184,7 @@ export class PriceScenarioService {
       const revenue = price * quantity;
       const profit = revenue - totalPurchaseCost - transportCost;
       const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
-      
+
       pricePoints.push({
         buyerPrice: Math.round(price * 100) / 100,
         profitMargin: Math.round(margin * 100) / 100,
@@ -189,8 +194,9 @@ export class PriceScenarioService {
 
     // Calculate key price points
     const breakEvenPrice = (totalPurchaseCost + transportCost) / quantity;
-    const targetMarginPrice = 
-      (totalPurchaseCost + transportCost) / (quantity * (1 - this.TARGET_PROFIT_MARGIN / 100));
+    const targetMarginPrice =
+      (totalPurchaseCost + transportCost) /
+      (quantity * (1 - this.TARGET_PROFIT_MARGIN / 100));
     const maxAcceptablePrice = maxPrice;
 
     // Calculate price elasticity
@@ -225,9 +231,10 @@ export class PriceScenarioService {
 
     // Apply quality factor if enabled
     if (includeQualityFactors) {
-      const qualityFactor = this.QUALITY_MULTIPLIERS[
-        Math.floor(Math.random() * this.QUALITY_MULTIPLIERS.length)
-      ];
+      const qualityFactor =
+        this.QUALITY_MULTIPLIERS[
+          Math.floor(Math.random() * this.QUALITY_MULTIPLIERS.length)
+        ];
       buyerPrice *= qualityFactor.priceMultiplier;
     }
 
@@ -239,10 +246,11 @@ export class PriceScenarioService {
     );
 
     // Calculate transport cost with variations
-    let transportCost = trade.estimatedTransportCost?.toNumber() || quantity * 1.5;
+    let transportCost =
+      trade.estimatedTransportCost?.toNumber() || quantity * 1.5;
     if (includeTransportVariations) {
       const transportVariance = (Math.random() - 0.5) * 0.2; // ±10% variance
-      transportCost *= (1 + transportVariance);
+      transportCost *= 1 + transportVariance;
     }
 
     // Calculate profit metrics
@@ -253,7 +261,8 @@ export class PriceScenarioService {
     );
     const totalCosts = purchaseCost + transportCost;
     const estimatedProfit = totalRevenue - totalCosts;
-    const profitMargin = totalRevenue > 0 ? (estimatedProfit / totalRevenue) * 100 : 0;
+    const profitMargin =
+      totalRevenue > 0 ? (estimatedProfit / totalRevenue) * 100 : 0;
 
     // Determine viability
     const viability = this.determineViability(profitMargin);
@@ -288,8 +297,8 @@ export class PriceScenarioService {
     availableSellers: any[],
     requiredQuantity: number,
     priceVariance: number,
-  ): PriceScenario['sellerPrices'] {
-    const selected: PriceScenario['sellerPrices'] = [];
+  ): PriceScenario["sellerPrices"] {
+    const selected: PriceScenario["sellerPrices"] = [];
     let remainingQuantity = requiredQuantity;
 
     // Shuffle sellers for variety
@@ -300,19 +309,19 @@ export class PriceScenarioService {
 
       const availableQty = seller.quantity.toNumber();
       const basePrice = seller.askingPrice.toNumber();
-      
+
       // Apply price variance
       const variance = (Math.random() - 0.5) * 2 * priceVariance;
       const price = basePrice * (1 + variance);
-      
+
       const quantity = Math.min(availableQty, remainingQuantity);
-      
+
       selected.push({
         sellerId: seller.sellerId,
         sellerName: seller.seller.name || `Seller ${seller.sellerId.slice(-4)}`,
         price: Math.round(price * 100) / 100,
         quantity,
-        quality: seller.quality || 'STANDARD',
+        quality: seller.quality || "STANDARD",
       });
 
       remainingQuantity -= quantity;
@@ -329,16 +338,16 @@ export class PriceScenarioService {
     minProfitMargin: number,
   ): PriceScenario[] {
     return scenarios
-      .map(scenario => {
+      .map((scenario) => {
         // Calculate score based on multiple factors
         let score = 0;
-        
+
         // Profit margin weight (40%)
         score += (scenario.profitMargin / 100) * 40;
-        
+
         // Acceptance probability weight (30%)
         score += scenario.acceptanceProbability * 0.3;
-        
+
         // Viability weight (20%)
         const viabilityScore = {
           HIGH: 20,
@@ -347,9 +356,9 @@ export class PriceScenarioService {
           UNVIABLE: 0,
         };
         score += viabilityScore[scenario.viability];
-        
+
         // Absolute profit weight (10%)
-        const maxProfit = Math.max(...scenarios.map(s => s.estimatedProfit));
+        const maxProfit = Math.max(...scenarios.map((s) => s.estimatedProfit));
         score += (scenario.estimatedProfit / maxProfit) * 10;
 
         return { ...scenario, score };
@@ -367,9 +376,10 @@ export class PriceScenarioService {
   private findOptimalScenario(scenarios: PriceScenario[]): PriceScenario {
     // Find scenario closest to target margin with high acceptance probability
     const targetScenarios = scenarios.filter(
-      s => s.profitMargin >= this.TARGET_PROFIT_MARGIN &&
-           s.profitMargin <= this.MAX_PROFIT_MARGIN &&
-           s.acceptanceProbability >= 70,
+      (s) =>
+        s.profitMargin >= this.TARGET_PROFIT_MARGIN &&
+        s.profitMargin <= this.MAX_PROFIT_MARGIN &&
+        s.acceptanceProbability >= 70,
     );
 
     if (targetScenarios.length > 0) {
@@ -377,33 +387,38 @@ export class PriceScenarioService {
     }
 
     // Fallback to highest viable scenario
-    const viableScenarios = scenarios.filter(s => s.viability !== 'UNVIABLE');
+    const viableScenarios = scenarios.filter((s) => s.viability !== "UNVIABLE");
     return viableScenarios[0] || scenarios[0];
   }
 
   /**
    * Calculate statistics for scenarios
    */
-  private calculateStatistics(scenarios: PriceScenario[]): ScenarioAnalysis['statistics'] {
-    const margins = scenarios.map(s => s.profitMargin);
-    const profits = scenarios.map(s => s.estimatedProfit);
-    
-    const viableCount = scenarios.filter(s => s.viability !== 'UNVIABLE').length;
+  private calculateStatistics(
+    scenarios: PriceScenario[],
+  ): ScenarioAnalysis["statistics"] {
+    const margins = scenarios.map((s) => s.profitMargin);
+    const profits = scenarios.map((s) => s.estimatedProfit);
+
+    const viableCount = scenarios.filter(
+      (s) => s.viability !== "UNVIABLE",
+    ).length;
     const unviableCount = scenarios.length - viableCount;
-    
+
     // Calculate average and median
-    const averageMargin = margins.reduce((sum, m) => sum + m, 0) / margins.length;
+    const averageMargin =
+      margins.reduce((sum, m) => sum + m, 0) / margins.length;
     const sortedMargins = [...margins].sort((a, b) => a - b);
     const medianMargin = sortedMargins[Math.floor(sortedMargins.length / 2)];
-    
+
     // Determine risk level
-    let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH';
+    let riskLevel: "LOW" | "MEDIUM" | "HIGH";
     if (viableCount >= scenarios.length * 0.7) {
-      riskLevel = 'LOW';
+      riskLevel = "LOW";
     } else if (viableCount >= scenarios.length * 0.4) {
-      riskLevel = 'MEDIUM';
+      riskLevel = "MEDIUM";
     } else {
-      riskLevel = 'HIGH';
+      riskLevel = "HIGH";
     }
 
     return {
@@ -422,15 +437,15 @@ export class PriceScenarioService {
    */
   private generateRecommendations(
     scenarios: PriceScenario[],
-    statistics: ScenarioAnalysis['statistics'],
+    statistics: ScenarioAnalysis["statistics"],
     minProfitMargin: number,
   ): string[] {
     const recommendations: string[] = [];
 
     // Risk assessment
-    if (statistics.riskLevel === 'HIGH') {
+    if (statistics.riskLevel === "HIGH") {
       recommendations.push(
-        'High risk: Most scenarios are unviable. Consider adjusting price expectations or finding lower-cost suppliers.',
+        "High risk: Most scenarios are unviable. Consider adjusting price expectations or finding lower-cost suppliers.",
       );
     }
 
@@ -446,18 +461,20 @@ export class PriceScenarioService {
     }
 
     // Optimal scenario recommendation
-    const optimal = scenarios.find(s => s.rank === 1);
-    if (optimal && optimal.viability === 'HIGH') {
+    const optimal = scenarios.find((s) => s.rank === 1);
+    if (optimal && optimal.viability === "HIGH") {
       recommendations.push(
         `Optimal scenario offers ${optimal.profitMargin}% margin with ${optimal.acceptanceProbability}% acceptance probability.`,
       );
     }
 
     // Transport optimization
-    const avgTransportCost = scenarios.reduce((sum, s) => sum + s.transportCost, 0) / scenarios.length;
-    const avgRevenue = scenarios.reduce((sum, s) => sum + s.totalRevenue, 0) / scenarios.length;
+    const avgTransportCost =
+      scenarios.reduce((sum, s) => sum + s.transportCost, 0) / scenarios.length;
+    const avgRevenue =
+      scenarios.reduce((sum, s) => sum + s.totalRevenue, 0) / scenarios.length;
     const transportPercentage = (avgTransportCost / avgRevenue) * 100;
-    
+
     if (transportPercentage > 10) {
       recommendations.push(
         `Transport costs represent ${transportPercentage.toFixed(1)}% of revenue. Consider route optimization.`,
@@ -465,14 +482,16 @@ export class PriceScenarioService {
     }
 
     // Quality vs price analysis
-    const premiumScenarios = scenarios.filter(s => 
-      s.sellerPrices.some(sp => sp.quality === 'PREMIUM'),
+    const premiumScenarios = scenarios.filter((s) =>
+      s.sellerPrices.some((sp) => sp.quality === "PREMIUM"),
     );
     if (premiumScenarios.length > 0) {
-      const avgPremiumMargin = premiumScenarios.reduce((sum, s) => sum + s.profitMargin, 0) / premiumScenarios.length;
+      const avgPremiumMargin =
+        premiumScenarios.reduce((sum, s) => sum + s.profitMargin, 0) /
+        premiumScenarios.length;
       if (avgPremiumMargin > statistics.averageMargin) {
         recommendations.push(
-          'Premium quality products yield higher margins. Consider targeting quality-conscious buyers.',
+          "Premium quality products yield higher margins. Consider targeting quality-conscious buyers.",
         );
       }
     }
@@ -483,15 +502,15 @@ export class PriceScenarioService {
   /**
    * Determine viability level
    */
-  private determineViability(profitMargin: number): PriceScenario['viability'] {
+  private determineViability(profitMargin: number): PriceScenario["viability"] {
     if (profitMargin >= this.TARGET_PROFIT_MARGIN) {
-      return 'HIGH';
+      return "HIGH";
     } else if (profitMargin >= this.MIN_PROFIT_MARGIN) {
-      return 'MEDIUM';
+      return "MEDIUM";
     } else if (profitMargin > 0) {
-      return 'LOW';
+      return "LOW";
     } else {
-      return 'UNVIABLE';
+      return "UNVIABLE";
     }
   }
 
@@ -501,7 +520,7 @@ export class PriceScenarioService {
   private calculateAcceptanceProbability(
     buyerPrice: number,
     maxBuyerPrice: number,
-    sellers: PriceScenario['sellerPrices'],
+    sellers: PriceScenario["sellerPrices"],
     profitMargin: number,
   ): number {
     let probability = 100;
@@ -511,14 +530,14 @@ export class PriceScenarioService {
     if (buyerPriceRatio > 1) {
       probability *= Math.exp(-2 * (buyerPriceRatio - 1)); // Exponential decay
     } else {
-      probability *= (1 - (1 - buyerPriceRatio) * 0.3); // Linear increase
+      probability *= 1 - (1 - buyerPriceRatio) * 0.3; // Linear increase
     }
 
     // Seller acceptance based on their asking prices
     for (const seller of sellers) {
       // Assume sellers more likely to accept higher prices
       const sellerAcceptance = Math.min(100, 70 + (seller.price / 100) * 5);
-      probability *= (sellerAcceptance / 100);
+      probability *= sellerAcceptance / 100;
     }
 
     // Adjust for profit margin
@@ -533,7 +552,7 @@ export class PriceScenarioService {
    * Calculate price elasticity
    */
   private calculatePriceElasticity(
-    pricePoints: SensitivityAnalysis['pricePoints'],
+    pricePoints: SensitivityAnalysis["pricePoints"],
   ): number {
     if (pricePoints.length < 2) return 0;
 
@@ -544,10 +563,13 @@ export class PriceScenarioService {
     for (let i = 1; i < pricePoints.length; i++) {
       const p1 = pricePoints[i - 1];
       const p2 = pricePoints[i];
-      
-      const priceChange = (p2.buyerPrice - p1.buyerPrice) / ((p2.buyerPrice + p1.buyerPrice) / 2);
-      const marginChange = (p2.profitMargin - p1.profitMargin) / ((p2.profitMargin + p1.profitMargin) / 2);
-      
+
+      const priceChange =
+        (p2.buyerPrice - p1.buyerPrice) / ((p2.buyerPrice + p1.buyerPrice) / 2);
+      const marginChange =
+        (p2.profitMargin - p1.profitMargin) /
+        ((p2.profitMargin + p1.profitMargin) / 2);
+
       if (priceChange !== 0) {
         totalElasticity += Math.abs(marginChange / priceChange);
         count++;
@@ -587,7 +609,7 @@ export class PriceScenarioService {
     return await this.prisma.saleListing.findMany({
       where: {
         productId: buyListing.productId,
-        status: 'ACTIVE',
+        status: "ACTIVE",
         quantity: {
           gt: 0,
         },
@@ -596,7 +618,7 @@ export class PriceScenarioService {
         seller: true,
       },
       orderBy: {
-        askingPrice: 'asc',
+        askingPrice: "asc",
       },
     });
   }
@@ -631,13 +653,13 @@ export class PriceScenarioService {
         strategy: strategy.name,
         bestScenario: analysis.optimal,
         averageMargin: analysis.statistics.averageMargin,
-        viablePercentage: 
+        viablePercentage:
           (analysis.statistics.viableCount / analysis.scenarios.length) * 100,
       });
     }
 
     // Determine winner based on average margin
-    const winner = results.reduce((best, current) => 
+    const winner = results.reduce((best, current) =>
       current.averageMargin > best.averageMargin ? current : best,
     );
 

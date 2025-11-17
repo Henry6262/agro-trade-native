@@ -4,14 +4,14 @@ import {
   BadRequestException,
   ForbiddenException,
   Logger,
-} from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+} from "@nestjs/common";
+import { PrismaService } from "../../prisma/prisma.service";
 import {
   TransportRequestStatus,
   BidStatus,
   TransportJobStatus,
   TruckType,
-} from '@prisma/client';
+} from "@prisma/client";
 
 @Injectable()
 export class TransportService {
@@ -42,7 +42,7 @@ export class TransportService {
     });
 
     if (!tradeOperation) {
-      throw new NotFoundException('Trade operation not found');
+      throw new NotFoundException("Trade operation not found");
     }
 
     // Calculate distance between pickup and delivery
@@ -67,7 +67,7 @@ export class TransportService {
             address: data.pickupLocation,
             quantity: data.estimatedWeight,
             sellerId: null,
-          }
+          },
         ],
         deliveryPoint: {
           lat: data.deliveryLatitude,
@@ -77,10 +77,13 @@ export class TransportService {
         },
         totalWeight: data.estimatedWeight,
         estimatedDistance: distance,
-        requiredVehicleType: data.requiredVehicleType as TruckType || TruckType.FLATBED,
+        requiredVehicleType:
+          (data.requiredVehicleType as TruckType) || TruckType.FLATBED,
         specialRequirements: data.specialRequirements || [],
         pickupWindowStart: data.pickupDate,
-        pickupWindowEnd: new Date(data.pickupDate.getTime() + 4 * 60 * 60 * 1000), // 4 hour window
+        pickupWindowEnd: new Date(
+          data.pickupDate.getTime() + 4 * 60 * 60 * 1000,
+        ), // 4 hour window
         deliveryDeadline: data.deliveryDate,
         biddingDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours from now
         status: TransportRequestStatus.OPEN,
@@ -116,7 +119,7 @@ export class TransportService {
     });
 
     if (!transporter) {
-      throw new NotFoundException('Transporter not found');
+      throw new NotFoundException("Transporter not found");
     }
 
     // Get all OPEN transport requests
@@ -147,14 +150,15 @@ export class TransportService {
           where: { transporterId: filters.transporterId },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     // Filter by radius if provided and transporter has coordinates
     if (filters.radius && transporter.company) {
-      const transporterCoords = (transporter.company as any).metadata?.coordinates;
+      const transporterCoords = (transporter.company as any).metadata
+        ?.coordinates;
       if (transporterCoords?.lat && transporterCoords?.lng) {
-        return requests.filter(request => {
+        return requests.filter((request) => {
           const pickupPoints = request.pickupPoints as any[];
           if (!pickupPoints || pickupPoints.length === 0) return false;
           const firstPickup = pickupPoints[0];
@@ -204,7 +208,7 @@ export class TransportService {
     });
 
     if (!request) {
-      throw new NotFoundException('Transport request not found');
+      throw new NotFoundException("Transport request not found");
     }
 
     return request;
@@ -217,7 +221,9 @@ export class TransportService {
     return this.prisma.transportRequest.findMany({
       where: {
         ...(filters.status && { status: filters.status }),
-        ...(filters.tradeOperationId && { tradeOperationId: filters.tradeOperationId }),
+        ...(filters.tradeOperationId && {
+          tradeOperationId: filters.tradeOperationId,
+        }),
       },
       include: {
         tradeOperation: {
@@ -240,7 +246,7 @@ export class TransportService {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -260,11 +266,11 @@ export class TransportService {
     });
 
     if (!request) {
-      throw new NotFoundException('Transport request not found');
+      throw new NotFoundException("Transport request not found");
     }
 
     if (request.status !== TransportRequestStatus.OPEN) {
-      throw new BadRequestException('Transport request is not accepting bids');
+      throw new BadRequestException("Transport request is not accepting bids");
     }
 
     // Check if transporter already has a bid
@@ -277,7 +283,9 @@ export class TransportService {
     });
 
     if (existingBid) {
-      throw new BadRequestException('You already have an active bid for this request');
+      throw new BadRequestException(
+        "You already have an active bid for this request",
+      );
     }
 
     // Create the bid
@@ -301,7 +309,9 @@ export class TransportService {
       },
     });
 
-    this.logger.log(`Bid submitted by ${data.transporterId} for request ${data.transportRequestId}`);
+    this.logger.log(
+      `Bid submitted by ${data.transporterId} for request ${data.transportRequestId}`,
+    );
 
     return bid;
   }
@@ -321,15 +331,15 @@ export class TransportService {
     });
 
     if (!bid) {
-      throw new NotFoundException('Bid not found');
+      throw new NotFoundException("Bid not found");
     }
 
     if (bid.transporterId !== transporterId) {
-      throw new ForbiddenException('You can only update your own bids');
+      throw new ForbiddenException("You can only update your own bids");
     }
 
     if (bid.status !== BidStatus.PENDING) {
-      throw new BadRequestException('Can only update pending bids');
+      throw new BadRequestException("Can only update pending bids");
     }
 
     return this.prisma.transportBid.update({
@@ -350,15 +360,15 @@ export class TransportService {
     });
 
     if (!bid) {
-      throw new NotFoundException('Bid not found');
+      throw new NotFoundException("Bid not found");
     }
 
     if (bid.transporterId !== transporterId) {
-      throw new ForbiddenException('You can only withdraw your own bids');
+      throw new ForbiddenException("You can only withdraw your own bids");
     }
 
     if (bid.status !== BidStatus.PENDING) {
-      throw new BadRequestException('Can only withdraw pending bids');
+      throw new BadRequestException("Can only withdraw pending bids");
     }
 
     return this.prisma.transportBid.update({
@@ -386,7 +396,7 @@ export class TransportService {
           },
         },
       },
-      orderBy: { submittedAt: 'desc' },
+      orderBy: { submittedAt: "desc" },
     });
   }
 
@@ -398,7 +408,7 @@ export class TransportService {
           include: { company: true },
         },
       },
-      orderBy: { bidAmount: 'asc' }, // Cheapest first
+      orderBy: { bidAmount: "asc" }, // Cheapest first
     });
   }
 
@@ -412,11 +422,11 @@ export class TransportService {
       });
 
       if (!bid) {
-        throw new NotFoundException('Bid not found');
+        throw new NotFoundException("Bid not found");
       }
 
       if (bid.status !== BidStatus.PENDING) {
-        throw new BadRequestException('Bid is not pending');
+        throw new BadRequestException("Bid is not pending");
       }
 
       // Accept this bid
@@ -477,11 +487,11 @@ export class TransportService {
     });
 
     if (!bid) {
-      throw new NotFoundException('Bid not found');
+      throw new NotFoundException("Bid not found");
     }
 
     if (bid.status !== BidStatus.PENDING) {
-      throw new BadRequestException('Bid is not pending');
+      throw new BadRequestException("Bid is not pending");
     }
 
     return this.prisma.transportBid.update({
@@ -514,7 +524,7 @@ export class TransportService {
           },
         },
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: "asc" },
     });
   }
 
@@ -524,15 +534,15 @@ export class TransportService {
     });
 
     if (!job) {
-      throw new NotFoundException('Job not found');
+      throw new NotFoundException("Job not found");
     }
 
     if (job.transporterId !== transporterId) {
-      throw new ForbiddenException('You can only start your own jobs');
+      throw new ForbiddenException("You can only start your own jobs");
     }
 
     if (job.status !== TransportJobStatus.ASSIGNED) {
-      throw new BadRequestException('Job is not assigned');
+      throw new BadRequestException("Job is not assigned");
     }
 
     return this.prisma.transportJob.update({
@@ -557,7 +567,7 @@ export class TransportService {
             timestamp: new Date(),
             notes: data.pickupNotes,
             weight: data.actualWeight,
-          }
+          },
         ],
       },
     });
@@ -575,7 +585,7 @@ export class TransportService {
         completedAt: new Date(),
         deliveryPhotos: data.deliveryPhotos || [],
         proofOfDelivery: data.recipientSignature,
-        notes: data.deliveryNotes || '',
+        notes: data.deliveryNotes || "",
         onTimeDelivery: true,
       },
     });
@@ -597,7 +607,7 @@ export class TransportService {
     });
 
     if (!job || job.transporterId !== transporterId) {
-      throw new ForbiddenException('Invalid job');
+      throw new ForbiddenException("Invalid job");
     }
 
     // Update metadata with latest location
@@ -608,7 +618,7 @@ export class TransportService {
           lat: data.latitude,
           lng: data.longitude,
           timestamp: data.timestamp || new Date(),
-          address: data.address || 'In transit',
+          address: data.address || "In transit",
         },
       },
     });
@@ -627,7 +637,7 @@ export class TransportService {
           include: { company: true },
         },
       },
-      orderBy: { bidAmount: 'asc' },
+      orderBy: { bidAmount: "asc" },
     });
 
     const request = await this.prisma.transportRequest.findUnique({
@@ -635,11 +645,11 @@ export class TransportService {
     });
 
     if (!request) {
-      throw new NotFoundException('Request not found');
+      throw new NotFoundException("Request not found");
     }
 
     // Calculate metrics for each bid
-    const comparison = bids.map(bid => ({
+    const comparison = bids.map((bid) => ({
       bidId: bid.id,
       transporter: {
         id: bid.transporterId,
@@ -668,7 +678,8 @@ export class TransportService {
         totalBids: bids.length,
         averagePrice:
           bids.length > 0
-            ? bids.reduce((sum, b) => sum + Number(b.bidAmount), 0) / bids.length
+            ? bids.reduce((sum, b) => sum + Number(b.bidAmount), 0) /
+              bids.length
             : 0,
         lowestBid: bids[0]?.bidAmount || 0,
         highestBid: bids[bids.length - 1]?.bidAmount || 0,
@@ -698,7 +709,7 @@ export class TransportService {
 
     const recentJobs = await this.prisma.transportJob.findMany({
       where: { transporterId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: 10,
       include: {
         transportRequest: {
@@ -719,7 +730,8 @@ export class TransportService {
         completedJobs,
         totalJobs,
         completionRate: totalJobs > 0 ? (completedJobs / totalJobs) * 100 : 0,
-        onTimeDeliveryRate: completedJobs > 0 ? (onTimeDeliveries / completedJobs) * 100 : 0,
+        onTimeDeliveryRate:
+          completedJobs > 0 ? (onTimeDeliveries / completedJobs) * 100 : 0,
       },
       recentJobs,
     };
@@ -727,7 +739,10 @@ export class TransportService {
 
   // ========== HELPERS ==========
 
-  async userHasBidOnRequest(userId: string, requestId: string): Promise<boolean> {
+  async userHasBidOnRequest(
+    userId: string,
+    requestId: string,
+  ): Promise<boolean> {
     const bid = await this.prisma.transportBid.findFirst({
       where: {
         transporterId: userId,
@@ -737,7 +752,12 @@ export class TransportService {
     return !!bid;
   }
 
-  private calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  private calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ): number {
     const R = 6371; // Radius of the Earth in km
     const dLat = this.deg2rad(lat2 - lat1);
     const dLon = this.deg2rad(lon2 - lon1);

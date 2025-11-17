@@ -8,10 +8,10 @@ import {
   IsString,
   Min,
   ValidateNested,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { ProductUnit, RequestStatus } from '@prisma/client';
-import { PartialType } from '@nestjs/swagger';
+} from "class-validator";
+import { Type } from "class-transformer";
+import { ProductUnit, RequestStatus } from "@prisma/client";
+import { PartialType } from "@nestjs/swagger";
 
 class LocationDto {
   @IsNumber()

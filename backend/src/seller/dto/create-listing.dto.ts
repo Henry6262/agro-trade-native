@@ -1,17 +1,26 @@
-import { IsNotEmpty, IsString, IsNumber, IsEnum, IsOptional, IsObject, ValidateNested, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsEnum,
+  IsOptional,
+  IsObject,
+  ValidateNested,
+  Min,
+} from "class-validator";
+import { Type } from "class-transformer";
 
 export enum OfferType {
-  LISTING = 'listing',
-  CUSTOM_OFFER = 'custom-offer',
+  LISTING = "listing",
+  CUSTOM_OFFER = "custom-offer",
 }
 
 export enum ListingStatus {
-  DRAFT = 'draft',
-  ACTIVE = 'active',
-  PENDING = 'pending',
-  SOLD = 'sold',
-  EXPIRED = 'expired',
+  DRAFT = "draft",
+  ACTIVE = "active",
+  PENDING = "pending",
+  SOLD = "sold",
+  EXPIRED = "expired",
 }
 
 class LocationDto {

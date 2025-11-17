@@ -1,27 +1,41 @@
-import { BadRequestException, Controller, Get, Post, Body, Request, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { plainToInstance } from 'class-transformer';
-import { OnboardingService } from './onboarding.service';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Post,
+  Body,
+  Request,
+  UseGuards,
+} from "@nestjs/common";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from "@nestjs/swagger";
+import { plainToInstance } from "class-transformer";
+import { OnboardingService } from "./onboarding.service";
 import {
   SellerOnboardingDto,
   BuyerOnboardingDto,
   TransporterOnboardingDto,
-} from './dto';
+} from "./dto";
 import {
   OnboardingStatusResponseDto,
   OnboardingUserResponseDto,
-} from './dto/onboarding-response.dto';
+} from "./dto/onboarding-response.dto";
 
-@ApiTags('Onboarding')
+@ApiTags("Onboarding")
 @ApiBearerAuth()
-@Controller('onboarding')
+@Controller("onboarding")
 @UseGuards(JwtAuthGuard)
 export class OnboardingController {
   constructor(private onboardingService: OnboardingService) {}
 
-  @Post('seller')
-  @ApiOperation({ summary: 'Complete seller onboarding' })
+  @Post("seller")
+  @ApiOperation({ summary: "Complete seller onboarding" })
   @ApiBody({ type: SellerOnboardingDto })
   @ApiOkResponse({ type: OnboardingUserResponseDto })
   async completeSellerOnboarding(
@@ -36,8 +50,8 @@ export class OnboardingController {
     return this.finishOnboarding(req.user.sub);
   }
 
-  @Post('buyer')
-  @ApiOperation({ summary: 'Complete buyer onboarding' })
+  @Post("buyer")
+  @ApiOperation({ summary: "Complete buyer onboarding" })
   @ApiBody({ type: BuyerOnboardingDto })
   @ApiOkResponse({ type: OnboardingUserResponseDto })
   async completeBuyerOnboarding(
@@ -52,8 +66,8 @@ export class OnboardingController {
     return this.finishOnboarding(req.user.sub);
   }
 
-  @Post('transporter')
-  @ApiOperation({ summary: 'Complete transporter onboarding' })
+  @Post("transporter")
+  @ApiOperation({ summary: "Complete transporter onboarding" })
   @ApiBody({ type: TransporterOnboardingDto })
   @ApiOkResponse({ type: OnboardingUserResponseDto })
   async completeTransporterOnboarding(
@@ -68,26 +82,32 @@ export class OnboardingController {
     return this.finishOnboarding(req.user.sub);
   }
 
-  @Get('status')
-  @ApiOperation({ summary: 'Get onboarding status' })
+  @Get("status")
+  @ApiOperation({ summary: "Get onboarding status" })
   @ApiOkResponse({ type: OnboardingStatusResponseDto })
   async getOnboardingStatus(@Request() req: any) {
-    const status = await this.onboardingService.getOnboardingStatus(req.user.sub);
+    const status = await this.onboardingService.getOnboardingStatus(
+      req.user.sub,
+    );
     return this.serializeStatus(status);
   }
 
-  private async finishOnboarding(userId: string): Promise<OnboardingUserResponseDto> {
+  private async finishOnboarding(
+    userId: string,
+  ): Promise<OnboardingUserResponseDto> {
     try {
       const user = await this.onboardingService.completeOnboarding(userId);
       return this.serializeUser(user);
     } catch (error: any) {
-      throw new BadRequestException(error?.message || 'Onboarding is not complete');
+      throw new BadRequestException(
+        error?.message || "Onboarding is not complete",
+      );
     }
   }
 
   private serializeStatus(status: any): OnboardingStatusResponseDto {
     if (!status) {
-      throw new BadRequestException('Invalid onboarding status payload');
+      throw new BadRequestException("Invalid onboarding status payload");
     }
 
     const company = status.data?.company
@@ -111,8 +131,14 @@ export class OnboardingController {
           cityId: address.cityId,
           postalCode: address.postalCode,
           country: address.country,
-          latitude: address.latitude !== null && address.latitude !== undefined ? Number(address.latitude) : null,
-          longitude: address.longitude !== null && address.longitude !== undefined ? Number(address.longitude) : null,
+          latitude:
+            address.latitude !== null && address.latitude !== undefined
+              ? Number(address.latitude)
+              : null,
+          longitude:
+            address.longitude !== null && address.longitude !== undefined
+              ? Number(address.longitude)
+              : null,
           isDefault: address.isDefault,
         }))
       : [];
@@ -121,11 +147,20 @@ export class OnboardingController {
       ? status.data.trucks.map((truck: any) => ({
           id: truck.id,
           plateNumber: truck.plateNumber,
-          capacity: truck.capacity !== null && truck.capacity !== undefined ? Number(truck.capacity) : null,
+          capacity:
+            truck.capacity !== null && truck.capacity !== undefined
+              ? Number(truck.capacity)
+              : null,
           type: truck.type,
           currentLocation: truck.currentLocation,
-          latitude: truck.latitude !== null && truck.latitude !== undefined ? Number(truck.latitude) : null,
-          longitude: truck.longitude !== null && truck.longitude !== undefined ? Number(truck.longitude) : null,
+          latitude:
+            truck.latitude !== null && truck.latitude !== undefined
+              ? Number(truck.latitude)
+              : null,
+          longitude:
+            truck.longitude !== null && truck.longitude !== undefined
+              ? Number(truck.longitude)
+              : null,
           isAvailable: Boolean(truck.isAvailable),
         }))
       : [];
@@ -150,7 +185,7 @@ export class OnboardingController {
 
   private serializeUser(user: any): OnboardingUserResponseDto {
     if (!user) {
-      throw new BadRequestException('Invalid onboarding user payload');
+      throw new BadRequestException("Invalid onboarding user payload");
     }
 
     return plainToInstance(

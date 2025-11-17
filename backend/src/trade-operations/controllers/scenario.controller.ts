@@ -8,7 +8,7 @@ import {
   UseGuards,
   HttpStatus,
   BadRequestException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
@@ -16,12 +16,12 @@ import {
   ApiBearerAuth,
   ApiParam,
   ApiQuery,
-} from '@nestjs/swagger';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
-import { PriceScenarioService } from '../services/price-scenario.service';
+} from "@nestjs/swagger";
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../../auth/guards/roles.guard";
+import { Roles } from "../../auth/decorators/roles.decorator";
+import { UserRole } from "@prisma/client";
+import { PriceScenarioService } from "../services/price-scenario.service";
 import {
   ScenarioGenerationRequestDto,
   ScenarioAnalysisResponseDto,
@@ -32,38 +32,39 @@ import {
   QuickEstimateDto,
   QuickEstimateResponseDto,
   PriceScenarioDto,
-} from '../dto/price-scenario.dto';
+} from "../dto/price-scenario.dto";
 
-@ApiTags('Price Scenarios')
+@ApiTags("Price Scenarios")
 @ApiBearerAuth()
 // @UseGuards(JwtAuthGuard, RolesGuard) // Temporarily disabled for testing
-@Controller('scenarios')
+@Controller("scenarios")
 export class ScenarioController {
-  constructor(
-    private readonly priceScenarioService: PriceScenarioService,
-  ) {}
+  constructor(private readonly priceScenarioService: PriceScenarioService) {}
 
-  @Post('generate')
+  @Post("generate")
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Generate multiple pricing scenarios for optimal profit' })
+  @ApiOperation({
+    summary: "Generate multiple pricing scenarios for optimal profit",
+  })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Generated scenarios with analysis',
+    description: "Generated scenarios with analysis",
     type: ScenarioAnalysisResponseDto,
   })
   async generateScenarios(
     @Body() generationDto: ScenarioGenerationRequestDto,
   ): Promise<ScenarioAnalysisResponseDto> {
-    const analysis = await this.priceScenarioService.generateScenarios(generationDto);
+    const analysis =
+      await this.priceScenarioService.generateScenarios(generationDto);
     return analysis;
   }
 
-  @Post('sensitivity-analysis')
+  @Post("sensitivity-analysis")
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Perform price sensitivity analysis' })
+  @ApiOperation({ summary: "Perform price sensitivity analysis" })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Sensitivity analysis results',
+    description: "Sensitivity analysis results",
     type: SensitivityAnalysisResponseDto,
   })
   async performSensitivityAnalysis(
@@ -87,12 +88,12 @@ export class ScenarioController {
     };
   }
 
-  @Post('compare-strategies')
+  @Post("compare-strategies")
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Compare different pricing strategies' })
+  @ApiOperation({ summary: "Compare different pricing strategies" })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Strategy comparison results',
+    description: "Strategy comparison results",
     type: StrategyComparisonResponseDto,
   })
   async compareStrategies(
@@ -112,12 +113,14 @@ export class ScenarioController {
     };
   }
 
-  @Post('quick-estimate')
+  @Post("quick-estimate")
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Get quick profit estimate without creating trade operation' })
+  @ApiOperation({
+    summary: "Get quick profit estimate without creating trade operation",
+  })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Quick estimate results',
+    description: "Quick estimate results",
     type: QuickEstimateResponseDto,
   })
   async quickEstimate(
@@ -126,21 +129,24 @@ export class ScenarioController {
     const quantity = estimateDto.quantity;
     const revenue = estimateDto.buyerPrice * quantity;
     const purchaseCost = estimateDto.avgSellerPrice * quantity;
-    
+
     // Estimate transport cost
     const transportDistance = estimateDto.transportDistance || 200;
     const transportCost = transportDistance * 0.15; // Base rate
-    
+
     const estimatedProfit = revenue - purchaseCost - transportCost;
     const profitMargin = revenue > 0 ? (estimatedProfit / revenue) * 100 : 0;
-    
+
     // Calculate price guidance
     const minMargin = 5;
     const targetMargin = 7;
-    
+
     const minSellerPrice = estimateDto.avgSellerPrice * 0.9;
-    const maxSellerPrice = estimateDto.buyerPrice * (1 - minMargin / 100) - (transportCost / quantity);
-    const targetSellerPrice = estimateDto.buyerPrice * (1 - targetMargin / 100) - (transportCost / quantity);
+    const maxSellerPrice =
+      estimateDto.buyerPrice * (1 - minMargin / 100) - transportCost / quantity;
+    const targetSellerPrice =
+      estimateDto.buyerPrice * (1 - targetMargin / 100) -
+      transportCost / quantity;
 
     return {
       revenue,
@@ -157,43 +163,47 @@ export class ScenarioController {
     };
   }
 
-  @Get(':tradeOperationId/scenarios')
+  @Get(":tradeOperationId/scenarios")
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Get saved scenarios for a trade operation' })
-  @ApiParam({ name: 'tradeOperationId', description: 'Trade operation ID' })
-  @ApiQuery({ name: 'viability', enum: ['HIGH', 'MEDIUM', 'LOW', 'UNVIABLE'], required: false })
-  @ApiQuery({ name: 'limit', type: Number, required: false, example: 10 })
+  @ApiOperation({ summary: "Get saved scenarios for a trade operation" })
+  @ApiParam({ name: "tradeOperationId", description: "Trade operation ID" })
+  @ApiQuery({
+    name: "viability",
+    enum: ["HIGH", "MEDIUM", "LOW", "UNVIABLE"],
+    required: false,
+  })
+  @ApiQuery({ name: "limit", type: Number, required: false, example: 10 })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'List of saved scenarios',
+    description: "List of saved scenarios",
   })
   async getSavedScenarios(
-    @Param('tradeOperationId') tradeOperationId: string,
-    @Query('viability') viability?: string,
-    @Query('limit') limit = '10',
+    @Param("tradeOperationId") tradeOperationId: string,
+    @Query("viability") viability?: string,
+    @Query("limit") limit = "10",
   ): Promise<any> {
     // This would retrieve saved scenarios from the database
     // For now, generate mock data
     const scenarios: PriceScenarioDto[] = [];
-    
+
     for (let i = 1; i <= parseInt(limit); i++) {
       scenarios.push({
         id: `scenario_${i}`,
         buyerPrice: 370 + i * 2,
         sellerPrices: [
           {
-            sellerId: 'seller1',
-            sellerName: 'Farm A',
+            sellerId: "seller1",
+            sellerName: "Farm A",
             price: 340 + i,
             quantity: 50,
-            quality: 'STANDARD',
+            quality: "STANDARD",
           },
           {
-            sellerId: 'seller2',
-            sellerName: 'Farm B',
+            sellerId: "seller2",
+            sellerName: "Farm B",
             price: 345 + i,
             quantity: 50,
-            quality: 'STANDARD',
+            quality: "STANDARD",
           },
         ],
         transportCost: 150 + i * 5,
@@ -201,7 +211,8 @@ export class ScenarioController {
         profitMargin: 5 + i * 0.2,
         totalRevenue: 37000 + i * 200,
         totalCosts: 35000 + i * 100,
-        viability: i <= 3 ? 'HIGH' : i <= 6 ? 'MEDIUM' : i <= 8 ? 'LOW' : 'UNVIABLE',
+        viability:
+          i <= 3 ? "HIGH" : i <= 6 ? "MEDIUM" : i <= 8 ? "LOW" : "UNVIABLE",
         acceptanceProbability: 90 - i * 5,
         rank: i,
       });
@@ -209,23 +220,23 @@ export class ScenarioController {
 
     return {
       tradeOperationId,
-      scenarios: viability 
-        ? scenarios.filter(s => s.viability === viability)
+      scenarios: viability
+        ? scenarios.filter((s) => s.viability === viability)
         : scenarios,
       total: scenarios.length,
     };
   }
 
-  @Get(':tradeOperationId/optimal')
+  @Get(":tradeOperationId/optimal")
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Get the optimal scenario for a trade operation' })
-  @ApiParam({ name: 'tradeOperationId', description: 'Trade operation ID' })
+  @ApiOperation({ summary: "Get the optimal scenario for a trade operation" })
+  @ApiParam({ name: "tradeOperationId", description: "Trade operation ID" })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Optimal scenario details',
+    description: "Optimal scenario details",
   })
   async getOptimalScenario(
-    @Param('tradeOperationId') tradeOperationId: string,
+    @Param("tradeOperationId") tradeOperationId: string,
   ): Promise<any> {
     const analysis = await this.priceScenarioService.generateScenarios({
       tradeOperationId,
@@ -239,35 +250,35 @@ export class ScenarioController {
       reasoning: analysis.recommendations,
       alternativeCount: analysis.scenarios.length - 1,
       betterThanOptimal: analysis.scenarios.filter(
-        s => s.profitMargin > analysis.optimal.profitMargin,
+        (s) => s.profitMargin > analysis.optimal.profitMargin,
       ).length,
     };
   }
 
-  @Post(':tradeOperationId/apply-scenario')
+  @Post(":tradeOperationId/apply-scenario")
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Apply a specific scenario to a trade operation' })
-  @ApiParam({ name: 'tradeOperationId', description: 'Trade operation ID' })
+  @ApiOperation({ summary: "Apply a specific scenario to a trade operation" })
+  @ApiParam({ name: "tradeOperationId", description: "Trade operation ID" })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Scenario applied successfully',
+    description: "Scenario applied successfully",
   })
   async applyScenario(
-    @Param('tradeOperationId') tradeOperationId: string,
+    @Param("tradeOperationId") tradeOperationId: string,
     @Body() body: { scenarioId: string },
   ): Promise<any> {
     // This would apply the scenario prices to the actual trade operation
     // For now, return a mock response
     return {
-      message: 'Scenario applied successfully',
+      message: "Scenario applied successfully",
       tradeOperationId,
       scenarioId: body.scenarioId,
       appliedAt: new Date(),
       changes: {
         buyerPrice: { old: 370, new: 378 },
         sellerPrices: [
-          { sellerId: 'seller1', old: 350, new: 345 },
-          { sellerId: 'seller2', old: 355, new: 348 },
+          { sellerId: "seller1", old: 350, new: 345 },
+          { sellerId: "seller2", old: 355, new: 348 },
         ],
         estimatedProfit: { old: 2500, new: 2850 },
         profitMargin: { old: 6.5, new: 7.5 },
@@ -275,27 +286,27 @@ export class ScenarioController {
     };
   }
 
-  @Get('market-analysis')
+  @Get("market-analysis")
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Get market analysis for pricing decisions' })
-  @ApiQuery({ name: 'productId', required: true })
-  @ApiQuery({ name: 'region', required: false })
+  @ApiOperation({ summary: "Get market analysis for pricing decisions" })
+  @ApiQuery({ name: "productId", required: true })
+  @ApiQuery({ name: "region", required: false })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Market analysis data',
+    description: "Market analysis data",
   })
   async getMarketAnalysis(
-    @Query('productId') productId: string,
-    @Query('region') region?: string,
+    @Query("productId") productId: string,
+    @Query("region") region?: string,
   ): Promise<any> {
     if (!productId) {
-      throw new BadRequestException('productId is required');
+      throw new BadRequestException("productId is required");
     }
 
     // This would analyze market data for the product
     return {
       productId,
-      region: region || 'ALL',
+      region: region || "ALL",
       priceRange: {
         min: 320,
         max: 400,
@@ -305,32 +316,32 @@ export class ScenarioController {
       volumeTrends: {
         last7Days: 1500,
         last30Days: 6500,
-        trend: 'INCREASING',
+        trend: "INCREASING",
       },
       competitorPricing: [
-        { competitor: 'Company A', price: 365, volume: 200 },
-        { competitor: 'Company B', price: 358, volume: 150 },
-        { competitor: 'Company C', price: 372, volume: 180 },
+        { competitor: "Company A", price: 365, volume: 200 },
+        { competitor: "Company B", price: 358, volume: 150 },
+        { competitor: "Company C", price: 372, volume: 180 },
       ],
       seasonalFactors: {
-        currentSeason: 'HIGH_DEMAND',
+        currentSeason: "HIGH_DEMAND",
         priceAdjustment: 1.05,
-        nextSeasonChange: '2024-03-01',
+        nextSeasonChange: "2024-03-01",
       },
       recommendations: [
-        'Current market prices support 7-8% profit margins',
-        'High demand season - consider premium pricing',
-        'Competitor prices allow room for competitive positioning',
+        "Current market prices support 7-8% profit margins",
+        "High demand season - consider premium pricing",
+        "Competitor prices allow room for competitive positioning",
       ],
     };
   }
 
-  @Post('batch-analysis')
+  @Post("batch-analysis")
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: 'Analyze multiple trade operations in batch' })
+  @ApiOperation({ summary: "Analyze multiple trade operations in batch" })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Batch analysis results',
+    description: "Batch analysis results",
   })
   async batchAnalysis(
     @Body() body: { tradeOperationIds: string[] },
@@ -347,7 +358,8 @@ export class ScenarioController {
         tradeOperationId: id,
         optimalScenario: analysis.optimal,
         averageMargin: analysis.statistics.averageMargin,
-        viabilityScore: analysis.statistics.viableCount / analysis.scenarios.length,
+        viabilityScore:
+          analysis.statistics.viableCount / analysis.scenarios.length,
         riskLevel: analysis.statistics.riskLevel,
       });
     }
@@ -356,10 +368,10 @@ export class ScenarioController {
       analyzed: results.length,
       results,
       summary: {
-        averageMarginAcrossAll: 
+        averageMarginAcrossAll:
           results.reduce((sum, r) => sum + r.averageMargin, 0) / results.length,
-        highRiskCount: results.filter(r => r.riskLevel === 'HIGH').length,
-        allViable: results.every(r => r.viabilityScore > 0.5),
+        highRiskCount: results.filter((r) => r.riskLevel === "HIGH").length,
+        allViable: results.every((r) => r.viabilityScore > 0.5),
       },
     };
   }
@@ -367,17 +379,19 @@ export class ScenarioController {
   /**
    * Calculate optimal price range
    */
-  private calculateOptimalRange(
-    pricePoints: any[],
-  ): { min: number; max: number } {
-    const viablePoints = pricePoints.filter(p => p.viability);
-    const targetPoints = pricePoints.filter(p => p.profitMargin >= 7);
+  private calculateOptimalRange(pricePoints: any[]): {
+    min: number;
+    max: number;
+  } {
+    const viablePoints = pricePoints.filter((p) => p.viability);
+    const targetPoints = pricePoints.filter((p) => p.profitMargin >= 7);
 
     return {
       min: viablePoints.length > 0 ? viablePoints[0].buyerPrice : 0,
-      max: targetPoints.length > 0 
-        ? targetPoints[targetPoints.length - 1].buyerPrice 
-        : viablePoints[viablePoints.length - 1]?.buyerPrice || 0,
+      max:
+        targetPoints.length > 0
+          ? targetPoints[targetPoints.length - 1].buyerPrice
+          : viablePoints[viablePoints.length - 1]?.buyerPrice || 0,
     };
   }
 
@@ -386,38 +400,38 @@ export class ScenarioController {
    */
   private identifyRiskZones(pricePoints: any[]): any[] {
     const zones = [];
-    const maxPrice = Math.max(...pricePoints.map(p => p.buyerPrice));
-    const minPrice = Math.min(...pricePoints.map(p => p.buyerPrice));
+    const maxPrice = Math.max(...pricePoints.map((p) => p.buyerPrice));
+    const minPrice = Math.min(...pricePoints.map((p) => p.buyerPrice));
 
     // Low risk zone (7%+ margin)
-    const highMarginPoints = pricePoints.filter(p => p.profitMargin >= 7);
+    const highMarginPoints = pricePoints.filter((p) => p.profitMargin >= 7);
     if (highMarginPoints.length > 0) {
       zones.push({
         range: `€${highMarginPoints[0].buyerPrice}-€${highMarginPoints[highMarginPoints.length - 1].buyerPrice}`,
-        risk: 'LOW' as const,
-        description: 'Optimal profit zone with target margins',
+        risk: "LOW" as const,
+        description: "Optimal profit zone with target margins",
       });
     }
 
     // Medium risk zone (5-7% margin)
     const mediumMarginPoints = pricePoints.filter(
-      p => p.profitMargin >= 5 && p.profitMargin < 7,
+      (p) => p.profitMargin >= 5 && p.profitMargin < 7,
     );
     if (mediumMarginPoints.length > 0) {
       zones.push({
         range: `€${mediumMarginPoints[0].buyerPrice}-€${mediumMarginPoints[mediumMarginPoints.length - 1].buyerPrice}`,
-        risk: 'MEDIUM' as const,
-        description: 'Acceptable but below target margins',
+        risk: "MEDIUM" as const,
+        description: "Acceptable but below target margins",
       });
     }
 
     // High risk zone (<5% margin)
-    const lowMarginPoints = pricePoints.filter(p => p.profitMargin < 5);
+    const lowMarginPoints = pricePoints.filter((p) => p.profitMargin < 5);
     if (lowMarginPoints.length > 0) {
       zones.push({
         range: `€${minPrice}-€${lowMarginPoints[lowMarginPoints.length - 1].buyerPrice}`,
-        risk: 'HIGH' as const,
-        description: 'Below minimum acceptable margins',
+        risk: "HIGH" as const,
+        description: "Below minimum acceptable margins",
       });
     }
 
@@ -428,18 +442,22 @@ export class ScenarioController {
    * Generate strategy insights
    */
   private generateStrategyInsights(comparison: any[]): any {
-    const profits = comparison.map(c => c.bestScenario.profitMargin);
-    const bestForProfit = comparison.reduce((best, current) => 
-      current.bestScenario.profitMargin > best.bestScenario.profitMargin ? current : best,
+    const profits = comparison.map((c) => c.bestScenario.profitMargin);
+    const bestForProfit = comparison.reduce((best, current) =>
+      current.bestScenario.profitMargin > best.bestScenario.profitMargin
+        ? current
+        : best,
     );
-    
+
     const bestForRisk = comparison.reduce((best, current) =>
       current.viablePercentage > best.viablePercentage ? current : best,
     );
 
     const bestForAcceptance = comparison.reduce((best, current) =>
-      current.bestScenario.acceptanceProbability > best.bestScenario.acceptanceProbability 
-        ? current : best,
+      current.bestScenario.acceptanceProbability >
+      best.bestScenario.acceptanceProbability
+        ? current
+        : best,
     );
 
     return {

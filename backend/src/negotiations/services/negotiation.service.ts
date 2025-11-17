@@ -7,18 +7,18 @@ import {
   ConflictException,
   Inject,
   forwardRef,
-} from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ProfitCalculationService } from '../../trade-operations/services/profit-calculation.service';
-import { InspectionService } from '../../inspections/inspection.service';
+} from "@nestjs/common";
+import { PrismaService } from "../../prisma/prisma.service";
+import { ProfitCalculationService } from "../../trade-operations/services/profit-calculation.service";
+import { InspectionService } from "../../inspections/inspection.service";
 import {
   NegotiationStatus,
   TradeStatus,
   SellerStatus,
   Prisma,
   InspectionPriority,
-} from '@prisma/client';
-import { CreateOfferDto, CounterOfferDto } from '../dto/negotiation.dto';
+} from "@prisma/client";
+import { CreateOfferDto, CounterOfferDto } from "../dto/negotiation.dto";
 
 export interface NegotiationWithDetails {
   id: string;
@@ -123,45 +123,47 @@ export class NegotiationService {
     });
 
     if (!trade) {
-      throw new NotFoundException('Trade operation not found');
+      throw new NotFoundException("Trade operation not found");
     }
 
     if (trade.status !== TradeStatus.ACTIVE) {
-      throw new BadRequestException('Trade operation is not active');
+      throw new BadRequestException("Trade operation is not active");
     }
 
     // Validate trade seller belongs to this trade
-    const tradeSeller = trade.sellers.find(s => s.id === dto.tradeSellerId);
+    const tradeSeller = trade.sellers.find((s) => s.id === dto.tradeSellerId);
     if (!tradeSeller) {
-      throw new BadRequestException('Trade seller not part of this trade operation');
+      throw new BadRequestException(
+        "Trade seller not part of this trade operation",
+      );
     }
 
     // Check if negotiation already exists
     const existing = await this.prisma.offerNegotiation.findFirst({
-      where: { 
+      where: {
         tradeOperationId,
         tradeSellerId: dto.tradeSellerId,
       },
     });
 
     if (existing) {
-      throw new ConflictException('Negotiation already exists for this seller');
+      throw new ConflictException("Negotiation already exists for this seller");
     }
 
     // Validate price and quantity
     if (dto.price <= 0) {
-      throw new BadRequestException('Price must be positive');
+      throw new BadRequestException("Price must be positive");
     }
 
     if (dto.quantity <= 0) {
-      throw new BadRequestException('Quantity must be positive');
+      throw new BadRequestException("Quantity must be positive");
     }
 
     // Create negotiation
     const offerData = {
       price: dto.price,
       quantity: dto.quantity,
-      terms: dto.terms || 'Standard terms',
+      terms: dto.terms || "Standard terms",
       createdAt: new Date().toISOString(),
     };
 
@@ -172,7 +174,9 @@ export class NegotiationService {
         status: NegotiationStatus.PENDING,
         currentOffer: offerData,
         offerHistory: [offerData],
-        expiresAt: new Date(Date.now() + this.DEFAULT_EXPIRY_HOURS * 60 * 60 * 1000),
+        expiresAt: new Date(
+          Date.now() + this.DEFAULT_EXPIRY_HOURS * 60 * 60 * 1000,
+        ),
       },
       include: {
         tradeSeller: {
@@ -268,7 +272,7 @@ export class NegotiationService {
     });
 
     if (!trade) {
-      throw new NotFoundException('Trade operation not found');
+      throw new NotFoundException("Trade operation not found");
     }
 
     // Create each trade seller and negotiation
@@ -282,15 +286,21 @@ export class NegotiationService {
       });
 
       if (!saleListing) {
-        throw new BadRequestException(`Sale listing ${offer.saleListingId} not found`);
+        throw new BadRequestException(
+          `Sale listing ${offer.saleListingId} not found`,
+        );
       }
 
       if (saleListing.sellerId !== offer.sellerId) {
-        throw new BadRequestException(`Sale listing ${offer.saleListingId} does not belong to seller ${offer.sellerId}`);
+        throw new BadRequestException(
+          `Sale listing ${offer.saleListingId} does not belong to seller ${offer.sellerId}`,
+        );
       }
 
       if (saleListing.productId !== trade.buyListing.productId) {
-        throw new BadRequestException(`Sale listing ${offer.saleListingId} product mismatch`);
+        throw new BadRequestException(
+          `Sale listing ${offer.saleListingId} product mismatch`,
+        );
       }
 
       // Create trade seller
@@ -302,7 +312,7 @@ export class NegotiationService {
           requestedQuantity: offer.quantity,
           offeredQuantity: Number(saleListing.quantity),
           unit: saleListing.unit,
-          status: 'INVITED',
+          status: "INVITED",
         },
         include: {
           seller: true,
@@ -316,7 +326,7 @@ export class NegotiationService {
       const offerData = {
         price: offer.offerPrice,
         quantity: offer.quantity,
-        terms: 'Standard terms',
+        terms: "Standard terms",
         createdAt: new Date().toISOString(),
       };
 
@@ -327,7 +337,9 @@ export class NegotiationService {
           status: NegotiationStatus.PENDING,
           currentOffer: offerData,
           offerHistory: [offerData],
-          expiresAt: new Date(Date.now() + this.DEFAULT_EXPIRY_HOURS * 60 * 60 * 1000),
+          expiresAt: new Date(
+            Date.now() + this.DEFAULT_EXPIRY_HOURS * 60 * 60 * 1000,
+          ),
         },
         include: {
           tradeSeller: {
@@ -352,7 +364,9 @@ export class NegotiationService {
         offer.quantity,
       );
 
-      negotiations.push(this.formatNegotiationWithDetails(negotiation, profitImpact));
+      negotiations.push(
+        this.formatNegotiationWithDetails(negotiation, profitImpact),
+      );
     }
 
     return {
@@ -378,7 +392,7 @@ export class NegotiationService {
     });
 
     if (!trade) {
-      throw new NotFoundException('Trade operation not found');
+      throw new NotFoundException("Trade operation not found");
     }
 
     // Build where clause
@@ -387,9 +401,7 @@ export class NegotiationService {
     };
 
     if (status) {
-      where.status = Array.isArray(status) 
-        ? { in: status }
-        : status;
+      where.status = Array.isArray(status) ? { in: status } : status;
     }
 
     // Get negotiations with details
@@ -405,8 +417,8 @@ export class NegotiationService {
           },
         },
         orderBy: [
-          { status: 'asc' }, // Priority order
-          { expiresAt: 'asc' },
+          { status: "asc" }, // Priority order
+          { expiresAt: "asc" },
         ],
         take: limit,
         skip: offset,
@@ -425,11 +437,11 @@ export class NegotiationService {
     };
 
     const formattedNegotiations: NegotiationWithDetails[] = [];
-    
+
     for (const nego of negotiations) {
       const statusKey = nego.status.toLowerCase();
       summary[statusKey] = (summary[statusKey] || 0) + 1;
-      
+
       // Calculate profit impact for each
       const currentOffer = nego.currentOffer as any;
       const profitImpact = await this.calculateProfitImpact(
@@ -438,14 +450,22 @@ export class NegotiationService {
         currentOffer?.quantity || 0,
       );
 
-      formattedNegotiations.push(this.formatNegotiationWithDetails(nego, profitImpact));
+      formattedNegotiations.push(
+        this.formatNegotiationWithDetails(nego, profitImpact),
+      );
     }
 
     // Calculate profit analysis
-    const profitAnalysis = await this.calculateProfitAnalysis(trade, negotiations);
+    const profitAnalysis = await this.calculateProfitAnalysis(
+      trade,
+      negotiations,
+    );
 
     // Check phase transition
-    const phaseTransition = await this.checkPhaseTransition(trade, negotiations);
+    const phaseTransition = await this.checkPhaseTransition(
+      trade,
+      negotiations,
+    );
 
     return {
       tradeOperationId,
@@ -467,7 +487,9 @@ export class NegotiationService {
   /**
    * Get single negotiation details
    */
-  async getNegotiationById(negotiationId: string): Promise<NegotiationWithDetails> {
+  async getNegotiationById(
+    negotiationId: string,
+  ): Promise<NegotiationWithDetails> {
     const negotiation = await this.prisma.offerNegotiation.findUnique({
       where: { id: negotiationId },
       include: {
@@ -482,7 +504,7 @@ export class NegotiationService {
     });
 
     if (!negotiation) {
-      throw new NotFoundException('Negotiation not found');
+      throw new NotFoundException("Negotiation not found");
     }
 
     const currentOffer = negotiation.currentOffer as any;
@@ -517,43 +539,43 @@ export class NegotiationService {
     });
 
     if (!negotiation) {
-      throw new NotFoundException('Negotiation not found');
+      throw new NotFoundException("Negotiation not found");
     }
 
     // Validate status
     if (negotiation.status === NegotiationStatus.ACCEPTED) {
-      throw new BadRequestException('Cannot counter an accepted negotiation');
+      throw new BadRequestException("Cannot counter an accepted negotiation");
     }
 
     if (negotiation.status === NegotiationStatus.REJECTED) {
-      throw new BadRequestException('Cannot counter a rejected negotiation');
+      throw new BadRequestException("Cannot counter a rejected negotiation");
     }
 
     if (negotiation.status === NegotiationStatus.EXPIRED) {
-      throw new BadRequestException('Negotiation has expired');
+      throw new BadRequestException("Negotiation has expired");
     }
 
     // Validate price and quantity
     if (dto.price <= 0) {
-      throw new BadRequestException('Price must be positive');
+      throw new BadRequestException("Price must be positive");
     }
 
     if (dto.quantity <= 0) {
-      throw new BadRequestException('Quantity must be positive');
+      throw new BadRequestException("Quantity must be positive");
     }
 
     // Create counter offer
     const counterOfferData = {
       price: dto.price,
       quantity: dto.quantity,
-      terms: dto.terms || 'Counter offer',
+      terms: dto.terms || "Counter offer",
       reason: dto.reason,
       receivedAt: new Date().toISOString(),
       offeredBy: this.determineOfferedBy(negotiation, userId),
     };
 
     // Add to offer history
-    const offerHistory = [...(negotiation.offerHistory as any[] || [])];
+    const offerHistory = [...((negotiation.offerHistory as any[]) || [])];
     offerHistory.push({
       ...counterOfferData,
       isCounterOffer: true,
@@ -622,26 +644,27 @@ export class NegotiationService {
     });
 
     if (!negotiation) {
-      throw new NotFoundException('Negotiation not found');
+      throw new NotFoundException("Negotiation not found");
     }
 
     // Validate status
     if (negotiation.status === NegotiationStatus.ACCEPTED) {
-      throw new BadRequestException('Negotiation already accepted');
+      throw new BadRequestException("Negotiation already accepted");
     }
 
     if (negotiation.status === NegotiationStatus.REJECTED) {
-      throw new BadRequestException('Cannot accept a rejected negotiation');
+      throw new BadRequestException("Cannot accept a rejected negotiation");
     }
 
     if (negotiation.status === NegotiationStatus.EXPIRED) {
-      throw new BadRequestException('Negotiation has expired');
+      throw new BadRequestException("Negotiation has expired");
     }
 
     // Determine final price and quantity
-    const finalOffer = negotiation.status === NegotiationStatus.COUNTERED 
-      ? negotiation.counterOffer as any
-      : negotiation.currentOffer as any;
+    const finalOffer =
+      negotiation.status === NegotiationStatus.COUNTERED
+        ? (negotiation.counterOffer as any)
+        : (negotiation.currentOffer as any);
 
     const finalPrice = finalOffer.price;
     const finalQuantity = finalOffer.quantity;
@@ -692,9 +715,10 @@ export class NegotiationService {
 
     // Check if all sellers accepted
     const updatedWithRelations = updated as any;
-    const allAccepted = updatedWithRelations.tradeOperation?.sellers?.every(
-      (s: any) => s.status === SellerStatus.ACCEPTED
-    ) || false;
+    const allAccepted =
+      updatedWithRelations.tradeOperation?.sellers?.every(
+        (s: any) => s.status === SellerStatus.ACCEPTED,
+      ) || false;
 
     // Calculate final profit impact
     const profitImpact = await this.calculateProfitImpact(
@@ -708,18 +732,19 @@ export class NegotiationService {
 
     // Add phase transition info
     if (allAccepted) {
-      (result as any)['phaseTransition'] = {
+      (result as any)["phaseTransition"] = {
         allSellersAccepted: true,
         readyForNextPhase: true,
-        nextPhase: 'INSPECTION_REQUIRED',
-        message: 'All sellers have accepted. Ready to proceed to inspection phase.',
+        nextPhase: "INSPECTION_REQUIRED",
+        message:
+          "All sellers have accepted. Ready to proceed to inspection phase.",
       };
     }
 
     // Add quantity gap info if partial
     const requestedQty = Number(negotiation.tradeSeller.requestedQuantity);
     if (finalQuantity < requestedQty) {
-      (result as any)['quantityGap'] = {
+      (result as any)["quantityGap"] = {
         requested: requestedQty,
         secured: finalQuantity,
         shortfall: requestedQty - finalQuantity,
@@ -752,16 +777,16 @@ export class NegotiationService {
     });
 
     if (!negotiation) {
-      throw new NotFoundException('Negotiation not found');
+      throw new NotFoundException("Negotiation not found");
     }
 
     // Validate status
     if (negotiation.status === NegotiationStatus.ACCEPTED) {
-      throw new BadRequestException('Cannot reject an accepted negotiation');
+      throw new BadRequestException("Cannot reject an accepted negotiation");
     }
 
     if (negotiation.status === NegotiationStatus.REJECTED) {
-      throw new BadRequestException('Negotiation already rejected');
+      throw new BadRequestException("Negotiation already rejected");
     }
 
     // Update negotiation
@@ -794,16 +819,16 @@ export class NegotiationService {
     // Re-activate sale listing
     await this.prisma.saleListing.update({
       where: { id: negotiation.tradeSeller.saleListingId },
-      data: { status: 'ACTIVE' },
+      data: { status: "ACTIVE" },
     });
 
     const result = this.formatNegotiationWithDetails(updated);
 
     // Add seller release info
-    (result as any)['sellerRelease'] = {
+    (result as any)["sellerRelease"] = {
       released: true,
       sellerId: negotiation.tradeSeller.sellerId,
-      message: 'Seller released and available for other trades',
+      message: "Seller released and available for other trades",
     };
 
     // Add replacement suggestions
@@ -811,9 +836,9 @@ export class NegotiationService {
       negotiation.tradeOperation,
       Number(negotiation.tradeSeller.requestedQuantity),
     );
-    
+
     if (replacements.length > 0) {
-      (result as any)['replacementSuggestions'] = {
+      (result as any)["replacementSuggestions"] = {
         available: true,
         suggestions: replacements,
       };
@@ -844,7 +869,7 @@ export class NegotiationService {
     });
 
     if (!negotiation) {
-      throw new NotFoundException('Negotiation not found');
+      throw new NotFoundException("Negotiation not found");
     }
 
     // Only admins can withdraw
@@ -852,11 +877,11 @@ export class NegotiationService {
 
     // Validate status
     if (negotiation.status === NegotiationStatus.ACCEPTED) {
-      throw new BadRequestException('Cannot withdraw accepted negotiation');
+      throw new BadRequestException("Cannot withdraw accepted negotiation");
     }
 
     if (negotiation.status === NegotiationStatus.WITHDRAWN) {
-      throw new BadRequestException('Negotiation already withdrawn');
+      throw new BadRequestException("Negotiation already withdrawn");
     }
 
     // Update negotiation
@@ -888,20 +913,22 @@ export class NegotiationService {
     // Re-activate sale listing
     await this.prisma.saleListing.update({
       where: { id: negotiation.tradeSeller.saleListingId },
-      data: { status: 'ACTIVE' },
+      data: { status: "ACTIVE" },
     });
 
     const result = this.formatNegotiationWithDetails(updated);
 
     // Add metrics
-    const offerHistory = negotiation.offerHistory as any[] || [];
-    (result as any)['negotiationMetrics'] = {
+    const offerHistory = (negotiation.offerHistory as any[]) || [];
+    (result as any)["negotiationMetrics"] = {
       rounds: offerHistory.length,
       priceRange: {
-        min: Math.min(...offerHistory.map(h => h.price)),
-        max: Math.max(...offerHistory.map(h => h.price)),
+        min: Math.min(...offerHistory.map((h) => h.price)),
+        max: Math.max(...offerHistory.map((h) => h.price)),
       },
-      negotiationDuration: new Date().getTime() - new Date((negotiation as any).createdAt || new Date()).getTime(),
+      negotiationDuration:
+        new Date().getTime() -
+        new Date((negotiation as any).createdAt || new Date()).getTime(),
     };
 
     return result;
@@ -929,22 +956,24 @@ export class NegotiationService {
     });
 
     if (!negotiation) {
-      throw new NotFoundException('Negotiation not found');
+      throw new NotFoundException("Negotiation not found");
     }
 
     // Check extension count
     const extensionCount = (negotiation as any).extensionCount || 0;
     if (extensionCount >= this.MAX_EXTENSIONS) {
-      throw new BadRequestException('Maximum extensions reached');
+      throw new BadRequestException("Maximum extensions reached");
     }
 
     const currentExpiry = new Date(negotiation.expiresAt);
-    const newExpiry = new Date(currentExpiry.getTime() + hours * 60 * 60 * 1000);
+    const newExpiry = new Date(
+      currentExpiry.getTime() + hours * 60 * 60 * 1000,
+    );
 
     const updated = await this.prisma.offerNegotiation.update({
       where: { id: negotiationId },
       data: {
-        expiresAt: newExpiry
+        expiresAt: newExpiry,
       },
       include: {
         tradeSeller: {
@@ -958,8 +987,8 @@ export class NegotiationService {
     });
 
     const result = this.formatNegotiationWithDetails(updated);
-    
-    (result as any)['extension'] = {
+
+    (result as any)["extension"] = {
       previousExpiry: currentExpiry.toISOString(),
       newExpiry: newExpiry.toISOString(),
       extensionHours: hours,
@@ -977,13 +1006,16 @@ export class NegotiationService {
   ): NegotiationWithDetails {
     const now = new Date();
     const expiresAt = new Date(negotiation.expiresAt);
-    const hoursUntilExpiry = (expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60);
+    const hoursUntilExpiry =
+      (expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60);
 
     return {
       id: negotiation.id,
       tradeOperationId: negotiation.tradeOperationId,
       tradeSellerId: negotiation.tradeSellerId,
-      saleListingId: negotiation.tradeSeller?.saleListing?.id || negotiation.tradeSeller?.saleListingId,
+      saleListingId:
+        negotiation.tradeSeller?.saleListing?.id ||
+        negotiation.tradeSeller?.saleListingId,
       status: negotiation.status,
       currentOffer: negotiation.currentOffer,
       counterOffer: negotiation.counterOffer,
@@ -1008,9 +1040,10 @@ export class NegotiationService {
     const totalRevenue = sellingPrice * quantity;
     const purchaseCost = price * quantity;
     const transportCost = trade.estimatedTransportCost || 0;
-    
+
     const estimatedProfit = totalRevenue - purchaseCost - transportCost;
-    const profitMargin = totalRevenue > 0 ? (estimatedProfit / totalRevenue) * 100 : 0;
+    const profitMargin =
+      totalRevenue > 0 ? (estimatedProfit / totalRevenue) * 100 : 0;
 
     const result: any = {
       estimatedProfit,
@@ -1021,15 +1054,19 @@ export class NegotiationService {
       result.newPurchasePrice = price;
       result.previousPurchasePrice = previousPrice;
       result.priceChange = price - previousPrice;
-      
-      const previousProfit = totalRevenue - (previousPrice * quantity) - transportCost;
+
+      const previousProfit =
+        totalRevenue - previousPrice * quantity - transportCost;
       result.profitReduction = previousProfit - estimatedProfit;
     }
 
     return result;
   }
 
-  private async calculateProfitAnalysis(trade: any, negotiations: any[]): Promise<any> {
+  private async calculateProfitAnalysis(
+    trade: any,
+    negotiations: any[],
+  ): Promise<any> {
     let totalRequestedQuantity = 0;
     let totalAgreedQuantity = 0;
     let totalOfferValue = 0;
@@ -1040,7 +1077,7 @@ export class NegotiationService {
     for (const nego of negotiations) {
       const quantity = nego.currentOffer?.quantity || 0;
       const price = nego.currentOffer?.price || 0;
-      
+
       totalRequestedQuantity += quantity;
       totalOfferValue += price * quantity;
       offerCount++;
@@ -1052,15 +1089,18 @@ export class NegotiationService {
       }
     }
 
-    const averageOfferPrice = offerCount > 0 ? totalOfferValue / totalRequestedQuantity : 0;
-    const averageAgreedPrice = agreedCount > 0 ? totalAgreedValue / totalAgreedQuantity : 0;
+    const averageOfferPrice =
+      offerCount > 0 ? totalOfferValue / totalRequestedQuantity : 0;
+    const averageAgreedPrice =
+      agreedCount > 0 ? totalAgreedValue / totalAgreedQuantity : 0;
 
     const sellingPrice = trade.sellingPrice || 0;
     const totalRevenue = sellingPrice * trade.buyListing.quantity;
     const estimatedTotalCost = totalAgreedValue || totalOfferValue;
     const transportCost = trade.estimatedTransportCost || 0;
     const estimatedProfit = totalRevenue - estimatedTotalCost - transportCost;
-    const profitMargin = totalRevenue > 0 ? (estimatedProfit / totalRevenue) * 100 : 0;
+    const profitMargin =
+      totalRevenue > 0 ? (estimatedProfit / totalRevenue) * 100 : 0;
 
     return {
       totalRequestedQuantity,
@@ -1073,7 +1113,10 @@ export class NegotiationService {
     };
   }
 
-  private async checkPhaseTransition(trade: any, negotiations: any[]): Promise<any> {
+  private async checkPhaseTransition(
+    trade: any,
+    negotiations: any[],
+  ): Promise<any> {
     const allSellers = await this.prisma.tradeSeller.count({
       where: { tradeOperationId: trade.id },
     });
@@ -1090,14 +1133,16 @@ export class NegotiationService {
     return {
       allSellersAccepted: allAccepted,
       readyForNextPhase: allAccepted,
-      nextPhase: allAccepted ? 'INSPECTION_REQUIRED' : undefined,
-      message: allAccepted 
-        ? 'All sellers have accepted. Ready for inspection phase.'
+      nextPhase: allAccepted ? "INSPECTION_REQUIRED" : undefined,
+      message: allAccepted
+        ? "All sellers have accepted. Ready for inspection phase."
         : `${acceptedSellers} of ${allSellers} sellers accepted`,
     };
   }
 
-  private async updateTradeOperationTotals(tradeOperationId: string): Promise<void> {
+  private async updateTradeOperationTotals(
+    tradeOperationId: string,
+  ): Promise<void> {
     const trade = await this.prisma.tradeOperation.findUnique({
       where: { id: tradeOperationId },
       include: {
@@ -1124,7 +1169,8 @@ export class NegotiationService {
     const totalRevenue = sellingPrice * Number(trade.buyListing.quantity);
     const transportCost = Number(trade.estimatedTransportCost || 0);
     const estimatedProfit = totalRevenue - totalPurchaseCost - transportCost;
-    const actualProfitMargin = totalRevenue > 0 ? (estimatedProfit / totalRevenue) * 100 : 0;
+    const actualProfitMargin =
+      totalRevenue > 0 ? (estimatedProfit / totalRevenue) * 100 : 0;
 
     await this.prisma.tradeOperation.update({
       where: { id: tradeOperationId },
@@ -1148,23 +1194,23 @@ export class NegotiationService {
 
     const availableListings = await this.prisma.saleListing.findMany({
       where: {
-        status: 'ACTIVE',
+        status: "ACTIVE",
         quantity: { gte: quantity * 0.8 }, // At least 80% of needed quantity
         productId: trade.buyListing?.productId,
         sellerId: {
-          notIn: existingSellerIds.map(s => s.sellerId),
+          notIn: existingSellerIds.map((s) => s.sellerId),
         },
       },
       include: {
         seller: true,
       },
       orderBy: {
-        askingPrice: 'asc',
+        askingPrice: "asc",
       },
       take: 3,
     });
 
-    return availableListings.map(listing => ({
+    return availableListings.map((listing) => ({
       sellerId: listing.sellerId,
       name: listing.seller.name,
       quantity: listing.quantity,
@@ -1177,12 +1223,14 @@ export class NegotiationService {
     // TODO: Implement proper user role detection
     // For now, simple logic based on negotiation state
     if (negotiation.status === NegotiationStatus.PENDING) {
-      return 'BUYER';
+      return "BUYER";
     }
     if (negotiation.status === NegotiationStatus.COUNTERED) {
-      return negotiation.counterOffer?.offeredBy === 'SELLER' ? 'BUYER' : 'SELLER';
+      return negotiation.counterOffer?.offeredBy === "SELLER"
+        ? "BUYER"
+        : "SELLER";
     }
-    return 'BUYER';
+    return "BUYER";
   }
 
   /**
@@ -1199,14 +1247,16 @@ export class NegotiationService {
       });
 
       if (!saleListing) {
-        this.logger.warn(`Sale listing ${saleListingId} not found for inspection`);
+        this.logger.warn(
+          `Sale listing ${saleListingId} not found for inspection`,
+        );
         return;
       }
 
       // If already verified (has qualityScore and qualityGrade), skip
       if (saleListing.qualityScore && saleListing.qualityGrade) {
         this.logger.log(
-          `Sale listing ${saleListingId} already verified. Skipping inspection creation.`
+          `Sale listing ${saleListingId} already verified. Skipping inspection creation.`,
         );
 
         // Mark trade seller as verified
@@ -1233,7 +1283,7 @@ export class NegotiationService {
 
       if (existingInspection) {
         this.logger.log(
-          `Inspection already exists for sale listing ${saleListingId} in trade ${tradeOperationId}`
+          `Inspection already exists for sale listing ${saleListingId} in trade ${tradeOperationId}`,
         );
         return;
       }
@@ -1250,7 +1300,8 @@ export class NegotiationService {
 
       if (tradeOp?.buyListing?.neededBy) {
         const daysUntilNeeded = Math.floor(
-          (new Date(tradeOp.buyListing.neededBy).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+          (new Date(tradeOp.buyListing.neededBy).getTime() - Date.now()) /
+            (1000 * 60 * 60 * 24),
         );
 
         if (daysUntilNeeded <= 3) {
@@ -1268,12 +1319,12 @@ export class NegotiationService {
         saleListingId,
         priority,
         requestedDate: new Date(),
-        notes: 'Auto-created after offer acceptance',
+        notes: "Auto-created after offer acceptance",
       });
 
       this.logger.log(
         `✅ Auto-created inspection request ${inspection.id} for sale listing ${saleListingId} ` +
-        `in trade operation ${tradeOperationId} with priority ${priority}`
+          `in trade operation ${tradeOperationId} with priority ${priority}`,
       );
     } catch (error) {
       this.logger.error(

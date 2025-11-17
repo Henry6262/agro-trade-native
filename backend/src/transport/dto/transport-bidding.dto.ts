@@ -1,56 +1,76 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsEnum, IsDateString, IsArray, ValidateNested, IsBoolean, Min, Max } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
-import { TruckType, UrgencyLevel, TransportRequestStatus, BidStatus, TransportJobStatus } from '@prisma/client';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsEnum,
+  IsDateString,
+  IsArray,
+  ValidateNested,
+  IsBoolean,
+  Min,
+  Max,
+} from "class-validator";
+import { Type, Transform } from "class-transformer";
+import {
+  TruckType,
+  UrgencyLevel,
+  TransportRequestStatus,
+  BidStatus,
+  TransportJobStatus,
+} from "@prisma/client";
 
 // ==================== TRANSPORT REQUEST DTOs ====================
 
 export class CreateTransportRequestDto {
-  @ApiProperty({ description: 'Trade operation ID' })
+  @ApiProperty({ description: "Trade operation ID" })
   @IsString()
   tradeOperationId: string;
 
-  @ApiProperty({ description: 'Total weight to transport in tons' })
+  @ApiProperty({ description: "Total weight to transport in tons" })
   @IsNumber()
   @Min(0.1)
   totalWeight: number;
 
-  @ApiPropertyOptional({ enum: TruckType, description: 'Required vehicle type' })
+  @ApiPropertyOptional({
+    enum: TruckType,
+    description: "Required vehicle type",
+  })
   @IsOptional()
   @IsEnum(TruckType)
   requiredVehicleType?: TruckType;
 
-  @ApiPropertyOptional({ description: 'Special requirements', type: [String] })
+  @ApiPropertyOptional({ description: "Special requirements", type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   specialRequirements?: string[];
 
-  @ApiPropertyOptional({ description: 'Pickup window start time' })
+  @ApiPropertyOptional({ description: "Pickup window start time" })
   @IsOptional()
   @IsDateString()
   pickupWindowStart?: string;
 
-  @ApiPropertyOptional({ description: 'Pickup window end time' })
+  @ApiPropertyOptional({ description: "Pickup window end time" })
   @IsOptional()
   @IsDateString()
   pickupWindowEnd?: string;
 
-  @ApiPropertyOptional({ description: 'Delivery deadline' })
+  @ApiPropertyOptional({ description: "Delivery deadline" })
   @IsOptional()
   @IsDateString()
   deliveryDeadline?: string;
 
-  @ApiPropertyOptional({ enum: UrgencyLevel, description: 'Urgency level' })
+  @ApiPropertyOptional({ enum: UrgencyLevel, description: "Urgency level" })
   @IsOptional()
   @IsEnum(UrgencyLevel)
   urgencyLevel?: UrgencyLevel;
 
-  @ApiProperty({ description: 'Bidding deadline' })
+  @ApiProperty({ description: "Bidding deadline" })
   @IsDateString()
   biddingDeadline: string;
 
-  @ApiPropertyOptional({ description: 'Maximum budget for transport' })
+  @ApiPropertyOptional({ description: "Maximum budget for transport" })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -125,62 +145,65 @@ export class TransportRequestResponseDto {
 // ==================== TRANSPORT BID DTOs ====================
 
 export class CreateTransportBidDto {
-  @ApiProperty({ description: 'Transport request ID' })
+  @ApiProperty({ description: "Transport request ID" })
   @IsString()
   transportRequestId: string;
 
-  @ApiProperty({ description: 'Bid amount in EUR' })
+  @ApiProperty({ description: "Bid amount in EUR" })
   @IsNumber()
   @Min(1)
   bidAmount: number;
 
-  @ApiProperty({ description: 'Number of trucks for this bid' })
+  @ApiProperty({ description: "Number of trucks for this bid" })
   @IsNumber()
   @Min(1)
   @Max(10)
   truckCount: number;
 
-  @ApiProperty({ description: 'Estimated duration in hours' })
+  @ApiProperty({ description: "Estimated duration in hours" })
   @IsNumber()
   @Min(1)
   @Max(72)
   estimatedDuration: number;
 
-  @ApiProperty({ enum: TruckType, description: 'Vehicle type for this bid' })
+  @ApiProperty({ enum: TruckType, description: "Vehicle type for this bid" })
   @IsEnum(TruckType)
   vehicleType: TruckType;
 
-  @ApiProperty({ description: 'Vehicle capacity in tons (per truck)' })
+  @ApiProperty({ description: "Vehicle capacity in tons (per truck)" })
   @IsNumber()
   @Min(1)
   vehicleCapacity: number;
 
-  @ApiPropertyOptional({ description: 'Assigned truck ID' })
+  @ApiPropertyOptional({ description: "Assigned truck ID" })
   @IsOptional()
   @IsString()
   assignedTruckId?: string;
 
-  @ApiPropertyOptional({ description: 'Special equipment available', type: [String] })
+  @ApiPropertyOptional({
+    description: "Special equipment available",
+    type: [String],
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   specialEquipment?: string[];
 
-  @ApiPropertyOptional({ description: 'Insurance coverage amount' })
+  @ApiPropertyOptional({ description: "Insurance coverage amount" })
   @IsOptional()
   @IsNumber()
   @Min(0)
   insuranceCoverage?: number;
 
-  @ApiPropertyOptional({ description: 'Proposed route details' })
+  @ApiPropertyOptional({ description: "Proposed route details" })
   @IsOptional()
   proposedRoute?: any;
 
-  @ApiPropertyOptional({ description: 'Detailed pickup schedule' })
+  @ApiPropertyOptional({ description: "Detailed pickup schedule" })
   @IsOptional()
   pickupSchedule?: any;
 
-  @ApiProperty({ description: 'Bid expiry date' })
+  @ApiProperty({ description: "Bid expiry date" })
   @IsDateString()
   expiresAt: string;
 }
@@ -257,27 +280,27 @@ export class TransportBidResponseDto {
   ranking?: number;
 
   @ApiPropertyOptional()
-  competitiveness?: 'LOWEST' | 'COMPETITIVE' | 'HIGH' | 'OVERPRICED';
+  competitiveness?: "LOWEST" | "COMPETITIVE" | "HIGH" | "OVERPRICED";
 }
 
 // ==================== TRANSPORT JOB DTOs ====================
 
 export class CreateTransportJobDto {
-  @ApiProperty({ description: 'Transport request ID' })
+  @ApiProperty({ description: "Transport request ID" })
   @IsString()
   transportRequestId: string;
 
-  @ApiProperty({ description: 'Selected transport bid ID' })
+  @ApiProperty({ description: "Selected transport bid ID" })
   @IsString()
   transportBidId: string;
 }
 
 export class UpdateTransportJobStatusDto {
-  @ApiProperty({ enum: TransportJobStatus, description: 'New job status' })
+  @ApiProperty({ enum: TransportJobStatus, description: "New job status" })
   @IsEnum(TransportJobStatus)
   status: TransportJobStatus;
 
-  @ApiPropertyOptional({ description: 'Current location' })
+  @ApiPropertyOptional({ description: "Current location" })
   @IsOptional()
   currentLocation?: {
     lat: number;
@@ -286,68 +309,71 @@ export class UpdateTransportJobStatusDto {
     timestamp: string;
   };
 
-  @ApiPropertyOptional({ description: 'Estimated arrival time' })
+  @ApiPropertyOptional({ description: "Estimated arrival time" })
   @IsOptional()
   @IsDateString()
   estimatedArrival?: string;
 
-  @ApiPropertyOptional({ description: 'Status update notes' })
+  @ApiPropertyOptional({ description: "Status update notes" })
   @IsOptional()
   @IsString()
   notes?: string;
 }
 
 export class CompletePickupDto {
-  @ApiProperty({ description: 'Seller ID for this pickup' })
+  @ApiProperty({ description: "Seller ID for this pickup" })
   @IsString()
   sellerId: string;
 
-  @ApiProperty({ description: 'Actual quantity picked up' })
+  @ApiProperty({ description: "Actual quantity picked up" })
   @IsNumber()
   @Min(0)
   quantityPickedUp: number;
 
-  @ApiPropertyOptional({ description: 'Photos of the pickup', type: [String] })
+  @ApiPropertyOptional({ description: "Photos of the pickup", type: [String] })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   pickupPhotos?: string[];
 
-  @ApiPropertyOptional({ description: 'Pickup notes' })
+  @ApiPropertyOptional({ description: "Pickup notes" })
   @IsOptional()
   @IsString()
   notes?: string;
 
-  @ApiProperty({ description: 'Pickup completion time' })
+  @ApiProperty({ description: "Pickup completion time" })
   @IsDateString()
   completedAt: string;
 }
 
 export class CompleteDeliveryDto {
-  @ApiPropertyOptional({ description: 'Photos of the delivery', type: [String] })
+  @ApiPropertyOptional({
+    description: "Photos of the delivery",
+    type: [String],
+  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   deliveryPhotos?: string[];
 
-  @ApiPropertyOptional({ description: 'Proof of delivery document URL' })
+  @ApiPropertyOptional({ description: "Proof of delivery document URL" })
   @IsOptional()
   @IsString()
   proofOfDelivery?: string;
 
-  @ApiPropertyOptional({ description: 'Customer rating (1-5)' })
+  @ApiPropertyOptional({ description: "Customer rating (1-5)" })
   @IsOptional()
   @IsNumber()
   @Min(1)
   @Max(5)
   customerRating?: number;
 
-  @ApiPropertyOptional({ description: 'Delivery notes' })
+  @ApiPropertyOptional({ description: "Delivery notes" })
   @IsOptional()
   @IsString()
   notes?: string;
 
-  @ApiProperty({ description: 'Delivery completion time' })
+  @ApiProperty({ description: "Delivery completion time" })
   @IsDateString()
   completedAt: string;
 }
@@ -444,28 +470,32 @@ export class GetTransportRequestsQueryDto {
   @IsEnum(UrgencyLevel)
   urgencyLevel?: UrgencyLevel;
 
-  @ApiPropertyOptional({ description: 'Filter by transporter ID (for available requests)' })
+  @ApiPropertyOptional({
+    description: "Filter by transporter ID (for available requests)",
+  })
   @IsOptional()
   @IsString()
   transporterId?: string;
 
-  @ApiPropertyOptional({ description: 'Maximum distance from transporter location' })
+  @ApiPropertyOptional({
+    description: "Maximum distance from transporter location",
+  })
   @IsOptional()
   @IsNumber()
   maxDistance?: number;
 
-  @ApiPropertyOptional({ description: 'Minimum required vehicle capacity' })
+  @ApiPropertyOptional({ description: "Minimum required vehicle capacity" })
   @IsOptional()
   @IsNumber()
   minCapacity?: number;
 
-  @ApiPropertyOptional({ description: 'Page size', default: 20 })
+  @ApiPropertyOptional({ description: "Page size", default: 20 })
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseInt(value))
   limit?: number = 20;
 
-  @ApiPropertyOptional({ description: 'Page number', default: 0 })
+  @ApiPropertyOptional({ description: "Page number", default: 0 })
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseInt(value))
@@ -473,12 +503,12 @@ export class GetTransportRequestsQueryDto {
 }
 
 export class GetTransportBidsQueryDto {
-  @ApiPropertyOptional({ description: 'Filter by transport request ID' })
+  @ApiPropertyOptional({ description: "Filter by transport request ID" })
   @IsOptional()
   @IsString()
   transportRequestId?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by transporter ID' })
+  @ApiPropertyOptional({ description: "Filter by transporter ID" })
   @IsOptional()
   @IsString()
   transporterId?: string;
@@ -488,13 +518,13 @@ export class GetTransportBidsQueryDto {
   @IsEnum(BidStatus)
   status?: BidStatus;
 
-  @ApiPropertyOptional({ description: 'Page size', default: 20 })
+  @ApiPropertyOptional({ description: "Page size", default: 20 })
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseInt(value))
   limit?: number = 20;
 
-  @ApiPropertyOptional({ description: 'Page number', default: 0 })
+  @ApiPropertyOptional({ description: "Page number", default: 0 })
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseInt(value))
@@ -502,7 +532,7 @@ export class GetTransportBidsQueryDto {
 }
 
 export class GetTransportJobsQueryDto {
-  @ApiPropertyOptional({ description: 'Filter by transporter ID' })
+  @ApiPropertyOptional({ description: "Filter by transporter ID" })
   @IsOptional()
   @IsString()
   transporterId?: string;
@@ -512,13 +542,13 @@ export class GetTransportJobsQueryDto {
   @IsEnum(TransportJobStatus)
   status?: TransportJobStatus;
 
-  @ApiPropertyOptional({ description: 'Page size', default: 20 })
+  @ApiPropertyOptional({ description: "Page size", default: 20 })
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseInt(value))
   limit?: number = 20;
 
-  @ApiPropertyOptional({ description: 'Page number', default: 0 })
+  @ApiPropertyOptional({ description: "Page number", default: 0 })
   @IsOptional()
   @IsNumber()
   @Transform(({ value }) => parseInt(value))

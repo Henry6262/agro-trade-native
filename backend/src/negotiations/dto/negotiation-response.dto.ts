@@ -1,19 +1,19 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { NegotiationStatus } from '@prisma/client';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { NegotiationStatus } from "@prisma/client";
 
 export class NegotiationSellerDto {
-  @ApiProperty({ example: 'seller_123' })
+  @ApiProperty({ example: "seller_123" })
   id: string;
 
-  @ApiProperty({ example: 'Green Grain Co.' })
+  @ApiProperty({ example: "Green Grain Co." })
   name: string;
 
-  @ApiPropertyOptional({ example: 'seller@example.com' })
+  @ApiPropertyOptional({ example: "seller@example.com" })
   email?: string;
 }
 
 export class NegotiationSaleListingDto {
-  @ApiProperty({ example: 'listing_456' })
+  @ApiProperty({ example: "listing_456" })
   id: string;
 
   @ApiProperty({ example: 120 })
@@ -24,7 +24,7 @@ export class NegotiationSaleListingDto {
 }
 
 export class NegotiationTradeSellerDto {
-  @ApiProperty({ example: 'ts_123' })
+  @ApiProperty({ example: "ts_123" })
   id: string;
 
   @ApiProperty({ example: 40 })
@@ -33,7 +33,7 @@ export class NegotiationTradeSellerDto {
   @ApiProperty({ example: 50 })
   offeredQuantity: number;
 
-  @ApiProperty({ example: 'PENDING' })
+  @ApiProperty({ example: "PENDING" })
   status: string;
 
   @ApiProperty({ type: NegotiationSellerDto })
@@ -50,13 +50,13 @@ export class OfferSnapshotDto {
   @ApiProperty({ example: 40 })
   quantity: number;
 
-  @ApiPropertyOptional({ example: 'Shipment within 5 days' })
+  @ApiPropertyOptional({ example: "Shipment within 5 days" })
   terms?: string;
 
-  @ApiPropertyOptional({ example: '2024-01-15T12:00:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-15T12:00:00Z" })
   createdAt?: string;
 
-  @ApiPropertyOptional({ example: 'Need higher price to cover logistics' })
+  @ApiPropertyOptional({ example: "Need higher price to cover logistics" })
   reason?: string;
 
   @ApiPropertyOptional({ example: true })
@@ -73,18 +73,18 @@ export class ProfitImpactDto {
   @ApiPropertyOptional({ example: -120 })
   profitChange?: number;
 
-  @ApiPropertyOptional({ example: 'Profit margin 4.9% is below minimum 5%' })
+  @ApiPropertyOptional({ example: "Profit margin 4.9% is below minimum 5%" })
   warning?: string;
 }
 
 export class NegotiationWithDetailsDto {
-  @ApiProperty({ example: 'neg_123' })
+  @ApiProperty({ example: "neg_123" })
   id: string;
 
-  @ApiProperty({ example: 'trade_123' })
+  @ApiProperty({ example: "trade_123" })
   tradeOperationId: string;
 
-  @ApiProperty({ example: 'ts_123' })
+  @ApiProperty({ example: "ts_123" })
   tradeSellerId: string;
 
   @ApiProperty({ enum: NegotiationStatus, example: NegotiationStatus.PENDING })
@@ -105,7 +105,7 @@ export class NegotiationWithDetailsDto {
   @ApiPropertyOptional({ example: 40 })
   finalQuantity?: number;
 
-  @ApiProperty({ example: '2024-01-18T15:00:00Z' })
+  @ApiProperty({ example: "2024-01-18T15:00:00Z" })
   expiresAt: Date;
 
   @ApiPropertyOptional({ example: 12 })
@@ -122,7 +122,7 @@ export class NegotiationWithDetailsDto {
 }
 
 export class NegotiationSummaryDto {
-  @ApiProperty({ example: 'trade_123' })
+  @ApiProperty({ example: "trade_123" })
   tradeOperationId: string;
 
   @ApiProperty({ example: 12 })
@@ -132,14 +132,14 @@ export class NegotiationSummaryDto {
   negotiations: NegotiationWithDetailsDto[];
 
   @ApiProperty({
-    type: 'object',
+    type: "object",
     properties: {
-      pending: { type: 'number' },
-      countered: { type: 'number' },
-      accepted: { type: 'number' },
-      rejected: { type: 'number' },
-      expired: { type: 'number' },
-      withdrawn: { type: 'number' },
+      pending: { type: "number" },
+      countered: { type: "number" },
+      accepted: { type: "number" },
+      rejected: { type: "number" },
+      expired: { type: "number" },
+      withdrawn: { type: "number" },
     },
   })
   summary: {
@@ -152,15 +152,15 @@ export class NegotiationSummaryDto {
   };
 
   @ApiPropertyOptional({
-    type: 'object',
+    type: "object",
     properties: {
-      totalRequestedQuantity: { type: 'number' },
-      totalAgreedQuantity: { type: 'number' },
-      averageOfferPrice: { type: 'number' },
-      averageAgreedPrice: { type: 'number' },
-      estimatedTotalCost: { type: 'number' },
-      estimatedProfit: { type: 'number' },
-      profitMargin: { type: 'number' },
+      totalRequestedQuantity: { type: "number" },
+      totalAgreedQuantity: { type: "number" },
+      averageOfferPrice: { type: "number" },
+      averageAgreedPrice: { type: "number" },
+      estimatedTotalCost: { type: "number" },
+      estimatedProfit: { type: "number" },
+      profitMargin: { type: "number" },
     },
   })
   profitAnalysis?: {
@@ -174,12 +174,12 @@ export class NegotiationSummaryDto {
   };
 
   @ApiPropertyOptional({
-    type: 'object',
+    type: "object",
     properties: {
-      allSellersAccepted: { type: 'boolean' },
-      readyForNextPhase: { type: 'boolean' },
-      nextPhase: { type: 'string' },
-      message: { type: 'string' },
+      allSellersAccepted: { type: "boolean" },
+      readyForNextPhase: { type: "boolean" },
+      nextPhase: { type: "string" },
+      message: { type: "string" },
     },
   })
   phaseTransition?: {
@@ -190,20 +190,20 @@ export class NegotiationSummaryDto {
   };
 
   @ApiPropertyOptional({
-    description: 'Price comparison for countered negotiations',
-    type: 'object',
+    description: "Price comparison for countered negotiations",
+    type: "object",
     properties: {
-      lowestCounter: { type: 'number' },
-      highestCounter: { type: 'number' },
-      averageCounter: { type: 'number' },
-      priceSpread: { type: 'number' },
+      lowestCounter: { type: "number" },
+      highestCounter: { type: "number" },
+      averageCounter: { type: "number" },
+      priceSpread: { type: "number" },
       bestDeal: {
-        type: 'object',
+        type: "object",
         nullable: true,
         properties: {
-          negotiationId: { type: 'string' },
-          price: { type: 'number' },
-          seller: { type: 'string' },
+          negotiationId: { type: "string" },
+          price: { type: "number" },
+          seller: { type: "string" },
         },
       },
     },
@@ -222,10 +222,10 @@ export class NegotiationSummaryDto {
 }
 
 export class NegotiationErrorDto {
-  @ApiProperty({ example: 'NEGOTIATION_NOT_FOUND' })
+  @ApiProperty({ example: "NEGOTIATION_NOT_FOUND" })
   code: string;
 
-  @ApiProperty({ example: 'Negotiation not found' })
+  @ApiProperty({ example: "Negotiation not found" })
   message: string;
 }
 
@@ -252,10 +252,10 @@ export class NegotiationSummaryWrapperDto {
 }
 
 export class BatchOfferErrorDto {
-  @ApiProperty({ example: 'ts_123' })
+  @ApiProperty({ example: "ts_123" })
   tradeSellerId: string;
 
-  @ApiProperty({ example: 'Negotiation already exists for this seller' })
+  @ApiProperty({ example: "Negotiation already exists for this seller" })
   error: string;
 }
 
@@ -285,13 +285,13 @@ export class NegotiationBatchResponseDto {
 }
 
 export class ExtendExpiryResultDto {
-  @ApiProperty({ example: 'neg_123' })
+  @ApiProperty({ example: "neg_123" })
   id: string;
 
-  @ApiPropertyOptional({ example: '2024-01-15T10:00:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-15T10:00:00Z" })
   previousExpiry?: string;
 
-  @ApiPropertyOptional({ example: '2024-01-16T10:00:00Z' })
+  @ApiPropertyOptional({ example: "2024-01-16T10:00:00Z" })
   newExpiry?: string;
 
   @ApiPropertyOptional({ example: 24 })
@@ -313,16 +313,16 @@ export class ExtendExpiryResponseDto {
 }
 
 export class ExpiringNegotiationItemDto {
-  @ApiProperty({ example: 'neg_123' })
+  @ApiProperty({ example: "neg_123" })
   id: string;
 
   @ApiProperty({ example: 4 })
   hoursRemaining: number;
 
-  @ApiProperty({ example: 'HIGH' })
-  urgency: 'HIGH' | 'MEDIUM' | 'LOW';
+  @ApiProperty({ example: "HIGH" })
+  urgency: "HIGH" | "MEDIUM" | "LOW";
 
-  @ApiProperty({ example: 'Follow up immediately' })
+  @ApiProperty({ example: "Follow up immediately" })
   recommendedAction: string;
 }
 

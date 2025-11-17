@@ -1,6 +1,6 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { TransportCostSettings, TruckType, Prisma } from '@prisma/client';
+import { Injectable, Logger, BadRequestException } from "@nestjs/common";
+import { PrismaService } from "../../prisma/prisma.service";
+import { TransportCostSettings, TruckType, Prisma } from "@prisma/client";
 
 export interface TransportSettingsDto {
   baseRatePerKm: number;
@@ -74,7 +74,7 @@ export class TransportCostSettingsService {
 
     const settings = await this.prisma.transportCostSettings.findFirst({
       where: { isActive: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     if (!settings) {
@@ -114,7 +114,8 @@ export class TransportCostSettingsService {
       data: {
         baseRatePerKm: settingsDto.baseRatePerKm,
         flatbedMultiplier: settingsDto.vehicleMultipliers?.FLATBED || 1.0,
-        refrigeratedMultiplier: settingsDto.vehicleMultipliers?.REFRIGERATED || 1.3,
+        refrigeratedMultiplier:
+          settingsDto.vehicleMultipliers?.REFRIGERATED || 1.3,
         tankerMultiplier: settingsDto.vehicleMultipliers?.TANKER || 1.2,
         containerMultiplier: settingsDto.vehicleMultipliers?.CONTAINER || 1.1,
         tier1MaxKm: settingsDto.distanceTiers?.[0]?.maxKm || 50,
@@ -149,17 +150,17 @@ export class TransportCostSettingsService {
     offset: number = 0,
   ): Promise<SettingsHistory[]> {
     const settings = await this.prisma.transportCostSettings.findMany({
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       take: limit,
       skip: offset,
     });
 
-    return settings.map(s => ({
+    return settings.map((s) => ({
       id: s.id,
       effectiveFrom: s.effectiveFrom || s.createdAt,
       effectiveTo: s.effectiveTo,
-      changedBy: 'System', // field doesn't exist in schema
-      changeReason: 'Settings update', // field doesn't exist in schema
+      changedBy: "System", // field doesn't exist in schema
+      changeReason: "Settings update", // field doesn't exist in schema
       settings: s,
     }));
   }
@@ -179,16 +180,21 @@ export class TransportCostSettingsService {
     const baseCost = this.calculateTieredDistanceCost(distance, settings);
 
     // Vehicle surcharge - use the specific multiplier fields
-    const vehicleMultiplier = 
-      vehicleType === 'FLATBED' ? settings.flatbedMultiplier :
-      vehicleType === 'REFRIGERATED' ? settings.refrigeratedMultiplier :
-      vehicleType === 'TANKER' ? settings.tankerMultiplier :
-      vehicleType === 'CONTAINER' ? settings.containerMultiplier :
-      1.0;
+    const vehicleMultiplier =
+      vehicleType === "FLATBED"
+        ? settings.flatbedMultiplier
+        : vehicleType === "REFRIGERATED"
+          ? settings.refrigeratedMultiplier
+          : vehicleType === "TANKER"
+            ? settings.tankerMultiplier
+            : vehicleType === "CONTAINER"
+              ? settings.containerMultiplier
+              : 1.0;
     const vehicleSurcharge = baseCost * (vehicleMultiplier - 1);
 
     // Loading cost
-    const loadingCost = quantity * (settings.loadingCostPerTon?.toNumber() || 0.5);
+    const loadingCost =
+      quantity * (settings.loadingCostPerTon?.toNumber() || 0.5);
 
     // Urgency surcharge
     const urgencySurcharge = isUrgent
@@ -198,9 +204,10 @@ export class TransportCostSettingsService {
     // Bulk discount - using default values since not in schema
     const bulkThreshold = 100;
     const bulkRate = 0.1;
-    const bulkDiscount = quantity >= bulkThreshold
-      ? (baseCost + vehicleSurcharge + loadingCost) * bulkRate
-      : 0;
+    const bulkDiscount =
+      quantity >= bulkThreshold
+        ? (baseCost + vehicleSurcharge + loadingCost) * bulkRate
+        : 0;
 
     // Additional costs - set to 0 since not in schema
     const fuelSurcharge = 0;
@@ -210,7 +217,7 @@ export class TransportCostSettingsService {
     const maintenanceCosts = 0;
 
     // Total cost
-    const totalCost = 
+    const totalCost =
       baseCost +
       vehicleSurcharge +
       loadingCost +
@@ -269,15 +276,24 @@ export class TransportCostSettingsService {
         ...currentSettings,
         baseRatePerKm: new Prisma.Decimal(newSettings.baseRatePerKm),
         flatbedMultiplier: newSettings.vehicleMultipliers?.FLATBED || 1.0,
-        refrigeratedMultiplier: newSettings.vehicleMultipliers?.REFRIGERATED || 1.3,
+        refrigeratedMultiplier:
+          newSettings.vehicleMultipliers?.REFRIGERATED || 1.3,
         tankerMultiplier: newSettings.vehicleMultipliers?.TANKER || 1.2,
         containerMultiplier: newSettings.vehicleMultipliers?.CONTAINER || 1.1,
         tier1MaxKm: newSettings.distanceTiers?.[0]?.maxKm || 50,
-        tier1Rate: new Prisma.Decimal(newSettings.distanceTiers?.[0]?.ratePerKm || 0.15),
+        tier1Rate: new Prisma.Decimal(
+          newSettings.distanceTiers?.[0]?.ratePerKm || 0.15,
+        ),
         tier2MaxKm: newSettings.distanceTiers?.[1]?.maxKm || 200,
-        tier2Rate: new Prisma.Decimal(newSettings.distanceTiers?.[1]?.ratePerKm || 0.13),
-        tier3Rate: new Prisma.Decimal(newSettings.distanceTiers?.[2]?.ratePerKm || 0.11),
-        loadingCostPerTon: new Prisma.Decimal(newSettings.loadingCostPerTon || 0.5),
+        tier2Rate: new Prisma.Decimal(
+          newSettings.distanceTiers?.[1]?.ratePerKm || 0.13,
+        ),
+        tier3Rate: new Prisma.Decimal(
+          newSettings.distanceTiers?.[2]?.ratePerKm || 0.11,
+        ),
+        loadingCostPerTon: new Prisma.Decimal(
+          newSettings.loadingCostPerTon || 0.5,
+        ),
         urgencySurcharge: newSettings.urgencySurcharge || 0.3,
       } as TransportCostSettings;
 
@@ -291,9 +307,9 @@ export class TransportCostSettingsService {
       // Restore cache
       this.settingsCache = currentSettings;
 
-      const difference = proposedBreakdown.totalCost - currentBreakdown.totalCost;
-      const percentageChange = 
-        (difference / currentBreakdown.totalCost) * 100;
+      const difference =
+        proposedBreakdown.totalCost - currentBreakdown.totalCost;
+      const percentageChange = (difference / currentBreakdown.totalCost) * 100;
 
       const impactAnalysis = this.analyzeImpact(
         currentBreakdown,
@@ -311,13 +327,15 @@ export class TransportCostSettingsService {
     }
 
     // Calculate average change
-    const averageChange = comparisons.reduce(
-      (sum, c) => sum + c.percentageChange,
-      0,
-    ) / comparisons.length;
+    const averageChange =
+      comparisons.reduce((sum, c) => sum + c.percentageChange, 0) /
+      comparisons.length;
 
     // Generate recommendation
-    const recommendation = this.generateRecommendation(averageChange, comparisons);
+    const recommendation = this.generateRecommendation(
+      averageChange,
+      comparisons,
+    );
 
     return {
       comparisons,
@@ -339,10 +357,10 @@ export class TransportCostSettingsService {
     },
   ): Promise<TransportSettingsDto> {
     const currentSettings = await this.getActiveSettings();
-    
+
     // Calculate adjustment factor
     const marginGap = targetMargin - currentAverageMargin;
-    const adjustmentFactor = 1 - (marginGap / 100);
+    const adjustmentFactor = 1 - marginGap / 100;
 
     // Prepare optimized settings
     const optimized: TransportSettingsDto = {
@@ -360,15 +378,28 @@ export class TransportCostSettingsService {
         OTHER: 1.0,
       },
       distanceTiers: [
-        { minKm: 0, maxKm: currentSettings.tier1MaxKm || 50, 
-          ratePerKm: (currentSettings.tier1Rate?.toNumber() || 0.15) * adjustmentFactor },
-        { minKm: currentSettings.tier1MaxKm || 50, maxKm: currentSettings.tier2MaxKm || 200, 
-          ratePerKm: (currentSettings.tier2Rate?.toNumber() || 0.13) * adjustmentFactor },
-        { minKm: currentSettings.tier2MaxKm || 200, maxKm: null, 
-          ratePerKm: (currentSettings.tier3Rate?.toNumber() || 0.11) * adjustmentFactor },
+        {
+          minKm: 0,
+          maxKm: currentSettings.tier1MaxKm || 50,
+          ratePerKm:
+            (currentSettings.tier1Rate?.toNumber() || 0.15) * adjustmentFactor,
+        },
+        {
+          minKm: currentSettings.tier1MaxKm || 50,
+          maxKm: currentSettings.tier2MaxKm || 200,
+          ratePerKm:
+            (currentSettings.tier2Rate?.toNumber() || 0.13) * adjustmentFactor,
+        },
+        {
+          minKm: currentSettings.tier2MaxKm || 200,
+          maxKm: null,
+          ratePerKm:
+            (currentSettings.tier3Rate?.toNumber() || 0.11) * adjustmentFactor,
+        },
       ],
-      loadingCostPerTon: 
-        (currentSettings.loadingCostPerTon?.toNumber() || 0.5) * adjustmentFactor,
+      loadingCostPerTon:
+        (currentSettings.loadingCostPerTon?.toNumber() || 0.5) *
+        adjustmentFactor,
       urgencySurcharge: Math.min(
         (currentSettings.urgencySurcharge || 0.3) * adjustmentFactor,
         constraints?.maxUrgencySurcharge || 0.5,
@@ -416,7 +447,6 @@ export class TransportCostSettingsService {
     return totalCost;
   }
 
-
   /**
    * Analyze impact of settings change
    */
@@ -443,7 +473,10 @@ export class TransportCostSettingsService {
       );
     }
 
-    if (route.isUrgent && proposed.urgencySurcharge !== current.urgencySurcharge) {
+    if (
+      route.isUrgent &&
+      proposed.urgencySurcharge !== current.urgencySurcharge
+    ) {
       analysis.push(
         `Urgency surcharge changed by €${Math.abs(proposed.urgencySurcharge - current.urgencySurcharge).toFixed(2)}`,
       );
@@ -460,13 +493,13 @@ export class TransportCostSettingsService {
     comparisons: CostComparison[],
   ): string {
     if (averageChange > 10) {
-      return 'Significant cost increase detected. Consider phasing implementation or adjusting rates.';
+      return "Significant cost increase detected. Consider phasing implementation or adjusting rates.";
     } else if (averageChange > 5) {
-      return 'Moderate cost increase. Review impact on profit margins before implementation.';
+      return "Moderate cost increase. Review impact on profit margins before implementation.";
     } else if (averageChange < -5) {
-      return 'Cost reduction achieved. This should improve profit margins.';
+      return "Cost reduction achieved. This should improve profit margins.";
     } else {
-      return 'Minimal impact on transport costs. Safe to implement.';
+      return "Minimal impact on transport costs. Safe to implement.";
     }
   }
 
@@ -475,19 +508,21 @@ export class TransportCostSettingsService {
    */
   private validateSettings(settings: TransportSettingsDto): void {
     if (settings.baseRatePerKm <= 0) {
-      throw new BadRequestException('Base rate must be positive');
+      throw new BadRequestException("Base rate must be positive");
     }
 
     if (settings.distanceTiers.length === 0) {
-      throw new BadRequestException('At least one distance tier is required');
+      throw new BadRequestException("At least one distance tier is required");
     }
 
     // Validate tier continuity
-    const sortedTiers = [...settings.distanceTiers].sort((a, b) => a.minKm - b.minKm);
+    const sortedTiers = [...settings.distanceTiers].sort(
+      (a, b) => a.minKm - b.minKm,
+    );
     for (let i = 0; i < sortedTiers.length - 1; i++) {
       const current = sortedTiers[i];
       const next = sortedTiers[i + 1];
-      
+
       if (current.maxKm !== null && current.maxKm !== next.minKm) {
         throw new BadRequestException(
           `Gap or overlap in distance tiers between ${current.maxKm}km and ${next.minKm}km`,
@@ -497,12 +532,12 @@ export class TransportCostSettingsService {
 
     // Validate vehicle multipliers
     const requiredVehicles: TruckType[] = [
-      'FLATBED',
-      'REFRIGERATED',
-      'TANKER',
-      'CONTAINER',
-      'CURTAIN_SIDE',
-      'BOX_TRUCK',
+      "FLATBED",
+      "REFRIGERATED",
+      "TANKER",
+      "CONTAINER",
+      "CURTAIN_SIDE",
+      "BOX_TRUCK",
     ];
 
     for (const vehicle of requiredVehicles) {
@@ -538,7 +573,7 @@ export class TransportCostSettingsService {
       },
     });
 
-    this.logger.log('Created default transport cost settings');
+    this.logger.log("Created default transport cost settings");
     return defaultSettings;
   }
 
@@ -568,9 +603,21 @@ export class TransportCostSettingsService {
           OTHER: 1.0,
         },
         distanceTiers: [
-          { minKm: 0, maxKm: settings.tier1MaxKm, ratePerKm: settings.tier1Rate?.toNumber() },
-          { minKm: settings.tier1MaxKm, maxKm: settings.tier2MaxKm, ratePerKm: settings.tier2Rate?.toNumber() },
-          { minKm: settings.tier2MaxKm, maxKm: null, ratePerKm: settings.tier3Rate?.toNumber() },
+          {
+            minKm: 0,
+            maxKm: settings.tier1MaxKm,
+            ratePerKm: settings.tier1Rate?.toNumber(),
+          },
+          {
+            minKm: settings.tier1MaxKm,
+            maxKm: settings.tier2MaxKm,
+            ratePerKm: settings.tier2Rate?.toNumber(),
+          },
+          {
+            minKm: settings.tier2MaxKm,
+            maxKm: null,
+            ratePerKm: settings.tier3Rate?.toNumber(),
+          },
         ],
         loadingCostPerTon: settings.loadingCostPerTon?.toNumber(),
         urgencySurcharge: settings.urgencySurcharge,
@@ -593,10 +640,10 @@ export class TransportCostSettingsService {
       return await this.updateSettings(
         parsed,
         importedBy,
-        'Imported from JSON configuration',
+        "Imported from JSON configuration",
       );
     } catch (error) {
-      throw new BadRequestException('Invalid JSON format for settings import');
+      throw new BadRequestException("Invalid JSON format for settings import");
     }
   }
 }

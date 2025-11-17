@@ -12,7 +12,7 @@ import {
   Request,
   UseGuards,
   BadRequestException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiBody,
@@ -21,8 +21,8 @@ import {
   ApiQuery,
   ApiResponse,
   ApiTags,
-} from '@nestjs/swagger';
-import { plainToInstance } from 'class-transformer';
+} from "@nestjs/swagger";
+import { plainToInstance } from "class-transformer";
 import {
   AssignInspectorDto,
   CreateBatchInspectionsDto,
@@ -34,10 +34,10 @@ import {
   SubmitInspectionResultsDto,
   UpdateInspectionStatusDto,
   UpdateInspectionDto,
-} from './dto/inspection.dto';
-import { InspectionService } from './inspection.service';
-import { InspectionStatus, InspectionPriority } from '@prisma/client';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+} from "./dto/inspection.dto";
+import { InspectionService } from "./inspection.service";
+import { InspectionStatus, InspectionPriority } from "@prisma/client";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 
 interface AuthenticatedRequest {
   user?: {
@@ -45,20 +45,20 @@ interface AuthenticatedRequest {
   };
 }
 
-@ApiTags('Inspections')
+@ApiTags("Inspections")
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
-@Controller('inspections')
+@Controller("inspections")
 export class InspectionController {
   constructor(private readonly inspectionService: InspectionService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create inspection request' })
+  @ApiOperation({ summary: "Create inspection request" })
   @ApiBody({ type: CreateInspectionRequestDto })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Inspection request created',
+    description: "Inspection request created",
     type: InspectionResponseDto,
   })
   async createInspection(@Body() data: CreateInspectionRequestDto) {
@@ -72,13 +72,13 @@ export class InspectionController {
     return this.serializeInspection(inspection);
   }
 
-  @Post('batch')
+  @Post("batch")
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create batch inspection requests' })
+  @ApiOperation({ summary: "Create batch inspection requests" })
   @ApiBody({ type: CreateBatchInspectionsDto })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Batch inspections created',
+    description: "Batch inspections created",
     type: InspectionResponseDto,
     isArray: true,
   })
@@ -89,18 +89,20 @@ export class InspectionController {
       data.priority,
     );
 
-    return inspections.map((inspection) => this.serializeInspection(inspection));
+    return inspections.map((inspection) =>
+      this.serializeInspection(inspection),
+    );
   }
 
-  @Put(':id/assign')
-  @ApiOperation({ summary: 'Assign inspector to inspection' })
+  @Put(":id/assign")
+  @ApiOperation({ summary: "Assign inspector to inspection" })
   @ApiBody({ type: AssignInspectorDto })
   @ApiOkResponse({
-    description: 'Inspector assigned',
+    description: "Inspector assigned",
     type: InspectionResponseDto,
   })
   async assignInspector(
-    @Param('id') inspectionId: string,
+    @Param("id") inspectionId: string,
     @Body() payload: AssignInspectorDto,
   ) {
     const inspection = await this.inspectionService.assignInspector(
@@ -112,13 +114,15 @@ export class InspectionController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all inspection requests with filters and pagination' })
-  @ApiQuery({ name: 'status', enum: InspectionStatus, required: false })
-  @ApiQuery({ name: 'priority', enum: InspectionPriority, required: false })
-  @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
-  @ApiQuery({ name: 'limit', type: Number, required: false, example: 20 })
+  @ApiOperation({
+    summary: "Get all inspection requests with filters and pagination",
+  })
+  @ApiQuery({ name: "status", enum: InspectionStatus, required: false })
+  @ApiQuery({ name: "priority", enum: InspectionPriority, required: false })
+  @ApiQuery({ name: "page", type: Number, required: false, example: 1 })
+  @ApiQuery({ name: "limit", type: Number, required: false, example: 20 })
   @ApiOkResponse({
-    description: 'List of inspections with pagination',
+    description: "List of inspections with pagination",
     schema: {
       example: {
         data: [],
@@ -126,16 +130,16 @@ export class InspectionController {
           page: 1,
           limit: 20,
           total: 100,
-          totalPages: 5
-        }
-      }
-    }
+          totalPages: 5,
+        },
+      },
+    },
   })
   async getAllInspections(
-    @Query('status') status?: InspectionStatus,
-    @Query('priority') priority?: InspectionPriority,
-    @Query('page') page = '1',
-    @Query('limit') limit = '20',
+    @Query("status") status?: InspectionStatus,
+    @Query("priority") priority?: InspectionPriority,
+    @Query("page") page = "1",
+    @Query("limit") limit = "20",
   ) {
     const pageNum = parseInt(page);
     const limitNum = Math.min(parseInt(limit), 100); // Max 100 per page
@@ -152,7 +156,9 @@ export class InspectionController {
     ]);
 
     return {
-      data: inspections.map((inspection) => this.serializeInspection(inspection)),
+      data: inspections.map((inspection) =>
+        this.serializeInspection(inspection),
+      ),
       pagination: {
         page: pageNum,
         limit: limitNum,
@@ -162,10 +168,10 @@ export class InspectionController {
     };
   }
 
-  @Get('inspectors')
-  @ApiOperation({ summary: 'Get available inspectors' })
+  @Get("inspectors")
+  @ApiOperation({ summary: "Get available inspectors" })
   @ApiOkResponse({
-    description: 'List of available inspectors',
+    description: "List of available inspectors",
     type: InspectionAssigneeDto,
     isArray: true,
   })
@@ -191,15 +197,15 @@ export class InspectionController {
     );
   }
 
-  @Put(':id/status')
-  @ApiOperation({ summary: 'Update inspection status' })
+  @Put(":id/status")
+  @ApiOperation({ summary: "Update inspection status" })
   @ApiBody({ type: UpdateInspectionStatusDto })
   @ApiOkResponse({
-    description: 'Status updated',
+    description: "Status updated",
     type: InspectionResponseDto,
   })
   async updateStatus(
-    @Param('id') inspectionId: string,
+    @Param("id") inspectionId: string,
     @Body() payload: UpdateInspectionStatusDto,
     @Request() req: AuthenticatedRequest,
   ) {
@@ -213,19 +219,19 @@ export class InspectionController {
     return this.serializeInspection(inspection);
   }
 
-  @Post(':id/results')
-  @ApiOperation({ summary: 'Submit inspection results' })
+  @Post(":id/results")
+  @ApiOperation({ summary: "Submit inspection results" })
   @ApiBody({ type: SubmitInspectionResultsDto })
   @ApiOkResponse({
-    description: 'Results submitted',
+    description: "Results submitted",
     type: InspectionResponseDto,
   })
   async submitResults(
-    @Param('id') inspectionId: string,
+    @Param("id") inspectionId: string,
     @Body() data: SubmitInspectionResultsDto,
     @Request() req: AuthenticatedRequest,
   ) {
-    const inspectorId = req?.user?.id || 'default-inspector';
+    const inspectorId = req?.user?.id || "default-inspector";
     const inspection = await this.inspectionService.submitInspectionResults(
       inspectionId,
       inspectorId,
@@ -236,8 +242,11 @@ export class InspectionController {
           productSpecifications: data.verificationResult.productSpecifications
             ? {
                 ...data.verificationResult.productSpecifications,
-                harvestDate: data.verificationResult.productSpecifications.harvestDate
-                  ? new Date(data.verificationResult.productSpecifications.harvestDate)
+                harvestDate: data.verificationResult.productSpecifications
+                  .harvestDate
+                  ? new Date(
+                      data.verificationResult.productSpecifications.harvestDate,
+                    )
                   : undefined,
               }
             : undefined,
@@ -248,35 +257,37 @@ export class InspectionController {
     return this.serializeInspection(inspection);
   }
 
-  @Get('trade-operation/:tradeOperationId')
-  @ApiOperation({ summary: 'Get inspections for trade operation' })
+  @Get("trade-operation/:tradeOperationId")
+  @ApiOperation({ summary: "Get inspections for trade operation" })
   @ApiOkResponse({
-    description: 'List of inspections',
+    description: "List of inspections",
     type: InspectionResponseDto,
     isArray: true,
   })
   async getByTradeOperation(
-    @Param('tradeOperationId') tradeOperationId: string,
+    @Param("tradeOperationId") tradeOperationId: string,
   ) {
     const inspections =
       await this.inspectionService.getInspectionsByTradeOperation(
         tradeOperationId,
       );
 
-    return inspections.map((inspection) => this.serializeInspection(inspection));
+    return inspections.map((inspection) =>
+      this.serializeInspection(inspection),
+    );
   }
 
-  @Get('inspector/:inspectorId')
-  @ApiOperation({ summary: 'Get inspector missions' })
-  @ApiQuery({ name: 'status', enum: InspectionStatus, required: false })
+  @Get("inspector/:inspectorId")
+  @ApiOperation({ summary: "Get inspector missions" })
+  @ApiQuery({ name: "status", enum: InspectionStatus, required: false })
   @ApiOkResponse({
-    description: 'Inspector missions',
+    description: "Inspector missions",
     type: InspectorMissionDto,
     isArray: true,
   })
   async getInspectorMissions(
-    @Param('inspectorId') inspectorId: string,
-    @Query('status') status?: InspectionStatus,
+    @Param("inspectorId") inspectorId: string,
+    @Query("status") status?: InspectionStatus,
   ) {
     const missions = await this.inspectionService.getInspectorMissions(
       inspectorId,
@@ -286,25 +297,25 @@ export class InspectionController {
     return missions.map((inspection) => this.serializeInspection(inspection));
   }
 
-  @Get('stats')
-  @ApiOperation({ summary: 'Get inspection statistics' })
+  @Get("stats")
+  @ApiOperation({ summary: "Get inspection statistics" })
   @ApiOkResponse({
-    description: 'Inspection statistics',
+    description: "Inspection statistics",
     type: InspectionStatsDto,
   })
   async getStats() {
     return this.inspectionService.getInspectionStats();
   }
 
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update inspection (for completion)' })
+  @Patch(":id")
+  @ApiOperation({ summary: "Update inspection (for completion)" })
   @ApiBody({ type: UpdateInspectionDto })
   @ApiOkResponse({
-    description: 'Inspection updated',
+    description: "Inspection updated",
     type: InspectionResponseDto,
   })
   async updateInspection(
-    @Param('id') inspectionId: string,
+    @Param("id") inspectionId: string,
     @Body() payload: UpdateInspectionDto,
   ) {
     const inspection = await this.inspectionService.updateInspection(
@@ -317,7 +328,7 @@ export class InspectionController {
 
   private serializeInspection(entity: any): InspectionResponseDto {
     if (!entity) {
-      throw new BadRequestException('Invalid inspection payload');
+      throw new BadRequestException("Invalid inspection payload");
     }
 
     const saleListing = entity.saleListing
@@ -400,8 +411,10 @@ export class InspectionController {
         saleListing,
         inspector,
         tradeOperation,
-        createdAt: entity.createdAt?.toISOString?.() ?? new Date().toISOString(),
-        updatedAt: entity.updatedAt?.toISOString?.() ?? new Date().toISOString(),
+        createdAt:
+          entity.createdAt?.toISOString?.() ?? new Date().toISOString(),
+        updatedAt:
+          entity.updatedAt?.toISOString?.() ?? new Date().toISOString(),
       },
       { excludeExtraneousValues: false },
     );

@@ -9,24 +9,24 @@ import {
   ValidateNested,
   IsNotEmpty,
   IsBoolean,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { NegotiationStatus } from '@prisma/client';
+} from "class-validator";
+import { Type } from "class-transformer";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { NegotiationStatus } from "@prisma/client";
 
 // Request DTOs for new negotiation management
 
 export class CreateOfferDto {
   @ApiProperty({
-    description: 'Trade seller ID to send offer to',
-    example: 'clxyzabc123',
+    description: "Trade seller ID to send offer to",
+    example: "clxyzabc123",
   })
   @IsString()
   @IsNotEmpty()
   tradeSellerId: string;
 
   @ApiProperty({
-    description: 'Offered price per unit',
+    description: "Offered price per unit",
     example: 340,
   })
   @IsNumber()
@@ -34,7 +34,7 @@ export class CreateOfferDto {
   price: number;
 
   @ApiProperty({
-    description: 'Quantity for negotiation',
+    description: "Quantity for negotiation",
     example: 100,
   })
   @IsNumber()
@@ -42,8 +42,8 @@ export class CreateOfferDto {
   quantity: number;
 
   @ApiPropertyOptional({
-    description: 'Additional terms or conditions',
-    example: 'Payment on delivery, quality inspection required',
+    description: "Additional terms or conditions",
+    example: "Payment on delivery, quality inspection required",
   })
   @IsString()
   @IsOptional()
@@ -52,7 +52,7 @@ export class CreateOfferDto {
 
 export class BatchOfferDto {
   @ApiProperty({
-    description: 'Array of offers to send to multiple sellers',
+    description: "Array of offers to send to multiple sellers",
     type: [CreateOfferDto],
   })
   @IsArray()
@@ -63,7 +63,7 @@ export class BatchOfferDto {
 
 export class CounterOfferDto {
   @ApiProperty({
-    description: 'Counter-offered price per unit',
+    description: "Counter-offered price per unit",
     example: 345,
   })
   @IsNumber()
@@ -71,7 +71,7 @@ export class CounterOfferDto {
   price: number;
 
   @ApiProperty({
-    description: 'Counter-offered quantity',
+    description: "Counter-offered quantity",
     example: 100,
   })
   @IsNumber()
@@ -79,16 +79,16 @@ export class CounterOfferDto {
   quantity: number;
 
   @ApiPropertyOptional({
-    description: 'Counter-offer terms',
-    example: 'Can deliver within 3 days at this price',
+    description: "Counter-offer terms",
+    example: "Can deliver within 3 days at this price",
   })
   @IsString()
   @IsOptional()
   terms?: string;
 
   @ApiPropertyOptional({
-    description: 'Reason for counter-offer',
-    example: 'Current market conditions require higher price',
+    description: "Reason for counter-offer",
+    example: "Current market conditions require higher price",
   })
   @IsString()
   @IsOptional()
@@ -97,8 +97,8 @@ export class CounterOfferDto {
 
 export class AcceptOfferDto {
   @ApiPropertyOptional({
-    description: 'Acceptance note',
-    example: 'Terms accepted, delivery expected within 5 days',
+    description: "Acceptance note",
+    example: "Terms accepted, delivery expected within 5 days",
   })
   @IsString()
   @IsOptional()
@@ -107,8 +107,8 @@ export class AcceptOfferDto {
 
 export class RejectOfferDto {
   @ApiPropertyOptional({
-    description: 'Reason for rejection',
-    example: 'Price too low for quality offered',
+    description: "Reason for rejection",
+    example: "Price too low for quality offered",
   })
   @IsString()
   @IsOptional()
@@ -117,8 +117,8 @@ export class RejectOfferDto {
 
 export class WithdrawOfferDto {
   @ApiPropertyOptional({
-    description: 'Reason for withdrawal',
-    example: 'Trade strategy changed',
+    description: "Reason for withdrawal",
+    example: "Trade strategy changed",
   })
   @IsString()
   @IsOptional()
@@ -127,7 +127,7 @@ export class WithdrawOfferDto {
 
 export class ExtendExpiryDto {
   @ApiProperty({
-    description: 'Hours to extend the negotiation expiry',
+    description: "Hours to extend the negotiation expiry",
     example: 24,
   })
   @IsNumber()
@@ -135,8 +135,8 @@ export class ExtendExpiryDto {
   hours: number;
 
   @ApiPropertyOptional({
-    description: 'Reason for extension',
-    example: 'Seller requested more time to review',
+    description: "Reason for extension",
+    example: "Seller requested more time to review",
   })
   @IsString()
   @IsOptional()
@@ -145,15 +145,15 @@ export class ExtendExpiryDto {
 
 export class BulkWithdrawDto {
   @ApiPropertyOptional({
-    description: 'Reason for bulk withdrawal',
-    example: 'Changing procurement strategy',
+    description: "Reason for bulk withdrawal",
+    example: "Changing procurement strategy",
   })
   @IsString()
   @IsOptional()
   reason?: string;
 
   @ApiPropertyOptional({
-    description: 'Whether to notify sellers of withdrawal',
+    description: "Whether to notify sellers of withdrawal",
     example: true,
   })
   @IsBoolean()
@@ -165,14 +165,14 @@ export class BulkWithdrawDto {
 
 export class NegotiationOfferDto {
   @ApiProperty({
-    description: 'Trade operation ID',
-    example: 'clxyzabc123',
+    description: "Trade operation ID",
+    example: "clxyzabc123",
   })
   @IsString()
   tradeOperationId: string;
 
   @ApiProperty({
-    description: 'Offered price per unit',
+    description: "Offered price per unit",
     example: 375,
   })
   @IsNumber()
@@ -180,7 +180,7 @@ export class NegotiationOfferDto {
   price: number;
 
   @ApiProperty({
-    description: 'Quantity for negotiation',
+    description: "Quantity for negotiation",
     example: 100,
   })
   @IsNumber()
@@ -188,8 +188,8 @@ export class NegotiationOfferDto {
   quantity: number;
 
   @ApiPropertyOptional({
-    description: 'Additional terms or conditions',
-    example: 'Payment on delivery, quality inspection required',
+    description: "Additional terms or conditions",
+    example: "Payment on delivery, quality inspection required",
   })
   @IsOptional()
   @IsString()
@@ -198,14 +198,14 @@ export class NegotiationOfferDto {
 
 export class SellerNegotiationOfferDto {
   @ApiProperty({
-    description: 'Trade seller ID',
-    example: 'clxyzabc123',
+    description: "Trade seller ID",
+    example: "clxyzabc123",
   })
   @IsString()
   tradeSellerId: string;
 
   @ApiProperty({
-    description: 'Offered price per unit',
+    description: "Offered price per unit",
     example: 345,
   })
   @IsNumber()
@@ -213,7 +213,7 @@ export class SellerNegotiationOfferDto {
   price: number;
 
   @ApiProperty({
-    description: 'Quantity for negotiation',
+    description: "Quantity for negotiation",
     example: 50,
   })
   @IsNumber()
@@ -221,16 +221,16 @@ export class SellerNegotiationOfferDto {
   quantity: number;
 
   @ApiPropertyOptional({
-    description: 'Response type',
-    example: 'COUNTER',
+    description: "Response type",
+    example: "COUNTER",
   })
   @IsOptional()
   @IsString()
   response?: string;
 
   @ApiPropertyOptional({
-    description: 'Response note or counter-offer explanation',
-    example: 'Can accept 350 per unit for immediate payment',
+    description: "Response note or counter-offer explanation",
+    example: "Can accept 350 per unit for immediate payment",
   })
   @IsOptional()
   @IsString()
@@ -239,15 +239,15 @@ export class SellerNegotiationOfferDto {
 
 export class BulkNegotiationDto {
   @ApiProperty({
-    description: 'Trade operation ID',
-    example: 'clxyzabc123',
+    description: "Trade operation ID",
+    example: "clxyzabc123",
   })
   @IsString()
   tradeOperationId: string;
 
   @ApiPropertyOptional({
-    description: 'Buyer offer',
-    type: 'object',
+    description: "Buyer offer",
+    type: "object",
   })
   @IsOptional()
   buyerOffer?: {
@@ -256,7 +256,7 @@ export class BulkNegotiationDto {
   };
 
   @ApiProperty({
-    description: 'Seller offers',
+    description: "Seller offers",
     type: [SellerNegotiationOfferDto],
   })
   @IsArray()
@@ -277,7 +277,7 @@ export class ProfitImpactDto {
   @ApiPropertyOptional({ example: -150 })
   profitChange?: number;
 
-  @ApiPropertyOptional({ example: 'Profit margin below minimum 5%' })
+  @ApiPropertyOptional({ example: "Profit margin below minimum 5%" })
   warning?: string;
 
   @ApiPropertyOptional({ example: false })
@@ -285,16 +285,16 @@ export class ProfitImpactDto {
 }
 
 export class NegotiationRoundResponseDto {
-  @ApiProperty({ example: 'clxyzabc123' })
+  @ApiProperty({ example: "clxyzabc123" })
   id: string;
 
-  @ApiProperty({ example: 'ACTIVE' })
+  @ApiProperty({ example: "ACTIVE" })
   status: string;
 
   @ApiProperty({ example: 3 })
   roundNumber: number;
 
-  @ApiProperty({ example: 'SELLER' })
+  @ApiProperty({ example: "SELLER" })
   offerType: string;
 
   @ApiProperty()
@@ -326,7 +326,7 @@ export class PriceSuggestionDto {
     profitMargin: number;
   };
 
-  @ApiProperty({ type: 'array' })
+  @ApiProperty({ type: "array" })
   sellerTargets: Array<{
     sellerId: string;
     suggestedPrice: number;
@@ -354,7 +354,7 @@ export class NegotiationSummaryDto {
     rounds: number;
   };
 
-  @ApiProperty({ type: 'array' })
+  @ApiProperty({ type: "array" })
   sellerNegotiations: Array<{
     sellerId: string;
     sellerName: string;
@@ -384,11 +384,11 @@ export class NegotiationHistoryDto {
   @ApiProperty()
   negotiationId: string;
 
-  @ApiProperty({ type: 'array' })
+  @ApiProperty({ type: "array" })
   history: Array<{
     round: number;
     timestamp: Date;
-    offerType: 'INITIAL' | 'COUNTER' | 'ACCEPTANCE';
+    offerType: "INITIAL" | "COUNTER" | "ACCEPTANCE";
     price: number;
     quantity: number;
     terms?: string;

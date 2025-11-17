@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { Decimal } from '@prisma/client/runtime/library';
-import { TradeOperation, TradeSeller, ProfitEstimation } from '@prisma/client';
+import { Injectable, Logger } from "@nestjs/common";
+import { PrismaService } from "../../prisma/prisma.service";
+import { Decimal } from "@prisma/client/runtime/library";
+import { TradeOperation, TradeSeller, ProfitEstimation } from "@prisma/client";
 
 export interface ProfitCalculation {
   tradeOperationId: string;
@@ -87,7 +87,7 @@ export class ProfitCalculationService {
         buyListing: true,
         sellers: true,
         transportCostCalculations: {
-          orderBy: { calculatedAt: 'desc' },
+          orderBy: { calculatedAt: "desc" },
           take: 1,
         },
       },
@@ -100,21 +100,26 @@ export class ProfitCalculationService {
     // Calculate revenue
     const quantity = trade.buyListing?.quantity?.toNumber() || 0;
     const sellingPrice = trade.sellingPrice?.toNumber() || 0;
-    const totalRevenue = trade.totalRevenue?.toNumber() || sellingPrice * quantity;
+    const totalRevenue =
+      trade.totalRevenue?.toNumber() || sellingPrice * quantity;
 
     // Calculate purchase costs
-    const purchaseBreakdown = await this.calculatePurchaseCosts(trade.sellers || []);
-    
+    const purchaseBreakdown = await this.calculatePurchaseCosts(
+      trade.sellers || [],
+    );
+
     // Calculate transport costs
     const transportCosts = this.calculateTransportCosts(trade);
 
     // Calculate total costs
-    const totalCosts = purchaseBreakdown.totalCost + transportCosts.estimatedCost;
+    const totalCosts =
+      purchaseBreakdown.totalCost + transportCosts.estimatedCost;
 
     // Calculate profit
     const grossProfit = totalRevenue - purchaseBreakdown.totalCost;
     const netProfit = totalRevenue - totalCosts;
-    const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+    const profitMargin =
+      totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
 
     return {
       tradeOperationId,
@@ -132,10 +137,10 @@ export class ProfitCalculationService {
         grossProfit,
         netProfit,
         profitMargin,
-        currency: trade.currency || 'EUR',
+        currency: trade.currency || "EUR",
       },
       status: {
-        isEstimated: trade.phase !== 'COMPLETED',
+        isEstimated: trade.phase !== "COMPLETED",
         lastUpdated: new Date(),
       },
     };
@@ -167,11 +172,13 @@ export class ProfitCalculationService {
     );
 
     // Use provided transport cost or estimate
-    const transportCost = params.transportCost || this.estimateTransportCost(quantity);
+    const transportCost =
+      params.transportCost || this.estimateTransportCost(quantity);
 
     // Calculate profit
     const estimatedProfit = totalRevenue - totalPurchaseCost - transportCost;
-    const profitMargin = totalRevenue > 0 ? (estimatedProfit / totalRevenue) * 100 : 0;
+    const profitMargin =
+      totalRevenue > 0 ? (estimatedProfit / totalRevenue) * 100 : 0;
 
     // Check viability
     const isViable = profitMargin >= this.MIN_PROFIT_MARGIN;
@@ -205,10 +212,12 @@ export class ProfitCalculationService {
   /**
    * Track profit history for a trade
    */
-  async trackProfitHistory(tradeOperationId: string): Promise<ProfitEstimation[]> {
+  async trackProfitHistory(
+    tradeOperationId: string,
+  ): Promise<ProfitEstimation[]> {
     return await this.prisma.profitEstimation.findMany({
       where: { tradeOperationId },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: "asc" },
     });
   }
 
@@ -222,8 +231,9 @@ export class ProfitCalculationService {
     viableCount: number;
   } {
     const sorted = scenarios.sort((a, b) => b.profitMargin - a.profitMargin);
-    const viable = scenarios.filter(s => s.isViable);
-    const average = scenarios.reduce((sum, s) => sum + s.profitMargin, 0) / scenarios.length;
+    const viable = scenarios.filter((s) => s.isViable);
+    const average =
+      scenarios.reduce((sum, s) => sum + s.profitMargin, 0) / scenarios.length;
 
     return {
       best: sorted[0],
@@ -240,21 +250,22 @@ export class ProfitCalculationService {
     tradeOperationId: string,
     offerPrice: number,
     offerQuantity: number,
-    offerType: 'BUYER' | 'SELLER',
+    offerType: "BUYER" | "SELLER",
   ): Promise<ProfitImpact> {
     const currentProfit = await this.calculateProfit(tradeOperationId);
-    
+
     // Calculate new profit with the offer
     let newRevenue = currentProfit.revenue.totalRevenue;
     let newCosts = currentProfit.costs.totalCosts;
 
-    if (offerType === 'BUYER') {
+    if (offerType === "BUYER") {
       newRevenue = offerPrice * currentProfit.revenue.quantity;
     } else {
       // Recalculate purchase costs with new seller price
       const currentPurchaseCost = currentProfit.costs.purchases.totalCost;
-      const priceDifference = offerPrice - (currentPurchaseCost / currentProfit.revenue.quantity);
-      newCosts = currentPurchaseCost + (priceDifference * offerQuantity);
+      const priceDifference =
+        offerPrice - currentPurchaseCost / currentProfit.revenue.quantity;
+      newCosts = currentPurchaseCost + priceDifference * offerQuantity;
     }
 
     const newProfit = newRevenue - newCosts;
@@ -288,8 +299,11 @@ export class ProfitCalculationService {
       totalCost: number;
     }>;
   }> {
-    const breakdown = sellers.map(seller => {
-      const quantity = seller.agreedQuantity?.toNumber() || seller.requestedQuantity?.toNumber() || 0;
+    const breakdown = sellers.map((seller) => {
+      const quantity =
+        seller.agreedQuantity?.toNumber() ||
+        seller.requestedQuantity?.toNumber() ||
+        0;
       const price = seller.agreedPrice?.toNumber() || 0;
       const totalCost = quantity * price;
 
@@ -302,7 +316,10 @@ export class ProfitCalculationService {
     });
 
     const totalCost = breakdown.reduce((sum, item) => sum + item.totalCost, 0);
-    const totalQuantity = breakdown.reduce((sum, item) => sum + item.quantity, 0);
+    const totalQuantity = breakdown.reduce(
+      (sum, item) => sum + item.quantity,
+      0,
+    );
     const avgPrice = totalQuantity > 0 ? totalCost / totalQuantity : 0;
 
     return {
@@ -324,10 +341,11 @@ export class ProfitCalculationService {
     const estimatedCost = trade.estimatedTransportCost?.toNumber() || 0;
     const actualCost = trade.actualTransportCost?.toNumber();
     const distance = trade.totalDistanceKm || 0;
-    
+
     // Get rate from latest calculation or use default
     const latestCalc = trade.transportCalculations?.[0];
-    const ratePerKm = latestCalc?.baseRatePerKm?.toNumber() || this.DEFAULT_TRANSPORT_RATE;
+    const ratePerKm =
+      latestCalc?.baseRatePerKm?.toNumber() || this.DEFAULT_TRANSPORT_RATE;
 
     return {
       estimatedCost,
@@ -352,11 +370,15 @@ export class ProfitCalculationService {
     const warnings: string[] = [];
 
     if (profitMargin < this.MIN_PROFIT_MARGIN) {
-      warnings.push(`Profit margin ${profitMargin.toFixed(2)}% is below minimum ${this.MIN_PROFIT_MARGIN}%`);
+      warnings.push(
+        `Profit margin ${profitMargin.toFixed(2)}% is below minimum ${this.MIN_PROFIT_MARGIN}%`,
+      );
     }
 
     if (profitMargin < this.TARGET_PROFIT_MARGIN) {
-      warnings.push(`Profit margin ${profitMargin.toFixed(2)}% is below target ${this.TARGET_PROFIT_MARGIN}%`);
+      warnings.push(
+        `Profit margin ${profitMargin.toFixed(2)}% is below target ${this.TARGET_PROFIT_MARGIN}%`,
+      );
     }
 
     if (profit < 0) {
@@ -373,7 +395,11 @@ export class ProfitCalculationService {
     tradeOperationId: string,
     data: {
       buyerPrice: number;
-      sellerPrices: Array<{ sellerId: string; price: number; quantity: number }>;
+      sellerPrices: Array<{
+        sellerId: string;
+        price: number;
+        quantity: number;
+      }>;
       estimatedProfit: number;
       profitMargin: number;
     },
@@ -383,15 +409,17 @@ export class ProfitCalculationService {
         tradeOperationId,
         proposedBuyerPrice: data.buyerPrice,
         proposedSellerPrices: data.sellerPrices,
-        estimatedRevenue: data.buyerPrice * 
+        estimatedRevenue:
+          data.buyerPrice *
           data.sellerPrices.reduce((sum, s) => sum + s.quantity, 0),
         estimatedPurchaseCost: data.sellerPrices.reduce(
-          (sum, s) => sum + s.price * s.quantity, 0
+          (sum, s) => sum + s.price * s.quantity,
+          0,
         ),
         estimatedTransportCost: 0, // Should be calculated properly
         estimatedProfit: data.estimatedProfit,
         profitMargin: data.profitMargin,
-        createdBy: 'system', // Should be actual admin ID in production
+        createdBy: "system", // Should be actual admin ID in production
       },
     });
   }

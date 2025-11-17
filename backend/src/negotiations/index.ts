@@ -1,11 +1,11 @@
 // Module
-export * from './negotiations.module';
+export * from "./negotiations.module";
 
 // Services
-export * from './services/negotiation.service';
+export * from "./services/negotiation.service";
 
 // DTOs
-export * from './dto/negotiation.dto';
+export * from "./dto/negotiation.dto";
 
 // Controllers
-export * from './controllers/negotiation.controller';
+export * from "./controllers/negotiation.controller";

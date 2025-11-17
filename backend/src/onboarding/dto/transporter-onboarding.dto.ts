@@ -1,7 +1,16 @@
-import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested, IsNumber, IsBoolean } from 'class-validator';
-import { Type } from 'class-transformer';
-import { TruckType } from '@prisma/client';
-import { CompanyInfoDto } from './seller-onboarding.dto';
+import {
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+  IsNumber,
+  IsBoolean,
+} from "class-validator";
+import { Type } from "class-transformer";
+import { TruckType } from "@prisma/client";
+import { CompanyInfoDto } from "./seller-onboarding.dto";
 
 export class TransporterBaseDto {
   @IsString()

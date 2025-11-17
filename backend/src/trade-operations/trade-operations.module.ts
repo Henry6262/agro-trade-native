@@ -1,18 +1,18 @@
-import { Module, forwardRef } from '@nestjs/common';
-import { PrismaModule } from '../prisma/prisma.module';
-import { TransportModule } from '../transport/transport.module';
-import { NegotiationsModule } from '../negotiations/negotiations.module';
+import { Module, forwardRef } from "@nestjs/common";
+import { PrismaModule } from "../prisma/prisma.module";
+import { TransportModule } from "../transport/transport.module";
+import { NegotiationsModule } from "../negotiations/negotiations.module";
 
 // Services
-import { TradeOperationService } from './services/trade-operation.service';
-import { ProfitCalculationService } from './services/profit-calculation.service';
-import { PriceScenarioService } from './services/price-scenario.service';
+import { TradeOperationService } from "./services/trade-operation.service";
+import { ProfitCalculationService } from "./services/profit-calculation.service";
+import { PriceScenarioService } from "./services/price-scenario.service";
 
 // Controllers
-import { TradeOperationController } from './controllers/trade-operation.controller';
-import { ProfitController } from './controllers/profit.controller';
-import { ScenarioController } from './controllers/scenario.controller';
-import { TestController } from './controllers/test.controller';
+import { TradeOperationController } from "./controllers/trade-operation.controller";
+import { ProfitController } from "./controllers/profit.controller";
+import { ScenarioController } from "./controllers/scenario.controller";
+import { TestController } from "./controllers/test.controller";
 
 @Module({
   imports: [

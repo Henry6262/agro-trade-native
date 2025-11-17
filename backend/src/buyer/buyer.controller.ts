@@ -10,24 +10,27 @@ import {
   UseGuards,
   BadRequestException,
   Query,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
-} from '@nestjs/swagger';
-import { plainToInstance } from 'class-transformer';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { BuyerService } from './buyer.service';
-import { CreateBuyListingDto, UpdateBuyListingDto } from './dto/create-buy-listing.dto';
+} from "@nestjs/swagger";
+import { plainToInstance } from "class-transformer";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { BuyerService } from "./buyer.service";
+import {
+  CreateBuyListingDto,
+  UpdateBuyListingDto,
+} from "./dto/create-buy-listing.dto";
 import {
   BuyListingResponseDto,
   BuyerOfferSummaryDto,
   BuyerStatsDto,
-} from './dto/buyer-response.dto';
-import { RequestStatus, UserRole } from '@prisma/client';
+} from "./dto/buyer-response.dto";
+import { RequestStatus, UserRole } from "@prisma/client";
 
 interface AuthRequest {
   user: {
@@ -36,16 +39,16 @@ interface AuthRequest {
   };
 }
 
-@ApiTags('Buyer')
-@Controller('buyer')
+@ApiTags("Buyer")
+@Controller("buyer")
 export class BuyerController {
   constructor(private readonly buyerService: BuyerService) {}
 
-  @Post('listings')
-  @ApiOperation({ summary: 'Create a buy listing' })
+  @Post("listings")
+  @ApiOperation({ summary: "Create a buy listing" })
   @ApiBody({ type: CreateBuyListingDto })
   @ApiOkResponse({
-    description: 'Created buy listing',
+    description: "Created buy listing",
     type: BuyListingResponseDto,
   })
   async createBuyListing(
@@ -60,39 +63,41 @@ export class BuyerController {
     return this.serializeBuyListing(listing);
   }
 
-  @Get('listings')
-  @ApiOperation({ summary: 'Get buy listings for current user' })
+  @Get("listings")
+  @ApiOperation({ summary: "Get buy listings for current user" })
   @ApiOkResponse({
-    description: 'Buyer listings',
+    description: "Buyer listings",
     type: BuyListingResponseDto,
     isArray: true,
   })
   async getMyBuyListings(
     @Request() req?: AuthRequest,
-    @Query('includeTradeOps') includeTradeOps?: string,
+    @Query("includeTradeOps") includeTradeOps?: string,
   ) {
-    const listings = await this.buyerService.getAllBuyListings(includeTradeOps === 'true');
+    const listings = await this.buyerService.getAllBuyListings(
+      includeTradeOps === "true",
+    );
     return listings.map((listing) => this.serializeBuyListing(listing));
   }
 
-  @Get('listings/:id')
-  @ApiOperation({ summary: 'Get buy listing by id' })
+  @Get("listings/:id")
+  @ApiOperation({ summary: "Get buy listing by id" })
   @ApiOkResponse({
-    description: 'Buy listing detail',
+    description: "Buy listing detail",
     type: BuyListingResponseDto,
   })
   async getBuyListingById(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @Request() req: AuthRequest,
   ) {
     const listing = await this.buyerService.getBuyListingById(id, req.user.id);
     return this.serializeBuyListing(listing);
   }
 
-  @Get('offers')
-  @ApiOperation({ summary: 'Get offers for current buyer listings' })
+  @Get("offers")
+  @ApiOperation({ summary: "Get offers for current buyer listings" })
   @ApiOkResponse({
-    description: 'Buyer offers',
+    description: "Buyer offers",
     type: BuyerOfferSummaryDto,
     isArray: true,
   })
@@ -101,10 +106,10 @@ export class BuyerController {
     return offers.map((offer) => this.serializeOffer(offer));
   }
 
-  @Get('trades')
-  @ApiOperation({ summary: 'Get accepted trade offers for buyer' })
+  @Get("trades")
+  @ApiOperation({ summary: "Get accepted trade offers for buyer" })
   @ApiOkResponse({
-    description: 'Buyer trades',
+    description: "Buyer trades",
     type: BuyerOfferSummaryDto,
     isArray: true,
   })
@@ -113,37 +118,37 @@ export class BuyerController {
     return trades.map((offer) => this.serializeOffer(offer));
   }
 
-  @Get('stats')
-  @ApiOperation({ summary: 'Get buyer statistics' })
+  @Get("stats")
+  @ApiOperation({ summary: "Get buyer statistics" })
   @ApiOkResponse({
-    description: 'Buyer statistics',
+    description: "Buyer statistics",
     type: BuyerStatsDto,
   })
   async getMyStats(@Request() req: AuthRequest) {
     return this.buyerService.getBuyerStats(req.user.id);
   }
 
-  @Patch('listings/:id/status')
-  @ApiOperation({ summary: 'Update buy listing status' })
+  @Patch("listings/:id/status")
+  @ApiOperation({ summary: "Update buy listing status" })
   @ApiBody({
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         status: {
-          type: 'string',
+          type: "string",
           enum: Object.values(RequestStatus),
         },
       },
-      required: ['status'],
+      required: ["status"],
     },
   })
   @ApiOkResponse({
-    description: 'Updated listing',
+    description: "Updated listing",
     type: BuyListingResponseDto,
   })
   async updateBuyListingStatus(
-    @Param('id') id: string,
-    @Body('status') status: RequestStatus,
+    @Param("id") id: string,
+    @Body("status") status: RequestStatus,
     @Request() req: AuthRequest,
   ) {
     const listing = await this.buyerService.updateBuyListingStatus(
@@ -155,15 +160,15 @@ export class BuyerController {
     return this.serializeBuyListing(listing);
   }
 
-  @Patch('listings/:id')
-  @ApiOperation({ summary: 'Update buy listing' })
+  @Patch("listings/:id")
+  @ApiOperation({ summary: "Update buy listing" })
   @ApiBody({ type: UpdateBuyListingDto })
   @ApiOkResponse({
-    description: 'Updated listing',
+    description: "Updated listing",
     type: BuyListingResponseDto,
   })
   async updateBuyListing(
-    @Param('id') id: string,
+    @Param("id") id: string,
     @Body() updateDto: UpdateBuyListingDto,
     @Request() req: AuthRequest,
   ) {
@@ -176,23 +181,20 @@ export class BuyerController {
     return this.serializeBuyListing(listing);
   }
 
-  @Delete('listings/:id')
-  @ApiOperation({ summary: 'Delete buy listing' })
+  @Delete("listings/:id")
+  @ApiOperation({ summary: "Delete buy listing" })
   @ApiOkResponse({
-    description: 'Deleted buy listing',
+    description: "Deleted buy listing",
     type: BuyListingResponseDto,
   })
-  async deleteBuyListing(
-    @Param('id') id: string,
-    @Request() req: AuthRequest,
-  ) {
+  async deleteBuyListing(@Param("id") id: string, @Request() req: AuthRequest) {
     const deleted = await this.buyerService.deleteBuyListing(id, req.user.id);
     return this.serializeBuyListing(deleted);
   }
 
   private serializeBuyListing(entity: any): BuyListingResponseDto {
     if (!entity) {
-      throw new BadRequestException('Invalid buy listing payload');
+      throw new BadRequestException("Invalid buy listing payload");
     }
 
     const product = entity.product
@@ -228,7 +230,8 @@ export class BuyerController {
       ? {
           id: entity.deliveryAddress.id,
           street: entity.deliveryAddress.street,
-          city: entity.deliveryAddress.city?.name ?? entity.deliveryAddress.city,
+          city:
+            entity.deliveryAddress.city?.name ?? entity.deliveryAddress.city,
           region: entity.deliveryAddress.city?.region?.name ?? null,
           country: entity.deliveryAddress.country,
           address: entity.deliveryAddress.street,
@@ -248,13 +251,15 @@ export class BuyerController {
           valueText: spec.valueText,
           valueNumber: spec.valueNumber ? Number(spec.valueNumber) : null,
           valueBool: spec.valueBool,
-          specificationType: spec.specificationType ? {
-            id: spec.specificationType.id,
-            code: spec.specificationType.code,
-            name: spec.specificationType.name,
-            unit: spec.specificationType.unit,
-            dataType: spec.specificationType.dataType,
-          } : null,
+          specificationType: spec.specificationType
+            ? {
+                id: spec.specificationType.id,
+                code: spec.specificationType.code,
+                name: spec.specificationType.name,
+                unit: spec.specificationType.unit,
+                dataType: spec.specificationType.dataType,
+              }
+            : null,
         }))
       : null;
 
@@ -276,8 +281,10 @@ export class BuyerController {
         product,
         buyer,
         specifications,
-        createdAt: entity.createdAt?.toISOString?.() ?? new Date().toISOString(),
-        updatedAt: entity.updatedAt?.toISOString?.() ?? new Date().toISOString(),
+        createdAt:
+          entity.createdAt?.toISOString?.() ?? new Date().toISOString(),
+        updatedAt:
+          entity.updatedAt?.toISOString?.() ?? new Date().toISOString(),
       },
       { excludeExtraneousValues: false },
     );
@@ -285,7 +292,7 @@ export class BuyerController {
 
   private serializeOffer(entity: any): BuyerOfferSummaryDto {
     if (!entity) {
-      throw new BadRequestException('Invalid offer payload');
+      throw new BadRequestException("Invalid offer payload");
     }
 
     const saleListing = entity.saleListing
@@ -324,7 +331,7 @@ export class BuyerController {
               name: entity.buyListing.product.name,
               category: entity.buyListing.product.category,
             }
-          : saleListing?.product ?? null,
+          : (saleListing?.product ?? null),
         createdAt: entity.createdAt?.toISOString?.() ?? null,
         updatedAt: entity.updatedAt?.toISOString?.() ?? null,
       },

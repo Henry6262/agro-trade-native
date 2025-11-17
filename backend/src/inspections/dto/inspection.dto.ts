@@ -1,9 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  InspectionPriority,
-  InspectionStatus,
-} from '@prisma/client';
-import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { InspectionPriority, InspectionStatus } from "@prisma/client";
+import { Type } from "class-transformer";
 import {
   IsArray,
   IsBoolean,
@@ -13,7 +10,7 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
-} from 'class-validator';
+} from "class-validator";
 
 export class CreateInspectionRequestDto {
   @ApiProperty()
@@ -31,7 +28,7 @@ export class CreateInspectionRequestDto {
   @IsEnum(InspectionPriority)
   priority?: InspectionPriority;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({ type: String, format: "date-time" })
   @IsOptional()
   @IsString()
   requestedDate?: string;
@@ -212,7 +209,7 @@ export class InspectionVerificationProductSpecificationsDto {
   @ApiPropertyOptional()
   origin?: string;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({ type: String, format: "date-time" })
   harvestDate?: string;
 }
 
@@ -281,13 +278,13 @@ export class InspectionResponseDto {
   @ApiProperty({ enum: InspectionPriority })
   priority: InspectionPriority;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   requestedDate: string;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({ type: String, format: "date-time" })
   scheduledDate?: string | null;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({ type: String, format: "date-time" })
   completedDate?: string | null;
 
   @ApiPropertyOptional({ type: Number })
@@ -324,10 +321,10 @@ export class InspectionResponseDto {
   @Type(() => InspectionTradeOperationSummaryDto)
   tradeOperation?: InspectionTradeOperationSummaryDto | null;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   createdAt: string;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   updatedAt: string;
 }
 
@@ -364,10 +361,10 @@ export class InspectionAssigneeDto {
   @ApiPropertyOptional({ type: Number })
   activeAssignments?: number;
 
-  @ApiPropertyOptional({ type: Number, description: 'Last known latitude' })
+  @ApiPropertyOptional({ type: Number, description: "Last known latitude" })
   latitude?: number;
 
-  @ApiPropertyOptional({ type: Number, description: 'Last known longitude' })
+  @ApiPropertyOptional({ type: Number, description: "Last known longitude" })
   longitude?: number;
 
   @ApiPropertyOptional()
@@ -376,7 +373,7 @@ export class InspectionAssigneeDto {
   @ApiPropertyOptional()
   region?: string | null;
 
-  @ApiPropertyOptional({ type: String, format: 'date-time' })
+  @ApiPropertyOptional({ type: String, format: "date-time" })
   lastSeenAt?: Date;
 }
 

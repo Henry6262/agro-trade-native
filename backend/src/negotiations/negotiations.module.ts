@@ -1,14 +1,14 @@
-import { Module, forwardRef } from '@nestjs/common';
-import { PrismaModule } from '../prisma/prisma.module';
-import { TradeOperationsModule } from '../trade-operations/trade-operations.module';
-import { InspectionModule } from '../inspections/inspection.module';
+import { Module, forwardRef } from "@nestjs/common";
+import { PrismaModule } from "../prisma/prisma.module";
+import { TradeOperationsModule } from "../trade-operations/trade-operations.module";
+import { InspectionModule } from "../inspections/inspection.module";
 
 // Services
-import { NegotiationService } from './services/negotiation.service';
-import { NegotiationExpiryService } from './services/negotiation-expiry.service';
+import { NegotiationService } from "./services/negotiation.service";
+import { NegotiationExpiryService } from "./services/negotiation-expiry.service";
 
 // Controllers
-import { NegotiationController } from './controllers/negotiation.controller';
+import { NegotiationController } from "./controllers/negotiation.controller";
 
 @Module({
   imports: [

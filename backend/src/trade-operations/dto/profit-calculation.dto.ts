@@ -1,9 +1,17 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, IsArray, ValidateNested, Min } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsBoolean,
+  IsArray,
+  ValidateNested,
+  Min,
+} from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Type } from "class-transformer";
 
 export class SellerPriceDto {
-  @ApiProperty({ example: 'cmfk0hzzh0004bfffxe82z2jz' })
+  @ApiProperty({ example: "cmfk0hzzh0004bfffxe82z2jz" })
   @IsString()
   sellerId: string;
 
@@ -20,14 +28,14 @@ export class SellerPriceDto {
 
 export class ProfitCalculationRequestDto {
   @ApiProperty({
-    description: 'Trade operation ID to calculate profit for',
-    example: 'cmfk0hzzh0004bfffxe82z2jz',
+    description: "Trade operation ID to calculate profit for",
+    example: "cmfk0hzzh0004bfffxe82z2jz",
   })
   @IsString()
   tradeOperationId: string;
 
   @ApiPropertyOptional({
-    description: 'Include sensitivity analysis in response',
+    description: "Include sensitivity analysis in response",
     example: true,
   })
   @IsOptional()
@@ -35,7 +43,7 @@ export class ProfitCalculationRequestDto {
   includeSensitivity?: boolean;
 
   @ApiPropertyOptional({
-    description: 'Include risk assessment in response',
+    description: "Include risk assessment in response",
     example: true,
   })
   @IsOptional()
@@ -45,14 +53,14 @@ export class ProfitCalculationRequestDto {
 
 export class ProfitEstimationDto {
   @ApiProperty({
-    description: 'Trade operation ID',
-    example: 'cmfk0hzzh0004bfffxe82z2jz',
+    description: "Trade operation ID",
+    example: "cmfk0hzzh0004bfffxe82z2jz",
   })
   @IsString()
   tradeOperationId: string;
 
   @ApiProperty({
-    description: 'Proposed buyer price per unit',
+    description: "Proposed buyer price per unit",
     example: 380,
   })
   @IsNumber()
@@ -60,7 +68,7 @@ export class ProfitEstimationDto {
   buyerPrice: number;
 
   @ApiProperty({
-    description: 'Proposed seller prices',
+    description: "Proposed seller prices",
     type: [SellerPriceDto],
   })
   @IsArray()
@@ -69,7 +77,7 @@ export class ProfitEstimationDto {
   sellerPrices: SellerPriceDto[];
 
   @ApiPropertyOptional({
-    description: 'Override transport cost estimation',
+    description: "Override transport cost estimation",
     example: 150,
   })
   @IsOptional()
@@ -78,7 +86,7 @@ export class ProfitEstimationDto {
   transportCost?: number;
 
   @ApiPropertyOptional({
-    description: 'Save this estimation for future reference',
+    description: "Save this estimation for future reference",
     example: true,
   })
   @IsOptional()
@@ -96,7 +104,7 @@ export class RevenueBreakdownDto {
   @ApiProperty({ example: 38000 })
   totalRevenue: number;
 
-  @ApiProperty({ example: 'EUR' })
+  @ApiProperty({ example: "EUR" })
   currency: string;
 }
 
@@ -108,14 +116,14 @@ export class PurchaseCostBreakdownDto {
   avgPrice: number;
 
   @ApiProperty({
-    type: 'array',
+    type: "array",
     items: {
-      type: 'object',
+      type: "object",
       properties: {
-        sellerId: { type: 'string' },
-        quantity: { type: 'number' },
-        price: { type: 'number' },
-        totalCost: { type: 'number' },
+        sellerId: { type: "string" },
+        quantity: { type: "number" },
+        price: { type: "number" },
+        totalCost: { type: "number" },
       },
     },
   })
@@ -131,7 +139,7 @@ export class TransportCostBreakdownDto {
   @ApiProperty({ example: 150 })
   estimatedCost: number;
 
-  @ApiPropertyOptional({ example: 155.50 })
+  @ApiPropertyOptional({ example: 155.5 })
   actualCost?: number;
 
   @ApiProperty({ example: 245 })
@@ -140,7 +148,7 @@ export class TransportCostBreakdownDto {
   @ApiProperty({ example: 0.15 })
   ratePerKm: number;
 
-  @ApiPropertyOptional({ example: 'FLATBED' })
+  @ApiPropertyOptional({ example: "FLATBED" })
   vehicleType?: string;
 }
 
@@ -165,7 +173,7 @@ export class ProfitMetricsDto {
   @ApiProperty({ example: 6.97 })
   profitMargin: number;
 
-  @ApiProperty({ example: 'EUR' })
+  @ApiProperty({ example: "EUR" })
   currency: string;
 
   @ApiPropertyOptional({ example: true })
@@ -176,7 +184,7 @@ export class ProfitMetricsDto {
 }
 
 export class ProfitCalculationResponseDto {
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000" })
   tradeOperationId: string;
 
   @ApiProperty({ type: RevenueBreakdownDto })
@@ -189,10 +197,10 @@ export class ProfitCalculationResponseDto {
   profit: ProfitMetricsDto;
 
   @ApiProperty({
-    type: 'object',
+    type: "object",
     properties: {
-      isEstimated: { type: 'boolean' },
-      lastUpdated: { type: 'string', format: 'date-time' },
+      isEstimated: { type: "boolean" },
+      lastUpdated: { type: "string", format: "date-time" },
     },
   })
   status: {
@@ -201,14 +209,14 @@ export class ProfitCalculationResponseDto {
   };
 
   @ApiPropertyOptional({
-    description: 'Sensitivity analysis if requested',
-    type: 'array',
+    description: "Sensitivity analysis if requested",
+    type: "array",
     items: {
-      type: 'object',
+      type: "object",
       properties: {
-        priceChange: { type: 'number' },
-        newMargin: { type: 'number' },
-        impact: { type: 'string' },
+        priceChange: { type: "number" },
+        newMargin: { type: "number" },
+        impact: { type: "string" },
       },
     },
   })
@@ -219,16 +227,16 @@ export class ProfitCalculationResponseDto {
   }>;
 
   @ApiPropertyOptional({
-    description: 'Risk assessment if requested',
-    type: 'object',
+    description: "Risk assessment if requested",
+    type: "object",
     properties: {
-      level: { type: 'string', enum: ['LOW', 'MEDIUM', 'HIGH'] },
-      factors: { type: 'array', items: { type: 'string' } },
-      mitigation: { type: 'array', items: { type: 'string' } },
+      level: { type: "string", enum: ["LOW", "MEDIUM", "HIGH"] },
+      factors: { type: "array", items: { type: "string" } },
+      mitigation: { type: "array", items: { type: "string" } },
     },
   })
   riskAssessment?: {
-    level: 'LOW' | 'MEDIUM' | 'HIGH';
+    level: "LOW" | "MEDIUM" | "HIGH";
     factors: string[];
     mitigation: string[];
   };
@@ -245,22 +253,22 @@ export class ProfitEstimationResponseDto {
   isViable: boolean;
 
   @ApiProperty({
-    type: 'array',
-    items: { type: 'string' },
-    example: ['Profit margin 6.97% is below target 7%'],
+    type: "array",
+    items: { type: "string" },
+    example: ["Profit margin 6.97% is below target 7%"],
   })
   warnings: string[];
 
-  @ApiPropertyOptional({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiPropertyOptional({ example: "123e4567-e89b-12d3-a456-426614174000" })
   estimationId?: string;
 }
 
 export class ProfitComparisonDto {
   @ApiProperty({
-    type: 'object',
+    type: "object",
     properties: {
-      profit: { type: 'number' },
-      margin: { type: 'number' },
+      profit: { type: "number" },
+      margin: { type: "number" },
     },
   })
   current: {
@@ -269,10 +277,10 @@ export class ProfitComparisonDto {
   };
 
   @ApiProperty({
-    type: 'object',
+    type: "object",
     properties: {
-      profit: { type: 'number' },
-      margin: { type: 'number' },
+      profit: { type: "number" },
+      margin: { type: "number" },
     },
   })
   proposed: {
@@ -286,12 +294,15 @@ export class ProfitComparisonDto {
   @ApiProperty({ example: 0.5 })
   marginDifference: number;
 
-  @ApiProperty({ example: 'INCREASE', enum: ['INCREASE', 'DECREASE', 'NO_CHANGE'] })
-  trend: 'INCREASE' | 'DECREASE' | 'NO_CHANGE';
+  @ApiProperty({
+    example: "INCREASE",
+    enum: ["INCREASE", "DECREASE", "NO_CHANGE"],
+  })
+  trend: "INCREASE" | "DECREASE" | "NO_CHANGE";
 }
 
 export class ProfitHistoryEntryDto {
-  @ApiProperty({ example: 'hist_123' })
+  @ApiProperty({ example: "hist_123" })
   id: string;
 
   @ApiProperty({ example: 380 })
@@ -312,10 +323,10 @@ export class ProfitHistoryEntryDto {
   @ApiProperty({ example: 7.4 })
   profitMargin: number;
 
-  @ApiPropertyOptional({ example: 'admin@agrotrade.test' })
+  @ApiPropertyOptional({ example: "admin@agrotrade.test" })
   createdBy?: string;
 
-  @ApiProperty({ example: '2024-01-15T12:30:00Z' })
+  @ApiProperty({ example: "2024-01-15T12:30:00Z" })
   createdAt: Date;
 }
 
@@ -332,16 +343,16 @@ export class ProfitScenarioComparisonDto {
   @ApiProperty({ example: 3 })
   viableCount: number;
 
-  @ApiProperty({ example: 'Proceed with scenario A (highest margin > 7%)' })
+  @ApiProperty({ example: "Proceed with scenario A (highest margin > 7%)" })
   recommendation: string;
 }
 
 export class ProfitImpactResponseDto {
-  @ApiProperty({ example: 'offer_123' })
+  @ApiProperty({ example: "offer_123" })
   offerId: string;
 
-  @ApiProperty({ example: 'BUYER', enum: ['BUYER', 'SELLER'] })
-  offerType: 'BUYER' | 'SELLER';
+  @ApiProperty({ example: "BUYER", enum: ["BUYER", "SELLER"] })
+  offerType: "BUYER" | "SELLER";
 
   @ApiProperty({ example: 385 })
   offerPrice: number;
@@ -364,10 +375,10 @@ export class ProfitImpactResponseDto {
   @ApiPropertyOptional({ example: 340 })
   averagePurchasePrice?: number;
 
-  @ApiPropertyOptional({ example: 'Profit margin 4.9% is below minimum 5%' })
+  @ApiPropertyOptional({ example: "Profit margin 4.9% is below minimum 5%" })
   warning?: string;
 
-  @ApiProperty({ example: 'ACCEPT' })
+  @ApiProperty({ example: "ACCEPT" })
   recommendation: string;
 }
 
@@ -387,16 +398,16 @@ export class ProfitValidationDto {
   @ApiProperty({ type: [String], example: [] })
   warnings: string[];
 
-  @ApiProperty({ type: [String], example: ['Negotiate higher selling price'] })
+  @ApiProperty({ type: [String], example: ["Negotiate higher selling price"] })
   recommendations: string[];
 
   @ApiProperty({
-    type: 'object',
+    type: "object",
     properties: {
-      revenue: { type: 'number' },
-      purchaseCosts: { type: 'number' },
-      transportCosts: { type: 'number' },
-      netProfit: { type: 'number' },
+      revenue: { type: "number" },
+      purchaseCosts: { type: "number" },
+      transportCosts: { type: "number" },
+      netProfit: { type: "number" },
     },
   })
   breakdown: {

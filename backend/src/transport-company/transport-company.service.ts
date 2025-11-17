@@ -1,9 +1,28 @@
-import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { RegisterCompanyDto, VerifyCompanyDto } from './dto/register-company.dto';
-import { LinkTransporterDto, UnlinkTransporterDto, InviteTransporterDto, TransporterSearchDto } from './dto/link-transporter.dto';
-import { AdminLevel, CompanyType, UserRole, DriverType, DriverStatus } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import {
+  RegisterCompanyDto,
+  VerifyCompanyDto,
+} from "./dto/register-company.dto";
+import {
+  LinkTransporterDto,
+  UnlinkTransporterDto,
+  InviteTransporterDto,
+  TransporterSearchDto,
+} from "./dto/link-transporter.dto";
+import {
+  AdminLevel,
+  CompanyType,
+  UserRole,
+  DriverType,
+  DriverStatus,
+} from "@prisma/client";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class TransportCompanyService {
@@ -23,7 +42,7 @@ export class TransportCompanyService {
     });
 
     if (existing) {
-      throw new ConflictException('Company with these details already exists');
+      throw new ConflictException("Company with these details already exists");
     }
 
     // Check if admin email is already in use
@@ -32,7 +51,7 @@ export class TransportCompanyService {
     });
 
     if (existingUser) {
-      throw new ConflictException('Admin email is already registered');
+      throw new ConflictException("Admin email is already registered");
     }
 
     // Start transaction
@@ -97,7 +116,7 @@ export class TransportCompanyService {
 
     return {
       success: true,
-      message: 'Company registered successfully. Awaiting verification.',
+      message: "Company registered successfully. Awaiting verification.",
       data: {
         companyId: result.company.id,
         companyName: result.company.companyName,
@@ -120,11 +139,11 @@ export class TransportCompanyService {
     });
 
     if (!company) {
-      throw new NotFoundException('Company not found');
+      throw new NotFoundException("Company not found");
     }
 
     if (company.isVerified) {
-      throw new BadRequestException('Company is already verified');
+      throw new BadRequestException("Company is already verified");
     }
 
     // Update company verification status
@@ -141,7 +160,7 @@ export class TransportCompanyService {
 
     return {
       success: true,
-      message: 'Company verified successfully',
+      message: "Company verified successfully",
       data: updated,
     };
   }
@@ -163,7 +182,7 @@ export class TransportCompanyService {
           },
         },
         drivers: {
-          where: { status: { not: 'OFFLINE' } },
+          where: { status: { not: "OFFLINE" } },
           select: {
             id: true,
             firstName: true,
@@ -193,7 +212,7 @@ export class TransportCompanyService {
     });
 
     if (!company) {
-      throw new NotFoundException('Company not found');
+      throw new NotFoundException("Company not found");
     }
 
     return company;
@@ -220,7 +239,7 @@ export class TransportCompanyService {
     });
 
     if (!company) {
-      throw new NotFoundException('Company not found');
+      throw new NotFoundException("Company not found");
     }
 
     const updated = await this.prisma.transportCompany.update({
@@ -247,39 +266,48 @@ export class TransportCompanyService {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     return companies;
   }
 
   async getCompanyStats(companyId: string) {
-    const [drivers, trucks, activeBids, activeJobs, completedJobs] = await Promise.all([
-      this.prisma.driver.count({
-        where: { transportCompanyId: companyId },
-      }),
-      this.prisma.truck.count({
-        where: { transportCompanyId: companyId },
-      }),
-      this.prisma.transportBid.count({
-        where: {
-          transportCompanyId: companyId,
-          status: 'PENDING',
-        },
-      }),
-      this.prisma.transportJob.count({
-        where: {
-          transportCompanyId: companyId,
-          status: { in: ['ASSIGNED', 'STARTED', 'PICKING_UP', 'IN_TRANSIT', 'DELIVERING'] },
-        },
-      }),
-      this.prisma.transportJob.count({
-        where: {
-          transportCompanyId: companyId,
-          status: 'COMPLETED',
-        },
-      }),
-    ]);
+    const [drivers, trucks, activeBids, activeJobs, completedJobs] =
+      await Promise.all([
+        this.prisma.driver.count({
+          where: { transportCompanyId: companyId },
+        }),
+        this.prisma.truck.count({
+          where: { transportCompanyId: companyId },
+        }),
+        this.prisma.transportBid.count({
+          where: {
+            transportCompanyId: companyId,
+            status: "PENDING",
+          },
+        }),
+        this.prisma.transportJob.count({
+          where: {
+            transportCompanyId: companyId,
+            status: {
+              in: [
+                "ASSIGNED",
+                "STARTED",
+                "PICKING_UP",
+                "IN_TRANSIT",
+                "DELIVERING",
+              ],
+            },
+          },
+        }),
+        this.prisma.transportJob.count({
+          where: {
+            transportCompanyId: companyId,
+            status: "COMPLETED",
+          },
+        }),
+      ]);
 
     return {
       drivers,
@@ -300,7 +328,7 @@ export class TransportCompanyService {
     });
 
     if (!company) {
-      throw new NotFoundException('Company not found');
+      throw new NotFoundException("Company not found");
     }
 
     // Verify transporter exists and has the right role
@@ -309,11 +337,11 @@ export class TransportCompanyService {
     });
 
     if (!transporter) {
-      throw new NotFoundException('Transporter not found');
+      throw new NotFoundException("Transporter not found");
     }
 
     if (transporter.role !== UserRole.TRANSPORTER) {
-      throw new BadRequestException('User is not a transporter');
+      throw new BadRequestException("User is not a transporter");
     }
 
     // Check if driver profile already exists for this user
@@ -322,10 +350,15 @@ export class TransportCompanyService {
     });
 
     if (existingDriver) {
-      if (existingDriver.transportCompanyId && existingDriver.transportCompanyId !== companyId) {
-        throw new ConflictException('Transporter is already linked to another company');
+      if (
+        existingDriver.transportCompanyId &&
+        existingDriver.transportCompanyId !== companyId
+      ) {
+        throw new ConflictException(
+          "Transporter is already linked to another company",
+        );
       }
-      
+
       // Update existing driver profile to link to company
       const updated = await this.prisma.driver.update({
         where: { id: existingDriver.id },
@@ -337,7 +370,7 @@ export class TransportCompanyService {
 
       return {
         success: true,
-        message: 'Transporter linked to company successfully',
+        message: "Transporter linked to company successfully",
         data: updated,
       };
     }
@@ -348,8 +381,8 @@ export class TransportCompanyService {
         userId: dto.transporterId,
         transportCompanyId: companyId,
         driverType: DriverType.EXTERNAL,
-        firstName: transporter.name?.split(' ')[0] || '',
-        lastName: transporter.name?.split(' ').slice(1).join(' ') || '',
+        firstName: transporter.name?.split(" ")[0] || "",
+        lastName: transporter.name?.split(" ").slice(1).join(" ") || "",
         email: transporter.email,
         phoneNumber: transporter.phoneNumber,
         licenseNumber: `TMP-${transporter.id}`, // Temporary until they provide real license
@@ -362,7 +395,7 @@ export class TransportCompanyService {
 
     return {
       success: true,
-      message: 'Transporter linked to company successfully',
+      message: "Transporter linked to company successfully",
       data: driver,
     };
   }
@@ -377,7 +410,7 @@ export class TransportCompanyService {
     });
 
     if (!driver) {
-      throw new NotFoundException('Transporter not found in this company');
+      throw new NotFoundException("Transporter not found in this company");
     }
 
     // Remove company association but keep driver profile
@@ -391,7 +424,7 @@ export class TransportCompanyService {
 
     return {
       success: true,
-      message: 'Transporter unlinked from company',
+      message: "Transporter unlinked from company",
       data: updated,
     };
   }
@@ -426,7 +459,7 @@ export class TransportCompanyService {
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     return drivers;
@@ -439,8 +472,8 @@ export class TransportCompanyService {
 
     if (dto.searchTerm) {
       whereClause.OR = [
-        { email: { contains: dto.searchTerm, mode: 'insensitive' } },
-        { name: { contains: dto.searchTerm, mode: 'insensitive' } },
+        { email: { contains: dto.searchTerm, mode: "insensitive" } },
+        { name: { contains: dto.searchTerm, mode: "insensitive" } },
         { phoneNumber: { contains: dto.searchTerm } },
       ];
     }
@@ -474,8 +507,8 @@ export class TransportCompanyService {
     });
 
     // Filter out transporters already linked to companies if needed
-    const availableTransporters = transporters.filter(t => 
-      !t.driverProfile || !t.driverProfile.transportCompanyId
+    const availableTransporters = transporters.filter(
+      (t) => !t.driverProfile || !t.driverProfile.transportCompanyId,
     );
 
     return {
@@ -491,7 +524,7 @@ export class TransportCompanyService {
     });
 
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException("User with this email already exists");
     }
 
     // Create invitation record (you might want to create an Invitation model)
@@ -516,7 +549,7 @@ export class TransportCompanyService {
 
     return {
       success: true,
-      message: 'Invitation sent to transporter',
+      message: "Invitation sent to transporter",
       data: driver,
     };
   }
@@ -540,11 +573,11 @@ export class TransportCompanyService {
         },
       },
       orderBy: {
-        companyName: 'asc',
+        companyName: "asc",
       },
     });
 
-    return companies.map(company => ({
+    return companies.map((company) => ({
       id: company.id,
       name: company.companyName,
       operatingRegions: company.operatingRegions,

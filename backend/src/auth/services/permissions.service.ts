@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { UserRole } from '@prisma/client';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../../prisma/prisma.service";
+import { UserRole } from "@prisma/client";
 
 @Injectable()
 export class PermissionsService {
@@ -36,14 +36,14 @@ export class PermissionsService {
         // Transporter without driver profile = legacy independent transporter
         return true;
       }
-      
+
       // Internal drivers (independent) can bid
-      if (user.driverProfile.driverType === 'INTERNAL') {
+      if (user.driverProfile.driverType === "INTERNAL") {
         return true;
       }
-      
+
       // External drivers (company drivers) cannot bid
-      if (user.driverProfile.driverType === 'EXTERNAL') {
+      if (user.driverProfile.driverType === "EXTERNAL") {
         return false;
       }
     }
@@ -67,7 +67,10 @@ export class PermissionsService {
   /**
    * Check if user can view company-wide data
    */
-  async canViewCompanyData(userId: string, companyId?: string): Promise<boolean> {
+  async canViewCompanyData(
+    userId: string,
+    companyId?: string,
+  ): Promise<boolean> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -98,7 +101,10 @@ export class PermissionsService {
     }
 
     // Company drivers can view their company data (limited)
-    if (user.role === UserRole.TRANSPORTER && user.driverProfile?.transportCompanyId) {
+    if (
+      user.role === UserRole.TRANSPORTER &&
+      user.driverProfile?.transportCompanyId
+    ) {
       if (!companyId) return true; // Can view their own company
       return user.driverProfile.transportCompanyId === companyId;
     }
@@ -130,7 +136,10 @@ export class PermissionsService {
     }
 
     // Company admins with driver management permission
-    if (user.role === UserRole.COMPANY_ADMIN && user.companyAdmin?.canManageDrivers) {
+    if (
+      user.role === UserRole.COMPANY_ADMIN &&
+      user.companyAdmin?.canManageDrivers
+    ) {
       if (!companyId) return true; // Can manage their own company drivers
       return user.companyAdmin.transportCompanyId === companyId;
     }
@@ -179,7 +188,7 @@ export class PermissionsService {
     // Company Admin context
     if (user.role === UserRole.COMPANY_ADMIN && user.companyAdmin) {
       return {
-        userType: 'COMPANY_ADMIN' as const,
+        userType: "COMPANY_ADMIN" as const,
         company: user.companyAdmin.transportCompany,
         permissions: {
           canBid: true,
@@ -193,9 +202,12 @@ export class PermissionsService {
     }
 
     // Company Driver context
-    if (user.role === UserRole.TRANSPORTER && user.driverProfile?.transportCompany) {
+    if (
+      user.role === UserRole.TRANSPORTER &&
+      user.driverProfile?.transportCompany
+    ) {
       return {
-        userType: 'COMPANY_DRIVER' as const,
+        userType: "COMPANY_DRIVER" as const,
         company: user.driverProfile.transportCompany,
         permissions: {
           canBid: false,
@@ -211,7 +223,7 @@ export class PermissionsService {
     // Independent Transporter context
     if (user.role === UserRole.TRANSPORTER) {
       return {
-        userType: 'INDEPENDENT_TRANSPORTER' as const,
+        userType: "INDEPENDENT_TRANSPORTER" as const,
         company: null,
         permissions: {
           canBid: true,
@@ -233,7 +245,7 @@ export class PermissionsService {
   async getAvailableDriversForAssignment(userId: string, companyId?: string) {
     const canAssign = await this.canAssignJobs(userId);
     if (!canAssign) {
-      throw new Error('User not authorized to assign jobs');
+      throw new Error("User not authorized to assign jobs");
     }
 
     // Get company ID from user context if not provided
@@ -244,14 +256,14 @@ export class PermissionsService {
     }
 
     if (!targetCompanyId) {
-      throw new Error('No company context found');
+      throw new Error("No company context found");
     }
 
     // Get available drivers in the company
     const drivers = await this.prisma.driver.findMany({
       where: {
         transportCompanyId: targetCompanyId,
-        status: 'AVAILABLE',
+        status: "AVAILABLE",
         isAvailable: true,
       },
       include: {

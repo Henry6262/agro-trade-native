@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { TransportCostSettings, TruckType } from '@prisma/client';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../../prisma/prisma.service";
+import { TransportCostSettings, TruckType } from "@prisma/client";
 
 /**
  * Adapter service to work with the existing Prisma schema
@@ -13,7 +13,7 @@ export class TransportSettingsAdapterService {
   async getActiveSettings(): Promise<any> {
     const settings = await this.prisma.transportCostSettings.findFirst({
       where: { isActive: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
 
     if (!settings) {
@@ -36,9 +36,21 @@ export class TransportSettingsAdapterService {
         BOX_TRUCK: 1.0, // Default value
       },
       distanceTiers: [
-        { minKm: 0, maxKm: settings.tier1MaxKm, ratePerKm: settings.tier1Rate?.toNumber() || 0.15 },
-        { minKm: settings.tier1MaxKm, maxKm: settings.tier2MaxKm, ratePerKm: settings.tier2Rate?.toNumber() || 0.13 },
-        { minKm: settings.tier2MaxKm, maxKm: null, ratePerKm: settings.tier3Rate?.toNumber() || 0.11 },
+        {
+          minKm: 0,
+          maxKm: settings.tier1MaxKm,
+          ratePerKm: settings.tier1Rate?.toNumber() || 0.15,
+        },
+        {
+          minKm: settings.tier1MaxKm,
+          maxKm: settings.tier2MaxKm,
+          ratePerKm: settings.tier2Rate?.toNumber() || 0.13,
+        },
+        {
+          minKm: settings.tier2MaxKm,
+          maxKm: null,
+          ratePerKm: settings.tier3Rate?.toNumber() || 0.11,
+        },
       ],
       loadingCostPerTon: settings.loadingCostPerTon,
       urgencySurcharge: settings.urgencySurcharge || 0.3,
@@ -52,7 +64,7 @@ export class TransportSettingsAdapterService {
 
   private getDefaultSettings(): any {
     return {
-      id: 'default',
+      id: "default",
       baseRatePerKm: 0.15,
       vehicleMultipliers: {
         FLATBED: 1.0,

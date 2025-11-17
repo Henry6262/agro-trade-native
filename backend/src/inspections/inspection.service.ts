@@ -3,15 +3,11 @@ import {
   Logger,
   NotFoundException,
   BadRequestException,
-} from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import {
-  InspectionStatus,
-  InspectionPriority,
-  UserRole,
-} from '@prisma/client';
-import { NotificationService } from '../notifications/notification.service';
-import { TransportBiddingService } from '../transport/services/transport-bidding.service';
+} from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import { InspectionStatus, InspectionPriority, UserRole } from "@prisma/client";
+import { NotificationService } from "../notifications/notification.service";
+import { TransportBiddingService } from "../transport/services/transport-bidding.service";
 
 @Injectable()
 export class InspectionService {
@@ -43,13 +39,13 @@ export class InspectionService {
     });
 
     if (!saleListing) {
-      throw new NotFoundException('Sale listing not found');
+      throw new NotFoundException("Sale listing not found");
     }
 
     // Get location from seller or use default (addresses relation needs to be included)
     const latitude = 42.6977; // Default Sofia latitude
     const longitude = 23.3219; // Default Sofia longitude
-    const address = 'Location to be confirmed';
+    const address = "Location to be confirmed";
 
     // Create inspection request
     const inspection = await this.prisma.inspectionRequest.create({
@@ -76,7 +72,9 @@ export class InspectionService {
       },
     });
 
-    this.logger.log(`Created inspection request ${inspection.id} for sale listing ${data.saleListingId}`);
+    this.logger.log(
+      `Created inspection request ${inspection.id} for sale listing ${data.saleListingId}`,
+    );
 
     return inspection;
   }
@@ -91,7 +89,7 @@ export class InspectionService {
     });
 
     if (!inspector || inspector.role !== UserRole.INSPECTOR) {
-      throw new BadRequestException('Invalid inspector');
+      throw new BadRequestException("Invalid inspector");
     }
 
     const inspection = await this.prisma.inspectionRequest.update({
@@ -112,7 +110,9 @@ export class InspectionService {
       },
     });
 
-    this.logger.log(`Assigned inspector ${inspectorId} to inspection ${inspectionId}`);
+    this.logger.log(
+      `Assigned inspector ${inspectorId} to inspection ${inspectionId}`,
+    );
 
     return inspection;
   }
@@ -132,7 +132,7 @@ export class InspectionService {
             isDefault: true,
           },
           orderBy: {
-            updatedAt: 'desc',
+            updatedAt: "desc",
           },
           take: 1,
           include: {
@@ -148,7 +148,10 @@ export class InspectionService {
             inspectionAssignments: {
               where: {
                 status: {
-                  in: [InspectionStatus.SCHEDULED, InspectionStatus.IN_PROGRESS],
+                  in: [
+                    InspectionStatus.SCHEDULED,
+                    InspectionStatus.IN_PROGRESS,
+                  ],
                 },
               },
             },
@@ -157,7 +160,7 @@ export class InspectionService {
       },
       orderBy: [
         {
-          updatedAt: 'desc',
+          updatedAt: "desc",
         },
       ],
     });
@@ -209,10 +212,7 @@ export class InspectionService {
       where,
       skip: filters?.skip,
       take: filters?.take,
-      orderBy: [
-        { priority: 'desc' },
-        { requestedDate: 'asc' },
-      ],
+      orderBy: [{ priority: "desc" }, { requestedDate: "asc" }],
       include: {
         saleListing: {
           include: {
@@ -267,12 +267,12 @@ export class InspectionService {
     });
 
     if (!inspection) {
-      throw new NotFoundException('Inspection request not found');
+      throw new NotFoundException("Inspection request not found");
     }
 
     // Verify inspector owns this inspection
     if (inspectorId && inspection.inspectorId !== inspectorId) {
-      throw new BadRequestException('Unauthorized to update this inspection');
+      throw new BadRequestException("Unauthorized to update this inspection");
     }
 
     const updateData: any = { status };
@@ -329,30 +329,35 @@ export class InspectionService {
     // Quality thresholds
     const MINIMUM_QUALITY_SCORE = 70; // Configurable threshold
     const CRITICAL_FAILURE_SCORE = 50; // Immediate rejection threshold
-    
+
     const inspection = await this.prisma.inspectionRequest.findUnique({
       where: { id: inspectionId },
-      include: { 
+      include: {
         saleListing: true,
         tradeOperation: {
           include: {
             buyListing: true,
-          }
-        }
+          },
+        },
       },
     });
 
     if (!inspection) {
-      throw new NotFoundException('Inspection request not found');
+      throw new NotFoundException("Inspection request not found");
     }
 
     // Allow submission if inspector matches or if it's a test/admin context
-    if (inspection.inspectorId !== inspectorId && inspectorId !== 'default-inspector') {
-      throw new BadRequestException('Unauthorized to submit results for this inspection');
+    if (
+      inspection.inspectorId !== inspectorId &&
+      inspectorId !== "default-inspector"
+    ) {
+      throw new BadRequestException(
+        "Unauthorized to submit results for this inspection",
+      );
     }
 
     if (inspection.status === InspectionStatus.COMPLETED) {
-      throw new BadRequestException('Inspection already completed');
+      throw new BadRequestException("Inspection already completed");
     }
 
     // Update inspection with results
@@ -374,13 +379,15 @@ export class InspectionService {
 
     // Find trade sellers using this sale listing
     const tradeSellers = await this.prisma.tradeSeller.findMany({
-      where: { 
+      where: {
         saleListingId: inspection.saleListingId,
-        ...(inspection.tradeOperationId && { tradeOperationId: inspection.tradeOperationId }),
+        ...(inspection.tradeOperationId && {
+          tradeOperationId: inspection.tradeOperationId,
+        }),
       },
       include: {
         tradeOperation: true,
-      }
+      },
     });
 
     if (tradeSellers.length > 0) {
@@ -394,14 +401,14 @@ export class InspectionService {
             },
           });
         }
-        
+
         this.logger.log(
-          `✅ Inspection PASSED: Sale listing ${inspection.saleListingId} verified with score ${data.qualityScore}`
+          `✅ Inspection PASSED: Sale listing ${inspection.saleListingId} verified with score ${data.qualityScore}`,
         );
       } else {
         // FAILED: Handle inspection failure
         this.logger.warn(
-          `❌ Inspection FAILED: Sale listing ${inspection.saleListingId} scored ${data.qualityScore} (minimum: ${MINIMUM_QUALITY_SCORE})`
+          `❌ Inspection FAILED: Sale listing ${inspection.saleListingId} scored ${data.qualityScore} (minimum: ${MINIMUM_QUALITY_SCORE})`,
         );
 
         // Update trade sellers to FAILED_INSPECTION status
@@ -409,14 +416,14 @@ export class InspectionService {
           await this.prisma.tradeSeller.update({
             where: { id: tradeSeller.id },
             data: {
-              status: 'FAILED_INSPECTION' as any,
+              status: "FAILED_INSPECTION" as any,
               isVerified: false,
             },
           });
 
           // Log the failure details
           this.logger.warn(
-            `Removed seller ${tradeSeller.sellerId} from trade operation ${tradeSeller.tradeOperationId} due to inspection failure`
+            `Removed seller ${tradeSeller.sellerId} from trade operation ${tradeSeller.tradeOperationId} due to inspection failure`,
           );
         }
 
@@ -427,17 +434,17 @@ export class InspectionService {
             include: {
               sellers: {
                 where: {
-                  status: { in: ['ACCEPTED', 'CONFIRMED'] }
-                }
-              }
-            }
+                  status: { in: ["ACCEPTED", "CONFIRMED"] },
+                },
+              },
+            },
           });
 
           if (tradeOp) {
             // Calculate remaining secured quantity
             const remainingQuantity = tradeOp.sellers.reduce(
               (sum, seller) => sum + Number(seller.agreedQuantity || 0),
-              0
+              0,
             );
 
             // Update metadata with quantity loss
@@ -446,19 +453,21 @@ export class InspectionService {
               data: {
                 // Add a note about the inspection failure
                 metadata: {
-                  ...(tradeOp.metadata as any || {}),
+                  ...((tradeOp.metadata as any) || {}),
                   inspectionFailures: [
                     ...((tradeOp.metadata as any)?.inspectionFailures || []),
                     {
                       saleListingId: inspection.saleListingId,
                       qualityScore: data.qualityScore,
                       failedAt: new Date(),
-                      reason: criticalFailure ? 'CRITICAL_FAILURE' : 'BELOW_THRESHOLD',
+                      reason: criticalFailure
+                        ? "CRITICAL_FAILURE"
+                        : "BELOW_THRESHOLD",
                       notes: data.notes,
-                    }
-                  ]
-                }
-              }
+                    },
+                  ],
+                },
+              },
             });
 
             // Check if we need to find replacement sellers
@@ -468,18 +477,18 @@ export class InspectionService {
             });
             const requiredQuantity = Number(buyListing?.quantity || 0);
             const quantityGap = requiredQuantity - remainingQuantity;
-            
+
             if (quantityGap > 0) {
               this.logger.warn(
-                `⚠️ Trade operation ${inspection.tradeOperationId} now has quantity gap of ${quantityGap} after inspection failure`
+                `⚠️ Trade operation ${inspection.tradeOperationId} now has quantity gap of ${quantityGap} after inspection failure`,
               );
-              
+
               // Trigger notification to admin about need for replacement seller
               await this.notificationService.notifyInspectionFailure({
                 tradeOperationId: inspection.tradeOperationId,
                 saleListingId: inspection.saleListingId,
                 sellerId: tradeSellers[0].sellerId,
-                sellerName: 'Failed Seller',
+                sellerName: "Failed Seller",
                 qualityScore: data.qualityScore,
                 quantityLost: quantityGap,
                 criticalFailure: criticalFailure,
@@ -508,17 +517,14 @@ export class InspectionService {
         },
         inspector: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
   /**
    * Get inspector's missions
    */
-  async getInspectorMissions(
-    inspectorId: string,
-    status?: InspectionStatus,
-  ) {
+  async getInspectorMissions(inspectorId: string, status?: InspectionStatus) {
     return await this.prisma.inspectionRequest.findMany({
       where: {
         inspectorId,
@@ -541,10 +547,7 @@ export class InspectionService {
           },
         },
       },
-      orderBy: [
-        { priority: 'desc' },
-        { requestedDate: 'asc' },
-      ],
+      orderBy: [{ priority: "desc" }, { requestedDate: "asc" }],
     });
   }
 
@@ -567,7 +570,9 @@ export class InspectionService {
       inspections.push(inspection);
     }
 
-    this.logger.log(`Created ${inspections.length} inspection requests for trade operation ${tradeOperationId}`);
+    this.logger.log(
+      `Created ${inspections.length} inspection requests for trade operation ${tradeOperationId}`,
+    );
 
     return inspections;
   }
@@ -593,16 +598,16 @@ export class InspectionService {
           include: {
             sellers: {
               where: {
-                status: { in: ['ACCEPTED', 'CONFIRMED'] }
-              }
-            }
-          }
-        }
+                status: { in: ["ACCEPTED", "CONFIRMED"] },
+              },
+            },
+          },
+        },
       },
     });
 
     if (!inspection) {
-      throw new NotFoundException('Inspection request not found');
+      throw new NotFoundException("Inspection request not found");
     }
 
     const updateData: any = {};
@@ -695,24 +700,24 @@ export class InspectionService {
         const allSellers = await this.prisma.tradeSeller.findMany({
           where: {
             tradeOperationId: inspection.tradeOperationId,
-            status: { in: ['ACCEPTED', 'CONFIRMED'] }
+            status: { in: ["ACCEPTED", "CONFIRMED"] },
           },
         });
 
-        const allVerified = allSellers.every(s => s.isVerified);
+        const allVerified = allSellers.every((s) => s.isVerified);
 
         if (allVerified && allSellers.length > 0) {
           // Update trade operation phase to TRANSPORT_MATCHING
           await this.prisma.tradeOperation.update({
             where: { id: inspection.tradeOperationId },
             data: {
-              phase: 'TRANSPORT_MATCHING',
+              phase: "TRANSPORT_MATCHING",
             },
           });
 
           this.logger.log(
             `✅ All sellers verified for trade operation ${inspection.tradeOperationId}. ` +
-            `Phase updated to TRANSPORT_MATCHING`
+              `Phase updated to TRANSPORT_MATCHING`,
           );
 
           await this.ensureTransportRequest(inspection.tradeOperationId);
@@ -727,13 +732,22 @@ export class InspectionService {
    * Get inspection statistics
    */
   async getInspectionStats() {
-    const [total, pending, scheduled, inProgress, completed] = await Promise.all([
-      this.prisma.inspectionRequest.count(),
-      this.prisma.inspectionRequest.count({ where: { status: InspectionStatus.PENDING } }),
-      this.prisma.inspectionRequest.count({ where: { status: InspectionStatus.SCHEDULED } }),
-      this.prisma.inspectionRequest.count({ where: { status: InspectionStatus.IN_PROGRESS } }),
-      this.prisma.inspectionRequest.count({ where: { status: InspectionStatus.COMPLETED } }),
-    ]);
+    const [total, pending, scheduled, inProgress, completed] =
+      await Promise.all([
+        this.prisma.inspectionRequest.count(),
+        this.prisma.inspectionRequest.count({
+          where: { status: InspectionStatus.PENDING },
+        }),
+        this.prisma.inspectionRequest.count({
+          where: { status: InspectionStatus.SCHEDULED },
+        }),
+        this.prisma.inspectionRequest.count({
+          where: { status: InspectionStatus.IN_PROGRESS },
+        }),
+        this.prisma.inspectionRequest.count({
+          where: { status: InspectionStatus.COMPLETED },
+        }),
+      ]);
 
     const avgQualityScore = await this.prisma.inspectionRequest.aggregate({
       where: {

@@ -1,15 +1,21 @@
-import { PrismaClient, UserRole, ListingStatus, ProductUnit, ProductCategory } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import {
+  PrismaClient,
+  UserRole,
+  ListingStatus,
+  ProductUnit,
+  ProductCategory,
+} from "@prisma/client";
+import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Starting buy listings seed...');
+  console.log("🌱 Starting buy listings seed...");
 
   // Create buyer users first
   const buyers = [];
   for (let i = 1; i <= 3; i++) {
-    const hashedPassword = await bcrypt.hash('password123', 10);
+    const hashedPassword = await bcrypt.hash("password123", 10);
     const buyer = await prisma.user.upsert({
       where: { email: `buyer${i}@agrotest.com` },
       update: {},
@@ -36,10 +42,10 @@ async function main() {
   for (let i = 0; i < buyers.length; i++) {
     const buyer = buyers[i];
     const category = productCategories[i];
-    
+
     // Find the product
-    let product = await prisma.product.findFirst({
-      where: { category }
+    const product = await prisma.product.findFirst({
+      where: { category },
     });
 
     if (!product) {
@@ -52,9 +58,9 @@ async function main() {
       data: {
         buyerId: buyer.id,
         productId: product.id,
-        quantity: 200 + (i * 50),
+        quantity: 200 + i * 50,
         unit: ProductUnit.TON,
-        maxPricePerUnit: 300 + (i * 20),
+        maxPricePerUnit: 300 + i * 20,
         neededBy: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
         status: ListingStatus.ACTIVE,
       },
@@ -64,18 +70,20 @@ async function main() {
     console.log(`   ID: ${buyListing.id}`);
   }
 
-  console.log('✅ Buy listings seeding completed successfully!');
-  console.log('\n📝 Summary:');
+  console.log("✅ Buy listings seeding completed successfully!");
+  console.log("\n📝 Summary:");
   console.log(`- Created ${buyers.length} buyers`);
   console.log(`- Created ${buyers.length} buy listings`);
-  console.log('\n🔐 Login credentials:');
-  console.log('All users have password: password123');
-  console.log('Buyer emails: buyer1@agrotest.com, buyer2@agrotest.com, buyer3@agrotest.com');
+  console.log("\n🔐 Login credentials:");
+  console.log("All users have password: password123");
+  console.log(
+    "Buyer emails: buyer1@agrotest.com, buyer2@agrotest.com, buyer3@agrotest.com",
+  );
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Error seeding buy listings:', e);
+    console.error("❌ Error seeding buy listings:", e);
     process.exit(1);
   })
   .finally(async () => {

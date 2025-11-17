@@ -1,6 +1,14 @@
-import { IsEmail, IsString, MinLength, IsOptional, IsEnum, IsPhoneNumber, IsObject } from 'class-validator';
-import { UserRole } from '@prisma/client';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  IsOptional,
+  IsEnum,
+  IsPhoneNumber,
+  IsObject,
+} from "class-validator";
+import { UserRole } from "@prisma/client";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 
 export class LoginDto {
   @IsEmail()
@@ -120,10 +128,10 @@ export class AuthSuccessResponseDto {
   @ApiProperty()
   success: boolean;
 
-  @ApiProperty({ name: 'access_token' })
+  @ApiProperty({ name: "access_token" })
   access_token: string;
 
-  @ApiProperty({ name: 'refresh_token' })
+  @ApiProperty({ name: "refresh_token" })
   refresh_token: string;
 
   @ApiProperty({ type: () => AuthUserDto })
@@ -137,10 +145,10 @@ export class RefreshTokenResponseDto {
   @ApiProperty()
   success: boolean;
 
-  @ApiProperty({ name: 'access_token' })
+  @ApiProperty({ name: "access_token" })
   access_token: string;
 
-  @ApiProperty({ name: 'refresh_token' })
+  @ApiProperty({ name: "refresh_token" })
   refresh_token: string;
 }
 
@@ -233,10 +241,10 @@ export class AuthProfileResponseDto {
   @ApiProperty({ enum: UserRole })
   role: UserRole;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   createdAt: string;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   updatedAt: string;
 
   @ApiPropertyOptional({ type: Object })

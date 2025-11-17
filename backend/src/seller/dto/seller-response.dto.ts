@@ -1,6 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ListingStatus } from './create-listing.dto';
-import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ListingStatus } from "./create-listing.dto";
+import { Type } from "class-transformer";
 
 export class SellerProductSummaryDto {
   @ApiProperty()
@@ -87,10 +87,10 @@ export class SellerListingResponseDto {
   @Type(() => SellerListingSpecificationDto)
   specifications?: SellerListingSpecificationDto[] | null;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   createdAt: string;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   updatedAt: string;
 }
 
@@ -140,10 +140,10 @@ export class SellerProductListingDto {
   @ApiProperty()
   isVerified: boolean;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   createdAt: string;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   updatedAt: string;
 
   @ApiProperty({ type: Number })
@@ -201,7 +201,7 @@ export class SellerOfferDto {
   @ApiProperty()
   adminNote: string;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   deadline: string;
 
   @ApiProperty()
@@ -231,13 +231,17 @@ export class SellerOfferDto {
   @ApiPropertyOptional({ type: () => Object, additionalProperties: true })
   counterOffer?: Record<string, any>;
 
-  @ApiPropertyOptional({ type: () => Object, isArray: true, additionalProperties: true })
+  @ApiPropertyOptional({
+    type: () => Object,
+    isArray: true,
+    additionalProperties: true,
+  })
   offerHistory?: Record<string, any>[];
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   createdAt: string;
 
-  @ApiProperty({ type: String, format: 'date-time' })
+  @ApiProperty({ type: String, format: "date-time" })
   updatedAt: string;
 }
 

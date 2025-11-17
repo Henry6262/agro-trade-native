@@ -1,6 +1,6 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AddressType, TruckType, UserRole } from '@prisma/client';
-import { Type } from 'class-transformer';
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { AddressType, TruckType, UserRole } from "@prisma/client";
+import { Type } from "class-transformer";
 
 export class OnboardingCompanyDto {
   @ApiProperty()
