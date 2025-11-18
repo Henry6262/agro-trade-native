@@ -7,19 +7,11 @@ import {
   Patch,
   Post,
   Request,
-  UseGuards,
   BadRequestException,
   Query,
 } from "@nestjs/common";
-import {
-  ApiBearerAuth,
-  ApiBody,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from "@nestjs/swagger";
+import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { plainToInstance } from "class-transformer";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { BuyerService } from "./buyer.service";
 import {
   CreateBuyListingDto,

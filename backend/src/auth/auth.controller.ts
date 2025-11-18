@@ -330,10 +330,6 @@ export class AuthController {
       companyName,
       licenseNumber,
       fleetSize,
-      baseLocation,
-      coordinates,
-      insuranceProvider,
-      insurancePolicyNumber,
     } = dto;
 
     // Check if user already exists
@@ -409,7 +405,8 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: "Logout current user" })
   @ApiOkResponse({ type: LogoutResponseDto })
-  async logout(@CurrentUser() user: User) {
+  async logout(@CurrentUser() _user: User) {
+    void _user;
     return this.serializeLogout("Logged out successfully");
   }
 

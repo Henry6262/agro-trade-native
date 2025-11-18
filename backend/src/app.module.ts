@@ -1,6 +1,5 @@
 import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { APP_GUARD } from "@nestjs/core";
 import { ScheduleModule } from "@nestjs/schedule";
 import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule } from "./auth/auth.module";
@@ -8,7 +7,6 @@ import { OnboardingModule } from "./onboarding/onboarding.module";
 import { ProductsModule } from "./products/products.module";
 import { SellerModule } from "./seller/seller.module";
 import { BuyerModule } from "./buyer/buyer.module";
-import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
 import { TradeOperationsModule } from "./trade-operations/trade-operations.module";
 import { TransportModule } from "./transport/transport.module";
 import { NegotiationsModule } from "./negotiations/negotiations.module";
@@ -44,13 +42,6 @@ import { ResponseTimeMiddleware } from "./common/middleware/response-time.middle
     NotificationModule,
     SimulationModule,
     RegionsModule,
-  ],
-  providers: [
-    // Temporarily disabled for testing
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: JwtAuthGuard, // Global JWT guard
-    // },
   ],
 })
 export class AppModule implements NestModule {
