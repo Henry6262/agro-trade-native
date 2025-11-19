@@ -3,11 +3,9 @@ import {
   Get,
   Post,
   Put,
-  Patch,
   Body,
   Param,
   Query,
-  UseGuards,
   Request,
   HttpStatus,
   HttpCode,
@@ -20,8 +18,6 @@ import {
   ApiBearerAuth,
   ApiParam,
 } from "@nestjs/swagger";
-import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
-import { RolesGuard } from "../../auth/guards/roles.guard";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
 import { TransportBiddingService } from "../services/transport-bidding.service";

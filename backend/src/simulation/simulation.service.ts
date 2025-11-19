@@ -273,6 +273,7 @@ export class SimulationService {
       sellerCommission: number;
     },
   ) {
+    void data;
     const buyListing = await this.prisma.buyListing.findUnique({
       where: { id: buyListingId },
       include: { product: true },

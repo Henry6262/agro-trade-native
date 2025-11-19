@@ -65,7 +65,9 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
       <View className="flex-1 justify-center items-center p-8">
         <Package size={64} color="#9ca3af" />
         <Text className="text-xl font-semibold text-gray-700 mt-4">No Active Job</Text>
-        <Text className="text-gray-500 text-center mt-2">Accept a job from the Available Jobs tab</Text>
+        <Text className="text-gray-500 text-center mt-2">
+          Accept a job from the Available Jobs tab
+        </Text>
       </View>
     );
   }
@@ -97,12 +99,19 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
           initialRegion={{
             latitude: (inspectorLocation.latitude + job.location.latitude) / 2,
             longitude: (inspectorLocation.longitude + job.location.longitude) / 2,
-            latitudeDelta: Math.abs(inspectorLocation.latitude - job.location.latitude) * 1.5 || 0.2,
+            latitudeDelta:
+              Math.abs(inspectorLocation.latitude - job.location.latitude) * 1.5 || 0.2,
             longitudeDelta:
               Math.abs(inspectorLocation.longitude - job.location.longitude) * 1.5 || 0.2,
           }}
         >
-          <Marker coordinate={{ latitude: inspectorLocation.latitude, longitude: inspectorLocation.longitude }} title="Your Location">
+          <Marker
+            coordinate={{
+              latitude: inspectorLocation.latitude,
+              longitude: inspectorLocation.longitude,
+            }}
+            title="Your Location"
+          >
             <View className="bg-blue-500 p-2 rounded-full">
               <Navigation size={20} color="white" />
             </View>
@@ -176,7 +185,11 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
 
         {showVerificationForm && (
           <View className="mt-4">
-            <VerificationForm job={job} onSubmit={onSubmitVerification} onCancel={onCancelVerification} />
+            <VerificationForm
+              job={job}
+              onSubmit={onSubmitVerification}
+              onCancel={onCancelVerification}
+            />
           </View>
         )}
       </View>

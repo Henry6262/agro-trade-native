@@ -12,10 +12,10 @@ export const DynamicGrid: React.FC<DynamicGridProps> = ({
   children,
   minItemWidth = 130,
   maxItemWidth = 300,
-  spacing = 8
+  spacing = 8,
 }) => {
   const [screenWidth, setScreenWidth] = useState(Dimensions.get('window').width);
-  
+
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     const updateDimensions = ({ window }: any) => {
@@ -25,18 +25,18 @@ export const DynamicGrid: React.FC<DynamicGridProps> = ({
         setScreenWidth(window.width);
       }, 100);
     };
-    
+
     const subscription = Dimensions.addEventListener('change', updateDimensions);
     return () => {
       clearTimeout(timeoutId);
       subscription?.remove();
     };
   }, []);
-  
+
   // Account for OnboardingLayout 10% margins on each side
   const containerMargins = screenWidth * 0.2; // 10% left + 10% right = 20% total
   const availableWidth = screenWidth - containerMargins;
-  
+
   // Calculate optimal number of columns
   const calculateColumns = () => {
     // For specifications layout (minWidth ~280), prefer 2 columns when possible
@@ -51,35 +51,35 @@ export const DynamicGrid: React.FC<DynamicGridProps> = ({
         return 1;
       }
       // If 2 columns would be too wide, try 3
-      const threeColumnWidth = (availableWidth - (spacing * 2)) / 3;
+      const threeColumnWidth = (availableWidth - spacing * 2) / 3;
       if (threeColumnWidth >= minItemWidth) {
         return 3;
       }
     }
-    
+
     // For product cards (minWidth ~130), fit as many as possible
     let maxPossibleColumns = Math.floor((availableWidth + spacing) / (minItemWidth + spacing));
-    
+
     // Ensure at least 1 column
     if (maxPossibleColumns < 1) maxPossibleColumns = 1;
-    
+
     // Calculate actual item width with this many columns
-    let itemWidth = (availableWidth - (spacing * (maxPossibleColumns - 1))) / maxPossibleColumns;
-    
+    let itemWidth = (availableWidth - spacing * (maxPossibleColumns - 1)) / maxPossibleColumns;
+
     // If items would exceed max width, use fewer columns
     while (itemWidth > maxItemWidth && maxPossibleColumns > 1) {
       maxPossibleColumns--;
-      itemWidth = (availableWidth - (spacing * (maxPossibleColumns - 1))) / maxPossibleColumns;
+      itemWidth = (availableWidth - spacing * (maxPossibleColumns - 1)) / maxPossibleColumns;
     }
-    
+
     return maxPossibleColumns;
   };
-  
+
   const columns = calculateColumns();
-  const itemWidth = (availableWidth - (spacing * (columns - 1))) / columns;
-  
+  const itemWidth = (availableWidth - spacing * (columns - 1)) / columns;
+
   return (
-    <View 
+    <View
       style={{
         flexDirection: 'row',
         flexWrap: 'wrap',

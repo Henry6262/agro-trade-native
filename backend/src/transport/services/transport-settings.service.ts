@@ -212,7 +212,6 @@ export class TransportCostSettingsService {
     // Additional costs - set to 0 since not in schema
     const fuelSurcharge = 0;
     const tollCosts = 0;
-    const estimatedHours = distance / 60; // Assuming 60 km/h average
     const driverCosts = 0;
     const maintenanceCosts = 0;
 
@@ -332,10 +331,7 @@ export class TransportCostSettingsService {
       comparisons.length;
 
     // Generate recommendation
-    const recommendation = this.generateRecommendation(
-      averageChange,
-      comparisons,
-    );
+    const recommendation = this.generateRecommendation(averageChange);
 
     return {
       comparisons,
@@ -488,10 +484,7 @@ export class TransportCostSettingsService {
   /**
    * Generate recommendation based on comparison
    */
-  private generateRecommendation(
-    averageChange: number,
-    comparisons: CostComparison[],
-  ): string {
+  private generateRecommendation(averageChange: number): string {
     if (averageChange > 10) {
       return "Significant cost increase detected. Consider phasing implementation or adjusting rates.";
     } else if (averageChange > 5) {

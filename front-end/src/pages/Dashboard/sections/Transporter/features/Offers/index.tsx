@@ -65,7 +65,11 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
         </ScrollView>
       )}
 
-      <MapDrawer isOpen={Boolean(selectedMapOffer)} offer={selectedMapOffer} onClose={() => setSelectedMapOffer(null)} />
+      <MapDrawer
+        isOpen={Boolean(selectedMapOffer)}
+        offer={selectedMapOffer}
+        onClose={() => setSelectedMapOffer(null)}
+      />
     </View>
   );
 };

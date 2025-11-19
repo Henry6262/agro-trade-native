@@ -4,7 +4,9 @@ import { Truck, Navigation, CheckCircle } from 'lucide-react-native';
 import { MetricCard } from '../../../components/MetricCard';
 import type { TransporterJobsSummaryGridProps } from '../types';
 
-export const TransporterJobsSummaryGrid: React.FC<TransporterJobsSummaryGridProps> = ({ summary }) => (
+export const TransporterJobsSummaryGrid: React.FC<TransporterJobsSummaryGridProps> = ({
+  summary,
+}) => (
   <View className="flex-row flex-wrap -mx-1">
     <View className="w-1/3 px-1 mb-2">
       <MetricCard

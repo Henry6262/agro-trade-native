@@ -120,7 +120,7 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
         tradeOperationId,
         selectedStatus || undefined
       );
-      
+
       setNegotiations(response.negotiations || []);
       setSummary(response.summary);
     } catch (error) {
@@ -140,97 +140,85 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
   }, [tradeOperationId, selectedStatus]);
 
   const handleAccept = async (negotiationId: string) => {
-    Alert.alert(
-      'Accept Offer',
-      'Are you sure you want to accept this offer?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Accept',
-          onPress: async () => {
-            try {
-              await negotiationService.acceptOffer(negotiationId);
-              Alert.alert('Success', 'Offer accepted successfully');
-              loadNegotiations();
-            } catch (error) {
-              Alert.alert('Error', 'Failed to accept offer');
-            }
-          },
+    Alert.alert('Accept Offer', 'Are you sure you want to accept this offer?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Accept',
+        onPress: async () => {
+          try {
+            await negotiationService.acceptOffer(negotiationId);
+            Alert.alert('Success', 'Offer accepted successfully');
+            loadNegotiations();
+          } catch (error) {
+            Alert.alert('Error', 'Failed to accept offer');
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleReject = async (negotiationId: string) => {
-    Alert.alert(
-      'Reject Offer',
-      'Are you sure you want to reject this offer?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reject',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await negotiationService.rejectOffer(negotiationId, 'Price not acceptable');
-              Alert.alert('Success', 'Offer rejected');
-              loadNegotiations();
-            } catch (error) {
-              Alert.alert('Error', 'Failed to reject offer');
-            }
-          },
+    Alert.alert('Reject Offer', 'Are you sure you want to reject this offer?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reject',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await negotiationService.rejectOffer(negotiationId, 'Price not acceptable');
+            Alert.alert('Success', 'Offer rejected');
+            loadNegotiations();
+          } catch (error) {
+            Alert.alert('Error', 'Failed to reject offer');
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleWithdraw = async (negotiationId: string) => {
-    Alert.alert(
-      'Withdraw Offer',
-      'Are you sure you want to withdraw this offer?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Withdraw',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await negotiationService.withdrawOffer(negotiationId, 'Strategic decision');
-              Alert.alert('Success', 'Offer withdrawn');
-              loadNegotiations();
-            } catch (error) {
-              Alert.alert('Error', 'Failed to withdraw offer');
-            }
-          },
+    Alert.alert('Withdraw Offer', 'Are you sure you want to withdraw this offer?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Withdraw',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await negotiationService.withdrawOffer(negotiationId, 'Strategic decision');
+            Alert.alert('Success', 'Offer withdrawn');
+            loadNegotiations();
+          } catch (error) {
+            Alert.alert('Error', 'Failed to withdraw offer');
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleExtendExpiry = async (negotiationId: string) => {
-    Alert.alert(
-      'Extend Expiry',
-      'Extend offer expiration by 24 hours?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Extend',
-          onPress: async () => {
-            try {
-              await negotiationService.extendExpiry(negotiationId, 24, 'More time needed for decision');
-              Alert.alert('Success', 'Expiry extended by 24 hours');
-              loadNegotiations();
-            } catch (error) {
-              Alert.alert('Error', 'Failed to extend expiry');
-            }
-          },
+    Alert.alert('Extend Expiry', 'Extend offer expiration by 24 hours?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Extend',
+        onPress: async () => {
+          try {
+            await negotiationService.extendExpiry(
+              negotiationId,
+              24,
+              'More time needed for decision'
+            );
+            Alert.alert('Success', 'Expiry extended by 24 hours');
+            loadNegotiations();
+          } catch (error) {
+            Alert.alert('Error', 'Failed to extend expiry');
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const toggleExpanded = (negotiationId: string) => {
-    setExpandedNegotiations(prev => {
+    setExpandedNegotiations((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(negotiationId)) {
         newSet.delete(negotiationId);
@@ -279,9 +267,7 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
             </Text>
             <View className="flex-row items-center mt-1">
               <View className={`px-2 py-0.5 rounded-full ${status.bg}`}>
-                <Text className={`text-xs font-medium ${status.text}`}>
-                  {negotiation.status}
-                </Text>
+                <Text className={`text-xs font-medium ${status.text}`}>{negotiation.status}</Text>
               </View>
               {negotiation.isExpiringSoon && (
                 <View className="ml-2 flex-row items-center">
@@ -304,15 +290,11 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
           <View className="flex-row justify-between items-center">
             <View className="flex-row items-center">
               <DollarSign size={16} color="#6B7280" />
-              <Text className="text-gray-800 ml-1">
-                €{negotiation.currentOffer.price}/unit
-              </Text>
+              <Text className="text-gray-800 ml-1">€{negotiation.currentOffer.price}/unit</Text>
             </View>
             <View className="flex-row items-center">
               <Package size={16} color="#6B7280" />
-              <Text className="text-gray-800 ml-1">
-                {negotiation.currentOffer.quantity} units
-              </Text>
+              <Text className="text-gray-800 ml-1">{negotiation.currentOffer.quantity} units</Text>
             </View>
           </View>
         </View>
@@ -324,9 +306,7 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
             <View className="flex-row justify-between items-center">
               <View className="flex-row items-center">
                 <DollarSign size={16} color="#2563EB" />
-                <Text className="text-blue-800 ml-1">
-                  €{negotiation.counterOffer.price}/unit
-                </Text>
+                <Text className="text-blue-800 ml-1">€{negotiation.counterOffer.price}/unit</Text>
               </View>
               <View className="flex-row items-center">
                 <Package size={16} color="#2563EB" />
@@ -346,13 +326,15 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
         {/* Profit Impact */}
         {negotiation.profitImpact && (
           <View className="flex-row items-center mb-2">
-            <TrendingUp 
-              size={16} 
-              color={negotiation.profitImpact.profitMargin >= 5 ? '#10B981' : '#EF4444'} 
+            <TrendingUp
+              size={16}
+              color={negotiation.profitImpact.profitMargin >= 5 ? '#10B981' : '#EF4444'}
             />
-            <Text className={`text-sm ml-2 ${
-              negotiation.profitImpact.profitMargin >= 5 ? 'text-green-600' : 'text-red-600'
-            }`}>
+            <Text
+              className={`text-sm ml-2 ${
+                negotiation.profitImpact.profitMargin >= 5 ? 'text-green-600' : 'text-red-600'
+              }`}
+            >
               Profit Margin: {negotiation.profitImpact.profitMargin.toFixed(1)}%
               {negotiation.profitImpact.warning && ' ⚠️'}
             </Text>
@@ -486,7 +468,8 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
               {tradeOperation?.operationNumber || 'Negotiations'}
             </Text>
             <Text className="text-sm text-gray-600">
-              {tradeOperation?.buyListing?.product.name} - {tradeOperation?.buyListing?.quantity} {tradeOperation?.buyListing?.unit}
+              {tradeOperation?.buyListing?.product.name} - {tradeOperation?.buyListing?.quantity}{' '}
+              {tradeOperation?.buyListing?.unit}
             </Text>
           </View>
         </View>
@@ -494,20 +477,18 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
 
       {/* Summary Cards */}
       {summary && (
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          className="px-4 py-3"
-        >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4 py-3">
           <TouchableOpacity
             onPress={() => setSelectedStatus(null)}
             className={`px-4 py-2 rounded-lg mr-2 ${
               selectedStatus === null ? 'bg-blue-600' : 'bg-white border border-gray-200'
             }`}
           >
-            <Text className={`text-sm font-medium ${
-              selectedStatus === null ? 'text-white' : 'text-gray-700'
-            }`}>
+            <Text
+              className={`text-sm font-medium ${
+                selectedStatus === null ? 'text-white' : 'text-gray-700'
+              }`}
+            >
               All ({summary.total || 0})
             </Text>
           </TouchableOpacity>
@@ -518,9 +499,11 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
                 selectedStatus === 'PENDING' ? 'bg-yellow-600' : 'bg-yellow-100'
               }`}
             >
-              <Text className={`text-sm font-medium ${
-                selectedStatus === 'PENDING' ? 'text-white' : 'text-yellow-800'
-              }`}>
+              <Text
+                className={`text-sm font-medium ${
+                  selectedStatus === 'PENDING' ? 'text-white' : 'text-yellow-800'
+                }`}
+              >
                 Pending ({summary.pending})
               </Text>
             </TouchableOpacity>
@@ -532,9 +515,11 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
                 selectedStatus === 'COUNTERED' ? 'bg-blue-600' : 'bg-blue-100'
               }`}
             >
-              <Text className={`text-sm font-medium ${
-                selectedStatus === 'COUNTERED' ? 'text-white' : 'text-blue-800'
-              }`}>
+              <Text
+                className={`text-sm font-medium ${
+                  selectedStatus === 'COUNTERED' ? 'text-white' : 'text-blue-800'
+                }`}
+              >
                 Countered ({summary.countered})
               </Text>
             </TouchableOpacity>
@@ -546,9 +531,11 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
                 selectedStatus === 'ACCEPTED' ? 'bg-green-600' : 'bg-green-100'
               }`}
             >
-              <Text className={`text-sm font-medium ${
-                selectedStatus === 'ACCEPTED' ? 'text-white' : 'text-green-800'
-              }`}>
+              <Text
+                className={`text-sm font-medium ${
+                  selectedStatus === 'ACCEPTED' ? 'text-white' : 'text-green-800'
+                }`}
+              >
                 Accepted ({summary.accepted})
               </Text>
             </TouchableOpacity>
@@ -568,17 +555,21 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
             </View>
             <View>
               <Text className="text-sm text-gray-600">Current Margin</Text>
-              <Text className={`text-lg font-bold ${
-                (tradeOperation.profitMargin || 0) >= 5 ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <Text
+                className={`text-lg font-bold ${
+                  (tradeOperation.profitMargin || 0) >= 5 ? 'text-green-600' : 'text-red-600'
+                }`}
+              >
                 {tradeOperation.profitMargin?.toFixed(1) || '0.0'}%
               </Text>
             </View>
             <View>
               <Text className="text-sm text-gray-600">Est. Profit</Text>
-              <Text className={`text-lg font-bold ${
-                (tradeOperation.estimatedProfit || 0) > 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <Text
+                className={`text-lg font-bold ${
+                  (tradeOperation.estimatedProfit || 0) > 0 ? 'text-green-600' : 'text-red-600'
+                }`}
+              >
                 €{tradeOperation.estimatedProfit?.toFixed(0) || '0'}
               </Text>
             </View>
@@ -602,15 +593,13 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
         {negotiations.length === 0 ? (
           <View className="flex-1 justify-center items-center py-8">
             <Users size={48} color="#9CA3AF" />
-            <Text className="text-gray-600 text-lg font-semibold mt-4">
-              No Negotiations Yet
-            </Text>
+            <Text className="text-gray-600 text-lg font-semibold mt-4">No Negotiations Yet</Text>
             <Text className="text-gray-500 text-center mt-2">
               Send offers to sellers to start negotiations
             </Text>
           </View>
         ) : (
-          negotiations.map(negotiation => renderNegotiation(negotiation))
+          negotiations.map((negotiation) => renderNegotiation(negotiation))
         )}
       </ScrollView>
     </View>

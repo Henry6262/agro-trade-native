@@ -20,6 +20,9 @@
     },
     "testflight": {
       "distribution": "store",
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "production"
+      },
       "ios": {
         "simulator": false,
         "buildConfiguration": "Release"

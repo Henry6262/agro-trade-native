@@ -28,9 +28,9 @@ import {
   RefreshCw,
   FileText,
 } from 'lucide-react-native';
-import { 
-  TradeOperation, 
-  TradePhase, 
+import {
+  TradeOperation,
+  TradePhase,
   TradeStatus,
   TradeSeller,
   TimelineEvent,
@@ -58,26 +58,28 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'sellers' | 'negotiations' | 'timeline'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'sellers' | 'negotiations' | 'timeline'>(
+    'overview'
+  );
 
   // Fetch operation details
   const fetchOperationDetails = async (showLoader = true) => {
     if (!operationId) return;
-    
+
     if (showLoader) setIsLoading(true);
     try {
       // Fetch main operation data
       const operationData = await tradeOperationService.getTradeOperation(operationId);
       setOperation(operationData);
-      
+
       // Fetch negotiations
       const negotiationsData = await negotiationService.getTradeNegotiations(operationId);
       setNegotiations(negotiationsData);
-      
+
       // Fetch inspections
       const inspectionsData = await inspectionService.getInspectionsByTradeOperation(operationId);
       setInspections(inspectionsData);
-      
+
       // TODO: Fetch timeline events
       // const timelineData = await tradeOperationService.getTimeline(operationId);
       // setTimeline(timelineData);
@@ -97,7 +99,7 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
       const interval = setInterval(() => {
         fetchOperationDetails(false);
       }, 5000); // Poll every 5 seconds
-      
+
       return () => clearInterval(interval);
     }
   }, [visible, operationId]);
@@ -111,7 +113,7 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
   // Handle phase transition
   const handlePhaseTransition = async (nextPhase: TradePhase) => {
     if (!operation) return;
-    
+
     Alert.alert(
       'Confirm Phase Change',
       `Move to ${nextPhase.replace('_', ' ').toLowerCase()} phase?`,
@@ -174,9 +176,7 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
         <TouchableOpacity
           key={tab}
           onPress={() => setActiveTab(tab)}
-          className={`flex-1 py-3 ${
-            activeTab === tab ? 'border-b-2 border-blue-500' : ''
-          }`}
+          className={`flex-1 py-3 ${activeTab === tab ? 'border-b-2 border-blue-500' : ''}`}
         >
           <Text
             className={`text-center text-sm font-semibold ${
@@ -200,17 +200,13 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
         <View className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
           <View className="flex-row justify-between items-start mb-3">
             <View>
-              <Text className="text-lg font-bold text-gray-800">
-                {operation.operationNumber}
-              </Text>
+              <Text className="text-lg font-bold text-gray-800">{operation.operationNumber}</Text>
               <Text className="text-sm text-gray-600 mt-1">
                 Created {new Date(operation.createdAt).toLocaleDateString()}
               </Text>
             </View>
             <View className={`px-3 py-1 rounded-full ${getStatusBadgeColor(operation.status)}`}>
-              <Text className="text-xs font-semibold">
-                {operation.status}
-              </Text>
+              <Text className="text-xs font-semibold">{operation.status}</Text>
             </View>
           </View>
 
@@ -288,18 +284,28 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
                   <Text className="text-yellow-700 text-sm">
                     {inspection.saleListing?.seller?.name || 'Seller'}
                   </Text>
-                  <View className={`px-2 py-1 rounded ${
-                    inspection.status === 'COMPLETED' ? 'bg-green-100' :
-                    inspection.status === 'IN_PROGRESS' ? 'bg-blue-100' :
-                    inspection.status === 'SCHEDULED' ? 'bg-purple-100' :
-                    'bg-yellow-100'
-                  }`}>
-                    <Text className={`text-xs font-medium ${
-                      inspection.status === 'COMPLETED' ? 'text-green-800' :
-                      inspection.status === 'IN_PROGRESS' ? 'text-blue-800' :
-                      inspection.status === 'SCHEDULED' ? 'text-purple-800' :
-                      'text-yellow-800'
-                    }`}>
+                  <View
+                    className={`px-2 py-1 rounded ${
+                      inspection.status === 'COMPLETED'
+                        ? 'bg-green-100'
+                        : inspection.status === 'IN_PROGRESS'
+                          ? 'bg-blue-100'
+                          : inspection.status === 'SCHEDULED'
+                            ? 'bg-purple-100'
+                            : 'bg-yellow-100'
+                    }`}
+                  >
+                    <Text
+                      className={`text-xs font-medium ${
+                        inspection.status === 'COMPLETED'
+                          ? 'text-green-800'
+                          : inspection.status === 'IN_PROGRESS'
+                            ? 'text-blue-800'
+                            : inspection.status === 'SCHEDULED'
+                              ? 'text-purple-800'
+                              : 'text-yellow-800'
+                      }`}
+                    >
                       {inspection.status}
                     </Text>
                   </View>
@@ -309,20 +315,25 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
             <TouchableOpacity
               onPress={async () => {
                 if (!operation) return;
-                const unverifiedSellers = operation.sellers.filter(s => s.status === 'ACCEPTED' && !s.isVerified);
+                const unverifiedSellers = operation.sellers.filter(
+                  (s) => s.status === 'ACCEPTED' && !s.isVerified
+                );
                 if (unverifiedSellers.length === 0) {
                   Alert.alert('Info', 'All accepted sellers already have inspection requests');
                   return;
                 }
-                
+
                 try {
-                  const saleListingIds = unverifiedSellers.map(s => s.saleListingId);
+                  const saleListingIds = unverifiedSellers.map((s) => s.saleListingId);
                   await inspectionService.requestInspectionsForTrade(
                     operation.id,
                     saleListingIds,
                     'MEDIUM'
                   );
-                  Alert.alert('Success', `Requested inspections for ${unverifiedSellers.length} sellers`);
+                  Alert.alert(
+                    'Success',
+                    `Requested inspections for ${unverifiedSellers.length} sellers`
+                  );
                   fetchOperationDetails();
                 } catch (error) {
                   Alert.alert('Error', 'Failed to request inspections');
@@ -331,9 +342,7 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
               className="mt-3 bg-yellow-500 py-2 rounded flex-row items-center justify-center"
             >
               <CheckCircle size={14} color="white" />
-              <Text className="text-white text-sm font-medium ml-1">
-                Request All Inspections
-              </Text>
+              <Text className="text-white text-sm font-medium ml-1">Request All Inspections</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -346,21 +355,17 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
               className="bg-blue-500 py-3 rounded-lg flex-row items-center justify-center"
             >
               <Truck size={18} color="white" />
-              <Text className="text-white font-semibold ml-2">
-                Proceed to Transport
-              </Text>
+              <Text className="text-white font-semibold ml-2">Proceed to Transport</Text>
             </TouchableOpacity>
           )}
-          
+
           {operation.phase === TradePhase.TRANSPORT_MATCHING && (
             <TouchableOpacity
               onPress={() => Alert.alert('Info', 'Transport bidding in progress')}
               className="bg-orange-500 py-3 rounded-lg flex-row items-center justify-center"
             >
               <Clock size={18} color="white" />
-              <Text className="text-white font-semibold ml-2">
-                Awaiting Transport Bids
-              </Text>
+              <Text className="text-white font-semibold ml-2">Awaiting Transport Bids</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -375,24 +380,29 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
     return (
       <ScrollView className="flex-1 p-4">
         {operation.sellers.map((seller) => (
-          <View
-            key={seller.id}
-            className="bg-white rounded-lg p-4 mb-3 border border-gray-200"
-          >
+          <View key={seller.id} className="bg-white rounded-lg p-4 mb-3 border border-gray-200">
             <View className="flex-row justify-between items-start mb-2">
               <Text className="font-semibold text-gray-800">
                 {seller.seller?.name || `Seller ${seller.sellerId.slice(-4)}`}
               </Text>
-              <View className={`px-2 py-1 rounded ${
-                seller.status === 'ACCEPTED' ? 'bg-green-100' :
-                seller.status === 'REJECTED' ? 'bg-red-100' :
-                'bg-yellow-100'
-              }`}>
-                <Text className={`text-xs font-medium ${
-                  seller.status === 'ACCEPTED' ? 'text-green-800' :
-                  seller.status === 'REJECTED' ? 'text-red-800' :
-                  'text-yellow-800'
-                }`}>
+              <View
+                className={`px-2 py-1 rounded ${
+                  seller.status === 'ACCEPTED'
+                    ? 'bg-green-100'
+                    : seller.status === 'REJECTED'
+                      ? 'bg-red-100'
+                      : 'bg-yellow-100'
+                }`}
+              >
+                <Text
+                  className={`text-xs font-medium ${
+                    seller.status === 'ACCEPTED'
+                      ? 'text-green-800'
+                      : seller.status === 'REJECTED'
+                        ? 'text-red-800'
+                        : 'text-yellow-800'
+                  }`}
+                >
                   {seller.status}
                 </Text>
               </View>
@@ -422,12 +432,10 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
                   className="flex-1 bg-blue-500 py-2 rounded flex-row items-center justify-center"
                 >
                   <MessageSquare size={14} color="white" />
-                  <Text className="text-white text-sm font-medium ml-1">
-                    Send Offer
-                  </Text>
+                  <Text className="text-white text-sm font-medium ml-1">Send Offer</Text>
                 </TouchableOpacity>
               )}
-              
+
               {seller.status === 'ACCEPTED' && !seller.isVerified && (
                 <TouchableOpacity
                   onPress={async () => {
@@ -447,9 +455,7 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
                   className="flex-1 bg-green-500 py-2 rounded flex-row items-center justify-center"
                 >
                   <CheckCircle size={14} color="white" />
-                  <Text className="text-white text-sm font-medium ml-1">
-                    Request Inspection
-                  </Text>
+                  <Text className="text-white text-sm font-medium ml-1">Request Inspection</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -479,18 +485,28 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
               <Text className="font-semibold text-gray-800">
                 {negotiation.type === 'BUYER_OFFER' ? 'Buyer' : 'Seller'} Negotiation
               </Text>
-              <View className={`px-2 py-1 rounded ${
-                negotiation.status === 'ACCEPTED' ? 'bg-green-100' :
-                negotiation.status === 'REJECTED' ? 'bg-red-100' :
-                negotiation.status === 'EXPIRED' ? 'bg-gray-100' :
-                'bg-yellow-100'
-              }`}>
-                <Text className={`text-xs font-medium ${
-                  negotiation.status === 'ACCEPTED' ? 'text-green-800' :
-                  negotiation.status === 'REJECTED' ? 'text-red-800' :
-                  negotiation.status === 'EXPIRED' ? 'text-gray-800' :
-                  'text-yellow-800'
-                }`}>
+              <View
+                className={`px-2 py-1 rounded ${
+                  negotiation.status === 'ACCEPTED'
+                    ? 'bg-green-100'
+                    : negotiation.status === 'REJECTED'
+                      ? 'bg-red-100'
+                      : negotiation.status === 'EXPIRED'
+                        ? 'bg-gray-100'
+                        : 'bg-yellow-100'
+                }`}
+              >
+                <Text
+                  className={`text-xs font-medium ${
+                    negotiation.status === 'ACCEPTED'
+                      ? 'text-green-800'
+                      : negotiation.status === 'REJECTED'
+                        ? 'text-red-800'
+                        : negotiation.status === 'EXPIRED'
+                          ? 'text-gray-800'
+                          : 'text-yellow-800'
+                  }`}
+                >
                   {negotiation.status}
                 </Text>
               </View>
@@ -500,17 +516,11 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
               <Text className="text-gray-600 text-sm">
                 Offered Price: €{negotiation.offeredPrice}/unit
               </Text>
-              <Text className="text-gray-600 text-sm">
-                Quantity: {negotiation.quantity} units
-              </Text>
+              <Text className="text-gray-600 text-sm">Quantity: {negotiation.quantity} units</Text>
               {negotiation.message && (
-                <Text className="text-gray-600 text-sm italic">
-                  "{negotiation.message}"
-                </Text>
+                <Text className="text-gray-600 text-sm italic">"{negotiation.message}"</Text>
               )}
-              <Text className="text-gray-500 text-xs">
-                Round {negotiation.roundNumber || 1}
-              </Text>
+              <Text className="text-gray-500 text-xs">Round {negotiation.roundNumber || 1}</Text>
             </View>
 
             <View className="mt-3 flex-row space-x-2">
@@ -518,19 +528,15 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
                 onPress={() => Alert.alert('Info', 'View offer history')}
                 className="flex-1 bg-gray-100 py-2 rounded"
               >
-                <Text className="text-gray-700 text-sm text-center">
-                  View Details
-                </Text>
+                <Text className="text-gray-700 text-sm text-center">View Details</Text>
               </TouchableOpacity>
-              
+
               {negotiation.status === 'PENDING' && (
                 <TouchableOpacity
                   onPress={() => Alert.alert('Info', 'Respond to offer')}
                   className="flex-1 bg-blue-500 py-2 rounded"
                 >
-                  <Text className="text-white text-sm text-center">
-                    Respond
-                  </Text>
+                  <Text className="text-white text-sm text-center">Respond</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -550,46 +556,44 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
   // Render timeline tab
   const renderTimeline = () => {
     // Mock timeline data for now
-    const mockTimeline = operation ? [
-      {
-        id: '1',
-        phase: TradePhase.BUYER_SELECTION,
-        timestamp: operation.createdAt,
-        description: 'Trade operation created',
-        actor: 'System',
-      },
-      {
-        id: '2',
-        phase: operation.phase,
-        timestamp: operation.updatedAt,
-        description: `Phase changed to ${operation.phase.replace(/_/g, ' ').toLowerCase()}`,
-        actor: 'Admin',
-      },
-    ] as TimelineEvent[] : [];
+    const mockTimeline = operation
+      ? ([
+          {
+            id: '1',
+            phase: TradePhase.BUYER_SELECTION,
+            timestamp: operation.createdAt,
+            description: 'Trade operation created',
+            actor: 'System',
+          },
+          {
+            id: '2',
+            phase: operation.phase,
+            timestamp: operation.updatedAt,
+            description: `Phase changed to ${operation.phase.replace(/_/g, ' ').toLowerCase()}`,
+            actor: 'Admin',
+          },
+        ] as TimelineEvent[])
+      : [];
 
     return (
       <ScrollView className="flex-1 p-4">
         {mockTimeline.map((event, index) => (
           <View key={event.id} className="flex-row mb-4">
             <View className="items-center mr-3">
-              <View className={`w-3 h-3 rounded-full ${
-                index === 0 ? 'bg-green-500' : 'bg-blue-500'
-              }`} />
+              <View
+                className={`w-3 h-3 rounded-full ${index === 0 ? 'bg-green-500' : 'bg-blue-500'}`}
+              />
               {index < mockTimeline.length - 1 && (
                 <View className="w-0.5 flex-1 bg-gray-300 mt-1" />
               )}
             </View>
-            
+
             <View className="flex-1 pb-4">
-              <Text className="text-gray-800 font-semibold">
-                {event.description}
-              </Text>
+              <Text className="text-gray-800 font-semibold">{event.description}</Text>
               <Text className="text-gray-500 text-xs mt-1">
                 {new Date(event.timestamp).toLocaleString()}
               </Text>
-              <Text className="text-gray-500 text-xs">
-                by {event.actor}
-              </Text>
+              <Text className="text-gray-500 text-xs">by {event.actor}</Text>
             </View>
           </View>
         ))}
@@ -605,42 +609,27 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={false}
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent={false} onRequestClose={onClose}>
       <View className="flex-1 bg-gray-50">
         {/* Header */}
         <View className="bg-white border-b border-gray-200">
           <View className="flex-row items-center justify-between p-4">
             <View className="flex-1">
-              <Text className="text-lg font-bold text-gray-800">
-                Trade Operation Details
-              </Text>
+              <Text className="text-lg font-bold text-gray-800">Trade Operation Details</Text>
               {operation && (
-                <Text className="text-sm text-gray-600 mt-1">
-                  {operation.operationNumber}
-                </Text>
+                <Text className="text-sm text-gray-600 mt-1">{operation.operationNumber}</Text>
               )}
             </View>
             <View className="flex-row items-center space-x-3">
-              <TouchableOpacity
-                onPress={handleRefresh}
-                className="p-2 rounded-full bg-gray-100"
-              >
+              <TouchableOpacity onPress={handleRefresh} className="p-2 rounded-full bg-gray-100">
                 <RefreshCw size={20} color="#6B7280" />
               </TouchableOpacity>
-              <TouchableOpacity
-                onPress={onClose}
-                className="p-2 rounded-full bg-gray-100"
-              >
+              <TouchableOpacity onPress={onClose} className="p-2 rounded-full bg-gray-100">
                 <X size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
           </View>
-          
+
           {/* Tabs */}
           {renderTabs()}
         </View>

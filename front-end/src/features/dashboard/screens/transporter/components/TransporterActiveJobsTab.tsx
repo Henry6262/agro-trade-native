@@ -79,7 +79,7 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
         actualWeight: 100,
         pickupPhotos: [],
       };
-      
+
       await transportService.completePickup(jobId, pickupData);
       Alert.alert('Success', 'Pickup completed');
       await loadActiveJobs();
@@ -100,7 +100,7 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
         deliveryPhotos: [],
         recipientSignature: 'Signed digitally',
       };
-      
+
       await transportService.completeDelivery(jobId, deliveryData);
       Alert.alert('Success', 'Delivery completed');
       await loadActiveJobs();
@@ -127,11 +127,12 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
     }
   };
 
-  const activeCount = activeJobs.filter(j => j.status !== 'COMPLETED').length;
-  const inTransitCount = activeJobs.filter(j => j.status === 'IN_TRANSIT').length;
-  const completedToday = activeJobs.filter(j => 
-    j.status === 'COMPLETED' && 
-    new Date(j.estimatedArrival || '').toDateString() === new Date().toDateString()
+  const activeCount = activeJobs.filter((j) => j.status !== 'COMPLETED').length;
+  const inTransitCount = activeJobs.filter((j) => j.status === 'IN_TRANSIT').length;
+  const completedToday = activeJobs.filter(
+    (j) =>
+      j.status === 'COMPLETED' &&
+      new Date(j.estimatedArrival || '').toDateString() === new Date().toDateString()
   ).length;
 
   return (
@@ -148,7 +149,7 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
           disabled={refreshing}
           className="flex-row items-center justify-center bg-gray-800/50 border border-gray-700 rounded-lg p-3 mb-4"
         >
-          <Navigation size={18} color={refreshing ? "#6B7280" : "#60A5FA"} />
+          <Navigation size={18} color={refreshing ? '#6B7280' : '#60A5FA'} />
           <Text className={`ml-2 ${refreshing ? 'text-gray-500' : 'text-blue-400'}`}>
             {refreshing ? 'Refreshing...' : 'Refresh Jobs'}
           </Text>
@@ -205,9 +206,15 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
             </View>
           ) : activeJobs.length === 0 ? (
             <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
-              <Package size={48} color="#6B7280" style={{ alignSelf: 'center', marginBottom: 12 }} />
+              <Package
+                size={48}
+                color="#6B7280"
+                style={{ alignSelf: 'center', marginBottom: 12 }}
+              />
               <Text className="text-gray-400 text-center">No active transport jobs</Text>
-              <Text className="text-gray-500 text-center text-sm mt-2">Submit bids to get transport jobs</Text>
+              <Text className="text-gray-500 text-center text-sm mt-2">
+                Submit bids to get transport jobs
+              </Text>
             </View>
           ) : (
             activeJobs.map((job) => {
@@ -225,19 +232,14 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
                   <View className="mb-3">
                     <View className="flex-row items-center justify-between mb-2">
                       <Text className="text-white font-bold">Job #{job.jobNumber}</Text>
-                      <Badge 
-                        text={job.status} 
-                        className={`${statusColor} bg-gray-800/50`}
-                      />
+                      <Badge text={job.status} className={`${statusColor} bg-gray-800/50`} />
                     </View>
 
                     {/* Job Details */}
                     <View className="flex-row items-center justify-between mb-2">
                       <View className="flex-row items-center">
                         <Package size={16} color="#9CA3AF" />
-                        <Text className="text-gray-400 ml-1">
-                          {totalWeight} tons
-                        </Text>
+                        <Text className="text-gray-400 ml-1">{totalWeight} tons</Text>
                       </View>
                       {job.estimatedArrival && (
                         <View className="flex-row items-center">

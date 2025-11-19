@@ -42,7 +42,7 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
   // Calculate zoom level from map region
   const getZoomLevel = () => {
     if (!mapRegion) return 10; // Default zoom level
-    
+
     // Convert latitudeDelta to approximate zoom level (1-20 scale)
     const zoomLevel = Math.round(Math.log2(360 / mapRegion.latitudeDelta));
     return Math.max(1, Math.min(20, zoomLevel));
@@ -73,7 +73,7 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
         if (index !== otherIndex && !processed.has(otherIndex)) {
           const latDiff = Math.abs(job.location.latitude - otherJob.location.latitude);
           const lngDiff = Math.abs(job.location.longitude - otherJob.location.longitude);
-          
+
           if (latDiff < clusterRadius && lngDiff < clusterRadius) {
             cluster.jobs.push(otherJob);
             cluster.count++;
@@ -125,12 +125,12 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
 
         {/* Job Markers or Clusters */}
         {(() => {
-          console.log('JobMapView rendering:', { 
-            jobsCount: jobs.length, 
-            shouldCluster, 
-            firstJob: jobs[0] 
+          console.log('JobMapView rendering:', {
+            jobsCount: jobs.length,
+            shouldCluster,
+            firstJob: jobs[0],
           });
-          
+
           if (shouldCluster && clusters) {
             return clusters.map((cluster) => (
               <Marker
@@ -142,12 +142,15 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
                 }}
                 onPress={() => {
                   // Zoom in on cluster
-                  mapRef.current?.animateToRegion({
-                    latitude: cluster.latitude,
-                    longitude: cluster.longitude,
-                    latitudeDelta: 0.02,
-                    longitudeDelta: 0.02,
-                  }, 500);
+                  mapRef.current?.animateToRegion(
+                    {
+                      latitude: cluster.latitude,
+                      longitude: cluster.longitude,
+                      latitudeDelta: 0.02,
+                      longitudeDelta: 0.02,
+                    },
+                    500
+                  );
                 }}
               >
                 <View className="bg-green-600 px-3 py-2 rounded-full">
@@ -158,7 +161,12 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
           } else {
             const currentZoomLevel = getZoomLevel();
             return jobs.map((job, index) => {
-              console.log(`Rendering marker ${index}:`, job.id, job.location, `zoom: ${currentZoomLevel}`);
+              console.log(
+                `Rendering marker ${index}:`,
+                job.id,
+                job.location,
+                `zoom: ${currentZoomLevel}`
+              );
               return (
                 <Marker
                   key={job.id}
@@ -170,12 +178,8 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
                   onPress={() => handleMarkerPress(job)}
                   anchor={{ x: 0.5, y: 1 }} // Pin point at bottom center
                 >
-                  <JobMarker 
-                    job={job}
-                    size="medium"
-                    zoomLevel={currentZoomLevel}
-                  />
-                  
+                  <JobMarker job={job} size="medium" zoomLevel={currentZoomLevel} />
+
                   <Callout testID="job-callout" onPress={() => onJobSelect?.(job)}>
                     <View className="p-3 min-w-[220px] bg-white rounded-lg">
                       <View className="flex-row items-start justify-between mb-2">
@@ -184,15 +188,16 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
                         </Text>
                         <JobPriorityBadge priority={job.priority} size="small" />
                       </View>
-                      
+
                       <Text className="text-gray-600 text-sm mb-1">
-                        {job.productDetails.type} • {job.productDetails.quantity} {job.productDetails.unit}
+                        {job.productDetails.type} • {job.productDetails.quantity}{' '}
+                        {job.productDetails.unit}
                       </Text>
-                      
+
                       <Text className="text-gray-500 text-xs mb-2">
                         📍 {job.location.city}, {job.location.region}
                       </Text>
-                      
+
                       <View className="flex-row items-center justify-between">
                         <Text className="text-gray-500 text-xs">
                           🕒 {job.estimatedDuration} min • 📏 {job.distance} km
@@ -215,17 +220,17 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
       {/* Enhanced Map Legend */}
       <View className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm p-3 rounded-xl shadow-lg border border-gray-200">
         <Text className="text-xs font-bold text-gray-800 mb-2">Job Priority</Text>
-        
+
         <View className="flex-row items-center mb-1">
           <View className="w-4 h-4 bg-red-500 rounded-full mr-2 shadow-sm" />
           <Text className="text-xs text-gray-700 font-medium">High Priority</Text>
         </View>
-        
+
         <View className="flex-row items-center mb-1">
           <View className="w-4 h-4 bg-amber-500 rounded-full mr-2 shadow-sm" />
           <Text className="text-xs text-gray-700 font-medium">Medium</Text>
         </View>
-        
+
         <View className="flex-row items-center">
           <View className="w-4 h-4 bg-white border-2 border-gray-300 rounded-full mr-2 shadow-sm" />
           <Text className="text-xs text-gray-700 font-medium">Low Priority</Text>

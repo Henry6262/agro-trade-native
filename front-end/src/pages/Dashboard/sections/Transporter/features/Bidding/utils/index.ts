@@ -1,9 +1,5 @@
 import type { MapOffer } from '../maps/types';
-import type {
-  TransportBid,
-  TransportRequest,
-  TransporterPerformance,
-} from '../types';
+import type { TransportBid, TransportRequest, TransporterPerformance } from '../types';
 import { TransportPickupPoint, TransportDeliveryPoint } from '@services/transportService';
 import { TransporterBiddingRequestView, TransporterBiddingSummary } from '../types';
 

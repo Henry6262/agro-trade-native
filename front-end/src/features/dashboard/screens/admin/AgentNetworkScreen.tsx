@@ -131,10 +131,14 @@ export default function AgentNetworkScreen() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="p-6 space-y-6">
           {/* Header */}
-          <View className={`${screenWidth >= 768 ? 'flex-row justify-between items-center' : 'space-y-4'}`}>
+          <View
+            className={`${screenWidth >= 768 ? 'flex-row justify-between items-center' : 'space-y-4'}`}
+          >
             <View>
               <Text className="text-2xl font-bold text-white tracking-wider">NETWORK</Text>
-              <Text className="text-sm text-neutral-400">Manage farmers, buyers, and transporters</Text>
+              <Text className="text-sm text-neutral-400">
+                Manage farmers, buyers, and transporters
+              </Text>
             </View>
             <View className="flex-row gap-2">
               <TouchableOpacity className="bg-green-600 px-4 py-2 rounded-lg flex-row items-center">
@@ -151,7 +155,12 @@ export default function AgentNetworkScreen() {
           <View className={`${screenWidth >= 768 ? 'flex-row' : 'space-y-2'} gap-2`}>
             <View className="flex-1 bg-neutral-900 border border-neutral-700 rounded-lg p-3">
               <View className="relative">
-                <Search width={16} height={16} color="#a3a3a3" style={{ position: 'absolute', left: 12, top: 10, zIndex: 1 }} />
+                <Search
+                  width={16}
+                  height={16}
+                  color="#a3a3a3"
+                  style={{ position: 'absolute', left: 12, top: 10, zIndex: 1 }}
+                />
                 <TextInput
                   placeholder="Search..."
                   value={searchTerm}
@@ -196,7 +205,9 @@ export default function AgentNetworkScreen() {
           {/* User List */}
           <View className="bg-neutral-900 border border-neutral-700 rounded-lg">
             <View className="p-4 border-b border-neutral-700">
-              <Text className="text-sm font-medium text-neutral-300 tracking-wider">NETWORK DIRECTORY</Text>
+              <Text className="text-sm font-medium text-neutral-300 tracking-wider">
+                NETWORK DIRECTORY
+              </Text>
             </View>
             <View>
               {/* Table Header */}
@@ -208,13 +219,19 @@ export default function AgentNetworkScreen() {
                   <Text className="text-xs font-medium text-neutral-400 tracking-wider">NAME</Text>
                 </View>
                 <View className="flex-1 px-2">
-                  <Text className="text-xs font-medium text-neutral-400 tracking-wider">LOCATION</Text>
+                  <Text className="text-xs font-medium text-neutral-400 tracking-wider">
+                    LOCATION
+                  </Text>
                 </View>
                 <View className="w-16 px-2">
-                  <Text className="text-xs font-medium text-neutral-400 tracking-wider">TRADES</Text>
+                  <Text className="text-xs font-medium text-neutral-400 tracking-wider">
+                    TRADES
+                  </Text>
                 </View>
                 <View className="w-16">
-                  <Text className="text-xs font-medium text-neutral-400 tracking-wider">RATING</Text>
+                  <Text className="text-xs font-medium text-neutral-400 tracking-wider">
+                    RATING
+                  </Text>
                 </View>
               </View>
 
@@ -228,9 +245,7 @@ export default function AgentNetworkScreen() {
                   }`}
                   activeOpacity={0.7}
                 >
-                  <View className="w-12 justify-center">
-                    {getUserTypeIcon(user.type)}
-                  </View>
+                  <View className="w-12 justify-center">{getUserTypeIcon(user.type)}</View>
                   <View className="flex-1 px-2 justify-center">
                     <Text className="text-sm text-white">{user.name}</Text>
                   </View>
@@ -263,7 +278,9 @@ export default function AgentNetworkScreen() {
           <View className="bg-neutral-900 border border-neutral-700 rounded-lg w-full max-w-2xl">
             <View className="flex-row items-center justify-between p-4 border-b border-neutral-700">
               <View>
-                <Text className="text-lg font-bold text-white tracking-wider">{selectedUser?.name}</Text>
+                <Text className="text-lg font-bold text-white tracking-wider">
+                  {selectedUser?.name}
+                </Text>
                 <Text className="text-sm text-neutral-400 font-mono">{selectedUser?.id}</Text>
               </View>
               <TouchableOpacity onPress={() => setSelectedUser(null)}>
@@ -287,7 +304,9 @@ export default function AgentNetworkScreen() {
                   <Text className="text-sm text-white">{selectedUser?.location}</Text>
                 </View>
                 <View className="w-1/2 mb-4">
-                  <Text className="text-xs text-neutral-400 tracking-wider mb-1">COMPLETED TRADES</Text>
+                  <Text className="text-xs text-neutral-400 tracking-wider mb-1">
+                    COMPLETED TRADES
+                  </Text>
                   <Text className="text-sm text-white font-mono">{selectedUser?.trades}</Text>
                 </View>
                 <View className="w-1/2 mb-4">
@@ -298,7 +317,9 @@ export default function AgentNetworkScreen() {
                   </View>
                 </View>
                 <View className="w-full">
-                  <Text className="text-xs text-neutral-400 tracking-wider mb-1">PRODUCTS/SERVICES</Text>
+                  <Text className="text-xs text-neutral-400 tracking-wider mb-1">
+                    PRODUCTS/SERVICES
+                  </Text>
                   <View className="flex-row flex-wrap gap-1">
                     {selectedUser?.products.map((product: string, idx: number) => (
                       <View key={idx} className="px-2 py-1 bg-neutral-800 rounded">

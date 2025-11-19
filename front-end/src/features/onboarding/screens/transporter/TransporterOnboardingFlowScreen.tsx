@@ -21,10 +21,10 @@ export const TransporterOnboardingFlowScreen: React.FC<Props> = ({ navigation })
   useEffect(() => {
     // Set user role to transporter when entering this flow
     onboardingStore.setRole('transport');
-    
+
     // Save onboarding data when component mounts
     onboardingStore.saveOnboardingData?.().catch(console.error);
-    
+
     // Check if we're returning from OAuth
     const googleAuthData = onboardingStore.googleAuthData;
     if (googleAuthData?.isAuthenticated) {

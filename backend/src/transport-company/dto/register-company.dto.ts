@@ -5,7 +5,6 @@ import {
   IsArray,
   MinLength,
   Matches,
-  IsPhoneNumber,
 } from "class-validator";
 
 export class RegisterCompanyDto {

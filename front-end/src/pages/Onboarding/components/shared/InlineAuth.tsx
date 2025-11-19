@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  Platform,
-  Animated,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Platform, Animated } from 'react-native';
 import { X, CheckCircle, User } from 'lucide-react-native';
 import { useOnboardingStore } from '../../../../stores/onboarding.store';
 import { useAuthStore } from '../../../../stores/auth.store';
@@ -19,15 +12,10 @@ interface InlineAuthProps {
   userRole: UserRole;
 }
 
-
-export const InlineAuth: React.FC<InlineAuthProps> = ({
-  onClose,
-  onComplete,
-  userRole,
-}) => {
+export const InlineAuth: React.FC<InlineAuthProps> = ({ onClose, onComplete, userRole }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [profileCreated, setProfileCreated] = useState(false);
-  
+
   // Animation values
   const fadeAnim = new Animated.Value(0);
   const scaleAnim = new Animated.Value(0.3);
@@ -40,7 +28,7 @@ export const InlineAuth: React.FC<InlineAuthProps> = ({
   // Handle successful profile creation animation
   const showProfileCreatedAnimation = () => {
     setProfileCreated(true);
-    
+
     // Start animations in sequence
     Animated.sequence([
       // Fade in and scale up the container
@@ -82,30 +70,29 @@ export const InlineAuth: React.FC<InlineAuthProps> = ({
   useEffect(() => {
     if (googleAuthData?.isAuthenticated) {
       console.log('User authenticated via Google:', googleAuthData);
-      
+
       // Show success animation and complete
       showProfileCreatedAnimation();
-      
+
       // Clear the Google auth data
       onboardingStore.setGoogleAuthData({ name: '', email: '', isAuthenticated: false });
     }
   }, [googleAuthData]);
 
-
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     const role = userRole || selectedRole || 'buyer';
-    
+
     try {
       // Use OAuth web flow for ALL platforms to ensure account selection works
       // The native SDK doesn't properly support account selection on Android
       // Adding approval_prompt=force ensures fresh consent each time
       const googleOAuthUrl = `${ENV.googleOAuthUrl}?role=${role}&prompt=select_account&access_type=online&approval_prompt=force`;
-      
+
       // Store data before auth
       await onboardingStore.saveOnboardingData();
       onboardingStore.setRole(role as UserRole);
-      
+
       if (Platform.OS === 'web') {
         // Web: Direct redirect
         window.location.href = googleOAuthUrl;
@@ -113,7 +100,7 @@ export const InlineAuth: React.FC<InlineAuthProps> = ({
         // Mobile: Open in system browser
         // This ensures proper Google account selection
         const Linking = require('react-native').Linking;
-        
+
         // Show message to user
         Alert.alert(
           'Sign in with Google',
@@ -176,15 +163,9 @@ export const InlineAuth: React.FC<InlineAuthProps> = ({
 
             {/* Success Message */}
             <Animated.View style={{ opacity: textOpacity }} className="items-center">
-              <Text className="text-2xl font-bold text-white mb-2">
-                Profile Created!
-              </Text>
-              <Text className="text-gray-400 text-center">
-                Welcome to AgroTrade
-              </Text>
-              <Text className="text-gray-500 text-sm mt-1">
-                Setting up your dashboard...
-              </Text>
+              <Text className="text-2xl font-bold text-white mb-2">Profile Created!</Text>
+              <Text className="text-gray-400 text-center">Welcome to AgroTrade</Text>
+              <Text className="text-gray-500 text-sm mt-1">Setting up your dashboard...</Text>
             </Animated.View>
           </Animated.View>
         </View>
@@ -196,9 +177,7 @@ export const InlineAuth: React.FC<InlineAuthProps> = ({
     <View className="bg-neutral-900 rounded-lg p-6 mx-4 my-6 border border-neutral-700">
       {/* Header */}
       <View className="flex-row justify-between items-center mb-6">
-        <Text className="text-white text-xl font-semibold">
-          Sign In to Continue
-        </Text>
+        <Text className="text-white text-xl font-semibold">Sign In to Continue</Text>
         <TouchableOpacity onPress={onClose} className="p-2">
           <X color="#9CA3AF" size={20} />
         </TouchableOpacity>

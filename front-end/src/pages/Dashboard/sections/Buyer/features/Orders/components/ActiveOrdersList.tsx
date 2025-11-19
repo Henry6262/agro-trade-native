@@ -72,7 +72,11 @@ export const ActiveOrdersList: React.FC<ActiveOrdersListProps> = ({
                 <Text className="text-sm font-medium text-white">Quality Requirements</Text>
                 <View className="flex-row flex-wrap gap-2 mt-2">
                   {order.qualityRequirements.map((req) => (
-                    <Badge key={req} variant="outline" className="text-xs border-blue-400 text-blue-300">
+                    <Badge
+                      key={req}
+                      variant="outline"
+                      className="text-xs border-blue-400 text-blue-300"
+                    >
                       {req}
                     </Badge>
                   ))}
@@ -81,7 +85,9 @@ export const ActiveOrdersList: React.FC<ActiveOrdersListProps> = ({
               <View className="space-y-1 text-sm">
                 <View className="flex-row justify-between">
                   <Text className="text-neutral-400">Created</Text>
-                  <Text className="text-white">{format(new Date(order.createdAt), 'MMM dd, yyyy')}</Text>
+                  <Text className="text-white">
+                    {format(new Date(order.createdAt), 'MMM dd, yyyy')}
+                  </Text>
                 </View>
                 <View className="flex-row justify-between">
                   <Text className="text-neutral-400">Budget</Text>

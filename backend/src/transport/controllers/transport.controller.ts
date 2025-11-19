@@ -4,7 +4,6 @@ import {
   Post,
   Put,
   Body,
-  Param,
   Query,
   UseGuards,
   HttpStatus,
@@ -16,7 +15,6 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiParam,
   ApiQuery,
 } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";

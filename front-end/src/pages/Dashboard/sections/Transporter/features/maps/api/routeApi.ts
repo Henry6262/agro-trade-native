@@ -47,29 +47,31 @@ export const calculateRoute = async (
   options?: RouteOptions
 ): Promise<RouteData> => {
   // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   // Validate coordinates
   const truckCoords = truckLocation.coordinates;
   const pickupCoords = pickupLocation.coordinates;
   const deliveryCoords = deliveryLocation.coordinates;
-  
-  if (!validateCoordinates(truckCoords.latitude, truckCoords.longitude) ||
-      !validateCoordinates(pickupCoords.latitude, pickupCoords.longitude) ||
-      !validateCoordinates(deliveryCoords.latitude, deliveryCoords.longitude)) {
+
+  if (
+    !validateCoordinates(truckCoords.latitude, truckCoords.longitude) ||
+    !validateCoordinates(pickupCoords.latitude, pickupCoords.longitude) ||
+    !validateCoordinates(deliveryCoords.latitude, deliveryCoords.longitude)
+  ) {
     throw new Error('Invalid coordinates');
   }
-  
-  // Calculate distances 
+
+  // Calculate distances
   const distanceToPickup = calculateDistance(
     truckCoords.latitude,
     truckCoords.longitude,
     pickupCoords.latitude,
     pickupCoords.longitude
   );
-  
-  const distanceToDelivery = 
-    pickupCoords.latitude === deliveryCoords.latitude && 
+
+  const distanceToDelivery =
+    pickupCoords.latitude === deliveryCoords.latitude &&
     pickupCoords.longitude === deliveryCoords.longitude
       ? 0
       : calculateDistance(
@@ -78,22 +80,19 @@ export const calculateRoute = async (
           deliveryCoords.latitude,
           deliveryCoords.longitude
         );
-  
+
   // Calculate durations
   const durationToPickup = calculateDuration(
     distanceToPickup,
     options?.includeTraffic,
     options?.timeOfDay
   );
-  
-  const durationToDelivery = distanceToDelivery === 0 
-    ? 0 
-    : calculateDuration(
-        distanceToDelivery,
-        options?.includeTraffic,
-        options?.timeOfDay
-      );
-  
+
+  const durationToDelivery =
+    distanceToDelivery === 0
+      ? 0
+      : calculateDuration(distanceToDelivery, options?.includeTraffic, options?.timeOfDay);
+
   // Generate polyline
   const polyline = generateMockPolyline(
     truckCoords.latitude,
@@ -101,7 +100,7 @@ export const calculateRoute = async (
     deliveryCoords.latitude,
     deliveryCoords.longitude
   );
-  
+
   // Create base route
   const route: RouteData = {
     truckId,
@@ -120,7 +119,7 @@ export const calculateRoute = async (
     },
     color: getColorForTruck(truckId),
   };
-  
+
   // Add alternatives if requested
   if (options?.includeAlternatives) {
     const altPolyline = generateMockPolyline(
@@ -129,7 +128,7 @@ export const calculateRoute = async (
       deliveryCoords.latitude,
       deliveryCoords.longitude
     );
-    
+
     route.alternativeRoutes = [
       {
         truckId,
@@ -150,7 +149,7 @@ export const calculateRoute = async (
       },
     ];
   }
-  
+
   return route;
 };
 
@@ -165,16 +164,9 @@ export const calculateMultipleRoutes = async (
   options?: RouteOptions
 ): Promise<RouteData[]> => {
   // Calculate routes in parallel for efficiency
-  const routePromises = trucks.map(truck =>
-    calculateRoute(
-      truck.id,
-      truck.label,
-      truck.location,
-      pickupLocation,
-      deliveryLocation,
-      options
-    )
+  const routePromises = trucks.map((truck) =>
+    calculateRoute(truck.id, truck.label, truck.location, pickupLocation, deliveryLocation, options)
   );
-  
+
   return Promise.all(routePromises);
 };

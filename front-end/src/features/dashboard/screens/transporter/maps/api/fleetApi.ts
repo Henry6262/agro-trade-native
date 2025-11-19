@@ -10,11 +10,11 @@ const mockFleets: Record<string, Fleet> = {
         registrationNumber: 'QTR-1234',
         capacity: 40,
         currentLocation: {
-          coordinates: { latitude: 25.2654, longitude: 51.5200 },
-          address: { 
-            city: 'Doha', 
-            state: 'Ad Dawhah', 
-            country: 'Qatar' 
+          coordinates: { latitude: 25.2654, longitude: 51.52 },
+          address: {
+            city: 'Doha',
+            state: 'Ad Dawhah',
+            country: 'Qatar',
           },
           type: 'truck_location',
         },
@@ -26,11 +26,11 @@ const mockFleets: Record<string, Fleet> = {
         registrationNumber: 'QTR-5678',
         capacity: 40,
         currentLocation: {
-          coordinates: { latitude: 25.2754, longitude: 51.5150 },
-          address: { 
-            city: 'Doha', 
-            state: 'Ad Dawhah', 
-            country: 'Qatar' 
+          coordinates: { latitude: 25.2754, longitude: 51.515 },
+          address: {
+            city: 'Doha',
+            state: 'Ad Dawhah',
+            country: 'Qatar',
           },
           type: 'truck_location',
         },
@@ -43,11 +43,11 @@ const mockFleets: Record<string, Fleet> = {
         registrationNumber: 'QTR-9012',
         capacity: 40,
         currentLocation: {
-          coordinates: { latitude: 25.2554, longitude: 51.5250 },
-          address: { 
-            city: 'Doha', 
-            state: 'Ad Dawhah', 
-            country: 'Qatar' 
+          coordinates: { latitude: 25.2554, longitude: 51.525 },
+          address: {
+            city: 'Doha',
+            state: 'Ad Dawhah',
+            country: 'Qatar',
           },
           type: 'truck_location',
         },
@@ -60,11 +60,11 @@ const mockFleets: Record<string, Fleet> = {
         registrationNumber: 'QTR-3456',
         capacity: 50,
         currentLocation: {
-          coordinates: { latitude: 25.2854, longitude: 51.5100 },
-          address: { 
-            city: 'Doha', 
-            state: 'Ad Dawhah', 
-            country: 'Qatar' 
+          coordinates: { latitude: 25.2854, longitude: 51.51 },
+          address: {
+            city: 'Doha',
+            state: 'Ad Dawhah',
+            country: 'Qatar',
           },
           type: 'truck_location',
         },
@@ -101,23 +101,23 @@ const mockFleets: Record<string, Fleet> = {
  */
 export const fetchAvailableFleet = async (transporterId: string): Promise<Fleet> => {
   // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
   const fleet = mockFleets[transporterId];
-  
+
   if (!fleet) {
     throw new Error('Transporter not found');
   }
-  
+
   // Create a deep copy with fresh Date objects
   const fleetCopy: Fleet = {
     ...fleet,
-    trucks: fleet.trucks.map(truck => ({
+    trucks: fleet.trucks.map((truck) => ({
       ...truck,
       currentLocation: { ...truck.currentLocation },
       lastUpdated: new Date(),
     })),
   };
-  
+
   return fleetCopy;
 };

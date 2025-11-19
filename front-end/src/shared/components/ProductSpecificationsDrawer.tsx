@@ -50,7 +50,7 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
       // Get specifications for the selected product
       const specs = getProductSpecifications(productId);
       setProductSpecs(specs || []);
-      
+
       // Initialize with existing values if any
       if (existingSpecs && Object.keys(existingSpecs).length > 0) {
         setSpecValues(existingSpecs);
@@ -63,9 +63,9 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
   };
 
   const handleSpecChange = (specKey: string, value: string) => {
-    setSpecValues(prev => ({
+    setSpecValues((prev) => ({
       ...prev,
-      [specKey]: value
+      [specKey]: value,
     }));
   };
 
@@ -92,8 +92,8 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
                   key={option}
                   onPress={() => handleSpecChange(specKey, option)}
                   className={`px-4 py-2 rounded-lg border ${
-                    value === option 
-                      ? 'bg-blue-500/20 border-blue-500' 
+                    value === option
+                      ? 'bg-blue-500/20 border-blue-500'
                       : 'bg-neutral-800 border-neutral-700'
                   }`}
                 >
@@ -112,9 +112,7 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
     return (
       <View key={specKey} className="mb-6">
         <Text className="text-white font-semibold mb-2">{spec.name || specKey}</Text>
-        {spec.description && (
-          <Text className="text-gray-400 text-sm mb-2">{spec.description}</Text>
-        )}
+        {spec.description && <Text className="text-gray-400 text-sm mb-2">{spec.description}</Text>}
         <View className="bg-neutral-800 rounded-xl p-4 border border-neutral-700">
           <View className="flex-row items-center">
             <TextInput
@@ -125,9 +123,7 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
               keyboardType={spec.type === 'number' ? 'numeric' : 'default'}
               className="flex-1 text-white text-lg"
             />
-            {spec.unit && (
-              <Text className="text-gray-400 ml-2">{spec.unit}</Text>
-            )}
+            {spec.unit && <Text className="text-gray-400 ml-2">{spec.unit}</Text>}
           </View>
         </View>
       </View>
@@ -135,13 +131,8 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <KeyboardAvoidingView 
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
@@ -166,10 +157,7 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
                 <Text className="mt-4 text-gray-400">Loading specifications...</Text>
               </View>
             ) : (
-              <ScrollView 
-                className="flex-1 p-6"
-                showsVerticalScrollIndicator={false}
-              >
+              <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
                 <Text className="text-lg text-white mb-1">{productName}</Text>
                 <Text className="text-gray-400 mb-6">
                   Specify your quality requirements (optional)
@@ -182,8 +170,8 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
                     <View className="ml-3 flex-1">
                       <Text className="text-blue-400 font-semibold mb-1">Optional Step</Text>
                       <Text className="text-blue-300 text-sm">
-                        These specifications help sellers match your exact requirements. 
-                        You can skip this step if you don't have specific quality needs.
+                        These specifications help sellers match your exact requirements. You can
+                        skip this step if you don't have specific quality needs.
                       </Text>
                     </View>
                   </View>
@@ -191,15 +179,13 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
 
                 {/* Product Specifications */}
                 {productSpecs && productSpecs.length > 0 ? (
-                  <View>
-                    {productSpecs.map(spec => renderSpecInput(spec))}
-                  </View>
+                  <View>{productSpecs.map((spec) => renderSpecInput(spec))}</View>
                 ) : (
                   <View className="bg-neutral-800/50 rounded-xl p-6 items-center">
                     <Text className="text-gray-400 text-center">
                       No specific quality parameters available for this product.
                     </Text>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       onPress={handleNext}
                       className="mt-4 bg-blue-500 px-6 py-2 rounded-lg"
                     >
@@ -218,17 +204,13 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
                     onPress={handleNext}
                     className="flex-1 bg-neutral-700 rounded-xl py-4"
                   >
-                    <Text className="text-white text-center font-semibold text-lg">
-                      Skip
-                    </Text>
+                    <Text className="text-white text-center font-semibold text-lg">Skip</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handleNext}
                     className="flex-1 bg-blue-500 rounded-xl py-4"
                   >
-                    <Text className="text-white text-center font-semibold text-lg">
-                      Continue
-                    </Text>
+                    <Text className="text-white text-center font-semibold text-lg">Continue</Text>
                   </TouchableOpacity>
                 </View>
               </View>

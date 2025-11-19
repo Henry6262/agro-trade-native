@@ -25,9 +25,15 @@ export const useSellerProducts = () => {
       isLoading: false,
       error: 'User is not a seller',
       refresh: async () => {},
-      create: async () => { throw new Error('User is not a seller'); },
-      update: async () => { throw new Error('User is not a seller'); },
-      delete: async () => { throw new Error('User is not a seller'); },
+      create: async () => {
+        throw new Error('User is not a seller');
+      },
+      update: async () => {
+        throw new Error('User is not a seller');
+      },
+      delete: async () => {
+        throw new Error('User is not a seller');
+      },
     };
   }
 
@@ -65,9 +71,15 @@ export const useSellerOffers = () => {
       isLoading: false,
       error: 'User is not a seller',
       refresh: async () => {},
-      accept: async () => { throw new Error('User is not a seller'); },
-      reject: async () => { throw new Error('User is not a seller'); },
-      negotiate: async () => { throw new Error('User is not a seller'); },
+      accept: async () => {
+        throw new Error('User is not a seller');
+      },
+      reject: async () => {
+        throw new Error('User is not a seller');
+      },
+      negotiate: async () => {
+        throw new Error('User is not a seller');
+      },
     };
   }
 
@@ -87,12 +99,7 @@ export const useSellerOffers = () => {
  */
 export const useSellerTrades = () => {
   const { user } = useAuthStore();
-  const {
-    sellerTrades,
-    isLoadingTrades,
-    tradesError,
-    refreshTrades,
-  } = useUserData();
+  const { sellerTrades, isLoadingTrades, tradesError, refreshTrades } = useUserData();
 
   const isSeller = user?.role?.toLowerCase() === 'farmer' || user?.role?.toLowerCase() === 'seller';
 
@@ -118,12 +125,7 @@ export const useSellerTrades = () => {
  */
 export const useSellerStats = () => {
   const { user } = useAuthStore();
-  const {
-    sellerStats,
-    isLoadingStats,
-    statsError,
-    refreshStats,
-  } = useUserData();
+  const { sellerStats, isLoadingStats, statsError, refreshStats } = useUserData();
 
   const isSeller = user?.role?.toLowerCase() === 'farmer' || user?.role?.toLowerCase() === 'seller';
 

@@ -6,12 +6,10 @@ import {
   IsEnum,
   IsDateString,
   IsArray,
-  ValidateNested,
-  IsBoolean,
   Min,
   Max,
 } from "class-validator";
-import { Type, Transform } from "class-transformer";
+import { Transform } from "class-transformer";
 import {
   TruckType,
   UrgencyLevel,

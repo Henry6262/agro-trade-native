@@ -60,33 +60,33 @@ interface ProductStore {
   products: ProductWithSpecs[];
   regions: Region[];
   specificationTypes: SpecificationType[];
-  
+
   // Loading states
   isLoadingProducts: boolean;
   isLoadingRegions: boolean;
   isLoadingSpecs: boolean;
-  
+
   // Error states
   productsError: string | null;
   regionsError: string | null;
   specsError: string | null;
-  
+
   // Timestamp for cache invalidation
   lastFetchedAt: Date | null;
-  
+
   // Actions
   fetchProductsWithSpecs: () => Promise<void>;
   fetchRegions: () => Promise<void>;
   fetchSpecificationTypes: () => Promise<void>;
   fetchAllData: () => Promise<void>;
-  
+
   // Getters
   getProductById: (id: string) => ProductWithSpecs | undefined;
   getProductByCategory: (category: string) => ProductWithSpecs | undefined;
   getProductSpecifications: (productId: string) => ProductSpecification[];
   getCitiesByRegion: (regionId: string) => City[];
   getSpecificationByCode: (code: string) => SpecificationType | undefined;
-  
+
   // Cache management
   clearCache: () => void;
   isCacheValid: () => boolean;
@@ -107,30 +107,31 @@ export const useProductStore = create<ProductStore>()(
     regionsError: null,
     specsError: null,
     lastFetchedAt: null,
-    
+
     // Fetch products with specifications
     fetchProductsWithSpecs: async () => {
       const state = get();
-      
+
       // Check cache validity - also check if products have specifications
-      const hasSpecifications = state.products.length > 0 && state.products[0]?.specifications !== undefined;
+      const hasSpecifications =
+        state.products.length > 0 && state.products[0]?.specifications !== undefined;
       if (state.isCacheValid() && hasSpecifications) {
         console.log('Using cached products data with specifications');
         return;
       }
-      
+
       console.log('Fetching fresh products data - cache invalid or missing specifications');
-      
+
       set((draft) => {
         draft.isLoadingProducts = true;
         draft.productsError = null;
       });
-      
+
       try {
         const response = await productService.getProductMetadata();
         console.log('Fetched products with specifications:', response);
         console.log('First product specs:', response[0]?.specifications);
-        
+
         set((draft) => {
           draft.products = response as ProductWithSpecs[];
           draft.isLoadingProducts = false;
@@ -144,26 +145,26 @@ export const useProductStore = create<ProductStore>()(
         });
       }
     },
-    
+
     // Fetch regions with cities
     fetchRegions: async () => {
       const state = get();
-      
+
       // Check cache validity
       if (state.isCacheValid() && state.regions.length > 0) {
         console.log('Using cached regions data');
         return;
       }
-      
+
       set((draft) => {
         draft.isLoadingRegions = true;
         draft.regionsError = null;
       });
-      
+
       try {
         const response = await apiClient.get<any>('/products/regions');
         console.log('Fetched regions:', response);
-        
+
         set((draft) => {
           draft.regions = response.data || [];
           draft.isLoadingRegions = false;
@@ -176,26 +177,26 @@ export const useProductStore = create<ProductStore>()(
         });
       }
     },
-    
+
     // Fetch specification types
     fetchSpecificationTypes: async () => {
       const state = get();
-      
+
       // Check cache validity
       if (state.isCacheValid() && state.specificationTypes.length > 0) {
         console.log('Using cached specification types');
         return;
       }
-      
+
       set((draft) => {
         draft.isLoadingSpecs = true;
         draft.specsError = null;
       });
-      
+
       try {
         const response = await apiClient.get<any>('/products/specifications');
         console.log('Fetched specification types:', response);
-        
+
         set((draft) => {
           draft.specificationTypes = response.data || [];
           draft.isLoadingSpecs = false;
@@ -208,22 +209,24 @@ export const useProductStore = create<ProductStore>()(
         });
       }
     },
-    
+
     // Fetch all data at once
     fetchAllData: async () => {
       const state = get();
-      
+
       // Check cache validity
-      if (state.isCacheValid() && 
-          state.products.length > 0 && 
-          state.regions.length > 0 && 
-          state.specificationTypes.length > 0) {
+      if (
+        state.isCacheValid() &&
+        state.products.length > 0 &&
+        state.regions.length > 0 &&
+        state.specificationTypes.length > 0
+      ) {
         console.log('Using cached data for all resources');
         return;
       }
-      
+
       console.log('Fetching all product data...');
-      
+
       // Fetch all data in parallel, but don't let one failure stop the others
       // Use the methods directly from the state to avoid creating new references
       const results = await Promise.allSettled([
@@ -231,7 +234,7 @@ export const useProductStore = create<ProductStore>()(
         state.fetchRegions(),
         state.fetchSpecificationTypes(),
       ]);
-      
+
       // Log results
       results.forEach((result, index) => {
         const dataType = ['products', 'regions', 'specifications'][index];
@@ -241,42 +244,41 @@ export const useProductStore = create<ProductStore>()(
           console.log(`Successfully fetched ${dataType}`);
         }
       });
-      
+
       // Check if at least products were fetched successfully
       const productsLoaded = results[0].status === 'fulfilled';
       if (!productsLoaded) {
         throw new Error('Failed to load products data');
       }
-      
+
       console.log('Product data fetch completed');
     },
-    
+
     // Getters
     getProductById: (id: string) => {
-      return get().products.find(p => p.id === id);
+      return get().products.find((p) => p.id === id);
     },
-    
+
     getProductByCategory: (category: string) => {
-      return get().products.find(p => 
-        p.category === category || 
-        p.name === category.toLowerCase().replace(/-/g, '_')
+      return get().products.find(
+        (p) => p.category === category || p.name === category.toLowerCase().replace(/-/g, '_')
       );
     },
-    
+
     getProductSpecifications: (productId: string) => {
-      const product = get().products.find(p => p.id === productId);
+      const product = get().products.find((p) => p.id === productId);
       return product?.specifications || [];
     },
-    
+
     getCitiesByRegion: (regionId: string) => {
-      const region = get().regions.find(r => r.id === regionId);
+      const region = get().regions.find((r) => r.id === regionId);
       return region?.cities || [];
     },
-    
+
     getSpecificationByCode: (code: string) => {
-      return get().specificationTypes.find(s => s.code === code);
+      return get().specificationTypes.find((s) => s.code === code);
     },
-    
+
     // Cache management
     clearCache: () => {
       set((draft) => {
@@ -289,14 +291,14 @@ export const useProductStore = create<ProductStore>()(
         draft.specsError = null;
       });
     },
-    
+
     isCacheValid: () => {
       const state = get();
       if (!state.lastFetchedAt) return false;
-      
+
       const now = new Date().getTime();
       const lastFetch = state.lastFetchedAt.getTime();
-      return (now - lastFetch) < CACHE_DURATION;
+      return now - lastFetch < CACHE_DURATION;
     },
   }))
 );

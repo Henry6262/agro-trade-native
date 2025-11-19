@@ -24,25 +24,27 @@ export const OnboardingCompleteScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleContinue = () => {
     const userRole = selectedRole || user?.role;
-    
+
     // Navigate to dashboard with success animation
     navigation.reset({
       index: 0,
-      routes: [{ 
-        name: 'Main', 
-        params: { 
-          screen: 'Dashboard',
+      routes: [
+        {
+          name: 'Main',
           params: {
-            screen: 'DashboardMain',
+            screen: 'Dashboard',
             params: {
-              userRole: userRole,
-              showSuccessAnimation: true
-            }
-          }
-        } 
-      }],
+              screen: 'DashboardMain',
+              params: {
+                userRole: userRole,
+                showSuccessAnimation: true,
+              },
+            },
+          },
+        },
+      ],
     });
-    
+
     // Clear onboarding data
     resetOnboarding();
   };
@@ -61,44 +63,49 @@ export const OnboardingCompleteScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <LinearGradient
-      colors={['#1F2937', '#111827']}
-      style={{ flex: 1 }}
-    >
+    <LinearGradient colors={['#1F2937', '#111827']} style={{ flex: 1 }}>
       <StatusBar barStyle="light-content" backgroundColor="#1F2937" />
-      <View style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 24
-      }}>
-        <View style={{
-          backgroundColor: '#10B981',
-          borderRadius: 60,
-          padding: 20,
-          marginBottom: 32
-        }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 24,
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: '#10B981',
+            borderRadius: 60,
+            padding: 20,
+            marginBottom: 32,
+          }}
+        >
           <CheckCircle size={80} color="white" />
         </View>
 
-        <Text style={{
-          fontSize: 32,
-          fontWeight: 'bold',
-          color: 'white',
-          textAlign: 'center',
-          marginBottom: 16
-        }}>
+        <Text
+          style={{
+            fontSize: 32,
+            fontWeight: 'bold',
+            color: 'white',
+            textAlign: 'center',
+            marginBottom: 16,
+          }}
+        >
           Welcome to Agro Trade!
         </Text>
 
-        <Text style={{
-          fontSize: 18,
-          color: '#9CA3AF',
-          textAlign: 'center',
-          marginBottom: 40,
-          lineHeight: 28,
-          maxWidth: 400
-        }}>
+        <Text
+          style={{
+            fontSize: 18,
+            color: '#9CA3AF',
+            textAlign: 'center',
+            marginBottom: 40,
+            lineHeight: 28,
+            maxWidth: 400,
+          }}
+        >
           {getRoleSpecificMessage()}
         </Text>
 
@@ -116,11 +123,13 @@ export const OnboardingCompleteScreen: React.FC<Props> = ({ navigation }) => {
             elevation: 8,
           }}
         >
-          <Text style={{
-            color: 'white',
-            fontSize: 18,
-            fontWeight: '600'
-          }}>
+          <Text
+            style={{
+              color: 'white',
+              fontSize: 18,
+              fontWeight: '600',
+            }}
+          >
             Go to Dashboard
           </Text>
         </TouchableOpacity>

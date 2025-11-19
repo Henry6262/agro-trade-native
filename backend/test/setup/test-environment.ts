@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
-import { AppModule } from '../../src/app.module';
-import { PrismaService } from '../../src/prisma/prisma.service';
-import { MockAuthService } from '../../src/auth/services/mock-auth.service';
-import { JwtService } from '@nestjs/jwt';
+import { Test, TestingModule } from "@nestjs/testing";
+import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { AppModule } from "../../src/app.module";
+import { PrismaService } from "../../src/prisma/prisma.service";
+import { MockAuthService } from "../../src/auth/services/mock-auth.service";
+import { JwtService } from "@nestjs/jwt";
 
 export class TestEnvironment {
   public app: INestApplication;
@@ -25,7 +25,7 @@ export class TestEnvironment {
 
     // Create application
     this.app = this.moduleRef.createNestApplication();
-    
+
     // Add global pipes
     this.app.useGlobalPipes(
       new ValidationPipe({
@@ -41,7 +41,7 @@ export class TestEnvironment {
     // Get services
     this.prisma = this.moduleRef.get<PrismaService>(PrismaService);
     const jwtService = this.moduleRef.get<JwtService>(JwtService);
-    
+
     // Create mock auth service
     this.mockAuth = new MockAuthService(jwtService);
     this.tokens = this.mockAuth.getMockTokens();
@@ -52,7 +52,7 @@ export class TestEnvironment {
   async teardown() {
     // Clean up database
     await this.cleanDatabase();
-    
+
     // Close app
     await this.app.close();
   }
@@ -60,16 +60,16 @@ export class TestEnvironment {
   async cleanDatabase() {
     // Clean tables in correct order to avoid foreign key constraints
     const tablesToClean = [
-      'offerRound',
-      'offerNegotiation',
-      'tradeSeller',
-      'transportCostCalculation',
-      'profitEstimation',
-      'priceScenario',
-      'tradeOperation',
-      'transportCostSettings',
-      'buyListing',
-      'saleListing',
+      "offerRound",
+      "offerNegotiation",
+      "tradeSeller",
+      "transportCostCalculation",
+      "profitEstimation",
+      "priceScenario",
+      "tradeOperation",
+      "transportCostSettings",
+      "buyListing",
+      "saleListing",
     ];
 
     for (const table of tablesToClean) {
@@ -84,13 +84,13 @@ export class TestEnvironment {
   async seedTestData() {
     // Create test user
     const testUser = await this.prisma.user.upsert({
-      where: { email: 'test@agrotrade.com' },
+      where: { email: "test@agrotrade.com" },
       update: {},
       create: {
-        id: 'test-user-123',
-        email: 'test@agrotrade.com',
-        name: 'Test User',
-        role: 'ADMIN',
+        id: "test-user-123",
+        email: "test@agrotrade.com",
+        name: "Test User",
+        role: "ADMIN",
         isActive: true,
         isEmailVerified: true,
         onboardingCompleted: true,
@@ -99,13 +99,13 @@ export class TestEnvironment {
 
     // Create test buyer
     const testBuyer = await this.prisma.user.upsert({
-      where: { email: 'buyer@agrotrade.com' },
+      where: { email: "buyer@agrotrade.com" },
       update: {},
       create: {
-        id: 'test-buyer-456',
-        email: 'buyer@agrotrade.com',
-        name: 'Test Buyer',
-        role: 'BUYER',
+        id: "test-buyer-456",
+        email: "buyer@agrotrade.com",
+        name: "Test Buyer",
+        role: "BUYER",
         isActive: true,
         isEmailVerified: true,
         onboardingCompleted: true,
@@ -114,13 +114,13 @@ export class TestEnvironment {
 
     // Create test sellers
     const testSeller1 = await this.prisma.user.upsert({
-      where: { email: 'seller1@agrotrade.com' },
+      where: { email: "seller1@agrotrade.com" },
       update: {},
       create: {
-        id: 'test-seller-001',
-        email: 'seller1@agrotrade.com',
-        name: 'Test Seller 1',
-        role: 'FARMER',
+        id: "test-seller-001",
+        email: "seller1@agrotrade.com",
+        name: "Test Seller 1",
+        role: "FARMER",
         isActive: true,
         isEmailVerified: true,
         onboardingCompleted: true,
@@ -128,13 +128,13 @@ export class TestEnvironment {
     });
 
     const testSeller2 = await this.prisma.user.upsert({
-      where: { email: 'seller2@agrotrade.com' },
+      where: { email: "seller2@agrotrade.com" },
       update: {},
       create: {
-        id: 'test-seller-002',
-        email: 'seller2@agrotrade.com',
-        name: 'Test Seller 2',
-        role: 'FARMER',
+        id: "test-seller-002",
+        email: "seller2@agrotrade.com",
+        name: "Test Seller 2",
+        role: "FARMER",
         isActive: true,
         isEmailVerified: true,
         onboardingCompleted: true,
@@ -143,28 +143,28 @@ export class TestEnvironment {
 
     // Create test product
     const testProduct = await this.prisma.product.upsert({
-      where: { id: 'test-product-wheat' },
+      where: { id: "test-product-wheat" },
       update: {},
       create: {
-        id: 'test-product-wheat',
-        name: 'Wheat',
-        category: 'SOFT_WHEAT',
-        displayName: 'Soft Wheat',
-        defaultUnit: 'TON',
-        description: 'High quality wheat',
+        id: "test-product-wheat",
+        name: "Wheat",
+        category: "SOFT_WHEAT",
+        displayName: "Soft Wheat",
+        defaultUnit: "TON",
+        description: "High quality wheat",
       },
     });
 
     // Create test buy listing
     const buyListing = await this.prisma.buyListing.create({
       data: {
-        id: 'test-buy-listing-001',
+        id: "test-buy-listing-001",
         buyerId: testBuyer.id,
         productId: testProduct.id,
         quantity: 100,
-        unit: 'TON',
+        unit: "TON",
         maxPricePerUnit: 380,
-        status: 'ACTIVE',
+        status: "ACTIVE",
         neededBy: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
       },
     });
@@ -172,26 +172,26 @@ export class TestEnvironment {
     // Create test sale listings
     const saleListing1 = await this.prisma.saleListing.create({
       data: {
-        id: 'test-sale-listing-001',
+        id: "test-sale-listing-001",
         sellerId: testSeller1.id,
         productId: testProduct.id,
         quantity: 60,
-        unit: 'TON',
+        unit: "TON",
         askingPrice: 345,
-        status: 'ACTIVE',
+        status: "ACTIVE",
         harvestDate: new Date(),
       },
     });
 
     const saleListing2 = await this.prisma.saleListing.create({
       data: {
-        id: 'test-sale-listing-002',
+        id: "test-sale-listing-002",
         sellerId: testSeller2.id,
         productId: testProduct.id,
         quantity: 50,
-        unit: 'TON',
+        unit: "TON",
         askingPrice: 350,
-        status: 'ACTIVE',
+        status: "ACTIVE",
         harvestDate: new Date(),
       },
     });
@@ -199,7 +199,7 @@ export class TestEnvironment {
     // Create transport settings
     const transportSettings = await this.prisma.transportCostSettings.create({
       data: {
-        id: 'test-transport-settings',
+        id: "test-transport-settings",
         baseRatePerKm: 2.0,
         flatbedMultiplier: 1.0,
         refrigeratedMultiplier: 1.3,
@@ -217,7 +217,12 @@ export class TestEnvironment {
     });
 
     return {
-      users: { admin: testUser, buyer: testBuyer, seller1: testSeller1, seller2: testSeller2 },
+      users: {
+        admin: testUser,
+        buyer: testBuyer,
+        seller1: testSeller1,
+        seller2: testSeller2,
+      },
       product: testProduct,
       buyListing,
       saleListings: [saleListing1, saleListing2],

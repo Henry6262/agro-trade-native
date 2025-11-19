@@ -1,10 +1,10 @@
-import { INestApplication } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
-import { PrismaService } from '../../src/prisma/prisma.service';
-import { TestDataFactory } from '../helpers/test-data-factory';
-import { DatabaseCleaner } from '../helpers/database-cleaner';
-import { ApiClient } from '../helpers/api-client';
+import { INestApplication } from "@nestjs/common";
+import { Test, TestingModule } from "@nestjs/testing";
+import { AppModule } from "../../src/app.module";
+import { PrismaService } from "../../src/prisma/prisma.service";
+import { TestDataFactory } from "../helpers/test-data-factory";
+import { DatabaseCleaner } from "../helpers/database-cleaner";
+import { ApiClient } from "../helpers/api-client";
 
 /**
  * Happy Path Trade Operation E2E Test
@@ -23,13 +23,15 @@ import { ApiClient } from '../helpers/api-client';
  * 11. System creates transport job
  * 12. System advances phase to IN_TRANSIT
  */
-describe('Happy Path - Complete Trade Operation E2E', () => {
+describe("Happy Path - Complete Trade Operation E2E", () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let dataFactory: TestDataFactory;
   let dbCleaner: DatabaseCleaner;
   let apiClient: ApiClient;
-  let testScenario: Awaited<ReturnType<TestDataFactory['createFullTradeScenario']>>;
+  let testScenario: Awaited<
+    ReturnType<TestDataFactory["createFullTradeScenario"]>
+  >;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -65,17 +67,17 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
     });
   });
 
-  it('should complete full workflow from trade operation creation to transport assignment', async () => {
+  it("should complete full workflow from trade operation creation to transport assignment", async () => {
     const startTime = Date.now();
-    console.log('\n========================================');
-    console.log('HAPPY PATH E2E TEST - FULL TRADE WORKFLOW');
-    console.log('========================================\n');
+    console.log("\n========================================");
+    console.log("HAPPY PATH E2E TEST - FULL TRADE WORKFLOW");
+    console.log("========================================\n");
 
     // ==================== STEP 1: Create Trade Operation ====================
-    console.log('STEP 1: Creating trade operation with sellers...');
+    console.log("STEP 1: Creating trade operation with sellers...");
 
     const createTradeOpResponse = await apiClient.post(
-      '/api/trade-operations',
+      "/api/trade-operations",
       {
         buyListingId: testScenario.buyListing.id,
         adminId: testScenario.admin.id,
@@ -100,12 +102,12 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
           },
         ],
       },
-      201
+      201,
     );
 
     const tradeOpData = createTradeOpResponse.body;
-    expect(tradeOpData).toHaveProperty('tradeOperationId');
-    expect(tradeOpData).toHaveProperty('operationNumber');
+    expect(tradeOpData).toHaveProperty("tradeOperationId");
+    expect(tradeOpData).toHaveProperty("operationNumber");
     expect(tradeOpData.negotiations).toHaveLength(3);
 
     const tradeOperationId = tradeOpData.tradeOperationId;
@@ -120,28 +122,29 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
 
     expect(tradeOp).toBeDefined();
     expect(tradeOp).not.toBeNull();
-    if (!tradeOp) throw new Error('Trade operation not found');
+    if (!tradeOp) throw new Error("Trade operation not found");
 
-    expect(tradeOp.phase).toBe('SELLER_NEGOTIATION');
-    expect(tradeOp.status).toBe('ACTIVE');
+    expect(tradeOp.phase).toBe("SELLER_NEGOTIATION");
+    expect(tradeOp.status).toBe("ACTIVE");
     expect(tradeOp.sellers).toHaveLength(3);
     expect(tradeOp.negotiations).toHaveLength(3);
     console.log(`   Phase: ${tradeOp.phase}, Status: ${tradeOp.status}`);
 
     // ==================== STEP 2: Verify Offers Created ====================
-    console.log('\nSTEP 2: Verifying offers sent to sellers...');
+    console.log("\nSTEP 2: Verifying offers sent to sellers...");
 
     const negotiations = tradeOpData.negotiations;
 
     for (const negotiation of negotiations) {
-      expect(negotiation.status).toBe('PENDING');
-      expect(negotiation).toHaveProperty('expiresAt');
-      expect(negotiation).toHaveProperty('hoursUntilExpiry');
+      expect(negotiation.status).toBe("PENDING");
+      expect(negotiation).toHaveProperty("expiresAt");
+      expect(negotiation).toHaveProperty("hoursUntilExpiry");
 
       // Verify 48-hour expiry
       const expiresAt = new Date(negotiation.expiresAt);
       const now = new Date();
-      const hoursUntilExpiry = (expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60);
+      const hoursUntilExpiry =
+        (expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60);
       expect(hoursUntilExpiry).toBeGreaterThan(47);
       expect(hoursUntilExpiry).toBeLessThanOrEqual(48);
     }
@@ -149,7 +152,7 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
     console.log(`✅ All 3 offers sent with 48-hour expiry`);
 
     // ==================== STEP 3: Sellers Accept Offers ====================
-    console.log('\nSTEP 3: Sellers accepting offers...');
+    console.log("\nSTEP 3: Sellers accepting offers...");
 
     for (let i = 0; i < negotiations.length; i++) {
       const negotiation = negotiations[i];
@@ -157,15 +160,19 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
       const acceptResponse = await apiClient.post(
         `/api/negotiations/${negotiation.id}/accept`,
         {},
-        200
+        200,
       );
 
-      expect(acceptResponse.body.status).toBe('ACCEPTED');
-      console.log(`   ✅ Seller ${i + 1} accepted offer (Negotiation ID: ${negotiation.id})`);
+      expect(acceptResponse.body.status).toBe("ACCEPTED");
+      console.log(
+        `   ✅ Seller ${i + 1} accepted offer (Negotiation ID: ${negotiation.id})`,
+      );
     }
 
     // ==================== STEP 4: Verify Inspections Auto-Created ====================
-    console.log('\nSTEP 4: Verifying inspection requests auto-created for unverified sellers...');
+    console.log(
+      "\nSTEP 4: Verifying inspection requests auto-created for unverified sellers...",
+    );
 
     const inspections = await prisma.inspectionRequest.findMany({
       where: { tradeOperationId },
@@ -174,13 +181,17 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
 
     // Only 2 sellers are unverified, so expect 2 inspections
     expect(inspections).toHaveLength(2);
-    console.log(`✅ ${inspections.length} inspection requests created (for unverified sellers)`);
+    console.log(
+      `✅ ${inspections.length} inspection requests created (for unverified sellers)`,
+    );
 
     for (const inspection of inspections) {
-      expect(inspection.status).toBe('PENDING');
+      expect(inspection.status).toBe("PENDING");
       expect(inspection.latitude).toBeDefined();
       expect(inspection.longitude).toBeDefined();
-      console.log(`   - Inspection ${inspection.id} for seller ${inspection.saleListing.seller.name}`);
+      console.log(
+        `   - Inspection ${inspection.id} for seller ${inspection.saleListing.seller.name}`,
+      );
     }
 
     // Verify phase is still SELLER_NEGOTIATION (waiting for inspections)
@@ -188,20 +199,22 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
       where: { id: tradeOperationId },
     });
     expect(updatedTradeOp).not.toBeNull();
-    if (!updatedTradeOp) throw new Error('Trade operation not found');
+    if (!updatedTradeOp) throw new Error("Trade operation not found");
 
-    expect(updatedTradeOp.phase).toBe('SELLER_NEGOTIATION');
-    console.log(`   Trade operation phase: ${updatedTradeOp.phase} (awaiting inspections)`);
+    expect(updatedTradeOp.phase).toBe("SELLER_NEGOTIATION");
+    console.log(
+      `   Trade operation phase: ${updatedTradeOp.phase} (awaiting inspections)`,
+    );
 
     // ==================== STEP 5: Assign Inspector ====================
-    console.log('\nSTEP 5: Assigning inspector to inspection requests...');
+    console.log("\nSTEP 5: Assigning inspector to inspection requests...");
 
     for (const inspection of inspections) {
       await prisma.inspectionRequest.update({
         where: { id: inspection.id },
         data: {
           inspectorId: testScenario.inspector.id,
-          status: 'SCHEDULED',
+          status: "SCHEDULED",
           scheduledDate: new Date(),
         },
       });
@@ -209,26 +222,28 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
     }
 
     // ==================== STEP 6: Inspector Completes Inspections ====================
-    console.log('\nSTEP 6: Inspector completing inspections...');
+    console.log("\nSTEP 6: Inspector completing inspections...");
 
     for (const inspection of inspections) {
       const completeResponse = await apiClient.patch(
         `/api/inspections/${inspection.id}`,
         {
-          status: 'COMPLETED',
+          status: "COMPLETED",
           qualityScore: 85,
-          qualityGrade: 'Premium',
-          notes: 'Wheat meets all quality standards',
+          qualityGrade: "Premium",
+          notes: "Wheat meets all quality standards",
         },
-        200
+        200,
       );
 
-      expect(completeResponse.body.status).toBe('COMPLETED');
-      console.log(`   ✅ Inspection ${inspection.id} completed with quality score 85`);
+      expect(completeResponse.body.status).toBe("COMPLETED");
+      console.log(
+        `   ✅ Inspection ${inspection.id} completed with quality score 85`,
+      );
     }
 
     // ==================== STEP 7: Verify Cascading Updates ====================
-    console.log('\nSTEP 7: Verifying cascading updates...');
+    console.log("\nSTEP 7: Verifying cascading updates...");
 
     // Verify SaleListing updated with quality scores
     for (const inspection of inspections) {
@@ -240,8 +255,10 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
       if (!updatedSaleListing) continue;
 
       expect(updatedSaleListing.qualityScore).toBe(85);
-      expect(updatedSaleListing.qualityGrade).toBe('Premium');
-      console.log(`   ✅ Sale listing ${updatedSaleListing.id} updated with quality data`);
+      expect(updatedSaleListing.qualityGrade).toBe("Premium");
+      console.log(
+        `   ✅ Sale listing ${updatedSaleListing.id} updated with quality data`,
+      );
     }
 
     // Verify TradeSeller marked as verified
@@ -250,25 +267,29 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
     });
 
     expect(tradeSellers).toHaveLength(3);
-    const verifiedSellers = tradeSellers.filter(ts => ts.isVerified);
+    const verifiedSellers = tradeSellers.filter((ts) => ts.isVerified);
     expect(verifiedSellers).toHaveLength(3); // All 3 should now be verified
-    console.log(`   ✅ All ${verifiedSellers.length} trade sellers marked as verified`);
+    console.log(
+      `   ✅ All ${verifiedSellers.length} trade sellers marked as verified`,
+    );
 
     // ==================== STEP 8: Verify Phase Advanced to TRANSPORT_MATCHING ====================
-    console.log('\nSTEP 8: Verifying trade operation phase advancement...');
+    console.log("\nSTEP 8: Verifying trade operation phase advancement...");
 
     updatedTradeOp = await prisma.tradeOperation.findUnique({
       where: { id: tradeOperationId },
     });
 
     expect(updatedTradeOp).not.toBeNull();
-    if (!updatedTradeOp) throw new Error('Trade operation not found');
+    if (!updatedTradeOp) throw new Error("Trade operation not found");
 
-    expect(updatedTradeOp.phase).toBe('TRANSPORT_MATCHING');
-    console.log(`   ✅ Trade operation phase advanced to: ${updatedTradeOp.phase}`);
+    expect(updatedTradeOp.phase).toBe("TRANSPORT_MATCHING");
+    console.log(
+      `   ✅ Trade operation phase advanced to: ${updatedTradeOp.phase}`,
+    );
 
     // ==================== STEP 9: Verify Transport Request Auto-Created ====================
-    console.log('\nSTEP 9: Verifying transport request auto-created...');
+    console.log("\nSTEP 9: Verifying transport request auto-created...");
 
     const transportRequest = await prisma.transportRequest.findFirst({
       where: { tradeOperationId },
@@ -276,9 +297,9 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
 
     expect(transportRequest).toBeDefined();
     expect(transportRequest).not.toBeNull();
-    if (!transportRequest) throw new Error('Transport request not found');
+    if (!transportRequest) throw new Error("Transport request not found");
 
-    expect(transportRequest.status).toBe('OPEN');
+    expect(transportRequest.status).toBe("OPEN");
     expect(transportRequest.pickupPoints).toBeDefined();
     expect(transportRequest.deliveryPoint).toBeDefined();
 
@@ -291,10 +312,10 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
     console.log(`   Pickup points: ${pickupPoints.length}`);
 
     // ==================== STEP 10: Transporter Submits Bid ====================
-    console.log('\nSTEP 10: Transporter submitting bid...');
+    console.log("\nSTEP 10: Transporter submitting bid...");
 
     const bidResponse = await apiClient.post(
-      '/api/transport/bids',
+      "/api/transport/bids",
       {
         transportRequestId: transportRequest.id,
         transportCompanyId: testScenario.transportCompany.id,
@@ -302,34 +323,34 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
         truckCount: 5,
         bidAmount: 450,
         estimatedDuration: 8, // 8 hours
-        vehicleType: 'FLATBED',
+        vehicleType: "FLATBED",
         vehicleCapacity: 25,
         assignedTruckId: testScenario.truck.id,
       },
-      201
+      201,
     );
 
     const bid = bidResponse.body;
-    expect(bid).toHaveProperty('id');
-    expect(bid.status).toBe('PENDING');
+    expect(bid).toHaveProperty("id");
+    expect(bid.status).toBe("PENDING");
     console.log(`✅ Transport bid submitted: ${bid.id}`);
     console.log(`   Bid amount: €${bid.bidAmount}`);
     console.log(`   Estimated duration: ${bid.estimatedDuration} hours`);
 
     // ==================== STEP 11: Admin Accepts Bid ====================
-    console.log('\nSTEP 11: Admin accepting transport bid...');
+    console.log("\nSTEP 11: Admin accepting transport bid...");
 
     const acceptBidResponse = await apiClient.post(
       `/api/transport/bids/${bid.id}/accept`,
       {},
-      200
+      200,
     );
 
-    expect(acceptBidResponse.body.status).toBe('ACCEPTED');
+    expect(acceptBidResponse.body.status).toBe("ACCEPTED");
     console.log(`✅ Transport bid accepted`);
 
     // ==================== STEP 12: Verify Transport Job Created ====================
-    console.log('\nSTEP 12: Verifying transport job created...');
+    console.log("\nSTEP 12: Verifying transport job created...");
 
     const transportJob = await prisma.transportJob.findFirst({
       where: { transportRequestId: transportRequest.id },
@@ -337,9 +358,9 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
 
     expect(transportJob).toBeDefined();
     expect(transportJob).not.toBeNull();
-    if (!transportJob) throw new Error('Transport job not found');
+    if (!transportJob) throw new Error("Transport job not found");
 
-    expect(transportJob.status).toBe('ASSIGNED');
+    expect(transportJob.status).toBe("ASSIGNED");
     expect(transportJob.transporterId).toBe(testScenario.transporter.id);
 
     console.log(`✅ Transport job created: ${transportJob.id}`);
@@ -347,7 +368,7 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
     console.log(`   Status: ${transportJob.status}`);
 
     // ==================== STEP 13: Verify Final Phase ====================
-    console.log('\nSTEP 13: Verifying final trade operation state...');
+    console.log("\nSTEP 13: Verifying final trade operation state...");
 
     const finalTradeOp = await prisma.tradeOperation.findUnique({
       where: { id: tradeOperationId },
@@ -360,13 +381,13 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
       },
     });
 
-    expect(finalTradeOp.phase).toBe('IN_TRANSIT');
-    expect(finalTradeOp.status).toBe('ACTIVE');
+    expect(finalTradeOp.phase).toBe("IN_TRANSIT");
+    expect(finalTradeOp.status).toBe("ACTIVE");
     console.log(`✅ Trade operation final phase: ${finalTradeOp.phase}`);
     console.log(`   Status: ${finalTradeOp.status}`);
 
     // ==================== VALIDATION: Database Integrity ====================
-    console.log('\nVALIDATION: Checking database integrity...');
+    console.log("\nVALIDATION: Checking database integrity...");
 
     // Check all foreign key relationships
     expect(finalTradeOp.buyListingId).toBe(testScenario.buyListing.id);
@@ -382,25 +403,32 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
     expect(finalTradeOp.createdAt).toBeInstanceOf(Date);
     expect(finalTradeOp.updatedAt).toBeInstanceOf(Date);
 
-    console.log('✅ All database relationships intact');
-    console.log('✅ All timestamps set correctly');
+    console.log("✅ All database relationships intact");
+    console.log("✅ All timestamps set correctly");
 
     // ==================== VALIDATION: Calculated Fields ====================
-    console.log('\nVALIDATION: Checking calculated fields...');
+    console.log("\nVALIDATION: Checking calculated fields...");
 
     // Calculate expected values
-    const expectedTotalPurchaseCost = (320 * 40) + (320 * 40) + (325 * 20); // 32300
+    const expectedTotalPurchaseCost = 320 * 40 + 320 * 40 + 325 * 20; // 32300
     const expectedTotalRevenue = 350 * 100; // 35000
-    const expectedProfit = expectedTotalRevenue - expectedTotalPurchaseCost - 450; // Transport cost
+    const expectedProfit =
+      expectedTotalRevenue - expectedTotalPurchaseCost - 450; // Transport cost
 
     // Note: These might be null if not calculated yet, which is fine for this test
     if (finalTradeOp.totalPurchaseCost) {
-      expect(Number(finalTradeOp.totalPurchaseCost)).toBeCloseTo(expectedTotalPurchaseCost, 2);
+      expect(Number(finalTradeOp.totalPurchaseCost)).toBeCloseTo(
+        expectedTotalPurchaseCost,
+        2,
+      );
       console.log(`✅ Total purchase cost: €${finalTradeOp.totalPurchaseCost}`);
     }
 
     if (finalTradeOp.totalRevenue) {
-      expect(Number(finalTradeOp.totalRevenue)).toBeCloseTo(expectedTotalRevenue, 2);
+      expect(Number(finalTradeOp.totalRevenue)).toBeCloseTo(
+        expectedTotalRevenue,
+        2,
+      );
       console.log(`✅ Total revenue: €${finalTradeOp.totalRevenue}`);
     }
 
@@ -408,14 +436,14 @@ describe('Happy Path - Complete Trade Operation E2E', () => {
     const endTime = Date.now();
     const duration = (endTime - startTime) / 1000;
 
-    console.log('\n========================================');
-    console.log('TEST SUMMARY');
-    console.log('========================================');
+    console.log("\n========================================");
+    console.log("TEST SUMMARY");
+    console.log("========================================");
     console.log(`✅ All 13 steps completed successfully`);
     console.log(`✅ Total test duration: ${duration.toFixed(2)}s`);
     console.log(`✅ Trade operation: ${tradeOperationId}`);
     console.log(`✅ Final phase: ${finalTradeOp.phase}`);
     console.log(`✅ Transport job: ${transportJob.id}`);
-    console.log('========================================\n');
+    console.log("========================================\n");
   });
 });

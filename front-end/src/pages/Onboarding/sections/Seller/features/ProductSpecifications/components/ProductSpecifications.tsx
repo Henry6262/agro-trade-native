@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,16 +7,16 @@ import {
   TextInput,
   Dimensions,
   Image,
-} from 'react-native'
-import { Package, ChevronUp, Plus } from 'lucide-react-native'
-import type { ProductSpecification } from '@shared/types/onboarding'
-import { useOnboardingStore } from '@stores/onboarding.store'
-import { productSpecificationsService } from '../service'
+} from 'react-native';
+import { Package, ChevronUp, Plus } from 'lucide-react-native';
+import type { ProductSpecification } from '@shared/types/onboarding';
+import { useOnboardingStore } from '@stores/onboarding.store';
+import { productSpecificationsService } from '../service';
 
 interface ProductSpecificationsProps {
-  selectedProducts: string[]
-  specifications: ProductSpecification[]
-  onSpecificationsChange: (specifications: ProductSpecification[]) => void
+  selectedProducts: string[];
+  specifications: ProductSpecification[];
+  onSpecificationsChange: (specifications: ProductSpecification[]) => void;
 }
 
 export function ProductSpecifications({
@@ -24,80 +24,78 @@ export function ProductSpecifications({
   specifications,
   onSpecificationsChange,
 }: ProductSpecificationsProps) {
-  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set())
-  const { selectedProductsMetadata, setSelectedProductsMetadata } = useOnboardingStore()
-  const [loading, setLoading] = useState(false)
-  const { width } = Dimensions.get('window')
-  const isLargeScreen = width >= 768
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
+  const { selectedProductsMetadata, setSelectedProductsMetadata } = useOnboardingStore();
+  const [loading, setLoading] = useState(false);
+  const { width } = Dimensions.get('window');
+  const isLargeScreen = width >= 768;
 
   // Load product metadata if missing
   useEffect(() => {
     if (selectedProducts.length > 0 && selectedProductsMetadata.length === 0) {
-      loadProductMetadata()
+      loadProductMetadata();
     }
-  }, [selectedProducts])
+  }, [selectedProducts]);
 
   const loadProductMetadata = async () => {
     try {
-      setLoading(true)
-      const selectedMetadata = await productSpecificationsService.loadSelectedMetadata(selectedProducts)
-      setSelectedProductsMetadata(selectedMetadata)
+      setLoading(true);
+      const selectedMetadata =
+        await productSpecificationsService.loadSelectedMetadata(selectedProducts);
+      setSelectedProductsMetadata(selectedMetadata);
     } catch (err) {
-      console.error('Error loading product metadata:', err)
+      console.error('Error loading product metadata:', err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const updateSpecification = (productId: string, field: string, value: any) => {
     const updatedSpecs = specifications.map((spec) => {
       if (spec.productId === productId) {
-        const updates = { ...spec, [field]: value }
+        const updates = { ...spec, [field]: value };
         // Always set unit to tons
         if (field === 'quantity') {
-          updates.unit = 'tons'
+          updates.unit = 'tons';
         }
-        return updates
+        return updates;
       }
-      return spec
-    })
-    onSpecificationsChange(updatedSpecs)
-  }
+      return spec;
+    });
+    onSpecificationsChange(updatedSpecs);
+  };
 
   const toggleCardExpansion = (productId: string) => {
-    const newExpanded = new Set(expandedCards)
+    const newExpanded = new Set(expandedCards);
     if (newExpanded.has(productId)) {
-      newExpanded.delete(productId)
+      newExpanded.delete(productId);
     } else {
-      newExpanded.add(productId)
+      newExpanded.add(productId);
     }
-    setExpandedCards(newExpanded)
-  }
+    setExpandedCards(newExpanded);
+  };
 
   const renderSpecificationCard = (productId: string, index: number) => {
     // Use metadata from store
-    const product = selectedProductsMetadata.find((p) => p.category === productId)
-    const spec = specifications.find((s) => s.productId === productId)
-    if (!product || !spec) return null
+    const product = selectedProductsMetadata.find((p) => p.category === productId);
+    const spec = specifications.find((s) => s.productId === productId);
+    if (!product || !spec) return null;
 
-    const isExpanded = expandedCards.has(productId)
-    const isCompleted = spec.quantity && spec.quantity.toString().trim() !== ''
+    const isExpanded = expandedCards.has(productId);
+    const isCompleted = spec.quantity && spec.quantity.toString().trim() !== '';
 
     return (
-      <View 
-        key={productId} 
-        className={`${isLargeScreen ? 'w-1/2' : 'w-full'} p-2`}
-      >
-        <View className={`border rounded-lg overflow-hidden ${
-          isCompleted 
-            ? 'bg-emerald-500/10 border-emerald-500' 
-            : 'bg-gray-800 border-gray-700'
-        }`}>
+      <View key={productId} className={`${isLargeScreen ? 'w-1/2' : 'w-full'} p-2`}>
+        <View
+          className={`border rounded-lg overflow-hidden ${
+            isCompleted ? 'bg-emerald-500/10 border-emerald-500' : 'bg-gray-800 border-gray-700'
+          }`}
+        >
           {/* Card Header */}
           <View className="p-4 border-b border-gray-700 relative">
             <View className="flex-row items-center">
               {product.image ? (
-                <Image 
+                <Image
                   source={{ uri: product.image }}
                   className="w-12 h-12 rounded-lg mr-3"
                   resizeMode="cover"
@@ -108,7 +106,9 @@ export function ProductSpecifications({
                 </View>
               )}
               <View className="flex-1">
-                <Text className="font-bold text-lg text-white">{product.name || product.category}</Text>
+                <Text className="font-bold text-lg text-white">
+                  {product.name || product.category}
+                </Text>
               </View>
               {isCompleted && (
                 <View className="absolute top-2 right-2 bg-emerald-500 rounded-full w-6 h-6 items-center justify-center">
@@ -180,9 +180,7 @@ export function ProductSpecifications({
             {isExpanded && (
               <View className="mt-4 space-y-3">
                 <View>
-                  <Text className="text-xs font-semibold text-gray-400 mb-2">
-                    Harvest Date
-                  </Text>
+                  <Text className="text-xs font-semibold text-gray-400 mb-2">Harvest Date</Text>
                   <TextInput
                     value={spec.harvestDate || ''}
                     onChangeText={(text) => updateSpecification(productId, 'harvestDate', text)}
@@ -193,9 +191,7 @@ export function ProductSpecifications({
                 </View>
 
                 <View>
-                  <Text className="text-xs font-semibold text-gray-400 mb-2">
-                    Storage Location
-                  </Text>
+                  <Text className="text-xs font-semibold text-gray-400 mb-2">Storage Location</Text>
                   <TextInput
                     value={spec.storageLocation || ''}
                     onChangeText={(text) => updateSpecification(productId, 'storageLocation', text)}
@@ -206,9 +202,7 @@ export function ProductSpecifications({
                 </View>
 
                 <View>
-                  <Text className="text-xs font-semibold text-gray-400 mb-2">
-                    Quality Notes
-                  </Text>
+                  <Text className="text-xs font-semibold text-gray-400 mb-2">Quality Notes</Text>
                   <TextInput
                     value={spec.qualityNotes || ''}
                     onChangeText={(text) => updateSpecification(productId, 'qualityNotes', text)}
@@ -224,8 +218,8 @@ export function ProductSpecifications({
           </View>
         </View>
       </View>
-    )
-  }
+    );
+  };
 
   if (loading) {
     return (
@@ -233,12 +227,12 @@ export function ProductSpecifications({
         <Package size={48} color="#9CA3AF" />
         <Text className="text-gray-400 mt-4">Loading product details...</Text>
       </View>
-    )
+    );
   }
 
   return (
     <View className="flex-1 bg-gray-900">
-      <ScrollView 
+      <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
@@ -257,18 +251,14 @@ export function ProductSpecifications({
           {/* Product Cards Grid */}
           {specifications.length > 0 ? (
             <View className={`${isLargeScreen ? 'flex-row flex-wrap -mx-2' : ''}`}>
-              {specifications.map((spec, index) => 
-                renderSpecificationCard(spec.productId, index)
-              )}
+              {specifications.map((spec, index) => renderSpecificationCard(spec.productId, index))}
             </View>
           ) : (
             <View className="bg-gray-800 border border-gray-700 rounded-lg p-8 items-center">
               <View className="w-16 h-16 bg-gray-700 rounded-full items-center justify-center mb-4">
                 <Package size={32} color="#6B7280" />
               </View>
-              <Text className="text-lg font-semibold text-white mb-2">
-                No Products Selected
-              </Text>
+              <Text className="text-lg font-semibold text-white mb-2">No Products Selected</Text>
               <Text className="text-sm text-gray-400 text-center">
                 Go back to select products first
               </Text>
@@ -277,5 +267,5 @@ export function ProductSpecifications({
         </View>
       </ScrollView>
     </View>
-  )
+  );
 }

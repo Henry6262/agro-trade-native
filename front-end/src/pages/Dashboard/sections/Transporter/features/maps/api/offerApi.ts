@@ -3,7 +3,7 @@ import { MapOffer } from '../types';
 // Mock offer data for different scenarios
 const mockOffers: Record<string, MapOffer> = {
   // Support both IO-prefixed IDs (from TransporterTransfersTab) and T-prefixed IDs (from BiddingTab)
-  'T001': {
+  T001: {
     id: 'T001',
     quantity: 25,
     pickup: {
@@ -18,7 +18,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.2854, longitude: 51.5310 },
+      coordinates: { latitude: 25.2854, longitude: 51.531 },
       address: {
         city: 'Chicago',
         state: 'IL',
@@ -32,7 +32,7 @@ const mockOffers: Record<string, MapOffer> = {
     estimatedValue: 3200,
     productType: 'grains',
   },
-  'T002': {
+  T002: {
     id: 'T002',
     quantity: 40,
     pickup: {
@@ -47,7 +47,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.2654, longitude: 51.5410 },
+      coordinates: { latitude: 25.2654, longitude: 51.541 },
       address: {
         city: 'Kansas',
         state: 'KS',
@@ -61,7 +61,7 @@ const mockOffers: Record<string, MapOffer> = {
     estimatedValue: 4800,
     productType: 'grains',
   },
-  'T003': {
+  T003: {
     id: 'T003',
     quantity: 15,
     pickup: {
@@ -76,7 +76,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.3254, longitude: 51.5210 },
+      coordinates: { latitude: 25.3254, longitude: 51.521 },
       address: {
         city: 'Milwaukee',
         state: 'WI',
@@ -90,7 +90,7 @@ const mockOffers: Record<string, MapOffer> = {
     estimatedValue: 2400,
     productType: 'vegetables',
   },
-  'IO001': {
+  IO001: {
     id: 'IO001',
     quantity: 30,
     pickup: {
@@ -105,7 +105,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.2854, longitude: 51.5310 },
+      coordinates: { latitude: 25.2854, longitude: 51.531 },
       address: {
         city: 'Chicago',
         state: 'IL',
@@ -119,7 +119,7 @@ const mockOffers: Record<string, MapOffer> = {
     estimatedValue: 3800,
     productType: 'grains',
   },
-  'IO002': {
+  IO002: {
     id: 'IO002',
     quantity: 22,
     pickup: {
@@ -134,7 +134,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.2654, longitude: 51.5410 },
+      coordinates: { latitude: 25.2654, longitude: 51.541 },
       address: {
         city: 'Kansas',
         state: 'KS',
@@ -163,7 +163,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.2854, longitude: 51.5310 },
+      coordinates: { latitude: 25.2854, longitude: 51.531 },
       address: {
         city: 'Doha',
         state: 'Ad Dawhah',
@@ -192,7 +192,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.2654, longitude: 51.5410 },
+      coordinates: { latitude: 25.2654, longitude: 51.541 },
       address: {
         city: 'Doha',
         state: 'Ad Dawhah',
@@ -220,7 +220,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.3254, longitude: 51.5210 },
+      coordinates: { latitude: 25.3254, longitude: 51.521 },
       address: {
         city: 'Doha',
         state: 'Ad Dawhah',
@@ -247,7 +247,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.2754, longitude: 51.5110 },
+      coordinates: { latitude: 25.2754, longitude: 51.511 },
       address: {
         city: 'Doha',
         state: 'Ad Dawhah',
@@ -273,7 +273,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.2854, longitude: 51.5210 },
+      coordinates: { latitude: 25.2854, longitude: 51.521 },
       address: {
         city: 'Doha',
         state: 'Ad Dawhah',
@@ -299,7 +299,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.2954, longitude: 51.5310 },
+      coordinates: { latitude: 25.2954, longitude: 51.531 },
       address: {
         city: 'Doha',
         state: 'Ad Dawhah',
@@ -325,7 +325,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.3054, longitude: 51.5210 },
+      coordinates: { latitude: 25.3054, longitude: 51.521 },
       address: {
         city: 'Doha',
         state: 'Ad Dawhah',
@@ -351,7 +351,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.3154, longitude: 51.5310 },
+      coordinates: { latitude: 25.3154, longitude: 51.531 },
       address: {
         city: 'Doha',
         state: 'Ad Dawhah',
@@ -377,7 +377,7 @@ const mockOffers: Record<string, MapOffer> = {
       type: 'pickup',
     },
     delivery: {
-      coordinates: { latitude: 25.3254, longitude: 51.5410 },
+      coordinates: { latitude: 25.3254, longitude: 51.541 },
       address: {
         city: 'Doha',
         state: 'Ad Dawhah',
@@ -398,14 +398,14 @@ const mockOffers: Record<string, MapOffer> = {
  */
 export const getOfferMapData = async (offerId: string): Promise<MapOffer> => {
   // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 50));
-  
+  await new Promise((resolve) => setTimeout(resolve, 50));
+
   const offer = mockOffers[offerId];
-  
+
   if (!offer) {
     throw new Error('Offer not found');
   }
-  
+
   // Create a deep copy with proper Date object
   const offerCopy: MapOffer = {
     ...offer,
@@ -413,7 +413,7 @@ export const getOfferMapData = async (offerId: string): Promise<MapOffer> => {
     delivery: { ...offer.delivery },
     deadline: new Date(offer.deadline),
   };
-  
+
   return offerCopy;
 };
 
@@ -423,6 +423,6 @@ export const getOfferMapData = async (offerId: string): Promise<MapOffer> => {
  */
 export const getMultipleOffersMapData = async (offerIds: string[]): Promise<MapOffer[]> => {
   // Fetch offers in parallel for efficiency
-  const offerPromises = offerIds.map(id => getOfferMapData(id));
+  const offerPromises = offerIds.map((id) => getOfferMapData(id));
   return Promise.all(offerPromises);
 };

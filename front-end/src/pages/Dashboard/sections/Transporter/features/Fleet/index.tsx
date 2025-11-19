@@ -42,8 +42,16 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
         <View className="p-4 space-y-4">
           <FleetStatsGrid summary={summary} />
           <FleetCreationCard onCreate={openFleetCreation} />
-          <FleetTrucksSection trucks={filteredTrucks} activeTab={truckTab} onTabChange={setTruckTab} />
-          <FleetDriversSection drivers={filteredDrivers} activeTab={driverTab} onTabChange={setDriverTab} />
+          <FleetTrucksSection
+            trucks={filteredTrucks}
+            activeTab={truckTab}
+            onTabChange={setTruckTab}
+          />
+          <FleetDriversSection
+            drivers={filteredDrivers}
+            activeTab={driverTab}
+            onTabChange={setDriverTab}
+          />
         </View>
       </ScrollView>
       {showFleetCreation && <FleetCreationFlow onClose={closeFleetCreation} />}

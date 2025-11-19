@@ -1,9 +1,6 @@
 import { format } from 'date-fns';
 import type { TransportJob } from '../service';
-import type {
-  TransporterDisplayJob,
-  TransporterJobSummary,
-} from '../types';
+import type { TransporterDisplayJob, TransporterJobSummary } from '../types';
 import type {
   TransporterDeliveryPayload,
   TransporterPickupPayload,

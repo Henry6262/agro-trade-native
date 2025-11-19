@@ -10,7 +10,13 @@ import {
   BadRequestException,
   Query,
 } from "@nestjs/common";
-import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from "@nestjs/swagger";
 import { plainToInstance } from "class-transformer";
 import { BuyerService } from "./buyer.service";
 import {
@@ -22,6 +28,7 @@ import {
   BuyerOfferSummaryDto,
   BuyerStatsDto,
 } from "./dto/buyer-response.dto";
+import { BuyerTimelineResponseDto } from "./dto/timeline.dto";
 import { RequestStatus, UserRole } from "@prisma/client";
 
 interface AuthRequest {
@@ -118,6 +125,31 @@ export class BuyerController {
   })
   async getMyStats(@Request() req: AuthRequest) {
     return this.buyerService.getBuyerStats(req.user.id);
+  }
+
+  @Get("timeline")
+  @ApiOperation({ summary: "Get recent buyer timeline events" })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    description: "Number of events to return (default 20, max 50)",
+  })
+  @ApiQuery({
+    name: "cursor",
+    required: false,
+    description: "Pagination cursor (last event ID from previous page)",
+  })
+  @ApiOkResponse({
+    description: "Timeline events",
+    type: BuyerTimelineResponseDto,
+  })
+  async getTimeline(
+    @Request() req: AuthRequest,
+    @Query("limit") limit = "20",
+    @Query("cursor") cursor?: string,
+  ): Promise<BuyerTimelineResponseDto> {
+    const parsedLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 50);
+    return this.buyerService.getTimeline(req.user.id, parsedLimit, cursor);
   }
 
   @Patch("listings/:id/status")

@@ -40,15 +40,10 @@ export const PlaceholderStep: React.FC<PlaceholderStepProps> = ({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/50">
         <Pressable className="flex-1" onPress={onClose} />
-        
+
         <View className="bg-neutral-900 rounded-t-3xl max-h-[90%]">
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-neutral-800">
@@ -74,14 +69,10 @@ export const PlaceholderStep: React.FC<PlaceholderStepProps> = ({
 
           {/* Content */}
           <View className="p-6">
-            <Text className="text-lg font-semibold text-white mb-4">
-              {stepName}
-            </Text>
-            
+            <Text className="text-lg font-semibold text-white mb-4">{stepName}</Text>
+
             <View className="bg-neutral-800 rounded-lg p-8 items-center">
-              <Text className="text-neutral-400 text-center mb-2">
-                This step is coming soon
-              </Text>
+              <Text className="text-neutral-400 text-center mb-2">This step is coming soon</Text>
               <Text className="text-neutral-500 text-sm text-center">
                 Click continue to proceed to the next step
               </Text>
@@ -93,15 +84,11 @@ export const PlaceholderStep: React.FC<PlaceholderStepProps> = ({
             <Button
               variant="gradient"
               className={`bg-gradient-to-r ${
-                flowType === 'truck' 
-                  ? 'from-green-600 to-green-700' 
-                  : 'from-blue-600 to-blue-700'
+                flowType === 'truck' ? 'from-green-600 to-green-700' : 'from-blue-600 to-blue-700'
               }`}
               onPress={handleAction}
             >
-              <Text className="text-white font-semibold">
-                {isLastStep ? 'Submit' : 'Continue'}
-              </Text>
+              <Text className="text-white font-semibold">{isLastStep ? 'Submit' : 'Continue'}</Text>
             </Button>
           </View>
         </View>

@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  Platform,
-  Animated,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Platform, Animated } from 'react-native';
 import { CheckCircle, User } from 'lucide-react-native';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
@@ -32,7 +25,7 @@ export const GoogleAuthMobile: React.FC<GoogleAuthMobileProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [profileCreated, setProfileCreated] = useState(false);
-  
+
   // Animation values
   const fadeAnim = new Animated.Value(0);
   const scaleAnim = new Animated.Value(0.3);
@@ -45,7 +38,7 @@ export const GoogleAuthMobile: React.FC<GoogleAuthMobileProps> = ({
 
   // Configure the auth request
   const discovery = AuthSession.useAutoDiscovery('https://accounts.google.com');
-  
+
   // Create the auth request
   const [request, response, promptAsync] = AuthSession.useAuthRequest(
     {
@@ -74,11 +67,11 @@ export const GoogleAuthMobile: React.FC<GoogleAuthMobileProps> = ({
   const handleAuthCode = async (code: string) => {
     try {
       setIsLoading(true);
-      
+
       // Exchange the auth code for tokens with our backend
       const role = userRole || selectedRole || 'buyer';
       const apiUrl = ENV.apiUrl;
-      
+
       const response = await apiClient.post('/auth/google/mobile', {
         code,
         redirectUri: AuthSession.makeRedirectUri({
@@ -90,11 +83,11 @@ export const GoogleAuthMobile: React.FC<GoogleAuthMobileProps> = ({
 
       if (response.data.success) {
         const { access_token, user } = response.data;
-        
+
         // Store tokens and user info
         setTokens(access_token, access_token);
         setUser(user);
-        
+
         // Show success animation
         showProfileCreatedAnimation();
       }
@@ -111,7 +104,7 @@ export const GoogleAuthMobile: React.FC<GoogleAuthMobileProps> = ({
   // Handle successful profile creation animation
   const showProfileCreatedAnimation = () => {
     setProfileCreated(true);
-    
+
     // Start animations in sequence
     Animated.sequence([
       // Fade in and scale up the container
@@ -162,17 +155,17 @@ export const GoogleAuthMobile: React.FC<GoogleAuthMobileProps> = ({
 
   const handleWebSignIn = async () => {
     setIsLoading(true);
-    
+
     try {
       const role = userRole || selectedRole || 'buyer';
       const apiUrl = ENV.apiUrl;
       // Add prompt=select_account to force account selection
       const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}&prompt=select_account`;
-      
+
       // Store onboarding data and role before redirecting
       await onboardingStore.saveOnboardingData();
       onboardingStore.setRole(role as UserRole);
-      
+
       // Redirect to Google OAuth
       window.location.href = googleOAuthUrl;
     } catch (error: any) {
@@ -214,15 +207,9 @@ export const GoogleAuthMobile: React.FC<GoogleAuthMobileProps> = ({
 
           {/* Success Message */}
           <Animated.View style={{ opacity: textOpacity }} className="items-center">
-            <Text className="text-2xl font-bold text-white mb-2">
-              Profile Created!
-            </Text>
-            <Text className="text-gray-400 text-center">
-              Welcome to AgroTrade
-            </Text>
-            <Text className="text-gray-500 text-sm mt-1">
-              Redirecting to dashboard...
-            </Text>
+            <Text className="text-2xl font-bold text-white mb-2">Profile Created!</Text>
+            <Text className="text-gray-400 text-center">Welcome to AgroTrade</Text>
+            <Text className="text-gray-500 text-sm mt-1">Redirecting to dashboard...</Text>
           </Animated.View>
         </Animated.View>
       </View>
@@ -233,9 +220,7 @@ export const GoogleAuthMobile: React.FC<GoogleAuthMobileProps> = ({
     <View className={`${mode === 'modal' ? 'bg-gray-800 rounded-xl p-6 m-4' : 'p-6'}`}>
       {/* Header */}
       <View className="mb-8 items-center">
-        <Text className="text-3xl font-bold text-white mb-2">
-          Welcome to AgroTrade
-        </Text>
+        <Text className="text-3xl font-bold text-white mb-2">Welcome to AgroTrade</Text>
         <Text className="text-gray-400 text-center">
           Sign in with your Google account to continue
         </Text>

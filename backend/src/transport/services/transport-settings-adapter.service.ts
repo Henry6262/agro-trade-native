@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
-import { TransportCostSettings, TruckType } from "@prisma/client";
+import { TransportCostSettings } from "@prisma/client";
 
 /**
  * Adapter service to work with the existing Prisma schema

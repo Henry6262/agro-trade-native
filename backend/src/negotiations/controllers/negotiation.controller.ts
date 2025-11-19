@@ -5,11 +5,9 @@ import {
   Body,
   Param,
   Query,
-  UseGuards,
   HttpStatus,
   HttpCode,
   Request,
-  BadRequestException,
   ParseIntPipe,
   DefaultValuePipe,
   ValidationPipe,
@@ -24,7 +22,6 @@ import {
   RejectOfferDto,
   WithdrawOfferDto,
   ExtendExpiryDto,
-  BulkWithdrawDto,
 } from "../dto/negotiation.dto";
 import {
   NegotiationSummaryWrapperDto,
@@ -600,12 +597,6 @@ export class NegotiationController {
       const total = negotiations.negotiations.length;
       const withCounters = negotiations.negotiations.filter(
         (n) => n.counterOffer,
-      ).length;
-      const accepted = negotiations.negotiations.filter(
-        (n) => n.status === "ACCEPTED",
-      ).length;
-      const rejected = negotiations.negotiations.filter(
-        (n) => n.status === "REJECTED",
       ).length;
       const acceptedAfterCounter = negotiations.negotiations.filter(
         (n) => n.status === "ACCEPTED" && n.counterOffer,

@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import {
   Bell,
   TrendingUp,
@@ -201,10 +196,7 @@ export default function CommandCenterScreen() {
                       activeOpacity={0.7}
                     >
                       <View className="flex-row items-center gap-3">
-                        <IconComponent
-                          color={getIconColor(order.status)}
-                          size={16}
-                        />
+                        <IconComponent color={getIconColor(order.status)} size={16} />
                         <View>
                           <Text className="text-xs text-white font-mono">{order.id}</Text>
                           <Text className="text-xs text-neutral-400">{order.product}</Text>
@@ -249,28 +241,33 @@ export default function CommandCenterScreen() {
                       >
                         <IconComponent
                           color={
-                            event.color === 'text-green-500' ? '#22c55e' : 
-                            event.color === 'text-yellow-500' ? '#eab308' :
-                            event.color === 'text-orange-500' ? '#f97316' :
-                            event.color === 'text-blue-500' ? '#3b82f6' :
-                            event.color === 'text-purple-500' ? '#8b5cf6' : '#22c55e'
+                            event.color === 'text-green-500'
+                              ? '#22c55e'
+                              : event.color === 'text-yellow-500'
+                                ? '#eab308'
+                                : event.color === 'text-orange-500'
+                                  ? '#f97316'
+                                  : event.color === 'text-blue-500'
+                                    ? '#3b82f6'
+                                    : event.color === 'text-purple-500'
+                                      ? '#8b5cf6'
+                                      : '#22c55e'
                           }
                           size={16}
                         />
                         <View className="flex-1 min-w-0">
                           <View className="flex-row items-center justify-between mb-1">
-                            <Text className="text-xs text-neutral-400 font-mono">
-                              {event.time}
-                            </Text>
-                            <View className={`px-2 py-0.5 rounded ${getStatusBadgeColor(event.type)}`}>
+                            <Text className="text-xs text-neutral-400 font-mono">{event.time}</Text>
+                            <View
+                              className={`px-2 py-0.5 rounded ${getStatusBadgeColor(event.type)}`}
+                            >
                               <Text className={`text-xs ${getStatusTextColor(event.type)}`}>
                                 {event.type.toUpperCase()}
                               </Text>
                             </View>
                           </View>
                           <Text className="text-xs text-white">
-                            <Text className="text-green-400 font-mono">{event.trader}</Text>
-                            {' '}
+                            <Text className="text-green-400 font-mono">{event.trader}</Text>{' '}
                             {event.action}
                           </Text>
                           <Text className="text-xs text-neutral-400 mt-1">
@@ -313,7 +310,7 @@ export default function CommandCenterScreen() {
               <View className="absolute top-1/2 left-0 right-0 h-px bg-neutral-700" />
               <View className="absolute top-3/4 left-0 right-0 h-px bg-neutral-700" />
               <View className="absolute bottom-0 left-0 right-0 h-px bg-neutral-700" />
-              
+
               {/* Vertical grid lines */}
               <View className="absolute top-0 bottom-0 left-0 w-px bg-neutral-700" />
               <View className="absolute top-0 bottom-0 left-1/4 w-px bg-neutral-700" />
@@ -336,14 +333,38 @@ export default function CommandCenterScreen() {
 
             {/* Dashed white line overlay */}
             <View className="absolute inset-0 flex-row items-end justify-between px-4 pb-4">
-              <View className="h-28 w-0.5 bg-white opacity-50 rounded-t" style={{ marginLeft: 10 }} />
-              <View className="h-27 w-0.5 bg-white opacity-50 rounded-t" style={{ marginLeft: 10 }} />
-              <View className="h-26 w-0.5 bg-white opacity-50 rounded-t" style={{ marginLeft: 10 }} />
-              <View className="h-25 w-0.5 bg-white opacity-50 rounded-t" style={{ marginLeft: 10 }} />
-              <View className="h-26 w-0.5 bg-white opacity-50 rounded-t" style={{ marginLeft: 10 }} />
-              <View className="h-27 w-0.5 bg-white opacity-50 rounded-t" style={{ marginLeft: 10 }} />
-              <View className="h-25 w-0.5 bg-white opacity-50 rounded-t" style={{ marginLeft: 10 }} />
-              <View className="h-24 w-0.5 bg-white opacity-50 rounded-t" style={{ marginLeft: 10 }} />
+              <View
+                className="h-28 w-0.5 bg-white opacity-50 rounded-t"
+                style={{ marginLeft: 10 }}
+              />
+              <View
+                className="h-27 w-0.5 bg-white opacity-50 rounded-t"
+                style={{ marginLeft: 10 }}
+              />
+              <View
+                className="h-26 w-0.5 bg-white opacity-50 rounded-t"
+                style={{ marginLeft: 10 }}
+              />
+              <View
+                className="h-25 w-0.5 bg-white opacity-50 rounded-t"
+                style={{ marginLeft: 10 }}
+              />
+              <View
+                className="h-26 w-0.5 bg-white opacity-50 rounded-t"
+                style={{ marginLeft: 10 }}
+              />
+              <View
+                className="h-27 w-0.5 bg-white opacity-50 rounded-t"
+                style={{ marginLeft: 10 }}
+              />
+              <View
+                className="h-25 w-0.5 bg-white opacity-50 rounded-t"
+                style={{ marginLeft: 10 }}
+              />
+              <View
+                className="h-24 w-0.5 bg-white opacity-50 rounded-t"
+                style={{ marginLeft: 10 }}
+              />
             </View>
 
             {/* Y-axis labels */}

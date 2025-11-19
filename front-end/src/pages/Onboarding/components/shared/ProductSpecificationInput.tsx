@@ -17,21 +17,26 @@ interface SpecificationInputProps {
   error?: string;
 }
 
-export function ProductSpecificationInput({ spec, value, onChange, error }: SpecificationInputProps) {
+export function ProductSpecificationInput({
+  spec,
+  value,
+  onChange,
+  error,
+}: SpecificationInputProps) {
   const specKey = spec.code || spec.id || '';
   const isRequired = spec.importance === 'CRITICAL' || spec.importance === 'IMPORTANT';
-  
+
   const handleChange = (text: string) => {
     let processedValue = text;
-    
+
     // Validate numeric inputs
     if (spec.dataType === 'NUMBER') {
       processedValue = text.replace(/[^0-9.]/g, '');
     }
-    
+
     onChange(processedValue);
   };
-  
+
   return (
     <View className="bg-gray-800/50 rounded-2xl p-4 mb-3 border border-gray-700/50">
       {/* Label Row */}
@@ -40,11 +45,9 @@ export function ProductSpecificationInput({ spec, value, onChange, error }: Spec
           {spec.name || spec.code}
           {isRequired && <Text className="text-red-400"> *</Text>}
         </Text>
-        {error && (
-          <Text className="text-red-400 text-xs mt-1">{error}</Text>
-        )}
+        {error && <Text className="text-red-400 text-xs mt-1">{error}</Text>}
       </View>
-      
+
       {/* Input Field with Unit Square */}
       <View className="flex-row items-center">
         <TextInput
@@ -64,7 +67,7 @@ export function ProductSpecificationInput({ spec, value, onChange, error }: Spec
           </Text>
         </View>
       </View>
-      
+
       {/* Valid Range Display */}
       {spec.dataType === 'NUMBER' && (spec.minValue || spec.maxValue) && (
         <View className="flex-row items-center justify-end mt-2">

@@ -1,9 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { 
-  tradeOperationService, 
-  negotiationService,
-} from '../../../../../services';
+import { tradeOperationService, negotiationService } from '../../../../../services';
 import type {
   BuyListing,
   SaleListing,
@@ -24,7 +21,7 @@ interface UseTradeOperationsReturn {
   profitCalculation: ProfitCalculation | null;
   transportEstimate: TransportEstimate | null;
   activeNegotiations: Negotiation[];
-  
+
   // Loading states
   isLoadingBuyListings: boolean;
   isLoadingSellListings: boolean;
@@ -33,26 +30,32 @@ interface UseTradeOperationsReturn {
   isCalculatingProfit: boolean;
   isEstimatingTransport: boolean;
   isSendingOffers: boolean;
-  
+
   // Actions
   loadBuyListings: () => Promise<void>;
   loadSellListings: () => Promise<void>;
-  createTradeOperation: (buyListingId: string, targetProfitMargin: number) => Promise<TradeOperation | null>;
+  createTradeOperation: (
+    buyListingId: string,
+    targetProfitMargin: number
+  ) => Promise<TradeOperation | null>;
   findMatchingSellers: (tradeOperationId: string, maxDistance?: number) => Promise<void>;
-  selectSellers: (tradeOperationId: string, sellers: Array<{
-    sellerId: string;
-    saleListingId: string;
-    requestedQuantity: number;
-  }>) => Promise<boolean>;
+  selectSellers: (
+    tradeOperationId: string,
+    sellers: {
+      sellerId: string;
+      saleListingId: string;
+      requestedQuantity: number;
+    }[]
+  ) => Promise<boolean>;
   calculateProfit: (tradeOperationId: string) => Promise<void>;
   estimateTransportCost: (params: {
     origin: { latitude: number; longitude: number; address: string };
-    pickupLocations?: Array<{
+    pickupLocations?: {
       latitude: number;
       longitude: number;
       address: string;
       quantity: number;
-    }>;
+    }[];
     destination: { latitude: number; longitude: number; address: string };
     quantity: number;
     vehicleType: string;
@@ -74,11 +77,11 @@ interface UseTradeOperationsReturn {
   sendBulkOffers: (params: {
     tradeOperationId: string;
     buyerOffer: { price: number; message?: string };
-    sellerOffers: Array<{ sellerId: string; price: number; quantity: number }>;
+    sellerOffers: { sellerId: string; price: number; quantity: number }[];
   }) => Promise<boolean>;
   loadTradeOperations: () => Promise<void>;
   refreshCurrentTrade: (tradeOperationId: string) => Promise<void>;
-  
+
   // Error handling
   error: string | null;
   clearError: () => void;
@@ -94,7 +97,7 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
   const [profitCalculation, setProfitCalculation] = useState<ProfitCalculation | null>(null);
   const [transportEstimate, setTransportEstimate] = useState<TransportEstimate | null>(null);
   const [activeNegotiations, setActiveNegotiations] = useState<Negotiation[]>([]);
-  
+
   // Loading states
   const [isLoadingBuyListings, setIsLoadingBuyListings] = useState(false);
   const [isLoadingSellListings, setIsLoadingSellListings] = useState(false);
@@ -103,7 +106,7 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
   const [isCalculatingProfit, setIsCalculatingProfit] = useState(false);
   const [isEstimatingTransport, setIsEstimatingTransport] = useState(false);
   const [isSendingOffers, setIsSendingOffers] = useState(false);
-  
+
   // Error state
   const [error, setError] = useState<string | null>(null);
 
@@ -161,194 +164,230 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
   }, [handleError]);
 
   // Create trade operation
-  const createTradeOperation = useCallback(async (buyListingId: string, targetProfitMargin: number) => {
-    try {
-      setIsCreatingTrade(true);
-      clearError();
-      const tradeOperation = await tradeOperationService.createTradeOperation(buyListingId, targetProfitMargin);
-      setCurrentTradeOperation(tradeOperation);
-      
-      // Refresh trade operations list
-      await loadTradeOperations();
-      
-      return tradeOperation;
-    } catch (err) {
-      handleError(err, 'create trade operation');
-      return null;
-    } finally {
-      setIsCreatingTrade(false);
-    }
-  }, [handleError, clearError, loadTradeOperations]);
+  const createTradeOperation = useCallback(
+    async (buyListingId: string, targetProfitMargin: number) => {
+      try {
+        setIsCreatingTrade(true);
+        clearError();
+        const tradeOperation = await tradeOperationService.createTradeOperation(
+          buyListingId,
+          targetProfitMargin
+        );
+        setCurrentTradeOperation(tradeOperation);
+
+        // Refresh trade operations list
+        await loadTradeOperations();
+
+        return tradeOperation;
+      } catch (err) {
+        handleError(err, 'create trade operation');
+        return null;
+      } finally {
+        setIsCreatingTrade(false);
+      }
+    },
+    [handleError, clearError, loadTradeOperations]
+  );
 
   // Find matching sellers
-  const findMatchingSellers = useCallback(async (tradeOperationId: string, maxDistance?: number) => {
-    try {
-      setIsLoadingMatchingSellers(true);
-      clearError();
-      const result = await tradeOperationService.findMatchingSellers(tradeOperationId, maxDistance);
-      setMatchingSellers(result.sellers);
-    } catch (err) {
-      handleError(err, 'find matching sellers');
-    } finally {
-      setIsLoadingMatchingSellers(false);
-    }
-  }, [handleError, clearError]);
+  const findMatchingSellers = useCallback(
+    async (tradeOperationId: string, maxDistance?: number) => {
+      try {
+        setIsLoadingMatchingSellers(true);
+        clearError();
+        const result = await tradeOperationService.findMatchingSellers(
+          tradeOperationId,
+          maxDistance
+        );
+        setMatchingSellers(result.sellers);
+      } catch (err) {
+        handleError(err, 'find matching sellers');
+      } finally {
+        setIsLoadingMatchingSellers(false);
+      }
+    },
+    [handleError, clearError]
+  );
 
   // Select sellers for trade
-  const selectSellers = useCallback(async (tradeOperationId: string, sellers: Array<{
-    sellerId: string;
-    saleListingId: string;
-    requestedQuantity: number;
-  }>) => {
-    try {
-      clearError();
-      await tradeOperationService.selectSellers(tradeOperationId, sellers);
-      
-      // Refresh current trade operation
-      await refreshCurrentTrade(tradeOperationId);
-      
-      return true;
-    } catch (err) {
-      handleError(err, 'select sellers');
-      return false;
-    }
-  }, [handleError, clearError]);
+  const selectSellers = useCallback(
+    async (
+      tradeOperationId: string,
+      sellers: {
+        sellerId: string;
+        saleListingId: string;
+        requestedQuantity: number;
+      }[]
+    ) => {
+      try {
+        clearError();
+        await tradeOperationService.selectSellers(tradeOperationId, sellers);
+
+        // Refresh current trade operation
+        await refreshCurrentTrade(tradeOperationId);
+
+        return true;
+      } catch (err) {
+        handleError(err, 'select sellers');
+        return false;
+      }
+    },
+    [handleError, clearError]
+  );
 
   // Calculate profit
-  const calculateProfit = useCallback(async (tradeOperationId: string) => {
-    try {
-      setIsCalculatingProfit(true);
-      clearError();
-      const calculation = await tradeOperationService.calculateProfit(tradeOperationId, {
-        includeSensitivity: true,
-        includeRiskAssessment: true,
-      });
-      setProfitCalculation(calculation);
-    } catch (err) {
-      handleError(err, 'calculate profit');
-    } finally {
-      setIsCalculatingProfit(false);
-    }
-  }, [handleError, clearError]);
+  const calculateProfit = useCallback(
+    async (tradeOperationId: string) => {
+      try {
+        setIsCalculatingProfit(true);
+        clearError();
+        const calculation = await tradeOperationService.calculateProfit(tradeOperationId, {
+          includeSensitivity: true,
+          includeRiskAssessment: true,
+        });
+        setProfitCalculation(calculation);
+      } catch (err) {
+        handleError(err, 'calculate profit');
+      } finally {
+        setIsCalculatingProfit(false);
+      }
+    },
+    [handleError, clearError]
+  );
 
   // Estimate transport cost
-  const estimateTransportCost = useCallback(async (params: {
-    origin: { latitude: number; longitude: number; address: string };
-    pickupLocations?: Array<{
-      latitude: number;
-      longitude: number;
-      address: string;
+  const estimateTransportCost = useCallback(
+    async (params: {
+      origin: { latitude: number; longitude: number; address: string };
+      pickupLocations?: {
+        latitude: number;
+        longitude: number;
+        address: string;
+        quantity: number;
+      }[];
+      destination: { latitude: number; longitude: number; address: string };
       quantity: number;
-    }>;
-    destination: { latitude: number; longitude: number; address: string };
-    quantity: number;
-    vehicleType: string;
-  }) => {
-    try {
-      setIsEstimatingTransport(true);
-      clearError();
-      const estimate = await tradeOperationService.estimateTransportCost(params);
-      setTransportEstimate(estimate);
-    } catch (err) {
-      handleError(err, 'estimate transport cost');
-    } finally {
-      setIsEstimatingTransport(false);
-    }
-  }, [handleError, clearError]);
+      vehicleType: string;
+    }) => {
+      try {
+        setIsEstimatingTransport(true);
+        clearError();
+        const estimate = await tradeOperationService.estimateTransportCost(params);
+        setTransportEstimate(estimate);
+      } catch (err) {
+        handleError(err, 'estimate transport cost');
+      } finally {
+        setIsEstimatingTransport(false);
+      }
+    },
+    [handleError, clearError]
+  );
 
   // Send buyer offer
-  const sendBuyerOffer = useCallback(async (params: {
-    tradeOperationId: string;
-    buyerId: string;
-    offeredPrice: number;
-    quantity: number;
-    message?: string;
-  }) => {
-    try {
-      setIsSendingOffers(true);
-      clearError();
-      const negotiation = await negotiationService.createBuyerOffer(params);
-      
-      // Add to active negotiations
-      setActiveNegotiations(prev => [...prev, negotiation]);
-      
-      return negotiation;
-    } catch (err) {
-      handleError(err, 'send buyer offer');
-      return null;
-    } finally {
-      setIsSendingOffers(false);
-    }
-  }, [handleError, clearError]);
+  const sendBuyerOffer = useCallback(
+    async (params: {
+      tradeOperationId: string;
+      buyerId: string;
+      offeredPrice: number;
+      quantity: number;
+      message?: string;
+    }) => {
+      try {
+        setIsSendingOffers(true);
+        clearError();
+        const negotiation = await negotiationService.createBuyerOffer(params);
+
+        // Add to active negotiations
+        setActiveNegotiations((prev) => [...prev, negotiation]);
+
+        return negotiation;
+      } catch (err) {
+        handleError(err, 'send buyer offer');
+        return null;
+      } finally {
+        setIsSendingOffers(false);
+      }
+    },
+    [handleError, clearError]
+  );
 
   // Send seller offer
-  const sendSellerOffer = useCallback(async (params: {
-    tradeOperationId: string;
-    sellerId: string;
-    offeredPrice: number;
-    quantity: number;
-    message?: string;
-  }) => {
-    try {
-      setIsSendingOffers(true);
-      clearError();
-      const negotiation = await negotiationService.createSellerOffer(params);
-      
-      // Add to active negotiations
-      setActiveNegotiations(prev => [...prev, negotiation]);
-      
-      return negotiation;
-    } catch (err) {
-      handleError(err, 'send seller offer');
-      return null;
-    } finally {
-      setIsSendingOffers(false);
-    }
-  }, [handleError, clearError]);
+  const sendSellerOffer = useCallback(
+    async (params: {
+      tradeOperationId: string;
+      sellerId: string;
+      offeredPrice: number;
+      quantity: number;
+      message?: string;
+    }) => {
+      try {
+        setIsSendingOffers(true);
+        clearError();
+        const negotiation = await negotiationService.createSellerOffer(params);
+
+        // Add to active negotiations
+        setActiveNegotiations((prev) => [...prev, negotiation]);
+
+        return negotiation;
+      } catch (err) {
+        handleError(err, 'send seller offer');
+        return null;
+      } finally {
+        setIsSendingOffers(false);
+      }
+    },
+    [handleError, clearError]
+  );
 
   // Send bulk offers to all parties
-  const sendBulkOffers = useCallback(async (params: {
-    tradeOperationId: string;
-    buyerOffer: { price: number; message?: string };
-    sellerOffers: Array<{ sellerId: string; price: number; quantity: number }>;
-  }) => {
-    try {
-      setIsSendingOffers(true);
-      clearError();
-      const result = await negotiationService.bulkNegotiate(params);
-      
-      // Update active negotiations
-      setActiveNegotiations(prev => [
-        ...prev,
-        result.negotiations.buyer,
-        ...result.negotiations.sellers,
-      ]);
-      
-      // Show recommendation
-      Alert.alert(
-        'Bulk Offers Sent',
-        `${result.recommendation.action}: ${result.recommendation.reasoning}`,
-        [{ text: 'OK' }]
-      );
-      
-      return true;
-    } catch (err) {
-      handleError(err, 'send bulk offers');
-      return false;
-    } finally {
-      setIsSendingOffers(false);
-    }
-  }, [handleError, clearError]);
+  const sendBulkOffers = useCallback(
+    async (params: {
+      tradeOperationId: string;
+      buyerOffer: { price: number; message?: string };
+      sellerOffers: { sellerId: string; price: number; quantity: number }[];
+    }) => {
+      try {
+        setIsSendingOffers(true);
+        clearError();
+        const result = await negotiationService.bulkNegotiate(params);
+
+        // Update active negotiations
+        setActiveNegotiations((prev) => [
+          ...prev,
+          result.negotiations.buyer,
+          ...result.negotiations.sellers,
+        ]);
+
+        // Show recommendation
+        Alert.alert(
+          'Bulk Offers Sent',
+          `${result.recommendation.action}: ${result.recommendation.reasoning}`,
+          [{ text: 'OK' }]
+        );
+
+        return true;
+      } catch (err) {
+        handleError(err, 'send bulk offers');
+        return false;
+      } finally {
+        setIsSendingOffers(false);
+      }
+    },
+    [handleError, clearError]
+  );
 
   // Refresh current trade operation
-  const refreshCurrentTrade = useCallback(async (tradeOperationId: string) => {
-    try {
-      const trade = await tradeOperationService.getTradeOperation(tradeOperationId);
-      setCurrentTradeOperation(trade);
-    } catch (err) {
-      handleError(err, 'refresh trade operation');
-    }
-  }, [handleError]);
+  const refreshCurrentTrade = useCallback(
+    async (tradeOperationId: string) => {
+      try {
+        const trade = await tradeOperationService.getTradeOperation(tradeOperationId);
+        setCurrentTradeOperation(trade);
+      } catch (err) {
+        handleError(err, 'refresh trade operation');
+      }
+    },
+    [handleError]
+  );
 
   // Load initial data on mount
   useEffect(() => {
@@ -367,7 +406,7 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
     profitCalculation,
     transportEstimate,
     activeNegotiations,
-    
+
     // Loading states
     isLoadingBuyListings,
     isLoadingSellListings,
@@ -376,7 +415,7 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
     isCalculatingProfit,
     isEstimatingTransport,
     isSendingOffers,
-    
+
     // Actions
     loadBuyListings,
     loadSellListings,
@@ -390,7 +429,7 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
     sendBulkOffers,
     loadTradeOperations,
     refreshCurrentTrade,
-    
+
     // Error handling
     error,
     clearError,

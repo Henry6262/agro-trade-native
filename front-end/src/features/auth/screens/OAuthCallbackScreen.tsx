@@ -26,7 +26,7 @@ export const OAuthCallbackScreen: React.FC = () => {
       console.log('=== OAuth Callback Screen Mounted ===');
       console.log('Platform:', Platform.OS);
       console.log('Window location:', window?.location?.href);
-      
+
       // Parse the URL parameters in web
       if (Platform.OS === 'web' && typeof window !== 'undefined' && window.location) {
         const params = new URLSearchParams(window.location.search);
@@ -54,16 +54,16 @@ export const OAuthCallbackScreen: React.FC = () => {
           console.log('Setting tokens in auth store...');
           // Update auth store with tokens and user info
           authStore.setTokens(accessToken, refreshToken || accessToken); // Use accessToken as refresh if not provided
-          
+
           // Decode the userName properly
           const decodedUserName = userName ? decodeURIComponent(userName) : '';
-          
+
           console.log('Setting user in auth store:', {
             email: userEmail,
             name: decodedUserName,
-            role: onboardingStore.selectedRole
+            role: onboardingStore.selectedRole,
           });
-          
+
           // Update auth store with user information
           if (userEmail && decodedUserName) {
             authStore.setUser({
@@ -80,14 +80,14 @@ export const OAuthCallbackScreen: React.FC = () => {
           // Load onboarding data to get the saved role
           await onboardingStore.loadOnboardingData();
           const savedUserRole = onboardingStore.selectedRole;
-          
+
           console.log('Saved user role from store:', savedUserRole);
 
           // Check if user has an existing profile
           if (hasProfile && accessToken && userEmail) {
             // User has an existing account - show modal to let them choose
             console.log('Existing account detected, showing options...');
-            
+
             setExistingAccountData({
               email: userEmail,
               name: decodedUserName,
@@ -97,14 +97,14 @@ export const OAuthCallbackScreen: React.FC = () => {
           } else if (accessToken && userEmail && !hasProfile) {
             // New user, continue with onboarding
             console.log('New user authenticated via Google, continuing onboarding...');
-            
+
             // Store success flag for showing animation
             onboardingStore.setGoogleAuthData({
               name: decodedUserName || '',
               email: userEmail || '',
               isAuthenticated: true,
             });
-            
+
             // Navigate back to the onboarding flow they came from
             const role = savedUserRole || 'buyer';
             switch (role) {
@@ -143,10 +143,10 @@ export const OAuthCallbackScreen: React.FC = () => {
     // User wants to login to their existing profile
     console.log('User chose to login to existing profile');
     setShowExistingAccountModal(false);
-    
+
     // Navigate to dashboard
     navigation.navigate('Main', {
-      screen: 'Dashboard'
+      screen: 'Dashboard',
     });
   };
 
@@ -154,7 +154,7 @@ export const OAuthCallbackScreen: React.FC = () => {
     // User wants to create a new profile with a different role
     console.log('User chose to create new profile');
     setShowExistingAccountModal(false);
-    
+
     // Clear existing data and go to role selection
     onboardingStore.resetOnboarding();
     navigation.navigate('RoleSelection');
@@ -164,11 +164,11 @@ export const OAuthCallbackScreen: React.FC = () => {
     // User wants to use a different Google account
     console.log('User chose to switch Google account');
     setShowExistingAccountModal(false);
-    
+
     // Sign out and redirect to Google OAuth with account selection
     authStore.logout();
     const googleOAuthUrl = `${ENV.googleOAuthUrl}?prompt=select_account`;
-    
+
     if (Platform.OS === 'web') {
       window.location.href = googleOAuthUrl;
     }
@@ -176,13 +176,20 @@ export const OAuthCallbackScreen: React.FC = () => {
 
   return (
     <>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc' }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#f8fafc',
+        }}
+      >
         <ActivityIndicator size="large" color="#22C55E" />
         <Text style={{ marginTop: 16, fontSize: 16, color: '#6b7280' }}>
           Completing authentication...
         </Text>
       </View>
-      
+
       {existingAccountData && (
         <ExistingAccountModal
           visible={showExistingAccountModal}

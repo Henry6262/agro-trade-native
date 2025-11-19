@@ -1,4 +1,8 @@
-import { inspectionService, type InspectionRequest, type SubmitInspectionResultsDto } from '@services/inspectionService';
+import {
+  inspectionService,
+  type InspectionRequest,
+  type SubmitInspectionResultsDto,
+} from '@services/inspectionService';
 import type {
   InspectorVerificationJob,
   InspectorVerificationFormValues,
@@ -64,6 +68,12 @@ const toSubmitPayload = (
 
 export const inspectorActiveJobService = {
   async fetchActiveJob(inspectorId: string): Promise<InspectorVerificationJob | null> {
+    const activeMission = await inspectionService.getInspectorActiveMission(inspectorId);
+    if (activeMission) {
+      return toInspectorJob(activeMission);
+    }
+
+    // Fallback to legacy missions query if backend returns null
     const [inProgress, scheduled] = await Promise.all([
       inspectionService.getInspectorMissions(inspectorId, 'IN_PROGRESS'),
       inspectionService.getInspectorMissions(inspectorId, 'SCHEDULED'),

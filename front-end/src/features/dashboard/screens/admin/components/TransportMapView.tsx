@@ -8,13 +8,7 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import MapView, { 
-  Marker, 
-  Polyline,
-  PROVIDER_GOOGLE, 
-  Region,
-  LatLng,
-} from 'react-native-maps';
+import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Region, LatLng } from 'react-native-maps';
 import {
   Truck,
   MapPin,
@@ -70,14 +64,10 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
 
   // Calculate region to fit all points
   const calculateRegion = (): Region => {
-    const points = [
-      route.origin,
-      ...route.pickupLocations,
-      route.destination,
-    ];
+    const points = [route.origin, ...route.pickupLocations, route.destination];
 
-    const latitudes = points.map(p => p.latitude);
-    const longitudes = points.map(p => p.longitude);
+    const latitudes = points.map((p) => p.latitude);
+    const longitudes = points.map((p) => p.longitude);
 
     const minLat = Math.min(...latitudes);
     const maxLat = Math.max(...latitudes);
@@ -86,7 +76,7 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
 
     const midLat = (minLat + maxLat) / 2;
     const midLng = (minLng + maxLng) / 2;
-    
+
     const deltaLat = (maxLat - minLat) * 1.3; // Add padding
     const deltaLng = (maxLng - minLng) * 1.3;
 
@@ -106,30 +96,26 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
 
     // Simple direct lines for demonstration
     const coordinates: LatLng[] = [];
-    
+
     // Origin to first pickup
     coordinates.push(route.origin);
-    
+
     // Through all pickups
-    route.pickupLocations.forEach(pickup => {
+    route.pickupLocations.forEach((pickup) => {
       coordinates.push(pickup);
     });
-    
+
     // To destination
     coordinates.push(route.destination);
-    
+
     return coordinates;
   };
 
   // Fit map to show all markers
   useEffect(() => {
     if (mapReady && mapRef.current) {
-      const coordinates = [
-        route.origin,
-        ...route.pickupLocations,
-        route.destination,
-      ];
-      
+      const coordinates = [route.origin, ...route.pickupLocations, route.destination];
+
       mapRef.current.fitToCoordinates(coordinates, {
         edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
         animated: true,
@@ -182,9 +168,11 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
             onPress={() => handleMarkerPress(route.origin, 'origin')}
           >
             <View className="items-center">
-              <View className={`p-3 rounded-full shadow-lg ${
-                selectedMarker === 'origin' ? 'bg-blue-600' : 'bg-gray-700'
-              }`}>
+              <View
+                className={`p-3 rounded-full shadow-lg ${
+                  selectedMarker === 'origin' ? 'bg-blue-600' : 'bg-gray-700'
+                }`}
+              >
                 <Package size={24} color="white" />
               </View>
               <View className="bg-white px-2 py-1 rounded mt-1">
@@ -202,9 +190,13 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
               onPress={() => handleMarkerPress(pickup, `pickup-${pickup.sellerId}`)}
             >
               <View className="items-center">
-                <View className={`p-2 rounded-full shadow-lg ${
-                  selectedMarker === `pickup-${pickup.sellerId}` ? 'bg-orange-600' : 'bg-orange-500'
-                }`}>
+                <View
+                  className={`p-2 rounded-full shadow-lg ${
+                    selectedMarker === `pickup-${pickup.sellerId}`
+                      ? 'bg-orange-600'
+                      : 'bg-orange-500'
+                  }`}
+                >
                   <Text className="text-white font-bold">{index + 1}</Text>
                 </View>
                 <View className="bg-white px-2 py-1 rounded mt-1">
@@ -223,9 +215,11 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
             onPress={() => handleMarkerPress(route.destination, 'destination')}
           >
             <View className="items-center">
-              <View className={`p-3 rounded-full shadow-lg ${
-                selectedMarker === 'destination' ? 'bg-green-600' : 'bg-green-500'
-              }`}>
+              <View
+                className={`p-3 rounded-full shadow-lg ${
+                  selectedMarker === 'destination' ? 'bg-green-600' : 'bg-green-500'
+                }`}
+              >
                 <MapPin size={24} color="white" />
               </View>
               <View className="bg-white px-2 py-1 rounded mt-1">
@@ -251,22 +245,20 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
                 <Truck size={16} color="#3B82F6" />
                 <Text className="text-gray-800 font-semibold ml-2">Transport Route</Text>
               </View>
-              
+
               <View className="flex-row justify-between">
                 <View className="flex-row items-center">
                   <Route size={14} color="#6B7280" />
-                  <Text className="text-gray-600 text-sm ml-1">
-                    {route.totalDistance} km
-                  </Text>
+                  <Text className="text-gray-600 text-sm ml-1">{route.totalDistance} km</Text>
                 </View>
-                
+
                 <View className="flex-row items-center ml-3">
                   <Clock size={14} color="#6B7280" />
                   <Text className="text-gray-600 text-sm ml-1">
                     {Math.round((route.estimatedDuration || 0) / 60)} hrs
                   </Text>
                 </View>
-                
+
                 {route.estimatedCost && (
                   <View className="flex-row items-center ml-3">
                     <DollarSign size={14} color="#6B7280" />
@@ -285,11 +277,7 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
           style={styles.centerButton}
           onPress={() => {
             if (mapRef.current) {
-              const coordinates = [
-                route.origin,
-                ...route.pickupLocations,
-                route.destination,
-              ];
+              const coordinates = [route.origin, ...route.pickupLocations, route.destination];
               mapRef.current.fitToCoordinates(coordinates, {
                 edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
                 animated: true,
@@ -304,8 +292,8 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
 
       {/* Pickup Details List */}
       {showDetails && (
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           className="bg-gray-50 border-t border-gray-200"
         >
@@ -334,7 +322,9 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
                 key={`card-${pickup.sellerId}`}
                 onPress={() => handleMarkerPress(pickup, `pickup-${pickup.sellerId}`)}
                 className={`bg-white rounded-lg p-3 mr-2 border-2 ${
-                  selectedMarker === `pickup-${pickup.sellerId}` ? 'border-orange-500' : 'border-gray-200'
+                  selectedMarker === `pickup-${pickup.sellerId}`
+                    ? 'border-orange-500'
+                    : 'border-gray-200'
                 }`}
                 style={{ width: screenWidth * 0.7 }}
               >
@@ -343,18 +333,14 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
                     <View className="bg-orange-500 rounded-full px-2 py-1">
                       <Text className="text-white text-xs font-bold">{index + 1}</Text>
                     </View>
-                    <Text className="font-semibold text-gray-800 ml-2">
-                      {pickup.sellerName}
-                    </Text>
+                    <Text className="font-semibold text-gray-800 ml-2">{pickup.sellerName}</Text>
                   </View>
                 </View>
                 <Text className="text-gray-600 text-sm" numberOfLines={2}>
                   {pickup.address}
                 </Text>
                 <View className="flex-row justify-between mt-2">
-                  <Text className="text-gray-500 text-xs">
-                    {pickup.product}
-                  </Text>
+                  <Text className="text-gray-500 text-xs">{pickup.product}</Text>
                   <Text className="text-orange-600 text-xs font-semibold">
                     {pickup.quantity} units
                   </Text>
@@ -387,30 +373,30 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
 };
 
 const styles = StyleSheet.create({
-  mapContainer: {
-    flex: 1,
-    position: 'relative',
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  infoOverlay: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    right: 10,
-  },
   centerButton: {
-    position: 'absolute',
     bottom: 20,
-    right: 20,
     elevation: 3,
+    position: 'absolute',
+    right: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+  },
+  infoOverlay: {
+    left: 10,
+    position: 'absolute',
+    right: 10,
+    top: 10,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+  },
+  mapContainer: {
+    flex: 1,
+    position: 'relative',
   },
 });

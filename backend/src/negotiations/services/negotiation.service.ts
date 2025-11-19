@@ -3,7 +3,6 @@ import {
   Logger,
   BadRequestException,
   NotFoundException,
-  ForbiddenException,
   ConflictException,
   Inject,
   forwardRef,
@@ -462,10 +461,7 @@ export class NegotiationService {
     );
 
     // Check phase transition
-    const phaseTransition = await this.checkPhaseTransition(
-      trade,
-      negotiations,
-    );
+    const phaseTransition = await this.checkPhaseTransition(trade);
 
     return {
       tradeOperationId,
@@ -525,6 +521,7 @@ export class NegotiationService {
     dto: CounterOfferDto,
     userId?: string,
   ): Promise<NegotiationWithDetails> {
+    void userId;
     const negotiation = await this.prisma.offerNegotiation.findUnique({
       where: { id: negotiationId },
       include: {
@@ -571,7 +568,7 @@ export class NegotiationService {
       terms: dto.terms || "Counter offer",
       reason: dto.reason,
       receivedAt: new Date().toISOString(),
-      offeredBy: this.determineOfferedBy(negotiation, userId),
+      offeredBy: this.determineOfferedBy(negotiation),
     };
 
     // Add to offer history
@@ -626,6 +623,8 @@ export class NegotiationService {
     acceptanceNote?: string,
     userId?: string,
   ): Promise<NegotiationWithDetails> {
+    void acceptanceNote;
+    void userId;
     const negotiation = await this.prisma.offerNegotiation.findUnique({
       where: { id: negotiationId },
       include: {
@@ -763,6 +762,8 @@ export class NegotiationService {
     reason?: string,
     userId?: string,
   ): Promise<NegotiationWithDetails> {
+    void reason;
+    void userId;
     const negotiation = await this.prisma.offerNegotiation.findUnique({
       where: { id: negotiationId },
       include: {
@@ -855,6 +856,8 @@ export class NegotiationService {
     reason?: string,
     userId?: string,
   ): Promise<NegotiationWithDetails> {
+    void reason;
+    void userId;
     const negotiation = await this.prisma.offerNegotiation.findUnique({
       where: { id: negotiationId },
       include: {
@@ -942,6 +945,7 @@ export class NegotiationService {
     hours: number,
     reason?: string,
   ): Promise<NegotiationWithDetails> {
+    void reason;
     const negotiation = await this.prisma.offerNegotiation.findUnique({
       where: { id: negotiationId },
       include: {
@@ -1113,10 +1117,7 @@ export class NegotiationService {
     };
   }
 
-  private async checkPhaseTransition(
-    trade: any,
-    negotiations: any[],
-  ): Promise<any> {
+  private async checkPhaseTransition(trade: any): Promise<any> {
     const allSellers = await this.prisma.tradeSeller.count({
       where: { tradeOperationId: trade.id },
     });
@@ -1154,14 +1155,12 @@ export class NegotiationService {
     if (!trade) return;
 
     let totalPurchaseCost = 0;
-    let totalQuantity = 0;
 
     for (const seller of trade.sellers) {
       if (seller.agreedPrice && seller.agreedQuantity) {
         const price = Number(seller.agreedPrice);
         const quantity = Number(seller.agreedQuantity);
         totalPurchaseCost += price * quantity;
-        totalQuantity += quantity;
       }
     }
 
@@ -1169,9 +1168,6 @@ export class NegotiationService {
     const totalRevenue = sellingPrice * Number(trade.buyListing.quantity);
     const transportCost = Number(trade.estimatedTransportCost || 0);
     const estimatedProfit = totalRevenue - totalPurchaseCost - transportCost;
-    const actualProfitMargin =
-      totalRevenue > 0 ? (estimatedProfit / totalRevenue) * 100 : 0;
-
     await this.prisma.tradeOperation.update({
       where: { id: tradeOperationId },
       data: {
@@ -1219,7 +1215,7 @@ export class NegotiationService {
     }));
   }
 
-  private determineOfferedBy(negotiation: any, userId?: string): string {
+  private determineOfferedBy(negotiation: any): string {
     // TODO: Implement proper user role detection
     // For now, simple logic based on negotiation state
     if (negotiation.status === NegotiationStatus.PENDING) {

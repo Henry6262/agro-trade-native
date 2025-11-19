@@ -12,6 +12,7 @@ import {
   TransportJobStatus,
   TruckType,
 } from "@prisma/client";
+import { TransporterAnalyticsMetricsDto } from "../dto/transporter-analytics.dto";
 
 @Injectable()
 export class TransportService {
@@ -482,6 +483,7 @@ export class TransportService {
   }
 
   async rejectBid(bidId: string, reason?: string) {
+    void reason;
     const bid = await this.prisma.transportBid.findUnique({
       where: { id: bidId },
     });
@@ -733,6 +735,94 @@ export class TransportService {
         onTimeDeliveryRate:
           completedJobs > 0 ? (onTimeDeliveries / completedJobs) * 100 : 0,
       },
+      recentJobs,
+    };
+  }
+
+  async getTransporterAnalyticsSummary(transporterId: string): Promise<{
+    metrics: TransporterAnalyticsMetricsDto;
+    recentJobs: any[];
+  }> {
+    const [
+      totalBids,
+      acceptedBids,
+      pendingBids,
+      averageAcceptedBid,
+      activeJobs,
+      completedJobs,
+      onTimeDeliveries,
+    ] = await Promise.all([
+      this.prisma.transportBid.count({
+        where: { transporterId },
+      }),
+      this.prisma.transportBid.count({
+        where: { transporterId, status: BidStatus.ACCEPTED },
+      }),
+      this.prisma.transportBid.count({
+        where: { transporterId, status: BidStatus.PENDING },
+      }),
+      this.prisma.transportBid.aggregate({
+        where: { transporterId, status: BidStatus.ACCEPTED },
+        _avg: { bidAmount: true },
+      }),
+      this.prisma.transportJob.count({
+        where: {
+          transporterId,
+          status: {
+            in: [TransportJobStatus.ASSIGNED, TransportJobStatus.IN_PROGRESS],
+          },
+        },
+      }),
+      this.prisma.transportJob.count({
+        where: {
+          transporterId,
+          status: TransportJobStatus.COMPLETED,
+        },
+      }),
+      this.prisma.transportJob.count({
+        where: {
+          transporterId,
+          status: TransportJobStatus.COMPLETED,
+          onTimeDelivery: true,
+        },
+      }),
+    ]);
+
+    const recentJobs = await this.prisma.transportJob.findMany({
+      where: { transporterId },
+      orderBy: { updatedAt: "desc" },
+      take: 5,
+      include: {
+        transportRequest: {
+          include: {
+            tradeOperation: {
+              include: {
+                buyListing: { include: { product: true } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const metrics: TransporterAnalyticsMetricsDto = {
+      totalBids,
+      acceptedBids,
+      winRate: totalBids > 0 ? (acceptedBids / totalBids) * 100 : 0,
+      pendingBids,
+      activeJobs,
+      completedJobs,
+      onTimeDeliveryRate:
+        completedJobs > 0 ? (onTimeDeliveries / completedJobs) * 100 : 0,
+      averageBidAmount:
+        averageAcceptedBid._avg.bidAmount !== null &&
+        averageAcceptedBid._avg.bidAmount !== undefined
+          ? Number(averageAcceptedBid._avg.bidAmount)
+          : 0,
+    };
+
+    return {
+      metrics,
       recentJobs,
     };
   }

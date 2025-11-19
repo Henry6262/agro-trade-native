@@ -35,7 +35,9 @@ export const OrderStageIndicator: React.FC<OrderStageIndicatorProps> = ({ curren
               }`}
             >
               <IconComponent color={isCompleted || isCurrent ? '#ffffff' : '#9CA3AF'} size={16} />
-              {isCurrent && <View className="absolute inset-0 rounded-full bg-yellow-500 opacity-75" />}
+              {isCurrent && (
+                <View className="absolute inset-0 rounded-full bg-yellow-500 opacity-75" />
+              )}
             </View>
             <Text
               className={`text-xs text-center mt-2 max-w-16 ${

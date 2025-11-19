@@ -6,6 +6,10 @@ import {
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateBuyListingDto } from "./dto/create-buy-listing.dto";
 import { RequestStatus, Prisma, TradeStatus } from "@prisma/client";
+import {
+  BuyerTimelineEventDto,
+  BuyerTimelineResponseDto,
+} from "./dto/timeline.dto";
 
 @Injectable()
 export class BuyerService {
@@ -607,6 +611,88 @@ export class BuyerService {
         },
       },
     });
+  }
+
+  async getTimeline(
+    userId: string,
+    limit = 20,
+    cursor?: string,
+  ): Promise<BuyerTimelineResponseDto> {
+    const take = Math.min(Math.max(limit, 1), 50);
+
+    const trades = await this.prisma.tradeOperation.findMany({
+      where: {
+        buyListing: {
+          buyerId: userId,
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+      take,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { id: cursor } : undefined,
+      include: {
+        buyListing: {
+          select: {
+            id: true,
+            quantity: true,
+            unit: true,
+            product: {
+              select: {
+                id: true,
+                displayName: true,
+                category: true,
+              },
+            },
+          },
+        },
+        negotiations: {
+          orderBy: { updatedAt: "desc" },
+          take: 1,
+          select: {
+            id: true,
+            status: true,
+            updatedAt: true,
+            tradeSeller: {
+              select: {
+                seller: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const events: BuyerTimelineEventDto[] = trades.map((trade) => {
+      const latestNegotiation = trade.negotiations[0];
+
+      return {
+        id: trade.id,
+        type: "TRADE",
+        title: trade.buyListing?.product?.displayName ?? "Trade operation",
+        status: trade.status,
+        timestamp: trade.updatedAt,
+        description: trade.phase,
+        metadata: {
+          phase: trade.phase,
+          quantity: trade.buyListing?.quantity
+            ? Number(trade.buyListing.quantity)
+            : null,
+          unit: trade.buyListing?.unit,
+          negotiationStatus: latestNegotiation?.status ?? null,
+          sellerName: latestNegotiation?.tradeSeller?.seller?.name ?? undefined,
+        },
+      };
+    });
+
+    return {
+      events,
+      nextCursor: trades.length === take ? trades[trades.length - 1].id : null,
+    };
   }
 
   async deleteBuyListing(id: string, userId: string) {

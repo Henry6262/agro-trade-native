@@ -67,12 +67,12 @@ export interface PriceSuggestion {
       reasoning: string;
       expectedAcceptance: number;
     };
-    sellers: Array<{
+    sellers: {
       sellerId: string;
       suggestedPrice: number;
       confidence: number;
       expectedAcceptance: number;
-    }>;
+    }[];
   };
   strategy: {
     approach: 'AGGRESSIVE' | 'BALANCED' | 'CONSERVATIVE';
@@ -102,12 +102,12 @@ export interface NegotiationValidation {
       inRange: boolean;
     };
   };
-  violations: Array<{
+  violations: {
     constraint: string;
     severity: 'ERROR' | 'WARNING';
     impact: string;
     suggestion: string;
-  }>;
+  }[];
   recommendations: string[];
 }
 
@@ -191,11 +191,11 @@ export const negotiationService = {
       price: number;
       message?: string;
     };
-    sellerOffers: Array<{
+    sellerOffers: {
       sellerId: string;
       price: number;
       quantity: number;
-    }>;
+    }[];
   }): Promise<{
     negotiations: {
       buyer: Negotiation;
@@ -223,20 +223,25 @@ export const negotiationService = {
   },
 
   // Counter offer
-  async counterOffer(negotiationId: string, params: {
-    counterPrice: number;
-    message?: string;
-  }): Promise<Negotiation & {
-    type: 'COUNTER_OFFER';
-    roundNumber: number;
-    counterPrice: number;
-    previousPrice: number;
-    convergence: {
-      priceDifference: number;
-      percentageDifference: number;
-      isConverging: boolean;
-    };
-  }> {
+  async counterOffer(
+    negotiationId: string,
+    params: {
+      counterPrice: number;
+      message?: string;
+    }
+  ): Promise<
+    Negotiation & {
+      type: 'COUNTER_OFFER';
+      roundNumber: number;
+      counterPrice: number;
+      previousPrice: number;
+      convergence: {
+        priceDifference: number;
+        percentageDifference: number;
+        isConverging: boolean;
+      };
+    }
+  > {
     try {
       const response = await apiClient.post(`/negotiations/${negotiationId}/counter`, params);
       return response.data;
@@ -248,13 +253,13 @@ export const negotiationService = {
 
   // Get profit impact of negotiation changes
   async getProfitImpact(negotiationId: string): Promise<{
-    rounds: Array<{
+    rounds: {
       roundNumber: number;
       price: number;
       profit: number;
       margin: number;
       timestamp: string;
-    }>;
+    }[];
     trend: {
       priceDirection: 'INCREASING' | 'DECREASING' | 'STABLE';
       profitDirection: 'INCREASING' | 'DECREASING' | 'STABLE';
@@ -296,8 +301,8 @@ export const negotiationService = {
       avgProfitChange: number;
     };
     parties: {
-      buyers: Array<{ id: string; name: string; negotiations: number }>;
-      sellers: Array<{ id: string; name: string; negotiations: number }>;
+      buyers: { id: string; name: string; negotiations: number }[];
+      sellers: { id: string; name: string; negotiations: number }[];
     };
   }> {
     try {
@@ -310,9 +315,12 @@ export const negotiationService = {
   },
 
   // Get AI-powered price suggestions
-  async getPriceSuggestions(tradeOperationId: string, options?: {
-    style?: 'AGGRESSIVE' | 'CONSERVATIVE' | 'BALANCED';
-  }): Promise<PriceSuggestion> {
+  async getPriceSuggestions(
+    tradeOperationId: string,
+    options?: {
+      style?: 'AGGRESSIVE' | 'CONSERVATIVE' | 'BALANCED';
+    }
+  ): Promise<PriceSuggestion> {
     try {
       const params = options || {};
       const response = await apiClient.get(
@@ -327,10 +335,13 @@ export const negotiationService = {
   },
 
   // Validate negotiation against business constraints
-  async validateNegotiation(negotiationId: string, params: {
-    proposedPrice: number;
-    party: 'BUYER' | 'SELLER';
-  }): Promise<NegotiationValidation> {
+  async validateNegotiation(
+    negotiationId: string,
+    params: {
+      proposedPrice: number;
+      party: 'BUYER' | 'SELLER';
+    }
+  ): Promise<NegotiationValidation> {
     try {
       const response = await apiClient.post(`/negotiations/${negotiationId}/validate`, params);
       return response.data;
@@ -341,27 +352,35 @@ export const negotiationService = {
   },
 
   // Validate all parties in a trade operation
-  async validateAllParties(tradeOperationId: string, params: {
-    buyerPrice: number;
-    sellerPrices: Array<{
-      sellerId: string;
-      price: number;
-    }>;
-  }): Promise<NegotiationValidation & {
-    overallValid: boolean;
-    profitMargin: number;
-    optimization?: {
-      canOptimize: boolean;
-      suggestedAdjustments?: Array<{
-        party: 'BUYER' | 'SELLER';
-        currentPrice: number;
-        suggestedPrice: number;
-        reason: string;
-      }>;
-    };
-  }> {
+  async validateAllParties(
+    tradeOperationId: string,
+    params: {
+      buyerPrice: number;
+      sellerPrices: {
+        sellerId: string;
+        price: number;
+      }[];
+    }
+  ): Promise<
+    NegotiationValidation & {
+      overallValid: boolean;
+      profitMargin: number;
+      optimization?: {
+        canOptimize: boolean;
+        suggestedAdjustments?: {
+          party: 'BUYER' | 'SELLER';
+          currentPrice: number;
+          suggestedPrice: number;
+          reason: string;
+        }[];
+      };
+    }
+  > {
     try {
-      const response = await apiClient.post(`/negotiations/trade/${tradeOperationId}/validate-all`, params);
+      const response = await apiClient.post(
+        `/negotiations/trade/${tradeOperationId}/validate-all`,
+        params
+      );
       return response.data;
     } catch (error) {
       console.error('Error validating all parties:', error);
@@ -370,25 +389,28 @@ export const negotiationService = {
   },
 
   // Finalize successful negotiation
-  async finalizeNegotiation(negotiationId: string, params: {
-    agreedPrices: {
-      buyerPrice: number;
-      sellerPrices: Array<{
-        sellerId: string;
-        price: number;
-        quantity: number;
-      }>;
-    };
-    transportCost: number;
-  }): Promise<{
+  async finalizeNegotiation(
+    negotiationId: string,
+    params: {
+      agreedPrices: {
+        buyerPrice: number;
+        sellerPrices: {
+          sellerId: string;
+          price: number;
+          quantity: number;
+        }[];
+      };
+      transportCost: number;
+    }
+  ): Promise<{
     status: 'ACCEPTED';
     finalTerms: {
       buyerPrice: number;
-      sellerPrices: Array<{
+      sellerPrices: {
         sellerId: string;
         price: number;
         quantity: number;
-      }>;
+      }[];
     };
     finalProfit: {
       revenue: number;
@@ -413,16 +435,19 @@ export const negotiationService = {
   },
 
   // Reject negotiation
-  async rejectNegotiation(negotiationId: string, params: {
-    reason: 'PRICE_DISAGREEMENT' | 'QUALITY_CONCERNS' | 'TIMELINE_ISSUES' | 'OTHER';
-    finalOffers: {
-      buyer: number;
-      sellers: Array<{
-        sellerId: string;
-        price: number;
-      }>;
-    };
-  }): Promise<{
+  async rejectNegotiation(
+    negotiationId: string,
+    params: {
+      reason: 'PRICE_DISAGREEMENT' | 'QUALITY_CONCERNS' | 'TIMELINE_ISSUES' | 'OTHER';
+      finalOffers: {
+        buyer: number;
+        sellers: {
+          sellerId: string;
+          price: number;
+        }[];
+      };
+    }
+  ): Promise<{
     status: 'REJECTED';
     reason: string;
     finalGap: {
@@ -472,8 +497,10 @@ export const negotiationService = {
       if (status) params.status = status;
       if (limit) params.limit = limit;
       if (offset) params.offset = offset;
-      
-      const response = await apiClient.get(`/trade-operations/${tradeOperationId}/negotiations`, { params });
+
+      const response = await apiClient.get(`/trade-operations/${tradeOperationId}/negotiations`, {
+        params,
+      });
       return response.data.data || response.data;
     } catch (error) {
       console.error('Error getting negotiations:', error);
@@ -482,12 +509,15 @@ export const negotiationService = {
   },
 
   // Send new offer to seller
-  async sendOffer(tradeOperationId: string, offer: {
-    tradeSellerId: string;
-    price: number;
-    quantity: number;
-    terms?: string;
-  }): Promise<Negotiation> {
+  async sendOffer(
+    tradeOperationId: string,
+    offer: {
+      tradeSellerId: string;
+      price: number;
+      quantity: number;
+      terms?: string;
+    }
+  ): Promise<Negotiation> {
     try {
       const response = await apiClient.post(`/trade-operations/${tradeOperationId}/offers`, offer);
       return response.data.data || response.data;
@@ -500,15 +530,17 @@ export const negotiationService = {
   // Send batch offers
   async sendBatchOffers(
     tradeOperationId: string,
-    offers: Array<{
+    offers: {
       tradeSellerId: string;
       price: number;
       quantity: number;
       terms?: string;
-    }>
+    }[]
   ): Promise<any> {
     try {
-      const response = await apiClient.post(`/trade-operations/${tradeOperationId}/offers/batch`, { offers });
+      const response = await apiClient.post(`/trade-operations/${tradeOperationId}/offers/batch`, {
+        offers,
+      });
       return response.data.data || response.data;
     } catch (error) {
       console.error('Error sending batch offers:', error);
@@ -519,7 +551,9 @@ export const negotiationService = {
   // Accept offer
   async acceptOffer(negotiationId: string, acceptanceNote?: string): Promise<Negotiation> {
     try {
-      const response = await apiClient.post(`/negotiations/${negotiationId}/accept`, { acceptanceNote });
+      const response = await apiClient.post(`/negotiations/${negotiationId}/accept`, {
+        acceptanceNote,
+      });
       return response.data.data || response.data;
     } catch (error) {
       console.error('Error accepting offer:', error);
@@ -552,7 +586,10 @@ export const negotiationService = {
   // Extend expiry
   async extendExpiry(negotiationId: string, hours: number, reason?: string): Promise<any> {
     try {
-      const response = await apiClient.post(`/negotiations/${negotiationId}/extend`, { hours, reason });
+      const response = await apiClient.post(`/negotiations/${negotiationId}/extend`, {
+        hours,
+        reason,
+      });
       return response.data.data || response.data;
     } catch (error) {
       console.error('Error extending expiry:', error);
@@ -563,9 +600,12 @@ export const negotiationService = {
   // Get expiring negotiations
   async getExpiringNegotiations(tradeOperationId: string, hours: number = 24): Promise<any> {
     try {
-      const response = await apiClient.get(`/trade-operations/${tradeOperationId}/negotiations/expiring`, {
-        params: { hours }
-      });
+      const response = await apiClient.get(
+        `/trade-operations/${tradeOperationId}/negotiations/expiring`,
+        {
+          params: { hours },
+        }
+      );
       return response.data.data || response.data;
     } catch (error) {
       console.error('Error getting expiring negotiations:', error);
@@ -576,7 +616,9 @@ export const negotiationService = {
   // Get negotiation metrics
   async getNegotiationMetrics(tradeOperationId: string): Promise<any> {
     try {
-      const response = await apiClient.get(`/trade-operations/${tradeOperationId}/negotiations/metrics`);
+      const response = await apiClient.get(
+        `/trade-operations/${tradeOperationId}/negotiations/metrics`
+      );
       return response.data.data || response.data;
     } catch (error) {
       console.error('Error getting negotiation metrics:', error);
@@ -585,10 +627,7 @@ export const negotiationService = {
   },
 
   // Get negotiation analytics
-  async getNegotiationAnalytics(params?: {
-    startDate?: string;
-    endDate?: string;
-  }): Promise<{
+  async getNegotiationAnalytics(params?: { startDate?: string; endDate?: string }): Promise<{
     summary: {
       totalNegotiations: number;
       successRate: number;
@@ -601,18 +640,18 @@ export const negotiationService = {
       velocityTrend: 'FASTER' | 'SLOWER' | 'STABLE';
     };
     partyAnalysis: {
-      buyers: Array<{
+      buyers: {
         id: string;
         name: string;
         successRate: number;
         avgNegotiationTime: string;
-      }>;
-      sellers: Array<{
+      }[];
+      sellers: {
         id: string;
         name: string;
         successRate: number;
         avgNegotiationTime: string;
-      }>;
+      }[];
     };
     bestPractices: {
       mostSuccessfulStrategies: string[];

@@ -6,19 +6,17 @@ import {
   Patch,
   Post,
   Request,
-  UseGuards,
   BadRequestException,
   Query,
 } from "@nestjs/common";
 import {
-  ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from "@nestjs/swagger";
 import { plainToInstance } from "class-transformer";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { SellerService } from "./seller.service";
 import { CreateListingDto, ListingStatus } from "./dto/create-listing.dto";
 import {
@@ -28,6 +26,7 @@ import {
   SellerProductListingDto,
   SellerStatsDto,
 } from "./dto/seller-response.dto";
+import { SellerTimelineResponseDto } from "./dto/timeline.dto";
 
 interface AuthRequest {
   user: {
@@ -155,6 +154,31 @@ export class SellerController {
     return plainToInstance(SellerStatsDto, stats, {
       excludeExtraneousValues: false,
     });
+  }
+
+  @Get("timeline")
+  @ApiOperation({ summary: "Get seller timeline events" })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    description: "Number of events to fetch (default 20, max 50)",
+  })
+  @ApiQuery({
+    name: "cursor",
+    required: false,
+    description: "Pagination cursor (last event ID from previous response)",
+  })
+  @ApiOkResponse({
+    description: "Seller timeline events",
+    type: SellerTimelineResponseDto,
+  })
+  async getSellerTimeline(
+    @Request() req: AuthRequest,
+    @Query("limit") limit = "20",
+    @Query("cursor") cursor?: string,
+  ): Promise<SellerTimelineResponseDto> {
+    const parsedLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 1), 50);
+    return this.sellerService.getTimeline(req.user.id, parsedLimit, cursor);
   }
 
   @Patch("listings/:id/status")

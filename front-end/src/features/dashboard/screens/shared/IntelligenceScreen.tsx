@@ -1,14 +1,7 @@
-"use client"
+'use client';
 
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Modal,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
 import {
   Search,
   FileText,
@@ -42,7 +35,8 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
       date: '2025-06-17',
       status: 'current',
       impact: 'high',
-      summary: 'Detailed analysis of corn futures showing 15% price increase expected due to weather conditions',
+      summary:
+        'Detailed analysis of corn futures showing 15% price increase expected due to weather conditions',
       tags: ['corn', 'futures', 'weather', 'pricing'],
       priceChange: '+12.5%',
       confidence: 85,
@@ -56,7 +50,8 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
       date: '2025-06-16',
       status: 'trending',
       impact: 'critical',
-      summary: 'Consumer demand for organic produce increased 28% quarter-over-quarter in major metropolitan areas',
+      summary:
+        'Consumer demand for organic produce increased 28% quarter-over-quarter in major metropolitan areas',
       tags: ['organic', 'demand', 'consumer', 'growth'],
       priceChange: '+28.3%',
       confidence: 92,
@@ -84,7 +79,8 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
       date: '2025-06-14',
       status: 'alert',
       impact: 'critical',
-      summary: 'Extended drought conditions threatening crop yields across multiple agricultural regions',
+      summary:
+        'Extended drought conditions threatening crop yields across multiple agricultural regions',
       tags: ['drought', 'risk', 'yield', 'climate'],
       priceChange: '+22.1%',
       confidence: 89,
@@ -98,7 +94,8 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
       date: '2025-06-13',
       status: 'current',
       impact: 'low',
-      summary: 'Growing adoption of sustainable farming practices creating new market opportunities',
+      summary:
+        'Growing adoption of sustainable farming practices creating new market opportunities',
       tags: ['sustainability', 'trends', 'innovation', 'practices'],
       priceChange: '+5.2%',
       confidence: 71,
@@ -162,9 +159,7 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
       {/* Header */}
       <View className="flex-col gap-4">
         <View>
-          <Text className="text-2xl font-bold text-white tracking-wider">
-            MARKET INTELLIGENCE
-          </Text>
+          <Text className="text-2xl font-bold text-white tracking-wider">MARKET INTELLIGENCE</Text>
           <Text className="text-sm text-neutral-400">
             Agricultural market analysis and forecasting
           </Text>
@@ -187,9 +182,9 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
           <Card className="bg-neutral-900 border-neutral-700">
             <CardContent className="p-4">
               <View className="relative">
-                <Search 
-                  color="#9CA3AF" 
-                  size={16} 
+                <Search
+                  color="#9CA3AF"
+                  size={16}
                   style={{ position: 'absolute', left: 12, top: 12, zIndex: 10 }}
                 />
                 <TextInput
@@ -210,9 +205,7 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
             <CardContent className="p-4">
               <View className="flex-row items-center justify-between">
                 <View>
-                  <Text className="text-xs text-neutral-400 tracking-wider">
-                    TOTAL REPORTS
-                  </Text>
+                  <Text className="text-xs text-neutral-400 tracking-wider">TOTAL REPORTS</Text>
                   <Text className="text-2xl font-bold text-white font-mono">847</Text>
                 </View>
                 <FileText color="#ffffff" size={32} />
@@ -226,9 +219,7 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
             <CardContent className="p-4">
               <View className="flex-row items-center justify-between">
                 <View>
-                  <Text className="text-xs text-neutral-400 tracking-wider">
-                    PRICE ALERTS
-                  </Text>
+                  <Text className="text-xs text-neutral-400 tracking-wider">PRICE ALERTS</Text>
                   <Text className="text-2xl font-bold text-red-500 font-mono">7</Text>
                 </View>
                 <AlertTriangle color="#ef4444" size={32} />
@@ -242,9 +233,7 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
             <CardContent className="p-4">
               <View className="flex-row items-center justify-between">
                 <View>
-                  <Text className="text-xs text-neutral-400 tracking-wider">
-                    MARKET TRENDS
-                  </Text>
+                  <Text className="text-xs text-neutral-400 tracking-wider">MARKET TRENDS</Text>
                   <Text className="text-2xl font-bold text-white font-mono">23</Text>
                 </View>
                 <TrendingUp color="#22c55e" size={32} />
@@ -278,15 +267,11 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
                         <Text className="text-sm font-bold text-white tracking-wider">
                           {report.title}
                         </Text>
-                        <Text className="text-xs text-neutral-400 font-mono">
-                          {report.id}
-                        </Text>
+                        <Text className="text-xs text-neutral-400 font-mono">{report.id}</Text>
                       </View>
                     </View>
 
-                    <Text className="text-sm text-neutral-300 ml-8">
-                      {report.summary}
-                    </Text>
+                    <Text className="text-sm text-neutral-300 ml-8">{report.summary}</Text>
 
                     <View className="flex-row flex-wrap gap-2 ml-8">
                       {report.tags.map((tag) => (
@@ -321,9 +306,7 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
                         <BarChart3 color="#9CA3AF" size={12} />
                         <Text className="text-neutral-400 text-xs">{report.region}</Text>
                       </View>
-                      <Text className="font-mono text-xs text-neutral-400">
-                        {report.date}
-                      </Text>
+                      <Text className="font-mono text-xs text-neutral-400">{report.date}</Text>
                     </View>
                   </View>
                 </View>
@@ -348,14 +331,9 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
                   <Text className="text-xl font-bold text-white tracking-wider">
                     {selectedReport.title}
                   </Text>
-                  <Text className="text-sm text-neutral-400 font-mono">
-                    {selectedReport.id}
-                  </Text>
+                  <Text className="text-sm text-neutral-400 font-mono">{selectedReport.id}</Text>
                 </View>
-                <TouchableOpacity
-                  onPress={() => setSelectedReport(null)}
-                  className="p-2"
-                >
+                <TouchableOpacity onPress={() => setSelectedReport(null)} className="p-2">
                   <Text className="text-neutral-400 text-xl">✕</Text>
                 </TouchableOpacity>
               </View>
@@ -418,9 +396,7 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
                         </View>
                         <View className="flex-row justify-between items-center">
                           <Text className="text-neutral-400 text-sm">Confidence Level</Text>
-                          <Text className="text-white font-mono">
-                            {selectedReport.confidence}%
-                          </Text>
+                          <Text className="text-white font-mono">{selectedReport.confidence}%</Text>
                         </View>
                         <View className="w-full bg-neutral-800 rounded-full h-2">
                           <View

@@ -11,28 +11,29 @@ export const useInspectorStore = create<InspectorStore>((set, get) => ({
 
   // Actions
   setProfile: (profile: InspectorProfile) => set({ profile }),
-  
+
   setActiveJob: (job: VerificationJob | null) => set({ activeJob: job }),
-  
+
   setAvailableJobs: (jobs: VerificationJob[]) => set({ availableJobs: jobs }),
-  
-  updateLocation: (location: any) => set({ 
-    currentLocation: {
-      latitude: location.latitude,
-      longitude: location.longitude,
-      accuracy: location.accuracy,
-      timestamp: location.timestamp || new Date(),
-    }
-  }),
-  
+
+  updateLocation: (location: any) =>
+    set({
+      currentLocation: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        accuracy: location.accuracy,
+        timestamp: location.timestamp || new Date(),
+      },
+    }),
+
   startTracking: () => set({ isTracking: true }),
-  
+
   stopTracking: () => set({ isTracking: false }),
-  
+
   acceptJob: (jobId: string) => {
     const { availableJobs } = get();
-    const job = availableJobs.find(j => j.id === jobId);
-    
+    const job = availableJobs.find((j) => j.id === jobId);
+
     if (job) {
       set({
         activeJob: {
@@ -40,18 +41,18 @@ export const useInspectorStore = create<InspectorStore>((set, get) => ({
           status: 'ASSIGNED' as any,
           inspectorId: get().profile?.id || 'inspector-001',
         },
-        availableJobs: availableJobs.filter(j => j.id !== jobId),
+        availableJobs: availableJobs.filter((j) => j.id !== jobId),
       });
     }
   },
-  
+
   completeJob: () => set({ activeJob: null }),
-  
+
   getJobsByPriority: (priority: string) => {
     const { availableJobs } = get();
-    return availableJobs.filter(job => job.priority === priority);
+    return availableJobs.filter((job) => job.priority === priority);
   },
-  
+
   getJobsSortedByDistance: () => {
     const { availableJobs } = get();
     return [...availableJobs].sort((a, b) => {
@@ -60,12 +61,13 @@ export const useInspectorStore = create<InspectorStore>((set, get) => ({
       return distA - distB;
     });
   },
-  
-  reset: () => set({
-    profile: null,
-    activeJob: null,
-    availableJobs: [],
-    currentLocation: null,
-    isTracking: false,
-  }),
+
+  reset: () =>
+    set({
+      profile: null,
+      activeJob: null,
+      availableJobs: [],
+      currentLocation: null,
+      isTracking: false,
+    }),
 }));

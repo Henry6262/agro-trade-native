@@ -24,11 +24,11 @@
 - [x] Draft backend rulebook outline (structure/components/services/testing/docs sections).
 - [x] Implement lint/check script + integrate with `atctl check`.
 - [x] Update handbook + migration plan to reflect backend standards.
-- [ ] Record findings + verification evidence in blueprint and `status.md`.
-- [ ] Apply the rulebook across backend modules (resolve violations flagged by the checker and document follow-up work).
-- [ ] Capture outstanding gaps + create follow-up tickets for modules needing deeper refactors.
+- [x] Record findings + verification evidence in blueprint and `status.md`.
+- [x] Apply the rulebook across backend modules (resolve violations flagged by the checker and document follow-up work).
+- [x] Capture outstanding gaps + create follow-up tickets for modules needing deeper refactors.
 
 ## Notes / Links
 - Reference frontend rulebook under `rules/frontend/` to stay consistent.
 - Capture blockers/tests in `DAILY_LOG.md` and `status.md` as progress occurs.
-- Current checker warnings: pricing/products/regions modules lack `dto/` folders; tracked in follow-up tasks above.
+- Backend lint + rule checks now part of the workflow (`cd backend && npm run lint`, `node scripts/check-backend-rules.mjs`). Remaining warnings are legacy `any` usages to be tackled in follow-on refactors.

@@ -11,12 +11,7 @@ import {
   UIManager,
   Alert,
 } from 'react-native';
-import {
-  X,
-  ShoppingCart,
-  Check,
-  AlertCircle,
-} from 'lucide-react-native';
+import { X, ShoppingCart, Check, AlertCircle } from 'lucide-react-native';
 import { GoogleAuthNative } from '@pages/Onboarding/components/shared/GoogleAuthNative';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useAuthStore } from '@stores/auth.store';
@@ -40,13 +35,13 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export function BuyerSubmitDrawer({ 
-  visible, 
-  onClose, 
-  productId, 
+export function BuyerSubmitDrawer({
+  visible,
+  onClose,
+  productId,
   specifications,
   onComplete,
-  onBack
+  onBack,
 }: BuyerSubmitDrawerProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,7 +63,7 @@ export function BuyerSubmitDrawer({
         tension: 65,
         friction: 11,
       }).start();
-      
+
       // Check if authentication is needed
       if (!isAuthenticated) {
         setShowAuth(true);
@@ -95,15 +90,15 @@ export function BuyerSubmitDrawer({
   const handleAuthComplete = async () => {
     console.log('Authentication complete callback triggered');
     setShowAuth(false);
-    
+
     // Wait a moment for auth state to update in store
     setTimeout(() => {
       const currentAuth = useAuthStore.getState();
-      console.log('Auth state after delay:', { 
-        isAuthenticated: currentAuth.isAuthenticated, 
-        user: currentAuth.user?.email 
+      console.log('Auth state after delay:', {
+        isAuthenticated: currentAuth.isAuthenticated,
+        user: currentAuth.user?.email,
       });
-      
+
       if (currentAuth.isAuthenticated) {
         handleSubmit();
       } else {
@@ -117,32 +112,32 @@ export function BuyerSubmitDrawer({
     const currentAuth = useAuthStore.getState();
     if (!currentAuth.isAuthenticated) {
       console.log('User not authenticated, showing auth modal');
-      
+
       // Store the pending buyer listing data before authentication
       const buyerSpec = buyerSpecifications[productId] || specifications;
       const { location } = useOnboardingStore.getState();
-      
+
       const pendingListing = {
         productId,
         specifications: buyerSpec,
         location,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
-      
+
       // Save to persistent storage so it survives OAuth redirect
       await PendingListingService.savePendingListing(pendingListing);
-      
+
       setShowAuth(true);
       return;
     }
-    
+
     console.log('User is authenticated, proceeding with submission');
 
     setIsSubmitting(true);
     try {
       const buyerSpec = buyerSpecifications[productId] || specifications;
       const { location } = useOnboardingStore.getState();
-      
+
       // Parse delivery deadline to ISO string if provided
       let neededBy = null;
       if (buyerSpec.deliveryDeadline) {
@@ -153,7 +148,7 @@ export function BuyerSubmitDrawer({
           neededBy = date.toISOString();
         }
       }
-      
+
       // Create buy listing DTO matching backend expectations
       const buyListingData = {
         productId,
@@ -180,20 +175,20 @@ export function BuyerSubmitDrawer({
       console.log('specifications keys:', Object.keys(specifications || {}));
       console.log('Final specifications being sent:', buyListingData.specifications);
       console.log('Full buyListingData:', JSON.stringify(buyListingData, null, 2));
-      
+
       // WORKAROUND: Skip onboarding completely for now
       // The onboarding endpoint expects different data than what we have
       console.log('Skipping onboarding step - proceeding directly to listing creation');
-      
+
       // Create the buy listing regardless of role
       console.log('Calling /buyer/listings with data:', buyListingData);
       console.log('Auth token present:', !!currentAuth.token);
-      
+
       const response = await apiClient.post('/buyer/listings', buyListingData);
-      
+
       console.log('Buy listing created successfully:', response.data);
       setRequestCreated(true);
-      
+
       // Show success animation
       setShowSuccess(true);
       Animated.parallel([
@@ -209,11 +204,10 @@ export function BuyerSubmitDrawer({
           useNativeDriver: true,
         }),
       ]).start();
-      
     } catch (error: any) {
       console.error('Failed to submit purchase request:', error);
       console.error('Error details:', error.response?.data || error.message);
-      
+
       // Show error to user
       Alert.alert(
         'Submission Failed',
@@ -228,7 +222,7 @@ export function BuyerSubmitDrawer({
   const renderContent = () => {
     if (showSuccess) {
       return (
-        <Animated.View 
+        <Animated.View
           className="px-4 py-8"
           style={{
             opacity: successAnimOpacity,
@@ -240,9 +234,7 @@ export function BuyerSubmitDrawer({
             <View className="bg-emerald-600/20 p-4 rounded-full mb-4">
               <Check size={48} color="#10B981" />
             </View>
-            <Text className="text-2xl font-bold text-white mb-2">
-              Request Submitted!
-            </Text>
+            <Text className="text-2xl font-bold text-white mb-2">Request Submitted!</Text>
             <Text className="text-gray-400 text-center">
               Your purchase request has been sent to verified sellers
             </Text>
@@ -251,9 +243,8 @@ export function BuyerSubmitDrawer({
           <View className="bg-gray-800/50 rounded-xl p-4 mb-6 border border-gray-700">
             <Text className="text-gray-400 text-sm mb-2">What happens next?</Text>
             <Text className="text-white">
-              • Sellers will review your request{'\n'}
-              • You'll receive quotes within 24-48 hours{'\n'}
-              • Compare offers and choose the best one
+              • Sellers will review your request{'\n'}• You'll receive quotes within 24-48 hours
+              {'\n'}• Compare offers and choose the best one
             </Text>
           </View>
 
@@ -282,11 +273,7 @@ export function BuyerSubmitDrawer({
     if (showAuth) {
       return (
         <View className="flex-1">
-          <GoogleAuthNative
-            onComplete={handleAuthComplete}
-            userRole="buyer"
-            mode="inline"
-          />
+          <GoogleAuthNative onComplete={handleAuthComplete} userRole="buyer" mode="inline" />
         </View>
       );
     }
@@ -295,12 +282,8 @@ export function BuyerSubmitDrawer({
     return (
       <View className="px-4 py-6">
         <View className="mb-6">
-          <Text className="text-2xl font-bold text-white mb-2">
-            Submit Purchase Request?
-          </Text>
-          <Text className="text-gray-400">
-            Your request will be sent to verified sellers
-          </Text>
+          <Text className="text-2xl font-bold text-white mb-2">Submit Purchase Request?</Text>
+          <Text className="text-gray-400">Your request will be sent to verified sellers</Text>
         </View>
 
         <View className="bg-blue-900/20 rounded-xl p-4 mb-6 border border-blue-700/30">
@@ -309,10 +292,9 @@ export function BuyerSubmitDrawer({
             <View className="ml-3 flex-1">
               <Text className="text-blue-400 font-semibold mb-1">Quick Setup</Text>
               <Text className="text-blue-300 text-sm">
-                {isAuthenticated 
+                {isAuthenticated
                   ? 'Your request will be submitted immediately'
-                  : 'Sign in with Google to submit your request'
-                }
+                  : 'Sign in with Google to submit your request'}
               </Text>
             </View>
           </View>
@@ -339,29 +321,18 @@ export function BuyerSubmitDrawer({
           onPress={handleClose}
           className="bg-gray-800 rounded-xl p-4 border border-gray-700"
         >
-          <Text className="text-gray-400 font-semibold text-center">
-            Cancel
-          </Text>
+          <Text className="text-gray-400 font-semibold text-center">Cancel</Text>
         </TouchableOpacity>
       </View>
     );
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={handleClose}
-    >
+    <Modal visible={visible} transparent animationType="none" onRequestClose={handleClose}>
       <View className="flex-1 bg-black/50">
-        <TouchableOpacity 
-          className="flex-1" 
-          activeOpacity={1}
-          onPress={handleClose}
-        />
-        
-        <Animated.View 
+        <TouchableOpacity className="flex-1" activeOpacity={1} onPress={handleClose} />
+
+        <Animated.View
           className="bg-gray-900 rounded-t-3xl overflow-hidden"
           style={{
             transform: [{ translateY: slideAnim }],

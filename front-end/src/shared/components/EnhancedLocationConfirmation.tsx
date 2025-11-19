@@ -61,14 +61,11 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
   const getCurrentLocation = async () => {
     try {
       setIsLoadingLocation(true);
-      
+
       // Request permission
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
-          'Please enable location services to use this feature.'
-        );
+        Alert.alert('Permission Denied', 'Please enable location services to use this feature.');
         return;
       }
 
@@ -86,7 +83,8 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
       if (reverseGeocode.length > 0) {
         const result = reverseGeocode[0];
         setLocation({
-          address: `${result.streetNumber || ''} ${result.street || ''}`.trim() || result.name || '',
+          address:
+            `${result.streetNumber || ''} ${result.street || ''}`.trim() || result.name || '',
           city: result.city || '',
           region: result.region || '',
           country: result.country || '',
@@ -110,13 +108,13 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
 
     try {
       setIsLoadingLocation(true);
-      
+
       // Geocode the search query
       const geocodeResults = await Location.geocodeAsync(searchQuery);
-      
+
       if (geocodeResults.length > 0) {
         const result = geocodeResults[0];
-        
+
         // Reverse geocode to get full address details
         const reverseGeocode = await Location.reverseGeocodeAsync({
           latitude: result.latitude,
@@ -126,7 +124,10 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
         if (reverseGeocode.length > 0) {
           const addressResult = reverseGeocode[0];
           setLocation({
-            address: `${addressResult.streetNumber || ''} ${addressResult.street || ''}`.trim() || addressResult.name || '',
+            address:
+              `${addressResult.streetNumber || ''} ${addressResult.street || ''}`.trim() ||
+              addressResult.name ||
+              '',
             city: addressResult.city || '',
             region: addressResult.region || '',
             country: addressResult.country || '',
@@ -150,7 +151,7 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
     if (!selectedLocation) {
       return;
     }
-    
+
     // Update the location state with map-selected data
     setLocation({
       address: selectedLocation.address || '',
@@ -174,19 +175,19 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!location.address.trim()) {
       newErrors.address = 'Address is required';
     }
-    
+
     if (!location.city.trim()) {
       newErrors.city = 'City is required';
     }
-    
+
     if (!location.country.trim()) {
       newErrors.country = 'Country is required';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -195,19 +196,19 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
     if (!validateForm()) {
       return;
     }
-    
+
     onConfirm(location);
   };
 
   const updateLocationField = (field: keyof LocationData, value: string) => {
-    setLocation(prev => ({
+    setLocation((prev) => ({
       ...prev,
       [field]: value,
     }));
-    
+
     // Clear error for this field
     if (errors[field]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
@@ -222,17 +223,9 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
 
   return (
     <>
-      <Modal
-        visible={visible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={onClose}
-      >
+      <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
         <View className="flex-1 bg-black/50">
-          <View 
-            className="bg-neutral-900 rounded-t-3xl mt-20"
-            style={{ flex: 1 }}
-          >
+          <View className="bg-neutral-900 rounded-t-3xl mt-20" style={{ flex: 1 }}>
             {/* Header */}
             <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
               <View className="flex-1">
@@ -240,13 +233,21 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
                   {showMapView ? 'Select on Map' : 'Confirm Location'}
                 </Text>
                 <Text className="text-sm text-neutral-400 mt-1">
-                  {showMapView ? 'Tap on the map to select location' : 'Where is this product located?'}
+                  {showMapView
+                    ? 'Tap on the map to select location'
+                    : 'Where is this product located?'}
                 </Text>
               </View>
-              <TouchableOpacity onPress={showMapView ? () => {
-                setShowMapView(false);
-                setViewMode('text');
-              } : onClose}>
+              <TouchableOpacity
+                onPress={
+                  showMapView
+                    ? () => {
+                        setShowMapView(false);
+                        setViewMode('text');
+                      }
+                    : onClose
+                }
+              >
                 <X color="#ffffff" size={24} />
               </TouchableOpacity>
             </View>
@@ -272,199 +273,197 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
               </View>
             ) : (
               // Text Input View
-              <ScrollView 
+              <ScrollView
                 className="flex-1 px-6"
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 100 }}
               >
-              {/* View Mode Toggle */}
-              <View className="mt-6">
-                <Text className="text-lg font-semibold text-green-400 mb-4">
-                  Location Input Method
-                </Text>
-                <View className="flex-row bg-neutral-800 rounded-lg p-1">
+                {/* View Mode Toggle */}
+                <View className="mt-6">
+                  <Text className="text-lg font-semibold text-green-400 mb-4">
+                    Location Input Method
+                  </Text>
+                  <View className="flex-row bg-neutral-800 rounded-lg p-1">
+                    <TouchableOpacity
+                      onPress={() => setViewMode('text')}
+                      className={`flex-1 flex-row items-center justify-center py-2 px-4 rounded-md ${
+                        viewMode === 'text' ? 'bg-green-500' : ''
+                      }`}
+                    >
+                      <Search color={viewMode === 'text' ? '#ffffff' : '#9ca3af'} size={16} />
+                      <Text
+                        className={`ml-2 font-medium ${
+                          viewMode === 'text' ? 'text-white' : 'text-neutral-400'
+                        }`}
+                      >
+                        Text Input
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={openMapPicker}
+                      className="flex-1 flex-row items-center justify-center py-2 px-4 rounded-md"
+                    >
+                      <Map color="#9ca3af" size={16} />
+                      <Text className="ml-2 font-medium text-neutral-400">View on Map</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* Location Search */}
+                <View className="mt-6">
+                  <Text className="text-lg font-semibold text-green-400 mb-4">Search Location</Text>
+
+                  <View className="flex-row gap-2">
+                    <TextInput
+                      value={searchQuery}
+                      onChangeText={setSearchQuery}
+                      placeholder="Search for address, city, or landmark"
+                      placeholderTextColor="#6B7280"
+                      className="flex-1 bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
+                      onSubmitEditing={searchLocation}
+                    />
+                    <TouchableOpacity
+                      onPress={searchLocation}
+                      className="bg-neutral-800 border border-neutral-600 rounded-lg p-3"
+                      disabled={isLoadingLocation}
+                    >
+                      {isLoadingLocation ? (
+                        <ActivityIndicator size="small" color="#10B981" />
+                      ) : (
+                        <Search color="#10B981" size={20} />
+                      )}
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Current Location Button */}
                   <TouchableOpacity
-                    onPress={() => setViewMode('text')}
-                    className={`flex-1 flex-row items-center justify-center py-2 px-4 rounded-md ${
-                      viewMode === 'text' ? 'bg-green-500' : ''
-                    }`}
+                    onPress={getCurrentLocation}
+                    disabled={isLoadingLocation}
+                    className="mt-3 flex-row items-center justify-center bg-neutral-800 border border-neutral-600 rounded-lg py-3"
                   >
-                    <Search color={viewMode === 'text' ? '#ffffff' : '#9ca3af'} size={16} />
-                    <Text className={`ml-2 font-medium ${
-                      viewMode === 'text' ? 'text-white' : 'text-neutral-400'
-                    }`}>
-                      Text Input
-                    </Text>
+                    <MapPin color="#10B981" size={20} />
+                    <Text className="text-green-400 ml-2">Use Current Location</Text>
                   </TouchableOpacity>
+
+                  {/* Map Picker Button */}
                   <TouchableOpacity
                     onPress={openMapPicker}
-                    className="flex-1 flex-row items-center justify-center py-2 px-4 rounded-md"
+                    className="mt-3 flex-row items-center justify-center bg-green-500/20 border border-green-500/40 rounded-lg py-3"
                   >
-                    <Map color="#9ca3af" size={16} />
-                    <Text className="ml-2 font-medium text-neutral-400">
-                      View on Map
-                    </Text>
+                    <Map color="#10B981" size={20} />
+                    <Text className="text-green-400 ml-2 font-medium">View on Map</Text>
                   </TouchableOpacity>
                 </View>
-              </View>
 
-              {/* Location Search */}
-              <View className="mt-6">
-                <Text className="text-lg font-semibold text-green-400 mb-4">
-                  Search Location
-                </Text>
-                
-                <View className="flex-row gap-2">
-                  <TextInput
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    placeholder="Search for address, city, or landmark"
-                    placeholderTextColor="#6B7280"
-                    className="flex-1 bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
-                    onSubmitEditing={searchLocation}
-                  />
-                  <TouchableOpacity
-                    onPress={searchLocation}
-                    className="bg-neutral-800 border border-neutral-600 rounded-lg p-3"
-                    disabled={isLoadingLocation}
-                  >
-                    {isLoadingLocation ? (
-                      <ActivityIndicator size="small" color="#10B981" />
-                    ) : (
-                      <Search color="#10B981" size={20} />
+                {/* Location Details */}
+                <View className="mt-6">
+                  <Text className="text-lg font-semibold text-green-400 mb-4">
+                    Location Details
+                  </Text>
+
+                  {/* Address */}
+                  <View className="mb-4">
+                    <Text className="text-neutral-300 mb-2">
+                      Address <Text className="text-red-400">*</Text>
+                    </Text>
+                    <TextInput
+                      value={location.address}
+                      onChangeText={(text) => updateLocationField('address', text)}
+                      placeholder="Street address"
+                      placeholderTextColor="#6B7280"
+                      className={`bg-neutral-800 border ${
+                        errors.address ? 'border-red-500' : 'border-neutral-600'
+                      } rounded-lg px-3 py-2 text-white`}
+                    />
+                    {errors.address && (
+                      <Text className="text-red-400 text-xs mt-1">{errors.address}</Text>
                     )}
-                  </TouchableOpacity>
-                </View>
-                
-                {/* Current Location Button */}
-                <TouchableOpacity
-                  onPress={getCurrentLocation}
-                  disabled={isLoadingLocation}
-                  className="mt-3 flex-row items-center justify-center bg-neutral-800 border border-neutral-600 rounded-lg py-3"
-                >
-                  <MapPin color="#10B981" size={20} />
-                  <Text className="text-green-400 ml-2">Use Current Location</Text>
-                </TouchableOpacity>
-
-                {/* Map Picker Button */}
-                <TouchableOpacity
-                  onPress={openMapPicker}
-                  className="mt-3 flex-row items-center justify-center bg-green-500/20 border border-green-500/40 rounded-lg py-3"
-                >
-                  <Map color="#10B981" size={20} />
-                  <Text className="text-green-400 ml-2 font-medium">View on Map</Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Location Details */}
-              <View className="mt-6">
-                <Text className="text-lg font-semibold text-green-400 mb-4">
-                  Location Details
-                </Text>
-                
-                {/* Address */}
-                <View className="mb-4">
-                  <Text className="text-neutral-300 mb-2">
-                    Address <Text className="text-red-400">*</Text>
-                  </Text>
-                  <TextInput
-                    value={location.address}
-                    onChangeText={(text) => updateLocationField('address', text)}
-                    placeholder="Street address"
-                    placeholderTextColor="#6B7280"
-                    className={`bg-neutral-800 border ${
-                      errors.address ? 'border-red-500' : 'border-neutral-600'
-                    } rounded-lg px-3 py-2 text-white`}
-                  />
-                  {errors.address && (
-                    <Text className="text-red-400 text-xs mt-1">{errors.address}</Text>
-                  )}
-                </View>
-                
-                {/* City */}
-                <View className="mb-4">
-                  <Text className="text-neutral-300 mb-2">
-                    City <Text className="text-red-400">*</Text>
-                  </Text>
-                  <TextInput
-                    value={location.city}
-                    onChangeText={(text) => updateLocationField('city', text)}
-                    placeholder="City"
-                    placeholderTextColor="#6B7280"
-                    className={`bg-neutral-800 border ${
-                      errors.city ? 'border-red-500' : 'border-neutral-600'
-                    } rounded-lg px-3 py-2 text-white`}
-                  />
-                  {errors.city && (
-                    <Text className="text-red-400 text-xs mt-1">{errors.city}</Text>
-                  )}
-                </View>
-                
-                {/* Region/State */}
-                <View className="mb-4">
-                  <Text className="text-neutral-300 mb-2">Region/State</Text>
-                  <TextInput
-                    value={location.region}
-                    onChangeText={(text) => updateLocationField('region', text)}
-                    placeholder="Region or State"
-                    placeholderTextColor="#6B7280"
-                    className="bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
-                  />
-                </View>
-                
-                {/* Country */}
-                <View className="mb-4">
-                  <Text className="text-neutral-300 mb-2">
-                    Country <Text className="text-red-400">*</Text>
-                  </Text>
-                  <TextInput
-                    value={location.country}
-                    onChangeText={(text) => updateLocationField('country', text)}
-                    placeholder="Country"
-                    placeholderTextColor="#6B7280"
-                    className={`bg-neutral-800 border ${
-                      errors.country ? 'border-red-500' : 'border-neutral-600'
-                    } rounded-lg px-3 py-2 text-white`}
-                  />
-                  {errors.country && (
-                    <Text className="text-red-400 text-xs mt-1">{errors.country}</Text>
-                  )}
-                </View>
-                
-                {/* Coordinates (read-only) */}
-                {location.latitude && location.longitude && (
-                  <View className="p-3 bg-neutral-800 rounded-lg">
-                    <Text className="text-xs text-neutral-400">
-                      Coordinates: {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
-                    </Text>
                   </View>
-                )}
-              </View>
-            </ScrollView>
+
+                  {/* City */}
+                  <View className="mb-4">
+                    <Text className="text-neutral-300 mb-2">
+                      City <Text className="text-red-400">*</Text>
+                    </Text>
+                    <TextInput
+                      value={location.city}
+                      onChangeText={(text) => updateLocationField('city', text)}
+                      placeholder="City"
+                      placeholderTextColor="#6B7280"
+                      className={`bg-neutral-800 border ${
+                        errors.city ? 'border-red-500' : 'border-neutral-600'
+                      } rounded-lg px-3 py-2 text-white`}
+                    />
+                    {errors.city && (
+                      <Text className="text-red-400 text-xs mt-1">{errors.city}</Text>
+                    )}
+                  </View>
+
+                  {/* Region/State */}
+                  <View className="mb-4">
+                    <Text className="text-neutral-300 mb-2">Region/State</Text>
+                    <TextInput
+                      value={location.region}
+                      onChangeText={(text) => updateLocationField('region', text)}
+                      placeholder="Region or State"
+                      placeholderTextColor="#6B7280"
+                      className="bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
+                    />
+                  </View>
+
+                  {/* Country */}
+                  <View className="mb-4">
+                    <Text className="text-neutral-300 mb-2">
+                      Country <Text className="text-red-400">*</Text>
+                    </Text>
+                    <TextInput
+                      value={location.country}
+                      onChangeText={(text) => updateLocationField('country', text)}
+                      placeholder="Country"
+                      placeholderTextColor="#6B7280"
+                      className={`bg-neutral-800 border ${
+                        errors.country ? 'border-red-500' : 'border-neutral-600'
+                      } rounded-lg px-3 py-2 text-white`}
+                    />
+                    {errors.country && (
+                      <Text className="text-red-400 text-xs mt-1">{errors.country}</Text>
+                    )}
+                  </View>
+
+                  {/* Coordinates (read-only) */}
+                  {location.latitude && location.longitude && (
+                    <View className="p-3 bg-neutral-800 rounded-lg">
+                      <Text className="text-xs text-neutral-400">
+                        Coordinates: {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </ScrollView>
             )}
 
             {/* Footer - Show only in text mode */}
             {!showMapView && (
               <View className="absolute bottom-0 left-0 right-0 bg-neutral-800 border-t border-neutral-700 p-4">
-              <TouchableOpacity
-                onPress={handleConfirm}
-                disabled={isLoadingLocation}
-                className={`bg-green-500 py-3 px-6 rounded-lg flex-row items-center justify-center ${
-                  isLoadingLocation ? 'opacity-50' : ''
-                }`}
-              >
-                {isLoadingLocation ? (
-                  <ActivityIndicator color="#ffffff" />
-                ) : (
-                  <>
-                    <Check color="#ffffff" size={20} />
-                    <Text className="text-white text-center font-semibold ml-2">
-                      Confirm Location
-                    </Text>
-                  </>
-                )}
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity
+                  onPress={handleConfirm}
+                  disabled={isLoadingLocation}
+                  className={`bg-green-500 py-3 px-6 rounded-lg flex-row items-center justify-center ${
+                    isLoadingLocation ? 'opacity-50' : ''
+                  }`}
+                >
+                  {isLoadingLocation ? (
+                    <ActivityIndicator color="#ffffff" />
+                  ) : (
+                    <>
+                      <Check color="#ffffff" size={20} />
+                      <Text className="text-white text-center font-semibold ml-2">
+                        Confirm Location
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         </View>

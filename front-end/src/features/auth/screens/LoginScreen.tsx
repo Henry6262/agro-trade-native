@@ -15,7 +15,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
   const { loginMutation } = useAuth();
-  
+
   const {
     control,
     handleSubmit,
@@ -39,12 +39,8 @@ export default function LoginScreen() {
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 px-6 py-8">
         <View className="mb-8">
-          <Text className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome Back
-          </Text>
-          <Text className="text-lg text-gray-600">
-            Sign in to your account
-          </Text>
+          <Text className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</Text>
+          <Text className="text-lg text-gray-600">Sign in to your account</Text>
         </View>
 
         <View className="space-y-4">
@@ -90,7 +86,7 @@ export default function LoginScreen() {
           />
         </View>
       </View>
-      
+
       {loginMutation.isPending && <LoadingSpinner overlay message="Signing in..." />}
     </SafeAreaView>
   );

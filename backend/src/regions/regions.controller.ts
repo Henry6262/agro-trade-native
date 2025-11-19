@@ -1,5 +1,5 @@
 import { Controller, Get, Query, UseInterceptors } from "@nestjs/common";
-import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from "@nestjs/swagger";
+import { ApiTags, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
 import { RegionsService } from "./regions.service";
 import { Public } from "../auth/decorators/public.decorator";

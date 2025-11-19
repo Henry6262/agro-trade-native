@@ -7,16 +7,20 @@ interface CurrentLocationMarkerProps {
   isMoving?: boolean;
 }
 
-export const CurrentLocationMarker: React.FC<CurrentLocationMarkerProps> = ({ 
+export const CurrentLocationMarker: React.FC<CurrentLocationMarkerProps> = ({
   size = 'medium',
-  isMoving = false 
+  isMoving = false,
 }) => {
   const getMarkerSize = () => {
     switch (size) {
-      case 'small': return 36;
-      case 'medium': return 48;
-      case 'large': return 60;
-      default: return 48;
+      case 'small':
+        return 36;
+      case 'medium':
+        return 48;
+      case 'large':
+        return 60;
+      default:
+        return 48;
     }
   };
 
@@ -36,7 +40,7 @@ export const CurrentLocationMarker: React.FC<CurrentLocationMarkerProps> = ({
           opacity: isMoving ? 1 : 0.6,
         }}
       />
-      
+
       {/* Middle ring */}
       <View
         style={{
@@ -69,11 +73,7 @@ export const CurrentLocationMarker: React.FC<CurrentLocationMarkerProps> = ({
           elevation: 10, // Android shadow
         }}
       >
-        <Navigation 
-          size={iconSize} 
-          color="#ffffff"
-          strokeWidth={2.5}
-        />
+        <Navigation size={iconSize} color="#ffffff" strokeWidth={2.5} />
       </View>
     </View>
   );

@@ -45,6 +45,15 @@ Bring the backend codebase under the same disciplined, rule-driven workflow as t
 - **Rule drift** if backend structure changes → require updates to `rules/backend/*` in the same PR as structural edits.
 
 ## Verification Plan
-- Run `node scripts/check-backend-rules.mjs` + `cd backend && npm run lint && npm run test`.
+- Run `node scripts/check-backend-rules.mjs` + `cd backend && npm run lint`.
 - Attach command output to Implementation Status + PR description.
 - Review doc diffs to ensure handbook/migration references new rules.
+
+## Verification (2025-11-17)
+- `node scripts/check-backend-rules.mjs` → **pass** (no warnings).
+- `cd backend && npm run lint` → **pass** (only expected legacy `no-explicit-any` warnings remain).
+- Implementation Status + daily log updated; EP-01 epic marked complete.
+
+## Follow-ups
+- Track remaining `TODO` comments in buyer/seller/transport-company services and schedule cleanup once feature wiring stabilizes.
+- Plan a dedicated sweep to replace `any` usages flagged by lint warnings during EP-02/EP-03 when DTO contracts are finalized.

@@ -19,7 +19,7 @@ interface MapZone {
   id: string;
   name: string;
   color: string;
-  cities: Array<{
+  cities: {
     id: string;
     name: string;
     latitude: number;
@@ -28,12 +28,12 @@ interface MapZone {
     countryCode: string;
     flagEmoji: string;
     isDefault: boolean;
-  }>;
-  samplePrices: Array<{
+  }[];
+  samplePrices: {
     productName: string;
     range: string;
     unit: string;
-  }>;
+  }[];
 }
 
 export function AdminMapView() {

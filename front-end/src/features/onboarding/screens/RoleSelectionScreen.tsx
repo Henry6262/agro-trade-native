@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StatusBar, Alert, Platform, ToastAndroid, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  StatusBar,
+  Alert,
+  Platform,
+  ToastAndroid,
+  ActivityIndicator,
+} from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../navigation/types';
@@ -74,7 +84,7 @@ export const RoleSelectionScreen: React.FC = () => {
   const handleRoleSelect = (role: 'buyer' | 'seller' | 'transport') => {
     setRole(role);
     setSelectedRole(role);
-    
+
     // Navigate to the appropriate onboarding flow
     setTimeout(() => {
       switch (role) {
@@ -93,7 +103,7 @@ export const RoleSelectionScreen: React.FC = () => {
 
   const handleExistingUserSignIn = async () => {
     setIsSigningIn(true);
-    
+
     try {
       if (Platform.OS === 'web') {
         // Web platform - use redirect OAuth
@@ -111,11 +121,11 @@ export const RoleSelectionScreen: React.FC = () => {
         }
         await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
         const response = await GoogleSignin.signIn();
-        
+
         if (isSuccessResponse(response)) {
           const { idToken } = await GoogleSignin.getTokens();
           const userInfo = response.data;
-          
+
           // Send to backend for authentication (no role for existing users)
           const authResponse = await apiClient.post<{
             success: boolean;
@@ -132,14 +142,14 @@ export const RoleSelectionScreen: React.FC = () => {
               photo: userInfo.user.photo,
             },
           });
-          
+
           if (authResponse?.data?.success) {
             const { access_token, user } = authResponse.data;
-            
+
             // Store auth data
             setTokens(access_token, access_token);
             setUser(user);
-            
+
             // Navigate to main app
             navigation.dispatch(
               CommonActions.reset({
@@ -185,130 +195,144 @@ export const RoleSelectionScreen: React.FC = () => {
     <AuthGuard requireAuth={false} redirectTo="Main">
       <View style={{ flex: 1, backgroundColor: '#0F172A' }}>
         <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
-      <ScrollView 
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingTop: 60,
-          paddingHorizontal: 24,
-          paddingBottom: 24,
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={{ maxWidth: 600, width: '100%', alignSelf: 'center' }}>
-          {/* Header - Simplified with just logo */}
-          <View style={{ marginBottom: 48, alignItems: 'center' }}>
-            <LinearGradient
-              colors={['#3B82F6', '#10B981']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingTop: 60,
+            paddingHorizontal: 24,
+            paddingBottom: 24,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={{ maxWidth: 600, width: '100%', alignSelf: 'center' }}>
+            {/* Header - Simplified with just logo */}
+            <View style={{ marginBottom: 48, alignItems: 'center' }}>
+              <LinearGradient
+                colors={['#3B82F6', '#10B981']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                  paddingHorizontal: 32,
+                  paddingVertical: 16,
+                  borderRadius: 20,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 42,
+                    fontWeight: 'bold',
+                    color: 'white',
+                    textAlign: 'center',
+                  }}
+                >
+                  AgroTrade
+                </Text>
+              </LinearGradient>
+            </View>
+
+            {/* Sign In Button for Existing Users - More prominent */}
+            <TouchableOpacity
+              onPress={handleExistingUserSignIn}
+              disabled={isSigningIn}
               style={{
-                paddingHorizontal: 32,
-                paddingVertical: 16,
-                borderRadius: 20,
+                marginBottom: 32,
               }}
             >
-              <Text style={{
-                fontSize: 42,
-                fontWeight: 'bold',
-                color: 'white',
-                textAlign: 'center',
-              }}>
-                AgroTrade
-              </Text>
-            </LinearGradient>
-          </View>
+              <LinearGradient
+                colors={['#3B82F6', '#2563EB']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                  borderRadius: 16,
+                  padding: 18,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  shadowColor: '#3B82F6',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 5,
+                }}
+              >
+                <LogIn size={24} color="white" style={{ marginRight: 12 }} />
+                <Text
+                  style={{
+                    color: 'white',
+                    fontSize: 18,
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {isSigningIn ? 'Signing in...' : 'Sign In'}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
 
-          {/* Sign In Button for Existing Users - More prominent */}
-          <TouchableOpacity
-            onPress={handleExistingUserSignIn}
-            disabled={isSigningIn}
-            style={{
-              marginBottom: 32,
-            }}
-          >
-            <LinearGradient
-              colors={['#3B82F6', '#2563EB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
+            {/* Divider */}
+            <View
               style={{
-                borderRadius: 16,
-                padding: 18,
                 flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'center',
-                shadowColor: '#3B82F6',
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 8,
-                elevation: 5,
+                marginBottom: 32,
               }}
             >
-              <LogIn size={24} color="white" style={{ marginRight: 12 }} />
-              <Text style={{
-                color: 'white',
-                fontSize: 18,
-                fontWeight: 'bold',
-              }}>
-                {isSigningIn ? 'Signing in...' : 'Sign In'}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-
-          {/* Divider */}
-          <View style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            marginBottom: 32,
-          }}>
-            <View style={{
-              flex: 1,
-              height: 1,
-              backgroundColor: 'rgba(148, 163, 184, 0.2)',
-            }} />
-            <Text style={{
-              color: '#94A3B8',
-              marginHorizontal: 16,
-              fontSize: 14,
-              fontWeight: '500',
-            }}>
-              OR CREATE NEW ACCOUNT
-            </Text>
-            <View style={{
-              flex: 1,
-              height: 1,
-              backgroundColor: 'rgba(148, 163, 184, 0.2)',
-            }} />
-          </View>
-
-          {/* Role Cards - Compact with Animated Icons */}
-          <View>
-            {roleCards.map((card, index) => (
-              <AnimatedRoleCard
-                key={card.id}
-                id={card.id}
-                title={card.title}
-                color={card.color}
-                gradient={card.gradient}
-                isSelected={selectedRole === card.id}
-                onPress={() => handleRoleSelect(card.id)}
-                delay={index * 100}
+              <View
+                style={{
+                  flex: 1,
+                  height: 1,
+                  backgroundColor: 'rgba(148, 163, 184, 0.2)',
+                }}
               />
-            ))}
-          </View>
+              <Text
+                style={{
+                  color: '#94A3B8',
+                  marginHorizontal: 16,
+                  fontSize: 14,
+                  fontWeight: '500',
+                }}
+              >
+                OR CREATE NEW ACCOUNT
+              </Text>
+              <View
+                style={{
+                  flex: 1,
+                  height: 1,
+                  backgroundColor: 'rgba(148, 163, 184, 0.2)',
+                }}
+              />
+            </View>
 
-          {/* Footer */}
-          <Text style={{
-            color: '#64748B',
-            fontSize: 12,
-            textAlign: 'center',
-            marginTop: 32,
-            lineHeight: 18,
-          }}>
-            By continuing, you agree to our Terms of Service and Privacy Policy
-          </Text>
-        </View>
-      </ScrollView>
-    </View>
+            {/* Role Cards - Compact with Animated Icons */}
+            <View>
+              {roleCards.map((card, index) => (
+                <AnimatedRoleCard
+                  key={card.id}
+                  id={card.id}
+                  title={card.title}
+                  color={card.color}
+                  gradient={card.gradient}
+                  isSelected={selectedRole === card.id}
+                  onPress={() => handleRoleSelect(card.id)}
+                  delay={index * 100}
+                />
+              ))}
+            </View>
+
+            {/* Footer */}
+            <Text
+              style={{
+                color: '#64748B',
+                fontSize: 12,
+                textAlign: 'center',
+                marginTop: 32,
+                lineHeight: 18,
+              }}
+            >
+              By continuing, you agree to our Terms of Service and Privacy Policy
+            </Text>
+          </View>
+        </ScrollView>
+      </View>
     </AuthGuard>
   );
 };

@@ -5,7 +5,6 @@ import {
   Body,
   Param,
   Query,
-  UseGuards,
   HttpStatus,
   BadRequestException,
 } from "@nestjs/common";
@@ -17,8 +16,6 @@ import {
   ApiParam,
   ApiQuery,
 } from "@nestjs/swagger";
-import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
-import { RolesGuard } from "../../auth/guards/roles.guard";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
 import { PriceScenarioService } from "../services/price-scenario.service";
@@ -400,7 +397,6 @@ export class ScenarioController {
    */
   private identifyRiskZones(pricePoints: any[]): any[] {
     const zones = [];
-    const maxPrice = Math.max(...pricePoints.map((p) => p.buyerPrice));
     const minPrice = Math.min(...pricePoints.map((p) => p.buyerPrice));
 
     // Low risk zone (7%+ margin)
@@ -442,7 +438,6 @@ export class ScenarioController {
    * Generate strategy insights
    */
   private generateStrategyInsights(comparison: any[]): any {
-    const profits = comparison.map((c) => c.bestScenario.profitMargin);
     const bestForProfit = comparison.reduce((best, current) =>
       current.bestScenario.profitMargin > best.bestScenario.profitMargin
         ? current

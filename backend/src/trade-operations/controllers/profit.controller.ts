@@ -5,7 +5,6 @@ import {
   Body,
   Param,
   Query,
-  UseGuards,
   HttpStatus,
   BadRequestException,
 } from "@nestjs/common";
@@ -17,13 +16,10 @@ import {
   ApiParam,
   ApiQuery,
 } from "@nestjs/swagger";
-import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
-import { RolesGuard } from "../../auth/guards/roles.guard";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
 import { ProfitCalculationService } from "../services/profit-calculation.service";
 import {
-  ProfitCalculationRequestDto,
   ProfitEstimationDto,
   ProfitCalculationResponseDto,
   ProfitEstimationResponseDto,

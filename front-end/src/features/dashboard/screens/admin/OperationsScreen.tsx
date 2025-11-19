@@ -30,7 +30,12 @@ import {
 
 import { useTradeOperations } from './hooks/useTradeOperations';
 import { TransportMapModal } from './components/TransportMapModal';
-import type { BuyListing, SaleListing, TradeOperation, MatchingSeller } from '@services/tradeOperationService';
+import type {
+  BuyListing,
+  SaleListing,
+  TradeOperation,
+  MatchingSeller,
+} from '@services/tradeOperationService';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -45,7 +50,7 @@ export default function OperationsScreen() {
     profitCalculation,
     transportEstimate,
     activeNegotiations,
-    
+
     // Loading states
     isLoadingBuyListings,
     isLoadingSellListings,
@@ -54,7 +59,7 @@ export default function OperationsScreen() {
     isCalculatingProfit,
     isEstimatingTransport,
     isSendingOffers,
-    
+
     // Actions
     loadBuyListings,
     loadSellListings,
@@ -63,7 +68,7 @@ export default function OperationsScreen() {
     selectSellers,
     calculateProfit,
     sendBulkOffers,
-    
+
     // Error handling
     error,
     clearError,
@@ -79,7 +84,7 @@ export default function OperationsScreen() {
   const [showTransportMapModal, setShowTransportMapModal] = useState(false);
   const [negotiationPrices, setNegotiationPrices] = useState({
     buyer: '',
-    sellers: {} as Record<string, string>
+    sellers: {} as Record<string, string>,
   });
 
   // Create trade operation from selected buy listing
@@ -99,7 +104,7 @@ export default function OperationsScreen() {
     if (tradeOp) {
       setShowTradeCreationModal(false);
       setActiveView('current-trade');
-      
+
       // Automatically find matching sellers
       await findMatchingSellers(tradeOp.id, 200); // 200km max distance
     }
@@ -107,10 +112,8 @@ export default function OperationsScreen() {
 
   // Handle seller selection
   const handleSellerToggle = (sellerId: string) => {
-    setSelectedSellers(prev => 
-      prev.includes(sellerId) 
-        ? prev.filter(id => id !== sellerId)
-        : [...prev, sellerId]
+    setSelectedSellers((prev) =>
+      prev.includes(sellerId) ? prev.filter((id) => id !== sellerId) : [...prev, sellerId]
     );
   };
 
@@ -121,16 +124,21 @@ export default function OperationsScreen() {
       return;
     }
 
-    const sellersToAdd = selectedSellers.map(sellerId => {
-      const seller = matchingSellers.find(s => s.sellerId === sellerId);
-      if (!seller) return null;
-      
-      return {
-        sellerId: seller.sellerId,
-        saleListingId: seller.saleListingId,
-        requestedQuantity: Math.min(seller.availability, currentTradeOperation.buyListing.quantity),
-      };
-    }).filter(Boolean) as any[];
+    const sellersToAdd = selectedSellers
+      .map((sellerId) => {
+        const seller = matchingSellers.find((s) => s.sellerId === sellerId);
+        if (!seller) return null;
+
+        return {
+          sellerId: seller.sellerId,
+          saleListingId: seller.saleListingId,
+          requestedQuantity: Math.min(
+            seller.availability,
+            currentTradeOperation.buyListing.quantity
+          ),
+        };
+      })
+      .filter(Boolean) as any[];
 
     const success = await selectSellers(currentTradeOperation.id, sellersToAdd);
     if (success) {
@@ -154,9 +162,11 @@ export default function OperationsScreen() {
       .map(([sellerId, price]) => ({
         sellerId,
         price: parseFloat(price),
-        quantity: currentTradeOperation.selectedSellers?.find(s => s.sellerId === sellerId)?.requestedQuantity || 0
+        quantity:
+          currentTradeOperation.selectedSellers?.find((s) => s.sellerId === sellerId)
+            ?.requestedQuantity || 0,
       }))
-      .filter(offer => !isNaN(offer.price) && offer.quantity > 0);
+      .filter((offer) => !isNaN(offer.price) && offer.quantity > 0);
 
     if (sellerOffers.length === 0) {
       Alert.alert('Error', 'Please enter prices for all selected sellers');
@@ -180,22 +190,26 @@ export default function OperationsScreen() {
     <TouchableOpacity
       key={listing.id}
       className={`mb-4 p-4 rounded-lg border-2 ${
-        selectedBuyListing?.id === listing.id 
-          ? 'border-green-500 bg-green-50' 
+        selectedBuyListing?.id === listing.id
+          ? 'border-green-500 bg-green-50'
           : 'border-gray-200 bg-white'
       }`}
       onPress={() => setSelectedBuyListing(listing)}
     >
       <View className="flex-row justify-between items-start mb-2">
-        <Text className="text-lg font-bold text-gray-800">{listing.product?.name || 'Unknown Product'}</Text>
+        <Text className="text-lg font-bold text-gray-800">
+          {listing.product?.name || 'Unknown Product'}
+        </Text>
         <View className="px-2 py-1 rounded bg-blue-100">
           <Text className="text-blue-800 text-xs font-medium">{listing.status}</Text>
         </View>
       </View>
-      
+
       <Text className="text-gray-600 mb-1">{listing.buyer?.name || 'Unknown Buyer'}</Text>
-      <Text className="text-gray-600 mb-2">{listing.quantity} {listing.unit}</Text>
-      
+      <Text className="text-gray-600 mb-2">
+        {listing.quantity} {listing.unit}
+      </Text>
+
       <View className="flex-row justify-between items-center">
         <Text className="text-green-600 font-bold">
           ${listing.maxPricePerUnit}/{listing.unit}
@@ -228,10 +242,12 @@ export default function OperationsScreen() {
           <Text className="text-orange-800 text-xs">Match: {seller.matchScore}%</Text>
         </View>
       </View>
-      
+
       <Text className="text-gray-600 mb-1">{seller.saleListing.product.name}</Text>
-      <Text className="text-gray-600 mb-2">{seller.availability} {seller.saleListing.unit} available</Text>
-      
+      <Text className="text-gray-600 mb-2">
+        {seller.availability} {seller.saleListing.unit} available
+      </Text>
+
       <View className="flex-row justify-between items-center">
         <Text className="text-green-600 font-bold">
           ${seller.askingPrice}/{seller.saleListing.unit}
@@ -250,31 +266,35 @@ export default function OperationsScreen() {
     return (
       <View className="bg-white p-4 rounded-lg border border-gray-200 mb-4">
         <Text className="text-lg font-bold text-gray-800 mb-3">Profit Analysis</Text>
-        
+
         <View className="flex-row justify-between mb-2">
           <Text className="text-gray-600">Revenue:</Text>
-          <Text className="font-semibold">${profitCalculation.revenue.totalRevenue.toFixed(2)}</Text>
+          <Text className="font-semibold">
+            ${profitCalculation.revenue.totalRevenue.toFixed(2)}
+          </Text>
         </View>
-        
+
         <View className="flex-row justify-between mb-2">
           <Text className="text-gray-600">Total Costs:</Text>
           <Text className="font-semibold">${profitCalculation.costs.totalCosts.toFixed(2)}</Text>
         </View>
-        
+
         <View className="h-px bg-gray-200 my-2" />
-        
+
         <View className="flex-row justify-between mb-2">
           <Text className="text-gray-800 font-semibold">Net Profit:</Text>
           <Text className="font-bold text-green-600">
             ${profitCalculation.profit.netProfit.toFixed(2)}
           </Text>
         </View>
-        
+
         <View className="flex-row justify-between">
           <Text className="text-gray-800 font-semibold">Profit Margin:</Text>
-          <Text className={`font-bold ${
-            profitCalculation.profit.meetsMinimumMargin ? 'text-green-600' : 'text-red-600'
-          }`}>
+          <Text
+            className={`font-bold ${
+              profitCalculation.profit.meetsMinimumMargin ? 'text-green-600' : 'text-red-600'
+            }`}
+          >
             {profitCalculation.profit.profitMargin.toFixed(1)}%
           </Text>
         </View>
@@ -300,24 +320,24 @@ export default function OperationsScreen() {
             <Text className="text-blue-600 text-sm font-medium ml-1">View Map</Text>
           </TouchableOpacity>
         </View>
-        
+
         <View className="flex-row justify-between mb-2">
           <Text className="text-gray-600">Distance:</Text>
           <Text className="font-semibold">{transportEstimate.distance} km</Text>
         </View>
-        
+
         <View className="flex-row justify-between mb-2">
           <Text className="text-gray-600">Duration:</Text>
           <Text className="font-semibold">{Math.round(transportEstimate.duration / 60)} hours</Text>
         </View>
-        
+
         <View className="flex-row justify-between mb-2">
           <Text className="text-gray-600">Transport Cost:</Text>
           <Text className="font-semibold text-blue-600">
             ${transportEstimate.costs.totalCost.toFixed(2)}
           </Text>
         </View>
-        
+
         <View className="flex-row justify-between">
           <Text className="text-gray-600">Cost per km:</Text>
           <Text className="text-sm text-gray-500">
@@ -330,8 +350,11 @@ export default function OperationsScreen() {
 
   // Estimate transport when sellers are selected
   const handleEstimateTransport = async () => {
-    if (!currentTradeOperation || !currentTradeOperation.selectedSellers || 
-        !currentTradeOperation.buyListing.deliveryAddress) {
+    if (
+      !currentTradeOperation ||
+      !currentTradeOperation.selectedSellers ||
+      !currentTradeOperation.buyListing.deliveryAddress
+    ) {
       Alert.alert('Error', 'Missing seller or delivery information');
       return;
     }
@@ -342,14 +365,14 @@ export default function OperationsScreen() {
     const destination = {
       latitude: currentTradeOperation.buyListing.deliveryAddress.latitude || 41.8781,
       longitude: currentTradeOperation.buyListing.deliveryAddress.longitude || -87.6298,
-      address: currentTradeOperation.buyListing.deliveryAddress.address || 'Chicago, IL'
+      address: currentTradeOperation.buyListing.deliveryAddress.address || 'Chicago, IL',
     };
 
     const pickupLocations = currentTradeOperation.selectedSellers.map((seller, index) => ({
-      latitude: 42.0 + (index * 0.1), // Mock coordinates
-      longitude: -93.0 + (index * 0.1),
+      latitude: 42.0 + index * 0.1, // Mock coordinates
+      longitude: -93.0 + index * 0.1,
       address: seller.saleListing.address?.address || `Farm ${index + 1}`,
-      quantity: seller.requestedQuantity
+      quantity: seller.requestedQuantity,
     }));
 
     await estimateTransportCost({
@@ -357,7 +380,7 @@ export default function OperationsScreen() {
       pickupLocations,
       destination,
       quantity: currentTradeOperation.buyListing.quantity,
-      vehicleType: 'TRUCK'
+      vehicleType: 'TRUCK',
     });
   };
 
@@ -395,8 +418,8 @@ export default function OperationsScreen() {
         {[
           { id: 'buy-listings', label: 'Buy Orders', count: buyListings.length },
           { id: 'matching-sellers', label: 'Sellers', count: matchingSellers.length },
-          { id: 'current-trade', label: 'Active Trade', count: currentTradeOperation ? 1 : 0 }
-        ].map(tab => (
+          { id: 'current-trade', label: 'Active Trade', count: currentTradeOperation ? 1 : 0 },
+        ].map((tab) => (
           <TouchableOpacity
             key={tab.id}
             className={`flex-1 py-3 px-4 ${
@@ -404,9 +427,11 @@ export default function OperationsScreen() {
             }`}
             onPress={() => setActiveView(tab.id)}
           >
-            <Text className={`text-center font-medium ${
-              activeView === tab.id ? 'text-blue-600' : 'text-gray-600'
-            }`}>
+            <Text
+              className={`text-center font-medium ${
+                activeView === tab.id ? 'text-blue-600' : 'text-gray-600'
+              }`}
+            >
               {tab.label} ({tab.count})
             </Text>
           </TouchableOpacity>
@@ -474,7 +499,9 @@ export default function OperationsScreen() {
 
             {!currentTradeOperation ? (
               <View className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                <Text className="text-yellow-800">Create a trade operation first to find matching sellers</Text>
+                <Text className="text-yellow-800">
+                  Create a trade operation first to find matching sellers
+                </Text>
               </View>
             ) : isLoadingMatchingSellers ? (
               <View className="flex-1 justify-center items-center py-8">
@@ -484,7 +511,7 @@ export default function OperationsScreen() {
             ) : (
               <>
                 {matchingSellers.map(renderMatchingSellerCard)}
-                
+
                 {selectedSellers.length > 0 && (
                   <TouchableOpacity
                     onPress={handleAddSellers}
@@ -522,15 +549,20 @@ export default function OperationsScreen() {
                     Buyer: {currentTradeOperation.buyListing.buyer.name}
                   </Text>
                   <Text className="text-gray-600 mb-3">
-                    Quantity: {currentTradeOperation.buyListing.quantity} {currentTradeOperation.buyListing.unit}
+                    Quantity: {currentTradeOperation.buyListing.quantity}{' '}
+                    {currentTradeOperation.buyListing.unit}
                   </Text>
-                  
+
                   <View className="flex-row justify-between items-center">
-                    <Text className={`font-bold px-3 py-1 rounded ${
-                      currentTradeOperation.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                      currentTradeOperation.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <Text
+                      className={`font-bold px-3 py-1 rounded ${
+                        currentTradeOperation.status === 'ACTIVE'
+                          ? 'bg-green-100 text-green-800'
+                          : currentTradeOperation.status === 'IN_PROGRESS'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {currentTradeOperation.status}
                     </Text>
                     <Text className="text-sm text-gray-500">
@@ -543,39 +575,49 @@ export default function OperationsScreen() {
 
                 {renderTransportSummary()}
 
-                {currentTradeOperation.selectedSellers && currentTradeOperation.selectedSellers.length > 0 && (
-                  <TouchableOpacity
-                    onPress={handleEstimateTransport}
-                    disabled={isEstimatingTransport}
-                    className="mb-4 bg-blue-600 p-3 rounded-lg flex-row items-center justify-center"
-                  >
-                    {isEstimatingTransport ? (
-                      <ActivityIndicator color="white" />
-                    ) : (
-                      <>
-                        <Truck size={18} color="white" />
-                        <Text className="text-white font-medium ml-2">Estimate Transport</Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
-                )}
+                {currentTradeOperation.selectedSellers &&
+                  currentTradeOperation.selectedSellers.length > 0 && (
+                    <TouchableOpacity
+                      onPress={handleEstimateTransport}
+                      disabled={isEstimatingTransport}
+                      className="mb-4 bg-blue-600 p-3 rounded-lg flex-row items-center justify-center"
+                    >
+                      {isEstimatingTransport ? (
+                        <ActivityIndicator color="white" />
+                      ) : (
+                        <>
+                          <Truck size={18} color="white" />
+                          <Text className="text-white font-medium ml-2">Estimate Transport</Text>
+                        </>
+                      )}
+                    </TouchableOpacity>
+                  )}
 
-                {currentTradeOperation.selectedSellers && currentTradeOperation.selectedSellers.length > 0 && (
-                  <View className="bg-white p-4 rounded-lg border border-gray-200 mb-4">
-                    <Text className="text-lg font-bold text-gray-800 mb-3">Selected Sellers</Text>
-                    {currentTradeOperation.selectedSellers.map(seller => (
-                      <View key={seller.id} className="flex-row justify-between items-center py-2 border-b border-gray-100">
-                        <Text className="text-gray-800">{seller.saleListing.seller.name}</Text>
-                        <Text className="text-gray-600">{seller.requestedQuantity} {seller.saleListing.unit}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
+                {currentTradeOperation.selectedSellers &&
+                  currentTradeOperation.selectedSellers.length > 0 && (
+                    <View className="bg-white p-4 rounded-lg border border-gray-200 mb-4">
+                      <Text className="text-lg font-bold text-gray-800 mb-3">Selected Sellers</Text>
+                      {currentTradeOperation.selectedSellers.map((seller) => (
+                        <View
+                          key={seller.id}
+                          className="flex-row justify-between items-center py-2 border-b border-gray-100"
+                        >
+                          <Text className="text-gray-800">{seller.saleListing.seller.name}</Text>
+                          <Text className="text-gray-600">
+                            {seller.requestedQuantity} {seller.saleListing.unit}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
 
                 <TouchableOpacity
                   onPress={() => setShowNegotiationModal(true)}
                   className="bg-orange-600 p-4 rounded-lg flex-row items-center justify-center"
-                  disabled={!currentTradeOperation.selectedSellers || currentTradeOperation.selectedSellers.length === 0}
+                  disabled={
+                    !currentTradeOperation.selectedSellers ||
+                    currentTradeOperation.selectedSellers.length === 0
+                  }
                 >
                   <Send size={20} color="white" />
                   <Text className="text-white font-bold ml-2">Send Offers</Text>
@@ -610,7 +652,8 @@ export default function OperationsScreen() {
                     {selectedBuyListing.product.name} - {selectedBuyListing.buyer.name}
                   </Text>
                   <Text className="text-gray-600">
-                    {selectedBuyListing.quantity} {selectedBuyListing.unit} @ ${selectedBuyListing.maxPricePerUnit}/{selectedBuyListing.unit}
+                    {selectedBuyListing.quantity} {selectedBuyListing.unit} @ $
+                    {selectedBuyListing.maxPricePerUnit}/{selectedBuyListing.unit}
                   </Text>
                 </View>
 
@@ -669,24 +712,28 @@ export default function OperationsScreen() {
                     <Text className="text-gray-600 mb-2">Buyer Offer Price:</Text>
                     <TextInput
                       value={negotiationPrices.buyer}
-                      onChangeText={(value) => setNegotiationPrices(prev => ({ ...prev, buyer: value }))}
+                      onChangeText={(value) =>
+                        setNegotiationPrices((prev) => ({ ...prev, buyer: value }))
+                      }
                       placeholder={`${currentTradeOperation.buyListing.maxPricePerUnit}`}
                       keyboardType="numeric"
                       className="border border-gray-300 rounded-lg px-3 py-2 text-gray-800"
                     />
                   </View>
 
-                  {currentTradeOperation.selectedSellers?.map(seller => (
+                  {currentTradeOperation.selectedSellers?.map((seller) => (
                     <View key={seller.id} className="mb-4">
                       <Text className="text-gray-600 mb-2">
                         {seller.saleListing.seller.name} - Offer Price:
                       </Text>
                       <TextInput
                         value={negotiationPrices.sellers[seller.sellerId] || ''}
-                        onChangeText={(value) => setNegotiationPrices(prev => ({
-                          ...prev,
-                          sellers: { ...prev.sellers, [seller.sellerId]: value }
-                        }))}
+                        onChangeText={(value) =>
+                          setNegotiationPrices((prev) => ({
+                            ...prev,
+                            sellers: { ...prev.sellers, [seller.sellerId]: value },
+                          }))
+                        }
                         placeholder={`${seller.saleListing.askingPrice}`}
                         keyboardType="numeric"
                         className="border border-gray-300 rounded-lg px-3 py-2 text-gray-800"

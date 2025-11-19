@@ -1,37 +1,37 @@
-import React, { useEffect, useRef, useState } from 'react'
-import {
-  View,
-  Text,
-  Animated,
-  Platform,
-} from 'react-native'
-import { Check, Leaf } from 'lucide-react-native'
-import type { OnboardingStep } from '@shared/types/onboarding'
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, Animated, Platform } from 'react-native';
+import { Check, Leaf } from 'lucide-react-native';
+import type { OnboardingStep } from '@shared/types/onboarding';
 
 interface ProgressSidebarProps {
-  steps: OnboardingStep[]
-  currentStepIndex: number
-  progressLineHeight: number
-  isAnimating: boolean
+  steps: OnboardingStep[];
+  currentStepIndex: number;
+  progressLineHeight: number;
+  isAnimating: boolean;
 }
 
-export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, isAnimating }: ProgressSidebarProps) {
-  const progressAnimation = useRef(new Animated.Value(0)).current
-  const pulseAnimation = useRef(new Animated.Value(1)).current
-  const glowAnimation = useRef(new Animated.Value(0)).current
+export function ProgressSidebar({
+  steps,
+  currentStepIndex,
+  progressLineHeight,
+  isAnimating,
+}: ProgressSidebarProps) {
+  const progressAnimation = useRef(new Animated.Value(0)).current;
+  const pulseAnimation = useRef(new Animated.Value(1)).current;
+  const glowAnimation = useRef(new Animated.Value(0)).current;
 
   // Calculate progress based on completed steps
   useEffect(() => {
     const totalSteps = steps.length - 1;
     const completedSteps = currentStepIndex;
     const progressPercent = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
-    
+
     Animated.timing(progressAnimation, {
       toValue: progressPercent,
       duration: 800,
       useNativeDriver: false,
-    }).start()
-  }, [currentStepIndex, steps.length])
+    }).start();
+  }, [currentStepIndex, steps.length]);
 
   // Pulsating animation for current step
   useEffect(() => {
@@ -62,21 +62,21 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
           }),
         ]),
       ])
-    )
+    );
 
-    pulse.start()
-    return () => pulse.stop()
-  }, [currentStepIndex, pulseAnimation, glowAnimation])
+    pulse.start();
+    return () => pulse.stop();
+  }, [currentStepIndex, pulseAnimation, glowAnimation]);
 
   // Calculate centered positioning for steps with 60% coverage
   const [containerHeight, setContainerHeight] = useState(600); // Default height
   const containerRef = useRef<View>(null);
-  
+
   // Calculate dimensions
   const availableHeight = containerHeight * 0.6; // Use 60% of container height
   const stepSpacing = steps.length > 1 ? availableHeight / (steps.length - 1) : 0;
   const progressHeight = steps.length > 1 ? availableHeight : 0;
-  
+
   // Center the progress area vertically
   const logoHeight = 120; // Approximate logo section height
   const bottomPadding = 80; // Space for percentage display
@@ -85,7 +85,7 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
   const startOffset = logoHeight + verticalOffset;
 
   return (
-    <View 
+    <View
       ref={containerRef}
       style={{
         width: 75,
@@ -102,41 +102,49 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
       }}
     >
       {/* Logo Section */}
-      <View style={{
-        paddingTop: 24,
-        paddingBottom: 32,
-        alignItems: 'center',
-      }}>
-        <View style={{
-          width: 48,
-          height: 48,
-          borderRadius: 24,
-          backgroundColor: '#22C55E',
+      <View
+        style={{
+          paddingTop: 24,
+          paddingBottom: 32,
           alignItems: 'center',
-          justifyContent: 'center',
-          marginBottom: 8,
-        }}>
+        }}
+      >
+        <View
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            backgroundColor: '#22C55E',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 8,
+          }}
+        >
           <Leaf size={24} color="white" />
         </View>
-        <Text style={{
-          color: '#22C55E',
-          fontSize: 12,
-          fontWeight: 'bold',
-          letterSpacing: 1,
-        }}>
+        <Text
+          style={{
+            color: '#22C55E',
+            fontSize: 12,
+            fontWeight: 'bold',
+            letterSpacing: 1,
+          }}
+        >
           AGRO
         </Text>
-        <Text style={{
-          color: '#9CA3AF',
-          fontSize: 10,
-          fontWeight: '500',
-        }}>
+        <Text
+          style={{
+            color: '#9CA3AF',
+            fontSize: 10,
+            fontWeight: '500',
+          }}
+        >
           TRADE
         </Text>
       </View>
 
       {/* Progress Container */}
-      <View 
+      <View
         style={{
           position: 'absolute',
           width: '100%',
@@ -146,7 +154,7 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
         }}
       >
         {/* Progress Line Background */}
-        <View 
+        <View
           style={{
             position: 'absolute',
             backgroundColor: '#4B5563',
@@ -158,7 +166,7 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
           }}
         >
           {/* Animated Progress Line */}
-          <Animated.View 
+          <Animated.View
             style={{
               width: 2,
               backgroundColor: '#22C55E',
@@ -178,7 +186,7 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
           const isCompleted = index < currentStepIndex;
           const isCurrent = index === currentStepIndex;
           const isPending = index > currentStepIndex;
-          
+
           return (
             <View
               key={step.id}
@@ -190,7 +198,9 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
               }}
             >
               {/* Step Circle Container */}
-              <View style={{ alignItems: 'center', justifyContent: 'center', width: 40, height: 40 }}>
+              <View
+                style={{ alignItems: 'center', justifyContent: 'center', width: 40, height: 40 }}
+              >
                 {/* Glow effect for current step */}
                 {isCurrent && (
                   <Animated.View
@@ -204,16 +214,18 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
                         inputRange: [0, 1],
                         outputRange: [0.3, 0.6],
                       }),
-                      transform: [{ 
-                        scale: glowAnimation.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [1, 1.5],
-                        })
-                      }],
+                      transform: [
+                        {
+                          scale: glowAnimation.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [1, 1.5],
+                          }),
+                        },
+                      ],
                     }}
                   />
                 )}
-                
+
                 {/* Main Step Circle */}
                 <Animated.View
                   style={[
@@ -240,7 +252,7 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
                   {isCompleted ? (
                     <Check size={16} color="white" strokeWidth={3} />
                   ) : (
-                    <Text 
+                    <Text
                       style={{
                         fontSize: 14,
                         fontWeight: 'bold',
@@ -254,13 +266,15 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
               </View>
 
               {/* Step Labels - Below circles, show for all steps */}
-              <View style={{
-                position: 'absolute',
-                top: 40,
-                width: 80,
-                alignItems: 'center',
-              }}>
-                <Text 
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 40,
+                  width: 80,
+                  alignItems: 'center',
+                }}
+              >
+                <Text
                   style={{
                     fontSize: 10,
                     fontWeight: isCurrent ? '600' : '500',
@@ -272,7 +286,7 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
                 >
                   {step.title}
                 </Text>
-                <Text 
+                <Text
                   style={{
                     fontSize: 8,
                     color: isCurrent ? '#9CA3AF' : '#6B7280',
@@ -290,26 +304,32 @@ export function ProgressSidebar({ steps, currentStepIndex, progressLineHeight, i
       </View>
 
       {/* Progress Percentage Display */}
-      <View style={{
-        position: 'absolute',
-        bottom: 24,
-        alignItems: 'center',
-      }}>
-        <Text style={{
-          color: '#22C55E',
-          fontSize: 18,
-          fontWeight: 'bold',
-        }}>
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 24,
+          alignItems: 'center',
+        }}
+      >
+        <Text
+          style={{
+            color: '#22C55E',
+            fontSize: 18,
+            fontWeight: 'bold',
+          }}
+        >
           {Math.round((currentStepIndex / (steps.length - 1)) * 100)}%
         </Text>
-        <Text style={{
-          color: '#6B7280',
-          fontSize: 10,
-          marginTop: 2,
-        }}>
+        <Text
+          style={{
+            color: '#6B7280',
+            fontSize: 10,
+            marginTop: 2,
+          }}
+        >
           Complete
         </Text>
       </View>
     </View>
-  )
+  );
 }

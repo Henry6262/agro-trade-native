@@ -1,5 +1,9 @@
 import { format } from 'date-fns';
-import type { TransportJob, TransportPickupPoint, TransportDeliveryPoint } from '@services/transportService';
+import type {
+  TransportJob,
+  TransportPickupPoint,
+  TransportDeliveryPoint,
+} from '@services/transportService';
 import type { MapOffer } from '../../maps/types';
 import type { TransfersJobView, TransfersSummary } from '../types';
 
@@ -28,7 +32,9 @@ export const stageIndexFromStatus = (status?: string): number => {
 };
 
 const toLocationLabel = (point?: TransportPickupPoint | TransportDeliveryPoint): string =>
-  point?.address?.split(',')[0] || (point as TransportPickupPoint | undefined)?.sellerName || 'Location';
+  point?.address?.split(',')[0] ||
+  (point as TransportPickupPoint | undefined)?.sellerName ||
+  'Location';
 
 export const buildMapOffer = (job: TransportJob): MapOffer => {
   const pickupPoint = job.transportRequest?.pickupPoints?.[0];
@@ -67,8 +73,7 @@ export const buildMapOffer = (job: TransportJob): MapOffer => {
     deadline: job.estimatedArrival ? new Date(job.estimatedArrival) : new Date(),
     status: job.status?.toLowerCase() ?? 'assigned',
     estimatedValue: job.transportRequest?.maxBudget ?? 0,
-    productType:
-      job.transportRequest?.tradeOperation?.buyListing?.product?.name ?? 'Transport Job',
+    productType: job.transportRequest?.tradeOperation?.buyListing?.product?.name ?? 'Transport Job',
   };
 };
 

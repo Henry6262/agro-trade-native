@@ -12,7 +12,7 @@ export const ActiveJobTab: React.FC<ActiveJobTabProps> = ({
   onCompleteVerification,
 }) => {
   const [showVerificationForm, setShowVerificationForm] = useState(false);
-  
+
   // Use real current location or fallback to mock
   const inspectorCurrentLocation = currentLocation || {
     latitude: 42.6877,
@@ -76,15 +76,14 @@ export const ActiveJobTab: React.FC<ActiveJobTabProps> = ({
           initialRegion={{
             latitude: (inspectorCurrentLocation.latitude + activeJob.location.latitude) / 2,
             longitude: (inspectorCurrentLocation.longitude + activeJob.location.longitude) / 2,
-            latitudeDelta: Math.abs(inspectorCurrentLocation.latitude - activeJob.location.latitude) * 1.5,
-            longitudeDelta: Math.abs(inspectorCurrentLocation.longitude - activeJob.location.longitude) * 1.5,
+            latitudeDelta:
+              Math.abs(inspectorCurrentLocation.latitude - activeJob.location.latitude) * 1.5,
+            longitudeDelta:
+              Math.abs(inspectorCurrentLocation.longitude - activeJob.location.longitude) * 1.5,
           }}
         >
           {/* Inspector Current Location Marker */}
-          <Marker
-            coordinate={inspectorCurrentLocation}
-            title="Your Location"
-          >
+          <Marker coordinate={inspectorCurrentLocation} title="Your Location">
             <View className="bg-blue-500 p-2 rounded-full">
               <Navigation size={20} color="white" />
             </View>

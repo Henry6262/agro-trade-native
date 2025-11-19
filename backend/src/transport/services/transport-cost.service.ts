@@ -122,7 +122,7 @@ export class TransportCostService {
         appliedRate: ratePerKm,
       },
       route: {
-        pickupSequence: this.createPickupSequence(pickupPoints, totalDistance),
+        pickupSequence: this.createPickupSequence(pickupPoints),
         deliveryPoint,
         optimizationApplied: false, // Will be set by RouteOptimizationService
       },
@@ -260,7 +260,6 @@ export class TransportCostService {
    */
   private createPickupSequence(
     pickupPoints: PickupPoint[],
-    totalDistance: number,
   ): Array<PickupPoint & { distanceToNext: number }> {
     const sequence: Array<PickupPoint & { distanceToNext: number }> = [];
 

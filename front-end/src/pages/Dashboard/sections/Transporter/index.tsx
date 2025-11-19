@@ -6,7 +6,9 @@ import TransporterTransfersFeature from './features/Transfers';
 import TransporterFleetFeature from './features/Fleet';
 import TransporterBiddingFeature from './features/Bidding';
 
-export function TransporterDashboardSection({ activeTab = 'offers' }: TransporterDashboardSectionProps) {
+export function TransporterDashboardSection({
+  activeTab = 'offers',
+}: TransporterDashboardSectionProps) {
   if (activeTab === 'jobs') {
     return <TransporterJobsFeature />;
   }

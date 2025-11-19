@@ -40,10 +40,10 @@ export interface BuyerRequestCreationData {
   location: LocationData | null;
 }
 
-export type BuyerRequestCreationStep = 
-  | 'product-selection' 
-  | 'quantity-price' 
-  | 'product-specifications' 
+export type BuyerRequestCreationStep =
+  | 'product-selection'
+  | 'quantity-price'
+  | 'product-specifications'
   | 'location-confirmation'
   | 'submit';
 

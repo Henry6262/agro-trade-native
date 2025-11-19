@@ -42,10 +42,10 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
       ...prev,
       [field]: value,
     }));
-    
+
     // Clear error for this field
     if (errors[field]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
@@ -65,19 +65,19 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!editedProduct?.quantity || editedProduct.quantity <= 0) {
       newErrors.quantity = 'Quantity must be greater than 0';
     }
-    
+
     if (!editedProduct?.location?.city) {
       newErrors.city = 'City is required';
     }
-    
+
     if (!editedProduct?.location?.country) {
       newErrors.country = 'Country is required';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -86,7 +86,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
     if (!validateForm()) {
       return;
     }
-    
+
     setIsLoading(true);
     try {
       await onSave(editedProduct);
@@ -99,37 +99,25 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      'Delete Product',
-      'Are you sure you want to delete this product listing?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: () => {
-            onDelete();
-            onClose();
-          }
+    Alert.alert('Delete Product', 'Are you sure you want to delete this product listing?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          onDelete();
+          onClose();
         },
-      ]
-    );
+      },
+    ]);
   };
 
   if (!editedProduct) return null;
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
       <View className="flex-1 bg-black/50">
-        <View 
-          className="bg-neutral-900 rounded-t-3xl mt-20"
-          style={{ flex: 1 }}
-        >
+        <View className="bg-neutral-900 rounded-t-3xl mt-20" style={{ flex: 1 }}>
           {/* Header */}
           <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
             <View className="flex-1">
@@ -144,7 +132,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
           </View>
 
           {/* Content */}
-          <ScrollView 
+          <ScrollView
             className="flex-1 px-6"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 100 }}
@@ -160,12 +148,8 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                   />
                 </View>
               )}
-              <Text className="text-2xl font-bold text-white">
-                {editedProduct.name}
-              </Text>
-              <Text className="text-neutral-400 text-sm mt-1">
-                {editedProduct.category}
-              </Text>
+              <Text className="text-2xl font-bold text-white">{editedProduct.name}</Text>
+              <Text className="text-neutral-400 text-sm mt-1">{editedProduct.category}</Text>
             </View>
 
             {/* Quantity */}
@@ -198,7 +182,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
               <Text className="text-lg font-semibold text-green-400 mb-3 flex-row items-center">
                 <MapPin size={20} /> Location Details
               </Text>
-              
+
               {/* Address */}
               <View className="mb-3">
                 <Text className="text-neutral-300 mb-2">Address</Text>
@@ -210,7 +194,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                   className="bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
                 />
               </View>
-              
+
               {/* City */}
               <View className="mb-3">
                 <Text className="text-neutral-300 mb-2">
@@ -225,11 +209,9 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                     errors.city ? 'border-red-500' : 'border-neutral-600'
                   } rounded-lg px-3 py-2 text-white`}
                 />
-                {errors.city && (
-                  <Text className="text-red-400 text-xs mt-1">{errors.city}</Text>
-                )}
+                {errors.city && <Text className="text-red-400 text-xs mt-1">{errors.city}</Text>}
               </View>
-              
+
               {/* Region/State */}
               <View className="mb-3">
                 <Text className="text-neutral-300 mb-2">Region/State</Text>
@@ -241,7 +223,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                   className="bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
                 />
               </View>
-              
+
               {/* Country */}
               <View className="mb-3">
                 <Text className="text-neutral-300 mb-2">
@@ -263,35 +245,34 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
             </View>
 
             {/* Specifications (if any) */}
-            {editedProduct.specifications && Object.keys(editedProduct.specifications).length > 0 && (
-              <View className="mb-4">
-                <Text className="text-lg font-semibold text-green-400 mb-3">
-                  Specifications
-                </Text>
-                {Object.entries(editedProduct.specifications).map(([key, value]) => (
-                  <View key={key} className="mb-3">
-                    <Text className="text-neutral-300 mb-2 capitalize">
-                      {key.replace(/_/g, ' ')}
-                    </Text>
-                    <TextInput
-                      value={String(value || '')}
-                      onChangeText={(text) => {
-                        setEditedProduct((prev: any) => ({
-                          ...prev,
-                          specifications: {
-                            ...prev.specifications,
-                            [key]: text,
-                          },
-                        }));
-                      }}
-                      placeholder={`Enter ${key}`}
-                      placeholderTextColor="#6B7280"
-                      className="bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
-                    />
-                  </View>
-                ))}
-              </View>
-            )}
+            {editedProduct.specifications &&
+              Object.keys(editedProduct.specifications).length > 0 && (
+                <View className="mb-4">
+                  <Text className="text-lg font-semibold text-green-400 mb-3">Specifications</Text>
+                  {Object.entries(editedProduct.specifications).map(([key, value]) => (
+                    <View key={key} className="mb-3">
+                      <Text className="text-neutral-300 mb-2 capitalize">
+                        {key.replace(/_/g, ' ')}
+                      </Text>
+                      <TextInput
+                        value={String(value || '')}
+                        onChangeText={(text) => {
+                          setEditedProduct((prev: any) => ({
+                            ...prev,
+                            specifications: {
+                              ...prev.specifications,
+                              [key]: text,
+                            },
+                          }));
+                        }}
+                        placeholder={`Enter ${key}`}
+                        placeholderTextColor="#6B7280"
+                        className="bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
+                      />
+                    </View>
+                  ))}
+                </View>
+              )}
 
             {/* Delete Button */}
             <TouchableOpacity
@@ -299,9 +280,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
               className="bg-red-500/10 border border-red-500 py-3 px-6 rounded-lg flex-row items-center justify-center mt-6"
             >
               <Trash2 color="#ef4444" size={20} />
-              <Text className="text-red-500 font-semibold ml-2">
-                Delete Product Listing
-              </Text>
+              <Text className="text-red-500 font-semibold ml-2">Delete Product Listing</Text>
             </TouchableOpacity>
           </ScrollView>
 
@@ -319,9 +298,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
               ) : (
                 <>
                   <Save color="#ffffff" size={20} />
-                  <Text className="text-white text-center font-semibold ml-2">
-                    Save Changes
-                  </Text>
+                  <Text className="text-white text-center font-semibold ml-2">Save Changes</Text>
                 </>
               )}
             </TouchableOpacity>

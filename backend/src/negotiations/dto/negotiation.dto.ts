@@ -2,7 +2,6 @@ import {
   IsString,
   IsNumber,
   IsOptional,
-  IsEnum,
   IsArray,
   IsPositive,
   Min,
@@ -12,7 +11,6 @@ import {
 } from "class-validator";
 import { Type } from "class-transformer";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { NegotiationStatus } from "@prisma/client";
 
 // Request DTOs for new negotiation management
 

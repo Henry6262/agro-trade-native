@@ -9,15 +9,15 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { 
-  MapPin, 
-  Package, 
-  Edit2, 
+import {
+  MapPin,
+  Package,
+  Edit2,
   ChevronRight,
   DollarSign,
   ShoppingCart,
   Sparkles,
-  Weight
+  Weight,
 } from 'lucide-react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
@@ -50,7 +50,7 @@ export function QuantityPricingStep() {
   // Removed offer type - moved to final step
 
   const productId = selectedProducts[0];
-  const product = products.find(p => p.id === productId);
+  const product = products.find((p) => p.id === productId);
   const currentSpecs = sellerSpecifications[productId] || {};
 
   // Load existing data
@@ -75,7 +75,7 @@ export function QuantityPricingStep() {
     try {
       setLoadingLocation(true);
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
+
       if (status === 'granted') {
         const currentLocation = await Location.getCurrentPositionAsync({});
         const reverseGeocode = await Location.reverseGeocodeAsync({
@@ -88,7 +88,8 @@ export function QuantityPricingStep() {
           setLocation({
             latitude: currentLocation.coords.latitude,
             longitude: currentLocation.coords.longitude,
-            address: `${locationData.street || ''} ${locationData.city || ''} ${locationData.region || ''} ${locationData.country || ''}`.trim(),
+            address:
+              `${locationData.street || ''} ${locationData.city || ''} ${locationData.region || ''} ${locationData.country || ''}`.trim(),
             city: locationData.city || '',
             region: locationData.region || '',
             country: locationData.country || '',
@@ -123,7 +124,7 @@ export function QuantityPricingStep() {
     setSelectedQuantity(quantity);
     setShowCustomInput(false);
     setCustomQuantity('');
-    
+
     updateSellerSpecification(productId, {
       quantity: quantity.toString(),
       unit: product?.defaultUnit || 'TON',
@@ -138,7 +139,7 @@ export function QuantityPricingStep() {
   const handleCustomQuantityChange = (value: string) => {
     const numValue = value.replace(/[^0-9.]/g, '');
     setCustomQuantity(numValue);
-    
+
     if (numValue) {
       setSelectedQuantity(parseFloat(numValue));
       updateSellerSpecification(productId, {
@@ -150,13 +151,13 @@ export function QuantityPricingStep() {
 
   const handleContinue = () => {
     if (!isFormValid()) return;
-    
+
     // Save the quantity and location data
     updateSellerSpecification(productId, {
       quantity: getQuantity().toString(),
       unit: product?.defaultUnit || 'TON',
     });
-    
+
     // Go directly to the overview step
     nextStep();
   };
@@ -165,23 +166,21 @@ export function QuantityPricingStep() {
   const isFormValid = () => getQuantity() > 0 && location;
 
   // Mock price data - will be replaced with API call
-  const priceOffer = product ? {
-    min: parseFloat(product.priceRangeMin || '0'),
-    max: parseFloat(product.priceRangeMax || '0'),
-    currency: 'USD',
-  } : null;
+  const priceOffer = product
+    ? {
+        min: parseFloat(product.priceRangeMin || '0'),
+        max: parseFloat(product.priceRangeMax || '0'),
+        currency: 'USD',
+      }
+    : null;
 
   return (
     <OnboardingLayout>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="mb-6">
-          <Text className="text-3xl font-bold text-white mb-2">
-            Quantity & Location
-          </Text>
-          <Text className="text-gray-400">
-            Set your supply quantity and confirm your location
-          </Text>
+          <Text className="text-3xl font-bold text-white mb-2">Quantity & Location</Text>
+          <Text className="text-gray-400">Set your supply quantity and confirm your location</Text>
         </View>
 
         {/* Product Info */}
@@ -189,10 +188,10 @@ export function QuantityPricingStep() {
           <View className="bg-gray-800/50 rounded-xl p-4 mb-6 flex-row items-center">
             {product.image && (
               <Image
-                source={{ 
-                  uri: product.image.startsWith('http') 
-                    ? product.image 
-                    : `${getApiUrl().replace('/api', '')}/static/${product.image}`
+                source={{
+                  uri: product.image.startsWith('http')
+                    ? product.image
+                    : `${getApiUrl().replace('/api', '')}/static/${product.image}`,
                 }}
                 style={{ width: 60, height: 60 }}
                 className="rounded-xl mr-4"
@@ -203,21 +202,17 @@ export function QuantityPricingStep() {
               <Text className="text-white text-lg font-semibold">
                 {product.displayName || product.name}
               </Text>
-              <Text className="text-gray-400 text-sm">
-                {product.category.replace(/_/g, ' ')}
-              </Text>
+              <Text className="text-gray-400 text-sm">{product.category.replace(/_/g, ' ')}</Text>
             </View>
           </View>
         )}
 
         {/* Location Section */}
         <View className="mb-6">
-          <Text className="text-white text-base font-semibold mb-3">
-            Your Location
-          </Text>
-          
+          <Text className="text-white text-base font-semibold mb-3">Your Location</Text>
+
           {!showManualLocation ? (
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowManualLocation(true)}
               className="bg-gray-800/50 rounded-xl p-4 flex-row items-center justify-between"
             >
@@ -238,9 +233,7 @@ export function QuantityPricingStep() {
                       )}
                     </>
                   ) : (
-                    <Text className="text-gray-400">
-                      Tap to set location
-                    </Text>
+                    <Text className="text-gray-400">Tap to set location</Text>
                   )}
                 </View>
               </View>
@@ -261,17 +254,13 @@ export function QuantityPricingStep() {
                   onPress={() => setShowManualLocation(false)}
                   className="flex-1 py-3 rounded-xl bg-gray-700"
                 >
-                  <Text className="text-center text-gray-300 font-medium">
-                    Cancel
-                  </Text>
+                  <Text className="text-center text-gray-300 font-medium">Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleManualLocation}
                   className="flex-1 py-3 rounded-xl bg-emerald-600"
                 >
-                  <Text className="text-center text-white font-medium">
-                    Set Location
-                  </Text>
+                  <Text className="text-center text-white font-medium">Set Location</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -286,13 +275,9 @@ export function QuantityPricingStep() {
               <Text className="text-white text-xl font-bold mx-2">
                 {priceOffer.min} - {priceOffer.max}
               </Text>
-              <Text className="text-emerald-100 text-sm">
-                /{product?.defaultUnit || 'TON'}
-              </Text>
+              <Text className="text-emerald-100 text-sm">/{product?.defaultUnit || 'TON'}</Text>
             </View>
-            <Text className="text-gray-400 text-xs mt-2">
-              Price range for your region
-            </Text>
+            <Text className="text-gray-400 text-xs mt-2">Price range for your region</Text>
           </View>
         )}
 
@@ -304,7 +289,7 @@ export function QuantityPricingStep() {
               How much can you supply?
             </Text>
           </View>
-          
+
           {/* Preset Quantities */}
           <View className="flex-row mb-3">
             {PRESET_QUANTITIES.map((qty) => (
@@ -313,33 +298,32 @@ export function QuantityPricingStep() {
                 onPress={() => handleQuantitySelect(qty)}
                 className="flex-1 mx-1"
               >
-                <View className={`py-4 rounded-2xl border-2 ${
-                  selectedQuantity === qty && !showCustomInput
-                    ? 'bg-emerald-600/20 border-emerald-500'
-                    : 'bg-gray-900/50 border-gray-800'
-                }`}>
-                  <Text className={`text-center text-lg font-bold ${
+                <View
+                  className={`py-4 rounded-2xl border-2 ${
                     selectedQuantity === qty && !showCustomInput
-                      ? 'text-emerald-400'
-                      : 'text-gray-300'
-                  }`}>
+                      ? 'bg-emerald-600/20 border-emerald-500'
+                      : 'bg-gray-900/50 border-gray-800'
+                  }`}
+                >
+                  <Text
+                    className={`text-center text-lg font-bold ${
+                      selectedQuantity === qty && !showCustomInput
+                        ? 'text-emerald-400'
+                        : 'text-gray-300'
+                    }`}
+                  >
                     {qty}/t
                   </Text>
                 </View>
               </TouchableOpacity>
             ))}
           </View>
-          
+
           {/* Custom Amount */}
           {!showCustomInput ? (
-            <TouchableOpacity
-              onPress={handleCustomQuantity}
-              className="mb-3"
-            >
+            <TouchableOpacity onPress={handleCustomQuantity} className="mb-3">
               <View className="py-4 rounded-2xl border-2 bg-gray-900/50 border-gray-800">
-                <Text className="text-center text-gray-400 font-medium">
-                  Custom Amount
-                </Text>
+                <Text className="text-center text-gray-400 font-medium">Custom Amount</Text>
               </View>
             </TouchableOpacity>
           ) : (
@@ -374,9 +358,7 @@ export function QuantityPricingStep() {
             className="bg-emerald-600 rounded-xl py-4 mb-4"
           >
             <View className="flex-row items-center justify-center">
-              <Text className="text-white font-semibold text-base mr-2">
-                Continue
-              </Text>
+              <Text className="text-white font-semibold text-base mr-2">Continue</Text>
               <ChevronRight size={20} color="white" />
             </View>
           </TouchableOpacity>

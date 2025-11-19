@@ -8,13 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import MapView, { 
-  Marker, 
-  PROVIDER_GOOGLE, 
-  Region, 
-  LatLng,
-  Circle,
-} from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE, Region, LatLng, Circle } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { MapPin, Search, Navigation, Check, X } from 'lucide-react-native';
 import { Button } from './Button';
@@ -63,18 +57,24 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   showUserLocation = true,
   showSearchBar = true,
   height = 400,
-  title = "Select Location",
-  confirmButtonText = "Confirm Location",
+  title = 'Select Location',
+  confirmButtonText = 'Confirm Location',
   style,
 }) => {
   // State
   const [currentRegion, setCurrentRegion] = useState<Region>(
-    initialLocation 
-      ? { ...initialLocation, latitudeDelta: DEFAULT_LATITUDE_DELTA, longitudeDelta: DEFAULT_LONGITUDE_DELTA }
+    initialLocation
+      ? {
+          ...initialLocation,
+          latitudeDelta: DEFAULT_LATITUDE_DELTA,
+          longitudeDelta: DEFAULT_LONGITUDE_DELTA,
+        }
       : INITIAL_REGION
   );
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(
-    initialLocation ? { latitude: initialLocation.latitude, longitude: initialLocation.longitude } : null
+    initialLocation
+      ? { latitude: initialLocation.latitude, longitude: initialLocation.longitude }
+      : null
   );
   const [userLocation, setUserLocation] = useState<LatLng | null>(null);
   const [mapReady, setMapReady] = useState(false);
@@ -97,10 +97,10 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   const initializeUserLocation = async () => {
     try {
       setIsLoadingLocation(true);
-      
+
       // Check permissions
       const { status } = await Location.getForegroundPermissionsAsync();
-      
+
       if (status !== 'granted') {
         const permissionResponse = await Location.requestForegroundPermissionsAsync();
         if (permissionResponse.status !== 'granted') {
@@ -108,21 +108,21 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
           return;
         }
       }
-      
+
       setLocationPermissionGranted(true);
-      
+
       // Get current location
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
-      
+
       const userCoords = {
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       };
-      
+
       setUserLocation(userCoords);
-      
+
       // Center map on user location if no initial location provided
       if (!initialLocation && mapRef.current) {
         const region = {
@@ -130,11 +130,10 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
           latitudeDelta: DEFAULT_LATITUDE_DELTA,
           longitudeDelta: DEFAULT_LONGITUDE_DELTA,
         };
-        
+
         setCurrentRegion(region);
         mapRef.current.animateToRegion(region, MAP_ANIMATION_DURATION);
       }
-      
     } catch (error) {
       console.error('Failed to get user location:', error);
       Alert.alert(
@@ -155,7 +154,7 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
         latitudeDelta: currentRegion.latitudeDelta,
         longitudeDelta: currentRegion.longitudeDelta,
       };
-      
+
       mapRef.current.animateToRegion(region, MAP_ANIMATION_DURATION);
     }
   }, [userLocation, currentRegion]);
@@ -163,17 +162,17 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   // Handle map press to select location
   const handleMapPress = async (event: any) => {
     const coordinate = event.nativeEvent.coordinate;
-    
+
     setSelectedLocation({
       latitude: coordinate.latitude,
       longitude: coordinate.longitude,
     });
-    
+
     onLocationSelect?.({
       latitude: coordinate.latitude,
       longitude: coordinate.longitude,
     });
-    
+
     // Start reverse geocoding
     await reverseGeocodeLocation(coordinate.latitude, coordinate.longitude);
   };
@@ -182,22 +181,22 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   const reverseGeocodeLocation = async (latitude: number, longitude: number) => {
     try {
       setIsLoadingAddress(true);
-      
+
       // Use expo-location reverse geocoding directly
       // (Backend endpoint doesn't exist yet, skip the API call)
       const [address] = await Location.reverseGeocodeAsync({
         latitude,
         longitude,
       });
-      
+
       const streetAddress = address
         ? `${address.streetNumber || ''} ${address.street || ''}`.trim() || address.name || ''
         : '';
-      
+
       const formattedAddress = address
         ? `${streetAddress} ${address.city || ''} ${address.region || ''} ${address.country || ''}`.trim()
         : `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
-      
+
       const updatedLocation: SelectedLocation = {
         latitude,
         longitude,
@@ -207,20 +206,19 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
         country: address?.country || 'Unknown Country',
         formattedAddress,
       };
-      
+
       setSelectedLocation(updatedLocation);
       onLocationSelect?.(updatedLocation);
-      
     } catch (error) {
       console.error('Reverse geocoding failed:', error);
-      
+
       // Fallback to coordinates
       const updatedLocation: SelectedLocation = {
         latitude,
         longitude,
         formattedAddress: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
       };
-      
+
       setSelectedLocation(updatedLocation);
       onLocationSelect?.(updatedLocation);
     } finally {
@@ -234,7 +232,7 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
       onLocationConfirm?.(selectedLocation);
     } else {
       Alert.alert(
-        'No Location Selected', 
+        'No Location Selected',
         'Please tap on the map to select a location before confirming.',
         [{ text: 'OK' }]
       );
@@ -257,10 +255,10 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   ];
 
   return (
-    <View 
+    <View
       style={[
         { flex: 1, backgroundColor: '#1F2937' }, // Always use flex: 1 for full height
-        style
+        style,
       ]}
     >
       {/* Header - Only show if title is provided */}
@@ -371,20 +369,17 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
                 <View className="flex-1">
                   <Text className="text-gray-900 font-medium text-sm">Selected Location</Text>
                   <Text className="text-gray-600 text-xs mt-0.5" numberOfLines={2}>
-                    {isLoadingAddress 
-                      ? 'Getting address...' 
-                      : selectedLocation.formattedAddress || `${selectedLocation.latitude.toFixed(6)}, ${selectedLocation.longitude.toFixed(6)}`
-                    }
+                    {isLoadingAddress
+                      ? 'Getting address...'
+                      : selectedLocation.formattedAddress ||
+                        `${selectedLocation.latitude.toFixed(6)}, ${selectedLocation.longitude.toFixed(6)}`}
                   </Text>
                 </View>
-                <TouchableOpacity
-                  onPress={handleClearLocation}
-                  className="ml-2 p-1"
-                >
+                <TouchableOpacity onPress={handleClearLocation} className="ml-2 p-1">
                   <X size={18} color="#6B7280" />
                 </TouchableOpacity>
               </View>
-              
+
               {onLocationConfirm && (
                 <View className="flex-row mt-2">
                   <TouchableOpacity

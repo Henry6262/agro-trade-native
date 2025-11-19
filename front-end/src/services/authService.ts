@@ -1,11 +1,5 @@
 import { apiClient } from './api';
-import {
-  User,
-  LoginForm,
-  RegisterForm,
-  ApiResponse,
-  UserRole,
-} from '../shared/types';
+import { User, LoginForm, RegisterForm, ApiResponse, UserRole } from '../shared/types';
 
 export interface LoginResponse {
   user: User;
@@ -52,12 +46,14 @@ export interface RegisterWithCompanyDto {
 export const authService = {
   // User authentication
   login: async (credentials: LoginForm): Promise<LoginResponse> => {
-    return apiClient.post<ApiResponse<LoginResponse>>('/auth/login', credentials)
+    return apiClient
+      .post<ApiResponse<LoginResponse>>('/auth/login', credentials)
       .then((response) => response.data);
   },
 
   register: async (userData: RegisterForm): Promise<RegisterResponse> => {
-    return apiClient.post<ApiResponse<RegisterResponse>>('/auth/register', userData)
+    return apiClient
+      .post<ApiResponse<RegisterResponse>>('/auth/register', userData)
       .then((response) => response.data);
   },
 
@@ -66,9 +62,11 @@ export const authService = {
   },
 
   refreshToken: async (refreshToken: string): Promise<{ token: string }> => {
-    return apiClient.post<ApiResponse<{ token: string }>>('/auth/refresh', {
-      refreshToken,
-    }).then((response) => response.data);
+    return apiClient
+      .post<ApiResponse<{ token: string }>>('/auth/refresh', {
+        refreshToken,
+      })
+      .then((response) => response.data);
   },
 
   forgotPassword: async (email: string): Promise<void> => {
@@ -84,12 +82,12 @@ export const authService = {
 
   // User profile
   getProfile: async (): Promise<User> => {
-    return apiClient.get<ApiResponse<User>>('/auth/profile')
-      .then((response) => response.data);
+    return apiClient.get<ApiResponse<User>>('/auth/profile').then((response) => response.data);
   },
 
   updateProfile: async (userData: Partial<User>): Promise<User> => {
-    return apiClient.put<ApiResponse<User>>('/auth/profile', userData)
+    return apiClient
+      .put<ApiResponse<User>>('/auth/profile', userData)
       .then((response) => response.data);
   },
 
@@ -111,10 +109,11 @@ export const authService = {
 
   // Social authentication
   googleAuth: async (token: string): Promise<GoogleAuthResponse> => {
-    return apiClient.post<ApiResponse<GoogleAuthResponse>>('/auth/google', { token })
+    return apiClient
+      .post<ApiResponse<GoogleAuthResponse>>('/auth/google', { token })
       .then((response) => response.data);
   },
-  
+
   // Native Google Sign-In
   googleSignIn: async (data: {
     idToken: string;
@@ -124,20 +123,26 @@ export const authService = {
     googleId?: string;
     photo?: string | null;
   }): Promise<LoginResponse> => {
-    return apiClient.post<ApiResponse<LoginResponse>>('/auth/google/native', data)
+    return apiClient
+      .post<ApiResponse<LoginResponse>>('/auth/google/native', data)
       .then((response) => response.data);
   },
 
   // Onboarding registration
   registerWithCompany: async (data: RegisterWithCompanyDto): Promise<RegisterResponse> => {
-    return apiClient.post<ApiResponse<RegisterResponse>>('/auth/register-with-company', data)
+    return apiClient
+      .post<ApiResponse<RegisterResponse>>('/auth/register-with-company', data)
       .then((response) => response.data);
   },
 
   // Refresh token
-  refreshAccessToken: async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
-    return apiClient.post<ApiResponse<{ accessToken: string; refreshToken: string }>>('/auth/refresh', {
-      refreshToken,
-    }).then((response) => response.data);
+  refreshAccessToken: async (
+    refreshToken: string
+  ): Promise<{ accessToken: string; refreshToken: string }> => {
+    return apiClient
+      .post<ApiResponse<{ accessToken: string; refreshToken: string }>>('/auth/refresh', {
+        refreshToken,
+      })
+      .then((response) => response.data);
   },
 };

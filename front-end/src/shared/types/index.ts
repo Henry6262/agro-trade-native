@@ -97,7 +97,7 @@ export interface OrderItem {
   totalPrice: number;
 }
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'draft'
   | 'pending'
   | 'confirmed'
@@ -107,19 +107,14 @@ export type OrderStatus =
   | 'cancelled'
   | 'refunded';
 
-export type PaymentMethod = 
+export type PaymentMethod =
   | 'credit_card'
   | 'debit_card'
   | 'bank_transfer'
   | 'mobile_money'
   | 'cash_on_delivery';
 
-export type PaymentStatus = 
-  | 'pending'
-  | 'processing'
-  | 'completed'
-  | 'failed'
-  | 'refunded';
+export type PaymentStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'refunded';
 
 // API Response types
 export interface ApiResponse<T> {
@@ -426,8 +421,19 @@ export interface DeliveryTerms {
 }
 
 export type DeliveryMethod = 'pickup' | 'delivery' | 'shipping' | 'fob' | 'cif';
-export type OfferStatus = 'pending' | 'accepted' | 'rejected' | 'countered' | 'expired' | 'withdrawn';
-export type SpecificationCategory = 'quality' | 'physical' | 'processing' | 'certification' | 'other';
+export type OfferStatus =
+  | 'pending'
+  | 'accepted'
+  | 'rejected'
+  | 'countered'
+  | 'expired'
+  | 'withdrawn';
+export type SpecificationCategory =
+  | 'quality'
+  | 'physical'
+  | 'processing'
+  | 'certification'
+  | 'other';
 
 export interface BuyerRequest {
   id: string;
@@ -505,7 +511,12 @@ export interface CounterOffer {
   createdAt: string;
 }
 
-export type NegotiationType = 'price' | 'quantity' | 'specifications' | 'delivery' | 'comprehensive';
+export type NegotiationType =
+  | 'price'
+  | 'quantity'
+  | 'specifications'
+  | 'delivery'
+  | 'comprehensive';
 export type NegotiationStatus = 'pending' | 'accepted' | 'rejected' | 'countered' | 'expired';
 export type CounterOfferStatus = 'pending' | 'accepted' | 'rejected' | 'expired';
 

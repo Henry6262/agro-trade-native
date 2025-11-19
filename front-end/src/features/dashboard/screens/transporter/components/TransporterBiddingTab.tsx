@@ -72,7 +72,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
         currency: 'EUR',
         maximumFractionDigits: 0,
       }),
-    [],
+    []
   );
 
   const resolvedTransporterId = id ?? transporterId;
@@ -201,23 +201,16 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
       deadline: new Date(request.biddingDeadline),
       status: 'pending',
       estimatedValue: request.maxBudget ?? 0,
-      productType:
-        request.tradeOperation?.buyListing?.product?.name || 'Agricultural Goods',
+      productType: request.tradeOperation?.buyListing?.product?.name || 'Agricultural Goods',
     };
 
     setSelectedOffer(mapOffer);
     setIsMapDrawerOpen(true);
   };
 
-  const pendingBids = useMemo(
-    () => myBids.filter((bid) => bid.status === 'PENDING'),
-    [myBids],
-  );
+  const pendingBids = useMemo(() => myBids.filter((bid) => bid.status === 'PENDING'), [myBids]);
 
-  const acceptedBids = useMemo(
-    () => myBids.filter((bid) => bid.status === 'ACCEPTED'),
-    [myBids],
-  );
+  const acceptedBids = useMemo(() => myBids.filter((bid) => bid.status === 'ACCEPTED'), [myBids]);
 
   const winRate = useMemo(() => {
     if (myBids.length === 0) return '0%';
@@ -257,9 +250,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
         showsVerticalScrollIndicator={false}
         testID={testID}
         accessibilityLabel={accessibilityLabel}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View className="p-4 space-y-4">
           {/* Stats Grid */}
@@ -361,8 +352,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
             ) : (
               transportRequests.map((request) => {
                 const productName =
-                  request.tradeOperation?.buyListing?.product?.name ||
-                  'Agricultural Goods';
+                  request.tradeOperation?.buyListing?.product?.name || 'Agricultural Goods';
                 const pickupPoint: TransportPickupPoint | undefined = request.pickupPoints?.[0];
                 const deliveryPoint: TransportDeliveryPoint | undefined = request.deliveryPoint;
                 const pickupLabel = toLocationLabel(pickupPoint);
@@ -373,7 +363,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                 const pricePerKmDisplay =
                   request.lowestBid && request.estimatedDistance
                     ? `${currencyFormatter.format(
-                        request.lowestBid / Math.max(request.estimatedDistance, 1),
+                        request.lowestBid / Math.max(request.estimatedDistance, 1)
                       )}/km`
                     : '--';
                 const totalBids = request.bidsCount ?? 0;
@@ -388,9 +378,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                     <View className="mb-3">
                       <View className="flex-row items-start mb-3">
                         <View className="w-12 h-12 bg-gradient-to-br from-green-500/30 to-green-600/10 rounded-lg items-center justify-center border border-green-500/30">
-                          <Text className="text-xl">
-                            {productName.charAt(0).toUpperCase()}
-                          </Text>
+                          <Text className="text-xl">{productName.charAt(0).toUpperCase()}</Text>
                         </View>
                         <View className="ml-3 flex-1">
                           <Text className="font-bold text-white mb-2">
@@ -460,9 +448,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                           {lowestBidDisplay}
                         </Text>
                         <View className="flex-row justify-between">
-                          <Text className="text-xs text-neutral-400">
-                            {totalBids} bids
-                          </Text>
+                          <Text className="text-xs text-neutral-400">{totalBids} bids</Text>
                           <Text className="text-xs text-green-300 font-medium">
                             {pricePerKmDisplay}
                           </Text>

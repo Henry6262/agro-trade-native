@@ -30,10 +30,10 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
   selectedProducts = [],
 }) => {
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>(selectedProducts);
-  
+
   // Ensure products is always an array, handle both direct array and response object
   const productsRaw = useProductStore((state) => state.products);
-  const products = Array.isArray(productsRaw) ? productsRaw : (productsRaw?.data || []);
+  const products = Array.isArray(productsRaw) ? productsRaw : productsRaw?.data || [];
   const isLoadingProducts = useProductStore((state) => state.isLoadingProducts) || false;
   const fetchAllData = useProductStore((state) => state.fetchAllData);
 
@@ -41,7 +41,7 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
     // Fetch products only when drawer opens and products aren't loaded
     if (visible && !isLoadingProducts) {
       // Check if we need to fetch products
-      const currentProducts = Array.isArray(productsRaw) ? productsRaw : (productsRaw?.data || []);
+      const currentProducts = Array.isArray(productsRaw) ? productsRaw : productsRaw?.data || [];
       if (currentProducts.length === 0) {
         fetchAllData().catch((error) => {
           console.error('Error fetching products:', error);
@@ -55,7 +55,7 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
   }, [selectedProducts]);
 
   const handleProductSelect = (productId: string) => {
-    const product = products.find(p => p.id === productId);
+    const product = products.find((p) => p.id === productId);
     if (!product) return;
 
     if (mode === 'single') {
@@ -73,36 +73,39 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
     } else {
       // For multiple selection, toggle selection
       const newSelection = selectedProductIds.includes(productId)
-        ? selectedProductIds.filter(id => id !== productId)
+        ? selectedProductIds.filter((id) => id !== productId)
         : [...selectedProductIds, productId];
-      
+
       setSelectedProductIds(newSelection);
     }
   };
 
   // Group products by category
-  const groupedProducts = (products || []).reduce((acc, product) => {
-    const category = product.category || 'Other';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(product);
-    return acc;
-  }, {} as Record<string, typeof products>);
+  const groupedProducts = (products || []).reduce(
+    (acc, product) => {
+      const category = product.category || 'Other';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(product);
+      return acc;
+    },
+    {} as Record<string, typeof products>
+  );
 
   const getCategoryDisplayName = (category: string) => {
     const categoryNames: Record<string, string> = {
-      'SOFT_WHEAT': 'Soft Wheat',
-      'HARD_WHEAT': 'Hard Wheat',
-      'CORN': 'Corn',
-      'SOYBEANS': 'Soybeans',
-      'RICE': 'Rice',
-      'BARLEY': 'Barley',
-      'OATS': 'Oats',
-      'VEGETABLES': 'Vegetables',
-      'FRUITS': 'Fruits',
-      'DAIRY': 'Dairy',
-      'LIVESTOCK': 'Livestock',
+      SOFT_WHEAT: 'Soft Wheat',
+      HARD_WHEAT: 'Hard Wheat',
+      CORN: 'Corn',
+      SOYBEANS: 'Soybeans',
+      RICE: 'Rice',
+      BARLEY: 'Barley',
+      OATS: 'Oats',
+      VEGETABLES: 'Vegetables',
+      FRUITS: 'Fruits',
+      DAIRY: 'Dairy',
+      LIVESTOCK: 'Livestock',
     };
     return categoryNames[category] || category;
   };
@@ -113,7 +116,7 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
 
   // Use absolute positioning instead of Modal
   return (
-    <View 
+    <View
       style={{
         position: 'absolute',
         top: 0,
@@ -124,16 +127,16 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
         elevation: 999,
       }}
     >
-      <TouchableOpacity 
-        style={{ 
-          flex: 1, 
-          backgroundColor: 'rgba(0,0,0,0.5)' 
+      <TouchableOpacity
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
         }}
         activeOpacity={1}
         onPress={onClose}
       >
-        <View 
-          style={{ 
+        <View
+          style={{
             flex: 1,
             marginTop: Platform.OS === 'web' ? 80 : 100,
             backgroundColor: '#171717',
@@ -168,10 +171,7 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
               </TouchableOpacity>
             </View>
           ) : (
-            <ScrollView 
-              className="flex-1"
-              showsVerticalScrollIndicator={false}
-            >
+            <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
               <View className="p-6 space-y-6">
                 {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
                   <View key={category}>
@@ -190,8 +190,10 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
                           }`}
                         >
                           <Image
-                            source={{ 
-                              uri: product.image || 'https://via.placeholder.com/200x200/10B981/FFFFFF?text=Product' 
+                            source={{
+                              uri:
+                                product.image ||
+                                'https://via.placeholder.com/200x200/10B981/FFFFFF?text=Product',
                             }}
                             className="w-16 h-16 rounded-lg"
                             resizeMode="cover"

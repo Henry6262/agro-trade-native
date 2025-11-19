@@ -297,6 +297,18 @@ export class InspectionController {
     return missions.map((inspection) => this.serializeInspection(inspection));
   }
 
+  @Get("inspector/:inspectorId/active")
+  @ApiOperation({ summary: "Get active mission for inspector" })
+  @ApiOkResponse({
+    description: "Active mission or null",
+    type: InspectorMissionDto,
+  })
+  async getInspectorActiveMission(@Param("inspectorId") inspectorId: string) {
+    const mission =
+      await this.inspectionService.getActiveInspectorMission(inspectorId);
+    return mission ? this.serializeInspection(mission) : null;
+  }
+
   @Get("stats")
   @ApiOperation({ summary: "Get inspection statistics" })
   @ApiOkResponse({

@@ -59,7 +59,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   if (requireAuth && isAuthenticated) {
     return <>{children}</>;
   }
-  
+
   if (!requireAuth && !isAuthenticated) {
     return <>{children}</>;
   }

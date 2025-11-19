@@ -14,7 +14,11 @@ export const DriverCard: React.FC<DriverCardProps> = ({ driver }) => (
       <Text className="text-white font-semibold">{driver.name}</Text>
       <Badge
         text={driver.status === 'available' ? 'Available' : 'Assigned'}
-        className={driver.status === 'available' ? 'text-green-400 bg-green-500/10' : 'text-orange-400 bg-orange-500/10'}
+        className={
+          driver.status === 'available'
+            ? 'text-green-400 bg-green-500/10'
+            : 'text-orange-400 bg-orange-500/10'
+        }
       />
     </View>
     <Text className="text-gray-300 text-sm">CDL: {driver.license}</Text>

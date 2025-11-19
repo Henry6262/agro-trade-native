@@ -40,6 +40,16 @@ interface TradeOperation {
   transportJob?: any;
 }
 
+interface BuyerTimelineEvent {
+  id: string;
+  type: 'TRADE' | 'NEGOTIATION' | 'TRANSPORT' | 'INSPECTION';
+  title: string;
+  status: string;
+  timestamp: string;
+  description?: string;
+  metadata?: Record<string, unknown>;
+}
+
 class BuyerService {
   private getHeaders = async () => {
     let token = useAuthStore.getState().token;
@@ -228,6 +238,29 @@ class BuyerService {
       console.error('Error fetching delivery status:', error);
       throw error;
     }
+  }
+
+  // Get buyer timeline events
+  async getMyTimeline(limit = 20, cursor?: string): Promise<{
+    events: BuyerTimelineEvent[];
+    nextCursor: string | null;
+  }> {
+    const headers = await this.getHeaders();
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (cursor) {
+      params.append('cursor', cursor);
+    }
+
+    const response = await fetch(`${API_URL}/buyer/timeline?${params.toString()}`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch buyer timeline');
+    }
+
+    return await response.json();
   }
 }
 

@@ -22,6 +22,7 @@
 - [ ] Inventory mock data/modules still referenced in `front-end/src/features` or legacy screens.
 - [ ] Prioritize buyer + seller dashboards (per user direction) → replace mocks with live hooks/services.
 - [ ] Extend to transporter + inspector dashboards, ensuring shared onboarding components handle multi-role use.
+- [x] Wire transporter bidding summary to `/transport/me/analytics` so win-rate/completed job metrics come from the backend (2025-11-17).
 - [ ] Update shared stores + design-system usage to align with rulebook.
 - [ ] Add/refresh tests + docs; update `status.md` progress + `DAILY_LOG.md` entries.
 

@@ -54,11 +54,11 @@ export const useVerificationJobs = (): UseVerificationJobsReturn => {
     try {
       setIsLoading(true);
       setIsError(false);
-      
+
       // Fetch inspector's missions
       const inspections = await inspectionService.getInspectorMissions(user.id);
       const mappedJobs = inspections.map(mapInspectionToJob);
-      
+
       setJobs(mappedJobs);
     } catch (err) {
       console.error('Error fetching verification jobs:', err);
@@ -83,14 +83,14 @@ export const useVerificationJobs = (): UseVerificationJobsReturn => {
     try {
       // Assign inspector to the inspection
       await inspectionService.assignInspector(jobId, inspectorId);
-      
+
       // Update local state - mark job as assigned
-      setJobs(prev => prev.map(job => 
-        job.id === jobId 
-          ? { ...job, status: 'ASSIGNED' as any, inspectorId }
-          : job
-      ));
-      
+      setJobs((prev) =>
+        prev.map((job) =>
+          job.id === jobId ? { ...job, status: 'ASSIGNED' as any, inspectorId } : job
+        )
+      );
+
       console.log(`Job ${jobId} accepted by ${inspectorId}`);
     } catch (err) {
       console.error('Error accepting job:', err);
@@ -105,13 +105,14 @@ export const useVerificationJobs = (): UseVerificationJobsReturn => {
         qualityScore: result.qualityScore || 85,
         verificationResult: result.verifiedSpecs || {},
         notes: result.notes || '',
-        photos: result.evidence?.filter((e: any) => e.type === 'photo').map((e: any) => e.url) || [],
+        photos:
+          result.evidence?.filter((e: any) => e.type === 'photo').map((e: any) => e.url) || [],
         recommendVerification: result.verificationStatus === 'VERIFIED',
       });
-      
+
       // Update local state - mark job as completed
-      setJobs(prev => prev.filter(job => job.id !== jobId));
-      
+      setJobs((prev) => prev.filter((job) => job.id !== jobId));
+
       console.log(`Job ${jobId} completed`, result);
     } catch (err) {
       console.error('Error completing job:', err);

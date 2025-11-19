@@ -54,7 +54,7 @@ export interface SellerOfferMock {
     timeframe: string;
     method: string;
   };
-  specifications: Array<{ name: string; requirement: string; matches: boolean }>;
+  specifications: { name: string; requirement: string; matches: boolean }[];
   matchScore: number;
   totalValue: number;
   message: string;

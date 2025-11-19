@@ -1,7 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
-import { Decimal } from "@prisma/client/runtime/library";
-import { TradeOperation, TradeSeller, ProfitEstimation } from "@prisma/client";
+import { TradeSeller, ProfitEstimation } from "@prisma/client";
 
 export interface ProfitCalculation {
   tradeOperationId: string;

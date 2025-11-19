@@ -9,13 +9,11 @@ export default function WelcomeScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 items-center justify-center px-6">
-        <Text className="text-4xl font-bold text-gray-900 mb-2">
-          AgroTrade
-        </Text>
+        <Text className="text-4xl font-bold text-gray-900 mb-2">AgroTrade</Text>
         <Text className="text-lg text-gray-600 text-center mb-8">
           Connect farmers with buyers for fresh agricultural products
         </Text>
-        
+
         <View className="w-full space-y-4">
           <Button
             title="Get Started"

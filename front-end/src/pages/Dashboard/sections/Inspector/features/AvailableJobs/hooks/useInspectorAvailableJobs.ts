@@ -14,7 +14,10 @@ export const useInspectorAvailableJobs = (): InspectorAvailableJobsHookResult =>
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [priorityFilter, setPriorityFilter] = useState<InspectorJobPriority | null>(null);
   const [sortBy, setSortBy] = useState<'distance' | 'priority'>('distance');
-  const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -51,7 +54,10 @@ export const useInspectorAvailableJobs = (): InspectorAvailableJobsHookResult =>
       if (sortBy === 'distance') {
         return (a.distance || 0) - (b.distance || 0);
       }
-      return priorityOrder[a.priority as InspectorJobPriority] - priorityOrder[b.priority as InspectorJobPriority];
+      return (
+        priorityOrder[a.priority as InspectorJobPriority] -
+        priorityOrder[b.priority as InspectorJobPriority]
+      );
     });
   }, [jobs, priorityFilter, sortBy]);
 

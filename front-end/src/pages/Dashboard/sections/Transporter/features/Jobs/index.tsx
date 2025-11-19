@@ -32,7 +32,10 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
   const handleStartJob = useCallback(
     async (jobId: string) => {
       const result = await startJob(jobId);
-      Alert.alert(result.success ? 'Success' : 'Error', result.success ? 'Transport job started' : 'Failed to start job');
+      Alert.alert(
+        result.success ? 'Success' : 'Error',
+        result.success ? 'Transport job started' : 'Failed to start job'
+      );
     },
     [startJob]
   );
@@ -40,7 +43,10 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
   const handleCompletePickup = useCallback(
     async (jobId: string) => {
       const result = await completePickup(jobId);
-      Alert.alert(result.success ? 'Success' : 'Error', result.success ? 'Pickup completed' : 'Failed to complete pickup');
+      Alert.alert(
+        result.success ? 'Success' : 'Error',
+        result.success ? 'Pickup completed' : 'Failed to complete pickup'
+      );
     },
     [completePickup]
   );

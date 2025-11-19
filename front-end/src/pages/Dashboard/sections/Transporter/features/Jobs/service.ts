@@ -23,7 +23,8 @@ export interface TransporterDeliveryPayload {
 }
 
 export const transporterJobsService = {
-  fetchJobs: (filters?: TransporterJobFilters): Promise<TransportJob[]> => transportService.getMyJobs(filters),
+  fetchJobs: (filters?: TransporterJobFilters): Promise<TransportJob[]> =>
+    transportService.getMyJobs(filters),
   startJob: (jobId: string, payload?: TransporterJobStartPayload) =>
     transportService.startJob(jobId, payload),
   completePickup: (jobId: string, payload: TransporterPickupPayload) =>

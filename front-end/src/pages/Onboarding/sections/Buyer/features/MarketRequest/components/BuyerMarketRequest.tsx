@@ -1,24 +1,18 @@
-import React, { useState } from 'react'
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-} from 'react-native'
-import { MapPin, ShoppingCart, Info } from 'lucide-react-native'
-import type { ProductSpecification } from '@shared/types/onboarding'
-import { useOnboardingStore } from '@stores/onboarding.store'
-import { useProductStore } from '@stores/product.store'
-import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout'
-import { getApiUrl } from '@shared/utils/environment'
-import { BuyerSubmitDrawer } from './BuyerSubmitDrawer'
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { MapPin, ShoppingCart, Info } from 'lucide-react-native';
+import type { ProductSpecification } from '@shared/types/onboarding';
+import { useOnboardingStore } from '@stores/onboarding.store';
+import { useProductStore } from '@stores/product.store';
+import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
+import { getApiUrl } from '@shared/utils/environment';
+import { BuyerSubmitDrawer } from './BuyerSubmitDrawer';
 
 interface BuyerMarketRequestProps {
-  selectedProducts: string[]
-  specifications: ProductSpecification[]
-  onSpecificationsChange: (specifications: ProductSpecification[]) => void
-  onComplete?: () => void
+  selectedProducts: string[];
+  specifications: ProductSpecification[];
+  onSpecificationsChange: (specifications: ProductSpecification[]) => void;
+  onComplete?: () => void;
 }
 
 export function BuyerMarketRequest({
@@ -27,59 +21,59 @@ export function BuyerMarketRequest({
   onSpecificationsChange,
   onComplete,
 }: BuyerMarketRequestProps) {
-  const { 
-    selectedProductsMetadata, 
-    userLocation,
-    buyerSpecifications 
-  } = useOnboardingStore()
-  
-  const { products, getProductSpecifications } = useProductStore()
-  const [showSubmitDrawer, setShowSubmitDrawer] = useState(false)
+  const { selectedProductsMetadata, userLocation, buyerSpecifications } = useOnboardingStore();
+
+  const { products, getProductSpecifications } = useProductStore();
+  const [showSubmitDrawer, setShowSubmitDrawer] = useState(false);
 
   const handleComplete = () => {
-    console.log('Opening submit drawer for purchase request')
-    setShowSubmitDrawer(true)
-  }
-  
+    console.log('Opening submit drawer for purchase request');
+    setShowSubmitDrawer(true);
+  };
+
   const handleDrawerComplete = () => {
-    setShowSubmitDrawer(false)
-    onComplete?.()
-  }
+    setShowSubmitDrawer(false);
+    onComplete?.();
+  };
 
   // Get the selected product
-  const selectedProductId = selectedProducts[0]
-  const selectedProduct = products.find(p => p.id === selectedProductId)
-  const productMetadata = selectedProductsMetadata.find(m => m.id === selectedProductId)
-  const spec = specifications[0] || buyerSpecifications[selectedProductId]
+  const selectedProductId = selectedProducts[0];
+  const selectedProduct = products.find((p) => p.id === selectedProductId);
+  const productMetadata = selectedProductsMetadata.find((m) => m.id === selectedProductId);
+  const spec = specifications[0] || buyerSpecifications[selectedProductId];
 
   // Get product specifications from backend
-  const productSpecs = selectedProductId ? getProductSpecifications(selectedProductId) : []
+  const productSpecs = selectedProductId ? getProductSpecifications(selectedProductId) : [];
 
   // Calculate totals for single product
-  const quantity = parseFloat(spec?.quantity) || 0
-  const pricePerKilo = parseFloat(spec?.pricePerKilo) || 0
-  const quantityInKg = quantity * 1000 // Convert tons to kg
-  const totalBudget = quantityInKg * pricePerKilo
+  const quantity = parseFloat(spec?.quantity) || 0;
+  const pricePerKilo = parseFloat(spec?.pricePerKilo) || 0;
+  const quantityInKg = quantity * 1000; // Convert tons to kg
+  const totalBudget = quantityInKg * pricePerKilo;
 
   // Format currency with K, M suffixes
   const formatCurrency = (value: number) => {
     if (value >= 1000000) {
-      return `€${(value / 1000000).toFixed(1)}M`
+      return `€${(value / 1000000).toFixed(1)}M`;
     } else if (value >= 1000) {
-      return `€${(value / 1000).toFixed(1)}K`
+      return `€${(value / 1000).toFixed(1)}K`;
     }
-    return `€${value.toFixed(0)}`
-  }
+    return `€${value.toFixed(0)}`;
+  };
 
   // Get product image URL
-  const productImage = selectedProduct?.image || productMetadata?.image
-  const imageUrl = productImage ? (
-    productImage.startsWith('http') 
-      ? productImage 
+  const productImage = selectedProduct?.image || productMetadata?.image;
+  const imageUrl = productImage
+    ? productImage.startsWith('http')
+      ? productImage
       : `${getApiUrl().replace('/api', '')}/static/${productImage}`
-  ) : null
+    : null;
 
-  const productName = selectedProduct?.displayName || selectedProduct?.name || productMetadata?.name || 'Unknown Product'
+  const productName =
+    selectedProduct?.displayName ||
+    selectedProduct?.name ||
+    productMetadata?.name ||
+    'Unknown Product';
 
   return (
     <OnboardingLayout>
@@ -102,7 +96,8 @@ export function BuyerMarketRequest({
               <View className="ml-3 flex-1">
                 <Text className="text-gray-400 text-sm">Delivery Location</Text>
                 <Text className="text-white font-semibold">
-                  {userLocation.city}{userLocation.country && `, ${userLocation.country}`}
+                  {userLocation.city}
+                  {userLocation.country && `, ${userLocation.country}`}
                 </Text>
               </View>
             </View>
@@ -124,33 +119,27 @@ export function BuyerMarketRequest({
               </View>
             </View>
           )}
-          
+
           {/* Product Details */}
           <View className="p-5">
-            <Text className="text-white font-bold text-xl mb-3">
-              {productName}
-            </Text>
-            
+            <Text className="text-white font-bold text-xl mb-3">{productName}</Text>
+
             {/* Main Requirements */}
             <View className="bg-gray-900/50 rounded-lg p-4 mb-4">
               <Text className="text-gray-400 text-sm font-semibold mb-3">Requirements</Text>
-              
+
               {/* Quantity */}
               <View className="flex-row justify-between mb-2">
                 <Text className="text-gray-400">Quantity Required:</Text>
-                <Text className="text-white font-semibold">
-                  {spec?.quantity || '0'} tons
-                </Text>
+                <Text className="text-white font-semibold">{spec?.quantity || '0'} tons</Text>
               </View>
-              
+
               {/* Max Price */}
               <View className="flex-row justify-between mb-2">
                 <Text className="text-gray-400">Maximum Price:</Text>
-                <Text className="text-white font-semibold">
-                  €{pricePerKilo}/kg
-                </Text>
+                <Text className="text-white font-semibold">€{pricePerKilo}/kg</Text>
               </View>
-              
+
               {/* Total Budget */}
               <View className="flex-row justify-between pt-2 border-t border-gray-700">
                 <Text className="text-gray-400">Total Budget:</Text>
@@ -165,8 +154,8 @@ export function BuyerMarketRequest({
               <View className="bg-gray-900/50 rounded-lg p-4 mb-4">
                 <Text className="text-gray-400 text-sm font-semibold mb-3">Specifications</Text>
                 {productSpecs.map((prodSpec: any) => {
-                  const specKey = prodSpec.code || prodSpec.id
-                  const specValue = spec[specKey]
+                  const specKey = prodSpec.code || prodSpec.id;
+                  const specValue = spec[specKey];
                   if (specValue) {
                     return (
                       <View key={specKey} className="flex-row justify-between mb-2">
@@ -175,9 +164,9 @@ export function BuyerMarketRequest({
                           {specValue} {prodSpec.unit || ''}
                         </Text>
                       </View>
-                    )
+                    );
                   }
-                  return null
+                  return null;
                 })}
               </View>
             )}
@@ -185,17 +174,19 @@ export function BuyerMarketRequest({
             {/* Additional Notes */}
             {spec?.notes && (
               <View className="bg-gray-900/50 rounded-lg p-4">
-                <Text className="text-gray-400 text-sm font-semibold mb-2">Additional Requirements</Text>
-                <Text className="text-gray-300 text-sm">
-                  {spec.notes}
+                <Text className="text-gray-400 text-sm font-semibold mb-2">
+                  Additional Requirements
                 </Text>
+                <Text className="text-gray-300 text-sm">{spec.notes}</Text>
               </View>
             )}
 
             {/* Quality Requirements if any */}
             {spec?.qualityRequirements && spec.qualityRequirements.length > 0 && (
               <View className="bg-gray-900/50 rounded-lg p-4 mt-4">
-                <Text className="text-gray-400 text-sm font-semibold mb-2">Quality Requirements</Text>
+                <Text className="text-gray-400 text-sm font-semibold mb-2">
+                  Quality Requirements
+                </Text>
                 {spec.qualityRequirements.map((req: string, idx: number) => (
                   <View key={idx} className="flex-row items-center mb-1">
                     <Text className="text-gray-300 text-sm">• {req}</Text>
@@ -213,8 +204,8 @@ export function BuyerMarketRequest({
             <View className="ml-3 flex-1">
               <Text className="text-blue-400 font-semibold mb-1">How it Works</Text>
               <Text className="text-blue-300 text-sm">
-                Once submitted, your purchase request will be sent to verified sellers. 
-                You'll receive quotes within 24-48 hours and can choose the best offer.
+                Once submitted, your purchase request will be sent to verified sellers. You'll
+                receive quotes within 24-48 hours and can choose the best offer.
               </Text>
             </View>
           </View>
@@ -226,12 +217,10 @@ export function BuyerMarketRequest({
           className="bg-blue-500 rounded-xl py-4 px-6 flex-row justify-center items-center"
         >
           <ShoppingCart size={20} color="white" />
-          <Text className="text-white font-bold text-lg ml-2">
-            Submit Purchase Request
-          </Text>
+          <Text className="text-white font-bold text-lg ml-2">Submit Purchase Request</Text>
         </TouchableOpacity>
       </ScrollView>
-      
+
       {/* Submit Drawer with Authentication */}
       {selectedProductId && (
         <BuyerSubmitDrawer
@@ -243,5 +232,5 @@ export function BuyerMarketRequest({
         />
       )}
     </OnboardingLayout>
-  )
+  );
 }

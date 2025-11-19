@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  Platform,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Platform, ActivityIndicator } from 'react-native';
 import {
   GoogleSignin,
   statusCodes,
@@ -43,7 +36,7 @@ export const NativeGoogleAuth: React.FC<NativeGoogleAuthProps> = ({
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-    
+
     try {
       // First, sign out any existing Google session to force account selection
       try {
@@ -60,17 +53,17 @@ export const NativeGoogleAuth: React.FC<NativeGoogleAuthProps> = ({
 
       // Sign in with account selection
       const response = await GoogleSignin.signIn();
-      
+
       if (isSuccessResponse(response)) {
         const userInfo = response.data;
         console.log('Google Sign-In successful:', userInfo);
 
         // Now send the Google token to your backend
         const role = userRole || selectedRole || 'buyer';
-        
+
         // Get the ID token to send to backend
         const tokens = await GoogleSignin.getTokens();
-        
+
         // Send to your backend for verification and user creation
         const backendResponse = await authService.googleSignIn({
           idToken: tokens.idToken,
@@ -88,20 +81,20 @@ export const NativeGoogleAuth: React.FC<NativeGoogleAuthProps> = ({
             backendResponse.accessToken,
             backendResponse.refreshToken
           );
-          
+
           // Store onboarding completion
           onboardingStore.setGoogleAuthData({
             name: userInfo.user.name || '',
             email: userInfo.user.email || '',
             isAuthenticated: true,
           });
-          
+
           onComplete();
         }
       }
     } catch (error: any) {
       console.error('Google Sign-In Error:', error);
-      
+
       if (isErrorWithCode(error)) {
         switch (error.code) {
           case statusCodes.SIGN_IN_CANCELLED:
@@ -119,10 +112,7 @@ export const NativeGoogleAuth: React.FC<NativeGoogleAuthProps> = ({
             );
             break;
           default:
-            Alert.alert(
-              'Sign In Error',
-              'An error occurred during sign in. Please try again.'
-            );
+            Alert.alert('Sign In Error', 'An error occurred during sign in. Please try again.');
         }
       } else {
         Alert.alert(
@@ -143,10 +133,10 @@ export const NativeGoogleAuth: React.FC<NativeGoogleAuthProps> = ({
         const role = userRole || selectedRole || 'buyer';
         // Force account selection with prompt parameter
         const googleOAuthUrl = `${ENV.googleOAuthUrl}?role=${role}&prompt=select_account`;
-        
+
         await onboardingStore.saveOnboardingData();
         onboardingStore.setRole(role as UserRole);
-        
+
         // Add a small delay to ensure state is saved
         setTimeout(() => {
           window.location.href = googleOAuthUrl;
@@ -161,10 +151,8 @@ export const NativeGoogleAuth: React.FC<NativeGoogleAuthProps> = ({
     return (
       <View className="bg-neutral-900 rounded-lg p-6 mx-4 my-6 border border-neutral-700">
         <View className="items-center">
-          <Text className="text-white text-xl font-semibold mb-6">
-            Sign In to Continue
-          </Text>
-          
+          <Text className="text-white text-xl font-semibold mb-6">Sign In to Continue</Text>
+
           <TouchableOpacity
             onPress={handleWebGoogleSignIn}
             disabled={isLoading}
@@ -177,9 +165,7 @@ export const NativeGoogleAuth: React.FC<NativeGoogleAuthProps> = ({
                 <View className="w-5 h-5 mr-3">
                   <Text style={{ fontSize: 18 }}>🔷</Text>
                 </View>
-                <Text className="text-gray-700 font-medium">
-                  Continue with Google
-                </Text>
+                <Text className="text-gray-700 font-medium">Continue with Google</Text>
               </>
             )}
           </TouchableOpacity>
@@ -192,10 +178,8 @@ export const NativeGoogleAuth: React.FC<NativeGoogleAuthProps> = ({
   return (
     <View className="bg-neutral-900 rounded-lg p-6 mx-4 my-6 border border-neutral-700">
       <View className="items-center">
-        <Text className="text-white text-xl font-semibold mb-6">
-          Sign In to Continue
-        </Text>
-        
+        <Text className="text-white text-xl font-semibold mb-6">Sign In to Continue</Text>
+
         <TouchableOpacity
           onPress={handleGoogleSignIn}
           disabled={isLoading}
@@ -208,13 +192,11 @@ export const NativeGoogleAuth: React.FC<NativeGoogleAuthProps> = ({
               <View className="w-5 h-5 mr-3">
                 <Text style={{ fontSize: 18 }}>🔷</Text>
               </View>
-              <Text className="text-gray-700 font-medium">
-                Sign in with Google
-              </Text>
+              <Text className="text-gray-700 font-medium">Sign in with Google</Text>
             </>
           )}
         </TouchableOpacity>
-        
+
         <Text className="text-neutral-400 text-xs mt-4 text-center">
           You'll be able to choose which Google account to use
         </Text>

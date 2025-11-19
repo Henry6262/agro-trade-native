@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import {
   Package,
   Plus,
@@ -42,7 +35,7 @@ export default function OperationsScreenRefactored() {
     matchingSellers,
     profitCalculation,
     transportEstimate,
-    
+
     // Loading states
     isLoadingBuyListings,
     isLoadingSellListings,
@@ -50,7 +43,7 @@ export default function OperationsScreenRefactored() {
     isCalculatingProfit,
     isEstimatingTransport,
     isSendingOffers,
-    
+
     // Actions
     loadBuyListings,
     loadSellListings,
@@ -62,7 +55,7 @@ export default function OperationsScreenRefactored() {
     refreshCurrentTrade,
     estimateTransportCost,
     sendBulkOffers,
-    
+
     // Error handling
     error,
     clearError,
@@ -77,7 +70,10 @@ export default function OperationsScreenRefactored() {
   const [showDetailDrawer, setShowDetailDrawer] = useState(false);
   const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
   const [showOfferModal, setShowOfferModal] = useState(false);
-  const [offerModalData, setOfferModalData] = useState<{ tradeOperationId: string; tradeSellerId: string } | null>(null);
+  const [offerModalData, setOfferModalData] = useState<{
+    tradeOperationId: string;
+    tradeSellerId: string;
+  } | null>(null);
   const [showNegotiationManagement, setShowNegotiationManagement] = useState(false);
   const [negotiationOperationId, setNegotiationOperationId] = useState<string | null>(null);
   const [showCounterOfferModal, setShowCounterOfferModal] = useState(false);
@@ -99,13 +95,9 @@ export default function OperationsScreenRefactored() {
   const TabButton = ({ id, label, count, isActive }: any) => (
     <TouchableOpacity
       onPress={() => setActiveTab(id)}
-      className={`flex-1 py-3 border-b-2 ${
-        isActive ? 'border-blue-600' : 'border-transparent'
-      }`}
+      className={`flex-1 py-3 border-b-2 ${isActive ? 'border-blue-600' : 'border-transparent'}`}
     >
-      <Text className={`text-center font-semibold ${
-        isActive ? 'text-blue-600' : 'text-gray-600'
-      }`}>
+      <Text className={`text-center font-semibold ${isActive ? 'text-blue-600' : 'text-gray-600'}`}>
         {label} {count > 0 && `(${count})`}
       </Text>
     </TouchableOpacity>
@@ -140,9 +132,7 @@ export default function OperationsScreenRefactored() {
     <ScrollView className="flex-1 bg-gray-50">
       <View className="p-4">
         <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-lg font-bold text-gray-800">
-            Available Seller Listings
-          </Text>
+          <Text className="text-lg font-bold text-gray-800">Available Seller Listings</Text>
           <TouchableOpacity
             onPress={loadSellListings}
             disabled={isLoadingSellListings}
@@ -181,16 +171,24 @@ export default function OperationsScreenRefactored() {
                       {listing.seller?.name || 'Unknown Seller'}
                     </Text>
                   </View>
-                  <View className={`px-3 py-1 rounded-full ${ 
-                    listing.quality === 'premium' ? 'bg-purple-100' :
-                    listing.quality === 'standard' ? 'bg-green-100' :
-                    'bg-gray-100'
-                  }`}>
-                    <Text className={`text-sm font-medium ${ 
-                      listing.quality === 'premium' ? 'text-purple-800' :
-                      listing.quality === 'standard' ? 'text-green-800' :
-                      'text-gray-800'
-                    }`}>
+                  <View
+                    className={`px-3 py-1 rounded-full ${
+                      listing.quality === 'premium'
+                        ? 'bg-purple-100'
+                        : listing.quality === 'standard'
+                          ? 'bg-green-100'
+                          : 'bg-gray-100'
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-medium ${
+                        listing.quality === 'premium'
+                          ? 'text-purple-800'
+                          : listing.quality === 'standard'
+                            ? 'text-green-800'
+                            : 'text-gray-800'
+                      }`}
+                    >
                       {listing.quality || 'Standard'}
                     </Text>
                   </View>
@@ -237,7 +235,8 @@ export default function OperationsScreenRefactored() {
                     <View className="flex-row items-center">
                       <Truck size={16} color="#6B7280" />
                       <Text className="text-gray-600 ml-2 text-sm">
-                        Location: {listing.location?.city || 'N/A'}, {listing.location?.country || 'N/A'}
+                        Location: {listing.location?.city || 'N/A'},{' '}
+                        {listing.location?.country || 'N/A'}
                       </Text>
                     </View>
                   )}
@@ -254,9 +253,7 @@ export default function OperationsScreenRefactored() {
   const renderCreateTrade = () => (
     <ScrollView className="flex-1 bg-gray-50">
       <View className="p-4">
-        <Text className="text-lg font-bold text-gray-800 mb-4">
-          Available Buy Orders
-        </Text>
+        <Text className="text-lg font-bold text-gray-800 mb-4">Available Buy Orders</Text>
 
         {isLoadingBuyListings ? (
           <View className="flex-1 justify-center items-center py-8">
@@ -292,16 +289,24 @@ export default function OperationsScreenRefactored() {
                       {listing.buyer?.name || 'Unknown Buyer'}
                     </Text>
                   </View>
-                  <View className={`px-3 py-1 rounded-full ${
-                    listing.urgency === 'critical' ? 'bg-red-100' :
-                    listing.urgency === 'high' ? 'bg-orange-100' :
-                    'bg-blue-100'
-                  }`}>
-                    <Text className={`text-sm font-medium ${
-                      listing.urgency === 'critical' ? 'text-red-800' :
-                      listing.urgency === 'high' ? 'text-orange-800' :
-                      'text-blue-800'
-                    }`}>
+                  <View
+                    className={`px-3 py-1 rounded-full ${
+                      listing.urgency === 'critical'
+                        ? 'bg-red-100'
+                        : listing.urgency === 'high'
+                          ? 'bg-orange-100'
+                          : 'bg-blue-100'
+                    }`}
+                  >
+                    <Text
+                      className={`text-sm font-medium ${
+                        listing.urgency === 'critical'
+                          ? 'text-red-800'
+                          : listing.urgency === 'high'
+                            ? 'text-orange-800'
+                            : 'text-blue-800'
+                      }`}
+                    >
                       {listing.urgency || listing.status}
                     </Text>
                   </View>
@@ -348,7 +353,8 @@ export default function OperationsScreenRefactored() {
                     <View className="flex-row items-center">
                       <Truck size={16} color="#6B7280" />
                       <Text className="text-gray-600 ml-2 text-sm">
-                        Delivery: {listing.deliveryAddress?.city || 'N/A'}, {listing.deliveryAddress?.country || 'N/A'}
+                        Delivery: {listing.deliveryAddress?.city || 'N/A'},{' '}
+                        {listing.deliveryAddress?.country || 'N/A'}
                       </Text>
                     </View>
                   )}
@@ -363,9 +369,7 @@ export default function OperationsScreenRefactored() {
                   className="mt-4 bg-green-600 py-3 rounded-lg flex-row items-center justify-center"
                 >
                   <Plus size={18} color="white" />
-                  <Text className="text-white font-semibold ml-2">
-                    Create Trade Operation
-                  </Text>
+                  <Text className="text-white font-semibold ml-2">Create Trade Operation</Text>
                 </TouchableOpacity>
               </TouchableOpacity>
             ))}
@@ -440,9 +444,11 @@ export default function OperationsScreenRefactored() {
       </View>
 
       {/* Content */}
-      {activeTab === 'active' ? renderActiveOperations() : 
-       activeTab === 'create' ? renderCreateTrade() :
-       renderSellers()}
+      {activeTab === 'active'
+        ? renderActiveOperations()
+        : activeTab === 'create'
+          ? renderCreateTrade()
+          : renderSellers()}
 
       {/* Trade Creation Drawer */}
       <TradeCreationDrawer

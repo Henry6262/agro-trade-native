@@ -14,8 +14,6 @@ import {
   TradeOperation,
   TradePhase,
   TradeStatus,
-  BuyListing,
-  SaleListing,
   TradeSeller,
   InspectionPriority,
   InspectionStatus,

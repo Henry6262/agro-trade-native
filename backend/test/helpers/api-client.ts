@@ -1,5 +1,5 @@
-import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import { INestApplication } from "@nestjs/common";
+import * as request from "supertest";
 
 /**
  * API Client
@@ -33,7 +33,7 @@ export class ApiClient {
     const req = request(this.app.getHttpServer()).get(path);
 
     if (this.authToken) {
-      req.set('Authorization', `Bearer ${this.authToken}`);
+      req.set("Authorization", `Bearer ${this.authToken}`);
     }
 
     const response = await req.expect(expectedStatus);
@@ -47,10 +47,10 @@ export class ApiClient {
     const req = request(this.app.getHttpServer())
       .post(path)
       .send(body)
-      .set('Content-Type', 'application/json');
+      .set("Content-Type", "application/json");
 
     if (this.authToken) {
-      req.set('Authorization', `Bearer ${this.authToken}`);
+      req.set("Authorization", `Bearer ${this.authToken}`);
     }
 
     const response = await req.expect(expectedStatus);
@@ -64,10 +64,10 @@ export class ApiClient {
     const req = request(this.app.getHttpServer())
       .put(path)
       .send(body)
-      .set('Content-Type', 'application/json');
+      .set("Content-Type", "application/json");
 
     if (this.authToken) {
-      req.set('Authorization', `Bearer ${this.authToken}`);
+      req.set("Authorization", `Bearer ${this.authToken}`);
     }
 
     const response = await req.expect(expectedStatus);
@@ -81,10 +81,10 @@ export class ApiClient {
     const req = request(this.app.getHttpServer())
       .patch(path)
       .send(body)
-      .set('Content-Type', 'application/json');
+      .set("Content-Type", "application/json");
 
     if (this.authToken) {
-      req.set('Authorization', `Bearer ${this.authToken}`);
+      req.set("Authorization", `Bearer ${this.authToken}`);
     }
 
     const response = await req.expect(expectedStatus);
@@ -98,7 +98,7 @@ export class ApiClient {
     const req = request(this.app.getHttpServer()).delete(path);
 
     if (this.authToken) {
-      req.set('Authorization', `Bearer ${this.authToken}`);
+      req.set("Authorization", `Bearer ${this.authToken}`);
     }
 
     const response = await req.expect(expectedStatus);
@@ -108,29 +108,34 @@ export class ApiClient {
   /**
    * Make a request expecting an error
    */
-  async expectError(method: 'get' | 'post' | 'put' | 'patch' | 'delete', path: string, body?: any, expectedStatus = 400) {
+  async expectError(
+    method: "get" | "post" | "put" | "patch" | "delete",
+    path: string,
+    body?: any,
+    expectedStatus = 400,
+  ) {
     let req;
 
     switch (method) {
-      case 'get':
+      case "get":
         req = request(this.app.getHttpServer()).get(path);
         break;
-      case 'post':
+      case "post":
         req = request(this.app.getHttpServer()).post(path).send(body);
         break;
-      case 'put':
+      case "put":
         req = request(this.app.getHttpServer()).put(path).send(body);
         break;
-      case 'patch':
+      case "patch":
         req = request(this.app.getHttpServer()).patch(path).send(body);
         break;
-      case 'delete':
+      case "delete":
         req = request(this.app.getHttpServer()).delete(path);
         break;
     }
 
     if (this.authToken) {
-      req.set('Authorization', `Bearer ${this.authToken}`);
+      req.set("Authorization", `Bearer ${this.authToken}`);
     }
 
     const response = await req.expect(expectedStatus);
@@ -140,18 +145,25 @@ export class ApiClient {
   /**
    * Batch requests (execute multiple requests in parallel)
    */
-  async batch(requests: Array<{ method: string; path: string; body?: any; expectedStatus?: number }>) {
+  async batch(
+    requests: Array<{
+      method: string;
+      path: string;
+      body?: any;
+      expectedStatus?: number;
+    }>,
+  ) {
     const promises = requests.map(({ method, path, body, expectedStatus }) => {
       switch (method.toLowerCase()) {
-        case 'get':
+        case "get":
           return this.get(path, expectedStatus);
-        case 'post':
+        case "post":
           return this.post(path, body, expectedStatus);
-        case 'put':
+        case "put":
           return this.put(path, body, expectedStatus);
-        case 'patch':
+        case "patch":
           return this.patch(path, body, expectedStatus);
-        case 'delete':
+        case "delete":
           return this.delete(path, expectedStatus);
         default:
           throw new Error(`Unsupported method: ${method}`);
@@ -166,7 +178,7 @@ export class ApiClient {
    */
   async waitFor(
     condition: () => Promise<boolean>,
-    options: { timeout?: number; interval?: number } = {}
+    options: { timeout?: number; interval?: number } = {},
   ): Promise<boolean> {
     const timeout = options.timeout || 10000; // 10 seconds default
     const interval = options.interval || 500; // 500ms default
@@ -185,14 +197,17 @@ export class ApiClient {
   /**
    * Measure response time
    */
-  async measureResponseTime(method: 'get' | 'post', path: string, body?: any): Promise<{
+  async measureResponseTime(
+    method: "get" | "post",
+    path: string,
+    body?: any,
+  ): Promise<{
     response: request.Response;
     duration: number;
   }> {
     const startTime = Date.now();
-    const response = method === 'get'
-      ? await this.get(path)
-      : await this.post(path, body);
+    const response =
+      method === "get" ? await this.get(path) : await this.post(path, body);
     const duration = Date.now() - startTime;
 
     return { response, duration };

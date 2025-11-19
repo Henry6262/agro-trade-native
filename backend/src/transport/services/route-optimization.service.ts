@@ -199,6 +199,7 @@ export class RouteOptimizationService {
     pickups: Pickup[],
     end: Location,
   ): Pickup[] {
+    void end;
     if (pickups.length === 0) return [];
     if (pickups.length === 1) return pickups;
 

@@ -24,10 +24,10 @@ export const BuyerOnboardingFlowScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     // Set user role to buyer when entering this flow
     onboardingStore.setRole('buyer');
-    
+
     // Save onboarding data when component mounts
     onboardingStore.saveOnboardingData?.().catch(console.error);
-    
+
     // Check if we're returning from Google OAuth
     const googleAuthData = onboardingStore.googleAuthData;
     if (googleAuthData?.isAuthenticated) {

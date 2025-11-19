@@ -1,5 +1,9 @@
 import transportService from '@services/transportService';
-import type { TransportOffersRequest, TransportOffersBid, TransporterOfferActionOptions } from './types';
+import type {
+  TransportOffersRequest,
+  TransportOffersBid,
+  TransporterOfferActionOptions,
+} from './types';
 
 export const transporterOffersService = {
   fetchRequests: (): Promise<TransportOffersRequest[]> => transportService.getAvailableRequests(),

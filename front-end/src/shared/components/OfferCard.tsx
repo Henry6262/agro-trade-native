@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  Animated,
-  Alert,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Image, Animated, Alert } from 'react-native';
 import {
   MapPin,
   Star,
@@ -74,7 +67,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
     // Specifications match (40% weight)
     const specsWeight = 0.4;
     if (offer.specifications && offer.specifications.length > 0) {
-      const matchingSpecs = offer.specifications.filter(spec => spec.matchesRequirement).length;
+      const matchingSpecs = offer.specifications.filter((spec) => spec.matchesRequirement).length;
       const specRatio = matchingSpecs / offer.specifications.length;
       totalScore += specRatio * 100 * specsWeight;
     } else {
@@ -85,7 +78,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
     // Delivery terms (10% weight)
     const deliveryWeight = 0.1;
     if (offer.deliveryTerms?.deliveryTime) {
-      const deliveryScore = Math.max(0, 100 - (offer.deliveryTerms.deliveryTime * 2));
+      const deliveryScore = Math.max(0, 100 - offer.deliveryTerms.deliveryTime * 2);
       totalScore += deliveryScore * deliveryWeight;
     } else {
       totalScore += 70 * deliveryWeight;
@@ -98,17 +91,19 @@ export const OfferCard: React.FC<OfferCardProps> = ({
   const matchScore = calculateMatchScore();
 
   const getMatchScoreColor = (score: number) => {
-    if (score >= 80) return { bg: 'bg-green-500/20', border: 'border-green-500/40', text: 'text-green-400' };
-    if (score >= 60) return { bg: 'bg-yellow-500/20', border: 'border-yellow-500/40', text: 'text-yellow-400' };
+    if (score >= 80)
+      return { bg: 'bg-green-500/20', border: 'border-green-500/40', text: 'text-green-400' };
+    if (score >= 60)
+      return { bg: 'bg-yellow-500/20', border: 'border-yellow-500/40', text: 'text-yellow-400' };
     return { bg: 'bg-orange-500/20', border: 'border-orange-500/40', text: 'text-orange-400' };
   };
 
   const getPriceComparison = () => {
     if (!buyerRequest?.maxPricePerUnit || !offer.pricePerUnit) return null;
-    
+
     const difference = buyerRequest.maxPricePerUnit - offer.pricePerUnit;
     const percentageDiff = (difference / buyerRequest.maxPricePerUnit) * 100;
-    
+
     if (difference > 0) {
       return {
         type: 'savings',
@@ -130,10 +125,10 @@ export const OfferCard: React.FC<OfferCardProps> = ({
 
   const getQuantityComparison = () => {
     if (!buyerRequest?.quantity || !offer.quantity) return null;
-    
+
     const difference = offer.quantity - buyerRequest.quantity;
     const percentageDiff = (difference / buyerRequest.quantity) * 100;
-    
+
     return {
       difference,
       percentage: percentageDiff,
@@ -145,16 +140,17 @@ export const OfferCard: React.FC<OfferCardProps> = ({
     if (!offer.specifications || !buyerRequest?.qualityRequirements) return [];
 
     return buyerRequest.qualityRequirements.map((requirement: string) => {
-      const matchingSpec = offer.specifications.find(spec => 
-        spec.name.toLowerCase().includes(requirement.toLowerCase().split(':')[0]) ||
-        requirement.toLowerCase().includes(spec.name.toLowerCase())
+      const matchingSpec = offer.specifications.find(
+        (spec) =>
+          spec.name.toLowerCase().includes(requirement.toLowerCase().split(':')[0]) ||
+          requirement.toLowerCase().includes(spec.name.toLowerCase())
       );
 
       if (matchingSpec) {
         return {
           specification: { name: requirement } as any,
           offerValue: matchingSpec,
-          matchType: matchingSpec.matchesRequirement ? 'exact' : 'partial' as MatchType,
+          matchType: matchingSpec.matchesRequirement ? 'exact' : ('partial' as MatchType),
           score: matchingSpec.matchesRequirement ? 100 : 60,
         };
       }
@@ -187,10 +183,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
   };
 
   return (
-    <Animated.View 
-      style={{ transform: [{ scale: scaleAnim }] }}
-      className="mb-4"
-    >
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }} className="mb-4">
       <View className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 rounded-xl border border-neutral-700/50 overflow-hidden">
         {/* Header with Seller Info and Match Score */}
         <View className="p-4 border-b border-neutral-700/30">
@@ -224,7 +217,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
                     </View>
                   )}
                 </View>
-                
+
                 {offer.seller?.location && (
                   <View className="flex-row items-center mt-1">
                     <MapPin size={12} color="#10B981" />
@@ -251,10 +244,10 @@ export const OfferCard: React.FC<OfferCardProps> = ({
             </View>
 
             {/* Match Score */}
-            <View className={`${matchColors.bg} ${matchColors.border} border rounded-lg px-3 py-2 ml-3`}>
-              <Text className={`${matchColors.text} text-xs font-bold`}>
-                {matchScore}% Match
-              </Text>
+            <View
+              className={`${matchColors.bg} ${matchColors.border} border rounded-lg px-3 py-2 ml-3`}
+            >
+              <Text className={`${matchColors.text} text-xs font-bold`}>{matchScore}% Match</Text>
             </View>
           </View>
         </View>
@@ -267,17 +260,18 @@ export const OfferCard: React.FC<OfferCardProps> = ({
                 <Text className="text-white font-bold text-2xl">
                   €{offer.pricePerUnit.toFixed(2)}
                 </Text>
-                <Text className="text-neutral-400 text-sm ml-1">
-                  /{offer.unit.toLowerCase()}
-                </Text>
+                <Text className="text-neutral-400 text-sm ml-1">/{offer.unit.toLowerCase()}</Text>
               </View>
-              
+
               {priceComparison && (
                 <View className="flex-row items-center mt-1">
-                  <priceComparison.icon size={14} color={priceComparison.color.replace('text-', '#')} />
+                  <priceComparison.icon
+                    size={14}
+                    color={priceComparison.color.replace('text-', '#')}
+                  />
                   <Text className={`${priceComparison.color} text-sm ml-1 font-medium`}>
-                    {priceComparison.type === 'savings' ? 'Save' : 'Over'} €{priceComparison.amount.toFixed(2)} 
-                    ({priceComparison.percentage.toFixed(1)}%)
+                    {priceComparison.type === 'savings' ? 'Save' : 'Over'} €
+                    {priceComparison.amount.toFixed(2)}({priceComparison.percentage.toFixed(1)}%)
                   </Text>
                 </View>
               )}
@@ -288,7 +282,9 @@ export const OfferCard: React.FC<OfferCardProps> = ({
                 {offer.quantity.toLocaleString()} {offer.unit.toLowerCase()}
               </Text>
               {quantityComparison && (
-                <Text className={`text-sm ${quantityComparison.sufficient ? 'text-green-400' : 'text-yellow-400'}`}>
+                <Text
+                  className={`text-sm ${quantityComparison.sufficient ? 'text-green-400' : 'text-yellow-400'}`}
+                >
                   {quantityComparison.sufficient ? 'Sufficient' : 'Partial'} quantity
                 </Text>
               )}
@@ -302,14 +298,14 @@ export const OfferCard: React.FC<OfferCardProps> = ({
             <Text className="text-neutral-300 text-sm mb-3">Specifications Match</Text>
             <View className="flex-row flex-wrap gap-2">
               {specificationMatches.slice(0, 3).map((match, index) => (
-                <View 
+                <View
                   key={index}
                   className={`flex-row items-center px-2 py-1 rounded-md ${
-                    match.matchType === 'exact' 
-                      ? 'bg-green-500/20 border border-green-500/40' 
+                    match.matchType === 'exact'
+                      ? 'bg-green-500/20 border border-green-500/40'
                       : match.matchType === 'partial'
-                      ? 'bg-yellow-500/20 border border-yellow-500/40'
-                      : 'bg-red-500/20 border border-red-500/40'
+                        ? 'bg-yellow-500/20 border border-yellow-500/40'
+                        : 'bg-red-500/20 border border-red-500/40'
                   }`}
                 >
                   {match.matchType === 'exact' ? (
@@ -319,10 +315,15 @@ export const OfferCard: React.FC<OfferCardProps> = ({
                   ) : (
                     <MessageSquare size={10} color="#FBBF24" />
                   )}
-                  <Text className={`text-xs ml-1 ${
-                    match.matchType === 'exact' ? 'text-green-400' :
-                    match.matchType === 'partial' ? 'text-yellow-400' : 'text-red-400'
-                  }`}>
+                  <Text
+                    className={`text-xs ml-1 ${
+                      match.matchType === 'exact'
+                        ? 'text-green-400'
+                        : match.matchType === 'partial'
+                          ? 'text-yellow-400'
+                          : 'text-red-400'
+                    }`}
+                  >
                     {match.specification.name.split(':')[0]}
                   </Text>
                 </View>

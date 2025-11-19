@@ -26,7 +26,7 @@ export const useLocationTracking = (): UseLocationTrackingReturn => {
     try {
       const { status } = await Location.getForegroundPermissionsAsync();
       setPermissionStatus(status);
-      
+
       if (status === 'granted') {
         startTracking();
       }
@@ -39,7 +39,7 @@ export const useLocationTracking = (): UseLocationTrackingReturn => {
   const startTracking = async () => {
     try {
       setError(null);
-      
+
       // Check permissions first
       const { status } = await Location.getForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -62,7 +62,7 @@ export const useLocationTracking = (): UseLocationTrackingReturn => {
         accuracy: Location.Accuracy.High,
         maximumAge: 10000, // Accept cached location up to 10s old
       });
-      
+
       setCurrentLocation({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
@@ -106,19 +106,16 @@ export const useLocationTracking = (): UseLocationTrackingReturn => {
     console.log('Stopped location tracking');
   };
 
-  const calculateDistance = (
-    lat1: number,
-    lng1: number,
-    lat2: number,
-    lng2: number
-  ): number => {
+  const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
     const R = 6371; // Earth's radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lng2 - lng1) * Math.PI / 180;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lng2 - lng1) * Math.PI) / 180;
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };

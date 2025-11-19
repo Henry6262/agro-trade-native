@@ -127,7 +127,7 @@ export class PricingService {
     const marketData: MarketData = {
       averagePrice: Math.round(adjustedPrice * 100) / 100,
       trend: this.getMarketTrend(productId),
-      demandLevel: this.getDemandLevel(productId, latitude, longitude),
+      demandLevel: this.getDemandLevel(productId),
     };
 
     return {
@@ -262,11 +262,7 @@ export class PricingService {
     return trends[productId] || "stable";
   }
 
-  private getDemandLevel(
-    productId: string,
-    latitude: number,
-    longitude: number,
-  ): "high" | "medium" | "low" {
+  private getDemandLevel(productId: string): "high" | "medium" | "low" {
     // Simplified demand analysis
     // Factors might include:
     // - Proximity to processing facilities

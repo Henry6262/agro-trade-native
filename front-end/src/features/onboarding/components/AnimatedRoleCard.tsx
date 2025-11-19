@@ -84,9 +84,7 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
     const selectedElevation = interpolate(selected.value, [0, 1], [3, 6]);
 
     return {
-      transform: [
-        { scale: scale.value * pressScale * selectedScale },
-      ],
+      transform: [{ scale: scale.value * pressScale * selectedScale }],
       opacity: opacity.value,
       elevation: selectedElevation,
       // Remove shadow properties for Android compatibility
@@ -96,10 +94,7 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
 
   const iconAnimatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [
-        { rotate: `${iconRotation.value}deg` },
-        { scale: iconScale.value },
-      ],
+      transform: [{ rotate: `${iconRotation.value}deg` }, { scale: iconScale.value }],
     };
   });
 
@@ -178,9 +173,7 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
               justifyContent: 'center',
             }}
           >
-            <Animated.View style={iconAnimatedStyle}>
-              {getIcon()}
-            </Animated.View>
+            <Animated.View style={iconAnimatedStyle}>{getIcon()}</Animated.View>
           </View>
 
           {/* Text content on the right */}
@@ -201,11 +194,11 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
                 fontSize: 14,
               }}
             >
-              {id === 'buyer' 
+              {id === 'buyer'
                 ? 'Purchase products'
-                : id === 'seller' 
-                ? 'List your products'
-                : 'Transport goods'}
+                : id === 'seller'
+                  ? 'List your products'
+                  : 'Transport goods'}
             </Text>
           </View>
 
@@ -222,9 +215,7 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
                 marginLeft: 12,
               }}
             >
-              <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>
-                ✓
-              </Text>
+              <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>✓</Text>
             </View>
           )}
         </View>

@@ -198,7 +198,7 @@ export class NotificationService {
     tradeOperationId?: string;
     limit?: number;
   }) {
-    const { userId, role, tradeOperationId, limit = 20 } = params;
+    const { tradeOperationId, limit = 20 } = params;
 
     const where: any = {
       authorId: "system",

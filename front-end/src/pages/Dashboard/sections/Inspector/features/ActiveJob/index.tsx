@@ -7,7 +7,10 @@ interface InspectorActiveJobTabProps extends BaseComponentProps {
   id?: string;
 }
 
-export const ActiveJobTab: React.FC<InspectorActiveJobTabProps> = ({ testID, accessibilityLabel }) => {
+export const ActiveJobTab: React.FC<InspectorActiveJobTabProps> = ({
+  testID,
+  accessibilityLabel,
+}) => {
   const {
     job,
     isLoading,

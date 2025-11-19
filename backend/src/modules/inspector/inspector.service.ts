@@ -215,6 +215,7 @@ export class InspectorService {
   }
 
   async getInspectorProfile(userId: string) {
+    void userId;
     // In real implementation, would fetch from database based on auth
     const profile = this.inspectorProfiles.get("inspector-001");
     if (!profile) {

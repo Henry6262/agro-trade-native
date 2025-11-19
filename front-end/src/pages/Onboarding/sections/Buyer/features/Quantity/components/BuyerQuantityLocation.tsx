@@ -9,13 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { 
-  MapPin, 
-  Package, 
-  Edit2, 
-  Weight,
-  DollarSign,
-} from 'lucide-react-native';
+import { MapPin, Package, Edit2, Weight, DollarSign } from 'lucide-react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
 import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
@@ -42,9 +36,9 @@ export function BuyerQuantityLocation() {
   const [loadingLocation, setLoadingLocation] = useState(false);
 
   const productId = selectedProducts[0];
-  const product = products.find(p => p.id === productId);
-  const productMetadata = selectedProductsMetadata.find(m => m.id === productId);
-  
+  const product = products.find((p) => p.id === productId);
+  const productMetadata = selectedProductsMetadata.find((m) => m.id === productId);
+
   // Use store as single source of truth
   const currentSpecs = buyerSpecifications[productId] || {};
   const currentQuantity = currentSpecs.quantity ? parseFloat(currentSpecs.quantity.toString()) : 0;
@@ -67,7 +61,7 @@ export function BuyerQuantityLocation() {
     try {
       setLoadingLocation(true);
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
+
       if (status === 'granted') {
         const currentLocation = await Location.getCurrentPositionAsync({});
         const reverseGeocode = await Location.reverseGeocodeAsync({
@@ -80,7 +74,8 @@ export function BuyerQuantityLocation() {
           setLocation({
             latitude: currentLocation.coords.latitude,
             longitude: currentLocation.coords.longitude,
-            address: `${locationData.street || ''} ${locationData.city || ''} ${locationData.region || ''} ${locationData.country || ''}`.trim(),
+            address:
+              `${locationData.street || ''} ${locationData.city || ''} ${locationData.region || ''} ${locationData.country || ''}`.trim(),
             city: locationData.city || '',
             region: locationData.region || '',
             country: locationData.country || '',
@@ -157,23 +152,19 @@ export function BuyerQuantityLocation() {
 
   // Get product image URL
   const productImage = product?.image || productMetadata?.image;
-  const imageUrl = productImage ? (
-    productImage.startsWith('http') 
-      ? productImage 
+  const imageUrl = productImage
+    ? productImage.startsWith('http')
+      ? productImage
       : `${getApiUrl().replace('/api', '')}/static/${productImage}`
-  ) : null;
+    : null;
 
   return (
     <OnboardingLayout>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="mb-6">
-          <Text className="text-3xl font-bold text-blue-500 mb-2">
-            Quantity & Location
-          </Text>
-          <Text className="text-gray-400">
-            Set your purchase quantity and delivery location
-          </Text>
+          <Text className="text-3xl font-bold text-blue-500 mb-2">Quantity & Location</Text>
+          <Text className="text-gray-400">Set your purchase quantity and delivery location</Text>
         </View>
 
         {/* Product Info */}
@@ -191,21 +182,17 @@ export function BuyerQuantityLocation() {
               <Text className="text-white text-lg font-semibold">
                 {product.displayName || product.name}
               </Text>
-              <Text className="text-gray-400 text-sm">
-                {product.category.replace(/_/g, ' ')}
-              </Text>
+              <Text className="text-gray-400 text-sm">{product.category.replace(/_/g, ' ')}</Text>
             </View>
           </View>
         )}
 
         {/* Delivery Location */}
         <View className="mb-6">
-          <Text className="text-white text-base font-semibold mb-3">
-            Delivery Location
-          </Text>
-          
+          <Text className="text-white text-base font-semibold mb-3">Delivery Location</Text>
+
           {!showManualLocation ? (
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setShowManualLocation(true)}
               className="bg-gray-800/50 rounded-xl p-4 flex-row items-center justify-between"
             >
@@ -226,9 +213,7 @@ export function BuyerQuantityLocation() {
                       )}
                     </>
                   ) : (
-                    <Text className="text-gray-400">
-                      Tap to set delivery location
-                    </Text>
+                    <Text className="text-gray-400">Tap to set delivery location</Text>
                   )}
                 </View>
               </View>
@@ -249,17 +234,13 @@ export function BuyerQuantityLocation() {
                   onPress={() => setShowManualLocation(false)}
                   className="flex-1 py-3 rounded-xl bg-gray-700"
                 >
-                  <Text className="text-center text-gray-300 font-medium">
-                    Cancel
-                  </Text>
+                  <Text className="text-center text-gray-300 font-medium">Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleManualLocation}
                   className="flex-1 py-3 rounded-xl bg-blue-600"
                 >
-                  <Text className="text-center text-white font-medium">
-                    Set Location
-                  </Text>
+                  <Text className="text-center text-white font-medium">Set Location</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -270,11 +251,9 @@ export function BuyerQuantityLocation() {
         <View className="mb-6">
           <View className="flex-row items-center mb-3">
             <Weight size={20} color="white" />
-            <Text className="text-white text-base font-semibold ml-2">
-              How much do you need?
-            </Text>
+            <Text className="text-white text-base font-semibold ml-2">How much do you need?</Text>
           </View>
-          
+
           {/* Preset Quantities */}
           <View className="flex-row flex-wrap mb-3">
             {PRESET_QUANTITIES.map((qty) => (
@@ -283,40 +262,43 @@ export function BuyerQuantityLocation() {
                 onPress={() => handleQuantitySelect(qty)}
                 className="w-[48%] mx-[1%] mb-2"
               >
-                <View className={`py-4 rounded-2xl border-2 ${
-                  currentQuantity === qty && !showCustomInput
-                    ? 'bg-blue-600/20 border-blue-500'
-                    : 'bg-gray-900/50 border-gray-800'
-                }`}>
-                  <Text className={`text-center text-lg font-bold ${
+                <View
+                  className={`py-4 rounded-2xl border-2 ${
                     currentQuantity === qty && !showCustomInput
-                      ? 'text-blue-400'
-                      : 'text-gray-300'
-                  }`}>
+                      ? 'bg-blue-600/20 border-blue-500'
+                      : 'bg-gray-900/50 border-gray-800'
+                  }`}
+                >
+                  <Text
+                    className={`text-center text-lg font-bold ${
+                      currentQuantity === qty && !showCustomInput
+                        ? 'text-blue-400'
+                        : 'text-gray-300'
+                    }`}
+                  >
                     {qty} tons
                   </Text>
                 </View>
               </TouchableOpacity>
             ))}
           </View>
-          
+
           {/* Custom Amount */}
           {!showCustomInput ? (
-            <TouchableOpacity
-              onPress={handleCustomQuantity}
-              className="mb-3"
-            >
-              <View className={`py-4 rounded-2xl border-2 ${
-                currentQuantity > 0 && !isPresetQuantity
-                  ? 'bg-blue-600/20 border-blue-500'
-                  : 'bg-gray-900/50 border-gray-800'
-              }`}>
-                <Text className={`text-center font-medium ${
+            <TouchableOpacity onPress={handleCustomQuantity} className="mb-3">
+              <View
+                className={`py-4 rounded-2xl border-2 ${
                   currentQuantity > 0 && !isPresetQuantity
-                    ? 'text-blue-400'
-                    : 'text-gray-400'
-                }`}>
-                  {currentQuantity > 0 && !isPresetQuantity 
+                    ? 'bg-blue-600/20 border-blue-500'
+                    : 'bg-gray-900/50 border-gray-800'
+                }`}
+              >
+                <Text
+                  className={`text-center font-medium ${
+                    currentQuantity > 0 && !isPresetQuantity ? 'text-blue-400' : 'text-gray-400'
+                  }`}
+                >
+                  {currentQuantity > 0 && !isPresetQuantity
                     ? `Custom: ${currentQuantity} tons`
                     : 'Custom Amount'}
                 </Text>
@@ -354,9 +336,7 @@ export function BuyerQuantityLocation() {
         <View className="mb-6">
           <View className="flex-row items-center mb-3">
             <DollarSign size={20} color="white" />
-            <Text className="text-white text-base font-semibold ml-2">
-              Maximum Price per Kilo
-            </Text>
+            <Text className="text-white text-base font-semibold ml-2">Maximum Price per Kilo</Text>
           </View>
           <View className="flex-row items-center">
             <TextInput
@@ -398,14 +378,16 @@ export function BuyerQuantityLocation() {
         {!isFormValid() && (
           <View className="bg-yellow-500/10 rounded-xl p-3 mb-4 border border-yellow-500/20">
             <Text className="text-yellow-400 text-sm text-center">
-              {!location ? 'Please set delivery location' :
-               currentQuantity === 0 ? 'Please select quantity' :
-               !currentPrice || parseFloat(currentPrice) === 0 ? 'Please enter maximum price' : 
-               'Complete all fields to continue'}
+              {!location
+                ? 'Please set delivery location'
+                : currentQuantity === 0
+                  ? 'Please select quantity'
+                  : !currentPrice || parseFloat(currentPrice) === 0
+                    ? 'Please enter maximum price'
+                    : 'Complete all fields to continue'}
             </Text>
           </View>
         )}
-
       </ScrollView>
     </OnboardingLayout>
   );

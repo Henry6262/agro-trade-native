@@ -16,10 +16,15 @@ export const resolveProductImage = (
   category: string
 ): string => {
   const match = metadata.find(
-    (product) => product.name === productName || product.displayName === productName || product.category === category
+    (product) =>
+      product.name === productName ||
+      product.displayName === productName ||
+      product.category === category
   );
   if (match?.image) {
     return match.image;
   }
-  return CATEGORY_IMAGES[category] || 'https://via.placeholder.com/400x400/10B981/FFFFFF?text=Product';
+  return (
+    CATEGORY_IMAGES[category] || 'https://via.placeholder.com/400x400/10B981/FFFFFF?text=Product'
+  );
 };

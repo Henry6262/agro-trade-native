@@ -56,6 +56,7 @@ import {
   TransportJobLocationDto,
   TransportPickupRecordDto,
 } from "../dto/transport-responses.dto";
+import { TransporterAnalyticsResponseDto } from "../dto/transporter-analytics.dto";
 
 @ApiTags("Transport")
 @Controller("transport")
@@ -513,6 +514,30 @@ export class TransportController {
       await this.transportService.getTransporterPerformance(transporterId);
     return {
       data: this.mapTransporterPerformance(performance),
+    };
+  }
+
+  @Get("me/analytics")
+  @ApiOperation({ summary: "Get analytics for the authenticated transporter" })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: TransporterAnalyticsResponseDto,
+  })
+  async getMyTransporterAnalytics(
+    @CurrentUser() user: User,
+  ): Promise<TransporterAnalyticsResponseDto> {
+    if (user.role !== UserRole.TRANSPORTER && user.role !== UserRole.ADMIN) {
+      throw new ForbiddenException(
+        "Only transporters can access their analytics",
+      );
+    }
+
+    const analytics =
+      await this.transportService.getTransporterAnalyticsSummary(user.id);
+
+    return {
+      metrics: analytics.metrics,
+      recentJobs: analytics.recentJobs.map((job) => this.mapTransportJob(job)),
     };
   }
 

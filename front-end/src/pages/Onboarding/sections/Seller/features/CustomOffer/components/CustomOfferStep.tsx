@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Alert,
-} from 'react-native';
-import { 
-  Package,
-  Info,
-  ChevronRight,
-} from 'lucide-react-native';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import { Package, Info, ChevronRight } from 'lucide-react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
 import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
@@ -28,18 +16,18 @@ export function CustomOfferStep() {
   } = useOnboardingStore();
 
   const { products } = useProductStore();
-  
+
   const [specifications, setSpecifications] = useState<Record<string, string>>({});
-  
+
   const productId = selectedProducts[0];
-  const product = products.find(p => p.id === productId);
+  const product = products.find((p) => p.id === productId);
   const currentSpecs = sellerSpecifications[productId] || {};
 
   useEffect(() => {
     // Initialize specifications with empty values
     if (product?.specifications) {
       const initialSpecs: Record<string, string> = {};
-      product.specifications.forEach(spec => {
+      product.specifications.forEach((spec) => {
         const specKey = spec.code || spec.id;
         // Load existing values if any
         initialSpecs[specKey] = currentSpecs.specifications?.[specKey] || '';
@@ -50,15 +38,15 @@ export function CustomOfferStep() {
 
   const handleSpecificationChange = (specKey: string, value: string, dataType?: string) => {
     let processedValue = value;
-    
+
     // Validate numeric inputs
     if (dataType === 'NUMBER') {
       processedValue = value.replace(/[^0-9.]/g, '');
     }
-    
-    setSpecifications(prev => ({
+
+    setSpecifications((prev) => ({
       ...prev,
-      [specKey]: processedValue
+      [specKey]: processedValue,
     }));
   };
 
@@ -68,41 +56,47 @@ export function CustomOfferStep() {
     // Validate required specifications
     if (product.specifications && product.specifications.length > 0) {
       const missingRequired = product.specifications
-        .filter(spec => (spec.importance === 'CRITICAL' || spec.importance === 'IMPORTANT'))
-        .filter(spec => {
+        .filter((spec) => spec.importance === 'CRITICAL' || spec.importance === 'IMPORTANT')
+        .filter((spec) => {
           const specKey = spec.code || spec.id;
           return !specifications[specKey]?.trim();
         });
-      
+
       if (missingRequired.length > 0) {
         Alert.alert(
           'Missing Information',
-          `Please fill in all required specifications: ${missingRequired.map(s => s.name || s.code).join(', ')}`,
+          `Please fill in all required specifications: ${missingRequired.map((s) => s.name || s.code).join(', ')}`,
           [{ text: 'OK' }]
         );
         return;
       }
-      
+
       // Validate numeric ranges
       for (const spec of product.specifications) {
         const specKey = spec.code || spec.id;
         const value = specifications[specKey];
-        
+
         if (value && spec.dataType === 'NUMBER') {
           const numValue = parseFloat(value);
-          
+
           if (isNaN(numValue)) {
             Alert.alert('Invalid Input', `${spec.name || spec.code} must be a valid number`);
             return;
           }
-          
+
           if (spec.minValue && numValue < spec.minValue) {
-            Alert.alert('Invalid Input', `${spec.name || spec.code} must be at least ${spec.minValue}`);
+            Alert.alert(
+              'Invalid Input',
+              `${spec.name || spec.code} must be at least ${spec.minValue}`
+            );
             return;
           }
-          
+
           if (spec.maxValue && numValue > spec.maxValue) {
-            Alert.alert('Invalid Input', `${spec.name || spec.code} must not exceed ${spec.maxValue}`);
+            Alert.alert(
+              'Invalid Input',
+              `${spec.name || spec.code} must not exceed ${spec.maxValue}`
+            );
             return;
           }
         }
@@ -124,9 +118,7 @@ export function CustomOfferStep() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="mb-6">
-          <Text className="text-3xl font-bold text-white mb-2">
-            Product Specifications
-          </Text>
+          <Text className="text-3xl font-bold text-white mb-2">Product Specifications</Text>
           <Text className="text-gray-400">
             Provide details about your {product?.displayName || product?.name}
           </Text>
@@ -137,10 +129,10 @@ export function CustomOfferStep() {
           <View className="bg-gray-800/50 rounded-xl p-4 mb-6 flex-row items-center">
             {product.image && (
               <Image
-                source={{ 
-                  uri: product.image.startsWith('http') 
-                    ? product.image 
-                    : `${getApiUrl().replace('/api', '')}/static/${product.image}`
+                source={{
+                  uri: product.image.startsWith('http')
+                    ? product.image
+                    : `${getApiUrl().replace('/api', '')}/static/${product.image}`,
                 }}
                 style={{ width: 60, height: 60 }}
                 className="rounded-xl mr-4"
@@ -168,10 +160,14 @@ export function CustomOfferStep() {
               .sort((a, b) => a.displayOrder - b.displayOrder)
               .map((spec) => {
                 const specKey = spec.code || spec.id;
-                const isRequired = spec.importance === 'CRITICAL' || spec.importance === 'IMPORTANT';
-                
+                const isRequired =
+                  spec.importance === 'CRITICAL' || spec.importance === 'IMPORTANT';
+
                 return (
-                  <View key={specKey} className="bg-gray-800/50 rounded-2xl p-4 mb-3 border border-gray-700/50">
+                  <View
+                    key={specKey}
+                    className="bg-gray-800/50 rounded-2xl p-4 mb-3 border border-gray-700/50"
+                  >
                     {/* Label Row */}
                     <View className="mb-3">
                       <Text className="text-white text-sm font-semibold">
@@ -179,12 +175,14 @@ export function CustomOfferStep() {
                         {isRequired && <Text className="text-red-400"> *</Text>}
                       </Text>
                     </View>
-                    
+
                     {/* Input Field with Unit Square */}
                     <View className="flex-row items-center">
                       <TextInput
                         value={specifications[specKey] || ''}
-                        onChangeText={(value) => handleSpecificationChange(specKey, value, spec.dataType)}
+                        onChangeText={(value) =>
+                          handleSpecificationChange(specKey, value, spec.dataType)
+                        }
                         placeholder={`Enter ${spec.name?.toLowerCase() || spec.code}`}
                         placeholderTextColor="#4B5563"
                         className="flex-1 bg-gray-900/50 rounded-l-xl px-4 py-3 text-white"
@@ -197,7 +195,7 @@ export function CustomOfferStep() {
                         </Text>
                       </View>
                     </View>
-                    
+
                     {/* Valid Range Display */}
                     {spec.dataType === 'NUMBER' && (spec.minValue || spec.maxValue) && (
                       <View className="flex-row items-center justify-end mt-2">
@@ -232,9 +230,7 @@ export function CustomOfferStep() {
           className="bg-emerald-600 rounded-xl py-4 mt-6 mb-4"
         >
           <View className="flex-row items-center justify-center">
-            <Text className="text-white font-semibold text-base mr-2">
-              Continue to Overview
-            </Text>
+            <Text className="text-white font-semibold text-base mr-2">Continue to Overview</Text>
             <ChevronRight size={20} color="white" />
           </View>
         </TouchableOpacity>

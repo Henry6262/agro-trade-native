@@ -82,7 +82,9 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     }
 
     if (quantity > (seller?.availableQuantity || 0)) {
-      errors.push(`Quantity exceeds available (${seller?.availableQuantity} ${seller?.saleListing?.unit || 'units'})`);
+      errors.push(
+        `Quantity exceeds available (${seller?.availableQuantity} ${seller?.saleListing?.unit || 'units'})`
+      );
     }
 
     setValidationErrors(errors);
@@ -105,27 +107,27 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
     try {
       // First check if this seller is already added to the trade operation
-      let tradeSeller = tradeOperation?.sellers?.find(
-        ts => ts.sellerId === seller.sellerId
-      );
-      
+      let tradeSeller = tradeOperation?.sellers?.find((ts) => ts.sellerId === seller.sellerId);
+
       // If seller is not added to trade operation yet, add them first
       if (!tradeSeller) {
         console.log('Seller not in trade operation yet, adding them first...');
-        
+
         try {
           // Add the seller to the trade operation
           const response = await apiClient.post(`/trade-operations/${tradeOperationId}/sellers`, {
-            sellers: [{
-              sellerId: seller.sellerId,
-              saleListingId: seller.saleListingId,
-              requestedQuantity: parseFloat(offerQuantity),
-            }]
+            sellers: [
+              {
+                sellerId: seller.sellerId,
+                saleListingId: seller.saleListingId,
+                requestedQuantity: parseFloat(offerQuantity),
+              },
+            ],
           });
-          
+
           const result = response.data;
           console.log('Seller added successfully:', result);
-          
+
           // Now the seller should have a TradeSeller ID
           // We need to get it from the response or refresh the trade operation
           if (result.sellersAdded && result.sellersAdded.length > 0) {
@@ -150,7 +152,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         quantity: parseFloat(offerQuantity),
         terms: terms || undefined,
       });
-      
+
       Alert.alert(
         'Offer Sent',
         `Your offer of €${offerPrice} for ${offerQuantity} units has been sent to ${seller.sellerName}.`,
@@ -166,7 +168,12 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       );
     } catch (error: any) {
       console.error('Error sending offer:', error);
-      Alert.alert('Error', error?.response?.data?.message || error?.message || 'Failed to send offer. Please try again.');
+      Alert.alert(
+        'Error',
+        error?.response?.data?.message ||
+          error?.message ||
+          'Failed to send offer. Please try again.'
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -194,17 +201,12 @@ export const OfferModal: React.FC<OfferModalProps> = ({
             {/* Header */}
             <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
               <View className="flex-1">
-                <Text className="text-lg font-bold text-gray-800">
-                  Create Offer
-                </Text>
+                <Text className="text-lg font-bold text-gray-800">Create Offer</Text>
                 <Text className="text-sm text-gray-600 mt-1">
                   {seller?.sellerName || `Seller ${sellerId}`}
                 </Text>
               </View>
-              <TouchableOpacity
-                onPress={onClose}
-                className="p-2 rounded-full bg-gray-100"
-              >
+              <TouchableOpacity onPress={onClose} className="p-2 rounded-full bg-gray-100">
                 <X size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
@@ -213,9 +215,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               {/* Seller Info */}
               {seller && (
                 <View className="bg-blue-50 rounded-lg p-3 mb-4">
-                  <Text className="text-blue-800 font-semibold mb-1">
-                    Seller Information
-                  </Text>
+                  <Text className="text-blue-800 font-semibold mb-1">Seller Information</Text>
                   <Text className="text-blue-700 text-sm">
                     Location: {seller.location?.displayName || 'Unknown'}
                   </Text>
@@ -242,9 +242,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
               {/* Price Input */}
               <View className="mb-4">
-                <Text className="text-gray-700 font-semibold mb-2">
-                  Offer Price (per unit)
-                </Text>
+                <Text className="text-gray-700 font-semibold mb-2">Offer Price (per unit)</Text>
                 <View className="flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border border-gray-300">
                   <DollarSign size={20} color="#6B7280" />
                   <TextInput
@@ -263,9 +261,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
               {/* Quantity Input */}
               <View className="mb-4">
-                <Text className="text-gray-700 font-semibold mb-2">
-                  Quantity
-                </Text>
+                <Text className="text-gray-700 font-semibold mb-2">Quantity</Text>
                 <View className="flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border border-gray-300">
                   <Package size={20} color="#6B7280" />
                   <TextInput
@@ -283,18 +279,18 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               </View>
 
               {/* Profit Indicator */}
-              <View className={`rounded-lg p-3 mb-4 ${
-                isProfitable ? 'bg-green-50' : 'bg-orange-50'
-              }`}>
-                <Text className={`font-semibold ${
-                  isProfitable ? 'text-green-800' : 'text-orange-800'
-                }`}>
+              <View
+                className={`rounded-lg p-3 mb-4 ${isProfitable ? 'bg-green-50' : 'bg-orange-50'}`}
+              >
+                <Text
+                  className={`font-semibold ${isProfitable ? 'text-green-800' : 'text-orange-800'}`}
+                >
                   Estimated Profit Margin: {profitMargin}%
                 </Text>
-                <Text className={`text-sm mt-1 ${
-                  isProfitable ? 'text-green-600' : 'text-orange-600'
-                }`}>
-                  {isProfitable 
+                <Text
+                  className={`text-sm mt-1 ${isProfitable ? 'text-green-600' : 'text-orange-600'}`}
+                >
+                  {isProfitable
                     ? 'This offer meets minimum profit requirements'
                     : 'Warning: Below 5% minimum margin'}
                 </Text>
@@ -302,9 +298,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
               {/* Terms Input */}
               <View className="mb-4">
-                <Text className="text-gray-700 font-semibold mb-2">
-                  Terms & Conditions
-                </Text>
+                <Text className="text-gray-700 font-semibold mb-2">Terms & Conditions</Text>
                 <TextInput
                   value={terms}
                   onChangeText={setTerms}
@@ -318,9 +312,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
               {/* Message Input */}
               <View className="mb-6">
-                <Text className="text-gray-700 font-semibold mb-2">
-                  Message (Optional)
-                </Text>
+                <Text className="text-gray-700 font-semibold mb-2">Message (Optional)</Text>
                 <TextInput
                   value={message}
                   onChangeText={setMessage}
@@ -341,19 +333,13 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                   className="flex-1 py-3 rounded-lg border border-gray-300"
                   disabled={isSubmitting}
                 >
-                  <Text className="text-gray-700 font-semibold text-center">
-                    Cancel
-                  </Text>
+                  <Text className="text-gray-700 font-semibold text-center">Cancel</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   onPress={handleSubmit}
                   className={`flex-1 py-3 rounded-lg flex-row items-center justify-center ${
-                    isSubmitting 
-                      ? 'bg-gray-400' 
-                      : isProfitable 
-                        ? 'bg-blue-500' 
-                        : 'bg-orange-500'
+                    isSubmitting ? 'bg-gray-400' : isProfitable ? 'bg-blue-500' : 'bg-orange-500'
                   }`}
                   disabled={isSubmitting}
                 >
@@ -362,9 +348,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                   ) : (
                     <>
                       <Send size={18} color="white" />
-                      <Text className="text-white font-semibold ml-2">
-                        Send Offer
-                      </Text>
+                      <Text className="text-white font-semibold ml-2">Send Offer</Text>
                     </>
                   )}
                 </TouchableOpacity>

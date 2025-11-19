@@ -17,7 +17,11 @@ export const TruckCard: React.FC<TruckCardProps> = ({ truck }) => (
       </View>
       <Badge
         text={truck.status === 'available' ? 'Available' : 'Assigned'}
-        className={truck.status === 'available' ? 'text-green-400 bg-green-500/10' : 'text-yellow-400 bg-yellow-500/10'}
+        className={
+          truck.status === 'available'
+            ? 'text-green-400 bg-green-500/10'
+            : 'text-yellow-400 bg-yellow-500/10'
+        }
       />
     </View>
     <Text className="text-gray-300 text-sm mb-2">Capacity: {truck.capacityTons} tons</Text>

@@ -3,7 +3,7 @@
 export interface SellerLocation {
   latitude: number;
   longitude: number;
-  lat?: number;  // Some APIs return lat/lng instead of latitude/longitude
+  lat?: number; // Some APIs return lat/lng instead of latitude/longitude
   lng?: number;
   city: string;
   address?: string;
@@ -15,13 +15,13 @@ export interface MatchingSeller {
   sellerName: string;
   saleListingId: string;
   availableQuantity: number;
-  availability?: number;  // For backward compatibility
+  availability?: number; // For backward compatibility
   askingPrice: number;
   quality: string;
   location?: SellerLocation;
   distance: number;
   score: number;
-  matchScore?: number;  // Frontend calculated percentage
+  matchScore?: number; // Frontend calculated percentage
   saleListing?: {
     seller?: {
       name?: string;
@@ -165,7 +165,7 @@ export enum TradePhase {
   IN_PROGRESS = 'IN_PROGRESS',
   DELIVERED = 'DELIVERED',
   COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
 }
 
 export enum TradeStatus {
@@ -173,7 +173,7 @@ export enum TradeStatus {
   PAUSED = 'PAUSED',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
-  FAILED = 'FAILED'
+  FAILED = 'FAILED',
 }
 
 export enum SellerStatus {
@@ -182,7 +182,7 @@ export enum SellerStatus {
   NEGOTIATING = 'NEGOTIATING',
   ACCEPTED = 'ACCEPTED',
   REJECTED = 'REJECTED',
-  WITHDRAWN = 'WITHDRAWN'
+  WITHDRAWN = 'WITHDRAWN',
 }
 
 export enum NegotiationStatus {
@@ -190,7 +190,7 @@ export enum NegotiationStatus {
   IN_PROGRESS = 'IN_PROGRESS',
   ACCEPTED = 'ACCEPTED',
   REJECTED = 'REJECTED',
-  EXPIRED = 'EXPIRED'
+  EXPIRED = 'EXPIRED',
 }
 
 export enum ListingStatus {
@@ -199,7 +199,7 @@ export enum ListingStatus {
   PENDING = 'PENDING',
   SOLD = 'SOLD',
   EXPIRED = 'EXPIRED',
-  CANCELLED = 'CANCELLED'
+  CANCELLED = 'CANCELLED',
 }
 
 export enum ProductUnit {
@@ -207,7 +207,7 @@ export enum ProductUnit {
   TON = 'TON',
   PIECE = 'PIECE',
   LITER = 'LITER',
-  BUSHEL = 'BUSHEL'
+  BUSHEL = 'BUSHEL',
 }
 
 // API Request/Response types
@@ -217,11 +217,11 @@ export interface CreateTradeOperationRequest {
 }
 
 export interface AddSellersRequest {
-  sellers: Array<{
+  sellers: {
     sellerId: string;
     saleListingId: string;
     requestedQuantity: number;
-  }>;
+  }[];
 }
 
 export interface CreateOfferRequest {

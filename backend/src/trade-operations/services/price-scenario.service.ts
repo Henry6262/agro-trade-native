@@ -2,7 +2,6 @@ import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { ProfitCalculationService } from "./profit-calculation.service";
 import { TransportCostService } from "../../transport/services/transport-cost.service";
-import { TradeOperation, BuyListing, SaleListing } from "@prisma/client";
 
 export interface PriceScenario {
   id: string;
@@ -125,7 +124,7 @@ export class PriceScenarioService {
     }
 
     // Sort and rank scenarios
-    const rankedScenarios = this.rankScenarios(scenarios, minProfitMargin);
+    const rankedScenarios = this.rankScenarios(scenarios);
 
     // Find optimal scenario
     const optimal = this.findOptimalScenario(rankedScenarios);
@@ -333,10 +332,7 @@ export class PriceScenarioService {
   /**
    * Rank scenarios by profitability and viability
    */
-  private rankScenarios(
-    scenarios: PriceScenario[],
-    minProfitMargin: number,
-  ): PriceScenario[] {
+  private rankScenarios(scenarios: PriceScenario[]): PriceScenario[] {
     return scenarios
       .map((scenario) => {
         // Calculate score based on multiple factors

@@ -6,22 +6,24 @@ import { z } from 'zod';
 import { useAuth } from '../../../shared/hooks';
 import { Button, Input, LoadingSpinner } from '../../../shared/components';
 
-const registerSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-  confirmPassword: z.string(),
-  role: z.enum(['buyer', 'seller']),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    name: z.string().min(2, 'Name must be at least 2 characters'),
+    email: z.string().email('Please enter a valid email'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string(),
+    role: z.enum(['buyer', 'seller']),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterScreen() {
   const { registerMutation } = useAuth();
-  
+
   const {
     control,
     handleSubmit,
@@ -37,10 +39,7 @@ export default function RegisterScreen() {
     try {
       await registerMutation.mutateAsync(data);
     } catch (error: any) {
-      Alert.alert(
-        'Registration Failed',
-        error?.response?.data?.message || 'Please try again.'
-      );
+      Alert.alert('Registration Failed', error?.response?.data?.message || 'Please try again.');
     }
   };
 
@@ -48,12 +47,8 @@ export default function RegisterScreen() {
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 px-6 py-8">
         <View className="mb-8">
-          <Text className="text-3xl font-bold text-gray-900 mb-2">
-            Create Account
-          </Text>
-          <Text className="text-lg text-gray-600">
-            Join the AgroTrade marketplace
-          </Text>
+          <Text className="text-3xl font-bold text-gray-900 mb-2">Create Account</Text>
+          <Text className="text-lg text-gray-600">Join the AgroTrade marketplace</Text>
         </View>
 
         <View className="space-y-4">
@@ -130,7 +125,7 @@ export default function RegisterScreen() {
           />
         </View>
       </View>
-      
+
       {registerMutation.isPending && <LoadingSpinner overlay message="Creating account..." />}
     </SafeAreaView>
   );

@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import React, { useState } from 'react';
 import {
@@ -46,10 +46,7 @@ type DashboardMainScreenNavigationProp = NativeStackNavigationProp<
   DashboardStackParamList,
   'DashboardMain'
 >;
-type DashboardMainScreenRouteProp = RouteProp<
-  DashboardStackParamList,
-  'DashboardMain'
->;
+type DashboardMainScreenRouteProp = RouteProp<DashboardStackParamList, 'DashboardMain'>;
 
 interface NavigationItem {
   id: string;
@@ -62,11 +59,13 @@ export default function DashboardMainScreen() {
   const route = useRoute<DashboardMainScreenRouteProp>();
   const { width: screenWidth } = Dimensions.get('window');
   const { user, isAuthenticated } = useAuthStore();
-  
+
   const [activeSection, setActiveSection] = useState('overview');
   // State for testing different dashboards
-  const [testRole, setTestRole] = useState<'admin' | 'seller' | 'buyer' | 'transporter' | 'inspector' | null>(null);
-  
+  const [testRole, setTestRole] = useState<
+    'admin' | 'seller' | 'buyer' | 'transporter' | 'inspector' | null
+  >(null);
+
   // Normalize user role to lowercase for consistency
   // Note: Backend uses 'FARMER' instead of 'SELLER'
   const userRole = React.useMemo(() => {
@@ -92,13 +91,13 @@ export default function DashboardMainScreen() {
     if (!isAuthenticated) {
       navigation.navigate('RoleSelection' as never);
     }
-    
+
     // Check if we're coming from onboarding with success animation
     if (route.params?.showSuccessAnimation) {
       setShowProfileDrawer(true);
       setShowSuccessAnimation(true);
     }
-    
+
     // Check for pending buyer listings after authentication
     if (isAuthenticated) {
       const checkPendingListing = async () => {
@@ -115,19 +114,19 @@ export default function DashboardMainScreen() {
   // Update active section when role changes
   React.useEffect(() => {
     switch (userRole) {
-      case 'seller': 
+      case 'seller':
         setActiveSection('products');
         break;
-      case 'buyer': 
+      case 'buyer':
         setActiveSection('orders');
         break;
-      case 'transporter': 
+      case 'transporter':
         setActiveSection('bidding');
         break;
       case 'inspector':
         setActiveSection('active');
         break;
-      default: 
+      default:
         setActiveSection('overview');
     }
   }, [userRole]);
@@ -174,16 +173,15 @@ export default function DashboardMainScreen() {
   };
 
   const navigationItems = getNavigationItems();
-  
+
   // Debug logging
   console.log('Dashboard State:', {
     userRole,
     activeSection,
-    navigationItems: navigationItems.map(i => i.id),
+    navigationItems: navigationItems.map((i) => i.id),
     isAuthenticated,
     user: user?.email,
   });
-
 
   const renderContent = () => {
     if (userRole === 'seller') {
@@ -191,7 +189,9 @@ export default function DashboardMainScreen() {
         return <IntelligenceScreen />;
       }
       // Pass all seller tabs to SellerDashboardSection (products, offers, trades)
-      return <SellerDashboardSection activeTab={activeSection as 'products' | 'offers' | 'trades'} />;
+      return (
+        <SellerDashboardSection activeTab={activeSection as 'products' | 'offers' | 'trades'} />
+      );
     }
     if (userRole === 'buyer') {
       if (activeSection === 'intelligence') {
@@ -229,49 +229,47 @@ export default function DashboardMainScreen() {
   return (
     <Container safeArea={true} noPadding={true} backgroundColor="#000000">
       <StatusBar backgroundColor="#000000" barStyle="light-content" />
-      
+
       <View className="flex-1">
         {/* Main Content */}
         <View className="flex-1">
           {/* Top Toolbar */}
           <View className="h-16 bg-neutral-800 border-b border-neutral-700 flex-row items-center justify-between px-6">
             <View className="flex-row items-center gap-4">
-              <Text className="text-green-500 font-bold text-lg tracking-wider">
-                AGRI TRADE
-              </Text>
+              <Text className="text-green-500 font-bold text-lg tracking-wider">AGRI TRADE</Text>
             </View>
             <View className="flex-row items-center gap-4">
               {/* Dashboard Switcher Button */}
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setShowDashboardSwitcher(!showDashboardSwitcher)}
                 className="flex-row items-center bg-neutral-700 px-3 py-2 rounded-lg"
               >
                 <LayoutGrid color="#9CA3AF" size={16} />
                 <Text className="text-neutral-300 text-sm ml-2">Switch Dashboard</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity className="p-2">
                 <Bell color="#9CA3AF" size={16} />
               </TouchableOpacity>
               <TouchableOpacity className="p-2">
                 <RefreshCw color="#9CA3AF" size={16} />
               </TouchableOpacity>
-              <TouchableOpacity 
-                className="p-2 ml-2"
-                onPress={() => setShowProfileDrawer(true)}
-              >
+              <TouchableOpacity className="p-2 ml-2" onPress={() => setShowProfileDrawer(true)}>
                 <View className="w-8 h-8 bg-emerald-500 rounded-full items-center justify-center">
                   <User color="white" size={16} />
                 </View>
               </TouchableOpacity>
             </View>
           </View>
-          
+
           {/* Dashboard Switcher Dropdown */}
           {showDashboardSwitcher && (
-            <View className="absolute top-16 right-6 bg-neutral-900 border border-neutral-700 rounded-lg p-2 z-50" style={{ minWidth: 200 }}>
+            <View
+              className="absolute top-16 right-6 bg-neutral-900 border border-neutral-700 rounded-lg p-2 z-50"
+              style={{ minWidth: 200 }}
+            >
               <Text className="text-neutral-400 text-xs px-3 py-1 mb-1">TEST DASHBOARDS</Text>
-              
+
               <TouchableOpacity
                 onPress={() => {
                   setShowDashboardSwitcher(false);
@@ -285,7 +283,7 @@ export default function DashboardMainScreen() {
                 <View className="w-2 h-2 bg-blue-500 rounded-full mr-2" />
                 <Text className="text-white">Seller Dashboard</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 onPress={() => {
                   setShowDashboardSwitcher(false);
@@ -299,7 +297,7 @@ export default function DashboardMainScreen() {
                 <View className="w-2 h-2 bg-yellow-500 rounded-full mr-2" />
                 <Text className="text-white">Buyer Dashboard</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 onPress={() => {
                   setShowDashboardSwitcher(false);
@@ -313,7 +311,7 @@ export default function DashboardMainScreen() {
                 <View className="w-2 h-2 bg-green-500 rounded-full mr-2" />
                 <Text className="text-white">Transporter Dashboard</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 onPress={() => {
                   setShowDashboardSwitcher(false);
@@ -327,7 +325,7 @@ export default function DashboardMainScreen() {
                 <View className="w-2 h-2 bg-purple-500 rounded-full mr-2" />
                 <Text className="text-white">Admin Dashboard</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 onPress={() => {
                   setShowDashboardSwitcher(false);
@@ -345,11 +343,9 @@ export default function DashboardMainScreen() {
           )}
 
           {/* Dashboard Content */}
-          <View className="flex-1">
-            {renderContent()}
-          </View>
+          <View className="flex-1">{renderContent()}</View>
         </View>
-        
+
         {/* Bottom Navigation */}
         <BottomNavigation
           items={navigationItems}
@@ -358,9 +354,8 @@ export default function DashboardMainScreen() {
         />
       </View>
 
-      
       {/* Profile Drawer */}
-      <ProfileDrawer 
+      <ProfileDrawer
         visible={showProfileDrawer}
         onClose={() => {
           setShowProfileDrawer(false);

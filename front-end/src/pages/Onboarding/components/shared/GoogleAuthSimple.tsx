@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  Platform,
-  Animated,
-  Linking,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Platform, Animated, Linking } from 'react-native';
 import { CheckCircle, User } from 'lucide-react-native';
 import * as WebBrowser from 'expo-web-browser';
 import { useOnboardingStore } from '../../../../stores/onboarding.store';
@@ -28,7 +20,7 @@ export const GoogleAuthSimple: React.FC<GoogleAuthSimpleProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [profileCreated, setProfileCreated] = useState(false);
-  
+
   // Animation values
   const fadeAnim = new Animated.Value(0);
   const scaleAnim = new Animated.Value(0.3);
@@ -42,7 +34,7 @@ export const GoogleAuthSimple: React.FC<GoogleAuthSimpleProps> = ({
   // Handle successful profile creation animation
   const showProfileCreatedAnimation = () => {
     setProfileCreated(true);
-    
+
     // Start animations in sequence
     Animated.sequence([
       // Fade in and scale up the container
@@ -84,10 +76,10 @@ export const GoogleAuthSimple: React.FC<GoogleAuthSimpleProps> = ({
   useEffect(() => {
     if (googleAuthData?.isAuthenticated) {
       console.log('User authenticated via Google:', googleAuthData);
-      
+
       // Show success animation and complete
       showProfileCreatedAnimation();
-      
+
       // Clear the Google auth data
       onboardingStore.setGoogleAuthData({ name: '', email: '', isAuthenticated: false });
     }
@@ -95,19 +87,19 @@ export const GoogleAuthSimple: React.FC<GoogleAuthSimpleProps> = ({
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-    
+
     try {
       const role = userRole || selectedRole || 'buyer';
       const apiUrl = ENV.apiUrl;
       // Add prompt=select_account to force account selection
       const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}&prompt=select_account`;
-      
+
       console.log('Opening Google OAuth in browser:', googleOAuthUrl);
-      
+
       // Store onboarding data and role before opening browser
       await onboardingStore.saveOnboardingData();
       onboardingStore.setRole(role as UserRole);
-      
+
       if (Platform.OS === 'web') {
         // For web, redirect directly
         window.location.href = googleOAuthUrl;
@@ -115,13 +107,13 @@ export const GoogleAuthSimple: React.FC<GoogleAuthSimpleProps> = ({
         // For mobile, open in system browser
         // The user will authenticate and be redirected back to the app
         const result = await WebBrowser.openBrowserAsync(googleOAuthUrl);
-        
+
         console.log('Browser result:', result);
-        
+
         if (result.type === 'cancel') {
           setIsLoading(false);
         }
-        
+
         // Note: The actual authentication completion happens when the user
         // is redirected back to the app and the OAuthCallbackScreen handles it
       }
@@ -164,15 +156,9 @@ export const GoogleAuthSimple: React.FC<GoogleAuthSimpleProps> = ({
 
           {/* Success Message */}
           <Animated.View style={{ opacity: textOpacity }} className="items-center">
-            <Text className="text-2xl font-bold text-white mb-2">
-              Profile Created!
-            </Text>
-            <Text className="text-gray-400 text-center">
-              Welcome to AgroTrade
-            </Text>
-            <Text className="text-gray-500 text-sm mt-1">
-              Redirecting to dashboard...
-            </Text>
+            <Text className="text-2xl font-bold text-white mb-2">Profile Created!</Text>
+            <Text className="text-gray-400 text-center">Welcome to AgroTrade</Text>
+            <Text className="text-gray-500 text-sm mt-1">Redirecting to dashboard...</Text>
           </Animated.View>
         </Animated.View>
       </View>
@@ -183,9 +169,7 @@ export const GoogleAuthSimple: React.FC<GoogleAuthSimpleProps> = ({
     <View className={`${mode === 'modal' ? 'bg-gray-800 rounded-xl p-6 m-4' : 'p-6'}`}>
       {/* Header */}
       <View className="mb-8 items-center">
-        <Text className="text-3xl font-bold text-white mb-2">
-          Welcome to AgroTrade
-        </Text>
+        <Text className="text-3xl font-bold text-white mb-2">Welcome to AgroTrade</Text>
         <Text className="text-gray-400 text-center">
           Sign in with your Google account to continue
         </Text>

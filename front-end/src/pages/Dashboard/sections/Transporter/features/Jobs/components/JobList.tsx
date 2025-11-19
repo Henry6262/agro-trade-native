@@ -26,7 +26,9 @@ export const TransporterJobList: React.FC<TransporterJobListProps> = ({
       <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
         <Package size={48} color="#6B7280" style={{ alignSelf: 'center', marginBottom: 12 }} />
         <Text className="text-gray-400 text-center">No active transport jobs</Text>
-        <Text className="text-gray-500 text-center text-sm mt-2">Submit bids to get transport jobs</Text>
+        <Text className="text-gray-500 text-center text-sm mt-2">
+          Submit bids to get transport jobs
+        </Text>
       </View>
     );
   }

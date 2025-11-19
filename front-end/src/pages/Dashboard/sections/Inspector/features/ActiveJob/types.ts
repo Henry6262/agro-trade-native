@@ -53,12 +53,12 @@ export interface InspectorVerificationFormValues {
     origin?: string;
     notes?: string;
   };
-  evidence?: Array<{
+  evidence?: {
     type: 'photo' | 'document' | 'video';
     url: string;
     caption?: string;
     timestamp: Date;
-  }>;
+  }[];
   verificationStatus: InspectorVerificationStatus;
 }
 

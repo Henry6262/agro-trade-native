@@ -9,7 +9,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
   const [testMethods, setTestMethods] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState('');
   const [evidence, setEvidence] = useState<
-    Array<{ type: 'photo' | 'document' | 'video'; url: string; caption?: string; timestamp: Date }>
+    { type: 'photo' | 'document' | 'video'; url: string; caption?: string; timestamp: Date }[]
   >([]);
   const [verificationStatus, setVerificationStatus] =
     useState<InspectorVerificationStatus>('VERIFIED');
@@ -123,7 +123,9 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
             onPress={() => setShowCorrections((prev) => !prev)}
             className="flex-row items-center justify-between bg-amber-50 p-3 rounded-lg"
           >
-            <Text className="text-sm font-semibold text-amber-800">Product Specification Corrections</Text>
+            <Text className="text-sm font-semibold text-amber-800">
+              Product Specification Corrections
+            </Text>
             <Text className="text-amber-600">{showCorrections ? '▼' : '▶'}</Text>
           </TouchableOpacity>
           {showCorrections && (
@@ -172,7 +174,10 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
             <ScrollView horizontal className="mt-3">
               {evidence.map((item) => (
                 <View key={item.url} className="mr-3">
-                  <Image source={{ uri: item.url }} style={{ width: 80, height: 80, borderRadius: 8 }} />
+                  <Image
+                    source={{ uri: item.url }}
+                    style={{ width: 80, height: 80, borderRadius: 8 }}
+                  />
                   <Text className="text-xs text-gray-500 mt-1">{item.caption}</Text>
                 </View>
               ))}
@@ -201,7 +206,10 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
                 verificationStatus === 'VERIFIED' ? 'bg-green-600' : 'bg-gray-100'
               }`}
             >
-              <CheckCircle size={16} color={verificationStatus === 'VERIFIED' ? '#fff' : '#374151'} />
+              <CheckCircle
+                size={16}
+                color={verificationStatus === 'VERIFIED' ? '#fff' : '#374151'}
+              />
               <Text
                 className={`ml-2 font-medium ${
                   verificationStatus === 'VERIFIED' ? 'text-white' : 'text-gray-700'

@@ -6,4 +6,4 @@ export interface ProductSelectionMetadata {
   specifications: any[];
 }
 
-export type ProductSelectionRole = "seller" | "buyer" | string | null;
+export type ProductSelectionRole = 'seller' | 'buyer' | string | null;

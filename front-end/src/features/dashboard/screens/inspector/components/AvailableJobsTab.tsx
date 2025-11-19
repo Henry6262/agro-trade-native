@@ -18,7 +18,7 @@ export const AvailableJobsTab: React.FC<AvailableJobsTabProps> = ({
 
   // Filter jobs by priority
   const filteredJobs = priorityFilter
-    ? jobs.filter(job => job.priority === priorityFilter)
+    ? jobs.filter((job) => job.priority === priorityFilter)
     : jobs;
 
   // Sort jobs
@@ -27,8 +27,10 @@ export const AvailableJobsTab: React.FC<AvailableJobsTabProps> = ({
       return (a.distance || 0) - (b.distance || 0);
     } else {
       const priorityOrder = { HIGH: 0, MEDIUM: 1, LOW: 2 };
-      return priorityOrder[a.priority as keyof typeof priorityOrder] - 
-             priorityOrder[b.priority as keyof typeof priorityOrder];
+      return (
+        priorityOrder[a.priority as keyof typeof priorityOrder] -
+        priorityOrder[b.priority as keyof typeof priorityOrder]
+      );
     }
   });
 
@@ -61,7 +63,7 @@ export const AvailableJobsTab: React.FC<AvailableJobsTabProps> = ({
                 All ({jobs.length})
               </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               testID="filter-high"
               onPress={() => setPriorityFilter('HIGH')}
@@ -73,7 +75,7 @@ export const AvailableJobsTab: React.FC<AvailableJobsTabProps> = ({
                 High
               </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               testID="filter-medium"
               onPress={() => setPriorityFilter('MEDIUM')}
@@ -85,7 +87,7 @@ export const AvailableJobsTab: React.FC<AvailableJobsTabProps> = ({
                 Medium
               </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               testID="filter-low"
               onPress={() => setPriorityFilter('LOW')}
@@ -93,9 +95,7 @@ export const AvailableJobsTab: React.FC<AvailableJobsTabProps> = ({
                 priorityFilter === 'LOW' ? 'bg-gray-600' : 'bg-gray-200'
               }`}
             >
-              <Text className={priorityFilter === 'LOW' ? 'text-white' : 'text-gray-700'}>
-                Low
-              </Text>
+              <Text className={priorityFilter === 'LOW' ? 'text-white' : 'text-gray-700'}>Low</Text>
             </TouchableOpacity>
           </ScrollView>
 
@@ -108,7 +108,7 @@ export const AvailableJobsTab: React.FC<AvailableJobsTabProps> = ({
             >
               <List size={20} color={viewMode === 'list' ? 'white' : '#4b5563'} />
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               testID="map-toggle"
               onPress={() => setViewMode('map')}
@@ -126,17 +126,21 @@ export const AvailableJobsTab: React.FC<AvailableJobsTabProps> = ({
             onPress={() => setSortBy('distance')}
             className={`mr-3 ${sortBy === 'distance' ? 'border-b-2 border-green-600' : ''}`}
           >
-            <Text className={sortBy === 'distance' ? 'text-green-600 font-medium' : 'text-gray-600'}>
+            <Text
+              className={sortBy === 'distance' ? 'text-green-600 font-medium' : 'text-gray-600'}
+            >
               Sort by Distance
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             testID="sort-priority"
             onPress={() => setSortBy('priority')}
             className={sortBy === 'priority' ? 'border-b-2 border-green-600' : ''}
           >
-            <Text className={sortBy === 'priority' ? 'text-green-600 font-medium' : 'text-gray-600'}>
+            <Text
+              className={sortBy === 'priority' ? 'text-green-600 font-medium' : 'text-gray-600'}
+            >
               Sort by Priority
             </Text>
           </TouchableOpacity>
@@ -156,9 +160,13 @@ export const AvailableJobsTab: React.FC<AvailableJobsTabProps> = ({
           </View>
         ) : (
           <View testID="jobs-map-view" className="flex-1">
-            <JobMapView    
+            <JobMapView
               jobs={sortedJobs}
-              currentLocation={currentLocation ? { latitude: currentLocation.latitude, longitude: currentLocation.longitude } : undefined}
+              currentLocation={
+                currentLocation
+                  ? { latitude: currentLocation.latitude, longitude: currentLocation.longitude }
+                  : undefined
+              }
               onJobSelect={onJobSelect}
             />
           </View>

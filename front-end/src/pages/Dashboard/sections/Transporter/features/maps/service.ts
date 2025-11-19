@@ -7,7 +7,7 @@ export const transporterMapService = {
   fetchOfferMapData: (offerId: string) => getOfferMapData(offerId),
   fetchAvailableFleet: (transporterId: string) => fetchAvailableFleet(transporterId),
   calculateRoutes: (
-    trucks: Array<{ id: string; label: string; location: Location }>,
+    trucks: { id: string; label: string; location: Location }[],
     pickup: Location,
     delivery: Location
   ): Promise<RouteData[]> => calculateMultipleRoutes(trucks, pickup, delivery),

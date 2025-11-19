@@ -73,17 +73,23 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
       const suggestedPrice = ((currentOffer.price + counterOffer.price) / 2).toFixed(2);
       setNewPrice(suggestedPrice);
       setNewQuantity(counterOffer.quantity.toString());
-      
+
       // Generate appropriate message based on price difference
       const priceDiff = counterOffer.price - currentOffer.price;
-      const percentDiff = (priceDiff / currentOffer.price * 100).toFixed(1);
-      
+      const percentDiff = ((priceDiff / currentOffer.price) * 100).toFixed(1);
+
       if (Math.abs(priceDiff) < currentOffer.price * 0.05) {
-        setResponseMessage(`We're very close to an agreement. This offer represents a fair middle ground.`);
+        setResponseMessage(
+          `We're very close to an agreement. This offer represents a fair middle ground.`
+        );
       } else if (priceDiff > 0) {
-        setResponseMessage(`While we understand your position, this price would impact our margins. We propose a compromise.`);
+        setResponseMessage(
+          `While we understand your position, this price would impact our margins. We propose a compromise.`
+        );
       } else {
-        setResponseMessage(`We appreciate your flexibility. This adjusted offer ensures a mutually beneficial arrangement.`);
+        setResponseMessage(
+          `We appreciate your flexibility. This adjusted offer ensures a mutually beneficial arrangement.`
+        );
       }
     }
   }, [counterOffer, currentOffer]);
@@ -96,11 +102,11 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
 
   const calculateConvergence = () => {
     if (!counterOffer || !currentOffer) return null;
-    
+
     const currentGap = Math.abs(counterOffer.price - currentOffer.price);
     const newGap = Math.abs(parseFloat(newPrice) - counterOffer.price);
-    const convergenceRate = ((currentGap - newGap) / currentGap * 100).toFixed(1);
-    
+    const convergenceRate = (((currentGap - newGap) / currentGap) * 100).toFixed(1);
+
     return {
       currentGap,
       newGap,
@@ -135,7 +141,7 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
 
       // Check if the new offer is moving in the right direction
       if (counterOffer && price >= counterOffer.price) {
-        errors.push('Counter-offer should be lower than seller\'s current offer');
+        errors.push("Counter-offer should be lower than seller's current offer");
       }
     } else if (responseType === 'REJECT' && !rejectReason) {
       errors.push('Please provide a reason for rejection');
@@ -154,7 +160,7 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
 
     try {
       let result;
-      
+
       switch (responseType) {
         case 'ACCEPT':
           result = await negotiationService.acceptOffer(
@@ -164,46 +170,63 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
           Alert.alert(
             'Offer Accepted',
             `You have accepted the seller's offer of €${counterOffer?.price || currentOffer.price} for ${counterOffer?.quantity || currentOffer.quantity} units.`,
-            [{ text: 'OK', onPress: () => { onOfferSent?.(); onClose(); } }]
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  onOfferSent?.();
+                  onClose();
+                },
+              },
+            ]
           );
           break;
-          
+
         case 'REJECT':
           result = await negotiationService.rejectOffer(
             negotiationId,
             rejectReason || 'Terms not acceptable'
           );
-          Alert.alert(
-            'Offer Rejected',
-            'The negotiation has been closed.',
-            [{ text: 'OK', onPress: () => { onOfferSent?.(); onClose(); } }]
-          );
+          Alert.alert('Offer Rejected', 'The negotiation has been closed.', [
+            {
+              text: 'OK',
+              onPress: () => {
+                onOfferSent?.();
+                onClose();
+              },
+            },
+          ]);
           break;
-          
+
         case 'COUNTER':
           result = await negotiationService.counterOffer(negotiationId, {
             counterPrice: parseFloat(newPrice),
             message: responseMessage,
           });
-          
+
           const convergence = calculateConvergence();
           Alert.alert(
             'Counter-Offer Sent',
             `Your counter-offer of €${newPrice} has been sent to ${sellerName}.${
-              convergence?.isConverging 
-                ? ` The price gap has narrowed by ${convergence.convergenceRate}%.` 
+              convergence?.isConverging
+                ? ` The price gap has narrowed by ${convergence.convergenceRate}%.`
                 : ''
             }`,
-            [{ text: 'OK', onPress: () => { onOfferSent?.(); onClose(); } }]
+            [
+              {
+                text: 'OK',
+                onPress: () => {
+                  onOfferSent?.();
+                  onClose();
+                },
+              },
+            ]
           );
           break;
       }
     } catch (error: any) {
       console.error('Error responding to counter-offer:', error);
-      Alert.alert(
-        'Error',
-        error?.message || 'Failed to send response. Please try again.'
-      );
+      Alert.alert('Error', error?.message || 'Failed to send response. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -231,17 +254,10 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
             {/* Header */}
             <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
               <View className="flex-1">
-                <Text className="text-lg font-bold text-gray-800">
-                  Respond to Counter-Offer
-                </Text>
-                <Text className="text-sm text-gray-600 mt-1">
-                  {sellerName}
-                </Text>
+                <Text className="text-lg font-bold text-gray-800">Respond to Counter-Offer</Text>
+                <Text className="text-sm text-gray-600 mt-1">{sellerName}</Text>
               </View>
-              <TouchableOpacity
-                onPress={onClose}
-                className="p-2 rounded-full bg-gray-100"
-              >
+              <TouchableOpacity onPress={onClose} className="p-2 rounded-full bg-gray-100">
                 <X size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
@@ -268,9 +284,7 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
                   </View>
                 </View>
                 {counterOffer?.reason && (
-                  <Text className="text-xs text-blue-600 italic mt-1">
-                    "{counterOffer.reason}"
-                  </Text>
+                  <Text className="text-xs text-blue-600 italic mt-1">"{counterOffer.reason}"</Text>
                 )}
               </View>
 
@@ -293,9 +307,11 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
                       color={responseType === 'COUNTER' ? 'white' : '#6B7280'}
                       style={{ alignSelf: 'center' }}
                     />
-                    <Text className={`text-xs text-center mt-1 ${
-                      responseType === 'COUNTER' ? 'text-white' : 'text-gray-700'
-                    }`}>
+                    <Text
+                      className={`text-xs text-center mt-1 ${
+                        responseType === 'COUNTER' ? 'text-white' : 'text-gray-700'
+                      }`}
+                    >
                       Counter
                     </Text>
                   </TouchableOpacity>
@@ -312,9 +328,11 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
                       color={responseType === 'ACCEPT' ? 'white' : '#6B7280'}
                       style={{ alignSelf: 'center' }}
                     />
-                    <Text className={`text-xs text-center mt-1 ${
-                      responseType === 'ACCEPT' ? 'text-white' : 'text-gray-700'
-                    }`}>
+                    <Text
+                      className={`text-xs text-center mt-1 ${
+                        responseType === 'ACCEPT' ? 'text-white' : 'text-gray-700'
+                      }`}
+                    >
                       Accept
                     </Text>
                   </TouchableOpacity>
@@ -331,9 +349,11 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
                       color={responseType === 'REJECT' ? 'white' : '#6B7280'}
                       style={{ alignSelf: 'center' }}
                     />
-                    <Text className={`text-xs text-center mt-1 ${
-                      responseType === 'REJECT' ? 'text-white' : 'text-gray-700'
-                    }`}>
+                    <Text
+                      className={`text-xs text-center mt-1 ${
+                        responseType === 'REJECT' ? 'text-white' : 'text-gray-700'
+                      }`}
+                    >
                       Reject
                     </Text>
                   </TouchableOpacity>
@@ -356,9 +376,7 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
               {responseType === 'COUNTER' && (
                 <>
                   <View className="mb-4">
-                    <Text className="text-gray-700 font-semibold mb-2">
-                      New Price (per unit)
-                    </Text>
+                    <Text className="text-gray-700 font-semibold mb-2">New Price (per unit)</Text>
                     <View className="flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border border-gray-300">
                       <DollarSign size={20} color="#6B7280" />
                       <TextInput
@@ -376,9 +394,7 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
                   </View>
 
                   <View className="mb-4">
-                    <Text className="text-gray-700 font-semibold mb-2">
-                      Quantity
-                    </Text>
+                    <Text className="text-gray-700 font-semibold mb-2">Quantity</Text>
                     <View className="flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border border-gray-300">
                       <Package size={20} color="#6B7280" />
                       <TextInput
@@ -394,45 +410,66 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
 
                   {/* Convergence Indicator */}
                   {convergence && (
-                    <View className={`rounded-lg p-3 mb-4 ${
-                      convergence.isConverging ? 'bg-green-50' : 'bg-orange-50'
-                    }`}>
+                    <View
+                      className={`rounded-lg p-3 mb-4 ${
+                        convergence.isConverging ? 'bg-green-50' : 'bg-orange-50'
+                      }`}
+                    >
                       <View className="flex-row items-center">
                         {convergence.isConverging ? (
                           <TrendingDown size={16} color="#10B981" />
                         ) : (
                           <TrendingUp size={16} color="#F97316" />
                         )}
-                        <Text className={`font-semibold ml-2 ${
-                          convergence.isConverging ? 'text-green-800' : 'text-orange-800'
-                        }`}>
+                        <Text
+                          className={`font-semibold ml-2 ${
+                            convergence.isConverging ? 'text-green-800' : 'text-orange-800'
+                          }`}
+                        >
                           {convergence.isConverging ? 'Converging' : 'Diverging'} Negotiation
                         </Text>
                       </View>
-                      <Text className={`text-xs mt-1 ${
-                        convergence.isConverging ? 'text-green-600' : 'text-orange-600'
-                      }`}>
-                        Price gap: €{convergence.currentGap.toFixed(2)} → €{convergence.newGap.toFixed(2)}
+                      <Text
+                        className={`text-xs mt-1 ${
+                          convergence.isConverging ? 'text-green-600' : 'text-orange-600'
+                        }`}
+                      >
+                        Price gap: €{convergence.currentGap.toFixed(2)} → €
+                        {convergence.newGap.toFixed(2)}
                         {convergence.isConverging && ` (-${convergence.convergenceRate}%)`}
                       </Text>
                     </View>
                   )}
 
                   {/* Profit Indicator */}
-                  <View className={`rounded-lg p-3 mb-4 ${
-                    meetsTarget ? 'bg-green-50' : isProfitable ? 'bg-yellow-50' : 'bg-red-50'
-                  }`}>
-                    <Text className={`font-semibold ${
-                      meetsTarget ? 'text-green-800' : isProfitable ? 'text-yellow-800' : 'text-red-800'
-                    }`}>
+                  <View
+                    className={`rounded-lg p-3 mb-4 ${
+                      meetsTarget ? 'bg-green-50' : isProfitable ? 'bg-yellow-50' : 'bg-red-50'
+                    }`}
+                  >
+                    <Text
+                      className={`font-semibold ${
+                        meetsTarget
+                          ? 'text-green-800'
+                          : isProfitable
+                            ? 'text-yellow-800'
+                            : 'text-red-800'
+                      }`}
+                    >
                       Profit Margin: {profitMargin.toFixed(1)}%
                     </Text>
-                    <Text className={`text-xs mt-1 ${
-                      meetsTarget ? 'text-green-600' : isProfitable ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
-                      {meetsTarget 
+                    <Text
+                      className={`text-xs mt-1 ${
+                        meetsTarget
+                          ? 'text-green-600'
+                          : isProfitable
+                            ? 'text-yellow-600'
+                            : 'text-red-600'
+                      }`}
+                    >
+                      {meetsTarget
                         ? `Meets target margin (${targetMargin}%)`
-                        : isProfitable 
+                        : isProfitable
                           ? `Below target (${targetMargin}%) but profitable`
                           : 'Below minimum margin (5%)'}
                     </Text>
@@ -453,7 +490,8 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
                     You will accept: €{counterOffer?.price} × {counterOffer?.quantity} units
                   </Text>
                   <Text className="text-green-600 text-xs mt-1">
-                    Total value: €{((counterOffer?.price || 0) * (counterOffer?.quantity || 0)).toFixed(2)}
+                    Total value: €
+                    {((counterOffer?.price || 0) * (counterOffer?.quantity || 0)).toFixed(2)}
                   </Text>
                 </View>
               )}
@@ -461,9 +499,7 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
               {/* Reject Form */}
               {responseType === 'REJECT' && (
                 <View className="mb-4">
-                  <Text className="text-gray-700 font-semibold mb-2">
-                    Reason for Rejection
-                  </Text>
+                  <Text className="text-gray-700 font-semibold mb-2">Reason for Rejection</Text>
                   <TextInput
                     value={rejectReason}
                     onChangeText={setRejectReason}
@@ -485,10 +521,10 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
                   value={responseMessage}
                   onChangeText={setResponseMessage}
                   placeholder={
-                    responseType === 'ACCEPT' 
-                      ? "Thank you for your flexibility..."
+                    responseType === 'ACCEPT'
+                      ? 'Thank you for your flexibility...'
                       : responseType === 'REJECT'
-                        ? "We appreciate your offer but..."
+                        ? 'We appreciate your offer but...'
                         : "Let's find a middle ground..."
                   }
                   multiline
@@ -502,16 +538,14 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
               <View className="bg-gray-50 rounded-lg p-3 mb-4">
                 <View className="flex-row items-center mb-1">
                   <Info size={14} color="#6B7280" />
-                  <Text className="text-xs font-semibold text-gray-700 ml-1">
-                    Negotiation Tips
-                  </Text>
+                  <Text className="text-xs font-semibold text-gray-700 ml-1">Negotiation Tips</Text>
                 </View>
                 <Text className="text-xs text-gray-600">
-                  {responseType === 'COUNTER' 
-                    ? "• Move closer to their price to show willingness\n• Consider quantity adjustments for better pricing\n• Keep communication professional and positive"
+                  {responseType === 'COUNTER'
+                    ? '• Move closer to their price to show willingness\n• Consider quantity adjustments for better pricing\n• Keep communication professional and positive'
                     : responseType === 'ACCEPT'
-                      ? "• Accepting builds trust for future deals\n• Consider the long-term relationship value\n• Quick acceptance can expedite delivery"
-                      : "• Provide clear reasoning for rejection\n• Leave door open for future negotiations\n• Consider alternative suppliers before rejecting"}
+                      ? '• Accepting builds trust for future deals\n• Consider the long-term relationship value\n• Quick acceptance can expedite delivery'
+                      : '• Provide clear reasoning for rejection\n• Leave door open for future negotiations\n• Consider alternative suppliers before rejecting'}
                 </Text>
               </View>
             </ScrollView>
@@ -524,22 +558,20 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
                   className="flex-1 py-3 rounded-lg border border-gray-300"
                   disabled={isSubmitting}
                 >
-                  <Text className="text-gray-700 font-semibold text-center">
-                    Cancel
-                  </Text>
+                  <Text className="text-gray-700 font-semibold text-center">Cancel</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   onPress={handleSubmit}
                   className={`flex-1 py-3 rounded-lg flex-row items-center justify-center ${
-                    isSubmitting 
-                      ? 'bg-gray-400' 
+                    isSubmitting
+                      ? 'bg-gray-400'
                       : responseType === 'ACCEPT'
                         ? 'bg-green-600'
                         : responseType === 'REJECT'
                           ? 'bg-red-600'
-                          : isProfitable 
-                            ? 'bg-blue-600' 
+                          : isProfitable
+                            ? 'bg-blue-600'
                             : 'bg-orange-600'
                   }`}
                   disabled={isSubmitting}
@@ -550,10 +582,10 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
                     <>
                       <Send size={18} color="white" />
                       <Text className="text-white font-semibold ml-2">
-                        {responseType === 'ACCEPT' 
-                          ? 'Accept' 
-                          : responseType === 'REJECT' 
-                            ? 'Reject' 
+                        {responseType === 'ACCEPT'
+                          ? 'Accept'
+                          : responseType === 'REJECT'
+                            ? 'Reject'
                             : 'Send Counter'}
                       </Text>
                     </>

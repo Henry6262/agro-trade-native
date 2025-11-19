@@ -1,12 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { buyerOrdersService } from '../service';
-import type { BuyerIncomingOffer, BuyerOrder, BuyerOrdersHookResult, BuyerStatistics } from '../types';
+import type {
+  BuyerIncomingOffer,
+  BuyerOrder,
+  BuyerOrdersHookResult,
+  BuyerStatistics,
+} from '../types';
 import { buildMockIncomingOffers, getDefaultBuyerStatistics, mapOperationToOrder } from '../utils';
 
 export const useBuyerOrders = (): BuyerOrdersHookResult => {
   const [orders, setOrders] = useState<BuyerOrder[]>([]);
   const [stats, setStats] = useState<BuyerStatistics>(getDefaultBuyerStatistics());
-  const [incomingOffers, setIncomingOffers] = useState<BuyerIncomingOffer[]>(buildMockIncomingOffers());
+  const [incomingOffers, setIncomingOffers] =
+    useState<BuyerIncomingOffer[]>(buildMockIncomingOffers());
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);

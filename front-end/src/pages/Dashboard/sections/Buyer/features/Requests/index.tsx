@@ -1,5 +1,12 @@
 import React, { useEffect } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Plus } from 'lucide-react-native';
 import { useProductStore } from '../../../../stores/product.store';
 import { BuyerRequestCreationFlow } from './request-creation';
@@ -44,15 +51,22 @@ export default function BuyerRequestsTab() {
         className="flex-1 bg-black"
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
-        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refresh} tintColor="#60A5FA" />}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={refresh} tintColor="#60A5FA" />
+        }
       >
         <View className="p-6 space-y-6">
           <View className="flex-row items-center justify-between">
             <View>
               <Text className="text-2xl font-bold text-white">Buyer Requests</Text>
-              <Text className="text-neutral-400">Submit purchase needs and review incoming offers</Text>
+              <Text className="text-neutral-400">
+                Submit purchase needs and review incoming offers
+              </Text>
             </View>
-            <TouchableOpacity onPress={openRequestCreation} className="bg-blue-600 px-4 py-2 rounded-lg flex-row items-center">
+            <TouchableOpacity
+              onPress={openRequestCreation}
+              className="bg-blue-600 px-4 py-2 rounded-lg flex-row items-center"
+            >
               <Plus size={16} color="#ffffff" />
               <Text className="text-white font-semibold ml-2">New Request</Text>
             </TouchableOpacity>

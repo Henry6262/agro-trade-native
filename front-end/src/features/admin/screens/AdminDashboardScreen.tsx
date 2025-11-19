@@ -100,7 +100,10 @@ export function AdminDashboardScreen() {
                 className={`w-1/2 p-2 ${selectedCard === card.id ? 'opacity-70' : ''}`}
                 activeOpacity={0.8}
               >
-                <View className="bg-gray-800 rounded-xl p-5 border border-gray-700" style={styles.cardShadow}>
+                <View
+                  className="bg-gray-800 rounded-xl p-5 border border-gray-700"
+                  style={styles.cardShadow}
+                >
                   {/* Icon */}
                   <View
                     className="w-12 h-12 rounded-lg items-center justify-center mb-4"

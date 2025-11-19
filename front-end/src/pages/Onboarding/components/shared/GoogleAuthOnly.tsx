@@ -29,7 +29,7 @@ export const GoogleAuthOnly: React.FC<GoogleAuthOnlyProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [profileCreated, setProfileCreated] = useState(false);
-  
+
   // Animation values
   const fadeAnim = new Animated.Value(0);
   const scaleAnim = new Animated.Value(0.3);
@@ -43,7 +43,7 @@ export const GoogleAuthOnly: React.FC<GoogleAuthOnlyProps> = ({
   // Handle successful profile creation animation
   const showProfileCreatedAnimation = () => {
     setProfileCreated(true);
-    
+
     // Start animations in sequence
     Animated.sequence([
       // Fade in and scale up the container
@@ -85,7 +85,7 @@ export const GoogleAuthOnly: React.FC<GoogleAuthOnlyProps> = ({
   useEffect(() => {
     if (googleAuthData?.isAuthenticated) {
       console.log('User authenticated via Google:', googleAuthData);
-      
+
       // Complete the profile automatically
       completeProfile(googleAuthData);
     }
@@ -96,7 +96,7 @@ export const GoogleAuthOnly: React.FC<GoogleAuthOnlyProps> = ({
       // The user is already authenticated from Google OAuth
       // Just show the success animation
       showProfileCreatedAnimation();
-      
+
       // Clear the Google auth data
       onboardingStore.setGoogleAuthData({ name: '', email: '', isAuthenticated: false });
     } catch (error) {
@@ -107,24 +107,24 @@ export const GoogleAuthOnly: React.FC<GoogleAuthOnlyProps> = ({
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
-    
+
     try {
       // For Google OAuth, redirect to the backend OAuth endpoint
       const role = userRole || selectedRole || 'buyer';
-      
+
       // Get the correct API URL based on platform
       const apiUrl = ENV.apiUrl;
       console.log('Using API URL:', apiUrl);
-      
+
       // Add prompt=select_account to force account selection
       const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}&prompt=select_account`;
       console.log('Redirecting to Google OAuth:', googleOAuthUrl);
-      
+
       if (Platform.OS === 'web') {
         // Store onboarding data and role before redirecting
         await onboardingStore.saveOnboardingData();
         onboardingStore.setRole(role as UserRole);
-        
+
         // Actually redirect to Google OAuth
         window.location.href = googleOAuthUrl;
       } else {
@@ -132,19 +132,17 @@ export const GoogleAuthOnly: React.FC<GoogleAuthOnlyProps> = ({
         // Store onboarding data before opening browser
         await onboardingStore.saveOnboardingData();
         onboardingStore.setRole(role as UserRole);
-        
+
         // Open the OAuth URL in the device's browser
         const canOpen = await Linking.canOpenURL(googleOAuthUrl);
         if (canOpen) {
           await Linking.openURL(googleOAuthUrl);
         } else {
-          Alert.alert(
-            'Error',
-            'Unable to open Google authentication. Please try again.',
-            [{ text: 'OK', onPress: () => setIsLoading(false) }]
-          );
+          Alert.alert('Error', 'Unable to open Google authentication. Please try again.', [
+            { text: 'OK', onPress: () => setIsLoading(false) },
+          ]);
         }
-        
+
         setIsLoading(false);
       }
     } catch (error: any) {
@@ -156,7 +154,7 @@ export const GoogleAuthOnly: React.FC<GoogleAuthOnlyProps> = ({
 
   if (profileCreated) {
     const { width } = Dimensions.get('window');
-    
+
     return (
       <View className="flex-1 justify-center items-center p-6">
         <Animated.View
@@ -188,15 +186,9 @@ export const GoogleAuthOnly: React.FC<GoogleAuthOnlyProps> = ({
 
           {/* Success Message */}
           <Animated.View style={{ opacity: textOpacity }} className="items-center">
-            <Text className="text-2xl font-bold text-white mb-2">
-              Profile Created!
-            </Text>
-            <Text className="text-gray-400 text-center">
-              Welcome to AgroTrade
-            </Text>
-            <Text className="text-gray-500 text-sm mt-1">
-              Redirecting to dashboard...
-            </Text>
+            <Text className="text-2xl font-bold text-white mb-2">Profile Created!</Text>
+            <Text className="text-gray-400 text-center">Welcome to AgroTrade</Text>
+            <Text className="text-gray-500 text-sm mt-1">Redirecting to dashboard...</Text>
           </Animated.View>
         </Animated.View>
       </View>
@@ -207,9 +199,7 @@ export const GoogleAuthOnly: React.FC<GoogleAuthOnlyProps> = ({
     <View className={`${mode === 'modal' ? 'bg-gray-800 rounded-xl p-6 m-4' : 'p-6'}`}>
       {/* Header */}
       <View className="mb-8 items-center">
-        <Text className="text-3xl font-bold text-white mb-2">
-          Welcome to AgroTrade
-        </Text>
+        <Text className="text-3xl font-bold text-white mb-2">Welcome to AgroTrade</Text>
         <Text className="text-gray-400 text-center">
           Sign in with your Google account to continue
         </Text>

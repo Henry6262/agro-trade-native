@@ -551,6 +551,62 @@ export class InspectionService {
     });
   }
 
+  async getActiveInspectorMission(inspectorId: string) {
+    const inProgress = await this.prisma.inspectionRequest.findFirst({
+      where: {
+        inspectorId,
+        status: InspectionStatus.IN_PROGRESS,
+      },
+      include: {
+        saleListing: {
+          include: {
+            seller: true,
+            product: true,
+          },
+        },
+        tradeOperation: {
+          include: {
+            buyListing: {
+              include: {
+                buyer: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    if (inProgress) {
+      return inProgress;
+    }
+
+    return this.prisma.inspectionRequest.findFirst({
+      where: {
+        inspectorId,
+        status: InspectionStatus.SCHEDULED,
+      },
+      include: {
+        saleListing: {
+          include: {
+            seller: true,
+            product: true,
+          },
+        },
+        tradeOperation: {
+          include: {
+            buyListing: {
+              include: {
+                buyer: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: [{ scheduledDate: "asc" }, { requestedDate: "asc" }],
+    });
+  }
+
   /**
    * Create batch inspection requests for multiple sellers
    */

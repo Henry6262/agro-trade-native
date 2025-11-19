@@ -32,23 +32,23 @@ export class PendingListingService {
   static async getPendingListing(): Promise<PendingBuyerListing | null> {
     try {
       let data: string | null = null;
-      
+
       if (Platform.OS === 'web') {
         data = localStorage.getItem(PENDING_LISTING_KEY);
       } else {
         data = await AsyncStorage.getItem(PENDING_LISTING_KEY);
       }
-      
+
       if (!data) return null;
-      
+
       const listing = JSON.parse(data) as PendingBuyerListing;
-      
+
       // Check if listing is expired
       if (Date.now() - listing.timestamp > EXPIRY_TIME) {
         await this.clearPendingListing();
         return null;
       }
-      
+
       return listing;
     } catch (error) {
       console.error('Failed to get pending listing:', error);
@@ -72,25 +72,25 @@ export class PendingListingService {
   static async processPendingListing(): Promise<boolean> {
     try {
       const authState = useAuthStore.getState();
-      
+
       // Only process if user is authenticated
       if (!authState.isAuthenticated) {
         console.log('User not authenticated, skipping pending listing processing');
         return false;
       }
-      
+
       const pending = await this.getPendingListing();
       if (!pending) {
         console.log('No pending listing found');
         return false;
       }
-      
+
       console.log('Processing pending buyer listing:', pending);
-      
+
       // Create the buyer listing
       const buyerSpec = pending.specifications;
       const location = pending.location;
-      
+
       // Parse delivery deadline if provided
       let neededBy = null;
       if (buyerSpec.deliveryDeadline) {
@@ -100,7 +100,7 @@ export class PendingListingService {
           neededBy = date.toISOString();
         }
       }
-      
+
       const buyListingData = {
         productId: pending.productId,
         quantity: parseFloat(buyerSpec.quantity || '0'),
@@ -119,33 +119,35 @@ export class PendingListingService {
         notes: buyerSpec.notes,
         status: 'ACTIVE',
       };
-      
+
       console.log('Submitting pending buy listing:', buyListingData);
-      
+
       // Skip onboarding for authenticated users
       const currentUser = authState.user;
       if (!currentUser || (!currentUser.onboardingComplete && !currentUser.hasProfile)) {
         try {
           await apiClient.post('/onboarding/buyer', {
-            requirements: [{
-              category: pending.productId,
-              estimatedQuantity: buyListingData.quantity,
-              unit: buyListingData.unit,
-              preferredLocation: location?.city,
-            }]
+            requirements: [
+              {
+                category: pending.productId,
+                estimatedQuantity: buyListingData.quantity,
+                unit: buyListingData.unit,
+                preferredLocation: location?.city,
+              },
+            ],
           });
         } catch (error) {
           console.warn('Onboarding failed, continuing anyway:', error);
         }
       }
-      
+
       // Create the listing
       const response = await apiClient.post('/buyer/listings', buyListingData);
       console.log('Pending buyer listing created successfully:', response.data);
-      
+
       // Clear the pending listing
       await this.clearPendingListing();
-      
+
       return true;
     } catch (error) {
       console.error('Failed to process pending listing:', error);

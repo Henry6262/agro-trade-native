@@ -1,14 +1,27 @@
 import transportService, {
   TransportBid,
+  TransportJob,
   TransportRequest,
+  TransporterAnalyticsSummary,
   TransporterPerformance,
 } from '@services/transportService';
+
+const mapAnalyticsToPerformance = (
+  analytics: TransporterAnalyticsSummary
+): TransporterPerformance => ({
+  transporterId: 'me',
+  completedJobs: analytics.metrics.completedJobs,
+  totalJobs: analytics.metrics.completedJobs + analytics.metrics.activeJobs,
+  completionRate: analytics.metrics.winRate,
+  onTimeDeliveryRate: analytics.metrics.onTimeDeliveryRate,
+  recentJobs: (analytics.recentJobs as TransportJob[]) ?? [],
+});
 
 export const transporterBiddingService = {
   fetchRequests: (): Promise<TransportRequest[]> => transportService.getAvailableRequests(),
   fetchBids: (): Promise<TransportBid[]> => transportService.getMyBids(),
-  fetchPerformance: (transporterId: string): Promise<TransporterPerformance> =>
-    transportService.getTransporterPerformance(transporterId),
+  fetchPerformance: async (): Promise<TransporterPerformance> =>
+    mapAnalyticsToPerformance(await transportService.getMyAnalytics()),
   submitBid: (payload: {
     transportRequestId: string;
     bidAmount: number;

@@ -1,86 +1,85 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { View, ScrollView, Text } from 'react-native'
-import type { OnboardingStep, ProductSpecification } from '@shared/types/onboarding'
-import { simplifiedRoleSteps } from '@shared/constants/simplifiedOnboarding'
-import { ProgressSidebar } from '@pages/Onboarding/components/shared/ProgressSidebar'
-import { Navigation } from '@pages/Onboarding/components/shared/Navigation'
-import { ProductSelectionUnified } from '@pages/Onboarding/features/shared/ProductSelection'
-import { BuyerQuantityLocation } from '@pages/Onboarding/sections/Buyer/features/Quantity/components/BuyerQuantityLocation'
-import { BuyerSpecifications } from '@pages/Onboarding/sections/Buyer/features/Specifications/components/BuyerSpecifications'
-import { BuyerMarketRequest } from '@pages/Onboarding/sections/Buyer/features/MarketRequest/components/BuyerMarketRequest'
-// Base management components moved to dashboard  
-import { useOnboardingStore } from '@stores/onboarding.store'
-import { useProductStore } from '@stores/product.store'
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, ScrollView, Text } from 'react-native';
+import type { OnboardingStep, ProductSpecification } from '@shared/types/onboarding';
+import { simplifiedRoleSteps } from '@shared/constants/simplifiedOnboarding';
+import { ProgressSidebar } from '@pages/Onboarding/components/shared/ProgressSidebar';
+import { Navigation } from '@pages/Onboarding/components/shared/Navigation';
+import { ProductSelectionUnified } from '@pages/Onboarding/features/shared/ProductSelection';
+import { BuyerQuantityLocation } from '@pages/Onboarding/sections/Buyer/features/Quantity/components/BuyerQuantityLocation';
+import { BuyerSpecifications } from '@pages/Onboarding/sections/Buyer/features/Specifications/components/BuyerSpecifications';
+import { BuyerMarketRequest } from '@pages/Onboarding/sections/Buyer/features/MarketRequest/components/BuyerMarketRequest';
+// Base management components moved to dashboard
+import { useOnboardingStore } from '@stores/onboarding.store';
+import { useProductStore } from '@stores/product.store';
 
 interface BuyerOnboardingProps {
-  onComplete?: () => void
+  onComplete?: () => void;
 }
 
 export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
-  const { 
-    selectedProducts, 
+  const {
+    selectedProducts,
     setSelectedProducts,
-    selectedProductsMetadata, 
-    buyerSpecifications, 
+    selectedProductsMetadata,
+    buyerSpecifications,
     updateBuyerSpecification,
     setBuyerRequirements,
     buyerData,
     currentStep,
     setStep,
     saveOnboardingData,
-    location
-  } = useOnboardingStore()
-  
-  const { 
-    fetchAllData,
-    products,
-    isLoadingProducts
-  } = useProductStore()
-  
+    location,
+  } = useOnboardingStore();
+
+  const { fetchAllData, products, isLoadingProducts } = useProductStore();
+
   // Initialize with saved step or default to 0 (products step is now first)
-  const [currentStepIndex, setCurrentStepIndex] = useState(currentStep >= 0 ? currentStep : 0)
-  const [steps, setSteps] = useState<OnboardingStep[]>([])
-  const [productSpecifications, setProductSpecifications] = useState<ProductSpecification[]>([])
-  const [isAnimating, setIsAnimating] = useState(false)
-  const [progressLineHeight, setProgressLineHeight] = useState(0)
+  const [currentStepIndex, setCurrentStepIndex] = useState(currentStep >= 0 ? currentStep : 0);
+  const [steps, setSteps] = useState<OnboardingStep[]>([]);
+  const [productSpecifications, setProductSpecifications] = useState<ProductSpecification[]>([]);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [progressLineHeight, setProgressLineHeight] = useState(0);
 
   // Fetch product data on mount
   useEffect(() => {
-    console.log('BuyerOnboarding: Fetching product data...')
-    fetchAllData().then(() => {
-      console.log('BuyerOnboarding: Product data fetched successfully')
-    }).catch((error) => {
-      console.error('BuyerOnboarding: Failed to fetch product data:', error)
-    })
-  }, [])
+    console.log('BuyerOnboarding: Fetching product data...');
+    fetchAllData()
+      .then(() => {
+        console.log('BuyerOnboarding: Product data fetched successfully');
+      })
+      .catch((error) => {
+        console.error('BuyerOnboarding: Failed to fetch product data:', error);
+      });
+  }, []);
 
   useEffect(() => {
     const buyerSteps = simplifiedRoleSteps.buyer.map((step, index) => ({
       ...step,
       completed: index < currentStepIndex, // Mark previous steps as completed
-    }))
-    setSteps(buyerSteps)
-    
+    }));
+    setSteps(buyerSteps);
+
     // Sync current step index with store on mount
     if (currentStep !== currentStepIndex) {
-      setCurrentStepIndex(currentStep)
+      setCurrentStepIndex(currentStep);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     // Calculate progress based on completed steps
-    const completedSteps = currentStepIndex // Current step index starts from 0
-    const totalSteps = steps.length - 1 // Total steps excluding the current one
-    const progressPercentage = totalSteps > 0 ? Math.max(0, (completedSteps / totalSteps) * 100) : 0
-    setProgressLineHeight(Math.min(progressPercentage, 100))
-  }, [currentStepIndex, steps.length])
+    const completedSteps = currentStepIndex; // Current step index starts from 0
+    const totalSteps = steps.length - 1; // Total steps excluding the current one
+    const progressPercentage =
+      totalSteps > 0 ? Math.max(0, (completedSteps / totalSteps) * 100) : 0;
+    setProgressLineHeight(Math.min(progressPercentage, 100));
+  }, [currentStepIndex, steps.length]);
 
   // Sync selectedProducts with specifications
   useEffect(() => {
-    const newSpecs = selectedProducts.map(productId => {
-      const existingSpec = productSpecifications.find(spec => spec.productId === productId)
+    const newSpecs = selectedProducts.map((productId) => {
+      const existingSpec = productSpecifications.find((spec) => spec.productId === productId);
       if (existingSpec) {
-        return existingSpec
+        return existingSpec;
       }
       // Create new specification for newly selected product
       return {
@@ -88,164 +87,165 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
         quantity: '',
         unit: '',
         pricePerKilo: '',
-        ...buyerSpecifications[productId]
-      }
-    })
-    
+        ...buyerSpecifications[productId],
+      };
+    });
+
     // Only update if there's a meaningful difference
-    const hasChanges = newSpecs.length !== productSpecifications.length || 
-      newSpecs.some((spec, index) => 
-        !productSpecifications[index] || 
-        spec.productId !== productSpecifications[index].productId
-      )
-    
+    const hasChanges =
+      newSpecs.length !== productSpecifications.length ||
+      newSpecs.some(
+        (spec, index) =>
+          !productSpecifications[index] || spec.productId !== productSpecifications[index].productId
+      );
+
     if (hasChanges) {
-      setProductSpecifications(newSpecs)
+      setProductSpecifications(newSpecs);
     }
-  }, [selectedProducts, buyerSpecifications, productSpecifications])
+  }, [selectedProducts, buyerSpecifications, productSpecifications]);
 
   // Sync selectedProducts to buyerData.requiredProducts
   useEffect(() => {
     if (selectedProducts.length > 0) {
       // Import products data to get product names and categories
-      const { products } = require('@shared/constants/onboarding')
-      
-      const requirements = selectedProducts.map(productId => {
-        const product = products.find((p: any) => p.id === productId)
-        const specs = buyerSpecifications[productId] || {}
-        
+      const { products } = require('@shared/constants/onboarding');
+
+      const requirements = selectedProducts.map((productId) => {
+        const product = products.find((p: any) => p.id === productId);
+        const specs = buyerSpecifications[productId] || {};
+
         return {
           productId,
           productName: product?.name || 'Unknown Product',
           category: product?.category || 'Other',
           quantity: {
             amount: specs.quantity || 0,
-            unit: specs.unit || 'tons' as const
+            unit: specs.unit || ('tons' as const),
           },
           maxPrice: specs.pricePerKilo ? parseFloat(specs.pricePerKilo) : undefined,
           qualityRequirements: specs.qualityRequirements || [],
-          deliveryDeadline: specs.deliveryDeadline
-        }
-      })
-      
-      setBuyerRequirements(requirements)
+          deliveryDeadline: specs.deliveryDeadline,
+        };
+      });
+
+      setBuyerRequirements(requirements);
     }
-  }, [selectedProducts, buyerSpecifications, setBuyerRequirements])
+  }, [selectedProducts, buyerSpecifications, setBuyerRequirements]);
 
   // Update Zustand store when specifications change - use callback to prevent circular updates
   const updateStoreSpecs = useCallback(() => {
-    productSpecifications.forEach(spec => {
-      const currentStoreSpec = buyerSpecifications[spec.productId]
-      const hasStoreChanges = !currentStoreSpec || 
-        Object.keys(spec).some(key => spec[key] !== currentStoreSpec[key])
-      
+    productSpecifications.forEach((spec) => {
+      const currentStoreSpec = buyerSpecifications[spec.productId];
+      const hasStoreChanges =
+        !currentStoreSpec || Object.keys(spec).some((key) => spec[key] !== currentStoreSpec[key]);
+
       if (hasStoreChanges) {
-        updateBuyerSpecification(spec.productId, spec)
+        updateBuyerSpecification(spec.productId, spec);
       }
-    })
-  }, [productSpecifications, buyerSpecifications, updateBuyerSpecification])
+    });
+  }, [productSpecifications, buyerSpecifications, updateBuyerSpecification]);
 
   useEffect(() => {
     if (productSpecifications.length > 0) {
-      updateStoreSpecs()
+      updateStoreSpecs();
     }
-  }, [updateStoreSpecs])
+  }, [updateStoreSpecs]);
 
   const handleNext = async () => {
-    if (!canProceedToNext() || isAnimating) return
+    if (!canProceedToNext() || isAnimating) return;
 
-    setIsAnimating(true)
-    
+    setIsAnimating(true);
+
     // Save onboarding data to persist state
     try {
-      await saveOnboardingData()
+      await saveOnboardingData();
     } catch (error) {
-      console.error('Failed to save onboarding data:', error)
+      console.error('Failed to save onboarding data:', error);
     }
-    
+
     setTimeout(() => {
       if (currentStepIndex === steps.length - 1) {
         // Last step, complete onboarding
-        onComplete?.()
+        onComplete?.();
       } else {
-        const nextStep = Math.min(currentStepIndex + 1, steps.length - 1)
-        setCurrentStepIndex(nextStep)
-        setStep(nextStep) // Save to store
+        const nextStep = Math.min(currentStepIndex + 1, steps.length - 1);
+        setCurrentStepIndex(nextStep);
+        setStep(nextStep); // Save to store
         setSteps((prev) =>
           prev.map((step, index) => ({
             ...step,
             completed: index <= currentStepIndex,
-          })),
-        )
+          }))
+        );
       }
-      setIsAnimating(false)
-    }, 300)
-  }
+      setIsAnimating(false);
+    }, 300);
+  };
 
   const handleBack = async () => {
-    if (currentStepIndex === 0 || isAnimating) return // Can't go back before products step
+    if (currentStepIndex === 0 || isAnimating) return; // Can't go back before products step
 
-    setIsAnimating(true)
-    
+    setIsAnimating(true);
+
     // Save onboarding data to persist state
     try {
-      await saveOnboardingData()
+      await saveOnboardingData();
     } catch (error) {
-      console.error('Failed to save onboarding data:', error)
+      console.error('Failed to save onboarding data:', error);
     }
-    
+
     setTimeout(() => {
-      const prevStep = Math.max(currentStepIndex - 1, 0)
-      setCurrentStepIndex(prevStep)
-      setStep(prevStep) // Save to store
-      setIsAnimating(false)
-    }, 300)
-  }
+      const prevStep = Math.max(currentStepIndex - 1, 0);
+      setCurrentStepIndex(prevStep);
+      setStep(prevStep); // Save to store
+      setIsAnimating(false);
+    }, 300);
+  };
 
   const canProceedToNext = () => {
-    const currentStep = steps[currentStepIndex]
-    if (!currentStep) return false
+    const currentStep = steps[currentStepIndex];
+    if (!currentStep) return false;
 
     switch (currentStep.id) {
       case 'products':
-        return selectedProducts.length > 0
-        
+        return selectedProducts.length > 0;
+
       case 'quantity-location':
         // Simplified validation - directly check store values
-        const productId = selectedProducts[0]
-        if (!productId) return false
-        
-        const spec = buyerSpecifications[productId]
-        if (!spec) return false
-        
+        const productId = selectedProducts[0];
+        if (!productId) return false;
+
+        const spec = buyerSpecifications[productId];
+        if (!spec) return false;
+
         // Parse quantity and price, handling string/number types
-        const quantity = spec.quantity ? parseFloat(spec.quantity.toString()) : 0
-        const price = spec.pricePerKilo ? parseFloat(spec.pricePerKilo.toString()) : 0
-        
+        const quantity = spec.quantity ? parseFloat(spec.quantity.toString()) : 0;
+        const price = spec.pricePerKilo ? parseFloat(spec.pricePerKilo.toString()) : 0;
+
         // All three must be valid
-        return quantity > 0 && price > 0 && location !== null
-        
+        return quantity > 0 && price > 0 && location !== null;
+
       case 'specifications':
         // Specifications are optional, user can proceed
-        return true
-        
+        return true;
+
       case 'market':
-        return true
-        
+        return true;
+
       default:
-        return true
+        return true;
     }
-  }
+  };
 
   const renderStepContent = () => {
-    const currentStep = steps[currentStepIndex]
-    if (!currentStep) return null
+    const currentStep = steps[currentStepIndex];
+    if (!currentStep) return null;
 
     switch (currentStep.id) {
       case 'products':
-        return <ProductSelectionUnified />
+        return <ProductSelectionUnified />;
       case 'quantity-location':
-        return <BuyerQuantityLocation />
+        return <BuyerQuantityLocation />;
       case 'specifications':
         return (
           <BuyerSpecifications
@@ -253,7 +253,7 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
             specifications={productSpecifications}
             onSpecificationsChange={setProductSpecifications}
           />
-        )
+        );
       case 'market':
         return (
           <BuyerMarketRequest
@@ -262,11 +262,11 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
             onSpecificationsChange={setProductSpecifications}
             onComplete={onComplete}
           />
-        )
+        );
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <View className="flex-1 flex-row bg-gray-900">
@@ -292,5 +292,5 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
         />
       </View>
     </View>
-  )
+  );
 }

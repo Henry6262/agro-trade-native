@@ -1,5 +1,5 @@
-import { PrismaService } from '../../src/prisma/prisma.service';
-import { faker } from '@faker-js/faker';
+import { PrismaService } from "../../src/prisma/prisma.service";
+import { faker } from "@faker-js/faker";
 
 /**
  * Test Data Factory
@@ -14,7 +14,13 @@ export class TestDataFactory {
   async createTestUser(data?: {
     email?: string;
     name?: string;
-    role?: 'ADMIN' | 'BUYER' | 'FARMER' | 'TRANSPORTER' | 'INSPECTOR' | 'COMPANY_ADMIN';
+    role?:
+      | "ADMIN"
+      | "BUYER"
+      | "FARMER"
+      | "TRANSPORTER"
+      | "INSPECTOR"
+      | "COMPANY_ADMIN";
     phoneNumber?: string;
   }) {
     const email = data?.email || faker.internet.email();
@@ -22,7 +28,7 @@ export class TestDataFactory {
       data: {
         email,
         name: data?.name || faker.person.fullName(),
-        role: data?.role || 'BUYER',
+        role: data?.role || "BUYER",
         phoneNumber: data?.phoneNumber || faker.phone.number(),
         isActive: true,
         isEmailVerified: true,
@@ -37,18 +43,22 @@ export class TestDataFactory {
   async createTestBuyer(data?: { email?: string; name?: string }) {
     return await this.createTestUser({
       ...data,
-      role: 'BUYER',
+      role: "BUYER",
     });
   }
 
   /**
    * Create a test seller (farmer) user
    */
-  async createTestSeller(data?: { email?: string; name?: string; verified?: boolean }) {
+  async createTestSeller(data?: {
+    email?: string;
+    name?: string;
+    verified?: boolean;
+  }) {
     const user = await this.createTestUser({
       email: data?.email,
       name: data?.name,
-      role: 'FARMER',
+      role: "FARMER",
     });
     return user;
   }
@@ -59,7 +69,7 @@ export class TestDataFactory {
   async createTestTransporter(data?: { email?: string; name?: string }) {
     return await this.createTestUser({
       ...data,
-      role: 'TRANSPORTER',
+      role: "TRANSPORTER",
     });
   }
 
@@ -69,7 +79,7 @@ export class TestDataFactory {
   async createTestInspector(data?: { email?: string; name?: string }) {
     return await this.createTestUser({
       ...data,
-      role: 'INSPECTOR',
+      role: "INSPECTOR",
     });
   }
 
@@ -79,7 +89,7 @@ export class TestDataFactory {
   async createTestAdmin(data?: { email?: string; name?: string }) {
     return await this.createTestUser({
       ...data,
-      role: 'ADMIN',
+      role: "ADMIN",
     });
   }
 
@@ -90,7 +100,7 @@ export class TestDataFactory {
     return await this.prisma.region.create({
       data: {
         name: data?.name || faker.location.state(),
-        country: data?.country || 'Bulgaria',
+        country: data?.country || "Bulgaria",
         isActive: true,
       },
     });
@@ -118,8 +128,8 @@ export class TestDataFactory {
       latitude?: number;
       longitude?: number;
       street?: string;
-      addressType?: 'FARM' | 'WAREHOUSE' | 'DELIVERY' | 'PICKUP' | 'OTHER';
-    }
+      addressType?: "FARM" | "WAREHOUSE" | "DELIVERY" | "PICKUP" | "OTHER";
+    },
   ) {
     return await this.prisma.address.create({
       data: {
@@ -128,7 +138,7 @@ export class TestDataFactory {
         street: data?.street || faker.location.streetAddress(),
         latitude: data?.latitude || Number(faker.location.latitude()),
         longitude: data?.longitude || Number(faker.location.longitude()),
-        addressType: data?.addressType || 'FARM',
+        addressType: data?.addressType || "FARM",
         isDefault: true,
       },
     });
@@ -138,19 +148,19 @@ export class TestDataFactory {
    * Create a test product
    */
   async createTestProduct(data?: {
-    category?: 'SOFT_WHEAT' | 'DURUM_WHEAT' | 'CORN_MAIZE' | 'BARLEY' | 'OATS';
+    category?: "SOFT_WHEAT" | "DURUM_WHEAT" | "CORN_MAIZE" | "BARLEY" | "OATS";
     name?: string;
     displayName?: string;
   }) {
-    const category = data?.category || 'SOFT_WHEAT';
+    const category = data?.category || "SOFT_WHEAT";
     return await this.prisma.product.upsert({
       where: { category },
       update: {},
       create: {
-        name: data?.name || category.toLowerCase().replace('_', '-'),
+        name: data?.name || category.toLowerCase().replace("_", "-"),
         category,
-        displayName: data?.displayName || category.replace('_', ' '),
-        defaultUnit: 'TON',
+        displayName: data?.displayName || category.replace("_", " "),
+        defaultUnit: "TON",
         isActive: true,
       },
     });
@@ -167,18 +177,19 @@ export class TestDataFactory {
       maxPricePerUnit?: number;
       deliveryAddressId?: string;
       neededBy?: Date;
-    }
+    },
   ) {
     return await this.prisma.buyListing.create({
       data: {
         buyerId,
         productId: data.productId,
         quantity: data.quantity,
-        unit: 'TON',
+        unit: "TON",
         maxPricePerUnit: data.maxPricePerUnit || 380,
         deliveryAddressId: data.deliveryAddressId,
-        neededBy: data.neededBy || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        status: 'ACTIVE',
+        neededBy:
+          data.neededBy || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        status: "ACTIVE",
       },
     });
   }
@@ -195,20 +206,20 @@ export class TestDataFactory {
       addressId?: string;
       qualityScore?: number;
       qualityGrade?: string;
-    }
+    },
   ) {
     return await this.prisma.saleListing.create({
       data: {
         sellerId,
         productId: data.productId,
         quantity: data.quantity,
-        unit: 'TON',
+        unit: "TON",
         askingPrice: data.askingPrice || 320,
         addressId: data.addressId,
         qualityScore: data.qualityScore,
         qualityGrade: data.qualityGrade,
         harvestDate: new Date(),
-        status: 'ACTIVE',
+        status: "ACTIVE",
       },
     });
   }
@@ -221,17 +232,17 @@ export class TestDataFactory {
     data?: {
       plateNumber?: string;
       capacity?: number;
-      type?: 'FLATBED' | 'REFRIGERATED' | 'TANKER' | 'CONTAINER';
+      type?: "FLATBED" | "REFRIGERATED" | "TANKER" | "CONTAINER";
       transportCompanyId?: string;
-    }
+    },
   ) {
     return await this.prisma.truck.create({
       data: {
         ownerId,
         plateNumber: data?.plateNumber || faker.vehicle.vrm(),
         capacity: data?.capacity || 20,
-        unit: 'TON',
-        type: data?.type || 'FLATBED',
+        unit: "TON",
+        type: data?.type || "FLATBED",
         transportCompanyId: data?.transportCompanyId,
         isAvailable: true,
         latitude: Number(faker.location.latitude()),
@@ -252,15 +263,15 @@ export class TestDataFactory {
       data: {
         companyName: data?.companyName || faker.company.name(),
         registrationNumber: faker.string.alphanumeric(10).toUpperCase(),
-        vatNumber: 'BG' + faker.string.numeric(9),
+        vatNumber: "BG" + faker.string.numeric(9),
         mainEmail: data?.mainEmail || faker.internet.email(),
         mainPhone: data?.mainPhone || faker.phone.number(),
-        companyType: 'EXTERNAL',
+        companyType: "EXTERNAL",
         isVerified: true,
         verifiedAt: new Date(),
         fleetSize: 10,
-        operatingRegions: ['Sofia', 'Plovdiv', 'Varna'],
-        specializations: ['Grain Transport', 'Bulk Transport'],
+        operatingRegions: ["Sofia", "Plovdiv", "Varna"],
+        specializations: ["Grain Transport", "Bulk Transport"],
       },
     });
   }
@@ -275,10 +286,10 @@ export class TestDataFactory {
     tier3Rate?: number;
   }) {
     return await this.prisma.transportCostSettings.upsert({
-      where: { id: 'default-transport-settings' },
+      where: { id: "default-transport-settings" },
       update: {},
       create: {
-        id: 'default-transport-settings',
+        id: "default-transport-settings",
         baseRatePerKm: data?.baseRatePerKm || 0.15,
         flatbedMultiplier: 1.0,
         refrigeratedMultiplier: 1.3,
@@ -316,19 +327,19 @@ export class TestDataFactory {
     const withAddresses = options?.withAddresses !== false;
 
     // Create product
-    const product = await this.createTestProduct({ category: 'SOFT_WHEAT' });
+    const product = await this.createTestProduct({ category: "SOFT_WHEAT" });
 
     // Create admin
-    const admin = await this.createTestAdmin({ email: 'admin@test.com' });
+    const admin = await this.createTestAdmin({ email: "admin@test.com" });
 
     // Create buyer
-    const buyer = await this.createTestBuyer({ email: 'buyer@test.com' });
+    const buyer = await this.createTestBuyer({ email: "buyer@test.com" });
     let buyerAddress = null;
     if (withAddresses) {
       buyerAddress = await this.createTestAddress(buyer.id, {
         latitude: 42.6977,
         longitude: 23.3219, // Sofia
-        addressType: 'DELIVERY',
+        addressType: "DELIVERY",
       });
     }
 
@@ -362,7 +373,7 @@ export class TestDataFactory {
         sellerAddress = await this.createTestAddress(seller.id, {
           latitude: coord.lat,
           longitude: coord.lon,
-          addressType: 'FARM',
+          addressType: "FARM",
         });
       }
 
@@ -372,7 +383,7 @@ export class TestDataFactory {
         askingPrice: sellerPrice,
         addressId: sellerAddress?.id,
         qualityScore: options?.withVerifiedSellers?.[i] ? 85 : undefined,
-        qualityGrade: options?.withVerifiedSellers?.[i] ? 'Premium' : undefined,
+        qualityGrade: options?.withVerifiedSellers?.[i] ? "Premium" : undefined,
       });
       saleListings.push(saleListing);
     }
@@ -381,16 +392,20 @@ export class TestDataFactory {
     await this.createTransportCostSettings();
 
     // Create transporter
-    const transporter = await this.createTestTransporter({ email: 'transporter@test.com' });
+    const transporter = await this.createTestTransporter({
+      email: "transporter@test.com",
+    });
     const transportCompany = await this.createTestTransportCompany();
     const truck = await this.createTestTruck(transporter.id, {
       capacity: 25,
-      type: 'FLATBED',
+      type: "FLATBED",
       transportCompanyId: transportCompany.id,
     });
 
     // Create inspector
-    const inspector = await this.createTestInspector({ email: 'inspector@test.com' });
+    const inspector = await this.createTestInspector({
+      email: "inspector@test.com",
+    });
 
     return {
       admin,

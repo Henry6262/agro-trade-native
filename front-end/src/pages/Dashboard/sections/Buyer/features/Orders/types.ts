@@ -52,3 +52,19 @@ export interface BuyerOrdersHookResult {
   toggleOrderExpand: (orderId: string) => void;
   refresh: () => Promise<void>;
 }
+
+export interface BuyerTimelineEvent {
+  id: string;
+  type: 'TRADE' | 'NEGOTIATION' | 'TRANSPORT' | 'INSPECTION';
+  title: string;
+  status: string;
+  timestamp: string;
+  description?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface BuyerTimelineHookResult {
+  events: BuyerTimelineEvent[];
+  isLoading: boolean;
+  refresh: () => Promise<void>;
+}

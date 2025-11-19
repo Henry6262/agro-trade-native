@@ -103,12 +103,12 @@ export interface ProfitCalculation {
     purchases: {
       totalCost: number;
       avgPrice: number;
-      breakdown: Array<{
+      breakdown: {
         sellerId: string;
         price: number;
         quantity: number;
         subtotal: number;
-      }>;
+      }[];
     };
     transport: {
       estimatedCost: number;
@@ -142,11 +142,11 @@ export interface TransportEstimate {
     costPerTonKm: number;
   };
   route?: {
-    waypoints: Array<{
+    waypoints: {
       latitude: number;
       longitude: number;
       address: string;
-    }>;
+    }[];
     totalDistance: number;
     estimatedDuration: number;
   };
@@ -171,11 +171,11 @@ export const tradeOperationService = {
     try {
       const response = await apiClient.get<BuyListing[]>('/buyer/listings');
       console.log('Raw buy listings response:', response.data);
-      
+
       // Filter for active listings and ensure they have proper IDs
-      const activeListings = response.data.filter(listing => listing.status === 'ACTIVE');
+      const activeListings = response.data.filter((listing) => listing.status === 'ACTIVE');
       console.log('Active buy listings:', activeListings);
-      
+
       return activeListings;
     } catch (error) {
       console.error('Error fetching buy listings:', error);
@@ -187,7 +187,7 @@ export const tradeOperationService = {
   async getActiveSellListings(): Promise<SaleListing[]> {
     try {
       const response = await apiClient.get<SaleListing[]>('/seller/listings');
-      return response.data.filter(listing => listing.status === 'ACTIVE');
+      return response.data.filter((listing) => listing.status === 'ACTIVE');
     } catch (error) {
       console.error('Error fetching sell listings:', error);
       throw error;
@@ -195,7 +195,10 @@ export const tradeOperationService = {
   },
 
   // Create a new trade operation from a buy listing
-  async createTradeOperation(buyListingId: string, targetProfitMargin: number): Promise<TradeOperation> {
+  async createTradeOperation(
+    buyListingId: string,
+    targetProfitMargin: number
+  ): Promise<TradeOperation> {
     try {
       const response = await apiClient.post<TradeOperation>('/trade-operations', {
         buyListingId,
@@ -220,7 +223,10 @@ export const tradeOperationService = {
   },
 
   // Find matching sellers for a trade operation
-  async findMatchingSellers(tradeOperationId: string, maxDistance?: number): Promise<{
+  async findMatchingSellers(
+    tradeOperationId: string,
+    maxDistance?: number
+  ): Promise<{
     sellers: MatchingSeller[];
     totalQuantityAvailable: number;
     averagePrice: number;
@@ -240,11 +246,14 @@ export const tradeOperationService = {
   },
 
   // Select sellers for a trade operation
-  async selectSellers(tradeOperationId: string, sellers: Array<{
-    sellerId: string;
-    saleListingId: string;
-    requestedQuantity: number;
-  }>): Promise<{
+  async selectSellers(
+    tradeOperationId: string,
+    sellers: {
+      sellerId: string;
+      saleListingId: string;
+      requestedQuantity: number;
+    }[]
+  ): Promise<{
     selectedSellers: TradeSeller[];
     totalQuantity: number;
     estimatedPurchaseCost: number;
@@ -261,16 +270,16 @@ export const tradeOperationService = {
   },
 
   // Calculate real-time profit for a trade operation
-  async calculateProfit(tradeOperationId: string, options?: {
-    includeSensitivity?: boolean;
-    includeRiskAssessment?: boolean;
-  }): Promise<ProfitCalculation> {
+  async calculateProfit(
+    tradeOperationId: string,
+    options?: {
+      includeSensitivity?: boolean;
+      includeRiskAssessment?: boolean;
+    }
+  ): Promise<ProfitCalculation> {
     try {
       const params = options || {};
-      const response = await apiClient.get(
-        `/profit/${tradeOperationId}/profit`,
-        { params }
-      );
+      const response = await apiClient.get(`/profit/${tradeOperationId}/profit`, { params });
       return response.data;
     } catch (error) {
       console.error('Error calculating profit:', error);
@@ -279,15 +288,18 @@ export const tradeOperationService = {
   },
 
   // Estimate profit with proposed prices
-  async estimateProfit(tradeOperationId: string, estimation: {
-    buyerPrice: number;
-    sellerPrices: Array<{
-      sellerId: string;
-      price: number;
-      quantity: number;
-    }>;
-    transportCost: number;
-  }): Promise<{
+  async estimateProfit(
+    tradeOperationId: string,
+    estimation: {
+      buyerPrice: number;
+      sellerPrices: {
+        sellerId: string;
+        price: number;
+        quantity: number;
+      }[];
+      transportCost: number;
+    }
+  ): Promise<{
     estimatedRevenue: number;
     estimatedCosts: number;
     estimatedProfit: number;
@@ -297,7 +309,10 @@ export const tradeOperationService = {
     warning?: string;
   }> {
     try {
-      const response = await apiClient.post(`/profit/${tradeOperationId}/profit/estimate`, estimation);
+      const response = await apiClient.post(
+        `/profit/${tradeOperationId}/profit/estimate`,
+        estimation
+      );
       return response.data;
     } catch (error) {
       console.error('Error estimating profit:', error);
@@ -308,12 +323,12 @@ export const tradeOperationService = {
   // Estimate transport costs
   async estimateTransportCost(params: {
     origin: { latitude: number; longitude: number; address: string };
-    pickupLocations?: Array<{
+    pickupLocations?: {
       latitude: number;
       longitude: number;
       address: string;
       quantity: number;
-    }>;
+    }[];
     destination: { latitude: number; longitude: number; address: string };
     quantity: number;
     vehicleType: string;
@@ -328,15 +343,18 @@ export const tradeOperationService = {
   },
 
   // Optimize transport route
-  async optimizeRoute(tradeOperationId: string, algorithm: 'TSP_NEAREST' | 'TSP_2OPT' | 'GENETIC' = 'TSP_2OPT'): Promise<{
+  async optimizeRoute(
+    tradeOperationId: string,
+    algorithm: 'TSP_NEAREST' | 'TSP_2OPT' | 'GENETIC' = 'TSP_2OPT'
+  ): Promise<{
     route: {
       algorithm: string;
-      waypoints: Array<{
+      waypoints: {
         latitude: number;
         longitude: number;
         address: string;
         order: number;
-      }>;
+      }[];
       sequence: number[];
       totalDistance: number;
       estimatedDuration: number;
@@ -357,9 +375,12 @@ export const tradeOperationService = {
     };
   }> {
     try {
-      const response = await apiClient.post(`/trade-operations/${tradeOperationId}/optimize-transport`, {
-        algorithm,
-      });
+      const response = await apiClient.post(
+        `/trade-operations/${tradeOperationId}/optimize-transport`,
+        {
+          algorithm,
+        }
+      );
       return response.data;
     } catch (error) {
       console.error('Error optimizing transport route:', error);
@@ -377,7 +398,7 @@ export const tradeOperationService = {
     try {
       const params = filters || {};
       const response = await apiClient.get('/trade-operations', { params });
-      
+
       // Handle different response formats
       if (Array.isArray(response.data)) {
         return response.data;
@@ -401,7 +422,10 @@ export const tradeOperationService = {
   },
 
   // Update trade operation status
-  async updateTradeOperationStatus(id: string, status: TradeOperation['status']): Promise<TradeOperation> {
+  async updateTradeOperationStatus(
+    id: string,
+    status: TradeOperation['status']
+  ): Promise<TradeOperation> {
     try {
       const response = await apiClient.patch<TradeOperation>(`/trade-operations/${id}`, { status });
       return response.data;
@@ -412,14 +436,17 @@ export const tradeOperationService = {
   },
 
   // Finalize trade operation
-  async finalizeTradeOperation(id: string, finalData: {
-    finalSellingPrice: number;
-    finalPurchasePrices: Array<{
-      sellerId: string;
-      price: number;
-    }>;
-    actualTransportCost: number;
-  }): Promise<{
+  async finalizeTradeOperation(
+    id: string,
+    finalData: {
+      finalSellingPrice: number;
+      finalPurchasePrices: {
+        sellerId: string;
+        price: number;
+      }[];
+      actualTransportCost: number;
+    }
+  ): Promise<{
     status: string;
     actualProfit: number;
     actualProfitMargin: number;

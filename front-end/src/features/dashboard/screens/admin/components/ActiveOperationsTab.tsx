@@ -100,7 +100,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
   const loadOperations = async () => {
     try {
       const ops = await tradeOperationService.getTradeOperations('ACTIVE');
-      
+
       // Load negotiations for each operation
       const opsWithNegotiations = await Promise.all(
         ops.map(async (op) => {
@@ -117,7 +117,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
           }
         })
       );
-      
+
       setOperations(opsWithNegotiations);
     } catch (error) {
       console.error('Failed to load operations:', error);
@@ -136,7 +136,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
   }, []);
 
   const toggleExpanded = (operationId: string) => {
-    setExpandedOperations(prev => {
+    setExpandedOperations((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(operationId)) {
         newSet.delete(operationId);
@@ -169,7 +169,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
   const renderNegotiationItem = (negotiation: Negotiation, operation: TradeOperation) => {
     const status = getStatusColor(negotiation.status);
     const StatusIcon = status.icon;
-    
+
     return (
       <View key={negotiation.id} className="bg-white rounded-lg p-3 mb-2 border border-gray-200">
         <View className="flex-row justify-between items-start">
@@ -179,12 +179,10 @@ export const ActiveOperationsTab: React.FC<Props> = ({
                 {negotiation.tradeSeller.seller.name}
               </Text>
               <View className={`ml-2 px-2 py-0.5 rounded-full ${status.bg}`}>
-                <Text className={`text-xs font-medium ${status.text}`}>
-                  {negotiation.status}
-                </Text>
+                <Text className={`text-xs font-medium ${status.text}`}>{negotiation.status}</Text>
               </View>
             </View>
-            
+
             <View className="flex-row items-center space-x-4">
               <Text className="text-sm text-gray-600">
                 €{negotiation.currentOffer.price}/unit × {negotiation.currentOffer.quantity} units
@@ -210,10 +208,15 @@ export const ActiveOperationsTab: React.FC<Props> = ({
 
             {negotiation.profitImpact && (
               <View className="flex-row items-center mt-1">
-                <TrendingUp size={14} color={negotiation.profitImpact.profitMargin >= 5 ? '#10B981' : '#EF4444'} />
-                <Text className={`text-xs ml-1 ${
-                  negotiation.profitImpact.profitMargin >= 5 ? 'text-green-600' : 'text-red-600'
-                }`}>
+                <TrendingUp
+                  size={14}
+                  color={negotiation.profitImpact.profitMargin >= 5 ? '#10B981' : '#EF4444'}
+                />
+                <Text
+                  className={`text-xs ml-1 ${
+                    negotiation.profitImpact.profitMargin >= 5 ? 'text-green-600' : 'text-red-600'
+                  }`}
+                >
                   Margin: {negotiation.profitImpact.profitMargin.toFixed(1)}%
                   {negotiation.profitImpact.warning && ' ⚠️'}
                 </Text>
@@ -247,8 +250,10 @@ export const ActiveOperationsTab: React.FC<Props> = ({
   const renderOperation = (operation: TradeOperation) => {
     const isExpanded = expandedOperations.has(operation.id);
     const summary = operation.negotiationSummary;
-    const hasUrgentItems = operation.negotiations?.some(n => n.isExpiringSoon || n.status === 'COUNTERED');
-    
+    const hasUrgentItems = operation.negotiations?.some(
+      (n) => n.isExpiringSoon || n.status === 'COUNTERED'
+    );
+
     return (
       <TouchableOpacity
         key={operation.id}
@@ -259,9 +264,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
         <View className="flex-row justify-between items-start mb-3">
           <View className="flex-1">
             <View className="flex-row items-center">
-              <Text className="text-lg font-bold text-gray-800">
-                {operation.operationNumber}
-              </Text>
+              <Text className="text-lg font-bold text-gray-800">{operation.operationNumber}</Text>
               {hasUrgentItems && (
                 <View className="ml-2 px-2 py-0.5 bg-amber-100 rounded-full">
                   <Text className="text-xs font-medium text-amber-800">Action Required</Text>
@@ -269,10 +272,11 @@ export const ActiveOperationsTab: React.FC<Props> = ({
               )}
             </View>
             <Text className="text-gray-600 text-sm mt-1">
-              {operation.buyListing?.product?.name || 'Product'} - {operation.buyListing?.quantity || 0} units
+              {operation.buyListing?.product?.name || 'Product'} -{' '}
+              {operation.buyListing?.quantity || 0} units
             </Text>
           </View>
-          
+
           <TouchableOpacity
             onPress={(e) => {
               e.stopPropagation();
@@ -292,33 +296,25 @@ export const ActiveOperationsTab: React.FC<Props> = ({
               {summary.pending > 0 && (
                 <View className="flex-row items-center mr-4 mb-1">
                   <Clock size={14} color="#F59E0B" />
-                  <Text className="text-xs text-gray-600 ml-1">
-                    {summary.pending} Pending
-                  </Text>
+                  <Text className="text-xs text-gray-600 ml-1">{summary.pending} Pending</Text>
                 </View>
               )}
               {summary.countered > 0 && (
                 <View className="flex-row items-center mr-4 mb-1">
                   <MessageSquare size={14} color="#3B82F6" />
-                  <Text className="text-xs text-gray-600 ml-1">
-                    {summary.countered} Countered
-                  </Text>
+                  <Text className="text-xs text-gray-600 ml-1">{summary.countered} Countered</Text>
                 </View>
               )}
               {summary.accepted > 0 && (
                 <View className="flex-row items-center mr-4 mb-1">
                   <CheckCircle size={14} color="#10B981" />
-                  <Text className="text-xs text-gray-600 ml-1">
-                    {summary.accepted} Accepted
-                  </Text>
+                  <Text className="text-xs text-gray-600 ml-1">{summary.accepted} Accepted</Text>
                 </View>
               )}
               {summary.rejected > 0 && (
                 <View className="flex-row items-center mr-4 mb-1">
                   <XCircle size={14} color="#EF4444" />
-                  <Text className="text-xs text-gray-600 ml-1">
-                    {summary.rejected} Rejected
-                  </Text>
+                  <Text className="text-xs text-gray-600 ml-1">{summary.rejected} Rejected</Text>
                 </View>
               )}
             </View>
@@ -334,9 +330,11 @@ export const ActiveOperationsTab: React.FC<Props> = ({
             </Text>
           </View>
           {operation.estimatedProfit && (
-            <Text className={`text-sm font-semibold ${
-              operation.estimatedProfit > 0 ? 'text-green-600' : 'text-red-600'
-            }`}>
+            <Text
+              className={`text-sm font-semibold ${
+                operation.estimatedProfit > 0 ? 'text-green-600' : 'text-red-600'
+              }`}
+            >
               €{operation.estimatedProfit.toFixed(0)}
             </Text>
           )}
@@ -347,22 +345,31 @@ export const ActiveOperationsTab: React.FC<Props> = ({
           <View className="flex-row items-center mb-2">
             <CheckCircle size={14} color="#16A34A" />
             <Text className="text-xs text-gray-600 ml-1">
-              {operation.sellers.filter(s => s.isVerified).length}/{operation.sellers.length} sellers verified
+              {operation.sellers.filter((s) => s.isVerified).length}/{operation.sellers.length}{' '}
+              sellers verified
             </Text>
           </View>
         )}
 
         {/* Sellers without negotiations */}
-        {operation.sellers?.filter(s => !operation.negotiations?.find(n => n.tradeSellerId === s.id))?.length > 0 && (
+        {operation.sellers?.filter(
+          (s) => !operation.negotiations?.find((n) => n.tradeSellerId === s.id)
+        )?.length > 0 && (
           <View className="bg-blue-50 rounded-lg p-2 mb-2">
             <Text className="text-xs text-blue-800 font-medium">
-              {operation.sellers.filter(s => !operation.negotiations?.find(n => n.tradeSellerId === s.id)).length} sellers awaiting offers
+              {
+                operation.sellers.filter(
+                  (s) => !operation.negotiations?.find((n) => n.tradeSellerId === s.id)
+                ).length
+              }{' '}
+              sellers awaiting offers
             </Text>
             <TouchableOpacity
               onPress={() => {
-                const sellersWithoutOffers = operation.sellers?.filter(
-                  s => !operation.negotiations?.find(n => n.tradeSellerId === s.id)
-                ) || [];
+                const sellersWithoutOffers =
+                  operation.sellers?.filter(
+                    (s) => !operation.negotiations?.find((n) => n.tradeSellerId === s.id)
+                  ) || [];
                 if (sellersWithoutOffers.length > 0) {
                   onSendOffer(operation.id, sellersWithoutOffers[0].id);
                 }
@@ -379,7 +386,9 @@ export const ActiveOperationsTab: React.FC<Props> = ({
         {isExpanded && operation.negotiations && operation.negotiations.length > 0 && (
           <View className="mt-3 pt-3 border-t border-gray-200">
             <Text className="text-sm font-semibold text-gray-700 mb-2">Active Negotiations</Text>
-            {operation.negotiations.map(negotiation => renderNegotiationItem(negotiation, operation))}
+            {operation.negotiations.map((negotiation) =>
+              renderNegotiationItem(negotiation, operation)
+            )}
           </View>
         )}
       </TouchableOpacity>
@@ -399,9 +408,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
     return (
       <View className="flex-1 justify-center items-center bg-gray-50 p-8">
         <Package size={64} color="#9CA3AF" />
-        <Text className="text-gray-600 text-lg font-semibold mt-4">
-          No Active Operations
-        </Text>
+        <Text className="text-gray-600 text-lg font-semibold mt-4">No Active Operations</Text>
         <Text className="text-gray-500 text-center mt-2">
           Create a new trade operation to start managing negotiations
         </Text>
@@ -410,7 +417,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
   }
 
   return (
-    <ScrollView 
+    <ScrollView
       className="flex-1 bg-gray-50"
       refreshControl={
         <RefreshControl
@@ -424,14 +431,10 @@ export const ActiveOperationsTab: React.FC<Props> = ({
     >
       <View className="p-4">
         <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-xl font-bold text-gray-800">
-            Active Trade Operations
-          </Text>
+          <Text className="text-xl font-bold text-gray-800">Active Trade Operations</Text>
           <View className="flex-row items-center space-x-2">
             <View className="px-3 py-1 bg-blue-100 rounded-full">
-              <Text className="text-blue-600 text-sm font-medium">
-                {operations.length} Active
-              </Text>
+              <Text className="text-blue-600 text-sm font-medium">{operations.length} Active</Text>
             </View>
           </View>
         </View>

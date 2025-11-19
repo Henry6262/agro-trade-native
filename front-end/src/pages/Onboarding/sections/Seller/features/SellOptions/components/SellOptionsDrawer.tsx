@@ -46,7 +46,12 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: SellOptionsDrawerProps) {
+export function SellOptionsDrawer({
+  visible,
+  onClose,
+  productId,
+  onComplete,
+}: SellOptionsDrawerProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [offerType, setOfferType] = useState<OfferType>(null);
   const [specifications, setSpecifications] = useState<Record<string, string>>({});
@@ -60,18 +65,29 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
   const successAnimScale = useRef(new Animated.Value(0)).current;
   const successAnimOpacity = useRef(new Animated.Value(0)).current;
 
-  const { sellerSpecifications, updateSellerSpecification, location, selectedRole } = useOnboardingStore();
+  const { sellerSpecifications, updateSellerSpecification, location, selectedRole } =
+    useOnboardingStore();
   const { products } = useProductStore();
   const { isAuthenticated, user } = useAuthStore();
 
-  console.log('SellOptionsDrawer - Available products:', products.length, 'first product specs:', products[0]?.specifications?.length);
-  const product = products.find(p => p.id === productId);
+  console.log(
+    'SellOptionsDrawer - Available products:',
+    products.length,
+    'first product specs:',
+    products[0]?.specifications?.length
+  );
+  const product = products.find((p) => p.id === productId);
   const currentSpecs = sellerSpecifications[productId] || {};
 
   useEffect(() => {
     console.log('SellOptionsDrawer - productId:', productId);
-    console.log('SellOptionsDrawer - found product:', product?.name, 'specifications:', product?.specifications?.length);
-    
+    console.log(
+      'SellOptionsDrawer - found product:',
+      product?.name,
+      'specifications:',
+      product?.specifications?.length
+    );
+
     if (visible) {
       Animated.spring(slideAnim, {
         toValue: 0,
@@ -79,17 +95,17 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
         tension: 65,
         friction: 11,
       }).start();
-      
+
       // Initialize specifications
       if (product?.specifications) {
         const initialSpecs: Record<string, string> = {};
-        product.specifications.forEach(spec => {
+        product.specifications.forEach((spec) => {
           const specKey = spec.code || spec.id;
           initialSpecs[specKey] = currentSpecs.specifications?.[specKey] || '';
         });
         setSpecifications(initialSpecs);
       }
-      
+
       // Reset to initial height when opening
       setDrawerHeight(Dimensions.get('window').height * 0.4);
     } else {
@@ -98,13 +114,13 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
         duration: 250,
         useNativeDriver: true,
       }).start();
-      
+
       // Reset state when closing
       setOfferType(null);
       setErrors({});
     }
   }, [visible, product]);
-  
+
   // Update height when offer type changes
   useEffect(() => {
     // Configure smooth animation
@@ -115,7 +131,7 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
         LayoutAnimation.Properties.scaleY
       )
     );
-    
+
     if (offerType === 'custom-offer') {
       // Expand to 75% height for specifications form
       setDrawerHeight(Dimensions.get('window').height * 0.75);
@@ -137,7 +153,7 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
     successAnimOpacity.setValue(0);
     onClose();
   };
-  
+
   const handleBack = () => {
     setOfferType(null);
     setErrors({});
@@ -146,11 +162,11 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
 
   const validateSpecifications = (): boolean => {
     if (!product?.specifications || product.specifications.length === 0) return true;
-    
+
     const newErrors: Record<string, string> = {};
     let isValid = true;
 
-    product.specifications.forEach(spec => {
+    product.specifications.forEach((spec) => {
       const specKey = spec.code || spec.id;
       const value = specifications[specKey];
       const isRequired = spec.importance === 'CRITICAL' || spec.importance === 'IMPORTANT';
@@ -160,7 +176,7 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
         isValid = false;
       } else if (value && spec.dataType === 'NUMBER') {
         const numValue = parseFloat(value);
-        
+
         if (isNaN(numValue)) {
           newErrors[specKey] = 'Must be a valid number';
           isValid = false;
@@ -180,7 +196,7 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
 
   const handleOfferTypeSelect = (type: 'listing' | 'custom-offer') => {
     setOfferType(type);
-    
+
     if (type === 'listing') {
       // For quick listing, proceed directly
       handleSubmit(type);
@@ -233,15 +249,20 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
           address: location?.address,
         },
         specifications: type === 'custom-offer' ? specifications : undefined,
-        priceExpectation: product ? {
-          min: parseFloat(product.priceRangeMin || '0'),
-          max: parseFloat(product.priceRangeMax || '0'),
-          currency: 'USD',
-        } : undefined,
+        priceExpectation: product
+          ? {
+              min: parseFloat(product.priceRangeMin || '0'),
+              max: parseFloat(product.priceRangeMax || '0'),
+              currency: 'USD',
+            }
+          : undefined,
         status: 'draft',
       };
 
-      const response = await apiClient.post<{ success: boolean; data: any }>('/seller/listings', listingData);
+      const response = await apiClient.post<{ success: boolean; data: any }>(
+        '/seller/listings',
+        listingData
+      );
 
       if (response?.success) {
         return true;
@@ -285,28 +306,26 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
   };
 
   const renderContent = () => {
-    console.log('SellOptionsDrawer renderContent:', { 
-      showAuth, 
-      offerType, 
+    console.log('SellOptionsDrawer renderContent:', {
+      showAuth,
+      offerType,
       visible,
       productId,
-      product: product?.name 
+      product: product?.name,
     });
-    
+
     // Debug: Always show content for testing
     if (!productId) {
       return (
         <View className="p-6">
-          <Text className="text-red-400 text-center">
-            Error: No product ID provided
-          </Text>
+          <Text className="text-red-400 text-center">Error: No product ID provided</Text>
         </View>
       );
     }
-    
+
     if (showSuccess) {
       return (
-        <Animated.View 
+        <Animated.View
           className="flex-1 p-6"
           style={{
             opacity: successAnimOpacity,
@@ -322,7 +341,7 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
               Listing Created Successfully!
             </Text>
             <Text className="text-gray-400 text-center">
-              {offerType === 'custom-offer' 
+              {offerType === 'custom-offer'
                 ? 'Your custom offer request has been submitted. You will receive a quote within 24 hours.'
                 : 'Your listing is now live on the marketplace.'}
             </Text>
@@ -384,7 +403,7 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
         </Animated.View>
       );
     }
-    
+
     if (showAuth) {
       return (
         <View className="flex-1">
@@ -402,12 +421,8 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
       return (
         <View className="px-4 py-6">
           <View className="mb-6">
-            <Text className="text-2xl font-bold text-white mb-2">
-              How would you like to sell?
-            </Text>
-            <Text className="text-gray-400">
-              Choose between quick listing or custom offer
-            </Text>
+            <Text className="text-2xl font-bold text-white mb-2">How would you like to sell?</Text>
+            <Text className="text-gray-400">Choose between quick listing or custom offer</Text>
           </View>
 
           <View>
@@ -422,9 +437,7 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
                     <ShoppingCart size={24} color="#3B82F6" />
                   </View>
                   <View className="ml-4 flex-1">
-                    <Text className="text-white font-semibold text-base">
-                      Quick Listing
-                    </Text>
+                    <Text className="text-white font-semibold text-base">Quick Listing</Text>
                     <Text className="text-gray-400 text-sm mt-1">
                       List instantly on the marketplace
                     </Text>
@@ -445,9 +458,7 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
                     <Sparkles size={24} color="#10B981" />
                   </View>
                   <View className="ml-4 flex-1">
-                    <Text className="text-white font-semibold text-base">
-                      Custom Offer
-                    </Text>
+                    <Text className="text-white font-semibold text-base">Custom Offer</Text>
                     <Text className="text-gray-400 text-sm mt-1">
                       Get personalized quote with specifications
                     </Text>
@@ -466,20 +477,15 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
       <View className="flex-1">
         {/* Back button header */}
         <View className="flex-row items-center px-4 pb-3">
-          <TouchableOpacity
-            onPress={handleBack}
-            className="flex-row items-center"
-          >
+          <TouchableOpacity onPress={handleBack} className="flex-row items-center">
             <ChevronLeft size={20} color="#10B981" />
             <Text className="text-emerald-400 ml-1">Back</Text>
           </TouchableOpacity>
         </View>
-        
+
         <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
           <View className="mb-6">
-            <Text className="text-2xl font-bold text-white mb-2">
-              Product Specifications
-            </Text>
+            <Text className="text-2xl font-bold text-white mb-2">Product Specifications</Text>
             <Text className="text-gray-400">
               Fill in the specifications for your {product?.displayName || product?.name}
             </Text>
@@ -487,7 +493,12 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
 
           {product?.specifications && product.specifications.length > 0 ? (
             <View>
-              {console.log('Rendering specifications:', product.specifications.length, 'specs:', product.specifications)}
+              {console.log(
+                'Rendering specifications:',
+                product.specifications.length,
+                'specs:',
+                product.specifications
+              )}
               {product.specifications
                 .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
                 .map((spec) => {
@@ -498,13 +509,13 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
                       spec={spec}
                       value={specifications[specKey] || ''}
                       onChange={(value) => {
-                        setSpecifications(prev => ({
+                        setSpecifications((prev) => ({
                           ...prev,
-                          [specKey]: value
+                          [specKey]: value,
                         }));
                         // Clear error when user types
                         if (errors[specKey]) {
-                          setErrors(prev => {
+                          setErrors((prev) => {
                             const newErrors = { ...prev };
                             delete newErrors[specKey];
                             return newErrors;
@@ -533,18 +544,14 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
           <TouchableOpacity
             onPress={() => handleSubmit()}
             disabled={isSubmitting}
-            className={`rounded-xl py-4 ${
-              isSubmitting ? 'bg-gray-700' : 'bg-emerald-600'
-            }`}
+            className={`rounded-xl py-4 ${isSubmitting ? 'bg-gray-700' : 'bg-emerald-600'}`}
           >
             {isSubmitting ? (
               <ActivityIndicator color="white" />
             ) : (
               <View className="flex-row items-center justify-center">
                 <Check size={20} color="white" />
-                <Text className="text-white font-semibold text-base ml-2">
-                  Complete
-                </Text>
+                <Text className="text-white font-semibold text-base ml-2">Complete</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -554,19 +561,10 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="none"
-      transparent={true}
-      onRequestClose={handleClose}
-    >
+    <Modal visible={visible} animationType="none" transparent={true} onRequestClose={handleClose}>
       <View className="flex-1 bg-black/60">
-        <TouchableOpacity 
-          className="flex-1" 
-          activeOpacity={1}
-          onPress={handleClose}
-        />
-        
+        <TouchableOpacity className="flex-1" activeOpacity={1} onPress={handleClose} />
+
         <Animated.View
           style={{
             transform: [{ translateY: slideAnim }],
@@ -580,18 +578,13 @@ export function SellOptionsDrawer({ visible, onClose, productId, onComplete }: S
           <View className="flex-row items-center justify-between p-4 border-b border-gray-800">
             <View className="w-10" />
             <View className="h-1 w-12 bg-gray-600 rounded-full" />
-            <TouchableOpacity
-              onPress={handleClose}
-              className="p-2"
-            >
+            <TouchableOpacity onPress={handleClose} className="p-2">
               <X size={24} color="white" />
             </TouchableOpacity>
           </View>
 
           {/* Content */}
-          <View className="flex-1">
-            {renderContent()}
-          </View>
+          <View className="flex-1">{renderContent()}</View>
         </Animated.View>
       </View>
     </Modal>

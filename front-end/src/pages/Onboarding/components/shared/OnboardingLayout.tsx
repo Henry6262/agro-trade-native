@@ -8,35 +8,35 @@ interface OnboardingLayoutProps {
   contentStyle?: ViewStyle;
 }
 
-export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({ 
-  children, 
+export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
+  children,
   scrollable = true,
   style,
-  contentStyle
+  contentStyle,
 }) => {
   const { width } = Dimensions.get('window');
-  
+
   // Calculate 10% margins for left and right
   const horizontalMargin = width * 0.1;
-  
+
   const containerStyle: ViewStyle = {
     flex: 1,
     backgroundColor: '#111827', // bg-gray-900
-    ...style
+    ...style,
   };
-  
+
   const contentContainerStyle: ViewStyle = {
     flexGrow: 1,
     paddingHorizontal: horizontalMargin,
     paddingTop: 20,
     paddingBottom: 120, // Increased to account for navigation buttons
-    ...contentStyle
+    ...contentStyle,
   };
 
   if (scrollable) {
     return (
       <View style={containerStyle}>
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={contentContainerStyle}
           showsVerticalScrollIndicator={false}
           bounces={true}
@@ -49,9 +49,5 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     );
   }
 
-  return (
-    <View style={[containerStyle, contentContainerStyle]}>
-      {children}
-    </View>
-  );
+  return <View style={[containerStyle, contentContainerStyle]}>{children}</View>;
 };

@@ -43,7 +43,9 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
       const result = await submitBid(requestId);
       Alert.alert(
         result.success ? 'Success' : 'Error',
-        result.success ? 'Bid submitted successfully' : result.errorMessage ?? 'Failed to submit bid'
+        result.success
+          ? 'Bid submitted successfully'
+          : (result.errorMessage ?? 'Failed to submit bid')
       );
     },
     [submitBid]

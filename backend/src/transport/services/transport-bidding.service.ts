@@ -569,6 +569,7 @@ export class TransportBiddingService {
   }
 
   async acceptTransportBid(bidId: string, adminId: string) {
+    void adminId;
     const bid = await this.prisma.transportBid.findUnique({
       where: { id: bidId },
       include: { transportRequest: true },
@@ -648,6 +649,8 @@ export class TransportBiddingService {
   }
 
   async rejectTransportBid(bidId: string, adminId: string, reason?: string) {
+    void adminId;
+    void reason;
     const bid = await this.prisma.transportBid.findUnique({
       where: { id: bidId },
     });

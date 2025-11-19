@@ -42,20 +42,16 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
       deliveryDeadline,
       notes,
     };
-    
+
     onSave([specs]);
   };
 
-  const isValid = quantity && parseFloat(quantity) > 0 && pricePerKilo && parseFloat(pricePerKilo) > 0;
+  const isValid =
+    quantity && parseFloat(quantity) > 0 && pricePerKilo && parseFloat(pricePerKilo) > 0;
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
-      <KeyboardAvoidingView 
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
@@ -67,21 +63,15 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
                 <Text className="text-blue-400 font-semibold">Back</Text>
               </TouchableOpacity>
               <Text className="text-xl font-bold text-white">Product Requirements</Text>
-              <TouchableOpacity
-                onPress={handleSave}
-                disabled={!isValid}
-              >
-                <Text className={isValid ? "text-blue-400 font-semibold" : "text-gray-500"}>
+              <TouchableOpacity onPress={handleSave} disabled={!isValid}>
+                <Text className={isValid ? 'text-blue-400 font-semibold' : 'text-gray-500'}>
                   Next
                 </Text>
               </TouchableOpacity>
             </View>
 
             {/* Content */}
-            <ScrollView 
-              className="flex-1 p-6"
-              showsVerticalScrollIndicator={false}
-            >
+            <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
               <Text className="text-lg text-white mb-1">{productName}</Text>
               <Text className="text-gray-400 mb-6">Specify your requirements</Text>
 
@@ -122,7 +112,12 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
                 </View>
                 {quantity && pricePerKilo && (
                   <Text className="text-gray-400 text-sm mt-2">
-                    Total budget: €{(parseFloat(quantity || '0') * 1000 * parseFloat(pricePerKilo || '0')).toLocaleString()}
+                    Total budget: €
+                    {(
+                      parseFloat(quantity || '0') *
+                      1000 *
+                      parseFloat(pricePerKilo || '0')
+                    ).toLocaleString()}
                   </Text>
                 )}
               </View>
@@ -143,7 +138,9 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
 
               {/* Additional Notes */}
               <View className="mb-6">
-                <Text className="text-white font-semibold mb-2">Additional Requirements (Optional)</Text>
+                <Text className="text-white font-semibold mb-2">
+                  Additional Requirements (Optional)
+                </Text>
                 <View className="bg-neutral-800 rounded-xl p-4 border border-neutral-700">
                   <TextInput
                     value={notes}

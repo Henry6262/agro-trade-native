@@ -35,7 +35,7 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [profileCreated, setProfileCreated] = useState(false);
-  
+
   // Animation values
   const fadeAnim = new Animated.Value(0);
   const scaleAnim = new Animated.Value(0.3);
@@ -53,7 +53,7 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
   // Handle successful profile creation animation
   const showProfileCreatedAnimation = () => {
     setProfileCreated(true);
-    
+
     // Start animations in sequence
     Animated.sequence([
       // Fade in and scale up the container
@@ -106,26 +106,26 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
       } catch {
         // ignore when no cached session exists
       }
-      
+
       // Check if Google Play Services are available (Android only)
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      
+
       // Sign in with Google
       const response = await GoogleSignin.signIn();
-      
+
       if (isSuccessResponse(response)) {
         const { data: userInfo } = response;
         console.log('Google Sign-In successful:', userInfo.user.email);
-        
+
         // Get the ID token for backend verification
         const { idToken } = await GoogleSignin.getTokens();
-        
+
         // Send the ID token to our backend for verification and JWT creation
         await authenticateWithBackend(idToken, userInfo);
       }
     } catch (error) {
       console.error('Google Sign-In error:', error);
-      
+
       if (isErrorWithCode(error)) {
         switch (error.code) {
           case statusCodes.SIGN_IN_CANCELLED:
@@ -156,7 +156,7 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
   const authenticateWithBackend = async (idToken: string, userInfo: any) => {
     try {
       const role = userRole || selectedRole || 'buyer';
-      
+
       // Send the ID token to our backend
       const response = await apiClient.post<{
         success: boolean;
@@ -179,10 +179,10 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
 
       if (response?.data?.success) {
         const { access_token, user } = response.data;
-        
+
         // Store tokens and user info using login method
         login(user, access_token);
-        
+
         // Show success animation
         showProfileCreatedAnimation();
       }
@@ -192,7 +192,7 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
         'Authentication Error',
         error.response?.data?.message || 'Failed to complete authentication with our servers'
       );
-      
+
       // Sign out from Google if backend auth fails
       try {
         await GoogleSignin.signOut();
@@ -204,17 +204,17 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
 
   const handleWebSignIn = async () => {
     setIsLoading(true);
-    
+
     try {
       const role = userRole || selectedRole || 'buyer';
       const apiUrl = ENV.apiUrl;
       // Add prompt=select_account to force account selection
       const googleOAuthUrl = `${apiUrl}/auth/google?role=${role}&prompt=select_account`;
-      
+
       // Store onboarding data and role before redirecting
       await onboardingStore.saveOnboardingData();
       onboardingStore.setRole(role as UserRole);
-      
+
       // Redirect to Google OAuth
       window.location.href = googleOAuthUrl;
     } catch (error: any) {
@@ -256,15 +256,9 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
 
           {/* Success Message */}
           <Animated.View style={{ opacity: textOpacity }} className="items-center">
-            <Text className="text-2xl font-bold text-white mb-2">
-              Profile Created!
-            </Text>
-            <Text className="text-gray-400 text-center">
-              Welcome to AgroTrade
-            </Text>
-            <Text className="text-gray-500 text-sm mt-1">
-              Redirecting to dashboard...
-            </Text>
+            <Text className="text-2xl font-bold text-white mb-2">Profile Created!</Text>
+            <Text className="text-gray-400 text-center">Welcome to AgroTrade</Text>
+            <Text className="text-gray-500 text-sm mt-1">Redirecting to dashboard...</Text>
           </Animated.View>
         </Animated.View>
       </View>
@@ -275,9 +269,7 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
     <View className={`${mode === 'modal' ? 'bg-gray-800 rounded-xl p-6 m-4' : 'p-6'}`}>
       {/* Header */}
       <View className="mb-8 items-center">
-        <Text className="text-3xl font-bold text-white mb-2">
-          Welcome to AgroTrade
-        </Text>
+        <Text className="text-3xl font-bold text-white mb-2">Welcome to AgroTrade</Text>
         <Text className="text-gray-400 text-center">
           Sign in with your Google account to continue
         </Text>
@@ -304,9 +296,7 @@ export const GoogleAuthNative: React.FC<GoogleAuthNativeProps> = ({
             <View className="mr-3">
               <Text className="text-2xl">🔍</Text>
             </View>
-            <Text className="text-gray-800 font-semibold text-lg">
-              Continue with Google
-            </Text>
+            <Text className="text-gray-800 font-semibold text-lg">Continue with Google</Text>
           </>
         )}
       </TouchableOpacity>

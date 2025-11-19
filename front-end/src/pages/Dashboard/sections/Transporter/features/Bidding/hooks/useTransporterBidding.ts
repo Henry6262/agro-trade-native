@@ -1,4 +1,3 @@
-import { useAuthStore } from '@stores/auth.store';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { transporterBiddingService } from '../service';
 import type {
@@ -12,9 +11,6 @@ import type { MapOffer } from '../maps/types';
 import { buildBiddingSummary, buildMapOfferFromRequest, mapRequestsToView } from '../utils';
 
 export const useTransporterBidding = (): TransporterBiddingHookResult => {
-  const user = useAuthStore((state) => state.user);
-  const transporterId = user?.id;
-
   const [requests, setRequests] = useState<TransportRequest[]>([]);
   const [bids, setBids] = useState<TransportBid[]>([]);
   const [performance, setPerformance] = useState<TransporterPerformance | null>(null);
@@ -37,19 +33,17 @@ export const useTransporterBidding = (): TransporterBiddingHookResult => {
       setRequests(fetchedRequests);
       setBids(fetchedBids);
 
-      if (transporterId) {
-        try {
-          const stats = await transporterBiddingService.fetchPerformance(transporterId);
-          setPerformance(stats);
-        } catch (performanceError) {
-          console.warn('Failed to load transporter performance', performanceError);
-        }
+      try {
+        const stats = await transporterBiddingService.fetchPerformance();
+        setPerformance(stats);
+      } catch (performanceError) {
+        console.warn('Failed to load transporter performance', performanceError);
       }
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [transporterId]);
+  }, []);
 
   useEffect(() => {
     setIsLoading(true);

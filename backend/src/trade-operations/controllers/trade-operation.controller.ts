@@ -8,7 +8,6 @@ import {
   Body,
   Param,
   Query,
-  UseGuards,
   Request,
   HttpStatus,
   HttpCode,
@@ -23,8 +22,6 @@ import {
   ApiQuery,
   ApiParam,
 } from "@nestjs/swagger";
-import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
-import { RolesGuard } from "../../auth/guards/roles.guard";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import {
   UserRole,
@@ -39,7 +36,6 @@ import { TransportCostService } from "../../transport/services/transport-cost.se
 import { PrismaService } from "../../prisma/prisma.service";
 import { NegotiationService } from "../../negotiations/services/negotiation.service";
 import {
-  CreateTradeOperationDto,
   AddSellersDto,
   CreateTradeOperationWithOffersDto,
 } from "../dto/create-trade-operation.dto";
@@ -49,7 +45,6 @@ import {
 } from "../dto/update-trade-operation.dto";
 import {
   TradeOperationResponseDto,
-  TradeOperationListResponseDto,
   TradeAnalyticsDto,
 } from "../dto/trade-operation-response.dto";
 import {
@@ -153,7 +148,7 @@ export class TradeOperationController {
     }
 
     // Create trade sellers and negotiations
-    const { tradeSellers, negotiations } =
+    const { negotiations } =
       await this.negotiationService.createTradeSellersWithOffers(
         tradeOperation.id,
         createDto.sellers,
@@ -238,7 +233,6 @@ export class TradeOperationController {
     @Query("page") page = "1",
     @Query("limit") limit = "10",
     @Query("buyListingId") buyListingId?: string,
-    @Request() req?: any,
   ): Promise<any> {
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
@@ -456,6 +450,8 @@ export class TradeOperationController {
     @Param("id") id: string,
     @Body() updateDto: UpdateTradeOperationDto,
   ): Promise<TradeOperationResponseDto> {
+    void id;
+    void updateDto;
     // This would need to be implemented in the service
     throw new BadRequestException("Update method not yet implemented");
   }
@@ -490,10 +486,7 @@ export class TradeOperationController {
       }
 
       // Update the phase using the service
-      const updatedTrade = await this.tradeOperationService.updateTradePhase(
-        id,
-        body.phase,
-      );
+      await this.tradeOperationService.updateTradePhase(id, body.phase);
 
       // Return the updated trade operation
       const summary =
@@ -728,6 +721,7 @@ export class TradeOperationController {
     @Param("id") id: string,
     @Body() finalizeDto?: FinalizeTradeDto,
   ): Promise<FinalizeTradeResponseDto> {
+    void finalizeDto;
     const result = await this.tradeOperationService.finalizeTrade(id);
 
     if (!result.success) {
@@ -747,6 +741,7 @@ export class TradeOperationController {
     description: "Trade operation cancelled",
   })
   async cancel(@Param("id") id: string): Promise<void> {
+    void id;
     // This would need to be implemented in the service
     throw new BadRequestException("Cancel method not yet implemented");
   }

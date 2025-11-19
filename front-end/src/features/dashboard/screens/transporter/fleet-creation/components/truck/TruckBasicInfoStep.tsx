@@ -47,15 +47,10 @@ export const TruckBasicInfoStep: React.FC<TruckBasicInfoStepProps> = ({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/50">
         <Pressable className="flex-1" onPress={onClose} />
-        
+
         <View className="bg-neutral-900 rounded-t-3xl max-h-[90%]">
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-neutral-800">
@@ -80,9 +75,7 @@ export const TruckBasicInfoStep: React.FC<TruckBasicInfoStepProps> = ({
           {/* Content */}
           <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 400 }}>
             <View className="p-6">
-              <Text className="text-lg font-semibold text-white mb-4">
-                Basic Information
-              </Text>
+              <Text className="text-lg font-semibold text-white mb-4">Basic Information</Text>
 
               {/* License Plate */}
               <View className="mb-4">

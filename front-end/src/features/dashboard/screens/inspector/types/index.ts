@@ -76,7 +76,7 @@ export interface Certification {
 
 export interface WorkingHours {
   start: string; // "09:00"
-  end: string;   // "18:00"
+  end: string; // "18:00"
   workDays: number[]; // 1-7 (Mon-Sun)
 }
 
@@ -231,7 +231,7 @@ export interface InspectorStore {
     timestamp: Date;
   } | null;
   isTracking: boolean;
-  
+
   // Actions
   setProfile: (profile: InspectorProfile) => void;
   setActiveJob: (job: VerificationJob | null) => void;

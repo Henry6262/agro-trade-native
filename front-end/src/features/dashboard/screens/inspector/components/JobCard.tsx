@@ -37,9 +37,7 @@ export const JobCard: React.FC<JobCardProps> = ({
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3 bg-gray-50">
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-gray-800">
-            {job.productDetails.name}
-          </Text>
+          <Text className="text-lg font-semibold text-gray-800">{job.productDetails.name}</Text>
           <Text className="text-sm text-gray-600">
             {job.productDetails.type} • {job.productDetails.quantity} {job.productDetails.unit}
           </Text>
@@ -55,33 +53,25 @@ export const JobCard: React.FC<JobCardProps> = ({
         <View className="flex-row items-start mb-2">
           <MapPin size={16} color="#6b7280" />
           <View className="ml-2 flex-1">
-            <Text className="text-sm font-medium text-gray-700">
-              {job.location.address}
-            </Text>
+            <Text className="text-sm font-medium text-gray-700">{job.location.address}</Text>
             <Text className="text-xs text-gray-500">
               {job.location.city}, {job.location.region}
             </Text>
           </View>
           <View className="bg-green-100 px-2 py-1 rounded">
-            <Text className="text-green-700 text-sm font-medium">
-              {job.distance} km
-            </Text>
+            <Text className="text-green-700 text-sm font-medium">{job.distance} km</Text>
           </View>
         </View>
 
         {/* Specifications Preview */}
         <View className="mb-2">
-          <Text className="text-xs text-gray-500">
-            {formatSpecs()}
-          </Text>
+          <Text className="text-xs text-gray-500">{formatSpecs()}</Text>
         </View>
 
         {/* Duration */}
         <View className="flex-row items-center">
           <Clock size={14} color="#6b7280" />
-          <Text className="text-xs text-gray-600 ml-1">
-            Est. {job.estimatedDuration} min
-          </Text>
+          <Text className="text-xs text-gray-600 ml-1">Est. {job.estimatedDuration} min</Text>
         </View>
       </View>
 

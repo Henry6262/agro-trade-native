@@ -84,7 +84,7 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
         currency: 'EUR',
         maximumFractionDigits: 0,
       }),
-    [],
+    []
   );
 
   const fetchData = async (effectiveId?: string) => {
@@ -120,15 +120,9 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
     fetchData(resolvedTransporterId);
   };
 
-  const activeJobs = useMemo(
-    () => jobs.filter((job) => job.status !== 'COMPLETED'),
-    [jobs],
-  );
+  const activeJobs = useMemo(() => jobs.filter((job) => job.status !== 'COMPLETED'), [jobs]);
 
-  const completedJobs = useMemo(
-    () => jobs.filter((job) => job.status === 'COMPLETED'),
-    [jobs],
-  );
+  const completedJobs = useMemo(() => jobs.filter((job) => job.status === 'COMPLETED'), [jobs]);
 
   const totalEarnings = useMemo(() => {
     const amounts = completedJobs
@@ -180,8 +174,7 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
       status: job.status?.toLowerCase() ?? 'assigned',
       estimatedValue: job.transportRequest?.maxBudget ?? 0,
       productType:
-        job.transportRequest?.tradeOperation?.buyListing?.product?.name ||
-        'Transport Job',
+        job.transportRequest?.tradeOperation?.buyListing?.product?.name || 'Transport Job',
     };
 
     setSelectedOffer(mapOffer);
@@ -259,14 +252,16 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
           <View className="mt-4">
             <View className="flex-row items-center mb-3">
               <Truck size={20} color="#34D399" />
-              <Text className="text-lg font-semibold text-green-400 ml-2">
-                MY ACTIVE TRANSFERS
-              </Text>
+              <Text className="text-lg font-semibold text-green-400 ml-2">MY ACTIVE TRANSFERS</Text>
             </View>
 
             {jobs.length === 0 ? (
               <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
-                <Truck size={48} color="#6B7280" style={{ alignSelf: 'center', marginBottom: 12 }} />
+                <Truck
+                  size={48}
+                  color="#6B7280"
+                  style={{ alignSelf: 'center', marginBottom: 12 }}
+                />
                 <Text className="text-gray-400 text-center">No transport jobs yet</Text>
                 <Text className="text-gray-500 text-center text-sm mt-2">
                   Submit bids to secure your first transport assignment.
@@ -333,16 +328,10 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
                       </Text>
                     </View>
 
-                    <TransferStageIndicator
-                      currentStage={stageIndex}
-                      stages={stageDefinitions}
-                    />
+                    <TransferStageIndicator currentStage={stageIndex} stages={stageDefinitions} />
 
                     <View className="flex-row mt-4 space-x-2">
-                      <TouchableOpacity
-                        className="flex-1"
-                        onPress={() => handleViewRoute(job)}
-                      >
+                      <TouchableOpacity className="flex-1" onPress={() => handleViewRoute(job)}>
                         <View className="border border-blue-500/40 rounded-lg py-2 items-center justify-center">
                           <Navigation size={16} color="#60A5FA" />
                           <Text className="text-blue-400 text-sm mt-1">VIEW ROUTE</Text>

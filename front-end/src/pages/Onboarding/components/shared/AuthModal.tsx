@@ -69,7 +69,7 @@ const FormField: React.FC<FormFieldProps> = ({
     const borderColor = error
       ? '#ef4444'
       : interpolate(focusAnimation.value, [0, 1], [0xe5e7eb, 0x3b82f6]);
-    
+
     return {
       borderColor: `#${borderColor.toString(16).padStart(6, '0')}`,
       borderWidth: interpolate(focusAnimation.value, [0, 1], [1, 2]),
@@ -82,7 +82,7 @@ const FormField: React.FC<FormFieldProps> = ({
         {label}
         {required && <Text style={{ color: '#ef4444' }}> *</Text>}
       </Text>
-      
+
       <Animated.View style={[containerStyle, { backgroundColor: '#ffffff', borderRadius: 12 }]}>
         <TextInput
           style={{ padding: 16, fontSize: 16, color: '#111827' }}
@@ -98,12 +98,8 @@ const FormField: React.FC<FormFieldProps> = ({
           autoCorrect={false}
         />
       </Animated.View>
-      
-      {error && (
-        <Text style={{ color: '#ef4444', fontSize: 14, marginTop: 4 }}>
-          {error}
-        </Text>
-      )}
+
+      {error && <Text style={{ color: '#ef4444', fontSize: 14, marginTop: 4 }}>{error}</Text>}
     </View>
   );
 };
@@ -116,13 +112,7 @@ interface OAuthButtonProps {
   color: string;
 }
 
-const OAuthButton: React.FC<OAuthButtonProps> = ({
-  provider,
-  onPress,
-  icon,
-  label,
-  color,
-}) => {
+const OAuthButton: React.FC<OAuthButtonProps> = ({ provider, onPress, icon, label, color }) => {
   const pressed = useSharedValue(0);
 
   const buttonStyle = useAnimatedStyle(() => ({
@@ -156,42 +146,38 @@ const OAuthButton: React.FC<OAuthButtonProps> = ({
         }}
       >
         <Text style={{ fontSize: 20, marginRight: 12 }}>{icon}</Text>
-        <Text style={{ color: '#111827', fontWeight: '600', fontSize: 16 }}>
-          {label}
-        </Text>
+        <Text style={{ color: '#111827', fontWeight: '600', fontSize: 16 }}>{label}</Text>
       </TouchableOpacity>
     </Animated.View>
   );
 };
 
-export const AuthModal: React.FC<AuthModalProps> = ({
-  visible,
-  onClose,
-  onComplete,
-  userRole,
-}) => {
+export const AuthModal: React.FC<AuthModalProps> = ({ visible, onClose, onComplete, userRole }) => {
   const [currentStep, setCurrentStep] = useState<'auth' | 'details' | 'success'>('auth');
   const [authMethod, setAuthMethod] = useState<'oauth' | 'email' | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [successData, setSuccessData] = useState<{name: string, email: string}>({ name: '', email: '' });
-  
+  const [successData, setSuccessData] = useState<{ name: string; email: string }>({
+    name: '',
+    email: '',
+  });
+
   // Animation values for success screen
   const successFadeAnim = useSharedValue(0);
   const successScaleAnim = useSharedValue(0.3);
   const checkmarkScale = useSharedValue(0);
   const textOpacity = useSharedValue(0);
-  
+
   // Zustand stores
   const onboardingStore = useOnboardingStore();
   const authStore = useAuthStore();
-  
+
   // Get loading and error states from onboarding store
   const storeIsLoading = onboardingStore.isLoading || onboardingStore.isSubmitting;
   const storeError = onboardingStore.error;
-  
+
   const isProcessing = isLoading || storeIsLoading;
-  
+
   // Step 1: Authentication
   const [authData, setAuthData] = useState({
     name: '',
@@ -199,7 +185,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     password: '',
     confirmPassword: '',
   });
-  
+
   // Step 2: Business Details
   const [businessData, setBusinessData] = useState({
     companyName: '',
@@ -207,7 +193,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     businessType: '',
     contactNumber: '',
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const slideAnimation = useSharedValue(0);
@@ -215,37 +201,37 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   React.useEffect(() => {
     if (visible) {
       slideAnimation.value = withTiming(1, { duration: 300 });
-      
+
       // Check if we have Google auth data
       const googleAuthData = onboardingStore.googleAuthData;
       if (googleAuthData?.isAuthenticated) {
         console.log('Google auth successful, showing success animation:', googleAuthData);
-        
+
         // Store data for success animation
         setSuccessData({
           name: googleAuthData.name || '',
-          email: googleAuthData.email || ''
+          email: googleAuthData.email || '',
         });
-        
+
         // Clear the Google auth data from store
         onboardingStore.setGoogleAuthData({ name: '', email: '', isAuthenticated: false });
-        
+
         // Show success animation
         setShowSuccess(true);
         setCurrentStep('success');
-        
+
         // Start success animations
         successFadeAnim.value = withTiming(1, { duration: 400 });
         successScaleAnim.value = withSpring(1, { friction: 4, tension: 40 });
-        
+
         setTimeout(() => {
           checkmarkScale.value = withSpring(1, { friction: 3, tension: 40 });
         }, 400);
-        
+
         setTimeout(() => {
           textOpacity.value = withTiming(1, { duration: 400 });
         }, 700);
-        
+
         // Complete after animation
         setTimeout(() => {
           onComplete();
@@ -303,29 +289,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleOAuthSignIn = async (provider: 'google' | 'apple' | 'facebook') => {
     setIsLoading(true);
     setErrors({});
-    
+
     try {
       if (provider === 'google') {
         // For Google OAuth, we need to redirect to the backend OAuth endpoint
         // The backend expects a GET request to /api/auth/google
         // Add prompt=select_account to force account selection
         const googleOAuthUrl = `${ENV.googleOAuthUrl}?prompt=select_account`;
-        
+
         // In React Native Web, we can use window.location for OAuth redirect
         if (Platform.OS === 'web') {
           // Store onboarding data and modal state before redirecting
           await onboardingStore.saveOnboardingData();
-          
+
           // Store the user role in the onboarding store before OAuth
           onboardingStore.setRole(userRole);
-          
+
           // Redirect to Google OAuth with account selection
           window.location.href = googleOAuthUrl;
         } else {
           // For native platforms, we'd use a WebView or deep linking
           // For now, show a message that OAuth is only available on web
           Alert.alert(
-            'OAuth on Mobile', 
+            'OAuth on Mobile',
             'Google authentication will open in your browser. Please complete the authentication and return to the app.',
             [
               {
@@ -337,7 +323,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 onPress: async () => {
                   // Store onboarding data before opening browser
                   await onboardingStore.saveOnboardingData();
-                  
+
                   // Open OAuth URL in browser (requires expo-linking or react-native-linking)
                   // For now, we'll just show the URL
                   Alert.alert('OAuth URL', googleOAuthUrl);
@@ -352,7 +338,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
     } catch (error: any) {
       console.error(`${provider} authentication failed:`, error);
-      const errorMessage = error?.message || `Failed to sign in with ${provider}. Please try again.`;
+      const errorMessage =
+        error?.message || `Failed to sign in with ${provider}. Please try again.`;
       Alert.alert('Authentication Error', errorMessage);
     } finally {
       setIsLoading(false);
@@ -410,7 +397,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     setIsLoading(true);
     setErrors({});
-    
+
     try {
       // Skip business details - submit directly with minimal info
       const companyInfo: CompanyInfo = {
@@ -430,10 +417,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
       // Submit onboarding data to backend
       await onboardingStore.submitOnboarding(companyInfo, userInfo);
-      
+
       // Success
       Alert.alert(
-        'Welcome!', 
+        'Welcome!',
         `Your ${getRoleDisplayName()} account has been created successfully!`,
         [{ text: 'Get Started', onPress: onComplete }]
       );
@@ -451,14 +438,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     setIsLoading(true);
     setErrors({});
-    
+
     try {
       // Prepare company info from business data
       const companyInfo: CompanyInfo = {
         companyName: businessData.companyName,
         vatNumber: businessData.vatNumber || undefined,
         businessLicense: undefined, // Could be added later
-        companyAddress: undefined, // Could be added later  
+        companyAddress: undefined, // Could be added later
         website: undefined, // Could be added later
         establishedYear: undefined, // Could be added later
       };
@@ -472,18 +459,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
       // Submit onboarding data to backend
       await onboardingStore.submitOnboarding(companyInfo, userInfo);
-      
+
       // If we get here, registration was successful
       Alert.alert(
-        'Welcome!', 
+        'Welcome!',
         `Your ${getRoleDisplayName()} account has been created successfully!`,
         [{ text: 'Get Started', onPress: onComplete }]
       );
-      
     } catch (error: any) {
       console.error('Complete registration failed:', error);
       const errorMessage = error?.message || 'Failed to complete setup. Please try again.';
-      
+
       // Show more specific error if available
       if (error?.response?.data?.message) {
         Alert.alert('Registration Error', error.response.data.message);
@@ -501,13 +487,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setAuthData({ name: '', email: '', password: '', confirmPassword: '' });
     setBusinessData({ companyName: '', vatNumber: '', businessType: '', contactNumber: '' });
     setErrors({});
-    
+
     // Clear onboarding store errors
     onboardingStore.clearError();
-    
+
     onClose();
   };
-  
+
   // Clear errors when component unmounts or becomes invisible
   React.useEffect(() => {
     if (!visible) {
@@ -516,12 +502,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   }, [visible]);
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={handleClose}
-    >
+    <Modal visible={visible} transparent animationType="none" onRequestClose={handleClose}>
       <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)', justifyContent: 'flex-end' }}>
         <Animated.View style={[modalStyle, { flex: 1, maxHeight: '90%' }]}>
           <LinearGradient
@@ -530,14 +511,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           >
             <SafeAreaView style={{ flex: 1 }}>
               {/* Header */}
-              <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: 20,
-                borderBottomWidth: 1,
-                borderBottomColor: '#e5e7eb'
-              }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: 20,
+                  borderBottomWidth: 1,
+                  borderBottomColor: '#e5e7eb',
+                }}
+              >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={{ fontSize: 18, marginRight: 8 }}>{getRoleIcon()}</Text>
                   <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#111827' }}>
@@ -556,14 +539,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               >
                 {/* Global Error Display */}
                 {storeError && currentStep !== 'success' && (
-                  <View style={{
-                    backgroundColor: '#fef2f2',
-                    borderWidth: 1,
-                    borderColor: '#fecaca',
-                    borderRadius: 12,
-                    padding: 16,
-                    marginBottom: 16,
-                  }}>
+                  <View
+                    style={{
+                      backgroundColor: '#fef2f2',
+                      borderWidth: 1,
+                      borderColor: '#fecaca',
+                      borderRadius: 12,
+                      padding: 16,
+                      marginBottom: 16,
+                    }}
+                  >
                     <Text style={{ color: '#dc2626', fontSize: 14, fontWeight: '500' }}>
                       {storeError}
                     </Text>
@@ -572,7 +557,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                 {/* Success Animation */}
                 {currentStep === 'success' && showSuccess && (
-                  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 60 }}>
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      paddingVertical: 60,
+                    }}
+                  >
                     <Animated.View
                       style={{
                         opacity: successFadeAnim.value,
@@ -582,14 +574,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     >
                       {/* Profile Avatar with Checkmark */}
                       <View style={{ position: 'relative', marginBottom: 32 }}>
-                        <View style={{
-                          width: 120,
-                          height: 120,
-                          backgroundColor: '#10b981',
-                          borderRadius: 60,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}>
+                        <View
+                          style={{
+                            width: 120,
+                            height: 120,
+                            backgroundColor: '#10b981',
+                            borderRadius: 60,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
                           <User size={60} color="white" strokeWidth={2} />
                         </View>
                         <Animated.View
@@ -600,21 +594,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                             transform: [{ scale: checkmarkScale.value }],
                           }}
                         >
-                          <View style={{
-                            backgroundColor: 'white',
-                            borderRadius: 24,
-                            padding: 2,
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.1,
-                            shadowRadius: 4,
-                            elevation: 3,
-                          }}>
-                            <View style={{
-                              backgroundColor: '#10b981',
-                              borderRadius: 20,
-                              padding: 4,
-                            }}>
+                          <View
+                            style={{
+                              backgroundColor: 'white',
+                              borderRadius: 24,
+                              padding: 2,
+                              shadowColor: '#000',
+                              shadowOffset: { width: 0, height: 2 },
+                              shadowOpacity: 0.1,
+                              shadowRadius: 4,
+                              elevation: 3,
+                            }}
+                          >
+                            <View
+                              style={{
+                                backgroundColor: '#10b981',
+                                borderRadius: 20,
+                                padding: 4,
+                              }}
+                            >
                               <CheckCircle size={32} color="white" strokeWidth={3} />
                             </View>
                           </View>
@@ -623,34 +621,50 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                       {/* Success Message */}
                       <Animated.View style={{ opacity: textOpacity.value, alignItems: 'center' }}>
-                        <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#111827', marginBottom: 12 }}>
+                        <Text
+                          style={{
+                            fontSize: 28,
+                            fontWeight: 'bold',
+                            color: '#111827',
+                            marginBottom: 12,
+                          }}
+                        >
                           Welcome to AgroTrade!
                         </Text>
-                        
+
                         {successData.name && (
                           <Text style={{ fontSize: 20, color: '#374151', marginBottom: 8 }}>
                             Hi, {successData.name}! 👋
                           </Text>
                         )}
-                        
-                        <Text style={{ fontSize: 16, color: '#6b7280', textAlign: 'center', marginBottom: 8 }}>
+
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            color: '#6b7280',
+                            textAlign: 'center',
+                            marginBottom: 8,
+                          }}
+                        >
                           Your profile has been created successfully
                         </Text>
-                        
+
                         {successData.email && (
                           <Text style={{ fontSize: 14, color: '#9ca3af' }}>
                             {successData.email}
                           </Text>
                         )}
-                        
+
                         <View style={{ marginTop: 24, flexDirection: 'row', alignItems: 'center' }}>
-                          <View style={{
-                            width: 8,
-                            height: 8,
-                            backgroundColor: '#10b981',
-                            borderRadius: 4,
-                            marginRight: 8,
-                          }} />
+                          <View
+                            style={{
+                              width: 8,
+                              height: 8,
+                              backgroundColor: '#10b981',
+                              borderRadius: 4,
+                              marginRight: 8,
+                            }}
+                          />
                           <Text style={{ fontSize: 14, color: '#6b7280' }}>
                             Preparing your dashboard...
                           </Text>
@@ -662,7 +676,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
                 {currentStep === 'auth' && !showSuccess && (
                   <>
-                    <Text style={{ fontSize: 16, color: '#6b7280', marginBottom: 24, textAlign: 'center' }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: '#6b7280',
+                        marginBottom: 24,
+                        textAlign: 'center',
+                      }}
+                    >
                       Create your account to start as a {getRoleDisplayName()}
                     </Text>
 
@@ -670,10 +691,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                       <>
                         {/* OAuth Options */}
                         <View style={{ marginBottom: 32 }}>
-                          <Text style={{ fontSize: 18, fontWeight: '600', color: '#111827', marginBottom: 16 }}>
+                          <Text
+                            style={{
+                              fontSize: 18,
+                              fontWeight: '600',
+                              color: '#111827',
+                              marginBottom: 16,
+                            }}
+                          >
                             Quick Sign Up
                           </Text>
-                          
+
                           <OAuthButton
                             provider="google"
                             onPress={() => handleOAuthSignIn('google')}
@@ -681,7 +709,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                             label="Continue with Google"
                             color="#4285f4"
                           />
-                          
+
                           {/* Disabled for now - only Google auth is active
                           <OAuthButton
                             provider="apple"
@@ -702,7 +730,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                         </View>
 
                         {/* Divider */}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 32 }}>
+                        <View
+                          style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 32 }}
+                        >
                           <View style={{ flex: 1, height: 1, backgroundColor: '#d1d5db' }} />
                           <Text style={{ marginHorizontal: 16, color: '#6b7280' }}>or</Text>
                           <View style={{ flex: 1, height: 1, backgroundColor: '#d1d5db' }} />
@@ -761,14 +791,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                           label="Confirm Password"
                           placeholder="Confirm your password"
                           value={authData.confirmPassword}
-                          onChangeText={(text) => setAuthData({ ...authData, confirmPassword: text })}
+                          onChangeText={(text) =>
+                            setAuthData({ ...authData, confirmPassword: text })
+                          }
                           secureTextEntry
                           error={errors.confirmPassword}
                           required
                         />
 
                         <Button
-                          title={isProcessing ? "Creating Account..." : "Create Account"}
+                          title={isProcessing ? 'Creating Account...' : 'Create Account'}
                           onPress={handleEmailSignUp}
                           disabled={isProcessing}
                           variant="primary"
@@ -778,15 +810,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     )}
                   </>
                 )}
-
               </ScrollView>
 
               {/* Terms and Privacy */}
               <View style={{ padding: 20, paddingTop: 8 }}>
-                <Text style={{ fontSize: 12, color: '#6b7280', textAlign: 'center', lineHeight: 18 }}>
+                <Text
+                  style={{ fontSize: 12, color: '#6b7280', textAlign: 'center', lineHeight: 18 }}
+                >
                   By continuing, you agree to our{' '}
-                  <Text style={{ color: '#3b82f6' }}>Terms of Service</Text>
-                  {' '}and{' '}
+                  <Text style={{ color: '#3b82f6' }}>Terms of Service</Text> and{' '}
                   <Text style={{ color: '#3b82f6' }}>Privacy Policy</Text>
                 </Text>
               </View>

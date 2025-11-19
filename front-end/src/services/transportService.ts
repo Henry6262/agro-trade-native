@@ -137,6 +137,22 @@ export interface TransporterPerformance {
   recentJobs: TransportJob[];
 }
 
+export interface TransporterAnalyticsMetrics {
+  totalBids: number;
+  acceptedBids: number;
+  winRate: number;
+  pendingBids: number;
+  activeJobs: number;
+  completedJobs: number;
+  onTimeDeliveryRate: number;
+  averageBidAmount: number;
+}
+
+export interface TransporterAnalyticsSummary {
+  metrics: TransporterAnalyticsMetrics;
+  recentJobs: TransportJob[];
+}
+
 export const transportService = {
   // Get all transport requests (with optional filters)
   async getTransportRequests(params?: {
@@ -148,6 +164,20 @@ export const transportService = {
       return response.data;
     } catch (error) {
       console.error('Error fetching transport requests:', error);
+      throw error;
+    }
+  },
+
+  async getAvailableRequests(params?: {
+    radius?: number;
+    minWeight?: number;
+    maxWeight?: number;
+  }): Promise<TransportRequest[]> {
+    try {
+      const response = await apiClient.get('/transport/requests/available', { params });
+      return response.data?.data ?? response.data;
+    } catch (error) {
+      console.error('Error fetching available transport requests:', error);
       throw error;
     }
   },
@@ -197,9 +227,7 @@ export const transportService = {
   },
 
   // Get transport jobs (for transporter - filtered by their ID automatically)
-  async getMyJobs(params?: {
-    status?: string;
-  }): Promise<TransportJob[]> {
+  async getMyJobs(params?: { status?: string }): Promise<TransportJob[]> {
     try {
       const response = await apiClient.get('/transport/jobs', { params });
       return response.data;
@@ -210,7 +238,10 @@ export const transportService = {
   },
 
   // Start a transport job
-  async startJob(jobId: string, payload?: { actualPickupTime?: string; notes?: string }): Promise<TransportJob> {
+  async startJob(
+    jobId: string,
+    payload?: { actualPickupTime?: string; notes?: string }
+  ): Promise<TransportJob> {
     try {
       const response = await apiClient.post(`/transport/jobs/${jobId}/start`, payload ?? {});
       return response.data;
@@ -221,12 +252,15 @@ export const transportService = {
   },
 
   // Update job status
-  async updateJobStatus(jobId: string, statusData: {
-    status: string;
-    currentLocation?: { lat: number; lng: number; address?: string };
-    estimatedArrival?: string;
-    notes?: string;
-  }): Promise<TransportJob> {
+  async updateJobStatus(
+    jobId: string,
+    statusData: {
+      status: string;
+      currentLocation?: { lat: number; lng: number; address?: string };
+      estimatedArrival?: string;
+      notes?: string;
+    }
+  ): Promise<TransportJob> {
     try {
       const response = await apiClient.put(`/transport/jobs/${jobId}/status`, statusData);
       return response.data;
@@ -237,11 +271,14 @@ export const transportService = {
   },
 
   // Complete pickup
-  async completePickup(jobId: string, pickupData: {
-    pickupNotes?: string;
-    actualWeight?: number;
-    pickupPhotos?: string[];
-  }): Promise<TransportJob> {
+  async completePickup(
+    jobId: string,
+    pickupData: {
+      pickupNotes?: string;
+      actualWeight?: number;
+      pickupPhotos?: string[];
+    }
+  ): Promise<TransportJob> {
     try {
       const response = await apiClient.post(`/transport/jobs/${jobId}/pickup`, pickupData);
       return response.data;
@@ -252,12 +289,15 @@ export const transportService = {
   },
 
   // Complete delivery
-  async completeDelivery(jobId: string, deliveryData: {
-    deliveryPhotos?: string[];
-    proofOfDelivery?: string;
-    deliveryNotes?: string;
-    recipientSignature?: string;
-  }): Promise<TransportJob> {
+  async completeDelivery(
+    jobId: string,
+    deliveryData: {
+      deliveryPhotos?: string[];
+      proofOfDelivery?: string;
+      deliveryNotes?: string;
+      recipientSignature?: string;
+    }
+  ): Promise<TransportJob> {
     try {
       const response = await apiClient.post(`/transport/jobs/${jobId}/delivery`, deliveryData);
       return response.data;
@@ -270,10 +310,25 @@ export const transportService = {
   // Get transporter performance metrics
   async getTransporterPerformance(transporterId: string): Promise<TransporterPerformance> {
     try {
-      const response = await apiClient.get(`/transport/analytics/transporter-performance/${transporterId}`);
+      const response = await apiClient.get(
+        `/transport/analytics/transporter-performance/${transporterId}`
+      );
       return response.data;
     } catch (error) {
       console.error('Error fetching transporter performance:', error);
+      throw error;
+    }
+  },
+
+  async getMyAnalytics(): Promise<TransporterAnalyticsSummary> {
+    try {
+      const response = await apiClient.get('/transport/me/analytics');
+      return {
+        metrics: response.data.metrics,
+        recentJobs: response.data.recentJobs ?? [],
+      };
+    } catch (error) {
+      console.error('Error fetching transporter analytics:', error);
       throw error;
     }
   },

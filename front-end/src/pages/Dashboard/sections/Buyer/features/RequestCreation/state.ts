@@ -91,7 +91,10 @@ export const buyerRequestCreationReducer = (
   }
 };
 
-export const isStepComplete = (state: BuyerRequestCreationState, step: BuyerRequestCreationStep) => {
+export const isStepComplete = (
+  state: BuyerRequestCreationState,
+  step: BuyerRequestCreationStep
+) => {
   switch (step) {
     case 'product-selection':
       return Boolean(state.data.productData);

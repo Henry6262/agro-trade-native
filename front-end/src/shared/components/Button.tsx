@@ -1,8 +1,8 @@
 import React from 'react';
-import { 
-  TouchableOpacity, 
-  Text, 
-  ActivityIndicator, 
+import {
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
   TouchableOpacityProps,
   ViewStyle,
   TextStyle,
@@ -12,7 +12,16 @@ import { BaseComponentProps } from '../../shared/types';
 interface ButtonProps extends Omit<TouchableOpacityProps, 'className'>, BaseComponentProps {
   className?: string;
   title?: string;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger' | 'gradient' | 'gradient-green' | 'gradient-blue' | 'gradient-yellow';
+  variant?:
+    | 'primary'
+    | 'secondary'
+    | 'outline'
+    | 'ghost'
+    | 'danger'
+    | 'gradient'
+    | 'gradient-green'
+    | 'gradient-blue'
+    | 'gradient-yellow';
   size?: 'sm' | 'small' | 'medium' | 'large';
   loading?: boolean;
   disabled?: boolean;
@@ -147,19 +156,19 @@ export const Button: React.FC<ButtonProps> = ({
       {...props}
     >
       {loading && (
-        <ActivityIndicator 
-          size="small" 
+        <ActivityIndicator
+          size="small"
           color={
-            variant === 'outline' || variant === 'ghost' 
-              ? '#22C55E' 
-              : variant === 'gradient-yellow' 
-                ? '#000000' 
+            variant === 'outline' || variant === 'ghost'
+              ? '#22C55E'
+              : variant === 'gradient-yellow'
+                ? '#000000'
                 : '#FFFFFF'
           }
           className="mr-2"
         />
       )}
-      
+
       {children ? (
         children
       ) : (
@@ -170,13 +179,9 @@ export const Button: React.FC<ButtonProps> = ({
               <Text className="w-2" />
             </React.Fragment>
           )}
-          
-          {title && (
-            <Text className={`${variantStyles.text} ${sizeStyles.text}`}>
-              {title}
-            </Text>
-          )}
-          
+
+          {title && <Text className={`${variantStyles.text} ${sizeStyles.text}`}>{title}</Text>}
+
           {rightIcon && !loading && (
             <React.Fragment>
               <Text className="w-2" />

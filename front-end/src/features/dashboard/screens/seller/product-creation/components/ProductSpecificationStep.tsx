@@ -9,7 +9,6 @@ export const ProductSpecificationStep: React.FC<ProductSpecificationStepProps> =
   onNext,
   onBack,
 }) => {
-  
   const handleSpecificationsSave = (specs: any) => {
     // Transform the specs data to match our ProductSpecifications interface
     const specifications: ProductSpecifications = {

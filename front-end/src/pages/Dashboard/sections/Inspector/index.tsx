@@ -4,7 +4,9 @@ import { PermissionGuard } from '../../../../shared/components/PermissionGuard';
 import ActiveJobFeature from './features/ActiveJob';
 import AvailableJobsFeature from './features/AvailableJobs';
 
-export function InspectorDashboardSection({ activeTab = 'active' }: InspectorDashboardSectionProps) {
+export function InspectorDashboardSection({
+  activeTab = 'active',
+}: InspectorDashboardSectionProps) {
   const [tab, setTab] = useState<'active' | 'available'>(activeTab);
 
   return (
@@ -18,7 +20,9 @@ export function InspectorDashboardSection({ activeTab = 'active' }: InspectorDas
             className={`flex-1 py-3 ${tab === 'active' ? 'border-b-2 border-green-600' : ''}`}
             onPress={() => setTab('active')}
           >
-            <Text className={`text-center font-medium ${tab === 'active' ? 'text-green-600' : 'text-gray-600'}`}>
+            <Text
+              className={`text-center font-medium ${tab === 'active' ? 'text-green-600' : 'text-gray-600'}`}
+            >
               Active Job
             </Text>
           </TouchableOpacity>
@@ -26,7 +30,9 @@ export function InspectorDashboardSection({ activeTab = 'active' }: InspectorDas
             className={`flex-1 py-3 ${tab === 'available' ? 'border-b-2 border-green-600' : ''}`}
             onPress={() => setTab('available')}
           >
-            <Text className={`text-center font-medium ${tab === 'available' ? 'text-green-600' : 'text-gray-600'}`}>
+            <Text
+              className={`text-center font-medium ${tab === 'available' ? 'text-green-600' : 'text-gray-600'}`}
+            >
               Available Jobs
             </Text>
           </TouchableOpacity>

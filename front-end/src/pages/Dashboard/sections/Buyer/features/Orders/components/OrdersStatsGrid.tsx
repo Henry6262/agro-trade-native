@@ -14,7 +14,9 @@ export const OrdersStatsGrid: React.FC<OrdersStatsGridProps> = ({ stats }) => (
       <CardContent className="p-3 items-center">
         <DollarSign color="#60a5fa" size={20} />
         <Text className="text-xs text-neutral-400 mt-1">Total</Text>
-        <Text className="text-lg font-bold text-white">${(stats.totalSpent / 1000).toFixed(0)}k</Text>
+        <Text className="text-lg font-bold text-white">
+          ${(stats.totalSpent / 1000).toFixed(0)}k
+        </Text>
         <Text className="text-xs text-blue-400">-{stats.savingsRate}%</Text>
       </CardContent>
     </Card>
@@ -22,7 +24,9 @@ export const OrdersStatsGrid: React.FC<OrdersStatsGridProps> = ({ stats }) => (
       <CardContent className="p-3 items-center">
         <Calendar color="#22c55e" size={20} />
         <Text className="text-xs text-neutral-400 mt-1">Month</Text>
-        <Text className="text-lg font-bold text-white">${(stats.monthlySpent / 1000).toFixed(0)}k</Text>
+        <Text className="text-lg font-bold text-white">
+          ${(stats.monthlySpent / 1000).toFixed(0)}k
+        </Text>
         <Text className="text-xs text-green-400">Jan 2025</Text>
       </CardContent>
     </Card>

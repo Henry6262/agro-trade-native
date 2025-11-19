@@ -162,7 +162,7 @@ class LocationService {
     if (countryCode) {
       params.append('country', countryCode);
     }
-    
+
     const response = await apiClient.get(`/location/cities/search?${params.toString()}`);
     return response.data;
   }
@@ -185,20 +185,16 @@ class LocationService {
     try {
       // Get current coordinates
       const coords = await this.getCurrentLocation();
-      
+
       // Reverse geocode to get location details
       const location = await this.reverseGeocode(coords.latitude, coords.longitude);
-      
+
       // Save to user profile
-      await this.updateUserLocation(
-        coords.latitude,
-        coords.longitude,
-        'auto'
-      );
-      
+      await this.updateUserLocation(coords.latitude, coords.longitude, 'auto');
+
       // Get pricing for this location
       const pricing = await this.getPricingForLocation(coords.latitude, coords.longitude);
-      
+
       return { location, pricing };
     } catch (error) {
       console.error('Failed to detect location:', error);

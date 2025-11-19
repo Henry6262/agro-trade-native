@@ -17,8 +17,7 @@ export const useProducts = () => {
   const useInfiniteProducts = (params: Omit<ProductsListParams, 'page'> = {}) => {
     return useInfiniteQuery({
       queryKey: ['products', 'infinite', params],
-      queryFn: ({ pageParam = 1 }) =>
-        productService.getProducts({ ...params, page: pageParam }),
+      queryFn: ({ pageParam = 1 }) => productService.getProducts({ ...params, page: pageParam }),
       getNextPageParam: (lastPage) => {
         const { page, totalPages } = lastPage.pagination;
         return page < totalPages ? page + 1 : undefined;
@@ -67,7 +66,10 @@ export const useProducts = () => {
   };
 
   // Get products by category
-  const useProductsByCategory = (categoryId: string, params: Omit<ProductsListParams, 'category'> = {}) => {
+  const useProductsByCategory = (
+    categoryId: string,
+    params: Omit<ProductsListParams, 'category'> = {}
+  ) => {
     return useQuery({
       queryKey: ['products', 'category', categoryId, params],
       queryFn: () => productService.getProductsByCategory(categoryId, params),
@@ -136,7 +138,11 @@ export const useProducts = () => {
 
   // Report product
   const reportProductMutation = useMutation({
-    mutationFn: ({ productId, reason, description }: {
+    mutationFn: ({
+      productId,
+      reason,
+      description,
+    }: {
       productId: string;
       reason: string;
       description?: string;

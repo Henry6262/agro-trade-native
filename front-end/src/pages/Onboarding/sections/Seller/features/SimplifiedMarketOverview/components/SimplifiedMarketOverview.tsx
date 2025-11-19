@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
-import { 
-  Package, 
-  MapPin, 
-  DollarSign, 
-  Info, 
+  Package,
+  MapPin,
+  DollarSign,
+  Info,
   Weight,
   TrendingUp,
   FileText,
@@ -55,30 +49,30 @@ interface SimplifiedMarketOverviewProps {
   onComplete?: () => void;
 }
 
-export function SimplifiedMarketOverview({ 
-  selectedProducts = [], 
+export function SimplifiedMarketOverview({
+  selectedProducts = [],
   specifications,
-  onComplete 
+  onComplete,
 }: SimplifiedMarketOverviewProps) {
-  const { 
+  const {
     selectedProductsMetadata,
     location,
     sellerSpecifications,
     selectedRole,
     selectedProducts: storeSelectedProducts,
   } = useOnboardingStore();
-  
+
   const { products } = useProductStore();
   const { user } = useAuthStore();
-  
+
   const [showSellDrawer, setShowSellDrawer] = useState(false);
-  
+
   // Use selectedProducts from props or fall back to store
   const productList = selectedProducts.length > 0 ? selectedProducts : storeSelectedProducts;
   const productId = productList?.[0];
-  const product = products.find(p => p.id === productId);
+  const product = products.find((p) => p.id === productId);
   const productSpecs = sellerSpecifications[productId] || {};
-  
+
   // Build the DTO
   const handleSellClick = () => {
     console.log('handleSellClick - productId:', productId, 'product:', product?.name);
@@ -87,18 +81,18 @@ export function SimplifiedMarketOverview({
     }
     setShowSellDrawer(true);
   };
-  
+
   const buildListingDTO = (): CreateListingDTO | null => {
     if (!productId || !product) return null;
-    
+
     const quantity = parseFloat(productSpecs.quantity || '0');
     const unit = productSpecs.unit || product?.defaultUnit || 'TON';
     const offerType = productSpecs.action || 'listing';
-    
+
     // Get price expectation from product data
     const priceMin = parseFloat(product?.priceRangeMin || '0');
     const priceMax = parseFloat(product?.priceRangeMax || '0');
-    
+
     const dto: CreateListingDTO = {
       productId,
       quantity,
@@ -114,12 +108,12 @@ export function SimplifiedMarketOverview({
       },
       status: 'draft',
     };
-    
+
     // Add specifications if it's a custom offer
     if (offerType === 'custom-offer' && productSpecs.specifications) {
       dto.specifications = productSpecs.specifications;
     }
-    
+
     // Add price expectation if available
     if (priceMin > 0 || priceMax > 0) {
       dto.priceExpectation = {
@@ -128,34 +122,34 @@ export function SimplifiedMarketOverview({
         currency: 'USD',
       };
     }
-    
+
     // Add seller ID if authenticated
     if (user?.id) {
       dto.sellerId = user.id;
     }
-    
+
     return dto;
   };
-  
+
   const handleDrawerComplete = () => {
     setShowSellDrawer(false);
     onComplete?.();
   };
-  
+
   // Calculate estimated value
   const calculateEstimatedValue = () => {
     const quantity = parseFloat(productSpecs.quantity || '0');
     const priceMin = parseFloat(product?.priceRangeMin || '0');
     const priceMax = parseFloat(product?.priceRangeMax || '0');
-    
+
     return {
       min: quantity * priceMin,
       max: quantity * priceMax,
     };
   };
-  
+
   const estimatedValue = calculateEstimatedValue();
-  
+
   // Format currency
   const formatCurrency = (value: number) => {
     if (value >= 1000000) {
@@ -165,14 +159,14 @@ export function SimplifiedMarketOverview({
     }
     return `$${value.toFixed(0)}`;
   };
-  
+
   // Check if specification has value
   const hasSpecValue = (specKey: string) => {
     return productSpecs.specifications?.[specKey]?.trim() !== '';
   };
-  
+
   // Remove the auth check here - it's now handled in the drawer
-  
+
   // Handle case when no product is selected
   if (!productId || !product) {
     return (
@@ -185,20 +179,16 @@ export function SimplifiedMarketOverview({
       </OnboardingLayout>
     );
   }
-  
+
   return (
     <OnboardingLayout>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="mb-6">
-          <Text className="text-3xl font-bold text-white mb-2">
-            Listing Overview
-          </Text>
-          <Text className="text-gray-400">
-            Review your listing details before submitting
-          </Text>
+          <Text className="text-3xl font-bold text-white mb-2">Listing Overview</Text>
+          <Text className="text-gray-400">Review your listing details before submitting</Text>
         </View>
-        
+
         {/* Product Card - Enhanced Display */}
         {product && (
           <View className="bg-gray-800/50 rounded-2xl overflow-hidden border border-gray-700 mb-6">
@@ -206,28 +196,30 @@ export function SimplifiedMarketOverview({
             {product.image && (
               <View className="relative">
                 <Image
-                  source={{ 
-                    uri: product.image.startsWith('http') 
-                      ? product.image 
-                      : `${APP_CONFIG.API_URL.replace('/api', '')}/static/${product.image}`
+                  source={{
+                    uri: product.image.startsWith('http')
+                      ? product.image
+                      : `${APP_CONFIG.API_URL.replace('/api', '')}/static/${product.image}`,
                   }}
                   style={{ width: '100%', height: 180 }}
                   resizeMode="cover"
                 />
                 <View className="absolute top-3 right-3">
-                  <View className={`px-3 py-1 rounded-full ${
-                    productSpecs.action === 'custom-offer' 
-                      ? 'bg-emerald-600' 
-                      : 'bg-blue-600'
-                  }`}>
+                  <View
+                    className={`px-3 py-1 rounded-full ${
+                      productSpecs.action === 'custom-offer' ? 'bg-emerald-600' : 'bg-blue-600'
+                    }`}
+                  >
                     <Text className="text-white text-xs font-semibold">
-                      {productSpecs.action === 'custom-offer' ? 'Custom Offer' : 'Marketplace Listing'}
+                      {productSpecs.action === 'custom-offer'
+                        ? 'Custom Offer'
+                        : 'Marketplace Listing'}
                     </Text>
                   </View>
                 </View>
               </View>
             )}
-            
+
             {/* Product Details */}
             <View className="p-4">
               <Text className="text-white text-xl font-bold mb-1">
@@ -236,7 +228,7 @@ export function SimplifiedMarketOverview({
               <Text className="text-gray-400 text-sm mb-4">
                 {product.category.replace(/_/g, ' ')}
               </Text>
-              
+
               {/* Key Metrics Grid */}
               <View className="flex-row flex-wrap -mx-2 mb-4">
                 {/* Quantity */}
@@ -247,11 +239,12 @@ export function SimplifiedMarketOverview({
                       <Text className="text-gray-400 text-xs ml-1">Quantity</Text>
                     </View>
                     <Text className="text-white text-lg font-semibold">
-                      {productSpecs.quantity || '0'} {productSpecs.unit || product.defaultUnit || 'TON'}
+                      {productSpecs.quantity || '0'}{' '}
+                      {productSpecs.unit || product.defaultUnit || 'TON'}
                     </Text>
                   </View>
                 </View>
-                
+
                 {/* Location */}
                 <View className="w-1/2 px-2 mb-3">
                   <View className="bg-gray-900/50 rounded-xl p-3">
@@ -264,7 +257,7 @@ export function SimplifiedMarketOverview({
                     </Text>
                   </View>
                 </View>
-                
+
                 {/* Estimated Value */}
                 <View className="w-full px-2">
                   <View className="bg-emerald-600/10 rounded-xl p-3 border border-emerald-600/20">
@@ -281,17 +274,15 @@ export function SimplifiedMarketOverview({
             </View>
           </View>
         )}
-        
+
         {/* Remove specifications section - moved to drawer */}
         {false && productSpecs.action === 'custom-offer' && product?.specifications && (
           <View className="mb-6">
             <View className="flex-row items-center mb-3">
               <FileText size={20} color="white" />
-              <Text className="text-white text-lg font-semibold ml-2">
-                Product Specifications
-              </Text>
+              <Text className="text-white text-lg font-semibold ml-2">Product Specifications</Text>
             </View>
-            
+
             <View className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
               {product.specifications.length > 0 ? (
                 <View className="space-y-3">
@@ -299,35 +290,34 @@ export function SimplifiedMarketOverview({
                     const specKey = spec.code || spec.id;
                     const value = productSpecs.specifications?.[specKey];
                     const hasValue = value?.trim() !== '';
-                    
+
                     return (
-                      <View key={specKey} className="flex-row items-center justify-between py-2 border-b border-gray-700/50">
+                      <View
+                        key={specKey}
+                        className="flex-row items-center justify-between py-2 border-b border-gray-700/50"
+                      >
                         <View className="flex-row items-center flex-1">
                           {hasValue ? (
                             <Check size={16} color="#10B981" />
                           ) : (
                             <X size={16} color="#EF4444" />
                           )}
-                          <Text className={`ml-2 text-sm ${hasValue ? 'text-gray-300' : 'text-gray-500'}`}>
+                          <Text
+                            className={`ml-2 text-sm ${hasValue ? 'text-gray-300' : 'text-gray-500'}`}
+                          >
                             {spec.name || spec.code}
                           </Text>
                         </View>
                         <View className="flex-row items-center">
                           {hasValue ? (
                             <>
-                              <Text className="text-white font-medium mr-2">
-                                {value}
-                              </Text>
+                              <Text className="text-white font-medium mr-2">{value}</Text>
                               {spec.unit && (
-                                <Text className="text-gray-400 text-xs">
-                                  {spec.unit}
-                                </Text>
+                                <Text className="text-gray-400 text-xs">{spec.unit}</Text>
                               )}
                             </>
                           ) : (
-                            <Text className="text-gray-500 text-xs italic">
-                              Not provided
-                            </Text>
+                            <Text className="text-gray-500 text-xs italic">Not provided</Text>
                           )}
                         </View>
                       </View>
@@ -345,35 +335,29 @@ export function SimplifiedMarketOverview({
             </View>
           </View>
         )}
-        
+
         {/* Market Info */}
         <View className="bg-blue-500/10 rounded-xl p-4 mb-6 border border-blue-500/20">
           <View className="flex-row items-start">
             <Info size={16} color="#3B82F6" />
             <View className="flex-1 ml-3">
-              <Text className="text-blue-400 font-semibold mb-1">
-                Ready to Sell
-              </Text>
+              <Text className="text-blue-400 font-semibold mb-1">Ready to Sell</Text>
               <Text className="text-blue-400/70 text-sm leading-5">
-                Choose between creating a quick marketplace listing or requesting a custom offer with detailed specifications.
+                Choose between creating a quick marketplace listing or requesting a custom offer
+                with detailed specifications.
               </Text>
             </View>
           </View>
         </View>
-        
+
         {/* Sell Button */}
-        <TouchableOpacity
-          onPress={handleSellClick}
-          className="bg-emerald-600 rounded-xl py-4 mb-4"
-        >
+        <TouchableOpacity onPress={handleSellClick} className="bg-emerald-600 rounded-xl py-4 mb-4">
           <View className="flex-row items-center justify-center">
             <TrendingUp size={20} color="white" />
-            <Text className="text-white font-semibold text-base ml-2">
-              Sell
-            </Text>
+            <Text className="text-white font-semibold text-base ml-2">Sell</Text>
           </View>
         </TouchableOpacity>
-        
+
         {/* Data Preview (Debug - Remove in production) */}
         {__DEV__ && (
           <View className="bg-gray-900 rounded-xl p-4 mb-4">
@@ -384,7 +368,7 @@ export function SimplifiedMarketOverview({
           </View>
         )}
       </ScrollView>
-      
+
       {/* Sell Options Drawer - only render when product exists */}
       {productId && (
         <SellOptionsDrawer

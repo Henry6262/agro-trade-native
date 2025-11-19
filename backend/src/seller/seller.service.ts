@@ -9,6 +9,10 @@ import {
   ListingStatus,
   OfferType,
 } from "./dto/create-listing.dto";
+import {
+  SellerTimelineEventDto,
+  SellerTimelineResponseDto,
+} from "./dto/timeline.dto";
 
 @Injectable()
 export class SellerService {
@@ -153,8 +157,7 @@ export class SellerService {
           });
         });
 
-        const results = await Promise.all(specPromises);
-        const validSpecs = results.filter((r) => r !== null);
+        await Promise.all(specPromises);
 
         // Create notification for admin review
         await this.createCustomOfferNotification(listing.id, userId);
@@ -418,7 +421,7 @@ export class SellerService {
 
     specifications?.forEach((spec) => {
       if (spec.specificationType) {
-        const { name, code } = spec.specificationType;
+        const { name } = spec.specificationType;
         let value = "";
 
         if (spec.valueText) value = spec.valueText;
@@ -684,6 +687,7 @@ export class SellerService {
 
   // Get active trades for seller (placeholder - implement when trade system is ready)
   async getSellerTrades(userId: string) {
+    void userId;
     // TODO: Implement proper trade fetching from database
     // For now, return empty array to prevent frontend errors
     return [];
@@ -832,6 +836,95 @@ export class SellerService {
     });
 
     return updatedListing;
+  }
+
+  async getTimeline(
+    userId: string,
+    limit = 20,
+    cursor?: string,
+  ): Promise<SellerTimelineResponseDto> {
+    const take = Math.min(Math.max(limit, 1), 50);
+
+    const trades = await this.prisma.tradeOperation.findMany({
+      where: {
+        sellers: {
+          some: {
+            sellerId: userId,
+          },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+      take,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { id: cursor } : undefined,
+      include: {
+        buyListing: {
+          select: {
+            id: true,
+            product: {
+              select: {
+                id: true,
+                displayName: true,
+              },
+            },
+            buyer: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        sellers: {
+          where: { sellerId: userId },
+          select: {
+            id: true,
+            status: true,
+            requestedQuantity: true,
+            agreedQuantity: true,
+          },
+        },
+        negotiations: {
+          where: {
+            tradeSeller: {
+              sellerId: userId,
+            },
+          },
+          orderBy: { updatedAt: "desc" },
+          take: 1,
+          select: {
+            id: true,
+            status: true,
+            updatedAt: true,
+          },
+        },
+      },
+    });
+
+    const events: SellerTimelineEventDto[] = trades.map((trade) => {
+      const sellerEntry = trade.sellers[0];
+      const latestNegotiation = trade.negotiations[0];
+
+      return {
+        id: trade.id,
+        type: latestNegotiation ? "NEGOTIATION" : "TRADE",
+        title: trade.buyListing?.product?.displayName ?? "Buyer opportunity",
+        status: sellerEntry?.status ?? trade.status,
+        timestamp: latestNegotiation?.updatedAt ?? trade.updatedAt,
+        description: trade.phase,
+        metadata: {
+          buyerName: trade.buyListing?.buyer?.name,
+          requestedQuantity: sellerEntry?.requestedQuantity ?? null,
+          agreedQuantity: sellerEntry?.agreedQuantity ?? null,
+          negotiationStatus: latestNegotiation?.status ?? null,
+        },
+      };
+    });
+
+    return {
+      events,
+      nextCursor: trades.length === take ? trades[trades.length - 1].id : null,
+    };
   }
 
   private async createCustomOfferNotification(

@@ -9,11 +9,7 @@ interface JobMarkerProps {
   zoomLevel?: number;
 }
 
-export const JobMarker: React.FC<JobMarkerProps> = ({ 
-  job, 
-  size = 'medium',
-  zoomLevel = 10 
-}) => {
+export const JobMarker: React.FC<JobMarkerProps> = ({ job, size = 'medium', zoomLevel = 10 }) => {
   // Calculate responsive size based on zoom level
   const getMarkerSize = () => {
     const baseSize = {
@@ -97,11 +93,7 @@ export const JobMarker: React.FC<JobMarkerProps> = ({
           elevation: 8, // Android shadow
         }}
       >
-        <IconComponent 
-          size={iconSize} 
-          color={config.textColor}
-          strokeWidth={2.5}
-        />
+        <IconComponent size={iconSize} color={config.textColor} strokeWidth={2.5} />
       </View>
 
       {/* Distance Badge */}

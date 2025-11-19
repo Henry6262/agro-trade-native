@@ -20,8 +20,8 @@
 - Requires EP-01 (rulebook + structure) to be complete.
 
 ## Milestones / Task List
-- [ ] Catalog admin dashboard endpoints already in production + their DTOs.
-- [ ] Identify gaps needed for mobile (transport jobs, onboarding flows, etc.).
+- [x] Catalog admin dashboard endpoints already in production + their DTOs (`docs/features/implemented/mobile-backend-contracts.md`).
+- [x] Identify gaps needed for mobile (transport jobs, onboarding flows, etc.).
 - [ ] Implement/adjust NestJS controllers + services; reuse Puppeteer layer when needed.
 - [ ] Write unit + e2e tests for each adjusted endpoint.
 - [ ] Publish contracts + update handbook/mobile project doc.
@@ -30,3 +30,9 @@
 ## Notes / Links
 - Coordinate with EP-04 for endpoints triggered by automation jobs.
 - Ensure responses are shaped for React Query hooks (status fields, pagination metadata, errors).
+- API inventory lives in `docs/features/implemented/mobile-backend-contracts.md` and should be updated whenever new endpoints land.
+- Planned endpoint details:
+  - Buyer/Seller timelines: `docs/features/planned/mobile-timeline-endpoints.md`
+  - Inspector active job: `docs/features/planned/inspector-active-job-endpoint.md`
+  - Transporter analytics scoping: `docs/features/planned/transporter-analytics-scoping.md`
+- Implemented so far: timeline feeds (`GET /buyer/timeline`, `GET /seller/timeline`) and scoped transporter analytics (`GET /transport/me/analytics`); inspector active job remains blocked on real data.

@@ -1,9 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { TransportCostService } from './transport-cost.service';
-import { PrismaService } from '../../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Test, TestingModule } from "@nestjs/testing";
+import { TransportCostService } from "./transport-cost.service";
+import { PrismaService } from "../../prisma/prisma.service";
+import { Prisma } from "@prisma/client";
 
-describe('TransportCostService', () => {
+describe("TransportCostService", () => {
   let service: TransportCostService;
   let prismaService: PrismaService;
 
@@ -32,8 +32,8 @@ describe('TransportCostService', () => {
     jest.clearAllMocks();
   });
 
-  describe('calculateDistance (Haversine formula)', () => {
-    it('should calculate distance between two points correctly', () => {
+  describe("calculateDistance (Haversine formula)", () => {
+    it("should calculate distance between two points correctly", () => {
       // Sofia to Plovdiv (approximately 132 km as the crow flies)
       const sofia = { lat: 42.6977, lng: 23.3219 };
       const plovdiv = { lat: 42.1354, lng: 24.7453 };
@@ -45,14 +45,14 @@ describe('TransportCostService', () => {
       expect(distance).toBeLessThan(139); // 132 + 7
     });
 
-    it('should return 0 for same location', () => {
+    it("should return 0 for same location", () => {
       const location = { lat: 42.6977, lng: 23.3219 };
       const distance = service.calculateDistance(location, location);
 
       expect(distance).toBe(0);
     });
 
-    it('should calculate long distances accurately', () => {
+    it("should calculate long distances accurately", () => {
       // Sofia to London (approximately 2100 km)
       const sofia = { lat: 42.6977, lng: 23.3219 };
       const london = { lat: 51.5074, lng: -0.1278 };
@@ -64,7 +64,7 @@ describe('TransportCostService', () => {
       expect(distance).toBeLessThan(2205); // 2100 + 105
     });
 
-    it('should handle negative coordinates correctly', () => {
+    it("should handle negative coordinates correctly", () => {
       // Buenos Aires to Cape Town
       const buenosAires = { lat: -34.6037, lng: -58.3816 };
       const capeTown = { lat: -33.9249, lng: 18.4241 };
@@ -75,7 +75,7 @@ describe('TransportCostService', () => {
       expect(distance).toBeGreaterThan(6000);
     });
 
-    it('should calculate short distances accurately', () => {
+    it("should calculate short distances accurately", () => {
       // Two points 1 km apart (approximately)
       const point1 = { lat: 42.6977, lng: 23.3219 };
       const point2 = { lat: 42.7067, lng: 23.3219 }; // ~1 km north
@@ -87,7 +87,7 @@ describe('TransportCostService', () => {
       expect(distance).toBeLessThan(1.1);
     });
 
-    it('should be symmetric (distance A to B equals B to A)', () => {
+    it("should be symmetric (distance A to B equals B to A)", () => {
       const pointA = { lat: 42.6977, lng: 23.3219 };
       const pointB = { lat: 42.1354, lng: 24.7453 };
 
@@ -98,13 +98,13 @@ describe('TransportCostService', () => {
     });
   });
 
-  describe('calculateDistanceBetweenCoordinates', () => {
-    it('should calculate distance using coordinate parameters', () => {
+  describe("calculateDistanceBetweenCoordinates", () => {
+    it("should calculate distance using coordinate parameters", () => {
       const distance = service.calculateDistanceBetweenCoordinates(
         42.6977,
         23.3219,
         42.1354,
-        24.7453
+        24.7453,
       );
 
       // Should match the same result as calculateDistance
@@ -113,9 +113,9 @@ describe('TransportCostService', () => {
     });
   });
 
-  describe('calculateTransportCosts', () => {
+  describe("calculateTransportCosts", () => {
     const mockSettings = {
-      id: 'test-settings',
+      id: "test-settings",
       baseRatePerKm: new Prisma.Decimal(0.15),
       flatbedMultiplier: 1.0,
       refrigeratedMultiplier: 1.3,
@@ -136,39 +136,39 @@ describe('TransportCostService', () => {
     };
 
     beforeEach(() => {
-      mockPrismaService.transportCostSettings.findFirst.mockResolvedValue(mockSettings);
+      mockPrismaService.transportCostSettings.findFirst.mockResolvedValue(
+        mockSettings,
+      );
     });
 
-    it('should calculate transport costs for multiple sellers', async () => {
+    it("should calculate transport costs for multiple sellers", async () => {
       const sellerAddresses = [
-        { id: 'seller1', lat: 42.6977, lng: 23.3219 }, // Sofia
-        { id: 'seller2', lat: 42.1354, lng: 24.7453 }, // Plovdiv
+        { id: "seller1", lat: 42.6977, lng: 23.3219 }, // Sofia
+        { id: "seller2", lat: 42.1354, lng: 24.7453 }, // Plovdiv
       ];
       const buyerAddress = { lat: 42.5048, lng: 27.4626 }; // Burgas
 
       const results = await service.calculateTransportCosts(
         sellerAddresses,
-        buyerAddress
+        buyerAddress,
       );
 
       expect(results).toHaveLength(2);
-      expect(results[0].sellerId).toBe('seller1');
-      expect(results[1].sellerId).toBe('seller2');
+      expect(results[0].sellerId).toBe("seller1");
+      expect(results[1].sellerId).toBe("seller2");
       expect(results[0].distance).toBeGreaterThan(0);
       expect(results[0].transportCost).toBeGreaterThan(0);
       expect(results[1].distance).toBeGreaterThan(0);
       expect(results[1].transportCost).toBeGreaterThan(0);
     });
 
-    it('should calculate correct cost based on distance and rate', async () => {
-      const sellerAddresses = [
-        { id: 'seller1', lat: 42.6977, lng: 23.3219 },
-      ];
+    it("should calculate correct cost based on distance and rate", async () => {
+      const sellerAddresses = [{ id: "seller1", lat: 42.6977, lng: 23.3219 }];
       const buyerAddress = { lat: 42.1354, lng: 24.7453 };
 
       const results = await service.calculateTransportCosts(
         sellerAddresses,
-        buyerAddress
+        buyerAddress,
       );
 
       const expectedCost = results[0].distance * 0.15; // baseRatePerKm
@@ -178,58 +178,55 @@ describe('TransportCostService', () => {
       expect(Math.abs(actualCost - expectedCost)).toBeLessThan(0.01);
     });
 
-    it('should round distance to 1 decimal place', async () => {
-      const sellerAddresses = [
-        { id: 'seller1', lat: 42.6977, lng: 23.3219 },
-      ];
+    it("should round distance to 1 decimal place", async () => {
+      const sellerAddresses = [{ id: "seller1", lat: 42.6977, lng: 23.3219 }];
       const buyerAddress = { lat: 42.1354, lng: 24.7453 };
 
       const results = await service.calculateTransportCosts(
         sellerAddresses,
-        buyerAddress
+        buyerAddress,
       );
 
       // Check that distance has at most 1 decimal place
-      const decimalPlaces = (results[0].distance.toString().split('.')[1] || '').length;
+      const decimalPlaces = (results[0].distance.toString().split(".")[1] || "")
+        .length;
       expect(decimalPlaces).toBeLessThanOrEqual(1);
     });
 
-    it('should round transport cost to 2 decimal places', async () => {
-      const sellerAddresses = [
-        { id: 'seller1', lat: 42.6977, lng: 23.3219 },
-      ];
+    it("should round transport cost to 2 decimal places", async () => {
+      const sellerAddresses = [{ id: "seller1", lat: 42.6977, lng: 23.3219 }];
       const buyerAddress = { lat: 42.1354, lng: 24.7453 };
 
       const results = await service.calculateTransportCosts(
         sellerAddresses,
-        buyerAddress
+        buyerAddress,
       );
 
       // Check that cost has at most 2 decimal places
-      const decimalPlaces = (results[0].transportCost.toString().split('.')[1] || '').length;
+      const decimalPlaces = (
+        results[0].transportCost.toString().split(".")[1] || ""
+      ).length;
       expect(decimalPlaces).toBeLessThanOrEqual(2);
     });
 
-    it('should handle empty seller array', async () => {
-      const results = await service.calculateTransportCosts(
-        [],
-        { lat: 42.1354, lng: 24.7453 }
-      );
+    it("should handle empty seller array", async () => {
+      const results = await service.calculateTransportCosts([], {
+        lat: 42.1354,
+        lng: 24.7453,
+      });
 
       expect(results).toHaveLength(0);
     });
 
-    it('should use default settings when no active settings found', async () => {
+    it("should use default settings when no active settings found", async () => {
       mockPrismaService.transportCostSettings.findFirst.mockResolvedValue(null);
 
-      const sellerAddresses = [
-        { id: 'seller1', lat: 42.6977, lng: 23.3219 },
-      ];
+      const sellerAddresses = [{ id: "seller1", lat: 42.6977, lng: 23.3219 }];
       const buyerAddress = { lat: 42.1354, lng: 24.7453 };
 
       const results = await service.calculateTransportCosts(
         sellerAddresses,
-        buyerAddress
+        buyerAddress,
       );
 
       expect(results).toHaveLength(1);
@@ -237,8 +234,8 @@ describe('TransportCostService', () => {
     });
   });
 
-  describe('clearCache', () => {
-    it('should clear the estimation cache', () => {
+  describe("clearCache", () => {
+    it("should clear the estimation cache", () => {
       expect(() => service.clearCache()).not.toThrow();
     });
   });

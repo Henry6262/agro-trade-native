@@ -1,5 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { sellerOfferService, SellerOffersResponse, CounterOfferRequest, AcceptOfferRequest, RejectOfferRequest } from '@services/sellerOfferService';
+import {
+  sellerOfferService,
+  SellerOffersResponse,
+  CounterOfferRequest,
+  AcceptOfferRequest,
+  RejectOfferRequest,
+} from '@services/sellerOfferService';
 import { useAuthStore } from '@stores/auth.store';
 
 export const useSellerOffers = () => {
@@ -24,8 +30,13 @@ export const useSellerOffers = () => {
 
   // Mutation to accept an offer
   const acceptOfferMutation = useMutation({
-    mutationFn: ({ negotiationId, request }: { negotiationId: string; request?: AcceptOfferRequest }) =>
-      sellerOfferService.acceptOffer(negotiationId, request),
+    mutationFn: ({
+      negotiationId,
+      request,
+    }: {
+      negotiationId: string;
+      request?: AcceptOfferRequest;
+    }) => sellerOfferService.acceptOffer(negotiationId, request),
     onSuccess: () => {
       // Invalidate and refetch offers to get updated data
       queryClient.invalidateQueries({ queryKey: ['seller-offers'] });
@@ -37,8 +48,13 @@ export const useSellerOffers = () => {
 
   // Mutation to reject an offer
   const rejectOfferMutation = useMutation({
-    mutationFn: ({ negotiationId, request }: { negotiationId: string; request?: RejectOfferRequest }) =>
-      sellerOfferService.rejectOffer(negotiationId, request),
+    mutationFn: ({
+      negotiationId,
+      request,
+    }: {
+      negotiationId: string;
+      request?: RejectOfferRequest;
+    }) => sellerOfferService.rejectOffer(negotiationId, request),
     onSuccess: () => {
       // Invalidate and refetch offers to get updated data
       queryClient.invalidateQueries({ queryKey: ['seller-offers'] });
@@ -50,8 +66,13 @@ export const useSellerOffers = () => {
 
   // Mutation to make a counter offer
   const counterOfferMutation = useMutation({
-    mutationFn: ({ negotiationId, request }: { negotiationId: string; request: CounterOfferRequest }) =>
-      sellerOfferService.counterOffer(negotiationId, request),
+    mutationFn: ({
+      negotiationId,
+      request,
+    }: {
+      negotiationId: string;
+      request: CounterOfferRequest;
+    }) => sellerOfferService.counterOffer(negotiationId, request),
     onSuccess: () => {
       // Invalidate and refetch offers to get updated data
       queryClient.invalidateQueries({ queryKey: ['seller-offers'] });
@@ -76,7 +97,12 @@ export const useSellerOffers = () => {
     });
   };
 
-  const makeCounterOffer = (negotiationId: string, counterPrice: number, quantity?: number, message?: string) => {
+  const makeCounterOffer = (
+    negotiationId: string,
+    counterPrice: number,
+    quantity?: number,
+    message?: string
+  ) => {
     counterOfferMutation.mutate({
       negotiationId,
       request: {
@@ -103,8 +129,8 @@ export const useSellerOffers = () => {
   };
 
   // Derived data
-  const pendingOffers = offers.filter(offer => offer.status === 'pending');
-  const expiringSoonOffers = offers.filter(offer => offer.isExpiringSoon);
+  const pendingOffers = offers.filter((offer) => offer.status === 'pending');
+  const expiringSoonOffers = offers.filter((offer) => offer.isExpiringSoon);
   const hasExpiringSoonOffers = expiringSoonOffers.length > 0;
 
   return {
@@ -114,28 +140,28 @@ export const useSellerOffers = () => {
     pendingOffers,
     expiringSoonOffers,
     hasExpiringSoonOffers,
-    
+
     // Query state
     isLoading,
     isError,
     error,
-    
+
     // Actions
     acceptOffer,
     rejectOffer,
     makeCounterOffer,
     refreshOffers,
-    
+
     // Mutation states
     isAccepting: acceptOfferMutation.isPending,
     isRejecting: rejectOfferMutation.isPending,
     isCountering: counterOfferMutation.isPending,
-    
+
     // Mutation errors
     acceptError: acceptOfferMutation.error,
     rejectError: rejectOfferMutation.error,
     counterError: counterOfferMutation.error,
-    
+
     // Success states
     acceptSuccess: acceptOfferMutation.isSuccess,
     rejectSuccess: rejectOfferMutation.isSuccess,

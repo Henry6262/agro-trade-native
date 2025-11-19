@@ -81,7 +81,6 @@ export const FleetCreationFlow: React.FC<FleetCreationFlowProps> = ({
     }
   };
 
-
   // Only render if visible
   if (!visible) return null;
 

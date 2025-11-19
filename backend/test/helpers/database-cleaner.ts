@@ -1,4 +1,4 @@
-import { PrismaService } from '../../src/prisma/prisma.service';
+import { PrismaService } from "../../src/prisma/prisma.service";
 
 /**
  * Database Cleaner
@@ -14,49 +14,49 @@ export class DatabaseCleaner {
     // Order matters! Must delete children before parents to avoid FK violations
     const tables = [
       // Trade operation related (deepest level first)
-      'offerRound',
-      'tradeNote',
-      'tradeStateHistory',
-      'profitEstimation',
-      'transportCostCalculation',
-      'transportJob',
-      'transportBid',
-      'transportRequest',
-      'inspectionRequest',
-      'offerNegotiation',
-      'tradeSeller',
-      'tradeTransporter',
-      'tradeOperation',
+      "offerRound",
+      "tradeNote",
+      "tradeStateHistory",
+      "profitEstimation",
+      "transportCostCalculation",
+      "transportJob",
+      "transportBid",
+      "transportRequest",
+      "inspectionRequest",
+      "offerNegotiation",
+      "tradeSeller",
+      "tradeTransporter",
+      "tradeOperation",
 
       // Marketplace
-      'offer',
-      'listingSpec',
-      'saleListing',
-      'buyListing',
+      "offer",
+      "listingSpec",
+      "saleListing",
+      "buyListing",
 
       // Transport & Drivers
-      'driverDocument',
-      'companyDocument',
-      'driver',
-      'truck',
-      'companyAdmin',
-      'transportCompany',
+      "driverDocument",
+      "companyDocument",
+      "driver",
+      "truck",
+      "companyAdmin",
+      "transportCompany",
 
       // Location & Products
-      'regionalPrice',
-      'address',
-      'city',
-      'region',
-      'productSpecTemplate',
-      'specificationType',
-      'product',
+      "regionalPrice",
+      "address",
+      "city",
+      "region",
+      "productSpecTemplate",
+      "specificationType",
+      "product",
 
       // Company & Users (last)
-      'company',
-      'user',
+      "company",
+      "user",
 
       // Settings
-      'transportCostSettings',
+      "transportCostSettings",
     ];
 
     for (const table of tables) {
@@ -74,19 +74,19 @@ export class DatabaseCleaner {
    */
   async cleanTradeOperations() {
     const tables = [
-      'offerRound',
-      'tradeNote',
-      'tradeStateHistory',
-      'profitEstimation',
-      'transportCostCalculation',
-      'transportJob',
-      'transportBid',
-      'transportRequest',
-      'inspectionRequest',
-      'offerNegotiation',
-      'tradeSeller',
-      'tradeTransporter',
-      'tradeOperation',
+      "offerRound",
+      "tradeNote",
+      "tradeStateHistory",
+      "profitEstimation",
+      "transportCostCalculation",
+      "transportJob",
+      "transportBid",
+      "transportRequest",
+      "inspectionRequest",
+      "offerNegotiation",
+      "tradeSeller",
+      "tradeTransporter",
+      "tradeOperation",
     ];
 
     for (const table of tables) {
@@ -102,7 +102,7 @@ export class DatabaseCleaner {
    * Clean only marketplace listings
    */
   async cleanMarketplace() {
-    const tables = ['offer', 'listingSpec', 'saleListing', 'buyListing'];
+    const tables = ["offer", "listingSpec", "saleListing", "buyListing"];
 
     for (const table of tables) {
       try {
@@ -118,12 +118,12 @@ export class DatabaseCleaner {
    */
   async cleanTransport() {
     const tables = [
-      'transportJob',
-      'transportBid',
-      'transportRequest',
-      'driverDocument',
-      'driver',
-      'truck',
+      "transportJob",
+      "transportBid",
+      "transportRequest",
+      "driverDocument",
+      "driver",
+      "truck",
     ];
 
     for (const table of tables) {
@@ -150,7 +150,7 @@ export class DatabaseCleaner {
    * Clean only negotiation data
    */
   async cleanNegotiations() {
-    const tables = ['offerRound', 'offerNegotiation'];
+    const tables = ["offerRound", "offerNegotiation"];
 
     for (const table of tables) {
       try {
@@ -184,13 +184,13 @@ export class DatabaseCleaner {
     remainingRecords: Record<string, number>;
   }> {
     const tables = [
-      'tradeOperation',
-      'tradeSeller',
-      'offerNegotiation',
-      'inspectionRequest',
-      'transportRequest',
-      'transportBid',
-      'transportJob',
+      "tradeOperation",
+      "tradeSeller",
+      "offerNegotiation",
+      "inspectionRequest",
+      "transportRequest",
+      "transportBid",
+      "transportJob",
     ];
 
     const remainingRecords: Record<string, number> = {};

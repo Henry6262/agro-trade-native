@@ -86,8 +86,7 @@ export const TransporterBiddingRequestCard: React.FC<TransporterBiddingRequestCa
         <View className="flex-row items-center mb-2">
           <Navigation size={16} color="#9CA3AF" />
           <Text className="text-neutral-400 ml-2">
-            Max budget:{' '}
-            <Text className="text-gray-400 font-medium">{request.maxBudgetLabel}</Text>
+            Max budget: <Text className="text-gray-400 font-medium">{request.maxBudgetLabel}</Text>
           </Text>
         </View>
       </View>

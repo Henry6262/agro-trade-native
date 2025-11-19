@@ -118,10 +118,13 @@ export const inspectionService = {
     saleListingIds: string[],
     priority: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM'
   ): Promise<InspectionRequest[]> {
-    const response = await apiClient.post(`/trade-operations/${tradeOperationId}/request-inspections`, {
-      saleListingIds,
-      priority,
-    });
+    const response = await apiClient.post(
+      `/trade-operations/${tradeOperationId}/request-inspections`,
+      {
+        saleListingIds,
+        priority,
+      }
+    );
     return response.data;
   },
 
@@ -197,6 +200,11 @@ export const inspectionService = {
     const params = status ? { status } : {};
     const response = await apiClient.get(`/inspections/inspector/${inspectorId}`, { params });
     return response.data;
+  },
+
+  async getInspectorActiveMission(inspectorId: string): Promise<InspectionRequest | null> {
+    const response = await apiClient.get(`/inspections/inspector/${inspectorId}/active`);
+    return response.data ?? null;
   },
 
   // Get single inspection details

@@ -58,13 +58,13 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   const [editMode, setEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState<'personal' | 'company' | 'bases'>('personal');
   const [showSuccess, setShowSuccess] = useState(showSuccessAnimation);
-  
+
   // Animation values
   const slideAnim = new Animated.Value(Dimensions.get('window').width);
   const successOpacity = new Animated.Value(0);
   const successScale = new Animated.Value(0.3);
   const checkmarkRotation = new Animated.Value(0);
-  
+
   React.useEffect(() => {
     if (visible) {
       Animated.spring(slideAnim, {
@@ -73,7 +73,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
         tension: 40,
         useNativeDriver: true,
       }).start();
-      
+
       // Show success animation if needed
       if (showSuccessAnimation && showSuccess) {
         setTimeout(() => {
@@ -115,7 +115,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
       }).start();
     }
   }, [visible, showSuccessAnimation]);
-  
+
   const redirectToDashboard = (role: string) => {
     onClose();
     switch (role) {
@@ -164,7 +164,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     // Clear the auth session (now async)
     await logout();
     onClose();
-    
+
     // Navigate to the Onboarding stack and then to RoleSelection
     navigation.reset({
       index: 0,
@@ -199,7 +199,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   };
 
   const removeBase = (id: string) => {
-    setBases(bases.filter(base => base.id !== id));
+    setBases(bases.filter((base) => base.id !== id));
   };
 
   const renderPersonalTab = () => (
@@ -208,14 +208,14 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
         <View className="w-24 h-24 bg-emerald-500 rounded-full items-center justify-center self-center mb-4">
           <User size={48} color="white" />
         </View>
-        
+
         <View className="space-y-4">
           <View>
             <Text className="text-gray-500 text-sm mb-1">Full Name</Text>
             {editMode ? (
               <TextInput
                 value={personalInfo.name}
-                onChangeText={(text) => setPersonalInfo({...personalInfo, name: text})}
+                onChangeText={(text) => setPersonalInfo({ ...personalInfo, name: text })}
                 className="bg-gray-100 p-3 rounded-lg text-gray-900"
               />
             ) : (
@@ -228,7 +228,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
             {editMode ? (
               <TextInput
                 value={personalInfo.email}
-                onChangeText={(text) => setPersonalInfo({...personalInfo, email: text})}
+                onChangeText={(text) => setPersonalInfo({ ...personalInfo, email: text })}
                 className="bg-gray-100 p-3 rounded-lg text-gray-900"
                 keyboardType="email-address"
               />
@@ -242,7 +242,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
             {editMode ? (
               <TextInput
                 value={personalInfo.phone}
-                onChangeText={(text) => setPersonalInfo({...personalInfo, phone: text})}
+                onChangeText={(text) => setPersonalInfo({ ...personalInfo, phone: text })}
                 className="bg-gray-100 p-3 rounded-lg text-gray-900"
                 keyboardType="phone-pad"
               />
@@ -264,17 +264,14 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                 };
                 const roleConfig = roleIcons[personalInfo.role?.toLowerCase()] || roleIcons.buyer;
                 const RoleIcon = roleConfig.icon;
-                
+
                 return (
-                  <View 
+                  <View
                     className="flex-row items-center gap-2 px-4 py-2 rounded-full"
                     style={{ backgroundColor: roleConfig.bg }}
                   >
                     <RoleIcon size={18} color={roleConfig.color} />
-                    <Text 
-                      className="font-semibold capitalize"
-                      style={{ color: roleConfig.color }}
-                    >
+                    <Text className="font-semibold capitalize" style={{ color: roleConfig.color }}>
                       {personalInfo.role || 'Unknown'}
                     </Text>
                   </View>
@@ -295,7 +292,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
           {editMode ? (
             <TextInput
               value={companyInfo.companyName}
-              onChangeText={(text) => setCompanyInfo({...companyInfo, companyName: text})}
+              onChangeText={(text) => setCompanyInfo({ ...companyInfo, companyName: text })}
               className="bg-gray-100 p-3 rounded-lg text-gray-900"
               placeholder="Enter company name"
             />
@@ -311,14 +308,12 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
           {editMode ? (
             <TextInput
               value={companyInfo.vatNumber}
-              onChangeText={(text) => setCompanyInfo({...companyInfo, vatNumber: text})}
+              onChangeText={(text) => setCompanyInfo({ ...companyInfo, vatNumber: text })}
               className="bg-gray-100 p-3 rounded-lg text-gray-900"
               placeholder="Enter VAT number"
             />
           ) : (
-            <Text className="text-gray-900 text-lg">
-              {companyInfo.vatNumber || 'Not provided'}
-            </Text>
+            <Text className="text-gray-900 text-lg">{companyInfo.vatNumber || 'Not provided'}</Text>
           )}
         </View>
 
@@ -327,7 +322,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
           {editMode ? (
             <TextInput
               value={companyInfo.businessType}
-              onChangeText={(text) => setCompanyInfo({...companyInfo, businessType: text})}
+              onChangeText={(text) => setCompanyInfo({ ...companyInfo, businessType: text })}
               className="bg-gray-100 p-3 rounded-lg text-gray-900"
               placeholder="e.g., Agriculture, Manufacturing"
             />
@@ -343,7 +338,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
           {editMode ? (
             <TextInput
               value={companyInfo.companyAddress}
-              onChangeText={(text) => setCompanyInfo({...companyInfo, companyAddress: text})}
+              onChangeText={(text) => setCompanyInfo({ ...companyInfo, companyAddress: text })}
               className="bg-gray-100 p-3 rounded-lg text-gray-900"
               placeholder="Enter company address"
               multiline
@@ -360,15 +355,13 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
           {editMode ? (
             <TextInput
               value={companyInfo.website}
-              onChangeText={(text) => setCompanyInfo({...companyInfo, website: text})}
+              onChangeText={(text) => setCompanyInfo({ ...companyInfo, website: text })}
               className="bg-gray-100 p-3 rounded-lg text-gray-900"
               placeholder="https://www.example.com"
               keyboardType="url"
             />
           ) : (
-            <Text className="text-gray-900 text-lg">
-              {companyInfo.website || 'Not provided'}
-            </Text>
+            <Text className="text-gray-900 text-lg">{companyInfo.website || 'Not provided'}</Text>
           )}
         </View>
 
@@ -377,7 +370,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
           {editMode ? (
             <TextInput
               value={companyInfo.establishedYear}
-              onChangeText={(text) => setCompanyInfo({...companyInfo, establishedYear: text})}
+              onChangeText={(text) => setCompanyInfo({ ...companyInfo, establishedYear: text })}
               className="bg-gray-100 p-3 rounded-lg text-gray-900"
               placeholder="e.g., 2020"
               keyboardType="numeric"
@@ -404,7 +397,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                     value={base.name}
                     onChangeText={(text) => {
                       const updated = [...bases];
-                      updated[index] = {...base, name: text};
+                      updated[index] = { ...base, name: text };
                       setBases(updated);
                     }}
                     className="bg-white p-2 rounded text-gray-900 font-semibold"
@@ -415,10 +408,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                 )}
               </View>
               {editMode && (
-                <TouchableOpacity
-                  onPress={() => removeBase(base.id)}
-                  className="ml-2 p-2"
-                >
+                <TouchableOpacity onPress={() => removeBase(base.id)} className="ml-2 p-2">
                   <Trash2 size={20} color="#ef4444" />
                 </TouchableOpacity>
               )}
@@ -432,7 +422,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                     value={base.location}
                     onChangeText={(text) => {
                       const updated = [...bases];
-                      updated[index] = {...base, location: text};
+                      updated[index] = { ...base, location: text };
                       setBases(updated);
                     }}
                     className="flex-1 ml-2 bg-white p-2 rounded text-gray-700"
@@ -450,7 +440,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                     value={base.type}
                     onChangeText={(text) => {
                       const updated = [...bases];
-                      updated[index] = {...base, type: text as any};
+                      updated[index] = { ...base, type: text as any };
                       setBases(updated);
                     }}
                     className="flex-1 ml-2 bg-white p-2 rounded text-gray-700"
@@ -468,7 +458,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                     value={base.capacity}
                     onChangeText={(text) => {
                       const updated = [...bases];
-                      updated[index] = {...base, capacity: text};
+                      updated[index] = { ...base, capacity: text };
                       setBases(updated);
                     }}
                     className="flex-1 ml-2 bg-white p-2 rounded text-gray-700"
@@ -496,19 +486,10 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   );
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-        <TouchableOpacity
-          style={{ flex: 1 }}
-          activeOpacity={1}
-          onPress={onClose}
-        />
-        
+        <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
+
         <Animated.View
           style={{
             position: 'absolute',
@@ -582,13 +563,13 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                 </Animated.Text>
               </Animated.View>
             )}
-            
+
             {/* Header */}
             <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
               <Text className="text-xl font-bold text-gray-900">Profile</Text>
               <View className="flex-row items-center space-x-3">
                 <TouchableOpacity
-                  onPress={() => editMode ? handleSave() : setEditMode(true)}
+                  onPress={() => (editMode ? handleSave() : setEditMode(true))}
                   className="p-2"
                 >
                   {editMode ? (
@@ -611,9 +592,11 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                   onPress={() => setActiveTab(tab)}
                   className={`flex-1 py-3 ${activeTab === tab ? 'border-b-2 border-emerald-500' : ''}`}
                 >
-                  <Text className={`text-center font-medium capitalize ${
-                    activeTab === tab ? 'text-emerald-600' : 'text-gray-500'
-                  }`}>
+                  <Text
+                    className={`text-center font-medium capitalize ${
+                      activeTab === tab ? 'text-emerald-600' : 'text-gray-500'
+                    }`}
+                  >
                     {tab}
                   </Text>
                 </TouchableOpacity>
