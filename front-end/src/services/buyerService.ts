@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../config/api';
 import { useAuthStore } from '@stores/auth.store';
 
-interface BuyListing {
+export interface BuyListing {
   id: string;
   buyerId: string;
   productId: string;
@@ -21,7 +21,7 @@ interface BuyListing {
   createdAt: string;
 }
 
-interface TradeOperation {
+export interface TradeOperation {
   id: string;
   operationNumber: string;
   buyListingId: string;
@@ -40,7 +40,7 @@ interface TradeOperation {
   transportJob?: any;
 }
 
-interface BuyerTimelineEvent {
+export interface BuyerTimelineEvent {
   id: string;
   type: 'TRADE' | 'NEGOTIATION' | 'TRANSPORT' | 'INSPECTION';
   title: string;
@@ -201,7 +201,7 @@ class BuyerService {
   }
 
   // Get buyer statistics
-  async getMyStatistics(): Promise<any> {
+  async getMyStatistics(): Promise<BuyerStats> {
     try {
       const headers = await this.getHeaders();
       const response = await fetch(`${API_URL}/buyer/statistics`, {
@@ -241,7 +241,10 @@ class BuyerService {
   }
 
   // Get buyer timeline events
-  async getMyTimeline(limit = 20, cursor?: string): Promise<{
+  async getMyTimeline(
+    limit = 20,
+    cursor?: string
+  ): Promise<{
     events: BuyerTimelineEvent[];
     nextCursor: string | null;
   }> {
@@ -262,6 +265,58 @@ class BuyerService {
 
     return await response.json();
   }
+  async getMyOffers(): Promise<BuyerOffer[]> {
+    try {
+      const headers = await this.getHeaders();
+      const response = await fetch(`${API_URL}/buyer/offers`, {
+        method: 'GET',
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch buyer offers');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching buyer offers:', error);
+      throw error;
+    }
+  }
 }
 
 export default new BuyerService();
+export interface BuyerOffer {
+  id: string;
+  buyListingId: string;
+  tradeOperationId?: string | null;
+  price?: number | null;
+  quantity?: number | null;
+  status?: string | null;
+  product?: {
+    id?: string;
+    name?: string;
+    category?: string;
+  } | null;
+  saleListing?: {
+    id: string;
+    sellerId: string;
+    quantity?: number | null;
+    askingPrice?: number | null;
+    product?: {
+      id?: string;
+      name?: string;
+      category?: string | null;
+    } | null;
+  } | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
+export interface BuyerStats {
+  totalListings: number;
+  activeListings: number;
+  totalOffers: number;
+  acceptedOffers: number;
+  fulfilledListings: number;
+}

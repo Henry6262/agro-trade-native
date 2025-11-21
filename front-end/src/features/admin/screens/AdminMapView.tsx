@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker, Circle, PROVIDER_GOOGLE } from 'react-native-maps';
 import axios from 'axios';
 import { API_URL } from '../../../config/api';
-import { useAuthStore } from '../../../stores/auth.store';
+import { useAuthStore } from '@stores/auth.store';
 
 interface MapZone {
   id: string;

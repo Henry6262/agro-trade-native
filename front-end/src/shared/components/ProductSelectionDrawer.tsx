@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { Check } from 'lucide-react-native';
-import { useProductStore } from '../../stores/product.store';
+import { useProductStore } from '@stores/product.store';
 
 interface ProductSelectionDrawerProps {
   visible: boolean;

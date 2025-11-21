@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
-import { Product } from '../../../shared/types';
-import { Card } from '../../../shared/components';
-import { formatCurrency } from '../../../shared/utils';
+import { Product } from '@shared/types';
+import { Card } from '@shared/components/Card';
+import { formatCurrency } from '@shared/utils';
 
 interface ProductCardProps {
   product: Product;

@@ -27,6 +27,8 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
+import { ApiOkResponse } from "@nestjs/swagger";
+import { FleetResponseDto } from "./dto/fleet.dto";
 
 @Controller("transport-company")
 export class TransportCompanyController {
@@ -76,6 +78,13 @@ export class TransportCompanyController {
       success: true,
       data: company,
     };
+  }
+
+  @Get("me/fleet")
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: FleetResponseDto })
+  async getMyFleet(@Request() req: any) {
+    return this.transportCompanyService.getFleetForUser(req.user.userId);
   }
 
   @Put("profile/:id")

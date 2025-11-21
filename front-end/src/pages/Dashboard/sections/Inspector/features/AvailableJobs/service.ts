@@ -1,5 +1,4 @@
 import { inspectionService } from '@services/inspectionService';
-import { mockVerificationJobs } from '@features/dashboard/screens/inspector/__mocks__/mockData';
 import type { VerificationJob } from './types';
 
 const mapInspectionToJob = (inspection: any): VerificationJob => ({
@@ -34,7 +33,7 @@ const mapInspectionToJob = (inspection: any): VerificationJob => ({
 export const inspectorAvailableJobsService = {
   async fetchJobs(inspectorId?: string | null): Promise<VerificationJob[]> {
     if (!inspectorId) {
-      return mockVerificationJobs as VerificationJob[];
+      return [];
     }
 
     try {
@@ -42,7 +41,7 @@ export const inspectorAvailableJobsService = {
       return inspections.map(mapInspectionToJob);
     } catch (error) {
       console.error('Failed to fetch available jobs', error);
-      return mockVerificationJobs as VerificationJob[];
+      return [];
     }
   },
 };

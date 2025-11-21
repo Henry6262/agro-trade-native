@@ -3,11 +3,11 @@ import { View, Text, TouchableOpacity, Alert, Platform, Animated } from 'react-n
 import { CheckCircle, User } from 'lucide-react-native';
 import * as AuthSession from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
-import { useOnboardingStore } from '../../../../stores/onboarding.store';
-import { useAuthStore } from '../../../../stores/auth.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
+import { useAuthStore } from '@stores/auth.store';
 import { UserRole } from '../../../../shared/types';
 import { ENV } from '../../../../shared/utils/environment';
-import { apiClient } from '../../../../services/api';
+import { apiClient } from '@services/api';
 
 // This ensures the web browser closes properly after auth
 WebBrowser.maybeCompleteAuthSession();

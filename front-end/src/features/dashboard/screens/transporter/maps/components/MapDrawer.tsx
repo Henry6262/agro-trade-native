@@ -12,7 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
-import { X, MapPin, Truck, Clock, Route, Package, Flag, Navigation } from 'lucide-react-native';
+import { X, Truck, Clock, Route, Package, Flag } from 'lucide-react-native';
 import { MapOffer, Fleet, RouteData } from '../types';
 import { fetchAvailableFleet } from '../api/fleetApi';
 import { calculateMultipleRoutes } from '../api/routeApi';
@@ -168,7 +168,6 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
         <Animated.View
           testID="map-drawer"
           {...panResponder.panHandlers}
-          onSwipeDown={closeDrawer}
           className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl"
           style={{
             height: DRAWER_HEIGHT,

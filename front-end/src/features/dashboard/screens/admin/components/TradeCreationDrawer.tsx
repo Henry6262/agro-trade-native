@@ -34,7 +34,7 @@ import type {
   MatchingSeller,
   ProfitCalculation,
   TransportEstimate,
-} from '../../../../services/tradeOperationService';
+} from '@services/tradeOperationService';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 

@@ -14,7 +14,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 import { LoadingSpinner } from '../../../shared/components';
-import { apiClient } from '../../../services/api';
+import { apiClient } from '@services/api';
 import { Picker } from '@react-native-picker/picker';
 
 type AdminNavigationProp = NativeStackNavigationProp<RootStackParamList>;

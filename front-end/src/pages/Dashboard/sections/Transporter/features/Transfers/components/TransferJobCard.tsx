@@ -3,7 +3,7 @@ import { View, Text } from 'react-native';
 import { MapPin, Weight, Calendar } from 'lucide-react-native';
 import { Badge } from '@shared/components/Badge';
 import type { TransfersJobView } from '../types';
-import { TransferStageIndicator } from '../../components/TransferStageIndicator';
+import { TransferStageIndicator } from '@features/dashboard/screens/components/TransferStageIndicator';
 import { Button } from '@shared/components/Button';
 
 interface TransferJobCardProps {

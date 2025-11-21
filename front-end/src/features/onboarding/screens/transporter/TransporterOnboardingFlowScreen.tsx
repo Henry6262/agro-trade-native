@@ -5,7 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../../navigation/types';
 import { TransporterOnboarding } from '@pages/Onboarding/sections/Transporter/components/TransporterOnboarding';
 import { AuthModal } from '@pages/Onboarding/components/shared/AuthModal';
-import { useOnboardingStore } from '../../../../stores/onboarding.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'TransporterOnboardingFlow'>;
 

@@ -1,4 +1,5 @@
 import type { BuyerIncomingOffer, BuyerOrder, BuyerStatistics } from './types';
+import type { BuyerOffer, BuyerStats } from '@services/buyerService';
 
 export const getDefaultBuyerStatistics = (): BuyerStatistics => ({
   totalSpent: 0,
@@ -66,36 +67,64 @@ export const mapOperationToOrder = (operation: any): BuyerOrder => ({
   updatedAt: operation.updatedAt,
 });
 
-export const buildMockIncomingOffers = (): BuyerIncomingOffer[] => [
-  {
-    id: 'IO001',
-    product: 'Premium Wheat',
-    quantity: 40,
-    offeredPricePerTon: 275,
-    totalValue: 11000,
-    seller: 'Midwest Grain Co',
-    sellerLocation: 'Nebraska, USA',
-    sellerFlag: '🇺🇸',
-    adminNote:
-      'High-quality wheat available for immediate delivery. Seller offers competitive pricing for bulk orders.',
-    deadline: '2025-01-26',
-    responseTime: '16 hours',
-    qualityOffered: ['Organic', 'Non-GMO', 'Protein 14%'],
-    deliveryDate: '2025-01-30',
-  },
-  {
-    id: 'IO002',
-    product: 'Corn Grain',
-    quantity: 60,
-    offeredPricePerTon: 210,
-    totalValue: 12600,
-    seller: 'Golden Harvest Farm',
-    sellerLocation: 'Kansas, USA',
-    sellerFlag: '🇺🇸',
-    adminNote: 'Fresh corn harvest with excellent moisture content. Perfect for feed production.',
-    deadline: '2025-01-29',
-    responseTime: '3 days',
-    qualityOffered: ['Grade A', 'Moisture 14%'],
-    deliveryDate: '2025-02-05',
-  },
-];
+export const deriveBuyerStatistics = (
+  operations: any[],
+  backendStats?: BuyerStats
+): BuyerStatistics => {
+  if (!operations.length && !backendStats) {
+    return getDefaultBuyerStatistics();
+  }
+
+  const totalSpent = operations.reduce((sum, operation) => {
+    const quantity = Number(operation.securedQuantity ?? operation.targetQuantity ?? 0);
+    const price = Number(operation.buyListing?.maxPricePerUnit ?? 0);
+    return sum + quantity * price;
+  }, 0);
+
+  const completedOrders = operations.filter((operation) => operation.phase === 'COMPLETED').length;
+  const averagePerOrder =
+    completedOrders > 0 ? Math.round(totalSpent / Math.max(completedOrders, 1)) : 0;
+
+  const topProduct =
+    operations.reduce<Record<string, number>>((acc, operation) => {
+      const productName = operation.buyListing?.product?.name;
+      if (!productName) return acc;
+      acc[productName] = (acc[productName] ?? 0) + 1;
+      return acc;
+    }, {}) ?? {};
+
+  const [topProductName] = Object.entries(topProduct).sort(([, a], [, b]) => b - a)[0] ?? [
+    'N/A',
+    0,
+  ];
+
+  return {
+    totalSpent,
+    monthlySpent: totalSpent, // TODO: refine once backend exposes month totals
+    completedOrders,
+    averagePerOrder,
+    topProduct: topProductName,
+    savingsRate: backendStats ? backendStats.acceptedOffers : 0,
+  };
+};
+
+export const mapOfferToIncoming = (offer: BuyerOffer): BuyerIncomingOffer => {
+  const quantity = Number(offer.quantity ?? 0);
+  const price = Number(offer.price ?? 0);
+
+  return {
+    id: offer.id,
+    product: offer.product?.name ?? offer.saleListing?.product?.name ?? 'Offer',
+    quantity,
+    offeredPricePerTon: price,
+    totalValue: quantity * price,
+    seller: offer.saleListing?.sellerId ?? 'Seller',
+    sellerLocation: offer.saleListing?.product?.category ?? '—',
+    sellerFlag: undefined,
+    adminNote: 'Offer received via negotiation',
+    deadline: offer.updatedAt ?? offer.createdAt ?? new Date().toISOString(),
+    responseTime: '—',
+    qualityOffered: [],
+    deliveryDate: offer.updatedAt ?? offer.createdAt ?? new Date().toISOString(),
+  };
+};

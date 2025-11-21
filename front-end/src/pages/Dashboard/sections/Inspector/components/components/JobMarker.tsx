@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { Package, AlertTriangle, Clock } from 'lucide-react-native';
-import { VerificationJob, JobPriority } from '../types';
+import { VerificationJob, JobPriority } from '@features/dashboard/screens/inspector/types/index';
 
 interface JobMarkerProps {
   job: VerificationJob;

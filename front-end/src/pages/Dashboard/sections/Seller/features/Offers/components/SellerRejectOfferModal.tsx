@@ -20,8 +20,8 @@ import {
   MapPin,
 } from 'lucide-react-native';
 
-import { Card, CardContent } from '../../../../../../shared/components/Card';
-import { SellerOffer } from '../../../../../../services/sellerOfferService';
+import { Card, CardContent } from '@shared/components/Card';
+import { SellerOffer } from '@services/sellerOfferService';
 
 interface SellerRejectOfferModalProps {
   visible: boolean;

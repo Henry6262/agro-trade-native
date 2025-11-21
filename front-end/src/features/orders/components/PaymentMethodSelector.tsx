@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { PaymentMethod } from '../../../shared/types';
-import { Card } from '../../../shared/components';
+import { PaymentMethod } from '@shared/types';
+import { Card } from '@shared/components/Card';
 
 interface PaymentMethodSelectorProps {
   selectedMethod: PaymentMethod | null;

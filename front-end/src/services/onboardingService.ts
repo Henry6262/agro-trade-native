@@ -1,6 +1,6 @@
 import { apiClient } from './api';
-import { useOnboardingStore } from '../stores/onboarding.store';
-import { useAuthStore } from '../stores/auth.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
+import { useAuthStore } from '@stores/auth.store';
 import { authService } from './authService';
 import type {
   ApiResponse,

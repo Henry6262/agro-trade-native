@@ -1,4 +1,4 @@
-import { apiClient } from '../../../../../../services/api';
+import { apiClient } from '@services/api';
 import type { CreateBuyerRequestDto } from './types';
 
 export const buyerRequestCreationService = {

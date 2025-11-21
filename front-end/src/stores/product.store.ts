@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { productService } from '../services/productService';
-import { apiClient } from '../services/api';
+import { productService } from '@services/productService';
+import { apiClient } from '@services/api';
 
 // Type for product with specifications from backend
 export interface ProductSpecification {

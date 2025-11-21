@@ -17,8 +17,8 @@ import { Button } from '@shared/components/Button';
 import { Badge } from '@shared/components/Badge';
 import { MetricCard } from '../../components/MetricCard';
 import { BaseComponentProps } from '@shared/types';
-import { MapDrawer } from '../maps/components/MapDrawer';
-import { MapOffer } from '../maps/types';
+import { MapDrawer } from '@features/dashboard/screens/transporter/maps/components/MapDrawer';
+import { MapOffer } from '@features/dashboard/screens/transporter/maps/types';
 import transportService, {
   TransportRequest,
   TransportBid,

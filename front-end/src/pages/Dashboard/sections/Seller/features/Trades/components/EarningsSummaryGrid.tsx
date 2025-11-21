@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { Card, CardContent } from '../../../../../../shared/components/Card';
+import { Card, CardContent } from '@shared/components/Card';
 import { DollarSign, Calendar, Target, Award } from 'lucide-react-native';
 import type { EarningsSummary } from '../types';
 

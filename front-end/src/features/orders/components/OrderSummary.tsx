@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { Card } from '../../../shared/components';
-import { formatCurrency } from '../../../shared/utils';
+import { Card } from '@shared/components/Card';
+import { formatCurrency } from '@shared/utils';
 
 interface OrderSummaryProps {
   subtotal: number;

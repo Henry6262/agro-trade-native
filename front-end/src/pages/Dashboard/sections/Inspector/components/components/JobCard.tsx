@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { MapPin, Clock, Package, ChevronRight } from 'lucide-react-native';
-import { JobCardProps } from '../types';
+import { JobCardProps } from '@features/dashboard/screens/inspector/types/index';
 import { JobPriorityBadge } from './JobPriorityBadge';
 
 export const JobCard: React.FC<JobCardProps> = ({

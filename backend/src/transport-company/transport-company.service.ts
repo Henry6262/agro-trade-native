@@ -319,6 +319,131 @@ export class TransportCompanyService {
     };
   }
 
+  async getFleetForUser(userId: string) {
+    let transportCompanyId: string | null = null;
+
+    const adminCompany = await this.getCompanyByAdminId(userId);
+    if (adminCompany) {
+      transportCompanyId = adminCompany.id;
+    } else {
+      const driverProfile = await this.prisma.driver.findFirst({
+        where: { userId },
+        select: { transportCompanyId: true },
+      });
+      transportCompanyId = driverProfile?.transportCompanyId ?? null;
+    }
+
+    const truckWhere = transportCompanyId
+      ? { transportCompanyId }
+      : { ownerId: userId };
+
+    const [trucks, drivers] = await Promise.all([
+      this.prisma.truck.findMany({
+        where: truckWhere,
+        include: {
+          currentDriver: {
+            select: {
+              firstName: true,
+              lastName: true,
+              currentJob: {
+                select: {
+                  jobNumber: true,
+                  status: true,
+                },
+              },
+            },
+          },
+          transportCompany: {
+            select: {
+              isVerified: true,
+            },
+          },
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      this.prisma.driver.findMany({
+        where: transportCompanyId
+          ? { transportCompanyId }
+          : { userId },
+        include: {
+          currentJob: {
+            select: {
+              jobNumber: true,
+              status: true,
+            },
+          },
+          user: {
+            select: {
+              phoneNumber: true,
+            },
+          },
+        },
+      }),
+    ]);
+
+    const mappedTrucks = trucks.map((truck) => {
+      const driverName = truck.currentDriver
+        ? [truck.currentDriver.firstName, truck.currentDriver.lastName]
+            .filter(Boolean)
+            .join(" ")
+        : undefined;
+
+      const assignment = truck.currentDriver?.currentJob?.jobNumber ?? null;
+
+      return {
+        id: truck.id,
+        licensePlate: truck.plateNumber,
+        model: truck.type,
+        capacityTons: Number(truck.capacity),
+        status: truck.isAvailable ? "available" : "assigned",
+        location: truck.currentLocation ?? "Unknown location",
+        verified: truck.transportCompany?.isVerified ?? false,
+        driver: driverName,
+        assignment,
+      };
+    });
+
+    const mappedDrivers = drivers.map((driver) => {
+      const name =
+        [driver.firstName, driver.lastName].filter(Boolean).join(" ") ||
+        driver.email ||
+        driver.id;
+      return {
+        id: driver.id,
+        name,
+        license: driver.licenseNumber,
+        phone: driver.phoneNumber ?? driver.user?.phoneNumber ?? null,
+        status:
+          driver.status === DriverStatus.AVAILABLE ? "available" : "assigned",
+        experienceYears: Math.max(1, Math.floor(driver.totalJobs / 5)),
+        assignment: driver.currentJob?.jobNumber ?? null,
+      };
+    });
+
+    const summary = {
+      totalTrucks: mappedTrucks.length,
+      availableTrucks: mappedTrucks.filter(
+        (truck) => truck.status === "available",
+      ).length,
+      inTransitTrucks: mappedTrucks.filter(
+        (truck) => truck.status === "assigned",
+      ).length,
+      verifiedTrucks: mappedTrucks.filter((truck) => truck.verified).length,
+      availableDrivers: mappedDrivers.filter(
+        (driver) => driver.status === "available",
+      ).length,
+      assignedDrivers: mappedDrivers.filter(
+        (driver) => driver.status === "assigned",
+      ).length,
+    };
+
+    return {
+      summary,
+      trucks: mappedTrucks,
+      drivers: mappedDrivers,
+    };
+  }
+
   // ==================== TRANSPORTER LINKING METHODS ====================
 
   async linkTransporter(companyId: string, dto: LinkTransporterDto) {

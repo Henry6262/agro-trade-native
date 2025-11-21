@@ -22,18 +22,19 @@ import {
 import { Button } from '@shared/components/Button';
 import { Badge } from '@shared/components/Badge';
 import { MetricCard } from '../../components/MetricCard';
-import { TransferStageIndicator } from '../../components/TransferStageIndicator';
-import { MapDrawer } from '../maps/components/MapDrawer';
-import { MapOffer } from '../maps/types';
+import { stageDefinitions } from '@features/dashboard/screens/transporter/features/Transfers/utils';
+import { TransferStageIndicator } from '@features/dashboard/screens/transporter/features/Jobs/components/TransferStageIndicator';
+import { MapDrawer } from '@features/dashboard/screens/transporter/maps/components/MapDrawer';
+import { MapOffer } from '@features/dashboard/screens/transporter/maps/types';
 import { BaseComponentProps } from '@shared/types';
+import { formatDate } from '@shared/utils';
+import { useAuthStore } from '@stores/auth.store';
 import transportService, {
   TransportJob,
   TransportPickupPoint,
   TransportDeliveryPoint,
   TransporterPerformance,
 } from '@services/transportService';
-import { format } from 'date-fns';
-import { useAuthStore } from '@stores/auth.store';
 
 interface TransporterTransfersTabProps extends BaseComponentProps {
   id?: string;
@@ -171,7 +172,9 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
         type: 'delivery',
       },
       deadline: job.estimatedArrival ? new Date(job.estimatedArrival) : new Date(),
-      status: job.status?.toLowerCase() ?? 'assigned',
+      status:
+        (job.status?.toLowerCase() as 'pending' | 'accepted' | 'in_transit' | 'delivered') ??
+        'pending',
       estimatedValue: job.transportRequest?.maxBudget ?? 0,
       productType:
         job.transportRequest?.tradeOperation?.buyListing?.product?.name || 'Transport Job',
@@ -303,7 +306,7 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
                             <Text className="text-neutral-500">ETA:</Text>
                             <Text className="text-green-400 font-medium ml-1">
                               {job.estimatedArrival
-                                ? format(new Date(job.estimatedArrival), 'MMM dd, HH:mm')
+                                ? formatDate(new Date(job.estimatedArrival))
                                 : 'TBD'}
                             </Text>
                           </View>

@@ -3,8 +3,8 @@ import { View, Text, ActivityIndicator, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../../navigation/types';
-import { useAuthStore } from '../../../stores/auth.store';
-import { useOnboardingStore } from '../../../stores/onboarding.store';
+import { useAuthStore } from '@stores/auth.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
 import { ExistingAccountModal } from '../components/ExistingAccountModal';
 import { ENV } from '../../../shared/utils/environment';
 

@@ -13,7 +13,7 @@ import * as Location from 'expo-location';
 import { MapPin, Search, Navigation, Check, X } from 'lucide-react-native';
 import { Button } from './Button';
 import { Input } from './Input';
-import { locationService, LocationData } from '../../services/locationService';
+import { locationService, LocationData } from '@services/locationService';
 
 // Configuration Constants
 const DEFAULT_LATITUDE_DELTA = 0.01;

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import MapView, { Marker, Circle, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
-import { JobMapViewProps } from '../types';
+import { JobMapViewProps } from '@features/dashboard/screens/inspector/types/index';
 import { JobPriorityBadge } from './JobPriorityBadge';
 import { JobMarker } from './JobMarker';
 import { CurrentLocationMarker } from './CurrentLocationMarker';

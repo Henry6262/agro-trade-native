@@ -8,7 +8,7 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import { Badge } from '../../../../../../shared/components/Badge';
+import { Badge } from '@shared/components/Badge';
 import { AlertCircle, RefreshCw } from 'lucide-react-native';
 
 import {
@@ -21,6 +21,7 @@ import {
 } from './components';
 import { useSellerOffersFeature } from './hooks';
 import type { SellerOffer } from './types';
+import SellerTimelineFeature from '../Timeline';
 
 export default function SellerOffersFeature() {
   const {
@@ -140,6 +141,10 @@ export default function SellerOffersFeature() {
           </View>
 
           <OfferStatsGrid cards={statsCards} />
+
+          <View className="mt-6">
+            <SellerTimelineFeature />
+          </View>
 
           <View>
             <View className="flex-row justify-between items-center mb-4">

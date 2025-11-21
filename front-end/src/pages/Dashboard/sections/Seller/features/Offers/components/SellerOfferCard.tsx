@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Card, CardContent } from '../../../../../../shared/components/Card';
-import { Badge } from '../../../../../../shared/components/Badge';
+import { Card, CardContent } from '@shared/components/Card';
+import { Badge } from '@shared/components/Badge';
 import {
   Weight,
   DollarSign,

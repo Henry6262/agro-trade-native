@@ -11,7 +11,7 @@ import {
 import { ChevronRight, Menu, User, LayoutGrid } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ProfileDrawer } from './ProfileDrawer';
-import { useAuthStore } from '../../../stores/auth.store';
+import { useAuthStore } from '@stores/auth.store';
 import { Container } from '../../../shared/components';
 
 export interface NavigationItem {

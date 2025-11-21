@@ -7,3 +7,5 @@ export { productService } from './productService';
 export { tradeOperationService } from './tradeOperationService';
 export { negotiationService } from './negotiationService';
 export { sellerOfferService } from './sellerOfferService';
+export { default as sellerService } from './sellerService';
+export { default as buyerService } from './buyerService';

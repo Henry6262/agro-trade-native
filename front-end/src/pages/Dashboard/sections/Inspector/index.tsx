@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { InspectorDashboardSectionProps } from './types';
-import { PermissionGuard } from '../../../../shared/components/PermissionGuard';
+import { PermissionGuard } from '@shared/components/PermissionGuard';
 import ActiveJobFeature from './features/ActiveJob';
 import AvailableJobsFeature from './features/AvailableJobs';
 

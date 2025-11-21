@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authService, RegisterWithCompanyDto, CompanyInfo } from '../services/authService';
+import { authService, RegisterWithCompanyDto, CompanyInfo } from '@services/authService';
 import { useAuthStore } from '@stores/auth.store';
 import type {
   OnboardingState,

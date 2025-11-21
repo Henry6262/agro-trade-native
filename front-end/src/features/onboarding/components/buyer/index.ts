@@ -1,5 +1,5 @@
-export { BuyerOnboarding } from './BuyerOnboarding';
-export { BuyerQuantityLocation } from './BuyerQuantityLocation';
-export { BuyerSpecifications } from './BuyerSpecifications';
-export { BuyerMarketRequest } from './BuyerMarketRequest';
-export { BuyerSubmitDrawer } from './BuyerSubmitDrawer';
+export { BuyerOnboarding } from '@pages/Onboarding/sections/Buyer/components/BuyerOnboarding';
+export { BuyerQuantityLocation } from '@pages/Onboarding/sections/Buyer/features/Quantity/components/BuyerQuantityLocation';
+export { BuyerSpecifications } from '@pages/Onboarding/sections/Buyer/features/Specifications/components/BuyerSpecifications';
+export { BuyerMarketRequest } from '@pages/Onboarding/sections/Buyer/features/MarketRequest/components/BuyerMarketRequest';
+export { BuyerSubmitDrawer } from '@pages/Onboarding/sections/Buyer/features/MarketRequest/components/BuyerSubmitDrawer';

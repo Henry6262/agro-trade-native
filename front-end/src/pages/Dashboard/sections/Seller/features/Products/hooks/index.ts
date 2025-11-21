@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { useUserData } from '../../../../../../contexts/UserDataContext';
-import { useProductStore } from '../../../../../../stores/product.store';
+import { useUserData } from '@contexts/UserDataContext';
+import { useProductStore } from '@stores/product.store';
 
 export const useSellerProducts = () => {
   const {

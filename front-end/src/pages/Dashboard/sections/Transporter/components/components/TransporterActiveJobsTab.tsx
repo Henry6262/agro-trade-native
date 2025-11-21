@@ -15,8 +15,7 @@ import { Badge } from '@shared/components/Badge';
 import { MetricCard } from '../../components/MetricCard';
 import { BaseComponentProps } from '@shared/types';
 import transportService, { TransportJob } from '@services/transportService';
-import { format } from 'date-fns';
-
+import { formatDate } from '@shared/utils';
 interface TransporterActiveJobsTabProps extends BaseComponentProps {
   id?: string;
 }
@@ -232,7 +231,42 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
                   <View className="mb-3">
                     <View className="flex-row items-center justify-between mb-2">
                       <Text className="text-white font-bold">Job #{job.jobNumber}</Text>
-                      <Badge text={job.status} className={`${statusColor} bg-gray-800/50`} />
+                      <Badge
+                        text={
+                          job.status as
+                            | 'pending'
+                            | 'accepted'
+                            | 'in_transit'
+                            | 'delivered'
+                            | 'completed'
+                            | 'cancelled'
+                        }
+                        className={`${statusColor} bg-gray-800/50`}
+                      />
+                      <Badge
+                        text={
+                          job.status as
+                            | 'pending'
+                            | 'accepted'
+                            | 'in_transit'
+                            | 'delivered'
+                            | 'completed'
+                            | 'cancelled'
+                        }
+                        className={`${statusColor} bg-gray-800/50`}
+                      />
+                      <Badge
+                        text={
+                          job.status as
+                            | 'pending'
+                            | 'accepted'
+                            | 'in_transit'
+                            | 'delivered'
+                            | 'completed'
+                            | 'cancelled'
+                        }
+                        className={`${statusColor} bg-gray-800/50`}
+                      />
                     </View>
 
                     {/* Job Details */}
@@ -245,7 +279,7 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
                         <View className="flex-row items-center">
                           <Clock size={16} color="#9CA3AF" />
                           <Text className="text-gray-400 ml-1">
-                            ETA: {format(new Date(job.estimatedArrival), 'MMM dd, HH:mm')}
+                            ETA: {formatDate(new Date(job.estimatedArrival))}
                           </Text>
                         </View>
                       )}

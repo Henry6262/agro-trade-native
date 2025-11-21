@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react-native';
-import type { SellerOffer, SellerOfferStats } from '../../../../../../services/sellerOfferService';
+import type { SellerOffer, SellerOfferStats } from '@services/sellerOfferService';
 
 export type { SellerOffer, SellerOfferStats };
 

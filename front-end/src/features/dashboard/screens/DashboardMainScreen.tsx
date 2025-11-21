@@ -1,15 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  Dimensions,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StatusBar, Dimensions } from 'react-native';
 import {
   BarChart3,
   Users,
@@ -37,10 +29,10 @@ import TransporterDashboardScreen from './transporter/TransporterDashboardScreen
 import { InspectorDashboard } from './inspector/InspectorDashboard';
 import { ProfileDrawer } from '../components/ProfileDrawer';
 import { BottomNavigation } from '../components/BottomNavigation';
-import { useAuthStore } from '../../../stores/auth.store';
+import { useAuthStore } from '@stores/auth.store';
 import { AdminPricingZonesScreen } from '../../admin/screens/AdminPricingZonesScreen';
 import { Container } from '../../../shared/components';
-import PendingListingService from '../../../services/pendingListingService';
+import PendingListingService from '@services/pendingListingService';
 
 type DashboardMainScreenNavigationProp = NativeStackNavigationProp<
   DashboardStackParamList,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProductSpecificationDrawer } from '../../../../../../shared/components/ProductSpecificationDrawer';
+import { ProductSpecificationDrawer } from '@shared/components/ProductSpecificationDrawer';
 import { ProductSpecificationStepProps, ProductSpecifications } from '../types';
 
 export const ProductSpecificationStep: React.FC<ProductSpecificationStepProps> = ({

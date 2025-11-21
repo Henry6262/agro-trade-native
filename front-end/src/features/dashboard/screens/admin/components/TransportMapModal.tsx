@@ -11,7 +11,7 @@ import {
   CheckCircle,
 } from 'lucide-react-native';
 import { TransportMapView } from './TransportMapView';
-import type { TradeOperation, TransportEstimate } from '../../../../services/tradeOperationService';
+import type { TradeOperation, TransportEstimate } from '@services/tradeOperationService';
 
 const { height: screenHeight } = Dimensions.get('window');
 

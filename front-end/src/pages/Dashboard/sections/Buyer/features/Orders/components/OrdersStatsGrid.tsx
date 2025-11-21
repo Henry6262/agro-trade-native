@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { DollarSign, Calendar, CheckCircle, Award } from 'lucide-react-native';
-import { Card, CardContent } from '../../../../../../shared/components/Card';
+import { Card, CardContent } from '@shared/components/Card';
 import type { BuyerStatistics } from '../types';
 
 interface OrdersStatsGridProps {

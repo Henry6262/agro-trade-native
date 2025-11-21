@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Alert } from 'react-native';
-import { LocationMapPicker, SelectedLocation, Button } from '../../../shared/components';
+import { LocationMapPicker, SelectedLocation } from '@shared/components/LocationMapPicker';
+import { Button } from '@shared/components/Button';
 
 export const LocationPickerDemoScreen: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<SelectedLocation | null>(null);

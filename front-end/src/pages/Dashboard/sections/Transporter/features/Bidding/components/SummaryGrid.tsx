@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Target, Trophy, DollarSign, TrendingUp } from 'lucide-react-native';
-import { MetricCard } from '../../components/MetricCard';
+import { MetricCard } from '../../../components/MetricCard';
 import type { TransporterBiddingSummary } from '../types';
 
 interface TransporterBiddingSummaryGridProps {

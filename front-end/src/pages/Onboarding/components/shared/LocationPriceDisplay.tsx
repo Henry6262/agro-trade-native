@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { MapPin, TrendingUp, TrendingDown, DollarSign } from 'lucide-react-native';
-import { useOnboardingStore } from '../../../../stores/onboarding.store';
-import { useProductStore } from '../../../../stores/product.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
+import { useProductStore } from '@stores/product.store';
 
 interface LocationPriceDisplayProps {
   productId?: string;

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { User, LogIn, UserPlus } from 'lucide-react-native';
-import { Button } from '../../../shared/components/Button';
+import { Button } from '@shared/components/Button';
 
 interface ExistingAccountModalProps {
   visible: boolean;

@@ -31,7 +31,7 @@ import {
   ShoppingCart,
   Truck,
 } from 'lucide-react-native';
-import { useAuthStore } from '../../../stores/auth.store';
+import { useAuthStore } from '@stores/auth.store';
 import { useNavigation } from '@react-navigation/native';
 
 interface ProfileDrawerProps {

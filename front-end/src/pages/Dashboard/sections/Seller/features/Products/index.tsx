@@ -3,16 +3,16 @@ import { View, Text, TouchableOpacity, FlatList, Alert, StyleSheet } from 'react
 import { useNavigation } from '@react-navigation/native';
 import { Building2, Package, Plus } from 'lucide-react-native';
 
-import { LoadingSpinner } from '../../../../../../shared/components/LoadingSpinner';
-import { ErrorState } from '../../../../../../shared/components/ErrorState';
-import { ProductCreationFlow } from '../../../../../../features/dashboard/screens/seller/product-creation/ProductCreationFlow';
-import { ProductEditDrawer } from '../../../../../../shared/components/ProductEditDrawer';
-import { SellerOffersDrawer } from '../../../../../../shared/components/SellerOffersDrawer';
+import { LoadingSpinner } from '@shared/components/LoadingSpinner';
+import { ErrorState } from '@shared/components/ErrorState';
+import { ProductCreationFlow } from '@features/dashboard/screens/seller/product-creation/ProductCreationFlow';
+import { ProductEditDrawer } from '@shared/components/ProductEditDrawer';
+import { SellerOffersDrawer } from '@shared/components/SellerOffersDrawer';
 import { SellerProductCard } from './components';
 import { useSellerProducts } from './hooks';
 import { sellerProductsService } from './service';
 import { getOfferSummary, getProductImage } from './utils';
-import type { SellerOfferMock, SellerProduct } from './types';
+import type { BuyerOffer, ProductMetadata, SellerOfferMock, SellerProduct } from './types';
 
 export default function SellerProductsFeature() {
   const navigation = useNavigation();
@@ -41,7 +41,7 @@ export default function SellerProductsFeature() {
   const handleEditProduct = (product: SellerProduct) => {
     setEditingProduct({
       ...product,
-      image: getProductImage(product, productMetadata),
+      image: getProductImage(product, productMetadata as ProductMetadata[]),
       specifications: product.specifications || {},
     });
     setShowEditDrawer(true);
@@ -97,7 +97,7 @@ export default function SellerProductsFeature() {
     return (
       <SellerProductCard
         product={item}
-        metadata={productMetadata}
+        metadata={productMetadata as ProductMetadata[]}
         offerSummary={offerSummary}
         onEdit={handleEditProduct}
         onViewOffers={handleViewOffers}
@@ -197,7 +197,7 @@ export default function SellerProductsFeature() {
             setShowOffersDrawer(false);
             setSelectedProduct(null);
           }}
-          offers={selectedProduct.offers}
+          offers={selectedProduct.offers as BuyerOffer[]}
           sellerProduct={selectedProduct.product}
           productName={selectedProduct.product.name}
           productId={selectedProduct.product.id}

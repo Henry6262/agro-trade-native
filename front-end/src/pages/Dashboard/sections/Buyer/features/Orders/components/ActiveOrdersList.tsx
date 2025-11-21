@@ -2,9 +2,9 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { MapPin, Weight, DollarSign, Truck, Package, Clock } from 'lucide-react-native';
 import { format } from 'date-fns';
-import { Card, CardContent } from '../../../../../../shared/components/Card';
-import { Badge } from '../../../../../../shared/components/Badge';
-import { OrderStageIndicator } from './OrderStageIndicator';
+import { Card, CardContent } from '@shared/components/Card';
+import { Badge } from '@shared/components/Badge';
+import { OrderStageIndicator } from '@pages/Dashboard/sections/Buyer/features/Orders/components/OrderStageIndicator';
 import type { BuyerOrder } from '../types';
 
 interface ActiveOrdersListProps {

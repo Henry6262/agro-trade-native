@@ -1,5 +1,6 @@
+import sellerService, { SellerStats, SellerTradeRecord } from '@services/sellerService';
+
 export const sellerTradesService = {
-  async fetchTrades() {
-    throw new Error('sellerTradesService.fetchTrades not implemented');
-  },
+  fetchTrades: (): Promise<SellerTradeRecord[]> => sellerService.getMyTrades(),
+  fetchStats: (): Promise<SellerStats> => sellerService.getMyStats(),
 };

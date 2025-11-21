@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, StatusBar, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../../../navigation/types';
+import type { OnboardingStackParamList } from '../../../../navigation/types';
 import { AuthModal } from '@pages/Onboarding/components/shared/AuthModal';
 import { BuyerOnboarding } from '@pages/Onboarding/sections/Buyer/components/BuyerOnboarding';
-import { useOnboardingStore } from '../../../../stores/onboarding.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
 
 type BuyerOnboardingFlowScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
+  OnboardingStackParamList,
   'BuyerOnboardingFlow'
 >;
 

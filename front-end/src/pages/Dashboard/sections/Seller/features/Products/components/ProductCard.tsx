@@ -12,10 +12,19 @@ import {
   DollarSign,
 } from 'lucide-react-native';
 
-import { Card } from '../../../../../../shared/components/Card';
-import { Badge } from '../../../../../../shared/components/Badge';
-import type { OfferSummary, ProductMetadata, SellerProduct } from '../types';
-import { formatLocation, formatTimeAgo, getPriceRange, getProductImage } from '../utils';
+import { Card } from '@shared/components/Card';
+import { Badge } from '@shared/components/Badge';
+import type {
+  OfferSummary,
+  ProductMetadata,
+  SellerProduct,
+} from '@pages/Dashboard/sections/Seller/features/Products/types';
+import {
+  formatLocation,
+  formatTimeAgo,
+  getPriceRange,
+  getProductImage,
+} from '@pages/Dashboard/sections/Seller/features/Products/utils';
 
 interface SellerProductCardProps {
   product: SellerProduct;

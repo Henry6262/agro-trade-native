@@ -8,9 +8,9 @@ import {
   View,
 } from 'react-native';
 import { Plus } from 'lucide-react-native';
-import { useProductStore } from '../../../../stores/product.store';
-import { BuyerRequestCreationFlow } from './request-creation';
-import { UnifiedOffersDrawer } from '../../../../shared/components/UnifiedOffersDrawer';
+import { useProductStore } from '@stores/product.store';
+import { BuyerRequestCreationFlow } from '@pages/Dashboard/sections/Buyer/features/RequestCreation/BuyerRequestCreationFlow';
+import { UnifiedOffersDrawer } from '@shared/components/UnifiedOffersDrawer';
 import { useBuyerRequests } from './hooks';
 import { RequestsList } from './components';
 
@@ -79,7 +79,11 @@ export default function BuyerRequestsTab() {
       </ScrollView>
 
       {showRequestCreation && (
-        <BuyerRequestCreationFlow isVisible onClose={closeRequestCreation} onCompleted={refresh} />
+        <BuyerRequestCreationFlow
+          visible={showRequestCreation}
+          onClose={closeRequestCreation}
+          onCompleted={refresh}
+        />
       )}
 
       <UnifiedOffersDrawer

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Modal, Pressable, TouchableOpacity } from 'react-native';
 import { X, ChevronLeft } from 'lucide-react-native';
-import { Button } from '../../../../../../../shared/components/Button';
+import { Button } from '@shared/components/Button';
 import { ProgressIndicator } from './ProgressIndicator';
 
 interface PlaceholderStepProps {

@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { UseVerificationJobsReturn, VerificationJob } from '../types';
-import { mockVerificationJobs } from '../__mocks__/mockData';
 import { inspectionService } from '@services/inspectionService';
 import { useAuthStore } from '@shared/stores/useAuthStore';
 
 export const useVerificationJobs = (): UseVerificationJobsReturn => {
   const [jobs, setJobs] = useState<VerificationJob[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [error, setError] = useState<any>(null);
   const { user } = useAuthStore();
@@ -43,41 +42,34 @@ export const useVerificationJobs = (): UseVerificationJobsReturn => {
     };
   };
 
-  const fetchJobs = useCallback(async () => {
-    if (!user?.id) {
-      // If no user, use mock data for now
-      setJobs(mockVerificationJobs as any);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setIsError(false);
-
-      // Fetch inspector's missions
-      const inspections = await inspectionService.getInspectorMissions(user.id);
-      const mappedJobs = inspections.map(mapInspectionToJob);
-
-      setJobs(mappedJobs);
-    } catch (err) {
-      console.error('Error fetching verification jobs:', err);
-      setIsError(true);
-      setError(err);
-      // Fallback to mock data on error
-      setJobs(mockVerificationJobs as any);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user?.id]);
+  const inspectorId = user?.id ?? null;
+  const missionsQuery = useQuery({
+    queryKey: ['inspector', 'verification-jobs', inspectorId],
+    queryFn: async () => {
+      if (!inspectorId) {
+        return [];
+      }
+      const inspections = await inspectionService.getInspectorMissions(inspectorId);
+      return inspections.map(mapInspectionToJob);
+    },
+    enabled: Boolean(inspectorId),
+  });
 
   useEffect(() => {
-    fetchJobs();
-  }, [fetchJobs]);
+    if (missionsQuery.data) {
+      setJobs(missionsQuery.data);
+      setIsError(false);
+      setError(null);
+    }
+    if (missionsQuery.error) {
+      setIsError(true);
+      setError(missionsQuery.error);
+    }
+  }, [missionsQuery.data, missionsQuery.error]);
 
-  const refetch = () => {
-    fetchJobs();
-  };
+  const refetch = useCallback(() => {
+    void missionsQuery.refetch();
+  }, [missionsQuery]);
 
   const acceptJob = async (jobId: string, inspectorId: string) => {
     try {
@@ -92,6 +84,7 @@ export const useVerificationJobs = (): UseVerificationJobsReturn => {
       );
 
       console.log(`Job ${jobId} accepted by ${inspectorId}`);
+      void missionsQuery.refetch();
     } catch (err) {
       console.error('Error accepting job:', err);
       throw err;
@@ -114,6 +107,7 @@ export const useVerificationJobs = (): UseVerificationJobsReturn => {
       setJobs((prev) => prev.filter((job) => job.id !== jobId));
 
       console.log(`Job ${jobId} completed`, result);
+      void missionsQuery.refetch();
     } catch (err) {
       console.error('Error completing job:', err);
       throw err;
@@ -122,7 +116,7 @@ export const useVerificationJobs = (): UseVerificationJobsReturn => {
 
   return {
     jobs,
-    isLoading,
+    isLoading: missionsQuery.isLoading,
     isError,
     error,
     refetch,

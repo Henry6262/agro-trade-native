@@ -15,11 +15,11 @@ import {
   isErrorWithCode,
   isSuccessResponse,
 } from '@react-native-google-signin/google-signin';
-import { useOnboardingStore } from '../../../../stores/onboarding.store';
-import { useAuthStore } from '../../../../stores/auth.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
+import { useAuthStore } from '@stores/auth.store';
 import { UserRole } from '../../../../shared/types';
 import { ENV } from '../../../../shared/utils/environment';
-import { apiClient } from '../../../../services/api';
+import { apiClient } from '@services/api';
 import configureGoogleSignIn from '../../../../config/googleSignIn';
 
 interface GoogleAuthNativeProps {

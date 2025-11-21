@@ -5,8 +5,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../navigation/types';
 import { CheckCircle } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAuthStore } from '../../../stores/auth.store';
-import { useOnboardingStore } from '../../../stores/onboarding.store';
+import { useAuthStore } from '@stores/auth.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
 
 type OnboardingCompleteScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,

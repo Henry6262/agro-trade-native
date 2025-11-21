@@ -11,8 +11,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { ChevronLeft, Check, Info } from 'lucide-react-native';
-import { useProductStore } from '../../stores/product.store';
-import { useOnboardingStore } from '../../stores/onboarding.store';
+import { useProductStore } from '@stores/product.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
 
 interface ProductSpecificationsDrawerProps {
   visible: boolean;

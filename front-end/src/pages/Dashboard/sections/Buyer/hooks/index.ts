@@ -1,2 +1,2 @@
-export * from './useBuyerOrders';
-export * from './useBuyerTimeline';
+export * from '@pages/Dashboard/sections/Buyer/features/Orders/hooks/useBuyerOrders';
+export * from '@pages/Dashboard/sections/Buyer/features/Orders/hooks/useBuyerTimeline';

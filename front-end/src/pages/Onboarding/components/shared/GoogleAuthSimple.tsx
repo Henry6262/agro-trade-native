@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, Platform, Animated, Linking } from 'react-native';
 import { CheckCircle, User } from 'lucide-react-native';
 import * as WebBrowser from 'expo-web-browser';
-import { useOnboardingStore } from '../../../../stores/onboarding.store';
-import { useAuthStore } from '../../../../stores/auth.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
+import { useAuthStore } from '@stores/auth.store';
 import { UserRole } from '../../../../shared/types';
 import { ENV } from '../../../../shared/utils/environment';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ShoppingCart, Wheat, Truck } from 'lucide-react-native';
 import Animated, {
@@ -22,7 +22,7 @@ interface AnimatedRoleCardProps {
   delay?: number;
 }
 
-const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   id,
@@ -79,7 +79,7 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   }, [isSelected, selected]);
 
   const animatedStyle = useAnimatedStyle(() => {
-    const pressScale = interpolate(pressed.value, [0, 1], [1, 0.98]);
+    const pressScale = interpolate(pressed.value, [0, 1], [1, 0.97]);
     const selectedScale = interpolate(selected.value, [0, 1], [1, 1.02]);
     const selectedElevation = interpolate(selected.value, [0, 1], [3, 6]);
 
@@ -110,11 +110,11 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   });
 
   const handlePressIn = () => {
-    pressed.value = withSpring(1, { damping: 20, stiffness: 300 });
+    pressed.value = withSpring(1, { damping: 15, stiffness: 200 });
   };
 
   const handlePressOut = () => {
-    pressed.value = withSpring(0, { damping: 20, stiffness: 300 });
+    pressed.value = withSpring(0, { damping: 15, stiffness: 200 });
   };
 
   const getIcon = () => {
@@ -134,12 +134,11 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   };
 
   return (
-    <AnimatedTouchable
+    <AnimatedPressable
       style={[animatedStyle, { marginBottom: 16 }]}
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      activeOpacity={1}
     >
       <LinearGradient
         colors={isSelected ? gradient : ['#1F2937', '#111827']}
@@ -236,6 +235,6 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
           },
         ]}
       />
-    </AnimatedTouchable>
+    </AnimatedPressable>
   );
 };

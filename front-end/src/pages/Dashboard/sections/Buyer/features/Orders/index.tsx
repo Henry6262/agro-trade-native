@@ -39,11 +39,7 @@ export default function BuyerOrdersTab() {
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior="automatic"
       refreshControl={
-        <RefreshControl
-          refreshing={isRefreshing}
-          onRefresh={handleRefresh}
-          tintColor="#60A5FA"
-        />
+        <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor="#60A5FA" />
       }
     >
       <View className="p-6 space-y-6">

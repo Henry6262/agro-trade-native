@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, Pressable, TouchableOpacity, ScrollView } from 'react-native';
 import { X, ChevronLeft } from 'lucide-react-native';
-import { Input } from '../../../../../../../shared/components/Input';
-import { Button } from '../../../../../../../shared/components/Button';
+import { Input } from '@shared/components/Input';
+import { Button } from '@shared/components/Button';
 import { ProgressIndicator } from '../shared/ProgressIndicator';
 import { DriverPersonalInfo } from '../../types';
 

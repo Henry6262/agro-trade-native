@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { Card, CardContent } from '../../../../../../../shared/components/Card';
-import { Badge } from '../../../../../../../shared/components/Badge';
+import { Card, CardContent } from '@shared/components/Card';
+import { Badge } from '@shared/components/Badge';
 import { MapPin, DollarSign, Weight, Calendar, Star } from 'lucide-react-native';
 import type { SellerTrade, TradeStage } from '../types';
 import { getStatusColorClass, getStatusIcon, getTradeStages } from '../utils';

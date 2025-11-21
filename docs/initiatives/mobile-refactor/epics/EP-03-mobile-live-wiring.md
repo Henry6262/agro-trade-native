@@ -20,9 +20,14 @@
 
 ## Milestones / Task List
 - [ ] Inventory mock data/modules still referenced in `front-end/src/features` or legacy screens.
-- [ ] Prioritize buyer + seller dashboards (per user direction) → replace mocks with live hooks/services.
+- [x] Prioritize buyer + seller dashboards (per user direction) → replace mocks with live hooks/services (2025-11-17: Buyer Requests now consumes `/buyer/listings` via `buyerService`).
 - [ ] Extend to transporter + inspector dashboards, ensuring shared onboarding components handle multi-role use.
 - [x] Wire transporter bidding summary to `/transport/me/analytics` so win-rate/completed job metrics come from the backend (2025-11-17).
+- [x] Add seller timeline feature (service, hook, component) backed by `/seller/timeline` and render it inside the Offers tab (2025-11-17).
+- [x] Replace seller trades summary/cards with `/seller/trades` + `/seller/stats` (new service + React Query hook) so the feature no longer relies on mocks (2025-11-17).
+- [x] Move seller offers feed to `/seller/offers` via `sellerService` and keep mutations wired to negotiations endpoints (2025-11-17).
+- [x] Buyer Orders hook now fetches trade operations/statistics/offers via React Query + `buyerService`, replacing mock incoming offers (2025-11-17).
+- [x] Transporter Fleet feature + legacy tab now consume `/transport-company/me/fleet` (new backend endpoint) so trucks/drivers/statistics reflect live data (2025-11-17).
 - [ ] Update shared stores + design-system usage to align with rulebook.
 - [ ] Add/refresh tests + docs; update `status.md` progress + `DAILY_LOG.md` entries.
 

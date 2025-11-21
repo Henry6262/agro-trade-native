@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Truck, CheckCircle, DollarSign } from 'lucide-react-native';
-import { MetricCard } from '../../components/MetricCard';
+import { MetricCard } from '../../../components/MetricCard';
 import type { TransfersSummary } from '../types';
 
 interface TransfersStatsGridProps {

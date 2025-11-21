@@ -15,17 +15,17 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../navigation/types';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Users, ShoppingBag, Truck, LogIn } from 'lucide-react-native';
-import { useOnboardingStore } from '../../../stores/onboarding.store';
-import { useAuthStore } from '../../../stores/auth.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
+import { useAuthStore } from '@stores/auth.store';
 import { AnimatedRoleCard } from '../components/AnimatedRoleCard';
-import { AuthGuard } from '../../../shared/components/AuthGuard';
+import { AuthGuard } from '@shared/components/AuthGuard';
 import {
   GoogleSignin,
   statusCodes,
   isErrorWithCode,
   isSuccessResponse,
 } from '@react-native-google-signin/google-signin';
-import { apiClient } from '../../../services/api';
+import { apiClient } from '@services/api';
 import configureGoogleSignIn from '../../../config/googleSignIn';
 
 type RoleSelectionScreenNavigationProp = NativeStackNavigationProp<

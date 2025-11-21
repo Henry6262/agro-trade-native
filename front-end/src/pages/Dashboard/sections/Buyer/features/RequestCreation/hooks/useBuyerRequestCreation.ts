@@ -1,7 +1,7 @@
 import { useReducer, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { useProductStore } from '../../../../../../../stores/product.store';
-import { useOnboardingStore } from '../../../../../../../stores/onboarding.store';
+import { useProductStore } from '@stores/product.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
 import type {
   BuyerRequestCreationStep,
   ProductData,

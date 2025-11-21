@@ -35,9 +35,9 @@ import {
   TradeSeller,
   TimelineEvent,
 } from '../../../../../types/trade-operations';
-import { tradeOperationService } from '../../../../../services/tradeOperationService';
-import { negotiationService, Negotiation } from '../../../../../services/negotiationService';
-import { inspectionService, InspectionRequest } from '../../../../../services/inspectionService';
+import { tradeOperationService } from '@services/tradeOperationService';
+import { negotiationService, Negotiation } from '@services/negotiationService';
+import { inspectionService, InspectionRequest } from '@services/inspectionService';
 
 interface TradeOperationDetailDrawerProps {
   visible: boolean;

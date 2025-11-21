@@ -26,8 +26,8 @@ import { Badge } from '@shared/components/Badge';
 import { Input } from '@shared/components/Input';
 import { MetricCard } from '../../components/MetricCard';
 import { BaseComponentProps } from '@shared/types';
-import { MapDrawer } from '../maps/components/MapDrawer';
-import { MapOffer } from '../maps/types';
+import { MapDrawer } from '@features/dashboard/screens/transporter/maps/components/MapDrawer';
+import { MapOffer } from '@features/dashboard/screens/transporter/maps/types';
 import { useAuthStore } from '@stores/auth.store';
 import transportService, {
   TransportBid,
@@ -126,6 +126,8 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
     try {
       await transportService.submitBid({
         transportRequestId: requestId,
+        tradeOperationId:
+          transportRequests.find((request) => request.id === requestId)?.tradeOperationId ?? '',
         bidAmount: amount,
         estimatedDuration: 24,
         vehicleType: 'FLATBED',

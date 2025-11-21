@@ -1,5 +1,5 @@
 import React, { useEffect, useState, ReactNode } from 'react';
-import { useAuthStore } from '../stores/auth.store';
+import { useAuthStore } from '@stores/auth.store';
 import configureGoogleSignIn from '../config/googleSignIn';
 
 type AppState = {

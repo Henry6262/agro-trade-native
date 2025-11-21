@@ -1,5 +1,5 @@
-import { useUserData } from '../contexts/UserDataContext';
-import { useAuthStore } from '../stores/auth.store';
+import { useUserData } from '@contexts/UserDataContext';
+import { useAuthStore } from '@stores/auth.store';
 
 /**
  * Hook to access seller products data

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, Alert, Platform, Animated } from 'react-native';
 import { X, CheckCircle, User } from 'lucide-react-native';
-import { useOnboardingStore } from '../../../../stores/onboarding.store';
-import { useAuthStore } from '../../../../stores/auth.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
+import { useAuthStore } from '@stores/auth.store';
 import { UserRole } from '../../../../shared/types';
 import { ENV } from '../../../../shared/utils/environment';
 

@@ -88,7 +88,7 @@ hooks/, providers/, services/, screens/, utils/, types/
    - ✅ `pages/Dashboard/sections/Buyer/features/Orders/` now follows the same structure (`types.ts`, `service.ts`, `hooks/useBuyerOrders.ts`, component folder) so buyer dashboards no longer fetch data inside components.
    - ✅ `pages/Dashboard/sections/Buyer/features/Requests/` uses `service.ts`, `utils.ts`, `hooks/useBuyerRequests.ts`, and a `components/RequestsList.tsx` so listings + drawers are managed via hooks/services.
    - ✅ `pages/Dashboard/sections/Buyer/features/RequestCreation/` now relies on a reducer-backed hook (<200 lines) with supporting `service.ts`, `state.ts`, and `utils.ts`.
-   - ✅ `pages/Dashboard/sections/Inspector/features/ActiveJob/` now uses its own `service.ts`, `hooks/useInspectorActiveJob.ts`, and `components/` (`ActiveJobContent`, `VerificationForm`) so verification flows no longer fetch inside components. Available Jobs remains to be migrated next.
+  - ✅ `pages/Dashboard/sections/Inspector/features/ActiveJob/` now uses its own `service.ts`, `hooks/useInspectorActiveJob.ts`, and `components/` (`ActiveJobContent`, `VerificationForm`) so verification flows no longer fetch inside components. `features/AvailableJobs/` now pulls live missions via `inspectionService` and React Query, replacing the legacy mock fallback.
 
 ### Phase 3 – Cleanup & Enforcement
 - Remove legacy `src/features/` once all screens moved.

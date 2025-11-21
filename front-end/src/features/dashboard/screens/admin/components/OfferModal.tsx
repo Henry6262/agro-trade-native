@@ -13,8 +13,8 @@ import {
 } from 'react-native';
 import { X, Send, AlertCircle, DollarSign, Package } from 'lucide-react-native';
 import { MatchingSeller, TradeOperation } from '../../../../../types/trade-operations';
-import { negotiationService } from '../../../../../services/negotiationService';
-import { apiClient } from '../../../../../services/api';
+import { negotiationService } from '@services/negotiationService';
+import { apiClient } from '@services/api';
 
 interface OfferModalProps {
   visible: boolean;

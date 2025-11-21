@@ -1,5 +1,6 @@
 import { useAuthStore } from '@stores/auth.store';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { inspectorAvailableJobsService } from '../service';
 import type {
   InspectorAvailableJobsHookResult,
@@ -10,7 +11,6 @@ import type {
 export const useInspectorAvailableJobs = (): InspectorAvailableJobsHookResult => {
   const { user } = useAuthStore();
 
-  const [jobs, setJobs] = useState<InspectorAvailableJob[]>([]);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [priorityFilter, setPriorityFilter] = useState<InspectorJobPriority | null>(null);
   const [sortBy, setSortBy] = useState<'distance' | 'priority'>('distance');
@@ -18,33 +18,38 @@ export const useInspectorAvailableJobs = (): InspectorAvailableJobsHookResult =>
     latitude: number;
     longitude: number;
   } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const loadJobs = useCallback(async () => {
-    const fetchedJobs = await inspectorAvailableJobsService.fetchJobs(user?.id);
-    setJobs(fetchedJobs);
-    if (!currentLocation && fetchedJobs.length) {
-      const firstJob = fetchedJobs[0];
-      setCurrentLocation({
-        latitude: firstJob.location.latitude,
-        longitude: firstJob.location.longitude,
-      });
-    }
-  }, [user?.id, currentLocation]);
+  const inspectorId = user?.id ?? null;
+  const jobsQuery = useQuery({
+    queryKey: ['inspector', 'available-jobs', inspectorId],
+    queryFn: () => inspectorAvailableJobsService.fetchJobs(inspectorId),
+    enabled: Boolean(inspectorId),
+  });
 
-  useEffect(() => {
-    setIsLoading(true);
-    loadJobs()
-      .catch((error) => console.error('Failed to load inspector jobs', error))
-      .finally(() => setIsLoading(false));
-  }, [loadJobs]);
+  const jobs = jobsQuery.data ?? [];
+  const isLoading = jobsQuery.isLoading && !isRefreshing;
 
   const refresh = useCallback(async () => {
+    if (!jobsQuery.refetch) {
+      return;
+    }
     setIsRefreshing(true);
-    await loadJobs().catch((error) => console.error('Failed to refresh inspector jobs', error));
-    setIsRefreshing(false);
-  }, [loadJobs]);
+    try {
+      await jobsQuery.refetch();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [jobsQuery]);
+
+  useEffect(() => {
+    if (!currentLocation && jobs.length) {
+      setCurrentLocation({
+        latitude: jobs[0].location.latitude,
+        longitude: jobs[0].location.longitude,
+      });
+    }
+  }, [jobs, currentLocation]);
 
   const displayedJobs = useMemo(() => {
     const filtered = priorityFilter ? jobs.filter((job) => job.priority === priorityFilter) : jobs;

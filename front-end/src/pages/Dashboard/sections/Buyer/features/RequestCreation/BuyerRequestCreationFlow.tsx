@@ -1,10 +1,10 @@
 import React, { useEffect, memo } from 'react';
 import { BuyerRequestCreationFlowProps } from './types';
 import { useBuyerRequestCreation } from './hooks/useBuyerRequestCreation';
-import { ProductSelectionDrawer } from '../../../../../../shared/components/ProductSelectionDrawer';
-import { BuyerSpecificationsDrawer } from '../../../../../../shared/components/BuyerSpecificationsDrawer';
-import { ProductSpecificationsDrawer } from '../../../../../../shared/components/ProductSpecificationsDrawer';
-import { LocationConfirmationDrawer } from '../../../../../../shared/components/LocationConfirmationDrawer';
+import { ProductSelectionDrawer } from '@shared/components/ProductSelectionDrawer';
+import { BuyerSpecificationsDrawer } from '@shared/components/BuyerSpecificationsDrawer';
+import { ProductSpecificationsDrawer } from '@shared/components/ProductSpecificationsDrawer';
+import { LocationConfirmationDrawer } from '@shared/components/LocationConfirmationDrawer';
 import { BuyerSubmitDrawer } from '../../../../../Onboarding/sections/Buyer/features/MarketRequest/components/BuyerSubmitDrawer';
 
 const BuyerRequestCreationFlowComponent: React.FC<BuyerRequestCreationFlowProps> = ({

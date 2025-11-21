@@ -1,11 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   sellerOfferService,
-  SellerOffersResponse,
   CounterOfferRequest,
   AcceptOfferRequest,
   RejectOfferRequest,
 } from '@services/sellerOfferService';
+import sellerService, {
+  SellerOfferStats,
+  SellerOffersPayload,
+  SellerOfferSummary,
+} from '@services/sellerService';
 import { useAuthStore } from '@stores/auth.store';
 
 export const useSellerOffers = () => {
@@ -19,9 +23,9 @@ export const useSellerOffers = () => {
     isError,
     error,
     refetch,
-  } = useQuery({
+  } = useQuery<SellerOffersPayload>({
     queryKey: ['seller-offers', user?.id],
-    queryFn: () => sellerOfferService.getMyOffers(),
+    queryFn: () => sellerService.getMyOffers(),
     enabled: isAuthenticated && user?.role === 'seller',
     staleTime: 1 * 60 * 1000, // 1 minute
     refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes for fresh offers
@@ -118,8 +122,8 @@ export const useSellerOffers = () => {
   };
 
   // Extract offers and stats from response
-  const offers = offersData?.data?.offers || [];
-  const stats = offersData?.data?.stats || {
+  const offers: SellerOfferSummary[] = offersData?.data?.offers ?? [];
+  const stats: SellerOfferStats = offersData?.data?.stats ?? {
     totalOffers: 0,
     pendingOffers: 0,
     acceptedThisMonth: 0,

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { useAuthStore } from '../stores/auth.store';
-import { apiClient } from '../services/api';
+import { useAuthStore } from '@stores/auth.store';
+import { apiClient } from '@services/api';
 
 // Types for different user data
 export interface SellerProduct {

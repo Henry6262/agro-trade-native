@@ -1,7 +1,7 @@
-import { useSellerOffers } from '../../../../../../shared/hooks/useSellerOffers';
+import { useSellerOffers } from '@shared/hooks/useSellerOffers';
 import { useMemo } from 'react';
 import { Clock, CheckCircle, DollarSign } from 'lucide-react-native';
-import type { OfferStatCard } from '../types';
+import type { OfferStatCard } from '@pages/Dashboard/sections/Seller/features/Offers/types';
 
 export const useSellerOffersFeature = () => {
   const data = useSellerOffers();

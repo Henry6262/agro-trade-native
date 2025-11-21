@@ -1,10 +1,10 @@
-import { format } from 'date-fns';
+import { formatDate } from '@shared/utils';
 import type {
   TransportJob,
   TransportPickupPoint,
   TransportDeliveryPoint,
 } from '@services/transportService';
-import type { MapOffer } from '../../maps/types';
+import type { MapOffer } from '@features/dashboard/screens/transporter/maps/types';
 import type { TransfersJobView, TransfersSummary } from '../types';
 
 const DEFAULT_COORDS = { lat: 42.6977, lng: 23.3219 };
@@ -71,7 +71,9 @@ export const buildMapOffer = (job: TransportJob): MapOffer => {
       type: 'delivery',
     },
     deadline: job.estimatedArrival ? new Date(job.estimatedArrival) : new Date(),
-    status: job.status?.toLowerCase() ?? 'assigned',
+    status:
+      (job.status?.toLowerCase() as 'pending' | 'accepted' | 'in_transit' | 'delivered') ??
+      'pending',
     estimatedValue: job.transportRequest?.maxBudget ?? 0,
     productType: job.transportRequest?.tradeOperation?.buyListing?.product?.name ?? 'Transport Job',
   };
@@ -111,10 +113,8 @@ export const mapJobsToView = (
       : '—',
     pickupLabel: toLocationLabel(job.transportRequest?.pickupPoints?.[0]),
     deliveryLabel: toLocationLabel(job.transportRequest?.deliveryPoint),
-    etaLabel: job.estimatedArrival
-      ? format(new Date(job.estimatedArrival), 'MMM dd, HH:mm')
-      : undefined,
-    updatedAtLabel: job.updatedAt ? format(new Date(job.updatedAt), 'MMM dd, HH:mm') : '',
+    etaLabel: job.estimatedArrival ? formatDate(new Date(job.estimatedArrival)) : undefined,
+    updatedAtLabel: job.updatedAt ? formatDate(new Date(job.updatedAt)) : '',
     stageIndex: stageIndexFromStatus(job.status),
     mapOffer: buildMapOffer(job),
   }));

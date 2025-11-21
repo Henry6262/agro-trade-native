@@ -1,5 +1,5 @@
-import { apiClient } from '../../../../../services/api';
+import buyerService, { BuyListing } from '@services/buyerService';
 
 export const buyerRequestsService = {
-  fetchBuyerListings: () => apiClient.get('/buyer/listings').then((res) => res.data),
+  fetchBuyerListings: (): Promise<BuyListing[]> => buyerService.getMyBuyListings(),
 };

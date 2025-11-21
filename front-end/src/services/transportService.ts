@@ -153,6 +153,43 @@ export interface TransporterAnalyticsSummary {
   recentJobs: TransportJob[];
 }
 
+export interface TransportFleetTruck {
+  id: string;
+  licensePlate: string;
+  model: string;
+  capacityTons: number;
+  status: 'available' | 'assigned';
+  location: string;
+  verified: boolean;
+  driver?: string;
+  assignment?: string | null;
+}
+
+export interface TransportFleetDriver {
+  id: string;
+  name: string;
+  license: string;
+  phone?: string | null;
+  status: 'available' | 'assigned';
+  experienceYears: number;
+  assignment?: string | null;
+}
+
+export interface TransportFleetSummary {
+  totalTrucks: number;
+  availableTrucks: number;
+  inTransitTrucks: number;
+  verifiedTrucks: number;
+  availableDrivers: number;
+  assignedDrivers: number;
+}
+
+export interface TransportFleetResponse {
+  summary: TransportFleetSummary;
+  trucks: TransportFleetTruck[];
+  drivers: TransportFleetDriver[];
+}
+
 export const transportService = {
   // Get all transport requests (with optional filters)
   async getTransportRequests(params?: {
@@ -329,6 +366,16 @@ export const transportService = {
       };
     } catch (error) {
       console.error('Error fetching transporter analytics:', error);
+      throw error;
+    }
+  },
+
+  async getMyFleet(): Promise<TransportFleetResponse> {
+    try {
+      const response = await apiClient.get('/transport-company/me/fleet');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching transporter fleet:', error);
       throw error;
     }
   },

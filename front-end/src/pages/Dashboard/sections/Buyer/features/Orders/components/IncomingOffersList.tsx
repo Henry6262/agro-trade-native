@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { MapPin, DollarSign, Calendar } from 'lucide-react-native';
-import { Card, CardContent } from '../../../../../../shared/components/Card';
-import { Badge } from '../../../../../../shared/components/Badge';
-import { Button } from '../../../../../../shared/components/Button';
+import { Card, CardContent } from '@shared/components/Card';
+import { Badge } from '@shared/components/Badge';
+import { Button } from '@shared/components/Button';
 import type { BuyerIncomingOffer } from '../types';
 
 interface IncomingOffersListProps {

@@ -6,9 +6,9 @@ import {
   isErrorWithCode,
   isSuccessResponse,
 } from '@react-native-google-signin/google-signin';
-import { useOnboardingStore } from '../../../../stores/onboarding.store';
-import { useAuthStore } from '../../../../stores/auth.store';
-import { authService } from '../../../../services/authService';
+import { useOnboardingStore } from '@stores/onboarding.store';
+import { useAuthStore } from '@stores/auth.store';
+import { authService } from '@services/authService';
 import { UserRole } from '../../../../shared/types';
 import { ENV } from '../../../../shared/utils/environment';
 import configureGoogleSignIn from '../../../../config/googleSignIn';

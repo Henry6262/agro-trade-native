@@ -26,7 +26,9 @@ export const BuyerTimeline: React.FC<BuyerTimelineProps> = ({ events, isLoading,
           </View>
         )}
         {!isLoading && events.length === 0 && (
-          <Text className="text-neutral-400 text-sm">No recent updates yet. Trade activity will show up here.</Text>
+          <Text className="text-neutral-400 text-sm">
+            No recent updates yet. Trade activity will show up here.
+          </Text>
         )}
         {!isLoading &&
           events.map((event) => (
@@ -35,7 +37,9 @@ export const BuyerTimeline: React.FC<BuyerTimelineProps> = ({ events, isLoading,
               <View className="flex-1 border-b border-neutral-800 pb-3">
                 <Text className="text-white font-semibold">{event.title}</Text>
                 <Text className="text-neutral-400 text-xs mt-1">{formatDate(event.timestamp)}</Text>
-                <Text className="text-neutral-300 text-sm mt-2">{event.description ?? event.status}</Text>
+                <Text className="text-neutral-300 text-sm mt-2">
+                  {event.description ?? event.status}
+                </Text>
                 <Text className="text-primary-300 text-xs mt-1">{timeAgo(event.timestamp)}</Text>
               </View>
             </View>

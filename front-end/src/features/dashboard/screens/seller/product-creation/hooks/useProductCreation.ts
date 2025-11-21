@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { apiClient } from '../../../../../../services/api';
-import { useUserData } from '../../../../../../contexts/UserDataContext';
-import { useProductStore } from '../../../../../../stores/product.store';
+import { apiClient } from '@services/api';
+import { useUserData } from '@contexts/UserDataContext';
+import { useProductStore } from '@stores/product.store';
 import {
   ProductCreationState,
   ProductCreationStep,

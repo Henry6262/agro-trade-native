@@ -1,51 +1,5 @@
 import { Calendar, Truck, MapPin, CheckCircle, Package, Clock } from 'lucide-react-native';
-import type { EarningsSummary, SellerTrade, TradeStage } from './types';
-
-export const mockEarningsSummary: EarningsSummary = {
-  totalEarnings: 156750,
-  monthlyEarnings: 28500,
-  completedTrades: 47,
-  averagePerTrade: 3335,
-  topProduct: 'Premium Wheat',
-  growthRate: 23.5,
-};
-
-export const mockTraderTrades: SellerTrade[] = [
-  {
-    id: 'T001',
-    product: 'Premium Wheat',
-    quantity: 25,
-    agreedPricePerTon: 280,
-    buyer: 'GrainCorp Ltd',
-    buyerLocation: 'Chicago, IL',
-    buyerFlag: '🇺🇸',
-    transporter: 'FastHaul Logistics',
-    transporterTrucks: 3,
-    licensePlate: 'TRK-4521',
-    status: 'Awaiting Departure',
-    pickupDate: '2025-01-25',
-    estimatedDeparture: '2025-01-24 08:00',
-    price: 7000,
-    currentStage: 1,
-  },
-  {
-    id: 'T002',
-    product: 'Corn Grain',
-    quantity: 40,
-    agreedPricePerTon: 220,
-    buyer: 'FeedMaster Co',
-    buyerLocation: 'Kansas City, MO',
-    buyerFlag: '🇺🇸',
-    transporter: 'AgriTransport',
-    transporterTrucks: 2,
-    licensePlate: 'AGR-7834',
-    status: 'Traveling',
-    pickupDate: '2025-01-22',
-    estimatedDeparture: '2025-01-22 10:00',
-    price: 8800,
-    currentStage: 2,
-  },
-];
+import type { TradeStage } from './types';
 
 export const getStatusColorClass = (status: string) => {
   switch (status) {
@@ -90,3 +44,37 @@ export const getTradeStages = (): TradeStage[] => [
   { name: 'Arrived', description: 'At pickup location', icon: MapPin },
   { name: 'Completed', description: 'Goods delivered', icon: CheckCircle },
 ];
+
+export const deriveStageFromStatus = (status?: string | null): number => {
+  switch (status) {
+    case 'Traveling':
+      return 1;
+    case 'Arrived':
+    case 'At Location':
+      return 2;
+    case 'Completed':
+      return 3;
+    default:
+      return 0;
+  }
+};
+
+const FLAG_MAP: Record<string, string> = {
+  'United States': '🇺🇸',
+  USA: '🇺🇸',
+  Canada: '🇨🇦',
+  Germany: '🇩🇪',
+  France: '🇫🇷',
+  'United Kingdom': '🇬🇧',
+  UK: '🇬🇧',
+  Singapore: '🇸🇬',
+  Japan: '🇯🇵',
+  China: '🇨🇳',
+  Brazil: '🇧🇷',
+  Argentina: '🇦🇷',
+  Australia: '🇦🇺',
+  Netherlands: '🇳🇱',
+};
+
+export const getBuyerFlag = (country?: string | null): string =>
+  country ? (FLAG_MAP[country] ?? '🌍') : '🌍';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, View } from 'react-native';
 import type { BaseComponentProps } from '@shared/types';
-import { FleetCreationFlow } from '../fleet-creation';
+import { FleetCreationFlow } from '../../../../../../features/dashboard/screens/transporter/fleet-creation';
 import { useTransporterFleet } from './hooks';
 import {
   FleetCreationCard,
@@ -44,7 +44,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
           <FleetCreationCard onCreate={openFleetCreation} />
           <FleetTrucksSection
             trucks={filteredTrucks}
-            activeTab={truckTab}
+            activeTab={truckTab as 'available' | 'in_transit'}
             onTabChange={setTruckTab}
           />
           <FleetDriversSection

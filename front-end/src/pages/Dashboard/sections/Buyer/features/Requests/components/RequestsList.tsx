@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { format } from 'date-fns';
-import { Card, CardContent } from '../../../../../../shared/components/Card';
-import { Badge } from '../../../../../../shared/components/Badge';
-import { BuyerRequestCard } from '../../../../../../shared/components/BuyerRequestCard';
+import { Card, CardContent } from '@shared/components/Card';
+import { Badge } from '@shared/components/Badge';
+import { BuyerRequestCard } from '@shared/components/BuyerRequestCard';
 import type { BuyerRequest } from '../types';
 
 interface RequestsListProps {
