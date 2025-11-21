@@ -1,12 +1,12 @@
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useVerificationJobs } from '../../../src/features/dashboard/screens/inspector/hooks/useVerificationJobs';
-import { mockVerificationJobs } from '../../../src/features/dashboard/screens/inspector/__mocks__/mockData';
+import axios from 'axios';
 import React from 'react';
+import { mockVerificationJobs } from '../../../src/features/dashboard/screens/inspector/__mocks__/mockData';
+import { useVerificationJobs } from '../../../src/features/dashboard/screens/inspector/hooks/useVerificationJobs';
 
 // Mock API calls
 jest.mock('axios');
-import axios from 'axios';
 
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
@@ -22,7 +22,7 @@ describe('useVerificationJobs', () => {
     jest.clearAllMocks();
   });
 
-  const wrapper = ({ children }: { children: React.ReactNode }) => 
+  const wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(QueryClientProvider, { client: queryClient }, children);
 
   it('should fetch verification jobs', async () => {
@@ -51,10 +51,7 @@ describe('useVerificationJobs', () => {
       },
     });
 
-    const { result } = renderHook(
-      () => useVerificationJobs({ priority: 'HIGH' }),
-      { wrapper }
-    );
+    const { result } = renderHook(() => useVerificationJobs({ priority: 'HIGH' }), { wrapper });
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -74,10 +71,11 @@ describe('useVerificationJobs', () => {
     });
 
     const { result } = renderHook(
-      () => useVerificationJobs({
-        location: { lat: 42.6977, lng: 23.3219 },
-        radius: 50,
-      }),
+      () =>
+        useVerificationJobs({
+          location: { lat: 42.6977, lng: 23.3219 },
+          radius: 50,
+        }),
       { wrapper }
     );
 
@@ -120,13 +118,10 @@ describe('useVerificationJobs', () => {
 
     await result.current.acceptJob('job-001', 'inspector-001');
 
-    expect(mockedAxios.post).toHaveBeenCalledWith(
-      '/api/inspector/jobs/job-001/accept',
-      {
-        inspectorId: 'inspector-001',
-        estimatedArrival: expect.any(String),
-      }
-    );
+    expect(mockedAxios.post).toHaveBeenCalledWith('/api/inspector/jobs/job-001/accept', {
+      inspectorId: 'inspector-001',
+      estimatedArrival: expect.any(String),
+    });
   });
 
   it('should complete a job', async () => {
@@ -184,10 +179,7 @@ describe('useVerificationJobs', () => {
       },
     });
 
-    renderHook(
-      () => useVerificationJobs({ refetchInterval: 5000 }),
-      { wrapper }
-    );
+    renderHook(() => useVerificationJobs({ refetchInterval: 5000 }), { wrapper });
 
     await waitFor(() => {
       expect(mockedAxios.get).toHaveBeenCalled();
@@ -209,20 +201,14 @@ describe('useVerificationJobs', () => {
       },
     });
 
-    const { result: result1 } = renderHook(
-      () => useVerificationJobs(),
-      { wrapper }
-    );
+    const { result: result1 } = renderHook(() => useVerificationJobs(), { wrapper });
 
     await waitFor(() => {
       expect(result1.current.isLoading).toBe(false);
     });
 
     // Second hook should use cached data
-    const { result: result2 } = renderHook(
-      () => useVerificationJobs(),
-      { wrapper }
-    );
+    const { result: result2 } = renderHook(() => useVerificationJobs(), { wrapper });
 
     expect(result2.current.jobs).toEqual(mockVerificationJobs);
     expect(mockedAxios.get).toHaveBeenCalledTimes(1); // Only one API call

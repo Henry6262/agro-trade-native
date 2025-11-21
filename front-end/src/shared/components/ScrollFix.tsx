@@ -16,9 +16,11 @@ export const ScrollFix: React.FC<{ children: React.ReactNode }> = ({ children })
             nextSibling.style.overflow = 'hidden';
             nextSibling.style.display = 'flex';
             nextSibling.style.flexDirection = 'column';
-            
+
             // Find the scrollable area within this container
-            const scrollableChild = nextSibling.querySelector('[class*="r-WebkitOverflowScrolling"]') as HTMLElement;
+            const scrollableChild = nextSibling.querySelector(
+              '[class*="r-WebkitOverflowScrolling"]'
+            ) as HTMLElement;
             if (scrollableChild) {
               scrollableChild.style.height = '100%';
               scrollableChild.style.overflow = 'auto';
@@ -26,7 +28,7 @@ export const ScrollFix: React.FC<{ children: React.ReactNode }> = ({ children })
             }
           }
         });
-        
+
         // Find all ScrollView elements
         const scrollViews = document.querySelectorAll('[class*="r-WebkitOverflowScrolling"]');
         scrollViews.forEach((element) => {
@@ -47,7 +49,9 @@ export const ScrollFix: React.FC<{ children: React.ReactNode }> = ({ children })
         });
 
         // Fix flex containers
-        const flexContainers = document.querySelectorAll('[style*="flex: 1"][style*="display: flex"]');
+        const flexContainers = document.querySelectorAll(
+          '[style*="flex: 1"][style*="display: flex"]'
+        );
         flexContainers.forEach((element) => {
           const el = element as HTMLElement;
           if (!el.style.overflow || el.style.overflow === 'hidden') {
@@ -65,7 +69,7 @@ export const ScrollFix: React.FC<{ children: React.ReactNode }> = ({ children })
         if (root) {
           root.style.height = '100vh';
           root.style.overflow = 'hidden';
-          
+
           // Fix direct children of root
           const rootChildren = root.children;
           if (rootChildren.length > 0) {
@@ -90,7 +94,7 @@ export const ScrollFix: React.FC<{ children: React.ReactNode }> = ({ children })
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ['style', 'class']
+        attributeFilter: ['style', 'class'],
       });
 
       // Fix on resize

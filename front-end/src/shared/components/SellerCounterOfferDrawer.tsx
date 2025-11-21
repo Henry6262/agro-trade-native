@@ -55,11 +55,11 @@ interface BuyerOffer {
     timeframe: string;
     method?: string;
   };
-  specifications?: Array<{
+  specifications?: {
     name: string;
     requirement: string;
     matches: boolean;
-  }>;
+  }[];
   matchScore: number;
   totalValue: number;
   message?: string;
@@ -99,15 +99,19 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
   isLoading = false,
 }) => {
   const [slideAnim] = useState(new Animated.Value(0));
-  
+
   // Form state
   const [counterPrice, setCounterPrice] = useState(buyerOffer?.offeredPrice?.toString() || '');
-  const [counterQuantity, setCounterQuantity] = useState(buyerOffer?.requestedQuantity?.toString() || '');
+  const [counterQuantity, setCounterQuantity] = useState(
+    buyerOffer?.requestedQuantity?.toString() || ''
+  );
   const [deliveryDays, setDeliveryDays] = useState('14');
   const [deliveryTerms, setDeliveryTerms] = useState('FOB');
   const [message, setMessage] = useState('');
   const [validDays, setValidDays] = useState('7');
-  const [negotiationType, setNegotiationType] = useState<'price' | 'quantity' | 'terms' | 'combined'>('price');
+  const [negotiationType, setNegotiationType] = useState<
+    'price' | 'quantity' | 'terms' | 'combined'
+  >('price');
 
   useEffect(() => {
     if (visible) {
@@ -140,7 +144,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
     const counter = parseFloat(counterPrice) || 0;
     const difference = counter - original;
     const percentageChange = original > 0 ? (difference / original) * 100 : 0;
-    
+
     return { difference, percentageChange, isIncrease: difference > 0 };
   };
 
@@ -149,7 +153,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
     const counter = parseFloat(counterQuantity) || 0;
     const difference = counter - original;
     const percentageChange = original > 0 ? (difference / original) * 100 : 0;
-    
+
     return { difference, percentageChange, isIncrease: difference > 0 };
   };
 
@@ -162,13 +166,13 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
   const calculateProfitMargin = () => {
     const counterPriceNum = parseFloat(counterPrice) || 0;
     const marketMin = sellerProduct?.priceRangeMin || 0;
-    
+
     if (marketMin > 0 && counterPriceNum > 0) {
       const margin = counterPriceNum - marketMin;
       const marginPercentage = (margin / marketMin) * 100;
       return { margin, marginPercentage, isProfitable: margin > 0 };
     }
-    
+
     return { margin: 0, marginPercentage: 0, isProfitable: false };
   };
 
@@ -177,25 +181,28 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
       Alert.alert('Validation Error', 'Please enter a valid counter price');
       return false;
     }
-    
+
     if (!counterQuantity || parseFloat(counterQuantity) <= 0) {
       Alert.alert('Validation Error', 'Please enter a valid quantity');
       return false;
     }
-    
+
     const counterQuantityNum = parseFloat(counterQuantity);
     const availableQuantity = sellerProduct?.quantity || 0;
-    
+
     if (counterQuantityNum > availableQuantity) {
-      Alert.alert('Validation Error', `Quantity cannot exceed your available stock (${availableQuantity} ${buyerOffer.unit})`);
+      Alert.alert(
+        'Validation Error',
+        `Quantity cannot exceed your available stock (${availableQuantity} ${buyerOffer.unit})`
+      );
       return false;
     }
-    
+
     if (!message.trim()) {
       Alert.alert('Validation Error', 'Please add a message explaining your counter-offer');
       return false;
     }
-    
+
     return true;
   };
 
@@ -234,26 +241,28 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
       presentationStyle="overFullScreen"
     >
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' }}>
-        <Animated.View 
-          style={{ 
+        <Animated.View
+          style={{
             flex: 1,
             marginTop: 80,
-            transform: [{
-              translateY: slideAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [300, 0],
-              }),
-            }],
+            transform: [
+              {
+                translateY: slideAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [300, 0],
+                }),
+              },
+            ],
           }}
           className="bg-gradient-to-b from-neutral-900 to-black rounded-t-3xl"
         >
-          <KeyboardAvoidingView 
+          <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
             {/* Header */}
             <View className="flex-row justify-between items-center p-6 border-b border-neutral-700/50">
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={handleClose}
                 className="p-2 -m-2 bg-neutral-800/50 rounded-lg border border-neutral-700/50"
               >
@@ -276,7 +285,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                     </View>
                     <Text className="text-blue-400 font-bold text-xl">Buyer's Offer</Text>
                   </View>
-                  <View 
+                  <View
                     className="rounded-2xl p-6 border border-blue-500/40"
                     style={{
                       shadowColor: '#3B82F6',
@@ -287,19 +296,28 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                     }}
                   >
                     <View className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-600/10" />
-                    
+
                     <View className="relative z-10">
                       <View className="flex-row justify-between items-center mb-4">
                         <Text className="text-blue-200 font-medium text-base">Offered Price</Text>
                         <View className="flex-row items-center">
-                          <Text className="text-blue-300 font-black text-2xl">€{buyerOffer?.offeredPrice?.toFixed(2) || '0.00'}</Text>
-                          <Text className="text-blue-400/70 ml-2 text-sm">/{buyerOffer?.unit?.toLowerCase() || 'unit'}</Text>
+                          <Text className="text-blue-300 font-black text-2xl">
+                            €{buyerOffer?.offeredPrice?.toFixed(2) || '0.00'}
+                          </Text>
+                          <Text className="text-blue-400/70 ml-2 text-sm">
+                            /{buyerOffer?.unit?.toLowerCase() || 'unit'}
+                          </Text>
                         </View>
                       </View>
                       <View className="h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent mb-4" />
                       <View className="flex-row justify-between items-center">
-                        <Text className="text-blue-200 font-medium text-base">Requested Quantity</Text>
-                        <Text className="text-white font-bold text-lg">{buyerOffer?.requestedQuantity || 0} {buyerOffer?.unit?.toLowerCase() || 'units'}</Text>
+                        <Text className="text-blue-200 font-medium text-base">
+                          Requested Quantity
+                        </Text>
+                        <Text className="text-white font-bold text-lg">
+                          {buyerOffer?.requestedQuantity || 0}{' '}
+                          {buyerOffer?.unit?.toLowerCase() || 'units'}
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -313,7 +331,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                     </View>
                     <Text className="text-green-400 font-bold text-xl">Your Product</Text>
                   </View>
-                  <View 
+                  <View
                     className="rounded-2xl p-6 border border-green-500/40"
                     style={{
                       shadowColor: '#10B981',
@@ -324,11 +342,16 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                     }}
                   >
                     <View className="absolute inset-0 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-600/10" />
-                    
+
                     <View className="relative z-10">
                       <View className="flex-row justify-between items-center mb-4">
-                        <Text className="text-green-200 font-medium text-base">Available Stock</Text>
-                        <Text className="text-white font-bold text-lg">{sellerProduct?.quantity || 0} {buyerOffer?.unit?.toLowerCase() || 'units'}</Text>
+                        <Text className="text-green-200 font-medium text-base">
+                          Available Stock
+                        </Text>
+                        <Text className="text-white font-bold text-lg">
+                          {sellerProduct?.quantity || 0}{' '}
+                          {buyerOffer?.unit?.toLowerCase() || 'units'}
+                        </Text>
                       </View>
                       <View className="h-px bg-gradient-to-r from-transparent via-green-400/30 to-transparent mb-4" />
                       <View className="flex-row justify-between items-center">
@@ -337,7 +360,9 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                           <Text className="text-green-300 font-black text-lg">
                             €{sellerProduct?.priceRangeMin || 0}-{sellerProduct?.priceRangeMax || 0}
                           </Text>
-                          <Text className="text-green-400/70 ml-2 text-sm">/{buyerOffer?.unit?.toLowerCase() || 'unit'}</Text>
+                          <Text className="text-green-400/70 ml-2 text-sm">
+                            /{buyerOffer?.unit?.toLowerCase() || 'unit'}
+                          </Text>
                         </View>
                       </View>
                     </View>
@@ -346,7 +371,9 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
 
                 {/* Negotiation Type Selection */}
                 <View className="mb-6">
-                  <Text className="text-white font-semibold mb-3">What would you like to negotiate?</Text>
+                  <Text className="text-white font-semibold mb-3">
+                    What would you like to negotiate?
+                  </Text>
                   <View className="flex-row flex-wrap gap-2">
                     {[
                       { key: 'price', label: 'Price Only', icon: DollarSign },
@@ -364,9 +391,11 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                         }`}
                       >
                         <Icon size={16} color={negotiationType === key ? '#F59E0B' : '#9CA3AF'} />
-                        <Text className={`ml-2 font-medium ${
-                          negotiationType === key ? 'text-yellow-400' : 'text-neutral-300'
-                        }`}>
+                        <Text
+                          className={`ml-2 font-medium ${
+                            negotiationType === key ? 'text-yellow-400' : 'text-neutral-300'
+                          }`}
+                        >
                           {label}
                         </Text>
                       </TouchableOpacity>
@@ -382,8 +411,8 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                     </View>
                     <Text className="text-yellow-400 font-bold text-xl">Your Counter Offer</Text>
                   </View>
-                  
-                  <View 
+
+                  <View
                     className="rounded-2xl border border-yellow-500/40 overflow-hidden"
                     style={{
                       shadowColor: '#F59E0B',
@@ -394,7 +423,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                     }}
                   >
                     <View className="absolute inset-0 bg-gradient-to-br from-yellow-500/20 to-orange-600/10" />
-                    
+
                     <View className="relative z-10 p-6">
                       {/* Price Input */}
                       {(negotiationType === 'price' || negotiationType === 'combined') && (
@@ -411,10 +440,12 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                                 className="text-white text-2xl font-black ml-3 flex-1 text-center"
                                 keyboardType="decimal-pad"
                               />
-                              <Text className="text-yellow-400/80 text-lg font-medium">/{buyerOffer?.unit?.toLowerCase() || 'unit'}</Text>
+                              <Text className="text-yellow-400/80 text-lg font-medium">
+                                /{buyerOffer?.unit?.toLowerCase() || 'unit'}
+                              </Text>
                             </View>
                           </View>
-                          
+
                           {/* Real-time Price Analysis */}
                           {priceDiff.difference !== 0 && (
                             <View className="mt-4 bg-black/30 rounded-xl p-4 border border-yellow-400/20">
@@ -425,28 +456,39 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                                   ) : (
                                     <TrendingDown size={16} color="#EF4444" />
                                   )}
-                                  <Text className={`ml-2 text-sm font-bold ${
-                                    priceDiff.isIncrease ? 'text-green-400' : 'text-red-400'
-                                  }`}>
-                                    {priceDiff.isIncrease ? '+' : ''}€{Math.abs(priceDiff.difference).toFixed(2)} per unit
+                                  <Text
+                                    className={`ml-2 text-sm font-bold ${
+                                      priceDiff.isIncrease ? 'text-green-400' : 'text-red-400'
+                                    }`}
+                                  >
+                                    {priceDiff.isIncrease ? '+' : ''}€
+                                    {Math.abs(priceDiff.difference).toFixed(2)} per unit
                                   </Text>
                                 </View>
-                                <Text className={`text-sm font-bold ${
-                                  priceDiff.isIncrease ? 'text-green-400' : 'text-red-400'
-                                }`}>
-                                  ({priceDiff.isIncrease ? '+' : ''}{priceDiff.percentageChange.toFixed(1)}%)
+                                <Text
+                                  className={`text-sm font-bold ${
+                                    priceDiff.isIncrease ? 'text-green-400' : 'text-red-400'
+                                  }`}
+                                >
+                                  ({priceDiff.isIncrease ? '+' : ''}
+                                  {priceDiff.percentageChange.toFixed(1)}%)
                                 </Text>
                               </View>
-                              
+
                               {/* Profit Margin Analysis */}
                               {profitMargin.margin !== 0 && (
                                 <View className="border-t border-yellow-400/20 pt-3 mt-3">
                                   <View className="flex-row justify-between items-center">
                                     <Text className="text-yellow-200 text-sm">Profit Margin:</Text>
-                                    <Text className={`text-sm font-bold ${
-                                      profitMargin.isProfitable ? 'text-green-400' : 'text-red-400'
-                                    }`}>
-                                      €{Math.abs(profitMargin.margin).toFixed(2)} ({profitMargin.marginPercentage.toFixed(1)}%)
+                                    <Text
+                                      className={`text-sm font-bold ${
+                                        profitMargin.isProfitable
+                                          ? 'text-green-400'
+                                          : 'text-red-400'
+                                      }`}
+                                    >
+                                      €{Math.abs(profitMargin.margin).toFixed(2)} (
+                                      {profitMargin.marginPercentage.toFixed(1)}%)
                                     </Text>
                                   </View>
                                 </View>
@@ -459,7 +501,9 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                       {/* Quantity Input */}
                       {(negotiationType === 'quantity' || negotiationType === 'combined') && (
                         <View className="mb-6">
-                          <Text className="text-yellow-300 font-semibold mb-3">Available Quantity</Text>
+                          <Text className="text-yellow-300 font-semibold mb-3">
+                            Available Quantity
+                          </Text>
                           <View className="bg-black/20 rounded-xl p-4 border border-yellow-400/20">
                             <View className="flex-row items-center justify-center">
                               <TextInput
@@ -470,19 +514,25 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                                 className="text-white text-2xl font-black flex-1 text-center"
                                 keyboardType="numeric"
                               />
-                              <Text className="text-yellow-400/80 text-lg font-medium ml-3">{buyerOffer?.unit?.toLowerCase() || 'units'}</Text>
+                              <Text className="text-yellow-400/80 text-lg font-medium ml-3">
+                                {buyerOffer?.unit?.toLowerCase() || 'units'}
+                              </Text>
                             </View>
                           </View>
-                          
+
                           {/* Quantity Analysis */}
                           {quantityDiff.difference !== 0 && (
                             <View className="mt-4 bg-black/30 rounded-xl p-4 border border-yellow-400/20">
                               <View className="flex-row items-center justify-between">
                                 <Text className="text-yellow-200 text-sm">Quantity Change:</Text>
-                                <Text className={`text-sm font-bold ${
-                                  quantityDiff.isIncrease ? 'text-green-400' : 'text-red-400'
-                                }`}>
-                                  {quantityDiff.isIncrease ? '+' : ''}{Math.abs(quantityDiff.difference)} {buyerOffer?.unit?.toLowerCase()}
+                                <Text
+                                  className={`text-sm font-bold ${
+                                    quantityDiff.isIncrease ? 'text-green-400' : 'text-red-400'
+                                  }`}
+                                >
+                                  {quantityDiff.isIncrease ? '+' : ''}
+                                  {Math.abs(quantityDiff.difference)}{' '}
+                                  {buyerOffer?.unit?.toLowerCase()}
                                 </Text>
                               </View>
                             </View>
@@ -508,16 +558,18 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                                         : 'bg-neutral-800/50 border-neutral-600/50'
                                     }`}
                                   >
-                                    <Text className={`text-center font-medium ${
-                                      deliveryDays === days ? 'text-blue-400' : 'text-neutral-300'
-                                    }`}>
+                                    <Text
+                                      className={`text-center font-medium ${
+                                        deliveryDays === days ? 'text-blue-400' : 'text-neutral-300'
+                                      }`}
+                                    >
                                       {days} days
                                     </Text>
                                   </TouchableOpacity>
                                 ))}
                               </View>
                             </View>
-                            
+
                             <View>
                               <Text className="text-yellow-200 text-sm mb-2">Terms</Text>
                               <View className="flex-row gap-2">
@@ -531,9 +583,13 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                                         : 'bg-neutral-800/50 border-neutral-600/50'
                                     }`}
                                   >
-                                    <Text className={`text-center text-sm font-medium ${
-                                      deliveryTerms === term ? 'text-green-400' : 'text-neutral-300'
-                                    }`}>
+                                    <Text
+                                      className={`text-center text-sm font-medium ${
+                                        deliveryTerms === term
+                                          ? 'text-green-400'
+                                          : 'text-neutral-300'
+                                      }`}
+                                    >
                                       {term}
                                     </Text>
                                   </TouchableOpacity>
@@ -585,9 +641,11 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                             : 'bg-gradient-to-br from-neutral-800/50 to-neutral-700/30 border-neutral-600/50'
                         }`}
                       >
-                        <Text className={`text-center font-semibold ${
-                          validDays === days ? 'text-blue-400' : 'text-neutral-300'
-                        }`}>
+                        <Text
+                          className={`text-center font-semibold ${
+                            validDays === days ? 'text-blue-400' : 'text-neutral-300'
+                          }`}
+                        >
                           {days} days
                         </Text>
                       </TouchableOpacity>
@@ -596,7 +654,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                 </View>
 
                 {/* Pro Tips */}
-                <View 
+                <View
                   className="rounded-2xl p-6 border border-purple-500/40 mb-6"
                   style={{
                     shadowColor: '#A855F7',
@@ -607,7 +665,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                   }}
                 >
                   <View className="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-500/15 to-indigo-500/10" />
-                  
+
                   <View className="relative z-10">
                     <View className="flex-row items-center mb-4">
                       <View className="w-8 h-8 bg-purple-500/30 rounded-lg items-center justify-center mr-3">
@@ -618,15 +676,21 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                     <View className="space-y-3">
                       <View className="flex-row items-start">
                         <Text className="text-purple-400 font-bold mr-2">•</Text>
-                        <Text className="text-purple-200 text-sm flex-1">Consider volume discounts for larger quantities</Text>
+                        <Text className="text-purple-200 text-sm flex-1">
+                          Consider volume discounts for larger quantities
+                        </Text>
                       </View>
                       <View className="flex-row items-start">
                         <Text className="text-purple-400 font-bold mr-2">•</Text>
-                        <Text className="text-purple-200 text-sm flex-1">Flexible delivery terms can increase acceptance rates</Text>
+                        <Text className="text-purple-200 text-sm flex-1">
+                          Flexible delivery terms can increase acceptance rates
+                        </Text>
                       </View>
                       <View className="flex-row items-start">
                         <Text className="text-purple-400 font-bold mr-2">•</Text>
-                        <Text className="text-purple-200 text-sm flex-1">Clear communication builds buyer confidence</Text>
+                        <Text className="text-purple-200 text-sm flex-1">
+                          Clear communication builds buyer confidence
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -643,7 +707,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                 >
                   <Text className="text-white font-semibold">Cancel</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   onPress={handleSubmit}
                   disabled={isLoading}

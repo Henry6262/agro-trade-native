@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { Alert } from 'react-native';
-import { apiClient } from '../../../../../../services/api';
-import { useUserData } from '../../../../../../contexts/UserDataContext';
-import { useProductStore } from '../../../../../../stores/product.store';
+import { apiClient } from '@services/api';
+import { useUserData } from '@contexts/UserDataContext';
+import { useProductStore } from '@stores/product.store';
 import {
   ProductCreationState,
   ProductCreationStep,
@@ -42,7 +42,7 @@ export const useProductCreation = () => {
 
   // Step navigation
   const goToStep = useCallback((step: ProductCreationStep) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       currentStep: step,
       error: null,
@@ -50,11 +50,15 @@ export const useProductCreation = () => {
   }, []);
 
   const goToNextStep = useCallback(() => {
-    setState(prev => {
-      const stepOrder: ProductCreationStep[] = ['product-selection', 'specifications', 'location-confirmation'];
+    setState((prev) => {
+      const stepOrder: ProductCreationStep[] = [
+        'product-selection',
+        'specifications',
+        'location-confirmation',
+      ];
       const currentIndex = stepOrder.indexOf(prev.currentStep);
       const nextStep = stepOrder[currentIndex + 1];
-      
+
       return {
         ...prev,
         currentStep: nextStep || prev.currentStep,
@@ -64,11 +68,15 @@ export const useProductCreation = () => {
   }, []);
 
   const goToPreviousStep = useCallback(() => {
-    setState(prev => {
-      const stepOrder: ProductCreationStep[] = ['product-selection', 'specifications', 'location-confirmation'];
+    setState((prev) => {
+      const stepOrder: ProductCreationStep[] = [
+        'product-selection',
+        'specifications',
+        'location-confirmation',
+      ];
       const currentIndex = stepOrder.indexOf(prev.currentStep);
       const previousStep = stepOrder[currentIndex - 1];
-      
+
       return {
         ...prev,
         currentStep: previousStep || prev.currentStep,
@@ -79,7 +87,7 @@ export const useProductCreation = () => {
 
   // Data updates
   const updateProductData = useCallback((productData: ProductData) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       data: {
         ...prev.data,
@@ -90,7 +98,7 @@ export const useProductCreation = () => {
   }, []);
 
   const updateSpecifications = useCallback((specifications: ProductSpecifications) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       data: {
         ...prev.data,
@@ -101,7 +109,7 @@ export const useProductCreation = () => {
   }, []);
 
   const updateLocation = useCallback((location: LocationData) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       data: {
         ...prev.data,
@@ -113,7 +121,7 @@ export const useProductCreation = () => {
 
   // Error handling
   const setError = useCallback((error: string) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       error,
       isLoading: false,
@@ -121,7 +129,7 @@ export const useProductCreation = () => {
   }, []);
 
   const clearError = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       error: null,
     }));
@@ -129,7 +137,7 @@ export const useProductCreation = () => {
 
   // Loading state
   const setLoading = useCallback((isLoading: boolean) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       isLoading,
     }));
@@ -208,10 +216,10 @@ export const useProductCreation = () => {
       if (response?.data?.success) {
         // Refresh the products list
         await refreshProducts();
-        
+
         // Reset the flow
         resetFlow();
-        
+
         Alert.alert('Success', 'Product listing created successfully!');
         return true;
       } else {
@@ -219,7 +227,8 @@ export const useProductCreation = () => {
       }
     } catch (error: any) {
       console.error('Error creating product:', error);
-      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to create product listing';
+      const errorMessage =
+        error?.response?.data?.message || error?.message || 'Failed to create product listing';
       setError(errorMessage);
       Alert.alert('Error', errorMessage);
       return false;
@@ -229,41 +238,49 @@ export const useProductCreation = () => {
   }, [validateData, state.data, setLoading, clearError, setError, refreshProducts, resetFlow]);
 
   // Get product image from metadata
-  const getProductImage = useCallback((productName: string, category: string): string => {
-    // Try to find product in metadata
-    const metaProduct = productMetadata?.find?.(
-      p => p.name === productName || p.displayName === productName || p.category === category
-    );
-    
-    if (metaProduct?.image) {
-      return metaProduct.image;
-    }
-    
-    // Fallback image based on category
-    const categoryImages: Record<string, string> = {
-      'SOFT_WHEAT': 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400',
-      'HARD_WHEAT': 'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=400',
-      'CORN': 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=400',
-      'SOYBEANS': 'https://images.unsplash.com/photo-1639843906836-85fc9fa11584?w=400',
-      'RICE': 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400',
-    };
-    
-    return categoryImages[category] || 'https://via.placeholder.com/400x400/10B981/FFFFFF?text=Product';
-  }, [productMetadata]);
+  const getProductImage = useCallback(
+    (productName: string, category: string): string => {
+      // Try to find product in metadata
+      const metaProduct = productMetadata?.find?.(
+        (p) => p.name === productName || p.displayName === productName || p.category === category
+      );
+
+      if (metaProduct?.image) {
+        return metaProduct.image;
+      }
+
+      // Fallback image based on category
+      const categoryImages: Record<string, string> = {
+        SOFT_WHEAT: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400',
+        HARD_WHEAT: 'https://images.unsplash.com/photo-1558818498-28c1e002b655?w=400',
+        CORN: 'https://images.unsplash.com/photo-1605000797499-95a51c5269ae?w=400',
+        SOYBEANS: 'https://images.unsplash.com/photo-1639843906836-85fc9fa11584?w=400',
+        RICE: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400',
+      };
+
+      return (
+        categoryImages[category] || 'https://via.placeholder.com/400x400/10B981/FFFFFF?text=Product'
+      );
+    },
+    [productMetadata]
+  );
 
   // Check if step is completed
-  const isStepCompleted = useCallback((step: ProductCreationStep): boolean => {
-    switch (step) {
-      case 'product-selection':
-        return !!state.data.productData;
-      case 'specifications':
-        return !!state.data.specifications;
-      case 'location-confirmation':
-        return !!state.data.location;
-      default:
-        return false;
-    }
-  }, [state.data]);
+  const isStepCompleted = useCallback(
+    (step: ProductCreationStep): boolean => {
+      switch (step) {
+        case 'product-selection':
+          return !!state.data.productData;
+        case 'specifications':
+          return !!state.data.specifications;
+        case 'location-confirmation':
+          return !!state.data.location;
+        default:
+          return false;
+      }
+    },
+    [state.data]
+  );
 
   // Check if can proceed to next step
   const canProceedToNext = useCallback((): boolean => {

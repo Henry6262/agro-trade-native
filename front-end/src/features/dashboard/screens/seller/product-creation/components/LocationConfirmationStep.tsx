@@ -9,7 +9,6 @@ export const LocationConfirmationStep: React.FC<LocationConfirmationStepProps> =
   onBack,
   initialLocation,
 }) => {
-  
   const handleLocationConfirm = (location: any) => {
     onNext(location);
   };

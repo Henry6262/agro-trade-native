@@ -1,0 +1,316 @@
+// ==================== TRANSPORT COMPANY & DRIVER MANAGEMENT ====================
+// Add these models to your main schema.prisma file
+
+model TransportCompany {
+  id                String      @id @default(cuid())
+  
+  // Company Profile
+  companyName       String      @unique @map("company_name")
+  registrationNumber String     @unique @map("registration_number")
+  vatNumber         String?     @unique @map("vat_number")
+  
+  // Contact Information
+  mainEmail         String      @unique @map("main_email")
+  mainPhone         String      @map("main_phone")
+  website           String?
+  
+  // Company Type
+  companyType       CompanyType @default(EXTERNAL) @map("company_type")
+  isVerified        Boolean     @default(false) @map("is_verified")
+  verifiedAt        DateTime?   @map("verified_at")
+  verifiedBy        String?     @map("verified_by") // Admin user ID who verified
+  
+  // Operating Information
+  operatingRegions  String[]    @map("operating_regions") // e.g., ["Sofia", "Plovdiv", "Varna"]
+  specializations   String[]    // Types of goods they transport
+  fleetSize         Int         @default(0) @map("fleet_size")
+  
+  // Performance Metrics
+  totalJobsCompleted Int        @default(0) @map("total_jobs_completed")
+  averageRating     Float?      @map("average_rating")
+  onTimeDeliveryRate Float?     @map("on_time_delivery_rate")
+  
+  // Financial
+  creditLimit       Decimal?    @map("credit_limit") @db.Decimal(10, 2)
+  currentBalance    Decimal?    @map("current_balance") @db.Decimal(10, 2)
+  
+  // Relations
+  admins            CompanyAdmin[]
+  drivers           Driver[]
+  trucks            Truck[]
+  transportBids     TransportBid[]
+  transportJobs     TransportJob[]
+  documents         CompanyDocument[]
+  
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+  
+  @@index([companyType])
+  @@index([isVerified])
+  @@map("transport_companies")
+}
+
+model CompanyAdmin {
+  id                String          @id @default(cuid())
+  
+  // Link to User account
+  userId            String          @unique @map("user_id")
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Link to Company
+  transportCompanyId String         @map("transport_company_id")
+  transportCompany  TransportCompany @relation(fields: [transportCompanyId], references: [id], onDelete: Cascade)
+  
+  // Admin Level
+  adminLevel        AdminLevel      @default(MANAGER) @map("admin_level")
+  
+  // Permissions
+  canManageDrivers  Boolean         @default(true) @map("can_manage_drivers")
+  canManageFleet    Boolean         @default(true) @map("can_manage_fleet")
+  canSubmitBids     Boolean         @default(true) @map("can_submit_bids")
+  canManageFinances Boolean         @default(false) @map("can_manage_finances")
+  canViewReports    Boolean         @default(true) @map("can_view_reports")
+  
+  // Activity
+  lastActiveAt      DateTime?       @map("last_active_at")
+  
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  
+  @@unique([userId, transportCompanyId])
+  @@index([transportCompanyId])
+  @@map("company_admins")
+}
+
+model Driver {
+  id                String      @id @default(cuid())
+  
+  // Driver can be either internal or external
+  driverType        DriverType  @map("driver_type")
+  
+  // For INTERNAL drivers - direct link to User
+  userId            String?     @unique @map("user_id")
+  user              User?       @relation(fields: [userId], references: [id])
+  
+  // For EXTERNAL drivers - link to transport company
+  transportCompanyId String?    @map("transport_company_id")
+  transportCompany  TransportCompany? @relation(fields: [transportCompanyId], references: [id])
+  
+  // Driver Profile (for external drivers who don't have user accounts)
+  email             String?     @unique
+  phoneNumber       String?     @unique @map("phone_number")
+  firstName         String?     @map("first_name")
+  lastName          String?     @map("last_name")
+  
+  // License & Compliance
+  licenseNumber     String      @unique @map("license_number")
+  licenseClass      String[]    @map("license_class") // ["C", "C+E", "ADR"]
+  licenseExpiryDate DateTime    @map("license_expiry_date")
+  
+  // Medical & Safety
+  medicalCertificateExpiry DateTime? @map("medical_certificate_expiry")
+  lastSafetyTraining      DateTime? @map("last_safety_training")
+  
+  // Current Status
+  status            DriverStatus @default(OFFLINE)
+  isAvailable       Boolean     @default(false) @map("is_available")
+  currentLocation   Json?       @map("current_location") // {lat, lng, timestamp, address}
+  lastLocationUpdate DateTime?  @map("last_location_update")
+  
+  // Current Assignment
+  currentJobId      String?     @unique @map("current_job_id")
+  currentJob        TransportJob? @relation("CurrentDriverJob", fields: [currentJobId], references: [id])
+  
+  // Performance
+  totalJobs         Int         @default(0) @map("total_jobs")
+  totalDistance     Float       @default(0) @map("total_distance") // km
+  averageRating     Float?      @map("average_rating")
+  onTimeRate        Float?      @map("on_time_rate")
+  
+  // Working Hours (simplified - full compliance tracking can be added later)
+  weeklyHoursWorked Float       @default(0) @map("weekly_hours_worked")
+  lastRestPeriod    DateTime?   @map("last_rest_period")
+  
+  // Relations
+  assignedTruck     Truck?      @relation("CurrentDriver")
+  jobHistory        TransportJob[] @relation("DriverJobHistory")
+  documents         DriverDocument[]
+  
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+  
+  @@index([driverType])
+  @@index([transportCompanyId])
+  @@index([status])
+  @@index([isAvailable])
+  @@map("drivers")
+}
+
+model CompanyDocument {
+  id                String          @id @default(cuid())
+  
+  transportCompanyId String         @map("transport_company_id")
+  transportCompany  TransportCompany @relation(fields: [transportCompanyId], references: [id], onDelete: Cascade)
+  
+  // Document details
+  documentType      CompanyDocumentType @map("document_type")
+  documentNumber    String?         @map("document_number")
+  documentUrl       String          @map("document_url") // Cloudinary URL
+  
+  // Validity
+  issuedDate        DateTime?       @map("issued_date")
+  expiryDate        DateTime?       @map("expiry_date")
+  
+  // Verification
+  isVerified        Boolean         @default(false) @map("is_verified")
+  verifiedAt        DateTime?       @map("verified_at")
+  verifiedBy        String?         @map("verified_by") // Admin user ID
+  
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  
+  @@index([transportCompanyId])
+  @@index([documentType])
+  @@map("company_documents")
+}
+
+model DriverDocument {
+  id              String        @id @default(cuid())
+  
+  driverId        String        @map("driver_id")
+  driver          Driver        @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  
+  // Document details
+  documentType    DriverDocumentType @map("document_type")
+  documentNumber  String?       @map("document_number")
+  documentUrl     String        @map("document_url") // Cloudinary URL
+  
+  // Validity
+  issuedDate      DateTime?     @map("issued_date")
+  expiryDate      DateTime?     @map("expiry_date")
+  
+  // Verification
+  isVerified      Boolean       @default(false) @map("is_verified")
+  verifiedAt      DateTime?     @map("verified_at")
+  verifiedBy      String?       @map("verified_by")
+  
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  
+  @@index([driverId])
+  @@index([documentType])
+  @@map("driver_documents")
+}
+
+// ==================== UPDATE EXISTING MODELS ====================
+
+// Add to existing TransportBid model
+// model TransportBid {
+//   ... existing fields ...
+//   
+//   // Link to transport company (for external bids)
+//   transportCompanyId String?    @map("transport_company_id")
+//   transportCompany  TransportCompany? @relation(fields: [transportCompanyId], references: [id])
+//   
+//   ... rest of existing fields ...
+// }
+
+// Add to existing TransportJob model  
+// model TransportJob {
+//   ... existing fields ...
+//   
+//   // Driver assignment
+//   assignedDriverId  String?     @map("assigned_driver_id")
+//   assignedDriver    Driver?     @relation("DriverJobHistory", fields: [assignedDriverId], references: [id])
+//   
+//   // Company tracking (for external jobs)
+//   transportCompanyId String?    @map("transport_company_id")
+//   transportCompany  TransportCompany? @relation(fields: [transportCompanyId], references: [id])
+//   
+//   ... rest of existing fields ...
+// }
+
+// Add to existing Truck model
+// model Truck {
+//   ... existing fields ...
+//   
+//   // Ownership
+//   ownerType         OwnerType   @map("owner_type")
+//   
+//   // For company-owned trucks
+//   transportCompanyId String?    @map("transport_company_id")
+//   transportCompany  TransportCompany? @relation(fields: [transportCompanyId], references: [id])
+//   
+//   // Current driver
+//   currentDriverId   String?     @unique @map("current_driver_id")
+//   currentDriver     Driver?     @relation("CurrentDriver", fields: [currentDriverId], references: [id])
+//   
+//   ... rest of existing fields ...
+// }
+
+// Add to existing User model
+// model User {
+//   ... existing fields ...
+//   
+//   // Company admin relation
+//   companyAdmin      CompanyAdmin?
+//   
+//   // Driver profile (for internal drivers)
+//   driverProfile     Driver?
+//   
+//   ... rest of existing fields ...
+// }
+
+// ==================== NEW ENUMS ====================
+
+enum CompanyType {
+  INTERNAL    // Agro-Trade's own fleet
+  EXTERNAL    // Partner transport companies
+}
+
+enum DriverType {
+  INTERNAL    // Agro-Trade employee drivers
+  EXTERNAL    // Drivers from partner companies
+}
+
+enum AdminLevel {
+  OWNER       // Company owner
+  MANAGER     // Fleet manager
+  DISPATCHER  // Can assign drivers
+  VIEWER      // Read-only access
+}
+
+enum OwnerType {
+  AGROTRADE   // Owned by Agro-Trade
+  COMPANY     // Owned by transport company
+  INDIVIDUAL  // Owner-operator
+}
+
+enum DriverStatus {
+  OFFLINE
+  AVAILABLE
+  ON_BREAK
+  ASSIGNED
+  EN_ROUTE
+  AT_PICKUP
+  IN_TRANSIT
+  AT_DELIVERY
+  COMPLETED
+}
+
+enum CompanyDocumentType {
+  REGISTRATION_CERTIFICATE
+  OPERATING_LICENSE
+  INSURANCE_CERTIFICATE
+  TAX_CERTIFICATE
+  SAFETY_CERTIFICATE
+  OTHER
+}
+
+enum DriverDocumentType {
+  DRIVING_LICENSE
+  MEDICAL_CERTIFICATE
+  TRAINING_CERTIFICATE
+  IDENTITY_CARD
+  OTHER
+}

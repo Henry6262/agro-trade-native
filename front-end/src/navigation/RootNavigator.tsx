@@ -27,98 +27,96 @@ interface RootNavigatorProps {
 }
 
 export default function RootNavigator({ appState }: RootNavigatorProps) {
-
   // Determine initial route based on authentication state
   let initialRouteName: keyof RootStackParamList = 'Main';
-  
+
   // If not authenticated, show onboarding (role selection) first
   // Authentication happens at the END of onboarding
   if (appState.isReady && !appState.isAuthenticated) {
-    initialRouteName = 'Onboarding';  // Show role selection, not login
+    initialRouteName = 'Onboarding'; // Show role selection, not login
   }
 
   return (
     <NavigationContainer linking={linking}>
-        <Stack.Navigator
-          initialRouteName={initialRouteName}
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: '#ffffff' },
-            
+      <Stack.Navigator
+        initialRouteName={initialRouteName}
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: '#ffffff' },
+        }}
+      >
+        {/* OAuth Callback Screen - for deep linking */}
+        <Stack.Screen name="OAuthCallback" component={OAuthCallbackScreen} />
+
+        {/* Authentication Stack */}
+        <Stack.Screen name="Auth" component={AuthStack} />
+
+        {/* Onboarding Stack */}
+        <Stack.Screen name="Onboarding" component={OnboardingStack} />
+
+        {/* Main App Stack */}
+        <Stack.Screen name="Main" component={DashboardStack} />
+
+        {/* Admin Stack */}
+        <Stack.Screen name="Admin" component={AdminStack} />
+        <Stack.Screen
+          name="OrderCreate"
+          component={OrderCreateScreen}
+          options={{
+            headerShown: true,
+            title: 'Create Order',
+            headerStyle: {
+              backgroundColor: '#ffffff',
+              shadowColor: 'transparent',
+              elevation: 0,
+            },
+            headerTitleStyle: {
+              fontSize: 18,
+              fontWeight: '600',
+              color: '#1F2937',
+            },
+            headerTintColor: '#22C55E',
           }}
-        >
-          {/* OAuth Callback Screen - for deep linking */}
-          <Stack.Screen name="OAuthCallback" component={OAuthCallbackScreen} />
-          
-          {/* Authentication Stack */}
-          <Stack.Screen name="Auth" component={AuthStack} />
-          
-          {/* Onboarding Stack */}
-          <Stack.Screen name="Onboarding" component={OnboardingStack} />
-          
-          {/* Main App Stack */}
-          <Stack.Screen name="Main" component={DashboardStack} />
-          
-          {/* Admin Stack */}
-          <Stack.Screen name="Admin" component={AdminStack} />
-          <Stack.Screen
-            name="OrderCreate"
-            component={OrderCreateScreen}
-            options={{
-              headerShown: true,
-              title: 'Create Order',
-              headerStyle: {
-                backgroundColor: '#ffffff',
-                shadowColor: 'transparent',
-                elevation: 0,
-              },
-              headerTitleStyle: {
-                fontSize: 18,
-                fontWeight: '600',
-                color: '#1F2937',
-              },
-              headerTintColor: '#22C55E',
-            }}
-          />
-          <Stack.Screen
-            name="OrderDetail"
-            component={OrderDetailScreen}
-            options={{
-              headerShown: true,
-              title: 'Order Details',
-              headerStyle: {
-                backgroundColor: '#ffffff',
-                shadowColor: 'transparent',
-                elevation: 0,
-              },
-              headerTitleStyle: {
-                fontSize: 18,
-                fontWeight: '600',
-                color: '#1F2937',
-              },
-              headerTintColor: '#22C55E',
-            }}
-          />
-          <Stack.Screen
-            name="ProductDetail"
-            component={ProductDetailScreen}
-            options={{
-              headerShown: true,
-              title: 'Product Details',
-              headerStyle: {
-                backgroundColor: '#ffffff',
-                shadowColor: 'transparent',
-                elevation: 0,
-              },
-              headerTitleStyle: {
-                fontSize: 18,
-                fontWeight: '600',
-                color: '#1F2937',
-              },
-              headerTintColor: '#22C55E',
-            }}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+        />
+        <Stack.Screen
+          name="OrderDetail"
+          component={OrderDetailScreen}
+          options={{
+            headerShown: true,
+            title: 'Order Details',
+            headerStyle: {
+              backgroundColor: '#ffffff',
+              shadowColor: 'transparent',
+              elevation: 0,
+            },
+            headerTitleStyle: {
+              fontSize: 18,
+              fontWeight: '600',
+              color: '#1F2937',
+            },
+            headerTintColor: '#22C55E',
+          }}
+        />
+        <Stack.Screen
+          name="ProductDetail"
+          component={ProductDetailScreen}
+          options={{
+            headerShown: true,
+            title: 'Product Details',
+            headerStyle: {
+              backgroundColor: '#ffffff',
+              shadowColor: 'transparent',
+              elevation: 0,
+            },
+            headerTitleStyle: {
+              fontSize: 18,
+              fontWeight: '600',
+              color: '#1F2937',
+            },
+            headerTintColor: '#22C55E',
+          }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }

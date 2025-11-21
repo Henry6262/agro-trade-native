@@ -29,36 +29,32 @@ export default function AdminStack() {
         },
       }}
     >
-      <Stack.Screen 
-        name="AdminDashboard" 
-        component={AdminDashboardScreen} 
+      <Stack.Screen
+        name="AdminDashboard"
+        component={AdminDashboardScreen}
         options={{ title: 'Admin Dashboard' }}
       />
-      <Stack.Screen 
-        name="AdminPricingZones" 
-        component={AdminPricingZonesScreen} 
+      <Stack.Screen
+        name="AdminPricingZones"
+        component={AdminPricingZonesScreen}
         options={{ title: 'Pricing Zones' }}
       />
-      <Stack.Screen 
-        name="AdminZoneDetails" 
-        component={AdminZoneDetailsScreen} 
+      <Stack.Screen
+        name="AdminZoneDetails"
+        component={AdminZoneDetailsScreen}
         options={{ title: 'Zone Details' }}
       />
-      <Stack.Screen 
-        name="AdminProductPrices" 
-        component={AdminProductPricesScreen} 
+      <Stack.Screen
+        name="AdminProductPrices"
+        component={AdminProductPricesScreen}
         options={{ title: 'Product Prices' }}
       />
-      <Stack.Screen 
-        name="BulkPriceUpdate" 
-        component={BulkPriceUpdateScreen} 
+      <Stack.Screen
+        name="BulkPriceUpdate"
+        component={BulkPriceUpdateScreen}
         options={{ title: 'Bulk Price Update' }}
       />
-      <Stack.Screen 
-        name="AdminMapView" 
-        component={AdminMapView} 
-        options={{ title: 'Map View' }}
-      />
+      <Stack.Screen name="AdminMapView" component={AdminMapView} options={{ title: 'Map View' }} />
     </Stack.Navigator>
   );
 }

@@ -1,6 +1,15 @@
-import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested, IsNumber, IsBoolean } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ProductCategory, ProductUnit } from '@prisma/client';
+import {
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+  IsNumber,
+  IsBoolean,
+} from "class-validator";
+import { Type } from "class-transformer";
+import { ProductCategory, ProductUnit } from "@prisma/client";
 
 export class LocationBasedPricingDto {
   @IsNumber()
@@ -24,7 +33,7 @@ export class LocationBasedPricingDto {
     min: number;
     max: number;
     currency: string;
-    confidence: 'high' | 'medium' | 'low';
+    confidence: "high" | "medium" | "low";
   };
 
   @IsOptional()
@@ -43,15 +52,15 @@ export class CustomOfferDataDto {
 
   @IsOptional()
   @IsString()
-  qualityGrade?: 'premium' | 'standard' | 'economy';
+  qualityGrade?: "premium" | "standard" | "economy";
 
   @IsOptional()
   @IsString()
-  storageType?: 'cold' | 'ambient' | 'controlled';
+  storageType?: "cold" | "ambient" | "controlled";
 
   @IsOptional()
   @IsString()
-  packaging?: 'bulk' | 'bags' | 'crates' | 'custom';
+  packaging?: "bulk" | "bags" | "crates" | "custom";
 
   @IsOptional()
   @IsString()
@@ -71,11 +80,11 @@ export class CustomOfferDataDto {
 
   @IsOptional()
   @IsString()
-  contactPreference?: 'email' | 'phone' | 'both';
+  contactPreference?: "email" | "phone" | "both";
 
   @IsOptional()
   @IsString()
-  urgency?: 'immediate' | 'within_week' | 'within_month' | 'flexible';
+  urgency?: "immediate" | "within_week" | "within_month" | "flexible";
 }
 
 export class ProductSpecificationDto {

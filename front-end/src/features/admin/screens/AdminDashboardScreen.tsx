@@ -1,25 +1,25 @@
-import React, { useState } from 'react'
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import type { RootStackParamList } from '../../../navigation/types'
-import { Ionicons } from '@expo/vector-icons'
+import React, { useState } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, StyleSheet } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../../navigation/types';
+import { Ionicons } from '@expo/vector-icons';
 
-type AdminNavigationProp = NativeStackNavigationProp<RootStackParamList>
+type AdminNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface AdminCard {
-  id: string
-  title: string
-  description: string
-  icon: keyof typeof Ionicons.glyphMap
-  color: string
-  route: keyof RootStackParamList
-  stats?: { label: string; value: string | number }[]
+  id: string;
+  title: string;
+  description: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  color: string;
+  route: keyof RootStackParamList;
+  stats?: { label: string; value: string | number }[];
 }
 
 export function AdminDashboardScreen() {
-  const navigation = useNavigation<AdminNavigationProp>()
-  const [selectedCard, setSelectedCard] = useState<string | null>(null)
+  const navigation = useNavigation<AdminNavigationProp>();
+  const [selectedCard, setSelectedCard] = useState<string | null>(null);
 
   const adminCards: AdminCard[] = [
     {
@@ -28,7 +28,7 @@ export function AdminDashboardScreen() {
       description: 'Manage regional pricing zones and city assignments',
       icon: 'map-outline',
       color: '#3B82F6',
-      route: 'AdminPricingZones' as keyof RootStackParamList,
+      route: 'AdminPricingZones',
       stats: [
         { label: 'Active Zones', value: 9 },
         { label: 'Cities Covered', value: 43 },
@@ -40,7 +40,7 @@ export function AdminDashboardScreen() {
       description: 'Set and update product prices for different zones',
       icon: 'pricetag-outline',
       color: '#10B981',
-      route: 'AdminProductPrices' as keyof RootStackParamList,
+      route: 'AdminProductPrices',
       stats: [
         { label: 'Products', value: 12 },
         { label: 'Price Points', value: 108 },
@@ -52,7 +52,7 @@ export function AdminDashboardScreen() {
       description: 'Update supply, demand, and market factors',
       icon: 'trending-up-outline',
       color: '#F59E0B',
-      route: 'AdminMarketConditions' as keyof RootStackParamList,
+      route: 'AdminMarketConditions',
       stats: [
         { label: 'Supply Level', value: '75%' },
         { label: 'Demand Level', value: '82%' },
@@ -64,22 +64,22 @@ export function AdminDashboardScreen() {
       description: 'View pricing analytics and market insights',
       icon: 'analytics-outline',
       color: '#8B5CF6',
-      route: 'AdminAnalytics' as keyof RootStackParamList,
+      route: 'AdminAnalytics',
       stats: [
         { label: 'Avg Price Change', value: '+3.2%' },
         { label: 'Active Listings', value: 247 },
       ],
     },
-  ]
+  ];
 
   const handleCardPress = (card: AdminCard) => {
-    setSelectedCard(card.id)
+    setSelectedCard(card.id);
     setTimeout(() => {
       // Navigate to the specific admin screen
-      navigation.navigate(card.route as any)
-      setSelectedCard(null)
-    }, 150)
-  }
+      navigation.navigate(card.route);
+      setSelectedCard(null);
+    }, 150);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-gray-900">
@@ -97,20 +97,12 @@ export function AdminDashboardScreen() {
               <TouchableOpacity
                 key={card.id}
                 onPress={() => handleCardPress(card)}
-                className={`w-1/2 p-2 ${
-                  selectedCard === card.id ? 'opacity-70' : ''
-                }`}
+                className={`w-1/2 p-2 ${selectedCard === card.id ? 'opacity-70' : ''}`}
                 activeOpacity={0.8}
               >
                 <View
                   className="bg-gray-800 rounded-xl p-5 border border-gray-700"
-                  style={{
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 4,
-                    elevation: 3,
-                  }}
+                  style={styles.cardShadow}
                 >
                   {/* Icon */}
                   <View
@@ -121,9 +113,7 @@ export function AdminDashboardScreen() {
                   </View>
 
                   {/* Title & Description */}
-                  <Text className="text-white font-semibold text-lg mb-1">
-                    {card.title}
-                  </Text>
+                  <Text className="text-white font-semibold text-lg mb-1">{card.title}</Text>
                   <Text className="text-gray-400 text-sm mb-4" numberOfLines={2}>
                     {card.description}
                   </Text>
@@ -134,9 +124,7 @@ export function AdminDashboardScreen() {
                       {card.stats.map((stat, index) => (
                         <View key={index} className="flex-row justify-between mb-1">
                           <Text className="text-gray-500 text-xs">{stat.label}</Text>
-                          <Text className="text-white text-xs font-medium">
-                            {stat.value}
-                          </Text>
+                          <Text className="text-white text-xs font-medium">{stat.value}</Text>
                         </View>
                       ))}
                     </View>
@@ -151,7 +139,7 @@ export function AdminDashboardScreen() {
             <Text className="text-white font-semibold text-lg mb-4">Quick Actions</Text>
             <View className="space-y-3">
               <TouchableOpacity
-                onPress={() => navigation.navigate('AdminBulkPriceUpdate' as any)}
+                onPress={() => navigation.navigate('AdminBulkPriceUpdate')}
                 className="flex-row items-center bg-gray-700 rounded-lg p-4"
               >
                 <Ionicons name="flash-outline" size={20} color="#F59E0B" />
@@ -160,7 +148,7 @@ export function AdminDashboardScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => navigation.navigate('AdminImportExport' as any)}
+                onPress={() => navigation.navigate('AdminImportExport')}
                 className="flex-row items-center bg-gray-700 rounded-lg p-4"
               >
                 <Ionicons name="download-outline" size={20} color="#10B981" />
@@ -169,7 +157,7 @@ export function AdminDashboardScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => navigation.navigate('AdminMapView' as any)}
+                onPress={() => navigation.navigate('AdminMapView')}
                 className="flex-row items-center bg-gray-700 rounded-lg p-4"
               >
                 <Ionicons name="map-outline" size={20} color="#3B82F6" />
@@ -181,5 +169,15 @@ export function AdminDashboardScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
-  )
+  );
 }
+
+const styles = StyleSheet.create({
+  cardShadow: {
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+});

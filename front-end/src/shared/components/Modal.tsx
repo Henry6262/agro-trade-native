@@ -1,11 +1,11 @@
 import React from 'react';
-import { 
-  View, 
-  Text, 
-  Modal as RNModal, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  Modal as RNModal,
+  TouchableOpacity,
   TouchableWithoutFeedback,
-  Dimensions 
+  Dimensions,
 } from 'react-native';
 import { X } from 'lucide-react-native';
 import { BaseComponentProps } from '../../shared/types';
@@ -92,9 +92,7 @@ export const Modal: React.FC<ModalProps> = ({
               {(title || closable) && (
                 <View className="flex-row items-center justify-between p-4 border-b border-neutral-700">
                   {title && (
-                    <Text className="text-lg font-semibold text-white flex-1 mr-4">
-                      {title}
-                    </Text>
+                    <Text className="text-lg font-semibold text-white flex-1 mr-4">{title}</Text>
                   )}
                   {closable && (
                     <TouchableOpacity
@@ -109,9 +107,7 @@ export const Modal: React.FC<ModalProps> = ({
               )}
 
               {/* Content */}
-              <View className="flex-1">
-                {children}
-              </View>
+              <View className="flex-1">{children}</View>
             </View>
           </TouchableWithoutFeedback>
         </View>

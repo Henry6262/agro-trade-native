@@ -15,7 +15,7 @@ export class LocationUpdateDto {
   };
   timestamp: string;
   batteryLevel?: number;
-  networkType?: 'wifi' | 'cellular' | 'none';
+  networkType?: "wifi" | "cellular" | "none";
   isMoving: boolean;
 }
 
@@ -32,20 +32,30 @@ export class VerificationResultDto {
     standardUsed?: string;
   }>;
   evidence: Array<{
-    type: 'photo' | 'document' | 'video';
+    type: "photo" | "document" | "video";
     url: string;
     caption?: string;
     timestamp: string;
   }>;
   notes: string;
-  verificationStatus: 'VERIFIED' | 'PARTIALLY_VERIFIED' | 'FAILED' | 'PENDING_REVIEW';
+  verificationStatus:
+    | "VERIFIED"
+    | "PARTIALLY_VERIFIED"
+    | "FAILED"
+    | "PENDING_REVIEW";
   signature?: string;
   verifiedAt: string;
 }
 
 export class JobFilterDto {
-  priority?: 'LOW' | 'MEDIUM' | 'HIGH';
-  status?: 'PENDING' | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+  priority?: "LOW" | "MEDIUM" | "HIGH";
+  status?:
+    | "PENDING"
+    | "ASSIGNED"
+    | "IN_PROGRESS"
+    | "COMPLETED"
+    | "FAILED"
+    | "CANCELLED";
   lat?: number;
   lng?: number;
   radius?: number;

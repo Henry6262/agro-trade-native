@@ -1,7 +1,7 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { DashboardStackParamList } from './types';
-import { UserDataProvider } from '../contexts/UserDataContext';
+import { UserDataProvider } from '@contexts/UserDataContext';
 
 import DashboardMainScreen from '../features/dashboard/screens/DashboardMainScreen';
 import CommandCenterScreen from '../features/dashboard/screens/admin/CommandCenterScreen';

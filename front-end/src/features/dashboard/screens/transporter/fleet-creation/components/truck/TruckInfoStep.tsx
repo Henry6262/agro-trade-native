@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, Pressable, TouchableOpacity, ScrollView } from 'react-native';
 import { X, ChevronLeft } from 'lucide-react-native';
-import { Input } from '../../../../../../../shared/components/Input';
-import { Button } from '../../../../../../../shared/components/Button';
+import { Input } from '@shared/components/Input';
+import { Button } from '@shared/components/Button';
 import { TruckInfo } from '../../types';
 
 interface TruckInfoStepProps {
@@ -45,15 +45,10 @@ export const TruckInfoStep: React.FC<TruckInfoStepProps> = ({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/50">
         <Pressable className="flex-1" onPress={onClose} />
-        
+
         <View className="bg-neutral-900 rounded-t-3xl max-h-[90%]">
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-neutral-800">
@@ -71,9 +66,7 @@ export const TruckInfoStep: React.FC<TruckInfoStepProps> = ({
           {/* Content - No progress indicator needed for single step */}
           <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 400 }}>
             <View className="p-6">
-              <Text className="text-lg font-semibold text-white mb-4">
-                Truck Information
-              </Text>
+              <Text className="text-lg font-semibold text-white mb-4">Truck Information</Text>
 
               {/* License Plate */}
               <View className="mb-4">
@@ -92,7 +85,9 @@ export const TruckInfoStep: React.FC<TruckInfoStepProps> = ({
                 <Input
                   placeholder="TR-12345"
                   value={formData.trailerRegistrationNumber}
-                  onChangeText={(text) => setFormData({ ...formData, trailerRegistrationNumber: text })}
+                  onChangeText={(text) =>
+                    setFormData({ ...formData, trailerRegistrationNumber: text })
+                  }
                   className="bg-neutral-800 border-neutral-700"
                 />
               </View>

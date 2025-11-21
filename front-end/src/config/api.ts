@@ -1,9 +1,6 @@
 // API Configuration
 import { ENV } from '../shared/utils/environment';
 
-// Determine if we're in development or production
-const isDev = __DEV__ || process.env.NODE_ENV === 'development';
-
 // Use dynamic environment-based API URL
 export const API_URL = ENV.apiUrl;
 
@@ -21,14 +18,14 @@ export const API_ENDPOINTS = {
     ME: '/auth/me',
     GOOGLE: '/auth/google',
   },
-  
+
   // Onboarding
   ONBOARDING: {
     SUBMIT: '/onboarding/submit',
     STATUS: '/onboarding/status',
     UPDATE: '/onboarding/update',
   },
-  
+
   // Products
   PRODUCTS: {
     LIST: '/products',
@@ -38,7 +35,7 @@ export const API_ENDPOINTS = {
     DELETE: (id: string) => `/products/${id}`,
     BY_ID: (id: string) => `/products/${id}`,
   },
-  
+
   // Bases
   BASES: {
     MY_BASES: '/bases/my-bases',
@@ -47,7 +44,7 @@ export const API_ENDPOINTS = {
     DELETE: (id: string) => `/bases/${id}`,
     SET_PRIMARY: (id: string) => `/bases/${id}/set-primary`,
   },
-  
+
   // Location
   LOCATION: {
     GEOCODE: '/location/geocode',
@@ -57,7 +54,7 @@ export const API_ENDPOINTS = {
     SAVE: '/location/save',
     COUNTRIES: '/location/countries',
   },
-  
+
   // Admin
   ADMIN: {
     PRICING_ZONES: '/admin/pricing-zones',
@@ -85,7 +82,11 @@ export const RETRY_CONFIG = {
 export const UPLOAD_CONFIG = {
   maxFileSize: 10 * 1024 * 1024, // 10MB
   allowedImageTypes: ['image/jpeg', 'image/png', 'image/webp'],
-  allowedDocumentTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+  allowedDocumentTypes: [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ],
 };
 
 export default {

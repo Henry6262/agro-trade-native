@@ -14,15 +14,10 @@ export const CreationTypeSelector: React.FC<CreationTypeSelectorProps> = ({
   onSelectType,
 }) => {
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/50">
         <Pressable className="flex-1" onPress={onClose} />
-        
+
         <View className="bg-neutral-900 rounded-t-3xl">
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-neutral-800">
@@ -34,9 +29,7 @@ export const CreationTypeSelector: React.FC<CreationTypeSelectorProps> = ({
 
           {/* Content */}
           <View className="p-6">
-            <Text className="text-neutral-400 mb-6">
-              Choose what you want to add to your fleet
-            </Text>
+            <Text className="text-neutral-400 mb-6">Choose what you want to add to your fleet</Text>
 
             {/* Truck Option */}
             <TouchableOpacity
@@ -49,9 +42,7 @@ export const CreationTypeSelector: React.FC<CreationTypeSelectorProps> = ({
                   <Truck size={32} color="#10B981" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-lg font-semibold text-white mb-1">
-                    Add New Truck
-                  </Text>
+                  <Text className="text-lg font-semibold text-white mb-1">Add New Truck</Text>
                   <Text className="text-sm text-neutral-400">
                     Register a new vehicle to your fleet
                   </Text>
@@ -70,9 +61,7 @@ export const CreationTypeSelector: React.FC<CreationTypeSelectorProps> = ({
                   <User size={32} color="#3B82F6" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-lg font-semibold text-white mb-1">
-                    Add New Driver
-                  </Text>
+                  <Text className="text-lg font-semibold text-white mb-1">Add New Driver</Text>
                   <Text className="text-sm text-neutral-400">
                     Add a driver to operate your vehicles
                   </Text>

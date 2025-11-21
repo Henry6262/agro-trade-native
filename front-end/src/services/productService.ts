@@ -1,10 +1,5 @@
 import { apiClient } from './api';
-import {
-  Product,
-  ProductCategory,
-  ApiResponse,
-  PaginatedResponse,
-} from '../shared/types';
+import { Product, ProductCategory, ApiResponse, PaginatedResponse } from '../shared/types';
 
 export interface ProductsListParams {
   page?: number;
@@ -24,14 +19,16 @@ export const productService = {
   // Get products list with filtering and pagination
   getProducts: async (params: ProductsListParams = {}): Promise<PaginatedResponse<Product>> => {
     const queryParams = new URLSearchParams();
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         queryParams.append(key, String(value));
       }
     });
 
-    const response = await apiClient.get<PaginatedResponse<Product>>(`/products?${queryParams.toString()}`);
+    const response = await apiClient.get<PaginatedResponse<Product>>(
+      `/products?${queryParams.toString()}`
+    );
     return response.data;
   },
 
@@ -93,11 +90,10 @@ export const productService = {
   },
 
   // Get similar products
-  getSimilarProducts: async (
-    productId: string,
-    limit: number = 5
-  ): Promise<Product[]> => {
-    const response = await apiClient.get<Product[]>(`/products/${productId}/similar?limit=${limit}`);
+  getSimilarProducts: async (productId: string, limit: number = 5): Promise<Product[]> => {
+    const response = await apiClient.get<Product[]>(
+      `/products/${productId}/similar?limit=${limit}`
+    );
     return response.data;
   },
 
@@ -127,14 +123,16 @@ export const productService = {
     productId: string,
     page: number = 1,
     limit: number = 10
-  ): Promise<PaginatedResponse<{
-    id: string;
-    userId: string;
-    userName: string;
-    rating: number;
-    review: string;
-    createdAt: string;
-  }>> => {
+  ): Promise<
+    PaginatedResponse<{
+      id: string;
+      userId: string;
+      userName: string;
+      rating: number;
+      review: string;
+      createdAt: string;
+    }>
+  > => {
     const response = await apiClient.get<PaginatedResponse<any>>(
       `/products/${productId}/reviews?page=${page}&limit=${limit}`
     );
@@ -158,11 +156,7 @@ export const productService = {
   },
 
   // Report product
-  reportProduct: async (
-    productId: string,
-    reason: string,
-    description?: string
-  ): Promise<void> => {
+  reportProduct: async (productId: string, reason: string, description?: string): Promise<void> => {
     await apiClient.post(`/products/${productId}/report`, {
       reason,
       description,

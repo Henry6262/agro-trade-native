@@ -12,10 +12,30 @@
       "distribution": "internal"
     },
     "production": {
+      "autoIncrement": true,
+      "ios": {
+        "simulator": false,
+        "buildConfiguration": "Release"
+      }
+    },
+    "testflight": {
+      "distribution": "store",
+      "env": {
+        "EXPO_PUBLIC_ENVIRONMENT": "production"
+      },
+      "ios": {
+        "simulator": false,
+        "buildConfiguration": "Release"
+      },
       "autoIncrement": true
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "henrymk20@icloud.com",
+        "appleTeamId": "A4W6U32K3F"
+      }
+    }
   }
 }

@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-} from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import {
   Check,
   X,
@@ -29,31 +25,34 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
   className = '',
   showHeader = true,
 }) => {
-  
   // Transform existing data into comparison structure
   const generateSpecificationMatches = (): SpecificationMatch[] => {
     const matches: SpecificationMatch[] = [];
-    
+
     // Process buyer requirements
     buyerRequirements.forEach((requirement) => {
       const reqParts = requirement.split(':');
       const reqName = reqParts[0]?.trim() || requirement;
       const reqValue = reqParts[1]?.trim() || '';
-      
+
       // Try to find matching offer specification
-      const matchingOfferSpec = offerSpecifications.find(offerSpec => 
-        offerSpec.name?.toLowerCase().includes(reqName.toLowerCase()) ||
-        reqName.toLowerCase().includes(offerSpec.name?.toLowerCase()) ||
-        offerSpec.valueText?.toLowerCase().includes(reqName.toLowerCase())
+      const matchingOfferSpec = offerSpecifications.find(
+        (offerSpec) =>
+          offerSpec.name?.toLowerCase().includes(reqName.toLowerCase()) ||
+          reqName.toLowerCase().includes(offerSpec.name?.toLowerCase()) ||
+          offerSpec.valueText?.toLowerCase().includes(reqName.toLowerCase())
       );
-      
+
       let matchType: MatchType = 'missing';
       let score = 0;
       let message = '';
-      
+
       if (matchingOfferSpec) {
-        const offerValue = matchingOfferSpec.valueText || matchingOfferSpec.valueNumber?.toString() || matchingOfferSpec.value;
-        
+        const offerValue =
+          matchingOfferSpec.valueText ||
+          matchingOfferSpec.valueNumber?.toString() ||
+          matchingOfferSpec.value;
+
         if (reqValue && offerValue) {
           // Try to compare values
           if (reqValue.toLowerCase() === offerValue.toLowerCase()) {
@@ -88,7 +87,7 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
           message = 'Specification provided but no comparison value';
         }
       }
-      
+
       matches.push({
         specification: {
           id: `req_${matches.length}`,
@@ -97,26 +96,33 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
           category: 'quality',
           priority: 'required',
         } as BuyerSpecification,
-        offerValue: matchingOfferSpec ? {
-          id: `offer_${matches.length}`,
-          name: matchingOfferSpec.name || reqName,
-          value: matchingOfferSpec.valueText || matchingOfferSpec.valueNumber || matchingOfferSpec.value || 'N/A',
-          category: 'quality',
-          matchesRequirement: matchType === 'exact' || matchType === 'close',
-        } as OfferSpecification : undefined,
+        offerValue: matchingOfferSpec
+          ? ({
+              id: `offer_${matches.length}`,
+              name: matchingOfferSpec.name || reqName,
+              value:
+                matchingOfferSpec.valueText ||
+                matchingOfferSpec.valueNumber ||
+                matchingOfferSpec.value ||
+                'N/A',
+              category: 'quality',
+              matchesRequirement: matchType === 'exact' || matchType === 'close',
+            } as OfferSpecification)
+          : undefined,
         matchType,
         score,
         message,
       });
     });
-    
+
     // Add offer specifications that don't match any requirements
     offerSpecifications.forEach((offerSpec) => {
-      const alreadyMatched = matches.some(match => 
-        match.offerValue?.name === offerSpec.name ||
-        offerSpec.name?.toLowerCase().includes(match.specification.name.toLowerCase())
+      const alreadyMatched = matches.some(
+        (match) =>
+          match.offerValue?.name === offerSpec.name ||
+          offerSpec.name?.toLowerCase().includes(match.specification.name.toLowerCase())
       );
-      
+
       if (!alreadyMatched && offerSpec.name) {
         matches.push({
           specification: {
@@ -139,65 +145,77 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
         });
       }
     });
-    
+
     return matches;
   };
-  
+
   const isNumericComparison = (req: string, offer: string): boolean => {
     const reqNum = extractNumber(req);
     const offerNum = extractNumber(offer);
     return reqNum !== null && offerNum !== null;
   };
-  
+
   const extractNumber = (text: string): number | null => {
     const match = text.match(/(\d+(?:\.\d+)?)/);
     return match ? parseFloat(match[1]) : null;
   };
-  
+
   const compareNumericValues = (req: string, offer: string) => {
     const reqNum = extractNumber(req);
     const offerNum = extractNumber(offer);
-    
+
     if (reqNum === null || offerNum === null) {
       return { type: 'partial' as MatchType, score: 40, message: 'Could not compare values' };
     }
-    
+
     const difference = Math.abs(reqNum - offerNum);
     const percentageDiff = (difference / reqNum) * 100;
-    
+
     if (percentageDiff === 0) {
       return { type: 'exact' as MatchType, score: 100, message: 'Exact match' };
     } else if (percentageDiff <= 5) {
-      return { type: 'close' as MatchType, score: 90, message: `Very close (${percentageDiff.toFixed(1)}% diff)` };
+      return {
+        type: 'close' as MatchType,
+        score: 90,
+        message: `Very close (${percentageDiff.toFixed(1)}% diff)`,
+      };
     } else if (percentageDiff <= 15) {
-      return { type: 'partial' as MatchType, score: 70, message: `Acceptable (${percentageDiff.toFixed(1)}% diff)` };
+      return {
+        type: 'partial' as MatchType,
+        score: 70,
+        message: `Acceptable (${percentageDiff.toFixed(1)}% diff)`,
+      };
     } else {
-      return { type: 'partial' as MatchType, score: 40, message: `Significant difference (${percentageDiff.toFixed(1)}% diff)` };
+      return {
+        type: 'partial' as MatchType,
+        score: 40,
+        message: `Significant difference (${percentageDiff.toFixed(1)}% diff)`,
+      };
     }
   };
-  
+
   const calculateTextSimilarity = (a: string, b: string): number => {
     const normalize = (str: string) => str.toLowerCase().replace(/[^\w]/g, '');
     const normA = normalize(a);
     const normB = normalize(b);
-    
+
     if (normA === normB) return 1;
     if (normA.length === 0 || normB.length === 0) return 0;
-    
+
     // Simple similarity based on common characters
     const shorter = normA.length < normB.length ? normA : normB;
     const longer = normA.length < normB.length ? normB : normA;
-    
+
     let matches = 0;
     for (let i = 0; i < shorter.length; i++) {
       if (longer.includes(shorter[i])) {
         matches++;
       }
     }
-    
+
     return matches / longer.length;
   };
-  
+
   const getMatchIcon = (matchType: MatchType) => {
     switch (matchType) {
       case 'exact':
@@ -214,7 +232,7 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
         return <Minus size={16} color="#6B7280" />;
     }
   };
-  
+
   const getMatchColors = (matchType: MatchType) => {
     switch (matchType) {
       case 'exact':
@@ -261,12 +279,16 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
         };
     }
   };
-  
+
   const specificationMatches = generateSpecificationMatches();
-  const overallScore = specificationMatches.length > 0 
-    ? Math.round(specificationMatches.reduce((sum, match) => sum + match.score, 0) / specificationMatches.length)
-    : 0;
-  
+  const overallScore =
+    specificationMatches.length > 0
+      ? Math.round(
+          specificationMatches.reduce((sum, match) => sum + match.score, 0) /
+            specificationMatches.length
+        )
+      : 0;
+
   return (
     <View className={`${className}`}>
       {showHeader && (
@@ -274,9 +296,7 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
           <View className="flex-row items-center justify-between">
             <Text className="text-white font-semibold text-lg">Specification Comparison</Text>
             <View className="bg-gradient-to-r from-blue-500/20 to-green-500/20 px-3 py-1 rounded-lg border border-blue-500/30">
-              <Text className="text-blue-400 font-bold text-sm">
-                {overallScore}% Overall Match
-              </Text>
+              <Text className="text-blue-400 font-bold text-sm">{overallScore}% Overall Match</Text>
             </View>
           </View>
           <Text className="text-neutral-400 text-sm mt-1">
@@ -284,21 +304,18 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
           </Text>
         </View>
       )}
-      
-      <ScrollView 
-        className="max-h-80" 
+
+      <ScrollView
+        className="max-h-80"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 16 }}
       >
         <View className="space-y-3">
           {specificationMatches.map((match, index) => {
             const colors = getMatchColors(match.matchType);
-            
+
             return (
-              <View 
-                key={index}
-                className={`${colors.bg} ${colors.border} border rounded-lg p-3`}
-              >
+              <View key={index} className={`${colors.bg} ${colors.border} border rounded-lg p-3`}>
                 <View className="flex-row items-start justify-between mb-2">
                   <View className="flex-1">
                     <View className="flex-row items-center">
@@ -308,18 +325,16 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
                       </Text>
                     </View>
                     {match.message && (
-                      <Text className={`${colors.label} text-xs mt-1`}>
-                        {match.message}
-                      </Text>
+                      <Text className={`${colors.label} text-xs mt-1`}>{match.message}</Text>
                     )}
                   </View>
-                  <View className={`px-2 py-1 rounded ${colors.bg} ${colors.border} border-opacity-50`}>
-                    <Text className={`${colors.text} text-xs font-bold`}>
-                      {match.score}%
-                    </Text>
+                  <View
+                    className={`px-2 py-1 rounded ${colors.bg} ${colors.border} border-opacity-50`}
+                  >
+                    <Text className={`${colors.text} text-xs font-bold`}>{match.score}%</Text>
                   </View>
                 </View>
-                
+
                 <View className="flex-row justify-between mt-2">
                   <View className="flex-1 mr-2">
                     <Text className="text-neutral-400 text-xs mb-1">Your Requirement</Text>
@@ -341,11 +356,13 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
               </View>
             );
           })}
-          
+
           {specificationMatches.length === 0 && (
             <View className="bg-neutral-800/50 rounded-lg p-6 items-center border border-neutral-700/50">
               <Info size={24} color="#6B7280" />
-              <Text className="text-neutral-400 font-medium mt-2">No Specifications to Compare</Text>
+              <Text className="text-neutral-400 font-medium mt-2">
+                No Specifications to Compare
+              </Text>
               <Text className="text-neutral-500 text-sm text-center mt-1">
                 No detailed specifications provided for comparison
               </Text>

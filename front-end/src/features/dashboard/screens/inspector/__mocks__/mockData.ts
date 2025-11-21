@@ -248,7 +248,8 @@ export const mockVerificationResult = {
       timestamp: new Date('2025-01-13T12:00:00'),
     },
   ],
-  notes: 'Sample tested according to ISO standards. Minor deviation in moisture content detected, likely due to storage conditions.',
+  notes:
+    'Sample tested according to ISO standards. Minor deviation in moisture content detected, likely due to storage conditions.',
   verificationStatus: 'PARTIALLY_VERIFIED',
   signature: 'digital-signature-hash-here',
   verifiedAt: new Date('2025-01-13T12:30:00'),

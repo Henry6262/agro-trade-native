@@ -10,7 +10,7 @@ global.mockFleetData = {
       registrationNumber: 'QTR-1234',
       capacity: 40,
       currentLocation: {
-        coordinates: { latitude: 25.2654, longitude: 51.5200 },
+        coordinates: { latitude: 25.2654, longitude: 51.52 },
         address: { city: 'Doha', state: 'Ad Dawhah', country: 'Qatar' },
         type: 'truck_location',
       },
@@ -22,7 +22,7 @@ global.mockFleetData = {
       registrationNumber: 'QTR-5678',
       capacity: 40,
       currentLocation: {
-        coordinates: { latitude: 25.2754, longitude: 51.5150 },
+        coordinates: { latitude: 25.2754, longitude: 51.515 },
         address: { city: 'Doha', state: 'Ad Dawhah', country: 'Qatar' },
         type: 'truck_location',
       },
@@ -34,7 +34,7 @@ global.mockFleetData = {
       registrationNumber: 'QTR-9012',
       capacity: 40,
       currentLocation: {
-        coordinates: { latitude: 25.2554, longitude: 51.5250 },
+        coordinates: { latitude: 25.2554, longitude: 51.525 },
         address: { city: 'Doha', state: 'Ad Dawhah', country: 'Qatar' },
         type: 'truck_location',
       },

@@ -1,11 +1,8 @@
 module.exports = function (api) {
   api.cache(true);
-  
+
   return {
-    presets: [
-      'babel-preset-expo',
-      'nativewind/babel'
-    ],
+    presets: ['babel-preset-expo', 'nativewind/babel'],
     plugins: [
       [
         'module-resolver',
@@ -13,6 +10,7 @@ module.exports = function (api) {
           root: ['./'],
           alias: {
             '@features': './src/features',
+            '@pages': './src/pages',
             '@shared': './src/shared',
             '@navigation': './src/navigation',
             '@stores': './src/stores',
@@ -22,7 +20,7 @@ module.exports = function (api) {
           },
         },
       ],
-      'react-native-reanimated/plugin'
+      'react-native-reanimated/plugin',
     ],
   };
 };

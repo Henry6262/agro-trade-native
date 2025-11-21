@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  Modal,
-  Animated,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Modal, Animated, ScrollView } from 'react-native';
 import {
   X,
   AlertTriangle,
@@ -122,26 +114,22 @@ export const RejectOfferModal: React.FC<RejectOfferModalProps> = ({
 
   const handleContinue = () => {
     if (!selectedReason) return;
-    
+
     if (selectedReason.requiresMessage && !message.trim()) {
       // Stay on selection step to allow message input
       return;
     }
-    
+
     setStep('confirm');
   };
 
   const handleConfirm = () => {
     if (!selectedReason) return;
-    
-    onConfirm(
-      offer.id, 
-      selectedReason.id, 
-      message.trim() || undefined
-    );
-    
+
+    onConfirm(offer.id, selectedReason.id, message.trim() || undefined);
+
     setStep('success');
-    
+
     // Auto-close after success animation
     setTimeout(() => {
       onClose();
@@ -165,7 +153,10 @@ export const RejectOfferModal: React.FC<RejectOfferModalProps> = ({
       statusBarTranslucent={true}
       presentationStyle="overFullScreen"
     >
-      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)' }} className="justify-center items-center p-6">
+      <View
+        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)' }}
+        className="justify-center items-center p-6"
+      >
         <Animated.View
           style={{
             transform: [{ scale: scaleAnim }],
@@ -202,7 +193,7 @@ export const RejectOfferModal: React.FC<RejectOfferModalProps> = ({
               <ScrollView className="max-h-80" showsVerticalScrollIndicator={false}>
                 <View className="p-6">
                   <Text className="text-white font-semibold mb-4">Select a reason:</Text>
-                  
+
                   <View className="space-y-3">
                     {REJECT_REASONS.map((reason) => (
                       <TouchableOpacity
@@ -216,20 +207,28 @@ export const RejectOfferModal: React.FC<RejectOfferModalProps> = ({
                       >
                         <View className="flex-row items-start justify-between">
                           <View className="flex-1">
-                            <Text className={`font-medium ${
-                              selectedReason?.id === reason.id ? 'text-red-400' : 'text-white'
-                            }`}>
+                            <Text
+                              className={`font-medium ${
+                                selectedReason?.id === reason.id ? 'text-red-400' : 'text-white'
+                              }`}
+                            >
                               {reason.label}
                             </Text>
-                            <Text className={`text-sm mt-1 ${
-                              selectedReason?.id === reason.id ? 'text-red-300' : 'text-neutral-400'
-                            }`}>
+                            <Text
+                              className={`text-sm mt-1 ${
+                                selectedReason?.id === reason.id
+                                  ? 'text-red-300'
+                                  : 'text-neutral-400'
+                              }`}
+                            >
                               {reason.description}
                             </Text>
                             {reason.requiresMessage && (
                               <View className="flex-row items-center mt-2">
                                 <MessageSquare size={14} color="#FBBF24" />
-                                <Text className="text-yellow-400 text-xs ml-1">Message required</Text>
+                                <Text className="text-yellow-400 text-xs ml-1">
+                                  Message required
+                                </Text>
                               </View>
                             )}
                           </View>
@@ -247,7 +246,8 @@ export const RejectOfferModal: React.FC<RejectOfferModalProps> = ({
                   {selectedReason?.requiresMessage && (
                     <View className="mt-6">
                       <Text className="text-white font-semibold mb-3">
-                        Additional details {selectedReason.requiresMessage ? '(required)' : '(optional)'}
+                        Additional details{' '}
+                        {selectedReason.requiresMessage ? '(required)' : '(optional)'}
                       </Text>
                       <TextInput
                         value={message}
@@ -277,10 +277,12 @@ export const RejectOfferModal: React.FC<RejectOfferModalProps> = ({
                   >
                     <Text className="text-white font-semibold">Cancel</Text>
                   </TouchableOpacity>
-                  
+
                   <TouchableOpacity
                     onPress={handleContinue}
-                    disabled={!selectedReason || (selectedReason?.requiresMessage && !message.trim())}
+                    disabled={
+                      !selectedReason || (selectedReason?.requiresMessage && !message.trim())
+                    }
                     className={`flex-1 rounded-lg py-3 items-center justify-center ${
                       selectedReason && (!selectedReason.requiresMessage || message.trim())
                         ? 'bg-red-500'
@@ -327,14 +329,16 @@ export const RejectOfferModal: React.FC<RejectOfferModalProps> = ({
                       Rejecting offer from {offer.seller?.name || 'Seller'}
                     </Text>
                   </View>
-                  
+
                   <View className="ml-7">
                     <Text className="text-red-300 font-medium mb-1">Reason:</Text>
                     <Text className="text-red-300 text-sm">{selectedReason.label}</Text>
-                    
+
                     {message.trim() && (
                       <>
-                        <Text className="text-red-300 font-medium mt-3 mb-1">Additional details:</Text>
+                        <Text className="text-red-300 font-medium mt-3 mb-1">
+                          Additional details:
+                        </Text>
                         <Text className="text-red-200 text-sm">{message}</Text>
                       </>
                     )}
@@ -347,11 +351,15 @@ export const RejectOfferModal: React.FC<RejectOfferModalProps> = ({
                   <View className="space-y-2">
                     <View className="flex-row justify-between">
                       <Text className="text-neutral-400">Price</Text>
-                      <Text className="text-white">€{offer.pricePerUnit.toFixed(2)} per {offer.unit}</Text>
+                      <Text className="text-white">
+                        €{offer.pricePerUnit.toFixed(2)} per {offer.unit}
+                      </Text>
                     </View>
                     <View className="flex-row justify-between">
                       <Text className="text-neutral-400">Quantity</Text>
-                      <Text className="text-white">{offer.quantity} {offer.unit}</Text>
+                      <Text className="text-white">
+                        {offer.quantity} {offer.unit}
+                      </Text>
                     </View>
                     <View className="flex-row justify-between">
                       <Text className="text-neutral-400">Total Value</Text>
@@ -367,8 +375,8 @@ export const RejectOfferModal: React.FC<RejectOfferModalProps> = ({
                   <View className="flex-row items-start">
                     <AlertTriangle size={16} color="#FBBF24" />
                     <Text className="text-yellow-300 text-sm ml-2 flex-1">
-                      The seller will be notified of your rejection and the reason provided. 
-                      This action cannot be undone.
+                      The seller will be notified of your rejection and the reason provided. This
+                      action cannot be undone.
                     </Text>
                   </View>
                 </View>
@@ -383,7 +391,7 @@ export const RejectOfferModal: React.FC<RejectOfferModalProps> = ({
                   >
                     <Text className="text-white font-semibold">Back</Text>
                   </TouchableOpacity>
-                  
+
                   <TouchableOpacity
                     onPress={handleConfirm}
                     disabled={isLoading}
@@ -412,29 +420,29 @@ export const RejectOfferModal: React.FC<RejectOfferModalProps> = ({
             <View className="p-8 items-center">
               <Animated.View
                 style={{
-                  transform: [{
-                    scale: scaleAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.5, 1.1],
-                    })
-                  }]
+                  transform: [
+                    {
+                      scale: scaleAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.5, 1.1],
+                      }),
+                    },
+                  ],
                 }}
                 className="w-20 h-20 bg-red-500/20 rounded-full items-center justify-center mb-6"
               >
                 <X size={40} color="#EF4444" />
               </Animated.View>
-              
-              <Text className="text-white font-bold text-xl text-center mb-2">
-                Offer Rejected
-              </Text>
-              
+
+              <Text className="text-white font-bold text-xl text-center mb-2">Offer Rejected</Text>
+
               <Text className="text-red-400 text-center mb-4">
                 The seller has been notified of your decision
               </Text>
-              
+
               <Text className="text-neutral-400 text-sm text-center">
-                Your rejection reason has been sent to help improve future offers. 
-                You can continue browsing other offers.
+                Your rejection reason has been sent to help improve future offers. You can continue
+                browsing other offers.
               </Text>
             </View>
           )}

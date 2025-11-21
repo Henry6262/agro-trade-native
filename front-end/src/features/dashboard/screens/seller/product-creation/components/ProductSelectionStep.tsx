@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProductSelectionDrawer } from '../../../../../../shared/components/ProductSelectionDrawer';
+import { ProductSelectionDrawer } from '@shared/components/ProductSelectionDrawer';
 import { ProductSelectionStepProps, ProductData } from '../types';
 
 export const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
@@ -8,7 +8,6 @@ export const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
   onNext,
   productMetadata,
 }) => {
-  
   const handleProductSelect = (productId: string, productData: any) => {
     // Transform the selected product data to match our ProductData interface
     const selectedProductData: ProductData = {

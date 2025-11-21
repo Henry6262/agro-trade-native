@@ -57,14 +57,11 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
   const getCurrentLocation = async () => {
     try {
       setIsLoadingLocation(true);
-      
+
       // Request permission
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert(
-          'Permission Denied',
-          'Please enable location services to use this feature.'
-        );
+        Alert.alert('Permission Denied', 'Please enable location services to use this feature.');
         return;
       }
 
@@ -82,7 +79,8 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
       if (reverseGeocode.length > 0) {
         const result = reverseGeocode[0];
         setLocation({
-          address: `${result.streetNumber || ''} ${result.street || ''}`.trim() || result.name || '',
+          address:
+            `${result.streetNumber || ''} ${result.street || ''}`.trim() || result.name || '',
           city: result.city || '',
           region: result.region || '',
           country: result.country || '',
@@ -106,13 +104,13 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
 
     try {
       setIsLoadingLocation(true);
-      
+
       // Geocode the search query
       const geocodeResults = await Location.geocodeAsync(searchQuery);
-      
+
       if (geocodeResults.length > 0) {
         const result = geocodeResults[0];
-        
+
         // Reverse geocode to get full address details
         const reverseGeocode = await Location.reverseGeocodeAsync({
           latitude: result.latitude,
@@ -122,7 +120,10 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
         if (reverseGeocode.length > 0) {
           const addressResult = reverseGeocode[0];
           setLocation({
-            address: `${addressResult.streetNumber || ''} ${addressResult.street || ''}`.trim() || addressResult.name || '',
+            address:
+              `${addressResult.streetNumber || ''} ${addressResult.street || ''}`.trim() ||
+              addressResult.name ||
+              '',
             city: addressResult.city || '',
             region: addressResult.region || '',
             country: addressResult.country || '',
@@ -143,19 +144,19 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!location.address.trim()) {
       newErrors.address = 'Address is required';
     }
-    
+
     if (!location.city.trim()) {
       newErrors.city = 'City is required';
     }
-    
+
     if (!location.country.trim()) {
       newErrors.country = 'Country is required';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -164,19 +165,19 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
     if (!validateForm()) {
       return;
     }
-    
+
     onConfirm(location);
   };
 
   const updateLocationField = (field: keyof LocationData, value: string) => {
-    setLocation(prev => ({
+    setLocation((prev) => ({
       ...prev,
       [field]: value,
     }));
-    
+
     // Clear error for this field
     if (errors[field]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
@@ -185,24 +186,14 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
       <View className="flex-1 bg-black/50">
-        <View 
-          className="bg-neutral-900 rounded-t-3xl mt-20"
-          style={{ flex: 1 }}
-        >
+        <View className="bg-neutral-900 rounded-t-3xl mt-20" style={{ flex: 1 }}>
           {/* Header */}
           <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
             <View>
               <Text className="text-xl font-bold text-white">Confirm Location</Text>
-              <Text className="text-sm text-neutral-400 mt-1">
-                Where is this product located?
-              </Text>
+              <Text className="text-sm text-neutral-400 mt-1">Where is this product located?</Text>
             </View>
             <TouchableOpacity onPress={onClose}>
               <X color="#ffffff" size={24} />
@@ -210,17 +201,15 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
           </View>
 
           {/* Content */}
-          <ScrollView 
+          <ScrollView
             className="flex-1 px-6"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 100 }}
           >
             {/* Location Search */}
             <View className="mt-6">
-              <Text className="text-lg font-semibold text-green-400 mb-4">
-                Search Location
-              </Text>
-              
+              <Text className="text-lg font-semibold text-green-400 mb-4">Search Location</Text>
+
               <View className="flex-row gap-2">
                 <TextInput
                   value={searchQuery}
@@ -242,7 +231,7 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
                   )}
                 </TouchableOpacity>
               </View>
-              
+
               {/* Current Location Button */}
               <TouchableOpacity
                 onPress={getCurrentLocation}
@@ -256,10 +245,8 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
 
             {/* Location Details */}
             <View className="mt-6">
-              <Text className="text-lg font-semibold text-green-400 mb-4">
-                Location Details
-              </Text>
-              
+              <Text className="text-lg font-semibold text-green-400 mb-4">Location Details</Text>
+
               {/* Address */}
               <View className="mb-4">
                 <Text className="text-neutral-300 mb-2">
@@ -278,7 +265,7 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
                   <Text className="text-red-400 text-xs mt-1">{errors.address}</Text>
                 )}
               </View>
-              
+
               {/* City */}
               <View className="mb-4">
                 <Text className="text-neutral-300 mb-2">
@@ -293,11 +280,9 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
                     errors.city ? 'border-red-500' : 'border-neutral-600'
                   } rounded-lg px-3 py-2 text-white`}
                 />
-                {errors.city && (
-                  <Text className="text-red-400 text-xs mt-1">{errors.city}</Text>
-                )}
+                {errors.city && <Text className="text-red-400 text-xs mt-1">{errors.city}</Text>}
               </View>
-              
+
               {/* Region/State */}
               <View className="mb-4">
                 <Text className="text-neutral-300 mb-2">Region/State</Text>
@@ -309,7 +294,7 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
                   className="bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
                 />
               </View>
-              
+
               {/* Country */}
               <View className="mb-4">
                 <Text className="text-neutral-300 mb-2">
@@ -328,7 +313,7 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
                   <Text className="text-red-400 text-xs mt-1">{errors.country}</Text>
                 )}
               </View>
-              
+
               {/* Coordinates (read-only) */}
               {location.latitude && location.longitude && (
                 <View className="p-3 bg-neutral-800 rounded-lg">

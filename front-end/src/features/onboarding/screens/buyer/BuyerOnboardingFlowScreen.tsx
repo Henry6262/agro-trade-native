@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { View, StatusBar, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../../../navigation/types';
-import { BuyerOnboarding } from '../../components/buyer/BuyerOnboarding';
-import { AuthModal } from '../../components/shared/AuthModal';
-import { useOnboardingStore } from '../../../../stores/onboarding.store';
+import type { OnboardingStackParamList } from '../../../../navigation/types';
+import { AuthModal } from '@pages/Onboarding/components/shared/AuthModal';
+import { BuyerOnboarding } from '@pages/Onboarding/sections/Buyer/components/BuyerOnboarding';
+import { useOnboardingStore } from '@stores/onboarding.store';
 
 type BuyerOnboardingFlowScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
+  OnboardingStackParamList,
   'BuyerOnboardingFlow'
 >;
 
@@ -24,10 +24,10 @@ export const BuyerOnboardingFlowScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     // Set user role to buyer when entering this flow
     onboardingStore.setRole('buyer');
-    
+
     // Save onboarding data when component mounts
     onboardingStore.saveOnboardingData?.().catch(console.error);
-    
+
     // Check if we're returning from Google OAuth
     const googleAuthData = onboardingStore.googleAuthData;
     if (googleAuthData?.isAuthenticated) {

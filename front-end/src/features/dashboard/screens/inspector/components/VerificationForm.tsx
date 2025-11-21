@@ -3,12 +3,9 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Image } fro
 import { Camera, FileText, CheckCircle, XCircle } from 'lucide-react-native';
 import { VerificationFormProps, VerificationStatus } from '../types';
 
-export const VerificationForm: React.FC<VerificationFormProps> = ({
-  job,
-  onSubmit,
-  onCancel,
-}) => {
+export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmit, onCancel }) => {
   const [verifiedSpecs, setVerifiedSpecs] = useState<Record<string, string>>({});
+  const [correctedSpecs, setCorrectedSpecs] = useState<Record<string, any>>({});
   const [testMethods, setTestMethods] = useState<Record<string, string>>({});
   const [notes, setNotes] = useState('');
   const [evidence, setEvidence] = useState<any[]>([]);
@@ -16,30 +13,27 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
     VerificationStatus.VERIFIED
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showCorrections, setShowCorrections] = useState(false);
 
   const specKeys = Object.keys(job.productDetails.claimedSpecs);
 
   const handleSpecChange = (key: string, value: string) => {
-    setVerifiedSpecs(prev => ({ ...prev, [key]: value }));
-    setErrors(prev => ({ ...prev, [key]: '' }));
+    setVerifiedSpecs((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => ({ ...prev, [key]: '' }));
   };
 
   const handleMethodChange = (key: string, value: string) => {
-    setTestMethods(prev => ({ ...prev, [key]: value }));
-    setErrors(prev => ({ ...prev, [`method-${key}`]: '' }));
+    setTestMethods((prev) => ({ ...prev, [key]: value }));
+    setErrors((prev) => ({ ...prev, [`method-${key}`]: '' }));
   };
 
   const handleAddPhoto = () => {
     // Mock photo picker
-    Alert.alert(
-      'Add Photo Evidence',
-      'Choose photo source',
-      [
-        { text: 'Camera', onPress: () => addMockPhoto('camera') },
-        { text: 'Gallery', onPress: () => addMockPhoto('gallery') },
-        { text: 'Cancel', style: 'cancel' },
-      ]
-    );
+    Alert.alert('Add Photo Evidence', 'Choose photo source', [
+      { text: 'Camera', onPress: () => addMockPhoto('camera') },
+      { text: 'Gallery', onPress: () => addMockPhoto('gallery') },
+      { text: 'Cancel', style: 'cancel' },
+    ]);
   };
 
   const addMockPhoto = (source: string) => {
@@ -49,14 +43,14 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
       caption: `Photo from ${source}`,
       timestamp: new Date(),
     };
-    setEvidence(prev => [...prev, newPhoto]);
+    setEvidence((prev) => [...prev, newPhoto]);
   };
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     // Check all specs have values
-    specKeys.forEach(key => {
+    specKeys.forEach((key) => {
       if (!verifiedSpecs[key]) {
         newErrors[key] = 'Required';
       }
@@ -84,20 +78,32 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
       jobId: job.id,
       inspectorId: 'inspector-001', // Would come from auth
       originalSpecs: job.productDetails.claimedSpecs,
-      verifiedSpecs: Object.keys(verifiedSpecs).reduce((acc, key) => {
-        acc[key] = `${verifiedSpecs[key]}%`; // Add unit
-        return acc;
-      }, {} as Record<string, string>),
-      testMethods: specKeys.map(key => ({
+      verifiedSpecs: Object.keys(verifiedSpecs).reduce(
+        (acc, key) => {
+          acc[key] = `${verifiedSpecs[key]}%`; // Add unit
+          return acc;
+        },
+        {} as Record<string, string>
+      ),
+      testMethods: specKeys.map((key) => ({
         parameter: key,
         method: testMethods[key] || '',
         equipment: 'Standard Equipment',
         standardUsed: 'ISO Standards',
       })),
       evidence,
-      notes,
+      notes: notes + (correctedSpecs.notes ? `\n\nCorrections: ${correctedSpecs.notes}` : ''),
       verificationStatus,
       verifiedAt: new Date(),
+      // Include product specification corrections if provided
+      productSpecifications:
+        Object.keys(correctedSpecs).length > 0
+          ? {
+              variety: correctedSpecs.variety || job.productDetails.claimedSpecs.variety,
+              grade: correctedSpecs.grade || job.productDetails.claimedSpecs.grade,
+              origin: correctedSpecs.origin || job.productDetails.claimedSpecs.origin,
+            }
+          : undefined,
     };
 
     onSubmit(result);
@@ -110,11 +116,9 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
 
         {/* Specifications */}
         <View className="mb-4">
-          <Text className="text-sm font-semibold text-gray-700 mb-2">
-            Verify Specifications
-          </Text>
-          
-          {specKeys.map(key => (
+          <Text className="text-sm font-semibold text-gray-700 mb-2">Verify Specifications</Text>
+
+          {specKeys.map((key) => (
             <View key={key} className="mb-4 bg-gray-50 p-3 rounded-lg">
               <Text className="text-sm font-medium text-gray-700 mb-1">
                 {key.charAt(0).toUpperCase() + key.slice(1)}
@@ -122,7 +126,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
               <Text className="text-xs text-gray-500 mb-2">
                 Claimed: {job.productDetails.claimedSpecs[key]}
               </Text>
-              
+
               <TextInput
                 testID={`input-${key}`}
                 placeholder="Verified value"
@@ -131,10 +135,8 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                 className={`bg-white border ${errors[key] ? 'border-red-500' : 'border-gray-300'} rounded px-3 py-2 mb-2`}
                 keyboardType="numeric"
               />
-              {errors[key] && (
-                <Text className="text-red-500 text-xs">{errors[key]}</Text>
-              )}
-              
+              {errors[key] && <Text className="text-red-500 text-xs">{errors[key]}</Text>}
+
               <TextInput
                 testID={`method-${key}`}
                 placeholder="Test method used"
@@ -149,11 +151,60 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
           ))}
         </View>
 
+        {/* Product Specification Corrections */}
+        <View className="mb-4">
+          <TouchableOpacity
+            onPress={() => setShowCorrections(!showCorrections)}
+            className="flex-row items-center justify-between bg-amber-50 p-3 rounded-lg"
+          >
+            <Text className="text-sm font-semibold text-amber-800">
+              Product Specification Corrections
+            </Text>
+            <Text className="text-amber-600">{showCorrections ? '▼' : '▶'}</Text>
+          </TouchableOpacity>
+
+          {showCorrections && (
+            <View className="mt-2 bg-amber-50 p-3 rounded-lg">
+              <Text className="text-xs text-amber-700 mb-2">
+                If seller-provided specifications are incorrect, enter corrected values:
+              </Text>
+
+              <TextInput
+                placeholder="Product variety (if different)"
+                value={correctedSpecs.variety || ''}
+                onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, variety: value }))}
+                className="bg-white border border-amber-300 rounded px-3 py-2 mb-2"
+              />
+
+              <TextInput
+                placeholder="Grade (if different)"
+                value={correctedSpecs.grade || ''}
+                onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, grade: value }))}
+                className="bg-white border border-amber-300 rounded px-3 py-2 mb-2"
+              />
+
+              <TextInput
+                placeholder="Origin (if different)"
+                value={correctedSpecs.origin || ''}
+                onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, origin: value }))}
+                className="bg-white border border-amber-300 rounded px-3 py-2 mb-2"
+              />
+
+              <TextInput
+                placeholder="Additional corrections notes"
+                value={correctedSpecs.notes || ''}
+                onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, notes: value }))}
+                className="bg-white border border-amber-300 rounded px-3 py-2"
+                multiline
+                numberOfLines={2}
+              />
+            </View>
+          )}
+        </View>
+
         {/* Verification Status */}
         <View className="mb-4">
-          <Text className="text-sm font-semibold text-gray-700 mb-2">
-            Verification Status
-          </Text>
+          <Text className="text-sm font-semibold text-gray-700 mb-2">Verification Status</Text>
           <View className="flex-row">
             <TouchableOpacity
               testID="status-verified"
@@ -164,14 +215,21 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                   : 'bg-white border-gray-300'
               }`}
             >
-              <CheckCircle size={16} color={verificationStatus === VerificationStatus.VERIFIED ? '#16a34a' : '#9ca3af'} />
-              <Text className={`ml-1 text-sm ${
-                verificationStatus === VerificationStatus.VERIFIED ? 'text-green-700' : 'text-gray-600'
-              }`}>
+              <CheckCircle
+                size={16}
+                color={verificationStatus === VerificationStatus.VERIFIED ? '#16a34a' : '#9ca3af'}
+              />
+              <Text
+                className={`ml-1 text-sm ${
+                  verificationStatus === VerificationStatus.VERIFIED
+                    ? 'text-green-700'
+                    : 'text-gray-600'
+                }`}
+              >
                 Verified
               </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               testID="status-partially-verified"
               onPress={() => setVerificationStatus(VerificationStatus.PARTIALLY_VERIFIED)}
@@ -181,13 +239,17 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                   : 'bg-white border-gray-300'
               }`}
             >
-              <Text className={`text-sm ${
-                verificationStatus === VerificationStatus.PARTIALLY_VERIFIED ? 'text-yellow-700' : 'text-gray-600'
-              }`}>
+              <Text
+                className={`text-sm ${
+                  verificationStatus === VerificationStatus.PARTIALLY_VERIFIED
+                    ? 'text-yellow-700'
+                    : 'text-gray-600'
+                }`}
+              >
                 Partial
               </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               testID="status-failed"
               onPress={() => setVerificationStatus(VerificationStatus.FAILED)}
@@ -197,10 +259,17 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
                   : 'bg-white border-gray-300'
               }`}
             >
-              <XCircle size={16} color={verificationStatus === VerificationStatus.FAILED ? '#dc2626' : '#9ca3af'} />
-              <Text className={`ml-1 text-sm ${
-                verificationStatus === VerificationStatus.FAILED ? 'text-red-700' : 'text-gray-600'
-              }`}>
+              <XCircle
+                size={16}
+                color={verificationStatus === VerificationStatus.FAILED ? '#dc2626' : '#9ca3af'}
+              />
+              <Text
+                className={`ml-1 text-sm ${
+                  verificationStatus === VerificationStatus.FAILED
+                    ? 'text-red-700'
+                    : 'text-gray-600'
+                }`}
+              >
                 Failed
               </Text>
             </TouchableOpacity>
@@ -209,10 +278,8 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
 
         {/* Evidence */}
         <View className="mb-4">
-          <Text className="text-sm font-semibold text-gray-700 mb-2">
-            Evidence
-          </Text>
-          
+          <Text className="text-sm font-semibold text-gray-700 mb-2">Evidence</Text>
+
           <TouchableOpacity
             testID="photo-picker"
             onPress={handleAddPhoto}
@@ -221,7 +288,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
             <Camera size={20} color="#6b7280" />
             <Text className="ml-2 text-gray-600">Add Photo Evidence</Text>
           </TouchableOpacity>
-          
+
           {evidence.length > 0 && (
             <View className="mt-2">
               {evidence.map((item, index) => (
@@ -237,7 +304,10 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
         {/* Notes */}
         <View className="mb-4">
           <Text className="text-sm font-semibold text-gray-700 mb-2">
-            Notes {verificationStatus === VerificationStatus.FAILED && <Text className="text-red-500">*</Text>}
+            Notes{' '}
+            {verificationStatus === VerificationStatus.FAILED && (
+              <Text className="text-red-500">*</Text>
+            )}
           </Text>
           <TextInput
             testID="verification-notes"
@@ -249,20 +319,15 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({
             className={`bg-white border ${errors.notes ? 'border-red-500' : 'border-gray-300'} rounded px-3 py-2`}
             textAlignVertical="top"
           />
-          {errors.notes && (
-            <Text className="text-red-500 text-xs mt-1">{errors.notes}</Text>
-          )}
+          {errors.notes && <Text className="text-red-500 text-xs mt-1">{errors.notes}</Text>}
         </View>
 
         {/* Actions */}
         <View className="flex-row">
-          <TouchableOpacity
-            onPress={onCancel}
-            className="flex-1 bg-gray-200 py-3 rounded-lg mr-2"
-          >
+          <TouchableOpacity onPress={onCancel} className="flex-1 bg-gray-200 py-3 rounded-lg mr-2">
             <Text className="text-center text-gray-700 font-medium">Cancel</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             onPress={handleSubmit}
             className="flex-1 bg-green-600 py-3 rounded-lg ml-2"

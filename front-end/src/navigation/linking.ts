@@ -17,7 +17,7 @@ export const linking = {
       // Flattened onboarding screens
       RoleSelection: 'onboarding/role',
       SellerOnboardingFlow: 'onboarding/seller',
-      BuyerOnboardingFlow: 'onboarding/buyer', 
+      BuyerOnboardingFlow: 'onboarding/buyer',
       TransporterOnboardingFlow: 'onboarding/transporter',
       OnboardingComplete: 'onboarding/complete',
       Auth: {

@@ -61,7 +61,7 @@ const ProductCreationFlowComponent: React.FC<ProductCreationFlowProps> = ({
   // Handle location confirmation and submit
   const handleLocationConfirm = async (location: any) => {
     updateLocation(location);
-    
+
     // Submit the product after location is confirmed
     const success = await submitProduct();
     if (success && onSuccess) {

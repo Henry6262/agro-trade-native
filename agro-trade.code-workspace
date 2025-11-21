@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"name": "agro-trade",
+			"path": "."
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "interactive",
+		"java.compile.nullAnalysis.mode": "disabled"
+	}
+}

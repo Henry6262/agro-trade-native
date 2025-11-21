@@ -7,7 +7,7 @@ interface MarketplaceState {
   products: Product[];
   featuredProducts: Product[];
   categories: ProductCategory[];
-  
+
   // Search and filtering
   searchQuery: string;
   selectedCategory: string | null;
@@ -17,12 +17,12 @@ interface MarketplaceState {
     location: string | null;
     rating: number | null;
   };
-  
+
   // UI state
   isLoading: boolean;
   isRefreshing: boolean;
   error: string | null;
-  
+
   // Pagination
   pagination: {
     page: number;

@@ -1,10 +1,13 @@
-import { calculateRoute, calculateMultipleRoutes } from '../../../../src/features/dashboard/screens/transporter/maps/api/routeApi';
-import { RouteData, Location } from '../../../../src/features/dashboard/screens/transporter/maps/types';
+import {
+  calculateRoute,
+  calculateMultipleRoutes,
+} from '../../../../src/features/dashboard/screens/transporter/maps/api/routeApi';
+import { Location } from '../../../../src/features/dashboard/screens/transporter/maps/types';
 
 describe('Route Calculation Contract', () => {
   describe('POST /api/routes/calculate', () => {
     const truckLocation: Location = {
-      coordinates: { latitude: 25.2654, longitude: 51.5200 },
+      coordinates: { latitude: 25.2654, longitude: 51.52 },
       address: { city: 'Doha', state: 'Ad Dawhah', country: 'Qatar' },
       type: 'truck_location',
     };
@@ -22,7 +25,7 @@ describe('Route Calculation Contract', () => {
     };
 
     const deliveryLocation: Location = {
-      coordinates: { latitude: 25.2854, longitude: 51.5310 },
+      coordinates: { latitude: 25.2854, longitude: 51.531 },
       address: {
         city: 'Doha',
         state: 'Ad Dawhah',
@@ -93,10 +96,8 @@ describe('Route Calculation Contract', () => {
       expect(route.distance).toBeDefined();
       expect(route.distance.toPickup).toBeGreaterThan(0);
       expect(route.distance.toDelivery).toBeGreaterThan(0);
-      expect(route.distance.total).toBe(
-        route.distance.toPickup + route.distance.toDelivery
-      );
-      
+      expect(route.distance.total).toBe(route.distance.toPickup + route.distance.toDelivery);
+
       // Reasonable distance ranges for Qatar (in km)
       expect(route.distance.total).toBeGreaterThan(1);
       expect(route.distance.total).toBeLessThan(200);
@@ -114,9 +115,7 @@ describe('Route Calculation Contract', () => {
       expect(route.duration).toBeDefined();
       expect(route.duration.toPickup).toBeGreaterThan(0);
       expect(route.duration.toDelivery).toBeGreaterThan(0);
-      expect(route.duration.total).toBe(
-        route.duration.toPickup + route.duration.toDelivery
-      );
+      expect(route.duration.total).toBe(route.duration.toPickup + route.duration.toDelivery);
 
       // Reasonable duration ranges (in minutes)
       expect(route.duration.total).toBeGreaterThan(5);
@@ -125,15 +124,33 @@ describe('Route Calculation Contract', () => {
 
     it('should assign correct colors to routes', async () => {
       const colors = ['#3B82F6', '#10B981', '#F97316', '#8B5CF6', '#EC4899'];
-      
-      const route1 = await calculateRoute('truck-001', 'T1', truckLocation, pickupLocation, deliveryLocation);
-      const route2 = await calculateRoute('truck-002', 'T2', truckLocation, pickupLocation, deliveryLocation);
-      const route3 = await calculateRoute('truck-003', 'T3', truckLocation, pickupLocation, deliveryLocation);
+
+      const route1 = await calculateRoute(
+        'truck-001',
+        'T1',
+        truckLocation,
+        pickupLocation,
+        deliveryLocation
+      );
+      const route2 = await calculateRoute(
+        'truck-002',
+        'T2',
+        truckLocation,
+        pickupLocation,
+        deliveryLocation
+      );
+      const route3 = await calculateRoute(
+        'truck-003',
+        'T3',
+        truckLocation,
+        pickupLocation,
+        deliveryLocation
+      );
 
       expect(colors).toContain(route1.color);
       expect(colors).toContain(route2.color);
       expect(colors).toContain(route3.color);
-      
+
       // Different trucks should get different colors
       expect(route1.color).not.toBe(route2.color);
       expect(route2.color).not.toBe(route3.color);
@@ -161,18 +178,14 @@ describe('Route Calculation Contract', () => {
       ];
 
       const startTime = Date.now();
-      const routes = await calculateMultipleRoutes(
-        trucks,
-        pickupLocation,
-        deliveryLocation
-      );
+      const routes = await calculateMultipleRoutes(trucks, pickupLocation, deliveryLocation);
       const endTime = Date.now();
 
       expect(routes).toHaveLength(3);
       expect(endTime - startTime).toBeLessThan(2000); // Should complete within 2 seconds
-      
+
       // Each route should be unique
-      const truckIds = routes.map(r => r.truckId);
+      const truckIds = routes.map((r) => r.truckId);
       expect(new Set(truckIds).size).toBe(3);
     });
 
@@ -184,13 +197,7 @@ describe('Route Calculation Contract', () => {
       };
 
       await expect(
-        calculateRoute(
-          'truck-001',
-          'T1',
-          invalidLocation,
-          pickupLocation,
-          deliveryLocation
-        )
+        calculateRoute('truck-001', 'T1', invalidLocation, pickupLocation, deliveryLocation)
       ).rejects.toThrow('Invalid coordinates');
     });
 
@@ -229,13 +236,13 @@ describe('Route Calculation Contract', () => {
 
       expect(route.alternativeRoutes).toBeDefined();
       expect(Array.isArray(route.alternativeRoutes)).toBe(true);
-      
+
       if (route.alternativeRoutes && route.alternativeRoutes.length > 0) {
         const alt = route.alternativeRoutes[0];
         expect(alt).toHaveProperty('polyline');
         expect(alt).toHaveProperty('distance');
         expect(alt).toHaveProperty('duration');
-        
+
         // Alternative route should be different
         expect(alt.polyline).not.toBe(route.polyline);
       }

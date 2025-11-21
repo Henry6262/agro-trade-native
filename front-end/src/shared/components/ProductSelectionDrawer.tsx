@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { Check } from 'lucide-react-native';
-import { useProductStore } from '../../stores/product.store';
+import { useProductStore } from '@stores/product.store';
 
 interface ProductSelectionDrawerProps {
   visible: boolean;
@@ -31,10 +31,10 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
   selectedProducts = [],
 }) => {
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>(selectedProducts);
-  
+
   // Ensure products is always an array, handle both direct array and response object
   const productsRaw = useProductStore((state) => state.products);
-  const products = Array.isArray(productsRaw) ? productsRaw : (productsRaw?.data || []);
+  const products = Array.isArray(productsRaw) ? productsRaw : productsRaw?.data || [];
   const isLoadingProducts = useProductStore((state) => state.isLoadingProducts) || false;
   const fetchAllData = useProductStore((state) => state.fetchAllData);
 
@@ -43,7 +43,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
     // Check isLoadingProducts to prevent multiple simultaneous fetches
     if (visible && !isLoadingProducts) {
       // Check if we need to fetch products
-      const currentProducts = Array.isArray(productsRaw) ? productsRaw : (productsRaw?.data || []);
+      const currentProducts = Array.isArray(productsRaw) ? productsRaw : productsRaw?.data || [];
       if (currentProducts.length === 0) {
         fetchAllData().catch((error) => {
           console.error('Error fetching products:', error);
@@ -57,7 +57,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
   }, [selectedProducts]);
 
   const handleProductSelect = (productId: string) => {
-    const product = products.find(p => p.id === productId);
+    const product = products.find((p) => p.id === productId);
     if (!product) return;
 
     if (mode === 'single') {
@@ -75,16 +75,16 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
     } else {
       // For multiple selection, toggle selection
       const newSelection = selectedProductIds.includes(productId)
-        ? selectedProductIds.filter(id => id !== productId)
+        ? selectedProductIds.filter((id) => id !== productId)
         : [...selectedProductIds, productId];
-      
+
       setSelectedProductIds(newSelection);
     }
   };
 
   const handleConfirmMultiple = () => {
-    const selectedProductsData = selectedProductIds.map(id => {
-      const product = products.find(p => p.id === id);
+    const selectedProductsData = selectedProductIds.map((id) => {
+      const product = products.find((p) => p.id === id);
       return {
         id: product?.id,
         category: product?.category,
@@ -96,35 +96,38 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
         priceRangeMax: product?.priceRangeMax,
       };
     });
-    
+
     selectedProductIds.forEach((id, index) => {
       onProductSelect(id, selectedProductsData[index]);
     });
   };
 
   // Group products by category - handle undefined/null products array
-  const groupedProducts = (products || []).reduce((acc, product) => {
-    const category = product.category || 'Other';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(product);
-    return acc;
-  }, {} as Record<string, typeof products>);
+  const groupedProducts = (products || []).reduce(
+    (acc, product) => {
+      const category = product.category || 'Other';
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(product);
+      return acc;
+    },
+    {} as Record<string, typeof products>
+  );
 
   const getCategoryDisplayName = (category: string) => {
     const categoryNames: Record<string, string> = {
-      'SOFT_WHEAT': 'Soft Wheat',
-      'HARD_WHEAT': 'Hard Wheat',
-      'CORN': 'Corn',
-      'SOYBEANS': 'Soybeans',
-      'RICE': 'Rice',
-      'BARLEY': 'Barley',
-      'OATS': 'Oats',
-      'VEGETABLES': 'Vegetables',
-      'FRUITS': 'Fruits',
-      'DAIRY': 'Dairy',
-      'LIVESTOCK': 'Livestock',
+      SOFT_WHEAT: 'Soft Wheat',
+      HARD_WHEAT: 'Hard Wheat',
+      CORN: 'Corn',
+      SOYBEANS: 'Soybeans',
+      RICE: 'Rice',
+      BARLEY: 'Barley',
+      OATS: 'Oats',
+      VEGETABLES: 'Vegetables',
+      FRUITS: 'Fruits',
+      DAIRY: 'Dairy',
+      LIVESTOCK: 'Livestock',
     };
     return categoryNames[category] || category;
   };
@@ -149,12 +152,12 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
       presentationStyle="overFullScreen"
     >
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}>
-        <View 
+        <View
           className="bg-neutral-900 rounded-t-3xl"
-          style={{ 
+          style={{
             flex: 1,
             marginTop: Platform.OS === 'web' ? 80 : 100,
-            backgroundColor: '#171717'
+            backgroundColor: '#171717',
           }}
         >
           {/* Header */}
@@ -183,7 +186,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
               </TouchableOpacity>
             </View>
           ) : (
-            <ScrollView 
+            <ScrollView
               className="flex-1"
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ paddingBottom: 100 }}
@@ -193,18 +196,18 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
                   <Text className="text-lg font-semibold text-green-400 px-6 py-2">
                     {getCategoryDisplayName(category)}
                   </Text>
-                  
+
                   <View className="flex-row flex-wrap px-4">
                     {categoryProducts.map((product) => {
                       const isSelected = selectedProductIds.includes(product.id);
-                      
+
                       return (
                         <TouchableOpacity
                           key={product.id}
                           onPress={() => handleProductSelect(product.id)}
                           className="w-1/2 p-2"
                         >
-                          <View 
+                          <View
                             className={`bg-neutral-800 rounded-lg overflow-hidden border-2 ${
                               isSelected ? 'border-green-500' : 'border-transparent'
                             }`}
@@ -212,13 +215,13 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
                             {/* Product Image */}
                             <View className="aspect-square bg-neutral-700">
                               <Image
-                                source={{ 
-                                  uri: product.image || getFallbackImage(product.category) 
+                                source={{
+                                  uri: product.image || getFallbackImage(product.category),
                                 }}
                                 className="w-full h-full"
                                 resizeMode="cover"
                               />
-                              
+
                               {/* Selection Indicator */}
                               {isSelected && (
                                 <View className="absolute top-2 right-2 bg-green-500 rounded-full p-1">
@@ -226,20 +229,20 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
                                 </View>
                               )}
                             </View>
-                            
+
                             {/* Product Info */}
                             <View className="p-3">
                               <Text className="text-white font-medium text-sm" numberOfLines={2}>
                                 {product.displayName || product.name}
                               </Text>
-                              
+
                               {/* Price Range */}
                               {product.priceRangeMin && product.priceRangeMax && (
                                 <Text className="text-gray-400 text-xs mt-1">
                                   €{product.priceRangeMin} - €{product.priceRangeMax}/ton
                                 </Text>
                               )}
-                              
+
                               {/* Harvest Season */}
                               {product.harvestSeason && (
                                 <Text className="text-green-400 text-xs mt-1">
@@ -265,7 +268,8 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
                 className="bg-green-500 py-3 px-6 rounded-lg"
               >
                 <Text className="text-white text-center font-semibold">
-                  Select {selectedProductIds.length} Product{selectedProductIds.length > 1 ? 's' : ''}
+                  Select {selectedProductIds.length} Product
+                  {selectedProductIds.length > 1 ? 's' : ''}
                 </Text>
               </TouchableOpacity>
             </View>

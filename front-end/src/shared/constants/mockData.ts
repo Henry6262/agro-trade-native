@@ -243,12 +243,7 @@ export const MOCK_MARKET_INSIGHTS: MarketInsights = {
       totalQuantityDemanded: 3200,
     },
   ],
-  trendingProducts: [
-    'Hard Red Winter Wheat',
-    'Soybeans',
-    'Alfalfa Hay',
-    'Long Grain Rice',
-  ],
+  trendingProducts: ['Hard Red Winter Wheat', 'Soybeans', 'Alfalfa Hay', 'Long Grain Rice'],
   averagePrices: [
     {
       productId: 'wheat-hard-red-winter',

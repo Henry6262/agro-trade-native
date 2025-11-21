@@ -1,20 +1,50 @@
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { GoogleSignin, GoogleSigninConfig } from '@react-native-google-signin/google-signin';
 import { Platform } from 'react-native';
 
-export const configureGoogleSignIn = () => {
-  // Configure Google Sign-In
-  // Note: webClientId is the OAuth 2.0 Web client ID from Google Cloud Console
-  GoogleSignin.configure({
-    webClientId: '1008767127587-47m9aht5dh71pe8kre41hhmlogmgp9in.apps.googleusercontent.com',
-    // Request offline access to get serverAuthCode for backend verification
+let isConfigured = false;
+
+const buildConfig = (): GoogleSigninConfig => {
+  const webClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '';
+  const iosClientId =
+    process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID ||
+    process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ||
+    '';
+
+  return {
+    webClientId,
+    iosClientId: Platform.OS === 'ios' && iosClientId ? iosClientId : undefined,
     offlineAccess: true,
-    // Request ID token for backend verification
     forceCodeForRefreshToken: true,
-    // iOS specific client ID (if different from web)
-    iosClientId: Platform.OS === 'ios' ? '1008767127587-47m9aht5dh71pe8kre41hhmlogmgp9in.apps.googleusercontent.com' : undefined,
-    // Request these scopes
     scopes: ['profile', 'email'],
-  });
+  };
 };
+
+export const configureGoogleSignIn = (): void => {
+  if (Platform.OS === 'web') {
+    return;
+  }
+
+  if (isConfigured) {
+    return;
+  }
+
+  const config = buildConfig();
+
+  if (!config.webClientId) {
+    console.warn(
+      '[GoogleSignIn] Missing EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID. Google authentication will be disabled until it is provided.'
+    );
+    return;
+  }
+
+  GoogleSignin.configure(config);
+  isConfigured = true;
+};
+
+export const resetGoogleSignInConfig = () => {
+  isConfigured = false;
+};
+
+export const getGoogleSignInConfig = () => buildConfig();
 
 export default configureGoogleSignIn;

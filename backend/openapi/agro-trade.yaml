@@ -1,0 +1,7145 @@
+openapi: 3.0.0
+paths:
+  /auth/google:
+    get:
+      operationId: AuthController_googleAuth
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: &a1
+        - Auth
+  /auth/google/callback:
+    get:
+      operationId: AuthController_googleAuthCallback
+      parameters: []
+      responses:
+        "200":
+          description: ""
+      tags: *a1
+  /auth/google/mobile:
+    post:
+      operationId: AuthController_googleMobileAuth
+      summary: Authenticate mobile app users with Google OAuth
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleMobileAuthDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSuccessResponseDto"
+      tags: *a1
+  /auth/google/native:
+    post:
+      operationId: AuthController_googleNativeAuth
+      summary: Authenticate native apps with Google ID token
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleNativeAuthDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSuccessResponseDto"
+      tags: *a1
+  /auth/login:
+    post:
+      operationId: AuthController_login
+      summary: Authenticate user with email and password
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSuccessResponseDto"
+      tags: *a1
+  /auth/register:
+    post:
+      operationId: AuthController_register
+      summary: Register a new user
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSuccessResponseDto"
+      tags: *a1
+  /auth/register/transporter:
+    post:
+      operationId: AuthController_registerTransporter
+      summary: Register a new transporter
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransporterRegisterDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransporterRegistrationResponseDto"
+      tags: *a1
+  /auth/refresh:
+    post:
+      operationId: AuthController_refreshToken
+      summary: Refresh access token using a refresh token
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefreshTokenResponseDto"
+      tags: *a1
+  /auth/logout:
+    post:
+      operationId: AuthController_logout
+      summary: Logout current user
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogoutResponseDto"
+      tags: *a1
+      security:
+        - bearer: []
+  /auth/me:
+    get:
+      operationId: AuthController_getProfile
+      summary: Get authenticated user profile
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthProfileResponseDto"
+      tags: *a1
+      security:
+        - bearer: []
+  /onboarding/seller:
+    post:
+      operationId: OnboardingController_completeSellerOnboarding
+      summary: Complete seller onboarding
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SellerOnboardingDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingUserResponseDto"
+      tags: &a2
+        - Onboarding
+      security: &a3
+        - bearer: []
+  /onboarding/buyer:
+    post:
+      operationId: OnboardingController_completeBuyerOnboarding
+      summary: Complete buyer onboarding
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BuyerOnboardingDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingUserResponseDto"
+      tags: *a2
+      security: *a3
+  /onboarding/transporter:
+    post:
+      operationId: OnboardingController_completeTransporterOnboarding
+      summary: Complete transporter onboarding
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransporterOnboardingDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingUserResponseDto"
+      tags: *a2
+      security: *a3
+  /onboarding/status:
+    get:
+      operationId: OnboardingController_getOnboardingStatus
+      summary: Get onboarding status
+      parameters: []
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingStatusResponseDto"
+      tags: *a2
+      security: *a3
+  /products/metadata:
+    get:
+      operationId: ProductsController_getProductMetadata
+      summary: Get all product metadata with images
+      parameters: []
+      responses:
+        "200":
+          description: Returns product metadata including images and descriptions
+      tags: &a4
+        - products
+  /products/categories:
+    get:
+      operationId: ProductsController_getCategoriesWithMetadata
+      summary: Get all categories with metadata and available product count
+      parameters: []
+      responses:
+        "200":
+          description: Returns categories with their metadata and product counts
+      tags: *a4
+  /products:
+    get:
+      operationId: ProductsController_getAllProducts
+      summary: Get all available products
+      parameters: []
+      responses:
+        "200":
+          description: Returns all available products from database
+      tags: *a4
+  /products/category/{category}:
+    get:
+      operationId: ProductsController_getProductsByCategory
+      summary: Get products by category
+      parameters:
+        - name: category
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns products filtered by category
+      tags: *a4
+  /products/regions:
+    get:
+      operationId: ProductsController_getRegionsWithCities
+      summary: Get all regions with cities
+      parameters: []
+      responses:
+        "200":
+          description: Returns regions with their cities
+      tags: *a4
+  /products/specifications:
+    get:
+      operationId: ProductsController_getSpecificationTypes
+      summary: Get all specification types
+      parameters: []
+      responses:
+        "200":
+          description: Returns all available specification types
+      tags: *a4
+  /products/{id}:
+    get:
+      operationId: ProductsController_getProductById
+      summary: Get product by ID
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Returns a specific product
+      tags: *a4
+  /seller/listings:
+    post:
+      operationId: SellerController_createListing
+      summary: Create a sale listing
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateListingDto"
+      responses:
+        "200":
+          description: Created listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerCreateListingResponseDto"
+      tags: &a5
+        - Seller
+      security: &a6
+        - bearer: []
+    get:
+      operationId: SellerController_getMyListings
+      summary: Get seller listings
+      parameters: []
+      responses:
+        "200":
+          description: Seller listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SellerListingResponseDto"
+      tags: *a5
+      security: *a6
+  /seller/listings/{id}:
+    get:
+      operationId: SellerController_getListingById
+      summary: Get listing by id
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Seller listing detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerListingResponseDto"
+      tags: *a5
+      security: *a6
+  /seller/products:
+    get:
+      operationId: SellerController_getMyProducts
+      summary: Get seller products view
+      parameters: []
+      responses:
+        "200":
+          description: Seller products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SellerProductListingDto"
+      tags: *a5
+      security: *a6
+  /seller/offers:
+    get:
+      operationId: SellerController_getMyOffers
+      summary: Get offers for seller
+      parameters: []
+      responses:
+        "200":
+          description: Seller offers and stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerOffersResponseDto"
+      tags: *a5
+      security: *a6
+  /seller/trades:
+    get:
+      operationId: SellerController_getMyTrades
+      summary: Get active trades for seller
+      parameters: []
+      responses:
+        "200":
+          description: Seller trades
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  additionalProperties: true
+      tags: *a5
+      security: *a6
+  /seller/stats:
+    get:
+      operationId: SellerController_getMyStats
+      summary: Get seller statistics
+      parameters: []
+      responses:
+        "200":
+          description: Seller stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerStatsDto"
+      tags: *a5
+      security: *a6
+  /seller/listings/{id}/status:
+    patch:
+      operationId: SellerController_updateListingStatus
+      summary: Update listing status
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - draft
+                    - active
+                    - pending
+                    - sold
+                    - expired
+              required:
+                - status
+      responses:
+        "200":
+          description: Updated listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerListingResponseDto"
+      tags: *a5
+      security: *a6
+  /buyer/listings:
+    post:
+      operationId: BuyerController_createBuyListing
+      summary: Create a buy listing
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBuyListingDto"
+      responses:
+        "200":
+          description: Created buy listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuyListingResponseDto"
+      tags: &a7
+        - Buyer
+      security: &a8
+        - bearer: []
+    get:
+      operationId: BuyerController_getMyBuyListings
+      summary: Get buy listings for current user
+      parameters: []
+      responses:
+        "200":
+          description: Buyer listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BuyListingResponseDto"
+      tags: *a7
+      security: *a8
+  /buyer/listings/{id}:
+    get:
+      operationId: BuyerController_getBuyListingById
+      summary: Get buy listing by id
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Buy listing detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuyListingResponseDto"
+      tags: *a7
+      security: *a8
+    patch:
+      operationId: BuyerController_updateBuyListing
+      summary: Update buy listing
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBuyListingDto"
+      responses:
+        "200":
+          description: Updated listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuyListingResponseDto"
+      tags: *a7
+      security: *a8
+    delete:
+      operationId: BuyerController_deleteBuyListing
+      summary: Delete buy listing
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted buy listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuyListingResponseDto"
+      tags: *a7
+      security: *a8
+  /buyer/offers:
+    get:
+      operationId: BuyerController_getMyOffers
+      summary: Get offers for current buyer listings
+      parameters: []
+      responses:
+        "200":
+          description: Buyer offers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BuyerOfferSummaryDto"
+      tags: *a7
+      security: *a8
+  /buyer/trades:
+    get:
+      operationId: BuyerController_getMyTrades
+      summary: Get accepted trade offers for buyer
+      parameters: []
+      responses:
+        "200":
+          description: Buyer trades
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BuyerOfferSummaryDto"
+      tags: *a7
+      security: *a8
+  /buyer/stats:
+    get:
+      operationId: BuyerController_getMyStats
+      summary: Get buyer statistics
+      parameters: []
+      responses:
+        "200":
+          description: Buyer statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuyerStatsDto"
+      tags: *a7
+      security: *a8
+  /buyer/listings/{id}/status:
+    patch:
+      operationId: BuyerController_updateBuyListingStatus
+      summary: Update buy listing status
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - ACTIVE
+                    - FULFILLED
+                    - PARTIALLY_FULFILLED
+                    - EXPIRED
+                    - CANCELLED
+              required:
+                - status
+      responses:
+        "200":
+          description: Updated listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BuyListingResponseDto"
+      tags: *a7
+      security: *a8
+  /trade-operations:
+    post:
+      operationId: TradeOperationController_create
+      summary: Create a new trade operation
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTradeOperationDto"
+      responses:
+        "201":
+          description: Trade operation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeOperationResponseDto"
+        "400":
+          description: Invalid input data
+      tags: &a9
+        - Trade Operations
+      security: &a10
+        - bearer: []
+    get:
+      operationId: TradeOperationController_findAll
+      summary: Get all trade operations with filters
+      parameters:
+        - name: phase
+          required: false
+          in: query
+          schema:
+            enum:
+              - INITIATION
+              - SELLER_MATCHING
+              - SELLER_NEGOTIATION
+              - INSPECTION_PENDING
+              - TRANSPORT_MATCHING
+              - TRANSPORT_BIDDING
+              - IN_TRANSIT
+              - DELIVERED
+              - COMPLETED
+              - CANCELLED
+            type: string
+        - name: status
+          required: false
+          in: query
+          schema:
+            enum:
+              - ACTIVE
+              - ON_HOLD
+              - COMPLETED
+              - CANCELLED
+              - DISPUTED
+            type: string
+        - name: minProfitMargin
+          required: false
+          in: query
+          schema:
+            type: number
+        - name: limit
+          required: false
+          in: query
+          schema:
+            example: 10
+            type: number
+        - name: page
+          required: false
+          in: query
+          schema:
+            example: 1
+            type: number
+      responses:
+        "200":
+          description: List of trade operations
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeOperationListResponseDto"
+      tags: *a9
+      security: *a10
+  /trade-operations/analytics:
+    get:
+      operationId: TradeOperationController_getAnalytics
+      summary: Get trade analytics and profit metrics
+      parameters:
+        - name: startDate
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Trade analytics data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeAnalyticsDto"
+      tags: *a9
+      security: *a10
+  /trade-operations/{id}:
+    get:
+      operationId: TradeOperationController_findOne
+      summary: Get a specific trade operation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Trade operation details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeOperationResponseDto"
+        "404":
+          description: Trade operation not found
+      tags: *a9
+      security: *a10
+    put:
+      operationId: TradeOperationController_update
+      summary: Update a trade operation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTradeOperationDto"
+      responses:
+        "200":
+          description: Trade operation updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeOperationResponseDto"
+      tags: *a9
+      security: *a10
+    delete:
+      operationId: TradeOperationController_cancel
+      summary: Cancel a trade operation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Trade operation cancelled
+      tags: *a9
+      security: *a10
+  /trade-operations/{id}/profit:
+    get:
+      operationId: TradeOperationController_getProfit
+      summary: Get profit data for a trade operation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Trade operation profit data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeProfitResponseDto"
+        "404":
+          description: Trade operation not found
+      tags: *a9
+      security: *a10
+  /trade-operations/{id}/phase:
+    patch:
+      operationId: TradeOperationController_updatePhase
+      summary: Update the phase of a trade operation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Trade operation phase updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TradeOperationResponseDto"
+        "400":
+          description: Invalid phase transition
+        "404":
+          description: Trade operation not found
+      tags: *a9
+      security: *a10
+  /trade-operations/{id}/sellers:
+    post:
+      operationId: TradeOperationController_addSellers
+      summary: Add sellers to a trade operation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddSellersDto"
+      responses:
+        "200":
+          description: Sellers added successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddSellersResponseDto"
+      tags: *a9
+      security: *a10
+  /trade-operations/{id}/matching-sellers:
+    get:
+      operationId: TradeOperationController_findMatchingSellers
+      summary: Find matching sellers for a trade operation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+        - name: quality
+          required: false
+          in: query
+          schema:
+            enum:
+              - PREMIUM
+              - STANDARD
+              - ECONOMY
+              - ANY
+            type: string
+      responses:
+        "200":
+          description: List of matching sellers
+      tags: *a9
+      security: *a10
+  /trade-operations/{id}/optimize-transport:
+    post:
+      operationId: TradeOperationController_optimizeTransport
+      summary: Optimize transport route for a trade operation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transport route optimized
+      tags: *a9
+      security: *a10
+  /trade-operations/{id}/finalize:
+    post:
+      operationId: TradeOperationController_finalize
+      summary: Finalize a trade operation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FinalizeTradeDto"
+      responses:
+        "200":
+          description: Trade operation finalized
+        "400":
+          description: Cannot finalize trade operation
+      tags: *a9
+      security: *a10
+  /trade-operations/{id}/request-inspections:
+    post:
+      operationId: TradeOperationController_requestInspections
+      summary: Request inspections for selected sellers
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "201":
+          description: Inspection requests created
+      tags: *a9
+      security: *a10
+  /profit/{id}/profit:
+    get:
+      operationId: ProfitController_calculateProfit
+      summary: Calculate real-time profit for a trade operation
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+        - name: includeSensitivity
+          required: false
+          in: query
+          schema:
+            type: boolean
+        - name: includeRiskAssessment
+          required: false
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Profit calculation details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfitCalculationResponseDto"
+      tags: &a11
+        - Profit Calculations
+      security: &a12
+        - bearer: []
+  /profit/{id}/profit/estimate:
+    post:
+      operationId: ProfitController_estimateProfit
+      summary: Estimate profit with proposed prices
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profit estimation results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfitEstimationResponseDto"
+      tags: *a11
+      security: *a12
+  /profit/{id}/profit/history:
+    get:
+      operationId: ProfitController_getProfitHistory
+      summary: Get profit estimation history for a trade
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of profit estimations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProfitHistoryEntryDto"
+      tags: *a11
+      security: *a12
+  /profit/{id}/profit/compare:
+    post:
+      operationId: ProfitController_compareProfit
+      summary: Compare current profit with proposed changes
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profit comparison
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfitComparisonDto"
+      tags: *a11
+      security: *a12
+  /profit/profit/compare-scenarios:
+    post:
+      operationId: ProfitController_compareScenarios
+      summary: Compare profit across multiple scenarios
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+      responses:
+        "200":
+          description: Scenario comparison results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfitScenarioComparisonDto"
+      tags: *a11
+      security: *a12
+  /profit/{id}/profit/impact/{offerId}:
+    get:
+      operationId: ProfitController_calculateOfferImpact
+      summary: Calculate profit impact of a specific offer
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+        - name: offerId
+          required: true
+          in: path
+          description: Offer ID
+          schema:
+            type: string
+        - name: offerPrice
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: offerQuantity
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: offerType
+          required: true
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profit impact analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfitImpactResponseDto"
+      tags: *a11
+      security: *a12
+  /profit/{id}/profit/validation:
+    get:
+      operationId: ProfitController_validateProfit
+      summary: Validate profit margins meet requirements
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Profit validation results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfitValidationDto"
+      tags: *a11
+      security: *a12
+  /scenarios/generate:
+    post:
+      operationId: ScenarioController_generateScenarios
+      summary: Generate multiple pricing scenarios for optimal profit
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScenarioGenerationRequestDto"
+      responses:
+        "200":
+          description: Generated scenarios with analysis
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScenarioAnalysisResponseDto"
+      tags: &a13
+        - Price Scenarios
+      security: &a14
+        - bearer: []
+  /scenarios/sensitivity-analysis:
+    post:
+      operationId: ScenarioController_performSensitivityAnalysis
+      summary: Perform price sensitivity analysis
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SensitivityAnalysisRequestDto"
+      responses:
+        "200":
+          description: Sensitivity analysis results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SensitivityAnalysisResponseDto"
+      tags: *a13
+      security: *a14
+  /scenarios/compare-strategies:
+    post:
+      operationId: ScenarioController_compareStrategies
+      summary: Compare different pricing strategies
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StrategyComparisonRequestDto"
+      responses:
+        "200":
+          description: Strategy comparison results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StrategyComparisonResponseDto"
+      tags: *a13
+      security: *a14
+  /scenarios/quick-estimate:
+    post:
+      operationId: ScenarioController_quickEstimate
+      summary: Get quick profit estimate without creating trade operation
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuickEstimateDto"
+      responses:
+        "200":
+          description: Quick estimate results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuickEstimateResponseDto"
+      tags: *a13
+      security: *a14
+  /scenarios/{tradeOperationId}/scenarios:
+    get:
+      operationId: ScenarioController_getSavedScenarios
+      summary: Get saved scenarios for a trade operation
+      parameters:
+        - name: tradeOperationId
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+        - name: viability
+          required: false
+          in: query
+          schema:
+            enum:
+              - HIGH
+              - MEDIUM
+              - LOW
+              - UNVIABLE
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            example: 10
+            type: number
+      responses:
+        "200":
+          description: List of saved scenarios
+      tags: *a13
+      security: *a14
+  /scenarios/{tradeOperationId}/optimal:
+    get:
+      operationId: ScenarioController_getOptimalScenario
+      summary: Get the optimal scenario for a trade operation
+      parameters:
+        - name: tradeOperationId
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Optimal scenario details
+      tags: *a13
+      security: *a14
+  /scenarios/{tradeOperationId}/apply-scenario:
+    post:
+      operationId: ScenarioController_applyScenario
+      summary: Apply a specific scenario to a trade operation
+      parameters:
+        - name: tradeOperationId
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Scenario applied successfully
+      tags: *a13
+      security: *a14
+  /scenarios/market-analysis:
+    get:
+      operationId: ScenarioController_getMarketAnalysis
+      summary: Get market analysis for pricing decisions
+      parameters:
+        - name: productId
+          required: true
+          in: query
+          schema:
+            type: string
+        - name: region
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Market analysis data
+      tags: *a13
+      security: *a14
+  /scenarios/batch-analysis:
+    post:
+      operationId: ScenarioController_batchAnalysis
+      summary: Analyze multiple trade operations in batch
+      parameters: []
+      responses:
+        "200":
+          description: Batch analysis results
+      tags: *a13
+      security: *a14
+  /test/profit-demo:
+    get:
+      operationId: TestController_profitDemo
+      summary: Demo profit calculation without authentication
+      parameters: []
+      responses:
+        "200":
+          description: Profit calculation demo
+      tags: &a15
+        - Test Endpoints
+  /test/health:
+    get:
+      operationId: TestController_health
+      summary: Health check endpoint
+      parameters: []
+      responses:
+        "200":
+          description: Service is healthy
+      tags: *a15
+  /transport/estimate:
+    post:
+      operationId: TransportController_estimateCost
+      summary: Estimate transport cost for a route
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransportEstimationRequestDto"
+      responses:
+        "200":
+          description: Transport cost estimation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportEstimationResponseDto"
+      tags: &a16
+        - Transport
+      security: &a17
+        - bearer: []
+  /transport/optimize-route:
+    post:
+      operationId: TransportController_optimizeRoute
+      summary: Optimize transport route for multiple pickups
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RouteOptimizationRequestDto"
+      responses:
+        "200":
+          description: Optimized route details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RouteOptimizationResponseDto"
+      tags: *a16
+      security: *a17
+  /transport/settings:
+    get:
+      operationId: TransportController_getSettings
+      summary: Get current transport cost settings
+      parameters: []
+      responses:
+        "200":
+          description: Current transport cost settings
+      tags: *a16
+      security: *a17
+    put:
+      operationId: TransportController_updateSettings
+      summary: Update transport cost settings
+      parameters: []
+      responses:
+        "200":
+          description: Settings updated successfully
+      tags: *a16
+      security: *a17
+  /transport/settings/history:
+    get:
+      operationId: TransportController_getSettingsHistory
+      summary: Get transport settings history
+      parameters:
+        - name: offset
+          required: false
+          in: query
+          schema:
+            example: 0
+            type: number
+        - name: limit
+          required: false
+          in: query
+          schema:
+            example: 10
+            type: number
+      responses:
+        "200":
+          description: Settings history
+      tags: *a16
+      security: *a17
+  /transport/settings/compare:
+    post:
+      operationId: TransportController_compareSettings
+      summary: Compare impact of new transport settings
+      parameters: []
+      responses:
+        "200":
+          description: Settings comparison results
+      tags: *a16
+      security: *a17
+  /transport/settings/optimize:
+    post:
+      operationId: TransportController_optimizeSettings
+      summary: Optimize transport settings for target margin
+      parameters: []
+      responses:
+        "200":
+          description: Optimized settings
+      tags: *a16
+      security: *a17
+  /transport/cost-breakdown:
+    get:
+      operationId: TransportController_getCostBreakdown
+      summary: Get detailed cost breakdown for a route
+      parameters:
+        - name: distance
+          required: true
+          in: query
+          schema:
+            type: number
+        - name: quantity
+          required: true
+          in: query
+          schema:
+            type: number
+        - name: vehicleType
+          required: true
+          in: query
+          schema:
+            enum:
+              - FLATBED
+              - REFRIGERATED
+              - TANKER
+              - CONTAINER
+              - CURTAIN_SIDE
+              - BOX_TRUCK
+              - OTHER
+            type: string
+        - name: isUrgent
+          required: false
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Detailed cost breakdown
+      tags: *a16
+      security: *a17
+  /transport/settings/export:
+    get:
+      operationId: TransportController_exportSettings
+      summary: Export transport settings as JSON
+      parameters: []
+      responses:
+        "200":
+          description: Settings exported as JSON
+      tags: *a16
+      security: *a17
+  /transport/settings/import:
+    post:
+      operationId: TransportController_importSettings
+      summary: Import transport settings from JSON
+      parameters: []
+      responses:
+        "200":
+          description: Settings imported successfully
+      tags: *a16
+      security: *a17
+  /transport/clear-cache:
+    post:
+      operationId: TransportController_clearCache
+      summary: Clear transport cost cache
+      parameters: []
+      responses:
+        "200":
+          description: Cache cleared
+      tags: *a16
+      security: *a17
+  /transport/requests:
+    post:
+      operationId: TransportController_createRequest
+      summary: Create transport request (Admin)
+      parameters: []
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportRequestResponseDto"
+      tags: &a18
+        - Transport
+      security: &a19
+        - bearer: []
+    get:
+      operationId: TransportController_getAllRequests
+      summary: Get all transport requests (Admin)
+      parameters:
+        - name: status
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: tradeOperationId
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportRequestListResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/requests/{id}:
+    get:
+      operationId: TransportController_getRequestDetails
+      summary: Get transport request details
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Transport request ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportRequestResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/bids:
+    post:
+      operationId: TransportController_submitBid
+      summary: Submit a bid for transport request
+      parameters: []
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportBidResponseDto"
+      tags: *a18
+      security: *a19
+    get:
+      operationId: TransportBiddingController_getTransportBids
+      summary: Get transport bids
+      parameters:
+        - name: transportRequestId
+          required: false
+          in: query
+          description: Filter by transport request ID
+          schema:
+            type: string
+        - name: transporterId
+          required: false
+          in: query
+          description: Filter by transporter ID
+          schema:
+            type: string
+        - name: status
+          required: false
+          in: query
+          schema:
+            enum:
+              - PENDING
+              - ACCEPTED
+              - REJECTED
+              - EXPIRED
+              - WITHDRAWN
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Page size
+          schema:
+            default: 20
+            type: number
+        - name: offset
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 0
+            type: number
+      responses:
+        "200":
+          description: List of transport bids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransportBidResponseDto"
+      tags: &a20
+        - Transport Bidding
+      security: &a21
+        - bearer: []
+  /transport/bids/{id}/accept:
+    post:
+      operationId: TransportBiddingController_acceptTransportBid
+      summary: Accept a transport bid
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Bid ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Bid accepted and transport job created
+      tags: *a20
+      security: *a21
+    put:
+      operationId: TransportController_acceptBid
+      summary: Accept a bid (Admin)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Bid ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportJobResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/bids/{id}/reject:
+    post:
+      operationId: TransportBiddingController_rejectTransportBid
+      summary: Reject a transport bid
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Bid ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Bid rejected
+      tags: *a20
+      security: *a21
+    put:
+      operationId: TransportController_rejectBid
+      summary: Reject a bid (Admin)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Bid ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportBidResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/jobs:
+    get:
+      operationId: TransportBiddingController_getTransportJobs
+      summary: Get transport jobs
+      parameters:
+        - name: transporterId
+          required: false
+          in: query
+          description: Filter by transporter ID
+          schema:
+            type: string
+        - name: status
+          required: false
+          in: query
+          schema:
+            enum:
+              - ASSIGNED
+              - STARTED
+              - PICKING_UP
+              - IN_TRANSIT
+              - DELIVERING
+              - COMPLETED
+              - DELAYED
+              - CANCELLED
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Page size
+          schema:
+            default: 20
+            type: number
+        - name: offset
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 0
+            type: number
+      responses:
+        "200":
+          description: List of transport jobs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransportJobResponseDto"
+      tags: *a20
+      security: *a21
+  /transport/jobs/{id}/start:
+    post:
+      operationId: TransportBiddingController_startTransportJob
+      summary: Start a transport job
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Job ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transport job started
+      tags: *a20
+      security: *a21
+    put:
+      operationId: TransportController_startJob
+      summary: Start a transport job
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Transport job ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportJobResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/jobs/{id}/status:
+    put:
+      operationId: TransportBiddingController_updateTransportJobStatus
+      summary: Update transport job status
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Job ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTransportJobStatusDto"
+      responses:
+        "200":
+          description: Job status updated
+      tags: *a20
+      security: *a21
+  /transport/jobs/{id}/pickup:
+    post:
+      operationId: TransportBiddingController_completePickup
+      summary: Complete a pickup for a transport job
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Job ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompletePickupDto"
+      responses:
+        "200":
+          description: Pickup completed
+      tags: *a20
+      security: *a21
+    put:
+      operationId: TransportController_confirmPickup
+      summary: Confirm pickup
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Transport job ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportJobResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/jobs/{id}/delivery:
+    post:
+      operationId: TransportBiddingController_completeDelivery
+      summary: Complete delivery for a transport job
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Job ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompleteDeliveryDto"
+      responses:
+        "200":
+          description: Delivery completed
+      tags: *a20
+      security: *a21
+  /transport/requests/{requestId}/bids:
+    get:
+      operationId: TransportBiddingController_getBidsForRequest
+      summary: Get all bids for a transport request
+      parameters:
+        - name: requestId
+          required: true
+          in: path
+          description: Transport request ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of bids for the transport request
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TransportBidResponseDto"
+      tags: *a20
+      security: *a21
+  /transport/trade-operations/{tradeOperationId}/transport:
+    get:
+      operationId: TransportBiddingController_getTransportForTradeOperation
+      summary: Get transport info for a trade operation
+      parameters:
+        - name: tradeOperationId
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Transport information for the trade operation
+      tags: *a20
+      security: *a21
+  /transport/requests/available:
+    get:
+      operationId: TransportController_getAvailableRequests
+      summary: Get available transport requests for bidding
+      parameters:
+        - name: radius
+          required: false
+          in: query
+          description: Search radius in km
+          schema:
+            example: 50
+            type: number
+        - name: minWeight
+          required: false
+          in: query
+          schema:
+            example: 10
+            type: number
+        - name: maxWeight
+          required: false
+          in: query
+          schema:
+            example: 100
+            type: number
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportRequestListResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/bids/{id}:
+    put:
+      operationId: TransportController_updateBid
+      summary: Update an existing bid
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Bid ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportBidResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/bids/{id}/withdraw:
+    put:
+      operationId: TransportController_withdrawBid
+      summary: Withdraw a bid
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Bid ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportBidResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/my-bids:
+    get:
+      operationId: TransportController_getMyBids
+      summary: Get transporter's own bids
+      parameters:
+        - name: status
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportBidListResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/my-jobs:
+    get:
+      operationId: TransportController_getMyJobs
+      summary: Get transporter's assigned jobs
+      parameters:
+        - name: status
+          required: false
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportJobListResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/requests/{id}/bids:
+    get:
+      operationId: TransportController_getRequestBids
+      summary: Get all bids for a transport request (Admin)
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Transport request ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportBidListResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/jobs/{id}/deliver:
+    put:
+      operationId: TransportController_confirmDelivery
+      summary: Confirm delivery
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Transport job ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportJobResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/jobs/{id}/location:
+    put:
+      operationId: TransportController_updateLocation
+      summary: Update current location
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Transport job ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportJobResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/analytics/bid-comparison/{requestId}:
+    get:
+      operationId: TransportController_compareBids
+      summary: Compare bids for a request (Admin)
+      parameters:
+        - name: requestId
+          required: true
+          in: path
+          description: Transport request ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransportBidComparisonResponseDto"
+      tags: *a18
+      security: *a19
+  /transport/analytics/transporter-performance/{transporterId}:
+    get:
+      operationId: TransportController_getTransporterPerformance
+      summary: Get transporter performance metrics
+      parameters:
+        - name: transporterId
+          required: true
+          in: path
+          description: Transporter ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransporterPerformanceResponseDto"
+      tags: *a18
+      security: *a19
+  /transport-company/register:
+    post:
+      operationId: TransportCompanyController_registerCompany
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterCompanyDto"
+      responses:
+        "201":
+          description: ""
+  /transport-company/verify:
+    post:
+      operationId: TransportCompanyController_verifyCompany
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyCompanyDto"
+      responses:
+        "201":
+          description: ""
+  /transport-company/unverified:
+    get:
+      operationId: TransportCompanyController_getUnverifiedCompanies
+      parameters: []
+      responses:
+        "200":
+          description: ""
+  /transport-company/profile/{id}:
+    get:
+      operationId: TransportCompanyController_getCompanyProfile
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+    put:
+      operationId: TransportCompanyController_updateCompanyProfile
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  /transport-company/my-company:
+    get:
+      operationId: TransportCompanyController_getMyCompany
+      parameters: []
+      responses:
+        "200":
+          description: ""
+  /transport-company/stats/{id}:
+    get:
+      operationId: TransportCompanyController_getCompanyStats
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  /transport-company/{companyId}/transporters/link:
+    post:
+      operationId: TransportCompanyController_linkTransporter
+      parameters:
+        - name: companyId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LinkTransporterDto"
+      responses:
+        "201":
+          description: ""
+  /transport-company/{companyId}/transporters/unlink:
+    delete:
+      operationId: TransportCompanyController_unlinkTransporter
+      parameters:
+        - name: companyId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnlinkTransporterDto"
+      responses:
+        "200":
+          description: ""
+  /transport-company/{companyId}/transporters:
+    get:
+      operationId: TransportCompanyController_getCompanyTransporters
+      parameters:
+        - name: companyId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+  /transport-company/transporters/available:
+    get:
+      operationId: TransportCompanyController_searchAvailableTransporters
+      parameters: []
+      responses:
+        "200":
+          description: ""
+  /transport-company/companies/available:
+    get:
+      operationId: TransportCompanyController_getAvailableCompanies
+      parameters: []
+      responses:
+        "200":
+          description: ""
+  /transport-company/{companyId}/transporters/invite:
+    post:
+      operationId: TransportCompanyController_inviteTransporter
+      parameters:
+        - name: companyId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InviteTransporterDto"
+      responses:
+        "201":
+          description: ""
+  /negotiations/trade-operation/{tradeOperationId}:
+    get:
+      operationId: NegotiationController_getNegotiationsByTradeOperation
+      summary: Get negotiations for a trade operation (frontend route)
+      parameters:
+        - name: tradeOperationId
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+        - name: status
+          required: false
+          in: query
+          description: Filter by status or comma-separated statuses
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          description: Max number of records
+          schema:
+            example: 100
+            type: number
+        - name: offset
+          required: false
+          in: query
+          description: Skip number of records
+          schema:
+            example: 0
+            type: number
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NegotiationSummaryWrapperDto"
+      tags: &a22
+        - Negotiations
+      security: &a23
+        - bearer: []
+    post:
+      operationId: NegotiationController_createNegotiation
+      summary: Create negotiation (frontend route)
+      parameters:
+        - name: tradeOperationId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOfferDto"
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NegotiationResponseWrapperDto"
+      tags: *a22
+      security: *a23
+  /negotiations/trade-operations/{tradeOperationId}/offers:
+    post:
+      operationId: NegotiationController_sendOffer
+      summary: Send offer to seller
+      parameters:
+        - name: tradeOperationId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOfferDto"
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NegotiationResponseWrapperDto"
+      tags: *a22
+      security: *a23
+  /negotiations/trade-operations/{tradeOperationId}/offers/batch:
+    post:
+      operationId: NegotiationController_sendBatchOffers
+      summary: Send batch offers to multiple sellers
+      parameters:
+        - name: tradeOperationId
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BatchOfferDto"
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NegotiationBatchResponseDto"
+      tags: *a22
+      security: *a23
+  /negotiations/trade-operations/{tradeOperationId}/negotiations:
+    get:
+      operationId: NegotiationController_getNegotiations
+      summary: Get negotiations for a trade operation
+      parameters:
+        - name: tradeOperationId
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+        - name: status
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            example: 100
+            type: number
+        - name: offset
+          required: false
+          in: query
+          schema:
+            example: 0
+            type: number
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NegotiationSummaryWrapperDto"
+      tags: *a22
+      security: *a23
+  /negotiations/negotiations/{negotiationId}:
+    get:
+      operationId: NegotiationController_getNegotiationById
+      summary: Get single negotiation details
+      parameters:
+        - name: negotiationId
+          required: true
+          in: path
+          description: Negotiation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NegotiationResponseWrapperDto"
+      tags: *a22
+      security: *a23
+  /negotiations/negotiations/{negotiationId}/counter:
+    post:
+      operationId: NegotiationController_counterOffer
+      summary: Counter an offer
+      parameters:
+        - name: negotiationId
+          required: true
+          in: path
+          description: Negotiation ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CounterOfferDto"
+      responses:
+        "201":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NegotiationResponseWrapperDto"
+      tags: *a22
+      security: *a23
+  /negotiations/negotiations/{negotiationId}/accept:
+    post:
+      operationId: NegotiationController_acceptOffer
+      summary: Accept an offer
+      parameters:
+        - name: negotiationId
+          required: true
+          in: path
+          description: Negotiation ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AcceptOfferDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NegotiationResponseWrapperDto"
+      tags: *a22
+      security: *a23
+  /negotiations/negotiations/{negotiationId}/reject:
+    post:
+      operationId: NegotiationController_rejectOffer
+      summary: Reject an offer
+      parameters:
+        - name: negotiationId
+          required: true
+          in: path
+          description: Negotiation ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RejectOfferDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NegotiationResponseWrapperDto"
+      tags: *a22
+      security: *a23
+  /negotiations/negotiations/{negotiationId}/withdraw:
+    post:
+      operationId: NegotiationController_withdrawOffer
+      summary: Withdraw an offer
+      parameters:
+        - name: negotiationId
+          required: true
+          in: path
+          description: Negotiation ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WithdrawOfferDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NegotiationResponseWrapperDto"
+      tags: *a22
+      security: *a23
+  /negotiations/negotiations/{negotiationId}/extend:
+    post:
+      operationId: NegotiationController_extendExpiry
+      summary: Extend negotiation expiry
+      parameters:
+        - name: negotiationId
+          required: true
+          in: path
+          description: Negotiation ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExtendExpiryDto"
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExtendExpiryResponseDto"
+      tags: *a22
+      security: *a23
+  /negotiations/trade-operations/{tradeOperationId}/negotiations/expiring:
+    get:
+      operationId: NegotiationController_getExpiringNegotiations
+      summary: Get expiring negotiations
+      parameters:
+        - name: tradeOperationId
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+        - name: hours
+          required: false
+          in: query
+          schema:
+            example: 24
+            type: number
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExpiringNegotiationsResponseDto"
+      tags: *a22
+      security: *a23
+  /negotiations/trade-operations/{tradeOperationId}/negotiations/metrics:
+    get:
+      operationId: NegotiationController_getNegotiationMetrics
+      summary: Get negotiation metrics
+      parameters:
+        - name: tradeOperationId
+          required: true
+          in: path
+          description: Trade operation ID
+          schema:
+            type: string
+      responses:
+        "200":
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NegotiationMetricsResponseDto"
+      tags: *a22
+      security: *a23
+  /inspections:
+    post:
+      operationId: InspectionController_createInspection
+      summary: Create inspection request
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInspectionRequestDto"
+      responses:
+        "201":
+          description: Inspection request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InspectionResponseDto"
+      tags: &a24
+        - Inspections
+      security: &a25
+        - bearer: []
+  /inspections/batch:
+    post:
+      operationId: InspectionController_createBatchInspections
+      summary: Create batch inspection requests
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBatchInspectionsDto"
+      responses:
+        "201":
+          description: Batch inspections created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InspectionResponseDto"
+      tags: *a24
+      security: *a25
+  /inspections/{id}/assign:
+    put:
+      operationId: InspectionController_assignInspector
+      summary: Assign inspector to inspection
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignInspectorDto"
+      responses:
+        "200":
+          description: Inspector assigned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InspectionResponseDto"
+      tags: *a24
+      security: *a25
+  /inspections/inspectors:
+    get:
+      operationId: InspectionController_getAvailableInspectors
+      summary: Get available inspectors
+      parameters: []
+      responses:
+        "200":
+          description: List of available inspectors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InspectionAssigneeDto"
+      tags: *a24
+      security: *a25
+  /inspections/{id}/status:
+    put:
+      operationId: InspectionController_updateStatus
+      summary: Update inspection status
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateInspectionStatusDto"
+      responses:
+        "200":
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InspectionResponseDto"
+      tags: *a24
+      security: *a25
+  /inspections/{id}/results:
+    post:
+      operationId: InspectionController_submitResults
+      summary: Submit inspection results
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitInspectionResultsDto"
+      responses:
+        "200":
+          description: Results submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InspectionResponseDto"
+      tags: *a24
+      security: *a25
+  /inspections/trade-operation/{tradeOperationId}:
+    get:
+      operationId: InspectionController_getByTradeOperation
+      summary: Get inspections for trade operation
+      parameters:
+        - name: tradeOperationId
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of inspections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InspectionResponseDto"
+      tags: *a24
+      security: *a25
+  /inspections/inspector/{inspectorId}:
+    get:
+      operationId: InspectionController_getInspectorMissions
+      summary: Get inspector missions
+      parameters:
+        - name: inspectorId
+          required: true
+          in: path
+          schema:
+            type: string
+        - name: status
+          required: false
+          in: query
+          schema:
+            enum:
+              - PENDING
+              - SCHEDULED
+              - IN_PROGRESS
+              - COMPLETED
+              - CANCELLED
+            type: string
+      responses:
+        "200":
+          description: Inspector missions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InspectorMissionDto"
+      tags: *a24
+      security: *a25
+  /inspections/stats:
+    get:
+      operationId: InspectionController_getStats
+      summary: Get inspection statistics
+      parameters: []
+      responses:
+        "200":
+          description: Inspection statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InspectionStatsDto"
+      tags: *a24
+      security: *a25
+  /notifications:
+    get:
+      operationId: NotificationController_getNotifications
+      summary: Get notifications
+      parameters:
+        - name: role
+          required: false
+          in: query
+          schema:
+            enum:
+              - ADMIN
+              - FARMER
+              - BUYER
+              - TRANSPORTER
+              - COMPANY_ADMIN
+              - INSPECTOR
+            type: string
+        - name: tradeOperationId
+          required: false
+          in: query
+          schema:
+            type: string
+        - name: limit
+          required: false
+          in: query
+          schema:
+            type: number
+      responses:
+        "200":
+          description: List of notifications
+      tags: &a26
+        - Notifications
+  /notifications/mark-read:
+    post:
+      operationId: NotificationController_markAsRead
+      summary: Mark notifications as read
+      parameters: []
+      responses:
+        "200":
+          description: Notifications marked as read
+      tags: *a26
+  /notifications/test:
+    post:
+      operationId: NotificationController_testNotification
+      summary: Test notification system
+      parameters: []
+      responses:
+        "200":
+          description: Test notification sent
+      tags: *a26
+info:
+  title: Agro-Trade API
+  description: API documentation for Agro-Trade platform
+  version: 0.0.1
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    bearer:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+  schemas:
+    GoogleMobileAuthDto:
+      type: object
+      properties:
+        code:
+          type: string
+        redirectUri:
+          type: string
+        role:
+          type: string
+      required:
+        - code
+        - redirectUri
+    AuthUserDto:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: object
+        phoneNumber:
+          type: object
+        role:
+          type: string
+          enum:
+            - ADMIN
+            - FARMER
+            - BUYER
+            - TRANSPORTER
+            - COMPANY_ADMIN
+            - INSPECTOR
+        hasProfile:
+          type: boolean
+      required:
+        - id
+        - email
+        - role
+    AuthSuccessResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        user:
+          $ref: "#/components/schemas/AuthUserDto"
+        message:
+          type: string
+      required:
+        - success
+        - access_token
+        - refresh_token
+        - user
+    GoogleNativeUserInfoDto:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        givenName:
+          type: string
+        familyName:
+          type: string
+        photo:
+          type: string
+      required:
+        - id
+        - email
+    GoogleNativeAuthDto:
+      type: object
+      properties:
+        idToken:
+          type: string
+        role:
+          type: string
+        userInfo:
+          $ref: "#/components/schemas/GoogleNativeUserInfoDto"
+      required:
+        - idToken
+    LoginDto:
+      type: object
+      properties: {}
+    RegisterDto:
+      type: object
+      properties: {}
+    TransporterRegisterDto:
+      type: object
+      properties: {}
+    TransporterRegistrationResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        user:
+          $ref: "#/components/schemas/AuthUserDto"
+        message:
+          type: string
+        transporter:
+          type: object
+      required:
+        - success
+        - access_token
+        - refresh_token
+        - user
+    RefreshTokenDto:
+      type: object
+      properties: {}
+    RefreshTokenResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+      required:
+        - success
+        - access_token
+        - refresh_token
+    LogoutResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+        - success
+        - message
+    AuthProfileResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: object
+        phoneNumber:
+          type: object
+        role:
+          type: string
+          enum:
+            - ADMIN
+            - FARMER
+            - BUYER
+            - TRANSPORTER
+            - COMPANY_ADMIN
+            - INSPECTOR
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        companyContext:
+          type: object
+      required:
+        - id
+        - email
+        - role
+        - createdAt
+        - updatedAt
+    SellerOnboardingDto:
+      type: object
+      properties: {}
+    OnboardingUserResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: object
+        phoneNumber:
+          type: object
+        role:
+          type: string
+          enum:
+            - ADMIN
+            - FARMER
+            - BUYER
+            - TRANSPORTER
+            - COMPANY_ADMIN
+            - INSPECTOR
+        onboardingCompleted:
+          type: boolean
+      required:
+        - id
+        - email
+        - role
+        - onboardingCompleted
+    BuyerOnboardingDto:
+      type: object
+      properties: {}
+    TransporterOnboardingDto:
+      type: object
+      properties: {}
+    OnboardingCompanyDto:
+      type: object
+      properties:
+        id:
+          type: string
+        legalName:
+          type: object
+        registrationNumber:
+          type: object
+        vatNumber:
+          type: object
+        phoneNumber:
+          type: object
+        email:
+          type: object
+        website:
+          type: object
+      required:
+        - id
+    OnboardingAddressDto:
+      type: object
+      properties:
+        id:
+          type: string
+        addressType:
+          type: string
+          enum:
+            - BILLING
+            - SHIPPING
+            - FARM
+            - WAREHOUSE
+            - OFFICE
+            - PICKUP
+            - DELIVERY
+            - OTHER
+        label:
+          type: object
+        street:
+          type: object
+        cityId:
+          type: object
+        postalCode:
+          type: object
+        country:
+          type: object
+        latitude:
+          type: number
+        longitude:
+          type: number
+        isDefault:
+          type: object
+      required:
+        - id
+        - addressType
+    OnboardingTruckDto:
+      type: object
+      properties:
+        id:
+          type: string
+        plateNumber:
+          type: string
+        capacity:
+          type: number
+        type:
+          type: string
+          enum:
+            - FLATBED
+            - REFRIGERATED
+            - TANKER
+            - CONTAINER
+            - CURTAIN_SIDE
+            - BOX_TRUCK
+            - OTHER
+        currentLocation:
+          type: object
+        latitude:
+          type: number
+        longitude:
+          type: number
+        isAvailable:
+          type: boolean
+      required:
+        - id
+        - plateNumber
+        - type
+        - isAvailable
+    OnboardingDataDto:
+      type: object
+      properties:
+        company:
+          $ref: "#/components/schemas/OnboardingCompanyDto"
+        addresses:
+          type: array
+          items:
+            $ref: "#/components/schemas/OnboardingAddressDto"
+        trucks:
+          type: array
+          items:
+            $ref: "#/components/schemas/OnboardingTruckDto"
+    OnboardingStatusResponseDto:
+      type: object
+      properties:
+        userId:
+          type: string
+        role:
+          type: string
+          enum:
+            - ADMIN
+            - FARMER
+            - BUYER
+            - TRANSPORTER
+            - COMPANY_ADMIN
+            - INSPECTOR
+        isComplete:
+          type: boolean
+        onboardingCompleted:
+          type: boolean
+        missingFields:
+          type: array
+          items:
+            type: string
+        data:
+          $ref: "#/components/schemas/OnboardingDataDto"
+      required:
+        - userId
+        - role
+        - isComplete
+        - onboardingCompleted
+        - missingFields
+        - data
+    CreateListingDto:
+      type: object
+      properties: {}
+    SellerProductSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: object
+        description:
+          type: object
+      required:
+        - id
+        - name
+    SellerAddressDto:
+      type: object
+      properties:
+        id:
+          type: string
+        street:
+          type: object
+        city:
+          type: object
+        country:
+          type: object
+        latitude:
+          type: number
+        longitude:
+          type: number
+      required:
+        - id
+    SellerListingSpecificationDto:
+      type: object
+      properties:
+        id:
+          type: string
+        specTypeId:
+          type: object
+        valueText:
+          type: object
+        valueNumber:
+          type: number
+        valueBool:
+          type: object
+      required:
+        - id
+    SellerListingResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        sellerId:
+          type: string
+        productId:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        askingPrice:
+          type: number
+        status:
+          type: string
+          enum:
+            - draft
+            - active
+            - pending
+            - sold
+            - expired
+        product:
+          $ref: "#/components/schemas/SellerProductSummaryDto"
+        address:
+          $ref: "#/components/schemas/SellerAddressDto"
+        specifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/SellerListingSpecificationDto"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - sellerId
+        - productId
+        - quantity
+        - unit
+        - status
+        - createdAt
+        - updatedAt
+    SellerCreateListingResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/SellerListingResponseDto"
+      required:
+        - success
+        - message
+        - data
+    SellerProductListingDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        subcategory:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+        pricePerUnit:
+          type: number
+        currency:
+          type: string
+        location:
+          type: object
+          additionalProperties: true
+        qualityTags:
+          type: array
+          items:
+            type: string
+        certifications:
+          type: array
+          items:
+            type: string
+        description:
+          type: object
+        images:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        isVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        views:
+          type: number
+        inquiries:
+          type: number
+      required:
+        - id
+        - name
+        - quantity
+        - unit
+        - pricePerUnit
+        - currency
+        - status
+        - isVerified
+        - createdAt
+        - updatedAt
+        - views
+        - inquiries
+    SellerOfferDto:
+      type: object
+      properties:
+        id:
+          type: string
+        product:
+          type: string
+        quantity:
+          type: number
+        offeredPricePerTon:
+          type: number
+        totalValue:
+          type: number
+        buyer:
+          type: string
+        buyerLocation:
+          type: string
+        buyerFlag:
+          type: string
+        adminNote:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        responseTime:
+          type: string
+        estimatedProfit:
+          type: number
+        qualityRequirements:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+        negotiationId:
+          type: string
+        tradeOperationId:
+          type: string
+        isExpiringSoon:
+          type: boolean
+        hoursUntilExpiry:
+          type: number
+        counterOffer:
+          type: object
+          additionalProperties: true
+        offerHistory:
+          additionalProperties: true
+          type: array
+          items:
+            type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - product
+        - quantity
+        - offeredPricePerTon
+        - totalValue
+        - buyer
+        - buyerLocation
+        - buyerFlag
+        - adminNote
+        - deadline
+        - responseTime
+        - estimatedProfit
+        - qualityRequirements
+        - status
+        - negotiationId
+        - tradeOperationId
+        - isExpiringSoon
+        - hoursUntilExpiry
+        - createdAt
+        - updatedAt
+    SellerOfferStatsDto:
+      type: object
+      properties:
+        totalOffers:
+          type: number
+        pendingOffers:
+          type: number
+        acceptedThisMonth:
+          type: number
+        averageOfferValue:
+          type: number
+        topRequestedProduct:
+          type: string
+        conversionRate:
+          type: number
+      required:
+        - totalOffers
+        - pendingOffers
+        - acceptedThisMonth
+        - averageOfferValue
+        - topRequestedProduct
+        - conversionRate
+    SellerOffersDataDto:
+      type: object
+      properties:
+        offers:
+          type: array
+          items:
+            $ref: "#/components/schemas/SellerOfferDto"
+        stats:
+          $ref: "#/components/schemas/SellerOfferStatsDto"
+      required:
+        - offers
+        - stats
+    SellerOffersResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: "#/components/schemas/SellerOffersDataDto"
+      required:
+        - success
+        - data
+    SellerStatsDto:
+      type: object
+      properties:
+        totalProducts:
+          type: number
+        activeListings:
+          type: number
+        totalOffers:
+          type: number
+        pendingOffers:
+          type: number
+        totalTrades:
+          type: number
+        completedTrades:
+          type: number
+        totalRevenue:
+          type: number
+        monthlyRevenue:
+          type: number
+        averageRating:
+          type: number
+      required:
+        - totalProducts
+        - activeListings
+        - totalOffers
+        - pendingOffers
+        - totalTrades
+        - completedTrades
+        - totalRevenue
+        - monthlyRevenue
+        - averageRating
+    CreateBuyListingDto:
+      type: object
+      properties: {}
+    BuyerDeliveryAddressDto:
+      type: object
+      properties:
+        id:
+          type: string
+        street:
+          type: object
+        city:
+          type: object
+        country:
+          type: object
+        latitude:
+          type: number
+        longitude:
+          type: number
+      required:
+        - id
+    BuyerProductSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: object
+      required:
+        - id
+        - name
+    BuyerCompanySummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        legalName:
+          type: object
+        registrationNumber:
+          type: object
+        phoneNumber:
+          type: object
+        email:
+          type: object
+      required:
+        - id
+    BuyerUserSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: object
+        email:
+          type: object
+        company:
+          $ref: "#/components/schemas/BuyerCompanySummaryDto"
+      required:
+        - id
+    BuyerListingSpecificationDto:
+      type: object
+      properties:
+        id:
+          type: string
+        specTypeId:
+          type: object
+        valueText:
+          type: object
+        valueNumber:
+          type: number
+        valueBool:
+          type: object
+      required:
+        - id
+    BuyListingResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        buyerId:
+          type: string
+        productId:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: string
+          enum:
+            - TON
+            - KG
+            - LITER
+            - PIECE
+        maxPricePerUnit:
+          type: number
+        neededBy:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - FULFILLED
+            - PARTIALLY_FULFILLED
+            - EXPIRED
+            - CANCELLED
+        notes:
+          type: string
+        deliveryAddress:
+          $ref: "#/components/schemas/BuyerDeliveryAddressDto"
+        product:
+          $ref: "#/components/schemas/BuyerProductSummaryDto"
+        buyer:
+          $ref: "#/components/schemas/BuyerUserSummaryDto"
+        specifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/BuyerListingSpecificationDto"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - buyerId
+        - productId
+        - quantity
+        - unit
+        - status
+        - createdAt
+        - updatedAt
+    BuyerOfferListingSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        sellerId:
+          type: string
+        quantity:
+          type: number
+        askingPrice:
+          type: number
+        product:
+          $ref: "#/components/schemas/BuyerProductSummaryDto"
+      required:
+        - id
+        - sellerId
+    BuyerOfferSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        buyListingId:
+          type: string
+        tradeOperationId:
+          type: object
+        price:
+          type: number
+        quantity:
+          type: number
+        status:
+          type: object
+        saleListing:
+          $ref: "#/components/schemas/BuyerOfferListingSummaryDto"
+        product:
+          $ref: "#/components/schemas/BuyerProductSummaryDto"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - buyListingId
+    BuyerStatsDto:
+      type: object
+      properties:
+        totalListings:
+          type: number
+        activeListings:
+          type: number
+        totalOffers:
+          type: number
+        acceptedOffers:
+          type: number
+        fulfilledListings:
+          type: number
+      required:
+        - totalListings
+        - activeListings
+        - totalOffers
+        - acceptedOffers
+        - fulfilledListings
+    UpdateBuyListingDto:
+      type: object
+      properties: {}
+    CreateTradeOperationDto:
+      type: object
+      properties:
+        buyListingId:
+          type: string
+          description: ID of the buy listing to create a trade operation for
+          example: cmfk0hzzh0004bfffxe82z2jz
+        targetProfitMargin:
+          type: number
+          description: "Target profit margin percentage (default: 7%)"
+          minimum: 5
+          maximum: 20
+          example: 7
+        maxTransportDistance:
+          type: number
+          description: Maximum transport distance in kilometers
+          example: 500
+        preferredVehicleType:
+          type: string
+          description: Preferred vehicle type for transport
+          enum:
+            - FLATBED
+            - REFRIGERATED
+            - TANKER
+            - CONTAINER
+            - CURTAIN_SIDE
+            - BOX_TRUCK
+            - OTHER
+          example: FLATBED
+        qualityPreference:
+          type: string
+          description: Quality preference for sourcing
+          enum:
+            - PREMIUM
+            - STANDARD
+            - ECONOMY
+            - ANY
+          example: STANDARD
+        notes:
+          type: string
+          description: Notes or special instructions for the trade operation
+          example: Prioritize local suppliers
+      required:
+        - buyListingId
+    BuyerSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          example: ABC Distributors
+        requestedQuantity:
+          type: number
+          example: 100
+        maxPrice:
+          type: number
+          example: 380
+        location:
+          type: string
+          example: Sofia, Bulgaria
+      required:
+        - id
+        - name
+        - requestedQuantity
+        - maxPrice
+    SellerSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          example: John Farm
+        quantity:
+          type: number
+          example: 50
+        price:
+          type: number
+          example: 350
+        status:
+          type: string
+          example: ACCEPTED
+        quality:
+          type: string
+          example: STANDARD
+        distance:
+          type: number
+          example: 120
+      required:
+        - id
+        - name
+        - quantity
+        - price
+        - status
+    ProfitSummaryDto:
+      type: object
+      properties:
+        estimated:
+          type: number
+          example: 2650
+        margin:
+          type: number
+          example: 6.97
+        isViable:
+          type: boolean
+          example: true
+        actual:
+          type: number
+          example: 2750
+        actualMargin:
+          type: number
+          example: 7.24
+      required:
+        - estimated
+        - margin
+        - isViable
+    TransportSummaryDto:
+      type: object
+      properties:
+        estimatedCost:
+          type: number
+          example: 150
+        distance:
+          type: number
+          example: 245
+        optimized:
+          type: boolean
+          example: true
+        vehicleType:
+          type: string
+          example: FLATBED
+        actualCost:
+          type: number
+          example: 155.5
+      required:
+        - estimatedCost
+        - distance
+        - optimized
+    TradeOperationResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+        phase:
+          type: string
+          enum:
+            - INITIATION
+            - SELLER_MATCHING
+            - SELLER_NEGOTIATION
+            - INSPECTION_PENDING
+            - TRANSPORT_MATCHING
+            - TRANSPORT_BIDDING
+            - IN_TRANSIT
+            - DELIVERED
+            - COMPLETED
+            - CANCELLED
+          example: NEGOTIATION
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - ON_HOLD
+            - COMPLETED
+            - CANCELLED
+            - DISPUTED
+          example: ACTIVE
+        buyer:
+          $ref: "#/components/schemas/BuyerSummaryDto"
+        sellers:
+          type: array
+          items:
+            $ref: "#/components/schemas/SellerSummaryDto"
+        profit:
+          $ref: "#/components/schemas/ProfitSummaryDto"
+        transport:
+          $ref: "#/components/schemas/TransportSummaryDto"
+        createdAt:
+          format: date-time
+          type: string
+          example: 2024-01-15T10:30:00Z
+        updatedAt:
+          format: date-time
+          type: string
+          example: 2024-01-15T14:45:00Z
+        expectedDeliveryDate:
+          format: date-time
+          type: string
+          example: 2024-01-20T12:00:00Z
+        confirmedAt:
+          format: date-time
+          type: string
+          example: 2024-01-18T16:30:00Z
+        completedAt:
+          format: date-time
+          type: string
+          example: 2024-01-20T14:30:00Z
+      required:
+        - id
+        - phase
+        - status
+        - buyer
+        - sellers
+        - profit
+        - transport
+        - createdAt
+        - updatedAt
+    TradeOperationListResponseDto:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TradeOperationResponseDto"
+        total:
+          type: number
+          example: 25
+        page:
+          type: number
+          example: 1
+        limit:
+          type: number
+          example: 10
+      required:
+        - data
+        - total
+        - page
+        - limit
+    TradeAnalyticsDto:
+      type: object
+      properties:
+        totalTrades:
+          type: number
+          example: 150
+        averageMargin:
+          type: number
+          example: 7.5
+        totalProfit:
+          type: number
+          example: 45000
+        successRate:
+          type: number
+          example: 92.5
+        marginDistribution:
+          type: object
+          example:
+            Below 5%: 5
+            5-7%: 35
+            7-10%: 45
+            Above 10%: 15
+        periodStart:
+          format: date-time
+          type: string
+          example: 2024-01-01T00:00:00Z
+        periodEnd:
+          format: date-time
+          type: string
+          example: 2024-12-31T23:59:59Z
+      required:
+        - totalTrades
+        - averageMargin
+        - totalProfit
+        - successRate
+        - marginDistribution
+    TradeProfitResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+      required:
+        - success
+        - data
+    UpdateTradeOperationDto:
+      type: object
+      properties:
+        phase:
+          type: string
+          description: Trade operation phase
+          enum:
+            - INITIATION
+            - SELLER_MATCHING
+            - SELLER_NEGOTIATION
+            - INSPECTION_PENDING
+            - TRANSPORT_MATCHING
+            - TRANSPORT_BIDDING
+            - IN_TRANSIT
+            - DELIVERED
+            - COMPLETED
+            - CANCELLED
+          example: NEGOTIATION
+        status:
+          type: string
+          description: Trade operation status
+          enum:
+            - ACTIVE
+            - ON_HOLD
+            - COMPLETED
+            - CANCELLED
+            - DISPUTED
+          example: ACTIVE
+        sellingPrice:
+          type: number
+          description: Selling price per unit to buyer
+          example: 380
+        targetProfitMargin:
+          type: number
+          description: Target profit margin percentage
+          minimum: 5
+          maximum: 20
+          example: 7
+        expectedDeliveryDate:
+          format: date-time
+          type: string
+          description: Expected delivery date
+          example: 2024-12-31T23:59:59Z
+        transportOptimized:
+          type: boolean
+          description: Whether transport has been optimized
+          example: true
+        adminNotes:
+          type: string
+          description: Admin notes or updates
+          example: Negotiation progressing well
+    SellerToAddDto:
+      type: object
+      properties:
+        sellerId:
+          type: string
+          example: cmf899npe003mmd437u4ojxe2
+        saleListingId:
+          type: string
+          example: cmf89d7s80008md43r3njqt4p
+        requestedQuantity:
+          type: number
+          example: 100
+      required:
+        - sellerId
+        - saleListingId
+        - requestedQuantity
+    AddSellersDto:
+      type: object
+      properties:
+        sellers:
+          description: List of sellers to add to the trade operation
+          type: array
+          items:
+            $ref: "#/components/schemas/SellerToAddDto"
+      required:
+        - sellers
+    TradeSellerDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: ts_123
+        sellerId:
+          type: string
+          example: seller_123
+        name:
+          type: string
+          example: Acme Farms Ltd
+        saleListingId:
+          type: string
+          example: listing_456
+        requestedQuantity:
+          type: number
+          example: 40
+        offeredQuantity:
+          type: number
+          example: 50
+        agreedQuantity:
+          type: object
+          example: 45
+        unit:
+          type: string
+          enum:
+            - TON
+            - KG
+            - LITER
+            - PIECE
+          example: TON
+        price:
+          type: number
+          example: 320
+        status:
+          type: string
+          enum:
+            - INVITED
+            - NEGOTIATING
+            - ACCEPTED
+            - REJECTED
+            - CONFIRMED
+            - WITHDRAWN
+            - FAILED_INSPECTION
+          example: NEGOTIATING
+      required:
+        - id
+        - sellerId
+        - saleListingId
+        - requestedQuantity
+        - offeredQuantity
+        - unit
+        - status
+    AddSellersResponseDto:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Sellers added successfully
+        sellersAdded:
+          type: array
+          items:
+            $ref: "#/components/schemas/TradeSellerDto"
+      required:
+        - message
+        - sellersAdded
+    FinalizeTradeDto:
+      type: object
+      properties:
+        actualTransportCost:
+          type: number
+          description: Actual transport cost if different from estimated
+          example: 155.5
+        actualDeliveryDate:
+          format: date-time
+          type: string
+          description: Actual delivery date
+          example: 2024-12-30T14:30:00Z
+        finalNotes:
+          type: string
+          description: Final notes or comments
+          example: Trade completed successfully
+    RevenueBreakdownDto:
+      type: object
+      properties:
+        sellingPrice:
+          type: number
+          example: 380
+        quantity:
+          type: number
+          example: 100
+        totalRevenue:
+          type: number
+          example: 38000
+        currency:
+          type: string
+          example: EUR
+      required:
+        - sellingPrice
+        - quantity
+        - totalRevenue
+        - currency
+    PurchaseCostBreakdownDto:
+      type: object
+      properties:
+        totalCost:
+          type: number
+          example: 35200
+        avgPrice:
+          type: number
+          example: 352
+        breakdown:
+          type: array
+          items:
+            type: object
+            properties:
+              sellerId:
+                type: string
+              quantity:
+                type: number
+              price:
+                type: number
+              totalCost:
+                type: number
+      required:
+        - totalCost
+        - avgPrice
+        - breakdown
+    TransportCostBreakdownDto:
+      type: object
+      properties:
+        estimatedCost:
+          type: number
+          example: 150
+        actualCost:
+          type: number
+          example: 155.5
+        distance:
+          type: number
+          example: 245
+        ratePerKm:
+          type: number
+          example: 0.15
+        vehicleType:
+          type: string
+          example: FLATBED
+      required:
+        - estimatedCost
+        - distance
+        - ratePerKm
+    CostBreakdownDto:
+      type: object
+      properties:
+        purchases:
+          $ref: "#/components/schemas/PurchaseCostBreakdownDto"
+        transport:
+          $ref: "#/components/schemas/TransportCostBreakdownDto"
+        totalCosts:
+          type: number
+          example: 35350
+      required:
+        - purchases
+        - transport
+        - totalCosts
+    ProfitMetricsDto:
+      type: object
+      properties:
+        grossProfit:
+          type: number
+          example: 2800
+        netProfit:
+          type: number
+          example: 2650
+        profitMargin:
+          type: number
+          example: 6.97
+        currency:
+          type: string
+          example: EUR
+        meetsMinimumMargin:
+          type: boolean
+          example: true
+        meetsTargetMargin:
+          type: boolean
+          example: false
+      required:
+        - grossProfit
+        - netProfit
+        - profitMargin
+        - currency
+    ProfitCalculationResponseDto:
+      type: object
+      properties:
+        tradeOperationId:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+        revenue:
+          $ref: "#/components/schemas/RevenueBreakdownDto"
+        costs:
+          $ref: "#/components/schemas/CostBreakdownDto"
+        profit:
+          $ref: "#/components/schemas/ProfitMetricsDto"
+        status:
+          type: object
+          properties:
+            isEstimated:
+              type: boolean
+            lastUpdated:
+              type: string
+              format: date-time
+        sensitivity:
+          type: array
+          description: Sensitivity analysis if requested
+          items:
+            type: object
+            properties:
+              priceChange:
+                type: number
+              newMargin:
+                type: number
+              impact:
+                type: string
+        riskAssessment:
+          type: object
+          description: Risk assessment if requested
+          properties:
+            level:
+              type: string
+              enum:
+                - LOW
+                - MEDIUM
+                - HIGH
+            factors:
+              type: array
+              items:
+                type: string
+            mitigation:
+              type: array
+              items:
+                type: string
+      required:
+        - tradeOperationId
+        - revenue
+        - costs
+        - profit
+        - status
+    ProfitEstimationResponseDto:
+      type: object
+      properties:
+        estimatedProfit:
+          type: number
+          example: 2650
+        profitMargin:
+          type: number
+          example: 6.97
+        isViable:
+          type: boolean
+          example: true
+        warnings:
+          type: array
+          items:
+            type: string
+          example:
+            - Profit margin 6.97% is below target 7%
+        estimationId:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+      required:
+        - estimatedProfit
+        - profitMargin
+        - isViable
+        - warnings
+    SellerPriceDto:
+      type: object
+      properties:
+        sellerId:
+          type: string
+          example: cmfk0hzzh0004bfffxe82z2jz
+        price:
+          type: number
+          example: 350
+        quantity:
+          type: number
+          example: 50
+      required:
+        - sellerId
+        - price
+        - quantity
+    ProfitHistoryEntryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: hist_123
+        buyerPrice:
+          type: number
+          example: 380
+        sellerPrices:
+          type: array
+          items:
+            $ref: "#/components/schemas/SellerPriceDto"
+        estimatedRevenue:
+          type: number
+          example: 38000
+        estimatedCosts:
+          type: number
+          example: 35200
+        estimatedProfit:
+          type: number
+          example: 2800
+        profitMargin:
+          type: number
+          example: 7.4
+        createdBy:
+          type: string
+          example: admin@agrotrade.test
+        createdAt:
+          format: date-time
+          type: string
+          example: 2024-01-15T12:30:00Z
+      required:
+        - id
+        - buyerPrice
+        - sellerPrices
+        - estimatedRevenue
+        - estimatedCosts
+        - estimatedProfit
+        - profitMargin
+        - createdAt
+    ProfitComparisonDto:
+      type: object
+      properties:
+        current:
+          type: object
+          properties:
+            profit:
+              type: number
+            margin:
+              type: number
+        proposed:
+          type: object
+          properties:
+            profit:
+              type: number
+            margin:
+              type: number
+        profitDifference:
+          type: number
+          example: 150
+        marginDifference:
+          type: number
+          example: 0.5
+        trend:
+          type: string
+          example: INCREASE
+          enum:
+            - INCREASE
+            - DECREASE
+            - NO_CHANGE
+      required:
+        - current
+        - proposed
+        - profitDifference
+        - marginDifference
+        - trend
+    ProfitScenarioComparisonDto:
+      type: object
+      properties:
+        best:
+          $ref: "#/components/schemas/ProfitEstimationResponseDto"
+        worst:
+          $ref: "#/components/schemas/ProfitEstimationResponseDto"
+        average:
+          type: number
+          example: 6.5
+        viableCount:
+          type: number
+          example: 3
+        recommendation:
+          type: string
+          example: Proceed with scenario A (highest margin > 7%)
+      required:
+        - best
+        - worst
+        - average
+        - viableCount
+        - recommendation
+    ProfitImpactResponseDto:
+      type: object
+      properties:
+        offerId:
+          type: string
+          example: offer_123
+        offerType:
+          type: string
+          example: BUYER
+          enum:
+            - BUYER
+            - SELLER
+        offerPrice:
+          type: number
+          example: 385
+        offerQuantity:
+          type: number
+          example: 40
+        estimatedProfit:
+          type: number
+          example: 2600
+        profitMargin:
+          type: number
+          example: 6.8
+        profitChange:
+          type: number
+          example: 120
+        cumulativeProfit:
+          type: number
+          example: 5200
+        averagePurchasePrice:
+          type: number
+          example: 340
+        warning:
+          type: string
+          example: Profit margin 4.9% is below minimum 5%
+        recommendation:
+          type: string
+          example: ACCEPT
+      required:
+        - offerId
+        - offerType
+        - offerPrice
+        - offerQuantity
+        - estimatedProfit
+        - profitMargin
+        - profitChange
+        - recommendation
+    ProfitValidationDto:
+      type: object
+      properties:
+        isValid:
+          type: boolean
+          example: true
+        currentMargin:
+          type: number
+          example: 7.1
+        minimumMargin:
+          type: number
+          example: 5
+        targetMargin:
+          type: number
+          example: 7
+        warnings:
+          example: []
+          type: array
+          items:
+            type: string
+        recommendations:
+          example:
+            - Negotiate higher selling price
+          type: array
+          items:
+            type: string
+        breakdown:
+          type: object
+          properties:
+            revenue:
+              type: number
+            purchaseCosts:
+              type: number
+            transportCosts:
+              type: number
+            netProfit:
+              type: number
+      required:
+        - isValid
+        - currentMargin
+        - minimumMargin
+        - targetMargin
+        - warnings
+        - recommendations
+        - breakdown
+    ScenarioGenerationRequestDto:
+      type: object
+      properties:
+        tradeOperationId:
+          type: string
+          description: Trade operation ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        priceVariance:
+          type: number
+          description: Price variance percentage (0.1 = 10%)
+          example: 0.1
+          minimum: 0
+          maximum: 0.5
+        scenarioCount:
+          type: number
+          description: Number of scenarios to generate
+          example: 10
+          minimum: 1
+          maximum: 100
+        includeQualityFactors:
+          type: boolean
+          description: Include quality factors in scenarios
+          example: true
+        includeTransportVariations:
+          type: boolean
+          description: Include transport cost variations
+          example: true
+        minProfitMargin:
+          type: number
+          description: Minimum acceptable profit margin
+          example: 5
+          minimum: 0
+          maximum: 20
+      required:
+        - tradeOperationId
+    SellerPriceScenarioDto:
+      type: object
+      properties:
+        sellerId:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+        sellerName:
+          type: string
+          example: John Farm
+        price:
+          type: number
+          example: 345
+        quantity:
+          type: number
+          example: 50
+        quality:
+          type: string
+          example: STANDARD
+      required:
+        - sellerId
+        - sellerName
+        - price
+        - quantity
+        - quality
+    PriceScenarioDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: scenario_1
+        buyerPrice:
+          type: number
+          example: 378
+        sellerPrices:
+          type: array
+          items:
+            $ref: "#/components/schemas/SellerPriceScenarioDto"
+        transportCost:
+          type: number
+          example: 155
+        estimatedProfit:
+          type: number
+          example: 2650
+        profitMargin:
+          type: number
+          example: 6.97
+        totalRevenue:
+          type: number
+          example: 38000
+        totalCosts:
+          type: number
+          example: 35350
+        viability:
+          type: string
+          enum:
+            - HIGH
+            - MEDIUM
+            - LOW
+            - UNVIABLE
+          example: MEDIUM
+        acceptanceProbability:
+          type: number
+          example: 75.5
+        rank:
+          type: number
+          example: 1
+      required:
+        - id
+        - buyerPrice
+        - sellerPrices
+        - transportCost
+        - estimatedProfit
+        - profitMargin
+        - totalRevenue
+        - totalCosts
+        - viability
+        - acceptanceProbability
+        - rank
+    ScenarioStatisticsDto:
+      type: object
+      properties:
+        averageMargin:
+          type: number
+          example: 7.2
+        medianMargin:
+          type: number
+          example: 7
+        viableCount:
+          type: number
+          example: 7
+        unviableCount:
+          type: number
+          example: 3
+        maxProfit:
+          type: number
+          example: 3500
+        minProfit:
+          type: number
+          example: -500
+        riskLevel:
+          type: string
+          enum:
+            - LOW
+            - MEDIUM
+            - HIGH
+          example: LOW
+      required:
+        - averageMargin
+        - medianMargin
+        - viableCount
+        - unviableCount
+        - maxProfit
+        - minProfit
+        - riskLevel
+    ScenarioAnalysisResponseDto:
+      type: object
+      properties:
+        scenarios:
+          type: array
+          items:
+            $ref: "#/components/schemas/PriceScenarioDto"
+        optimal:
+          $ref: "#/components/schemas/PriceScenarioDto"
+        statistics:
+          $ref: "#/components/schemas/ScenarioStatisticsDto"
+        recommendations:
+          type: array
+          items:
+            type: string
+          example:
+            - Average margin 7.2% meets target 7%
+            - Optimal scenario offers 7.5% margin with 82% acceptance probability
+      required:
+        - scenarios
+        - optimal
+        - statistics
+        - recommendations
+    SensitivityAnalysisRequestDto:
+      type: object
+      properties:
+        tradeOperationId:
+          type: string
+          description: Trade operation ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        baseSellerPrices:
+          type: array
+          description: Base seller prices for analysis
+          items:
+            type: object
+            properties:
+              sellerId:
+                type: string
+              price:
+                type: number
+              quantity:
+                type: number
+        pricePoints:
+          type: number
+          description: Number of price points to analyze
+          example: 20
+          minimum: 5
+          maximum: 50
+      required:
+        - tradeOperationId
+        - baseSellerPrices
+    PricePointDto:
+      type: object
+      properties:
+        buyerPrice:
+          type: number
+          example: 360
+        profitMargin:
+          type: number
+          example: 5.5
+        viability:
+          type: boolean
+          example: true
+      required:
+        - buyerPrice
+        - profitMargin
+        - viability
+    SensitivityAnalysisResponseDto:
+      type: object
+      properties:
+        pricePoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/PricePointDto"
+        breakEvenPrice:
+          type: number
+          example: 352
+        targetMarginPrice:
+          type: number
+          example: 378
+        maxAcceptablePrice:
+          type: number
+          example: 400
+        elasticity:
+          type: number
+          example: 1.5
+        analysis:
+          type: object
+          properties:
+            optimalRange:
+              type: object
+              properties:
+                min:
+                  type: number
+                max:
+                  type: number
+            riskZones:
+              type: array
+              items:
+                type: object
+                properties:
+                  range:
+                    type: string
+                  risk:
+                    type: string
+                  description:
+                    type: string
+      required:
+        - pricePoints
+        - breakEvenPrice
+        - targetMarginPrice
+        - maxAcceptablePrice
+        - elasticity
+    StrategyComparisonRequestDto:
+      type: object
+      properties:
+        tradeOperationId:
+          type: string
+          description: Trade operation ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        strategies:
+          type: array
+          description: Strategies to compare
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              params:
+                type: object
+      required:
+        - tradeOperationId
+        - strategies
+    StrategyResultDto:
+      type: object
+      properties:
+        strategy:
+          type: string
+          example: Conservative
+        bestScenario:
+          $ref: "#/components/schemas/PriceScenarioDto"
+        averageMargin:
+          type: number
+          example: 6.8
+        viablePercentage:
+          type: number
+          example: 70
+      required:
+        - strategy
+        - bestScenario
+        - averageMargin
+        - viablePercentage
+    StrategyComparisonResponseDto:
+      type: object
+      properties:
+        comparison:
+          type: array
+          items:
+            $ref: "#/components/schemas/StrategyResultDto"
+        winner:
+          type: string
+          example: Balanced
+        insights:
+          type: object
+          properties:
+            bestForProfit:
+              type: string
+            bestForRisk:
+              type: string
+            bestForAcceptance:
+              type: string
+      required:
+        - comparison
+        - winner
+    QuickEstimateDto:
+      type: object
+      properties:
+        productId:
+          type: string
+          description: Product ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        buyerPrice:
+          type: number
+          description: Buyer price per unit
+          example: 380
+        avgSellerPrice:
+          type: number
+          description: Average seller price per unit
+          example: 350
+        quantity:
+          type: number
+          description: Quantity in tons
+          example: 100
+        transportDistance:
+          type: number
+          description: Estimated transport distance in km
+          example: 250
+      required:
+        - productId
+        - buyerPrice
+        - avgSellerPrice
+        - quantity
+    QuickEstimateResponseDto:
+      type: object
+      properties:
+        revenue:
+          type: number
+          example: 38000
+        purchaseCost:
+          type: number
+          example: 35000
+        transportCost:
+          type: number
+          example: 150
+        estimatedProfit:
+          type: number
+          example: 2850
+        profitMargin:
+          type: number
+          example: 7.5
+        isViable:
+          type: boolean
+          example: true
+        priceGuidance:
+          type: object
+          properties:
+            minSellerPrice:
+              type: number
+            maxSellerPrice:
+              type: number
+            targetSellerPrice:
+              type: number
+      required:
+        - revenue
+        - purchaseCost
+        - transportCost
+        - estimatedProfit
+        - profitMargin
+        - isViable
+        - priceGuidance
+    PickupPointDto:
+      type: object
+      properties:
+        lat:
+          type: number
+          example: 42.6977
+          description: Latitude
+        lng:
+          type: number
+          example: 23.3219
+          description: Longitude
+        quantity:
+          type: number
+          example: 50
+          description: Quantity to pickup in tons
+        unit:
+          type: string
+          example: ton
+          description: Unit of measurement
+        id:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+        priority:
+          type: string
+          example: HIGH
+          enum:
+            - HIGH
+            - MEDIUM
+            - LOW
+          description: Pickup priority
+      required:
+        - lat
+        - lng
+        - quantity
+    LocationDto:
+      type: object
+      properties:
+        lat:
+          type: number
+          example: 42.6977
+          description: Latitude
+        lng:
+          type: number
+          example: 23.3219
+          description: Longitude
+      required:
+        - lat
+        - lng
+    TransportEstimationRequestDto:
+      type: object
+      properties:
+        pickupPoints:
+          description: List of pickup points
+          type: array
+          items:
+            $ref: "#/components/schemas/PickupPointDto"
+        deliveryPoint:
+          description: Delivery destination
+          allOf:
+            - $ref: "#/components/schemas/LocationDto"
+        vehicleType:
+          type: string
+          enum:
+            - FLATBED
+            - REFRIGERATED
+            - TANKER
+            - CONTAINER
+            - CURTAIN_SIDE
+            - BOX_TRUCK
+            - OTHER
+          example: FLATBED
+          description: Type of vehicle
+        urgency:
+          type: string
+          enum:
+            - NORMAL
+            - EXPRESS
+          example: NORMAL
+          description: Delivery urgency
+        includeAlternatives:
+          type: boolean
+          example: true
+          description: Include alternative vehicle types in response
+      required:
+        - pickupPoints
+        - deliveryPoint
+    TransportCostBreakdownResponseDto:
+      type: object
+      properties:
+        distanceCost:
+          type: number
+          example: 150
+        loadingCosts:
+          type: number
+          example: 25
+        vehicleMultiplier:
+          type: number
+          example: 1
+        appliedRate:
+          type: number
+          example: 0.15
+        distanceTier:
+          type: object
+          properties:
+            tier:
+              type: number
+            rateApplied:
+              type: number
+        bulkDiscount:
+          type: object
+          properties:
+            applied:
+              type: boolean
+            discountRate:
+              type: number
+            discountAmount:
+              type: number
+        urgencySurcharge:
+          type: object
+          properties:
+            applied:
+              type: boolean
+            surchargeRate:
+              type: number
+            surchargeAmount:
+              type: number
+      required:
+        - distanceCost
+        - loadingCosts
+        - vehicleMultiplier
+        - appliedRate
+    RouteInfoDto:
+      type: object
+      properties:
+        pickupSequence:
+          type: array
+          items:
+            type: object
+            properties:
+              lat:
+                type: number
+              lng:
+                type: number
+              quantity:
+                type: number
+              distanceToNext:
+                type: number
+        deliveryPoint:
+          $ref: "#/components/schemas/LocationDto"
+        optimizationApplied:
+          type: boolean
+          example: true
+        distanceSaved:
+          type: number
+          example: 25.5
+      required:
+        - pickupSequence
+        - deliveryPoint
+    VehicleInfoDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - FLATBED
+            - REFRIGERATED
+            - TANKER
+            - CONTAINER
+            - CURTAIN_SIDE
+            - BOX_TRUCK
+            - OTHER
+          example: FLATBED
+        requiredCapacity:
+          type: number
+          example: 100
+        multiplier:
+          type: number
+          example: 1
+      required:
+        - type
+        - requiredCapacity
+        - multiplier
+    TransportEstimationResponseDto:
+      type: object
+      properties:
+        totalDistance:
+          type: number
+          example: 245.5
+        totalCost:
+          type: number
+          example: 175.5
+        currency:
+          type: string
+          example: EUR
+        breakdown:
+          $ref: "#/components/schemas/TransportCostBreakdownResponseDto"
+        route:
+          $ref: "#/components/schemas/RouteInfoDto"
+        vehicleInfo:
+          $ref: "#/components/schemas/VehicleInfoDto"
+        cached:
+          type: boolean
+          example: false
+        alternatives:
+          type: array
+          items:
+            type: object
+            properties:
+              vehicleType:
+                type: string
+              cost:
+                type: number
+              difference:
+                type: number
+      required:
+        - totalDistance
+        - totalCost
+        - currency
+        - breakdown
+        - route
+        - vehicleInfo
+    RouteOptimizationRequestDto:
+      type: object
+      properties:
+        warehouseLocation:
+          description: Warehouse starting point
+          allOf:
+            - $ref: "#/components/schemas/LocationDto"
+        pickups:
+          description: Pickup points to optimize
+          type: array
+          items:
+            $ref: "#/components/schemas/PickupPointDto"
+        deliveryLocation:
+          description: Final delivery location
+          allOf:
+            - $ref: "#/components/schemas/LocationDto"
+        algorithm:
+          type: string
+          enum:
+            - nearest_neighbor
+            - tsp_2opt
+            - genetic
+          example: tsp_2opt
+          description: Optimization algorithm to use
+        maxDistance:
+          type: number
+          example: 1000
+          description: Maximum allowed distance in kilometers
+        maxDuration:
+          type: number
+          example: 480
+          description: Maximum allowed duration in minutes
+        priorityPickupsFirst:
+          type: boolean
+          example: true
+          description: Prioritize high-priority pickups first
+        vehicleCapacity:
+          type: number
+          example: 100
+          description: Vehicle capacity in tons
+      required:
+        - warehouseLocation
+        - pickups
+        - deliveryLocation
+    RoutePointDto:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - warehouse
+            - pickup
+            - delivery
+          example: pickup
+        id:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+        location:
+          $ref: "#/components/schemas/LocationDto"
+        quantity:
+          type: number
+          example: 50
+        distanceFromPrevious:
+          type: number
+          example: 25.5
+        cumulativeDistance:
+          type: number
+          example: 125.5
+        estimatedArrival:
+          format: date-time
+          type: string
+          example: 2024-01-20T14:30:00Z
+        estimatedDeparture:
+          format: date-time
+          type: string
+          example: 2024-01-20T15:00:00Z
+      required:
+        - type
+        - location
+        - distanceFromPrevious
+        - cumulativeDistance
+    OptimizedRouteDto:
+      type: object
+      properties:
+        sequence:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoutePointDto"
+        totalDistance:
+          type: number
+          example: 245.5
+        totalDuration:
+          type: number
+          example: 255
+          description: Total duration in minutes
+        algorithm:
+          type: string
+          enum:
+            - nearest_neighbor
+            - tsp_2opt
+            - genetic
+          example: tsp_2opt
+      required:
+        - sequence
+        - totalDistance
+        - totalDuration
+        - algorithm
+    RouteComparisonDto:
+      type: object
+      properties:
+        originalDistance:
+          type: number
+          example: 280.5
+        optimizedDistance:
+          type: number
+          example: 245.5
+        distanceSaved:
+          type: number
+          example: 35
+        percentageSaved:
+          type: number
+          example: 12.5
+      required:
+        - originalDistance
+        - optimizedDistance
+        - distanceSaved
+        - percentageSaved
+    RouteOptimizationResponseDto:
+      type: object
+      properties:
+        optimizedRoute:
+          $ref: "#/components/schemas/OptimizedRouteDto"
+        comparison:
+          $ref: "#/components/schemas/RouteComparisonDto"
+        metrics:
+          type: object
+          properties:
+            computationTime:
+              type: number
+            numberOfPermutations:
+              type: number
+            optimizationLevel:
+              type: string
+        multiTripSuggestion:
+          type: object
+          properties:
+            requiredTrips:
+              type: number
+            trips:
+              type: array
+              items:
+                type: object
+                properties:
+                  tripNumber:
+                    type: number
+                  totalQuantity:
+                    type: number
+                  distance:
+                    type: number
+      required:
+        - optimizedRoute
+        - comparison
+        - metrics
+    CreateTransportRequestDto:
+      type: object
+      properties:
+        tradeOperationId:
+          type: string
+          description: Trade operation ID
+        totalWeight:
+          type: number
+          description: Total weight to transport in tons
+        requiredVehicleType:
+          type: string
+          enum:
+            - FLATBED
+            - REFRIGERATED
+            - TANKER
+            - CONTAINER
+            - CURTAIN_SIDE
+            - BOX_TRUCK
+            - OTHER
+          description: Required vehicle type
+        specialRequirements:
+          description: Special requirements
+          type: array
+          items:
+            type: string
+        pickupWindowStart:
+          type: string
+          description: Pickup window start time
+        pickupWindowEnd:
+          type: string
+          description: Pickup window end time
+        deliveryDeadline:
+          type: string
+          description: Delivery deadline
+        urgencyLevel:
+          type: string
+          enum:
+            - STANDARD
+            - URGENT
+            - EXPRESS
+            - EMERGENCY
+          description: Urgency level
+        biddingDeadline:
+          type: string
+          description: Bidding deadline
+        maxBudget:
+          type: number
+          description: Maximum budget for transport
+      required:
+        - tradeOperationId
+        - totalWeight
+        - biddingDeadline
+    TransportRequestResponseDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/TransportRequestDto"
+        error:
+          $ref: "#/components/schemas/TransportErrorDto"
+      required:
+        - data
+    CreateTransportBidDto:
+      type: object
+      properties:
+        transportRequestId:
+          type: string
+          description: Transport request ID
+        bidAmount:
+          type: number
+          description: Bid amount in EUR
+        estimatedDuration:
+          type: number
+          description: Estimated duration in hours
+        vehicleType:
+          type: string
+          enum:
+            - FLATBED
+            - REFRIGERATED
+            - TANKER
+            - CONTAINER
+            - CURTAIN_SIDE
+            - BOX_TRUCK
+            - OTHER
+          description: Vehicle type for this bid
+        vehicleCapacity:
+          type: number
+          description: Vehicle capacity in tons
+        assignedTruckId:
+          type: string
+          description: Assigned truck ID
+        specialEquipment:
+          description: Special equipment available
+          type: array
+          items:
+            type: string
+        insuranceCoverage:
+          type: number
+          description: Insurance coverage amount
+        proposedRoute:
+          type: object
+          description: Proposed route details
+        pickupSchedule:
+          type: object
+          description: Detailed pickup schedule
+        expiresAt:
+          type: string
+          description: Bid expiry date
+      required:
+        - transportRequestId
+        - bidAmount
+        - estimatedDuration
+        - vehicleType
+        - vehicleCapacity
+        - expiresAt
+    TransportBidResponseDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/TransportBidDto"
+        error:
+          $ref: "#/components/schemas/TransportErrorDto"
+      required:
+        - data
+    TransportJobResponseDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/TransportJobDto"
+        error:
+          $ref: "#/components/schemas/TransportErrorDto"
+      required:
+        - data
+    UpdateTransportJobStatusDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - ASSIGNED
+            - STARTED
+            - PICKING_UP
+            - IN_TRANSIT
+            - DELIVERING
+            - COMPLETED
+            - DELAYED
+            - CANCELLED
+          description: New job status
+        currentLocation:
+          type: object
+          description: Current location
+        estimatedArrival:
+          type: string
+          description: Estimated arrival time
+        notes:
+          type: string
+          description: Status update notes
+      required:
+        - status
+    CompletePickupDto:
+      type: object
+      properties:
+        sellerId:
+          type: string
+          description: Seller ID for this pickup
+        quantityPickedUp:
+          type: number
+          description: Actual quantity picked up
+        pickupPhotos:
+          description: Photos of the pickup
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+          description: Pickup notes
+        completedAt:
+          type: string
+          description: Pickup completion time
+      required:
+        - sellerId
+        - quantityPickedUp
+        - completedAt
+    CompleteDeliveryDto:
+      type: object
+      properties:
+        deliveryPhotos:
+          description: Photos of the delivery
+          type: array
+          items:
+            type: string
+        proofOfDelivery:
+          type: string
+          description: Proof of delivery document URL
+        customerRating:
+          type: number
+          description: Customer rating (1-5)
+        notes:
+          type: string
+          description: Delivery notes
+        completedAt:
+          type: string
+          description: Delivery completion time
+      required:
+        - completedAt
+    TransportPickupPointDto:
+      type: object
+      properties:
+        lat:
+          type: number
+          example: 42.6977
+        lng:
+          type: number
+          example: 23.3219
+        address:
+          type: string
+          example: 123 Farm Lane, Sofia
+        quantity:
+          type: number
+          example: 80
+        sellerId:
+          type: string
+          example: seller_123
+        sellerName:
+          type: string
+          example: Fresh Farms Ltd
+        notes:
+          type: string
+          example: Pickup complete
+      required:
+        - lat
+        - lng
+    TransportDeliveryPointDto:
+      type: object
+      properties:
+        lat:
+          type: number
+          example: 43.2141
+        lng:
+          type: number
+          example: 27.9147
+        address:
+          type: string
+          example: Warehouse 5, Varna
+        addressId:
+          type: string
+          example: addr_456
+      required:
+        - lat
+        - lng
+    TransportProductSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: object
+      required:
+        - id
+        - name
+    TransportBuyerSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: object
+        email:
+          type: object
+      required:
+        - id
+    TransportBuyListingSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        quantity:
+          type: number
+          example: 120
+        unit:
+          type: string
+          enum:
+            - TON
+            - KG
+            - LITER
+            - PIECE
+        product:
+          $ref: "#/components/schemas/TransportProductSummaryDto"
+        buyer:
+          $ref: "#/components/schemas/TransportBuyerSummaryDto"
+      required:
+        - id
+    TransportTradeOperationSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        operationNumber:
+          type: object
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - ON_HOLD
+            - COMPLETED
+            - CANCELLED
+            - DISPUTED
+        phase:
+          type: string
+          enum:
+            - INITIATION
+            - SELLER_MATCHING
+            - SELLER_NEGOTIATION
+            - INSPECTION_PENDING
+            - TRANSPORT_MATCHING
+            - TRANSPORT_BIDDING
+            - IN_TRANSIT
+            - DELIVERED
+            - COMPLETED
+            - CANCELLED
+        profitMargin:
+          type: number
+        buyListing:
+          $ref: "#/components/schemas/TransportBuyListingSummaryDto"
+      required:
+        - id
+    TransportCompanySummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        legalName:
+          type: object
+        registrationNumber:
+          type: object
+      required:
+        - id
+    TransportBidTransporterSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: object
+        email:
+          type: object
+        phoneNumber:
+          type: object
+        company:
+          $ref: "#/components/schemas/TransportCompanySummaryDto"
+      required:
+        - id
+    TransportRequestSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: req_123
+        requestNumber:
+          type: string
+          example: TR-ABC123
+        status:
+          type: string
+          enum: &a27
+            - OPEN
+            - BIDDING
+            - EVALUATING
+            - ASSIGNED
+            - IN_PROGRESS
+            - COMPLETED
+            - CANCELLED
+          example: OPEN
+        tradeOperationId:
+          type: string
+          example: trade_123
+        totalWeight:
+          type: number
+          example: 120
+        requiredVehicleType:
+          type: string
+          enum: &a28
+            - FLATBED
+            - REFRIGERATED
+            - TANKER
+            - CONTAINER
+            - CURTAIN_SIDE
+            - BOX_TRUCK
+            - OTHER
+          example: FLATBED
+        pickupPoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransportPickupPointDto"
+        deliveryPoint:
+          $ref: "#/components/schemas/TransportDeliveryPointDto"
+        estimatedDistance:
+          type: number
+          example: 320
+        urgencyLevel:
+          type: string
+          example: STANDARD
+        biddingDeadline:
+          type: string
+          example: 2024-01-18T09:00:00Z
+        maxBudget:
+          type: number
+          example: 4500
+        createdAt:
+          type: string
+          example: 2024-01-15T10:00:00Z
+        updatedAt:
+          type: string
+          example: 2024-01-16T11:45:00Z
+        bidsCount:
+          type: number
+          example: 5
+        lowestBid:
+          type: number
+          example: 3400
+        tradeOperation:
+          $ref: "#/components/schemas/TransportTradeOperationSummaryDto"
+      required:
+        - id
+        - requestNumber
+        - status
+        - tradeOperationId
+        - totalWeight
+        - pickupPoints
+        - deliveryPoint
+        - biddingDeadline
+    TransportBidDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: bid_123
+        transportRequestId:
+          type: string
+          example: req_123
+        tradeOperationId:
+          type: string
+          example: trade_123
+        transporterId:
+          type: string
+          example: transporter_456
+        bidAmount:
+          type: number
+          example: 3400
+        estimatedDuration:
+          type: number
+          example: 36
+        vehicleType:
+          type: string
+          enum:
+            - FLATBED
+            - REFRIGERATED
+            - TANKER
+            - CONTAINER
+            - CURTAIN_SIDE
+            - BOX_TRUCK
+            - OTHER
+          example: FLATBED
+        vehicleCapacity:
+          type: number
+          example: 24
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
+            - REJECTED
+            - EXPIRED
+            - WITHDRAWN
+          example: PENDING
+        submittedAt:
+          type: string
+          example: 2024-01-19T12:00:00Z
+        expiresAt:
+          type: string
+          example: 2024-01-20T12:00:00Z
+        transporter:
+          $ref: "#/components/schemas/TransportBidTransporterSummaryDto"
+        transportRequest:
+          $ref: "#/components/schemas/TransportRequestSummaryDto"
+      required:
+        - id
+        - transportRequestId
+        - tradeOperationId
+        - transporterId
+        - bidAmount
+        - estimatedDuration
+        - status
+    TransportJobLocationDto:
+      type: object
+      properties:
+        lat:
+          type: number
+          example: 42.7
+        lng:
+          type: number
+          example: 23.3
+        address:
+          type: string
+          example: Highway A1 KM 25
+        timestamp:
+          type: string
+          example: 2024-01-17T10:03:00Z
+      required:
+        - lat
+        - lng
+    TransportPickupRecordDto:
+      type: object
+      properties:
+        sellerId:
+          type: string
+          example: seller_123
+        quantity:
+          type: number
+          example: 60
+        notes:
+          type: string
+          example: Pickup completed with no issues
+        completedAt:
+          type: string
+          example: 2024-01-17T09:20:00Z
+    TransportJobDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: job_123
+        jobNumber:
+          type: string
+          example: TRJ-2024-001
+        transportRequestId:
+          type: string
+          example: req_123
+        status:
+          type: string
+          enum:
+            - ASSIGNED
+            - STARTED
+            - PICKING_UP
+            - IN_TRANSIT
+            - DELIVERING
+            - COMPLETED
+            - DELAYED
+            - CANCELLED
+          example: IN_TRANSIT
+        transporterId:
+          type: string
+          example: transporter_456
+        currentLocation:
+          $ref: "#/components/schemas/TransportJobLocationDto"
+        estimatedArrival:
+          type: string
+          example: 2024-01-21T08:00:00Z
+        pickupsCompleted:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransportPickupRecordDto"
+        allPickupsComplete:
+          type: boolean
+          example: true
+        startedAt:
+          type: string
+          example: 2024-01-17T07:30:00Z
+        completedAt:
+          type: string
+          example: 2024-01-18T18:00:00Z
+        createdAt:
+          type: string
+          example: 2024-01-16T06:00:00Z
+        updatedAt:
+          type: string
+          example: 2024-01-17T12:30:00Z
+        pickupPhotos:
+          type: array
+          items:
+            type: string
+        deliveryPhotos:
+          type: array
+          items:
+            type: string
+        proofOfDelivery:
+          type: string
+          example: https://files.example.com/pod.pdf
+        notes:
+          type: object
+        transportRequest:
+          $ref: "#/components/schemas/TransportRequestSummaryDto"
+      required:
+        - id
+        - jobNumber
+        - transportRequestId
+        - status
+    TransportRequestDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: req_123
+        requestNumber:
+          type: string
+          example: TR-ABC123
+        status:
+          type: string
+          enum: *a27
+          example: OPEN
+        tradeOperationId:
+          type: string
+          example: trade_123
+        totalWeight:
+          type: number
+          example: 120
+        requiredVehicleType:
+          type: string
+          enum: *a28
+          example: FLATBED
+        pickupPoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransportPickupPointDto"
+        deliveryPoint:
+          $ref: "#/components/schemas/TransportDeliveryPointDto"
+        estimatedDistance:
+          type: number
+          example: 320
+        urgencyLevel:
+          type: string
+          example: STANDARD
+        biddingDeadline:
+          type: string
+          example: 2024-01-18T09:00:00Z
+        maxBudget:
+          type: number
+          example: 4500
+        createdAt:
+          type: string
+          example: 2024-01-15T10:00:00Z
+        updatedAt:
+          type: string
+          example: 2024-01-16T11:45:00Z
+        bidsCount:
+          type: number
+          example: 5
+        lowestBid:
+          type: number
+          example: 3400
+        tradeOperation:
+          $ref: "#/components/schemas/TransportTradeOperationSummaryDto"
+        bids:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransportBidDto"
+        transportJob:
+          $ref: "#/components/schemas/TransportJobDto"
+      required:
+        - id
+        - requestNumber
+        - status
+        - tradeOperationId
+        - totalWeight
+        - pickupPoints
+        - deliveryPoint
+        - biddingDeadline
+    TransportErrorDto:
+      type: object
+      properties:
+        code:
+          type: string
+          example: FORBIDDEN
+        message:
+          type: string
+          example: Only transporters can view transport requests
+      required:
+        - code
+        - message
+    TransportRequestListResponseDto:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransportRequestDto"
+        error:
+          $ref: "#/components/schemas/TransportErrorDto"
+      required:
+        - data
+    TransportBidListResponseDto:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransportBidDto"
+        error:
+          $ref: "#/components/schemas/TransportErrorDto"
+      required:
+        - data
+    TransportJobListResponseDto:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransportJobDto"
+        error:
+          $ref: "#/components/schemas/TransportErrorDto"
+      required:
+        - data
+    TransportBidComparisonRequestDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: req_123
+        distance:
+          type: number
+          example: 245
+        weight:
+          type: number
+          example: 120
+      required:
+        - id
+    TransportBidComparisonItemDto:
+      type: object
+      properties:
+        bidId:
+          type: string
+          example: bid_123
+        transporter:
+          $ref: "#/components/schemas/TransportBidTransporterSummaryDto"
+        bidAmount:
+          type: number
+          example: 3400
+        estimatedDuration:
+          type: number
+          example: 36
+        pricePerKm:
+          type: number
+          example: 12.5
+        pricePerTon:
+          type: number
+          example: 28.3
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
+            - REJECTED
+            - EXPIRED
+            - WITHDRAWN
+          example: PENDING
+      required:
+        - bidId
+        - transporter
+        - bidAmount
+        - estimatedDuration
+        - pricePerKm
+        - pricePerTon
+        - status
+    TransportBidComparisonStatisticsDto:
+      type: object
+      properties:
+        totalBids:
+          type: number
+          example: 5
+        averagePrice:
+          type: number
+          example: 3600
+        lowestBid:
+          type: number
+          example: 3200
+        highestBid:
+          type: number
+          example: 4100
+      required:
+        - totalBids
+        - averagePrice
+        - lowestBid
+        - highestBid
+    TransportBidComparisonDto:
+      type: object
+      properties:
+        request:
+          $ref: "#/components/schemas/TransportBidComparisonRequestDto"
+        bids:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransportBidComparisonItemDto"
+        statistics:
+          $ref: "#/components/schemas/TransportBidComparisonStatisticsDto"
+      required:
+        - request
+        - bids
+        - statistics
+    TransportBidComparisonResponseDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/TransportBidComparisonDto"
+        error:
+          $ref: "#/components/schemas/TransportErrorDto"
+      required:
+        - data
+    TransporterPerformanceDto:
+      type: object
+      properties:
+        transporterId:
+          type: string
+          example: transporter_456
+        completedJobs:
+          type: number
+          example: 45
+        totalJobs:
+          type: number
+          example: 60
+        completionRate:
+          type: number
+          example: 75
+        onTimeDeliveryRate:
+          type: number
+          example: 80
+        recentJobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/TransportJobDto"
+      required:
+        - transporterId
+        - completedJobs
+        - totalJobs
+        - recentJobs
+    TransporterPerformanceResponseDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/TransporterPerformanceDto"
+        error:
+          $ref: "#/components/schemas/TransportErrorDto"
+      required:
+        - data
+    TransportAnalyticsResponseDto:
+      type: object
+      properties:
+        comparison:
+          $ref: "#/components/schemas/TransportBidComparisonDto"
+      required:
+        - comparison
+    TransportAnalyticsResponseWrapperDto:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/TransportAnalyticsResponseDto"
+        error:
+          $ref: "#/components/schemas/TransportErrorDto"
+      required:
+        - data
+    RegisterCompanyDto:
+      type: object
+      properties: {}
+    VerifyCompanyDto:
+      type: object
+      properties: {}
+    LinkTransporterDto:
+      type: object
+      properties: {}
+    UnlinkTransporterDto:
+      type: object
+      properties: {}
+    InviteTransporterDto:
+      type: object
+      properties: {}
+    OfferSnapshotDto:
+      type: object
+      properties:
+        price:
+          type: number
+          example: 340
+        quantity:
+          type: number
+          example: 40
+        terms:
+          type: string
+          example: Shipment within 5 days
+        createdAt:
+          type: string
+          example: 2024-01-15T12:00:00Z
+        reason:
+          type: string
+          example: Need higher price to cover logistics
+        isCounterOffer:
+          type: boolean
+          example: true
+      required:
+        - price
+        - quantity
+    NegotiationSellerDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: seller_123
+        name:
+          type: string
+          example: Green Grain Co.
+        email:
+          type: string
+          example: seller@example.com
+      required:
+        - id
+        - name
+    NegotiationSaleListingDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: listing_456
+        quantity:
+          type: number
+          example: 120
+        askingPrice:
+          type: number
+          example: 340
+      required:
+        - id
+        - quantity
+        - askingPrice
+    NegotiationTradeSellerDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: ts_123
+        requestedQuantity:
+          type: number
+          example: 40
+        offeredQuantity:
+          type: number
+          example: 50
+        status:
+          type: string
+          example: PENDING
+        seller:
+          $ref: "#/components/schemas/NegotiationSellerDto"
+        saleListing:
+          $ref: "#/components/schemas/NegotiationSaleListingDto"
+      required:
+        - id
+        - requestedQuantity
+        - offeredQuantity
+        - status
+        - seller
+        - saleListing
+    ProfitImpactDto:
+      type: object
+      properties:
+        estimatedProfit:
+          type: number
+          example: 2600
+        profitMargin:
+          type: number
+          example: 6.8
+        profitChange:
+          type: number
+          example: -120
+        warning:
+          type: string
+          example: Profit margin 4.9% is below minimum 5%
+      required:
+        - estimatedProfit
+        - profitMargin
+    NegotiationWithDetailsDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: neg_123
+        tradeOperationId:
+          type: string
+          example: trade_123
+        tradeSellerId:
+          type: string
+          example: ts_123
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
+            - REJECTED
+            - COUNTERED
+            - EXPIRED
+            - WITHDRAWN
+          example: PENDING
+        currentOffer:
+          $ref: "#/components/schemas/OfferSnapshotDto"
+        counterOffer:
+          $ref: "#/components/schemas/OfferSnapshotDto"
+        offerHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/OfferSnapshotDto"
+        finalPrice:
+          type: number
+          example: 340
+        finalQuantity:
+          type: number
+          example: 40
+        expiresAt:
+          format: date-time
+          type: string
+          example: 2024-01-18T15:00:00Z
+        hoursUntilExpiry:
+          type: number
+          example: 12
+        isExpiringSoon:
+          type: boolean
+          example: true
+        tradeSeller:
+          $ref: "#/components/schemas/NegotiationTradeSellerDto"
+        profitImpact:
+          $ref: "#/components/schemas/ProfitImpactDto"
+      required:
+        - id
+        - tradeOperationId
+        - tradeSellerId
+        - status
+        - currentOffer
+        - offerHistory
+        - expiresAt
+        - tradeSeller
+    NegotiationSummaryDto:
+      type: object
+      properties:
+        tradeOperationId:
+          type: string
+          example: trade_123
+        totalNegotiations:
+          type: number
+          example: 12
+        negotiations:
+          type: array
+          items:
+            $ref: "#/components/schemas/NegotiationWithDetailsDto"
+        summary:
+          type: object
+          properties:
+            pending:
+              type: number
+            countered:
+              type: number
+            accepted:
+              type: number
+            rejected:
+              type: number
+            expired:
+              type: number
+            withdrawn:
+              type: number
+        profitAnalysis:
+          type: object
+          properties:
+            totalRequestedQuantity:
+              type: number
+            totalAgreedQuantity:
+              type: number
+            averageOfferPrice:
+              type: number
+            averageAgreedPrice:
+              type: number
+            estimatedTotalCost:
+              type: number
+            estimatedProfit:
+              type: number
+            profitMargin:
+              type: number
+        phaseTransition:
+          type: object
+          properties:
+            allSellersAccepted:
+              type: boolean
+            readyForNextPhase:
+              type: boolean
+            nextPhase:
+              type: string
+            message:
+              type: string
+        priceComparison:
+          type: object
+          description: Price comparison for countered negotiations
+          properties:
+            lowestCounter:
+              type: number
+            highestCounter:
+              type: number
+            averageCounter:
+              type: number
+            priceSpread:
+              type: number
+            bestDeal:
+              type: object
+              nullable: true
+              properties:
+                negotiationId:
+                  type: string
+                price:
+                  type: number
+                seller:
+                  type: string
+      required:
+        - tradeOperationId
+        - totalNegotiations
+        - negotiations
+        - summary
+    NegotiationErrorDto:
+      type: object
+      properties:
+        code:
+          type: string
+          example: NEGOTIATION_NOT_FOUND
+        message:
+          type: string
+          example: Negotiation not found
+      required:
+        - code
+        - message
+    NegotiationSummaryWrapperDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/NegotiationSummaryDto"
+        error:
+          $ref: "#/components/schemas/NegotiationErrorDto"
+      required:
+        - success
+    NegotiationResponseWrapperDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/NegotiationWithDetailsDto"
+        error:
+          $ref: "#/components/schemas/NegotiationErrorDto"
+      required:
+        - success
+    BatchOfferErrorDto:
+      type: object
+      properties:
+        tradeSellerId:
+          type: string
+          example: ts_123
+        error:
+          type: string
+          example: Negotiation already exists for this seller
+      required:
+        - tradeSellerId
+        - error
+    BatchOffersResultDto:
+      type: object
+      properties:
+        created:
+          type: number
+          example: 2
+        failed:
+          type: number
+          example: 1
+        negotiations:
+          type: array
+          items:
+            $ref: "#/components/schemas/NegotiationWithDetailsDto"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/BatchOfferErrorDto"
+      required:
+        - created
+        - failed
+        - negotiations
+    NegotiationBatchResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/BatchOffersResultDto"
+        error:
+          $ref: "#/components/schemas/NegotiationErrorDto"
+      required:
+        - success
+    ExtendExpiryResultDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: neg_123
+        previousExpiry:
+          type: string
+          example: 2024-01-15T10:00:00Z
+        newExpiry:
+          type: string
+          example: 2024-01-16T10:00:00Z
+        extensionHours:
+          type: number
+          example: 24
+        totalExtensions:
+          type: number
+          example: 1
+      required:
+        - id
+    ExtendExpiryResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/ExtendExpiryResultDto"
+        error:
+          $ref: "#/components/schemas/NegotiationErrorDto"
+      required:
+        - success
+    ExpiringNegotiationItemDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: neg_123
+        hoursRemaining:
+          type: number
+          example: 4
+        urgency:
+          type: string
+          example: HIGH
+        recommendedAction:
+          type: string
+          example: Follow up immediately
+      required:
+        - id
+        - hoursRemaining
+        - urgency
+        - recommendedAction
+    ExpiringSummaryDto:
+      type: object
+      properties:
+        total:
+          type: number
+          example: 12
+        expiringSoon:
+          type: number
+          example: 3
+        expired:
+          type: number
+          example: 2
+      required:
+        - total
+        - expiringSoon
+        - expired
+    ExpiringNegotiationsDataDto:
+      type: object
+      properties:
+        expiringSoon:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExpiringNegotiationItemDto"
+        summary:
+          $ref: "#/components/schemas/ExpiringSummaryDto"
+      required:
+        - expiringSoon
+        - summary
+    ExpiringNegotiationsResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/ExpiringNegotiationsDataDto"
+        error:
+          $ref: "#/components/schemas/NegotiationErrorDto"
+      required:
+        - success
+    NegotiationMetricsDataDto:
+      type: object
+      properties:
+        totalNegotiations:
+          type: number
+          example: 12
+        counterOfferRate:
+          type: number
+          example: 33.3
+        acceptanceAfterCounter:
+          type: number
+          example: 50
+        rejectionAfterCounter:
+          type: number
+          example: 25
+        averageRounds:
+          type: number
+          example: 3
+        averagePriceMovement:
+          type: number
+          example: 5.2
+      required:
+        - totalNegotiations
+        - counterOfferRate
+        - acceptanceAfterCounter
+        - rejectionAfterCounter
+        - averageRounds
+        - averagePriceMovement
+    NegotiationMetricsResponseDto:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          $ref: "#/components/schemas/NegotiationMetricsDataDto"
+        error:
+          $ref: "#/components/schemas/NegotiationErrorDto"
+      required:
+        - success
+    CreateOfferDto:
+      type: object
+      properties:
+        tradeSellerId:
+          type: string
+          description: Trade seller ID to send offer to
+          example: clxyzabc123
+        price:
+          type: number
+          description: Offered price per unit
+          example: 340
+        quantity:
+          type: number
+          description: Quantity for negotiation
+          example: 100
+        terms:
+          type: string
+          description: Additional terms or conditions
+          example: Payment on delivery, quality inspection required
+      required:
+        - tradeSellerId
+        - price
+        - quantity
+    BatchOfferDto:
+      type: object
+      properties:
+        offers:
+          description: Array of offers to send to multiple sellers
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateOfferDto"
+      required:
+        - offers
+    CounterOfferDto:
+      type: object
+      properties:
+        price:
+          type: number
+          description: Counter-offered price per unit
+          example: 345
+        quantity:
+          type: number
+          description: Counter-offered quantity
+          example: 100
+        terms:
+          type: string
+          description: Counter-offer terms
+          example: Can deliver within 3 days at this price
+        reason:
+          type: string
+          description: Reason for counter-offer
+          example: Current market conditions require higher price
+      required:
+        - price
+        - quantity
+    AcceptOfferDto:
+      type: object
+      properties:
+        acceptanceNote:
+          type: string
+          description: Acceptance note
+          example: Terms accepted, delivery expected within 5 days
+    RejectOfferDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason for rejection
+          example: Price too low for quality offered
+    WithdrawOfferDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason for withdrawal
+          example: Trade strategy changed
+    ExtendExpiryDto:
+      type: object
+      properties:
+        hours:
+          type: number
+          description: Hours to extend the negotiation expiry
+          example: 24
+        reason:
+          type: string
+          description: Reason for extension
+          example: Seller requested more time to review
+      required:
+        - hours
+    CreateInspectionRequestDto:
+      type: object
+      properties:
+        tradeOperationId:
+          type: string
+        saleListingId:
+          type: string
+        priority:
+          type: string
+          enum:
+            - LOW
+            - MEDIUM
+            - HIGH
+            - URGENT
+        requestedDate:
+          type: string
+          format: date-time
+        notes:
+          type: string
+      required:
+        - tradeOperationId
+        - saleListingId
+    InspectionVerificationProductSpecificationsDto:
+      type: object
+      properties:
+        variety:
+          type: string
+        grade:
+          type: string
+        origin:
+          type: string
+        harvestDate:
+          type: string
+          format: date-time
+    InspectionVerificationResultDto:
+      type: object
+      properties:
+        actualQuantity:
+          type: number
+        actualQuality:
+          type: string
+        moistureContent:
+          type: number
+        foreignMatter:
+          type: number
+        brokenGrains:
+          type: number
+        discoloration:
+          type: boolean
+        pestDamage:
+          type: boolean
+        productSpecifications:
+          $ref: "#/components/schemas/InspectionVerificationProductSpecificationsDto"
+    InspectionProductSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: object
+      required:
+        - id
+        - name
+    InspectionSellerSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: object
+        email:
+          type: object
+      required:
+        - id
+    InspectionSaleListingSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        sellerId:
+          type: string
+        productId:
+          type: string
+        quantity:
+          type: number
+        unit:
+          type: object
+        askingPrice:
+          type: number
+        product:
+          $ref: "#/components/schemas/InspectionProductSummaryDto"
+        seller:
+          $ref: "#/components/schemas/InspectionSellerSummaryDto"
+      required:
+        - id
+        - sellerId
+    InspectionInspectorSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: object
+        email:
+          type: object
+      required:
+        - id
+    InspectionBuyerSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: object
+        email:
+          type: object
+      required:
+        - id
+    InspectionBuyListingSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        productId:
+          type: object
+        quantity:
+          type: number
+        unit:
+          type: object
+        buyer:
+          $ref: "#/components/schemas/InspectionBuyerSummaryDto"
+      required:
+        - id
+    InspectionTradeOperationSummaryDto:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: object
+        buyListing:
+          $ref: "#/components/schemas/InspectionBuyListingSummaryDto"
+      required:
+        - id
+    InspectionResponseDto:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: &a29
+            - PENDING
+            - SCHEDULED
+            - IN_PROGRESS
+            - COMPLETED
+            - CANCELLED
+        priority:
+          type: string
+          enum: &a30
+            - LOW
+            - MEDIUM
+            - HIGH
+            - URGENT
+        requestedDate:
+          type: string
+          format: date-time
+        scheduledDate:
+          type: string
+          format: date-time
+        completedDate:
+          type: string
+          format: date-time
+        qualityScore:
+          type: number
+        verificationResult:
+          $ref: "#/components/schemas/InspectionVerificationResultDto"
+        notes:
+          type: object
+        photos:
+          type: array
+          items:
+            type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        address:
+          type: object
+        saleListing:
+          $ref: "#/components/schemas/InspectionSaleListingSummaryDto"
+        inspector:
+          $ref: "#/components/schemas/InspectionInspectorSummaryDto"
+        tradeOperation:
+          $ref: "#/components/schemas/InspectionTradeOperationSummaryDto"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - status
+        - priority
+        - requestedDate
+        - latitude
+        - longitude
+        - createdAt
+        - updatedAt
+    CreateBatchInspectionsDto:
+      type: object
+      properties:
+        tradeOperationId:
+          type: string
+        saleListingIds:
+          type: array
+          items:
+            type: string
+        priority:
+          type: string
+          enum:
+            - LOW
+            - MEDIUM
+            - HIGH
+            - URGENT
+      required:
+        - tradeOperationId
+        - saleListingIds
+    AssignInspectorDto:
+      type: object
+      properties:
+        inspectorId:
+          type: string
+      required:
+        - inspectorId
+    InspectionAssigneeDto:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: object
+        email:
+          type: object
+        activeAssignments:
+          type: number
+      required:
+        - id
+    UpdateInspectionStatusDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - PENDING
+            - SCHEDULED
+            - IN_PROGRESS
+            - COMPLETED
+            - CANCELLED
+      required:
+        - status
+    SubmitInspectionResultsDto:
+      type: object
+      properties:
+        qualityScore:
+          type: number
+        verificationResult:
+          $ref: "#/components/schemas/InspectionVerificationResultDto"
+        notes:
+          type: string
+        photos:
+          type: array
+          items:
+            type: string
+        recommendVerification:
+          type: boolean
+      required:
+        - qualityScore
+        - verificationResult
+        - recommendVerification
+    InspectorMissionDto:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: *a29
+        priority:
+          type: string
+          enum: *a30
+        requestedDate:
+          type: string
+          format: date-time
+        scheduledDate:
+          type: string
+          format: date-time
+        completedDate:
+          type: string
+          format: date-time
+        qualityScore:
+          type: number
+        verificationResult:
+          $ref: "#/components/schemas/InspectionVerificationResultDto"
+        notes:
+          type: object
+        photos:
+          type: array
+          items:
+            type: string
+        latitude:
+          type: number
+        longitude:
+          type: number
+        address:
+          type: object
+        saleListing:
+          $ref: "#/components/schemas/InspectionSaleListingSummaryDto"
+        inspector:
+          $ref: "#/components/schemas/InspectionInspectorSummaryDto"
+        tradeOperation:
+          $ref: "#/components/schemas/InspectionTradeOperationSummaryDto"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - status
+        - priority
+        - requestedDate
+        - latitude
+        - longitude
+        - createdAt
+        - updatedAt
+    InspectionStatsDto:
+      type: object
+      properties:
+        total:
+          type: number
+        pending:
+          type: number
+        scheduled:
+          type: number
+        inProgress:
+          type: number
+        completed:
+          type: number
+        avgQualityScore:
+          type: number
+      required:
+        - total
+        - pending
+        - scheduled
+        - inProgress
+        - completed
+        - avgQualityScore

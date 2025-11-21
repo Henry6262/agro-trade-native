@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  Animated,
-  Alert,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Image, Animated, Alert } from 'react-native';
 import {
   MapPin,
   Star,
@@ -50,11 +43,11 @@ interface BuyerOffer {
     timeframe: string;
     method?: string;
   };
-  specifications?: Array<{
+  specifications?: {
     name: string;
     requirement: string;
     matches: boolean;
-  }>;
+  }[];
   matchScore: number;
   totalValue: number;
   message?: string;
@@ -90,7 +83,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
     const offerPrice = offer.offeredPrice;
     const difference = offerPrice - marketPrice;
     const marginPercentage = marketPrice > 0 ? (difference / marketPrice) * 100 : 0;
-    
+
     return {
       difference,
       marginPercentage,
@@ -102,11 +95,12 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
   const priceAnalysis = calculatePriceAnalysis();
 
   const getMatchScoreColor = (score: number) => {
-    if (score >= 80) return { bg: 'bg-green-500/20', border: 'border-green-500/40', text: 'text-green-400' };
-    if (score >= 60) return { bg: 'bg-yellow-500/20', border: 'border-yellow-500/40', text: 'text-yellow-400' };
+    if (score >= 80)
+      return { bg: 'bg-green-500/20', border: 'border-green-500/40', text: 'text-green-400' };
+    if (score >= 60)
+      return { bg: 'bg-yellow-500/20', border: 'border-yellow-500/40', text: 'text-yellow-400' };
     return { bg: 'bg-orange-500/20', border: 'border-orange-500/40', text: 'text-orange-400' };
   };
-
 
   const formatTimeRemaining = (validUntil: string) => {
     const now = new Date();
@@ -114,7 +108,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
     const diffMs = expiry.getTime() - now.getTime();
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
     const diffDays = Math.floor(diffHours / 24);
-    
+
     if (diffDays > 1) return `${diffDays} days`;
     if (diffHours > 1) return `${diffHours} hours`;
     return 'Expires soon';
@@ -137,10 +131,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
   };
 
   return (
-    <Animated.View 
-      style={{ transform: [{ scale: scaleAnim }] }}
-      className="mb-4"
-    >
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }} className="mb-4">
       <View className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 rounded-xl border border-neutral-700/50 overflow-hidden">
         {/* Header with Buyer Info and Match Score */}
         <View className="p-4 border-b border-neutral-700/30">
@@ -174,7 +165,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
                     </View>
                   )}
                 </View>
-                
+
                 {offer.buyer?.location && (
                   <View className="flex-row items-center mt-1">
                     <MapPin size={12} color="#10B981" />
@@ -202,7 +193,9 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
 
             {/* Match Score */}
             <View className="ml-3 items-end">
-              <View className={`${matchColors.bg} ${matchColors.border} border rounded-lg px-3 py-2`}>
+              <View
+                className={`${matchColors.bg} ${matchColors.border} border rounded-lg px-3 py-2`}
+              >
                 <Text className={`${matchColors.text} text-xs font-bold`}>
                   {offer.matchScore}% Match
                 </Text>
@@ -219,11 +212,9 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
                 <Text className="text-white font-bold text-2xl">
                   €{offer.offeredPrice.toFixed(2)}
                 </Text>
-                <Text className="text-neutral-400 text-sm ml-1">
-                  /{offer.unit.toLowerCase()}
-                </Text>
+                <Text className="text-neutral-400 text-sm ml-1">/{offer.unit.toLowerCase()}</Text>
               </View>
-              
+
               {/* Price Analysis */}
               <View className="flex-row items-center mt-1">
                 {priceAnalysis.isProfitable ? (
@@ -231,11 +222,14 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
                 ) : (
                   <TrendingDown size={14} color="#EF4444" />
                 )}
-                <Text className={`text-sm ml-1 font-medium ${
-                  priceAnalysis.isProfitable ? 'text-green-400' : 'text-red-400'
-                }`}>
-                  {priceAnalysis.isProfitable ? '+' : ''}€{Math.abs(priceAnalysis.difference).toFixed(2)} 
-                  ({priceAnalysis.marginPercentage.toFixed(1)}%)
+                <Text
+                  className={`text-sm ml-1 font-medium ${
+                    priceAnalysis.isProfitable ? 'text-green-400' : 'text-red-400'
+                  }`}
+                >
+                  {priceAnalysis.isProfitable ? '+' : ''}€
+                  {Math.abs(priceAnalysis.difference).toFixed(2)}(
+                  {priceAnalysis.marginPercentage.toFixed(1)}%)
                 </Text>
               </View>
             </View>
@@ -244,9 +238,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
               <Text className="text-white font-semibold text-lg">
                 {offer.requestedQuantity.toLocaleString()} {offer.unit.toLowerCase()}
               </Text>
-              <Text className="text-neutral-400 text-sm">
-                Requested
-              </Text>
+              <Text className="text-neutral-400 text-sm">Requested</Text>
             </View>
           </View>
 
@@ -258,21 +250,24 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
                 €{offer.totalValue.toLocaleString()}
               </Text>
             </View>
-            
+
             {sellerProduct?.quantity && (
               <View className="flex-row justify-between items-center mt-2 pt-2 border-t border-neutral-700/30">
                 <Text className="text-neutral-400 text-sm">Your Available</Text>
-                <Text className={`text-sm font-medium ${
-                  sellerProduct.quantity >= offer.requestedQuantity ? 'text-green-400' : 'text-yellow-400'
-                }`}>
-                  {sellerProduct.quantity} {offer.unit.toLowerCase()} 
-                  ({sellerProduct.quantity >= offer.requestedQuantity ? 'Sufficient' : 'Partial'})
+                <Text
+                  className={`text-sm font-medium ${
+                    sellerProduct.quantity >= offer.requestedQuantity
+                      ? 'text-green-400'
+                      : 'text-yellow-400'
+                  }`}
+                >
+                  {sellerProduct.quantity} {offer.unit.toLowerCase()}(
+                  {sellerProduct.quantity >= offer.requestedQuantity ? 'Sufficient' : 'Partial'})
                 </Text>
               </View>
             )}
           </View>
         </View>
-
 
         {/* Specifications Match */}
         {offer.specifications && offer.specifications.length > 0 && (
@@ -280,11 +275,11 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
             <Text className="text-neutral-300 text-sm mb-3">Specification Requirements</Text>
             <View className="flex-row flex-wrap gap-2">
               {offer.specifications.slice(0, 3).map((spec, index) => (
-                <View 
+                <View
                   key={index}
                   className={`flex-row items-center px-2 py-1 rounded-md ${
-                    spec.matches 
-                      ? 'bg-green-500/20 border border-green-500/40' 
+                    spec.matches
+                      ? 'bg-green-500/20 border border-green-500/40'
                       : 'bg-red-500/20 border border-red-500/40'
                   }`}
                 >
@@ -293,9 +288,9 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
                   ) : (
                     <X size={10} color="#EF4444" />
                   )}
-                  <Text className={`text-xs ml-1 ${
-                    spec.matches ? 'text-green-400' : 'text-red-400'
-                  }`}>
+                  <Text
+                    className={`text-xs ml-1 ${spec.matches ? 'text-green-400' : 'text-red-400'}`}
+                  >
                     {spec.name}
                   </Text>
                 </View>

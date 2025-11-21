@@ -12,22 +12,14 @@ export default function OrderDetailScreen() {
       <ScrollView className="flex-1">
         <View className="p-4">
           <Card className="mb-4">
-            <Text className="text-xl font-bold text-gray-900 mb-2">
-              Order Details
-            </Text>
-            <Text className="text-gray-600 mb-4">
-              Order ID: {orderId}
-            </Text>
+            <Text className="text-xl font-bold text-gray-900 mb-2">Order Details</Text>
+            <Text className="text-gray-600 mb-4">Order ID: {orderId}</Text>
             <Text className="text-gray-600">
               Order information will be loaded from the backend.
             </Text>
           </Card>
 
-          <Button
-            title="Track Order"
-            fullWidth
-            onPress={() => {}}
-          />
+          <Button title="Track Order" fullWidth onPress={() => {}} />
         </View>
       </ScrollView>
     </SafeAreaView>

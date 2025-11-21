@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProductSpecificationDrawer } from '../../../../../../shared/components/ProductSpecificationDrawer';
+import { ProductSpecificationDrawer } from '@shared/components/ProductSpecificationDrawer';
 import { ProductSpecificationStepProps, ProductSpecifications } from '../types';
 
 export const ProductSpecificationStep: React.FC<ProductSpecificationStepProps> = ({
@@ -9,7 +9,6 @@ export const ProductSpecificationStep: React.FC<ProductSpecificationStepProps> =
   onNext,
   onBack,
 }) => {
-  
   const handleSpecificationsSave = (specs: any) => {
     // Transform the specs data to match our ProductSpecifications interface
     const specifications: ProductSpecifications = {

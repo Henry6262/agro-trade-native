@@ -142,11 +142,7 @@ export const CardContent: React.FC<CardContentProps> = ({
   testID,
   accessibilityLabel,
 }) => (
-  <View
-    className={className || ''}
-    testID={testID}
-    accessibilityLabel={accessibilityLabel}
-  >
+  <View className={className || ''} testID={testID} accessibilityLabel={accessibilityLabel}>
     {children}
   </View>
 );

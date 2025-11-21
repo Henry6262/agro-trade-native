@@ -1,0 +1,35 @@
+
+> admin-dashboard@0.0.0 build
+> tsc -b && vite build
+
+src/features/inspections/components/InspectorPortal/InspectionForm.tsx(4,40): error TS2307: Cannot find module '../../types' or its corresponding type declarations.
+src/features/inspections/components/InspectorPortal/InspectorPortal.tsx(3,40): error TS2307: Cannot find module '../../types' or its corresponding type declarations.
+src/features/matching/components/MatchingDashboard/MatchingDashboard.tsx(189,11): error TS2322: Type 'import("/Users/henry/agro-trade/admin-dashboard/src/types/listings").SaleListing[]' is not assignable to type 'SaleListing[]'.
+  Type 'import("/Users/henry/agro-trade/admin-dashboard/src/types/listings").SaleListing' is not assignable to type 'SaleListing'.
+    Types of property 'seller' are incompatible.
+      Type 'User' is missing the following properties from type '{ id: string; businessName: string; verificationStatus: string; }': businessName, verificationStatus
+src/features/matching/components/MatchingDashboard/MatchingDashboard.tsx(190,11): error TS2322: Type 'import("/Users/henry/agro-trade/admin-dashboard/src/types/listings").BuyListing' is not assignable to type 'BuyListing'.
+  Types of property 'buyer' are incompatible.
+    Property 'businessName' is missing in type 'User' but required in type '{ businessName: string; }'.
+src/features/matching/components/MatchingDashboard/OfferDetailsModal.tsx(3,41): error TS2307: Cannot find module '../../types' or its corresponding type declarations.
+src/features/matching/components/MatchingDashboard/OffersTrackingPanel.tsx(6,41): error TS2307: Cannot find module '../../types' or its corresponding type declarations.
+src/features/trade-operations/components/TradeCreationWizard.tsx(2,24): error TS2307: Cannot find module '../types' or its corresponding type declarations.
+src/features/trade-operations/components/TradeCreationWizard.tsx(7,8): error TS2307: Cannot find module '../services/api' or its corresponding type declarations.
+src/features/trade-operations/components/TradeDetails/TradeDetails.tsx(233,34): error TS2322: Type '{ tradeOperation: TradeOperation; onUpdate: () => Promise<void>; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'tradeOperation' does not exist on type 'IntrinsicAttributes'.
+src/features/trade-operations/components/TradeOperationsTable.tsx(2,24): error TS2307: Cannot find module '../types' or its corresponding type declarations.
+src/features/trade-operations/components/TradeOperationsTable.tsx(3,39): error TS2307: Cannot find module '../services/api' or its corresponding type declarations.
+src/features/trade-operations/components/TradeOperationsTable.tsx(138,21): error TS2322: Type 'unknown' is not assignable to type 'Key'.
+src/features/trade-operations/components/TradeOperationsTable.tsx(138,33): error TS2322: Type 'unknown' is not assignable to type 'string | number | readonly string[]'.
+src/features/trade-operations/components/TradeOperationsTable.tsx(138,54): error TS2339: Property 'replace' does not exist on type 'unknown'.
+src/features/trade-operations/components/TradeOperationsTable.tsx(148,21): error TS2322: Type 'unknown' is not assignable to type 'Key'.
+src/features/trade-operations/components/TradeOperationsTable.tsx(148,34): error TS2322: Type 'unknown' is not assignable to type 'string | number | readonly string[]'.
+src/features/trade-operations/components/TradeOperationsTable.tsx(148,49): error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+src/services/simulationApi.ts(3,3): error TS2614: Module '"./api"' has no exported member 'authService'. Did you mean to use 'import authService from "./api"' instead?
+src/services/simulationApi.ts(4,3): error TS2614: Module '"./api"' has no exported member 'buyerService'. Did you mean to use 'import buyerService from "./api"' instead?
+src/services/simulationApi.ts(5,3): error TS2614: Module '"./api"' has no exported member 'sellerService'. Did you mean to use 'import sellerService from "./api"' instead?
+src/services/simulationApi.ts(6,3): error TS2614: Module '"./api"' has no exported member 'transporterService'. Did you mean to use 'import transporterService from "./api"' instead?
+src/services/simulationApi.ts(7,3): error TS2724: '"./api"' has no exported member named 'inspectorService'. Did you mean 'inspectionService'?
+src/services/simulationApi.ts(8,3): error TS2614: Module '"./api"' has no exported member 'adminService'. Did you mean to use 'import adminService from "./api"' instead?
+src/services/simulationApi.ts(9,3): error TS2614: Module '"./api"' has no exported member 'userService'. Did you mean to use 'import userService from "./api"' instead?
+src/services/simulationApi.ts(10,3): error TS2614: Module '"./api"' has no exported member 'scenarioHelpers'. Did you mean to use 'import scenarioHelpers from "./api"' instead?

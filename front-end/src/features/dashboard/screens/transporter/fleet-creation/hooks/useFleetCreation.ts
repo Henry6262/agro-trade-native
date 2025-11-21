@@ -27,12 +27,10 @@ export const useFleetCreation = () => {
   // Set creation type and move to info step
   const selectCreationType = useCallback((type: CreationType) => {
     if (!type) return;
-    
-    const infoStep: FleetCreationStep = type === 'truck' 
-      ? 'truck-info' 
-      : 'driver-info';
-    
-    setState(prev => ({
+
+    const infoStep: FleetCreationStep = type === 'truck' ? 'truck-info' : 'driver-info';
+
+    setState((prev) => ({
       ...prev,
       creationType: type,
       currentStep: infoStep,
@@ -42,7 +40,7 @@ export const useFleetCreation = () => {
 
   // Navigation - simplified for single step
   const goBack = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       currentStep: 'type-selection',
       creationType: null,
@@ -52,7 +50,7 @@ export const useFleetCreation = () => {
 
   // Truck data update - simplified
   const updateTruckInfo = useCallback((data: TruckInfo) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       truckData: {
         info: data,
@@ -62,7 +60,7 @@ export const useFleetCreation = () => {
 
   // Driver data update - simplified
   const updateDriverInfo = useCallback((data: DriverInfo) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       driverData: {
         info: data,
@@ -72,42 +70,42 @@ export const useFleetCreation = () => {
 
   // Submit functions
   const submitTruck = useCallback(async () => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
-    
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
     try {
       // Mock API call - replace with actual API
       console.log('Submitting truck:', state.truckData.info);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       Alert.alert('Success', 'Truck added to fleet!');
-      setState(prev => ({ ...prev, isLoading: false }));
+      setState((prev) => ({ ...prev, isLoading: false }));
       return true;
     } catch (error) {
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: 'Failed to submit truck' 
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: 'Failed to submit truck',
       }));
       return false;
     }
   }, [state.truckData]);
 
   const submitDriver = useCallback(async () => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
-    
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
     try {
       // Mock API call - replace with actual API
       console.log('Submitting driver:', state.driverData.info);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       Alert.alert('Success', 'Driver added to fleet!');
-      setState(prev => ({ ...prev, isLoading: false }));
+      setState((prev) => ({ ...prev, isLoading: false }));
       return true;
     } catch (error) {
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: 'Failed to add driver' 
+      setState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: 'Failed to add driver',
       }));
       return false;
     }
@@ -128,7 +126,7 @@ export const useFleetCreation = () => {
 
   // Clear error
   const clearError = useCallback(() => {
-    setState(prev => ({ ...prev, error: null }));
+    setState((prev) => ({ ...prev, error: null }));
   }, []);
 
   return {
@@ -139,15 +137,15 @@ export const useFleetCreation = () => {
     driverData: state.driverData,
     isLoading: state.isLoading,
     error: state.error,
-    
+
     // Navigation
     selectCreationType,
     goBack,
-    
+
     // Data updates
     updateTruckInfo,
     updateDriverInfo,
-    
+
     // Actions
     submitFleetItem,
     resetFlow,
