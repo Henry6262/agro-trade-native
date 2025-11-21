@@ -62,17 +62,17 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!quantity || parseFloat(quantity) <= 0) {
       newErrors.quantity = 'Please enter a valid quantity';
     }
-    
+
     // Validate critical specifications
     productData?.specifications?.forEach((spec: ProductSpecification) => {
       if (spec.importance === 'CRITICAL' && !specifications[spec.code]) {
         newErrors[spec.code] = `${spec.name} is required`;
       }
-      
+
       if (spec.dataType === 'NUMBER' && specifications[spec.code]) {
         const value = parseFloat(specifications[spec.code]);
         if (spec.minValue !== undefined && value < spec.minValue) {
@@ -83,7 +83,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
         }
       }
     });
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -92,7 +92,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
     if (!validateForm()) {
       return;
     }
-    
+
     const data = {
       quantity: parseFloat(quantity),
       unit: productData?.defaultUnit || 'ton',
@@ -100,7 +100,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
       productId: productData?.id,
       productName: productData?.name,
     };
-    
+
     onSave(data);
   };
 
@@ -113,7 +113,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
       productId: productData?.id,
       productName: productData?.name,
     };
-    
+
     if (onSkip) {
       onSkip();
     } else {
@@ -122,14 +122,14 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
   };
 
   const updateSpecification = (code: string, value: any) => {
-    setSpecifications(prev => ({
+    setSpecifications((prev) => ({
       ...prev,
       [code]: value,
     }));
-    
+
     // Clear error for this field
     if (errors[code]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const newErrors = { ...prev };
         delete newErrors[code];
         return newErrors;
@@ -151,7 +151,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
             />
           </View>
         );
-      
+
       case 'NUMBER':
         return (
           <View>
@@ -165,9 +165,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
                 placeholderTextColor="#6B7280"
                 className="flex-1 bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
               />
-              {spec.unit && (
-                <Text className="ml-2 text-neutral-400">{spec.unit}</Text>
-              )}
+              {spec.unit && <Text className="ml-2 text-neutral-400">{spec.unit}</Text>}
             </View>
             {spec.minValue !== undefined && spec.maxValue !== undefined && (
               <Text className="text-xs text-neutral-500 mt-1">
@@ -176,7 +174,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
             )}
           </View>
         );
-      
+
       default:
         return (
           <View>
@@ -205,17 +203,9 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
   };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
       <View className="flex-1 bg-black/50">
-        <View 
-          className="bg-neutral-900 rounded-t-3xl mt-20"
-          style={{ flex: 1 }}
-        >
+        <View className="bg-neutral-900 rounded-t-3xl mt-20" style={{ flex: 1 }}>
           {/* Header */}
           <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
             <View>
@@ -230,17 +220,15 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
           </View>
 
           {/* Content */}
-          <ScrollView 
+          <ScrollView
             className="flex-1 px-6"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 100 }}
           >
             {/* Basic Information */}
             <View className="mt-6">
-              <Text className="text-lg font-semibold text-green-400 mb-4">
-                Basic Information
-              </Text>
-              
+              <Text className="text-lg font-semibold text-green-400 mb-4">Basic Information</Text>
+
               {/* Quantity */}
               <View className="mb-4">
                 <Text className="text-neutral-300 mb-2">
@@ -265,7 +253,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
                   <Text className="text-red-400 text-xs mt-1">{errors.quantity}</Text>
                 )}
               </View>
-              
+
               {/* Market Price Range Reference */}
               {productData?.priceRangeMin && productData?.priceRangeMax && (
                 <View className="mb-4 p-3 bg-neutral-800 rounded-lg flex-row items-center">
@@ -290,7 +278,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
                     </TouchableOpacity>
                   )}
                 </View>
-                
+
                 {productData.specifications.map((spec: ProductSpecification) => (
                   <View key={spec.id} className="mb-4">
                     {spec.importance && (
@@ -331,9 +319,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
                 {isLoading ? (
                   <ActivityIndicator color="#ffffff" />
                 ) : (
-                  <Text className="text-white text-center font-semibold">
-                    Continue
-                  </Text>
+                  <Text className="text-white text-center font-semibold">Continue</Text>
                 )}
               </TouchableOpacity>
             </View>

@@ -1,29 +1,34 @@
-import { Controller, Get, Query, BadRequestException } from '@nestjs/common';
-import { PricingService } from './pricing.service';
+import {
+  Controller,
+  Get,
+  Query,
+  BadRequestException,
+  ValidationPipe,
+} from "@nestjs/common";
+import { PricingService } from "./pricing.service";
+import {
+  LocationPricingQueryDto,
+  LocationPricingResponseDto,
+} from "./dto/location-pricing.dto";
 
-@Controller('pricing')
+@Controller("pricing")
 export class PricingController {
   constructor(private readonly pricingService: PricingService) {}
 
-  @Get('location-based')
+  @Get("location-based")
   async getLocationBasedPricing(
-    @Query('productId') productId: string,
-    @Query('quantity') quantity: string,
-    @Query('lat') latitude: string,
-    @Query('lng') longitude: string,
-  ) {
-    if (!productId || !quantity || !latitude || !longitude) {
-      throw new BadRequestException('Missing required parameters: productId, quantity, lat, lng');
+    @Query(new ValidationPipe({ transform: true, whitelist: true }))
+    query: LocationPricingQueryDto,
+  ): Promise<LocationPricingResponseDto> {
+    if (!query.productId) {
+      throw new BadRequestException("Missing required parameter: productId");
     }
 
-    const quantityNum = parseFloat(quantity);
-    const lat = parseFloat(latitude);
-    const lng = parseFloat(longitude);
-
-    if (isNaN(quantityNum) || isNaN(lat) || isNaN(lng)) {
-      throw new BadRequestException('Invalid numeric values for quantity, latitude, or longitude');
-    }
-
-    return this.pricingService.getLocationBasedPricing(productId, quantityNum, lat, lng);
+    return this.pricingService.getLocationBasedPricing(
+      query.productId,
+      query.quantity,
+      query.latitude,
+      query.longitude,
+    );
   }
 }

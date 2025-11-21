@@ -1,0 +1,7 @@
+color: true
+hookfiles: dredd-hooks.js
+language: nodejs
+reporter: mocha
+loglevel: warning
+endpoint: 'http://localhost:4000'
+blueprint: openapi/agro-trade.yaml

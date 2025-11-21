@@ -52,14 +52,14 @@ export const useOrders = () => {
     onSuccess: (newOrder) => {
       // Add to orders list
       addOrder(newOrder);
-      
+
       // Clear current order from store
       clearCurrentOrder();
-      
+
       // Invalidate and refetch orders
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['orders', 'stats'] });
-      
+
       // Set the new order in cache
       queryClient.setQueryData(['order', newOrder.id], newOrder);
     },
@@ -67,15 +67,12 @@ export const useOrders = () => {
 
   // Update order status mutation
   const updateOrderStatusMutation = useMutation({
-    mutationFn: ({ orderId, status, notes }: {
-      orderId: string;
-      status: string;
-      notes?: string;
-    }) => orderService.updateOrderStatus(orderId, status, notes),
+    mutationFn: ({ orderId, status, notes }: { orderId: string; status: string; notes?: string }) =>
+      orderService.updateOrderStatus(orderId, status, notes),
     onSuccess: (updatedOrder) => {
       // Update the specific order in cache
       queryClient.setQueryData(['order', updatedOrder.id], updatedOrder);
-      
+
       // Invalidate orders list to refetch
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['orders', 'stats'] });
@@ -89,7 +86,7 @@ export const useOrders = () => {
     onSuccess: (cancelledOrder) => {
       // Update the specific order in cache
       queryClient.setQueryData(['order', cancelledOrder.id], cancelledOrder);
-      
+
       // Invalidate orders list to refetch
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['orders', 'stats'] });
@@ -98,7 +95,11 @@ export const useOrders = () => {
 
   // Request refund mutation
   const requestRefundMutation = useMutation({
-    mutationFn: ({ orderId, reason, amount }: {
+    mutationFn: ({
+      orderId,
+      reason,
+      amount,
+    }: {
       orderId: string;
       reason: string;
       amount?: number;
@@ -112,7 +113,11 @@ export const useOrders = () => {
 
   // Rate order mutation
   const rateOrderMutation = useMutation({
-    mutationFn: ({ orderId, rating, review }: {
+    mutationFn: ({
+      orderId,
+      rating,
+      review,
+    }: {
       orderId: string;
       rating: number;
       review?: string;

@@ -21,20 +21,16 @@ export const TransferStageIndicator: React.FC<TransferStageIndicatorProps> = ({
   accessibilityLabel,
 }) => {
   const defaultStages: TransferStage[] = [
-    { name: "Assign Driver", description: "Assign driver to truck", icon: User },
-    { name: "Traveling", description: "En route to pickup", icon: Truck },
-    { name: "Arrived", description: "At pickup location", icon: MapPin },
-    { name: "Completed", description: "Delivery completed", icon: CheckCircle },
+    { name: 'Assign Driver', description: 'Assign driver to truck', icon: User },
+    { name: 'Traveling', description: 'En route to pickup', icon: Truck },
+    { name: 'Arrived', description: 'At pickup location', icon: MapPin },
+    { name: 'Completed', description: 'Delivery completed', icon: CheckCircle },
   ];
 
   const stagesList = stages || defaultStages;
 
   return (
-    <View 
-      className="relative mb-6"
-      testID={testID}
-      accessibilityLabel={accessibilityLabel}
-    >
+    <View className="relative mb-6" testID={testID} accessibilityLabel={accessibilityLabel}>
       {/* Progress Bar Background */}
       <View className="absolute top-4 left-8 right-8 h-0.5 bg-neutral-700 z-0" />
 
@@ -86,13 +82,13 @@ export const TransferStageIndicator: React.FC<TransferStageIndicatorProps> = ({
                 >
                   <Icon size={16} color={stageStyles.iconColor} />
                 </View>
-                
+
                 {/* Pulsing animation for current stage */}
                 {isCurrent && (
                   <View className="absolute inset-0 rounded-full bg-yellow-500 opacity-75 animate-pulse" />
                 )}
               </View>
-              
+
               <Text
                 className={`text-xs text-center mt-2 max-w-16 ${stageStyles.textColor}`}
                 numberOfLines={2}

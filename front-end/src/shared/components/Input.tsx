@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import {
-  TextInput,
-  View,
-  Text,
-  TouchableOpacity,
-  TextInputProps,
-} from 'react-native';
+import { TextInput, View, Text, TouchableOpacity, TextInputProps } from 'react-native';
 import { BaseComponentProps } from '../../shared/types';
 
 interface InputProps extends TextInputProps, BaseComponentProps {
@@ -105,14 +99,10 @@ export const Input: React.FC<InputProps> = ({
           {required && <Text className="text-red-500 ml-1">*</Text>}
         </Text>
       )}
-      
+
       <View className={`${variantStyles.container} ${sizeStyles.container} flex-row items-center`}>
-        {leftIcon && (
-          <View className="mr-3">
-            {leftIcon}
-          </View>
-        )}
-        
+        {leftIcon && <View className="mr-3">{leftIcon}</View>}
+
         <TextInput
           className={`${variantStyles.input} ${sizeStyles.input} flex-1`}
           value={value}
@@ -127,28 +117,18 @@ export const Input: React.FC<InputProps> = ({
           style={style}
           {...props}
         />
-        
+
         {isPassword && (
           <TouchableOpacity onPress={handlePasswordToggle} className="ml-3">
-            <Text className="text-neutral-400 text-sm">
-              {isPasswordVisible ? 'Hide' : 'Show'}
-            </Text>
+            <Text className="text-neutral-400 text-sm">{isPasswordVisible ? 'Hide' : 'Show'}</Text>
           </TouchableOpacity>
         )}
-        
-        {rightIcon && !isPassword && (
-          <View className="ml-3">
-            {rightIcon}
-          </View>
-        )}
+
+        {rightIcon && !isPassword && <View className="ml-3">{rightIcon}</View>}
       </View>
-      
+
       {(error || helperText) && (
-        <Text
-          className={`${sizeStyles.label} mt-1 ${
-            error ? 'text-red-500' : 'text-neutral-400'
-          }`}
-        >
+        <Text className={`${sizeStyles.label} mt-1 ${error ? 'text-red-500' : 'text-neutral-400'}`}>
           {error || helperText}
         </Text>
       )}

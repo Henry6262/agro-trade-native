@@ -49,7 +49,10 @@ export type MainTabParamList = {
 };
 
 export type DashboardStackParamList = {
-  DashboardMain: { userRole?: 'admin' | 'seller' | 'buyer' | 'transporter'; showSuccessAnimation?: boolean };
+  DashboardMain: {
+    userRole?: 'admin' | 'seller' | 'buyer' | 'transporter';
+    showSuccessAnimation?: boolean;
+  };
   CommandCenter: undefined;
   AgentNetwork: undefined;
   Operations: undefined;

@@ -24,7 +24,7 @@ api.interceptors.request.use(
   (config) => {
     // Debug log the actual request URL (disabled for performance)
     // console.log('API Request:', config.method?.toUpperCase(), config.baseURL + config.url);
-    
+
     const token = useAuthStore.getState().token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -44,14 +44,14 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
-    
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
+
       try {
         // Attempt to refresh the token
         await useAuthStore.getState().refreshTokens();
-        
+
         // Get the new token and retry the original request
         const newToken = useAuthStore.getState().token;
         if (newToken) {
@@ -65,10 +65,10 @@ api.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
-    
+
     // Log error for debugging
     console.error('API Error:', error.response?.data || error.message);
-    
+
     return Promise.reject(error);
   }
 );

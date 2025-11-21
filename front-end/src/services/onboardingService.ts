@@ -1,6 +1,6 @@
 import { apiClient } from './api';
-import { useOnboardingStore } from '../stores/onboarding.store';
-import { useAuthStore } from '../stores/auth.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
+import { useAuthStore } from '@stores/auth.store';
 import { authService } from './authService';
 import type {
   ApiResponse,
@@ -45,7 +45,8 @@ export const onboardingService = {
    * Submit complete onboarding data to backend
    */
   submitOnboardingData: async (data: OnboardingSubmissionData): Promise<OnboardingResponse> => {
-    return apiClient.post<ApiResponse<OnboardingResponse>>('/onboarding/submit', data)
+    return apiClient
+      .post<ApiResponse<OnboardingResponse>>('/onboarding/submit', data)
       .then((response) => response.data);
   },
 
@@ -57,11 +58,14 @@ export const onboardingService = {
     completedSteps: string[];
     currentStep: string;
   }> => {
-    return apiClient.get<ApiResponse<{
-      isComplete: boolean;
-      completedSteps: string[];
-      currentStep: string;
-    }>>('/onboarding/progress')
+    return apiClient
+      .get<
+        ApiResponse<{
+          isComplete: boolean;
+          completedSteps: string[];
+          currentStep: string;
+        }>
+      >('/onboarding/progress')
       .then((response) => response.data);
   },
 
@@ -77,7 +81,8 @@ export const onboardingService = {
    */
   getDraftData: async (): Promise<Partial<OnboardingSubmissionData> | null> => {
     try {
-      return apiClient.get<ApiResponse<Partial<OnboardingSubmissionData>>>('/onboarding/draft')
+      return apiClient
+        .get<ApiResponse<Partial<OnboardingSubmissionData>>>('/onboarding/draft')
         .then((response) => response.data);
     } catch (error: any) {
       if (error?.response?.status === 404) {
@@ -117,7 +122,7 @@ export const onboardingService = {
     try {
       // Submit to backend
       const response = await onboardingService.submitOnboardingData(submissionData);
-      
+
       if (!response.success) {
         throw new Error(response.message || 'Onboarding submission failed');
       }
@@ -146,25 +151,25 @@ export const onboardingService = {
     try {
       const progress = await onboardingService.getOnboardingProgress();
       const draftData = await onboardingService.getDraftData();
-      
+
       const onboardingStore = useOnboardingStore.getState();
-      
+
       // Update store with backend data
       if (draftData) {
         if (draftData.role && draftData.role !== onboardingStore.selectedRole) {
           onboardingStore.setRole(draftData.role);
         }
-        
+
         if (draftData.sellerData) {
           // Update seller data
           // This would require specific methods to update seller data
         }
-        
+
         if (draftData.buyerData) {
           // Update buyer data
           // This would require specific methods to update buyer data
         }
-        
+
         if (draftData.transportData) {
           // Update transport data
           // This would require specific methods to update transport data
@@ -185,34 +190,29 @@ export const onboardingService = {
    */
   handleGoogleOAuth: async (googleToken: string): Promise<void> => {
     const onboardingStore = useOnboardingStore.getState();
-    
+
     try {
       // Authenticate with Google
       const authResponse = await authService.googleAuth(googleToken);
-      
+
       // Create a User object with required fields
       const user = {
         ...authResponse.user,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      
+
       // Update auth store
-      useAuthStore.getState().login(
-        user, 
-        authResponse.accessToken, 
-        authResponse.refreshToken
-      );
-      
+      useAuthStore.getState().login(user, authResponse.accessToken, authResponse.refreshToken);
+
       // If user already has a profile, they might not need onboarding
       if (authResponse.user.hasProfile) {
         onboardingStore.completeOnboarding();
         return;
       }
-      
+
       // Otherwise, continue with onboarding flow
       await onboardingService.syncOnboardingState();
-      
     } catch (error) {
       console.error('Google OAuth integration failed:', error);
       throw error;
@@ -244,13 +244,13 @@ export const onboardingService = {
           errors.push('At least one product must be selected for sellers');
         }
         break;
-        
+
       case 'buyer':
         if (!data.buyerData?.requiredProducts?.length) {
           errors.push('At least one product requirement must be specified for buyers');
         }
         break;
-        
+
       case 'transport':
         if (!data.transportData?.fleetInfo?.vehicleCount) {
           errors.push('Fleet information is required for transporters');
@@ -264,7 +264,9 @@ export const onboardingService = {
   /**
    * Get role-specific onboarding requirements
    */
-  getOnboardingRequirements: (role: UserRole): {
+  getOnboardingRequirements: (
+    role: UserRole
+  ): {
     requiredSteps: string[];
     optionalSteps: string[];
     estimatedTime: number; // in minutes
@@ -277,12 +279,12 @@ export const onboardingService = {
             'Product Specifications',
             'Market Insights',
             'Business Information',
-            'Account Setup'
+            'Account Setup',
           ],
           optionalSteps: ['Marketing Preferences'],
-          estimatedTime: 8
+          estimatedTime: 8,
         };
-        
+
       case 'buyer':
         return {
           requiredSteps: [
@@ -290,12 +292,12 @@ export const onboardingService = {
             'Purchasing Specifications',
             'Market Overview',
             'Business Information',
-            'Account Setup'
+            'Account Setup',
           ],
           optionalSteps: ['Supplier Preferences'],
-          estimatedTime: 7
+          estimatedTime: 7,
         };
-        
+
       case 'transport':
         return {
           requiredSteps: [
@@ -303,18 +305,18 @@ export const onboardingService = {
             'Service Areas',
             'Job Preferences',
             'Business Information',
-            'Account Setup'
+            'Account Setup',
           ],
           optionalSteps: ['Route Optimization'],
-          estimatedTime: 10
+          estimatedTime: 10,
         };
-        
+
       default:
         return {
           requiredSteps: ['Account Setup'],
           optionalSteps: [],
-          estimatedTime: 3
+          estimatedTime: 3,
         };
     }
-  }
+  },
 };

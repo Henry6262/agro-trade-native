@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./App.{js,jsx,ts,tsx}", "./src/**/*.{js,jsx,ts,tsx}"],
-  presets: [require("nativewind/preset")],
+  content: ['./App.{js,jsx,ts,tsx}', './src/**/*.{js,jsx,ts,tsx}'],
+  presets: [require('nativewind/preset')],
   theme: {
     extend: {
       colors: {
@@ -43,23 +43,22 @@ module.exports = {
         },
       },
       fontFamily: {
-        'inter': ['Inter', 'sans-serif'],
-        'poppins': ['Poppins', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
+        poppins: ['Poppins', 'sans-serif'],
       },
       spacing: {
-        '18': '4.5rem',
-        '88': '22rem',
+        18: '4.5rem',
+        88: '22rem',
       },
       borderRadius: {
         '4xl': '2rem',
       },
       boxShadow: {
-        'soft': '0 2px 8px rgba(0, 0, 0, 0.1)',
-        'medium': '0 4px 16px rgba(0, 0, 0, 0.12)',
-        'hard': '0 8px 32px rgba(0, 0, 0, 0.16)',
+        soft: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        medium: '0 4px 16px rgba(0, 0, 0, 0.12)',
+        hard: '0 8px 32px rgba(0, 0, 0, 0.16)',
       },
     },
   },
   plugins: [],
-}
-
+};

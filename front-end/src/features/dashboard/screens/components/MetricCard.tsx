@@ -31,12 +31,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     >
       <View className="flex-row items-center justify-between">
         <View className="flex-1">
-          <Text className="text-xs text-neutral-400 mb-1">
-            {title}
-          </Text>
-          <Text className={`text-lg font-bold ${valueColor}`}>
-            {value}
-          </Text>
+          <Text className="text-xs text-neutral-400 mb-1">{title}</Text>
+          <Text className={`text-lg font-bold ${valueColor}`}>{value}</Text>
         </View>
         <View className="w-8 h-8 items-center justify-center">
           <Icon size={20} color={iconColor} />

@@ -50,10 +50,10 @@ export const useAuthStore = create<AuthState>()(
       },
 
       setTokens: (accessToken: string, refreshToken: string) => {
-        set({ 
-          token: accessToken, 
+        set({
+          token: accessToken,
           refreshToken,
-          isAuthenticated: true 
+          isAuthenticated: true,
         });
       },
 
@@ -78,16 +78,12 @@ export const useAuthStore = create<AuthState>()(
           isLoading: false,
           error: null,
         });
-        
+
         // Clear AsyncStorage to ensure complete logout
         try {
           await AsyncStorage.removeItem('auth-storage');
           // Clear any other app-specific storage if needed
-          await AsyncStorage.multiRemove([
-            'auth-storage',
-            'user-preferences',
-            'onboarding-data',
-          ]);
+          await AsyncStorage.multiRemove(['auth-storage', 'user-preferences', 'onboarding-data']);
         } catch (error) {
           console.error('Error clearing storage on logout:', error);
         }
@@ -101,11 +97,11 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           set({ isLoading: true, error: null });
-          
+
           // Import authService dynamically to avoid circular dependency
           const { authService } = await import('../services/authService');
           const response = await authService.refreshAccessToken(state.refreshToken);
-          
+
           set({
             token: response.accessToken,
             refreshToken: response.refreshToken,

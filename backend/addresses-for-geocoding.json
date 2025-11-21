@@ -1,0 +1,2102 @@
+{
+  "buyers": [
+    {
+      "userId": "cmgxfth9d001a123lq8wnejdd",
+      "name": "AgriCorp International",
+      "companyName": "AgriCorp International",
+      "email": "buyer1@agrocorp.bg",
+      "buyListings": [
+        {
+          "listingId": "cmgxfth9z001g123lt4ftgtay",
+          "product": "corn_maize",
+          "quantity": "146",
+          "unit": "TON",
+          "addressId": "cmgxfth9w001e123lefl26aa6",
+          "currentAddress": {
+            "street": "Industrial Complex 92",
+            "city": "cmgxfliba0009rluwc1hwv3lc",
+            "postalCode": "8245",
+            "country": "Bulgaria",
+            "currentLat": 42.66020773955191,
+            "currentLng": 23.35281654780956
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxftha2001i123l21la5b6w",
+          "product": "corn_maize",
+          "quantity": "88",
+          "unit": "TON",
+          "addressId": "cmgxfth9w001e123lefl26aa6",
+          "currentAddress": {
+            "street": "Industrial Complex 92",
+            "city": "cmgxfliba0009rluwc1hwv3lc",
+            "postalCode": "8245",
+            "country": "Bulgaria",
+            "currentLat": 42.66020773955191,
+            "currentLng": 23.35281654780956
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxftha3001k123li70pp8gg",
+          "product": "rapeseed",
+          "quantity": "86",
+          "unit": "TON",
+          "addressId": "cmgxfth9w001e123lefl26aa6",
+          "currentAddress": {
+            "street": "Industrial Complex 92",
+            "city": "cmgxfliba0009rluwc1hwv3lc",
+            "postalCode": "8245",
+            "country": "Bulgaria",
+            "currentLat": 42.66020773955191,
+            "currentLng": 23.35281654780956
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfth9w001e123lefl26aa6",
+          "type": "WAREHOUSE",
+          "street": "Industrial Complex 92",
+          "city": "cmgxfliba0009rluwc1hwv3lc",
+          "postalCode": "8245",
+          "country": "Bulgaria",
+          "currentLat": 42.66020773955191,
+          "currentLng": 23.35281654780956,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxftha3001l123lq0lwsyd0",
+      "name": "Bulgarian Grain Import Ltd",
+      "companyName": "Bulgarian Grain Import",
+      "email": "buyer2@grainimport.bg",
+      "buyListings": [
+        {
+          "listingId": "cmgxftha6001r123l1oc0g8yt",
+          "product": "soft_wheat",
+          "quantity": "90",
+          "unit": "TON",
+          "addressId": "cmgxftha5001p123lfenn2edl",
+          "currentAddress": {
+            "street": "Industrial Complex 76",
+            "city": "cmgxflibp0011rluwpak16w2e",
+            "postalCode": "3257",
+            "country": "Bulgaria",
+            "currentLat": 43.17881306959812,
+            "currentLng": 27.96329483373696
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxftha5001p123lfenn2edl",
+          "type": "WAREHOUSE",
+          "street": "Industrial Complex 76",
+          "city": "cmgxflibp0011rluwpak16w2e",
+          "postalCode": "3257",
+          "country": "Bulgaria",
+          "currentLat": 43.17881306959812,
+          "currentLng": 27.96329483373696,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxftha6001s123layuz2vru",
+      "name": "Plovdiv Mills Co.",
+      "companyName": "Plovdiv Mills Co.",
+      "email": "buyer3@millcompany.bg",
+      "buyListings": [
+        {
+          "listingId": "cmgxftha8001y123le9goe39e",
+          "product": "barley",
+          "quantity": "68",
+          "unit": "TON",
+          "addressId": "cmgxftha8001w123lzs5a0xoc",
+          "currentAddress": {
+            "street": "Industrial Complex 60",
+            "city": "cmgxflibk000nrluwbqlbm92k",
+            "postalCode": "1758",
+            "country": "Bulgaria",
+            "currentLat": 42.17712383457588,
+            "currentLng": 24.69819322690205
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxftha90020123levweel2f",
+          "product": "sunflower",
+          "quantity": "95",
+          "unit": "TON",
+          "addressId": "cmgxftha8001w123lzs5a0xoc",
+          "currentAddress": {
+            "street": "Industrial Complex 60",
+            "city": "cmgxflibk000nrluwbqlbm92k",
+            "postalCode": "1758",
+            "country": "Bulgaria",
+            "currentLat": 42.17712383457588,
+            "currentLng": 24.69819322690205
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthaa0022123lk16mv198",
+          "product": "rapeseed",
+          "quantity": "84",
+          "unit": "TON",
+          "addressId": "cmgxftha8001w123lzs5a0xoc",
+          "currentAddress": {
+            "street": "Industrial Complex 60",
+            "city": "cmgxflibk000nrluwbqlbm92k",
+            "postalCode": "1758",
+            "country": "Bulgaria",
+            "currentLat": 42.17712383457588,
+            "currentLng": 24.69819322690205
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxftha8001w123lzs5a0xoc",
+          "type": "WAREHOUSE",
+          "street": "Industrial Complex 60",
+          "city": "cmgxflibk000nrluwbqlbm92k",
+          "postalCode": "1758",
+          "country": "Bulgaria",
+          "currentLat": 42.17712383457588,
+          "currentLng": 24.69819322690205,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthad002c123lyxw2podp",
+      "name": "Organic Bulk Traders",
+      "companyName": "Organic Bulk BG",
+      "email": "buyer5@organicbulk.bg",
+      "buyListings": [
+        {
+          "listingId": "cmgxfthaf002i123ls0sox4vq",
+          "product": "soft_wheat",
+          "quantity": "57",
+          "unit": "TON",
+          "addressId": "cmgxfthaf002g123lqv4wm7bt",
+          "currentAddress": {
+            "street": "Industrial Complex 35",
+            "city": "cmgxflibp0013rluwg89rt2o5",
+            "postalCode": "3596",
+            "country": "Bulgaria",
+            "currentLat": 42.51637658422439,
+            "currentLng": 27.49575830309477
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthaf002k123lwj4y8j9a",
+          "product": "corn_maize",
+          "quantity": "68",
+          "unit": "TON",
+          "addressId": "cmgxfthaf002g123lqv4wm7bt",
+          "currentAddress": {
+            "street": "Industrial Complex 35",
+            "city": "cmgxflibp0013rluwg89rt2o5",
+            "postalCode": "3596",
+            "country": "Bulgaria",
+            "currentLat": 42.51637658422439,
+            "currentLng": 27.49575830309477
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthaf002g123lqv4wm7bt",
+          "type": "WAREHOUSE",
+          "street": "Industrial Complex 35",
+          "city": "cmgxflibp0013rluwg89rt2o5",
+          "postalCode": "3596",
+          "country": "Bulgaria",
+          "currentLat": 42.51637658422439,
+          "currentLng": 27.49575830309477,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthaa0023123lcvt6b9go",
+      "name": "Ruse Food Processing",
+      "companyName": "Ruse Food Processing",
+      "email": "buyer4@foodprocess.bg",
+      "buyListings": [
+        {
+          "listingId": "cmgxfthac0029123l3xrmt1sm",
+          "product": "rapeseed",
+          "quantity": "51",
+          "unit": "TON",
+          "addressId": "cmgxfthac0027123lk40m7df1",
+          "currentAddress": {
+            "street": "Industrial Complex 45",
+            "city": "cmgxflibo000zrluwlhn866p6",
+            "postalCode": "2411",
+            "country": "Bulgaria",
+            "currentLat": 43.8753761269254,
+            "currentLng": 26.00133833846752
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthad002b123la3ekq5jj",
+          "product": "rapeseed",
+          "quantity": "39",
+          "unit": "TON",
+          "addressId": "cmgxfthac0027123lk40m7df1",
+          "currentAddress": {
+            "street": "Industrial Complex 45",
+            "city": "cmgxflibo000zrluwlhn866p6",
+            "postalCode": "2411",
+            "country": "Bulgaria",
+            "currentLat": 43.8753761269254,
+            "currentLng": 26.00133833846752
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthac0027123lk40m7df1",
+          "type": "WAREHOUSE",
+          "street": "Industrial Complex 45",
+          "city": "cmgxflibo000zrluwlhn866p6",
+          "postalCode": "2411",
+          "country": "Bulgaria",
+          "currentLat": 43.8753761269254,
+          "currentLng": 26.00133833846752,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthag002l123lepyqw6cx",
+      "name": "Stara Zagora Mill Group",
+      "companyName": "SZ Mill Group",
+      "email": "buyer6@starazagora-mill.bg",
+      "buyListings": [
+        {
+          "listingId": "cmgxfthai002r123l5hxcrvgo",
+          "product": "corn_maize",
+          "quantity": "73",
+          "unit": "TON",
+          "addressId": "cmgxfthai002p123ljwpxduc4",
+          "currentAddress": {
+            "street": "Industrial Complex 31",
+            "city": "cmgxflibo000vrluwrvdlrumv",
+            "postalCode": "5418",
+            "country": "Bulgaria",
+            "currentLat": 42.42394302738529,
+            "currentLng": 25.60038005161883
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthai002t123lo4ja47x6",
+          "product": "sunflower",
+          "quantity": "66",
+          "unit": "TON",
+          "addressId": "cmgxfthai002p123ljwpxduc4",
+          "currentAddress": {
+            "street": "Industrial Complex 31",
+            "city": "cmgxflibo000vrluwrvdlrumv",
+            "postalCode": "5418",
+            "country": "Bulgaria",
+            "currentLat": 42.42394302738529,
+            "currentLng": 25.60038005161883
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthaj002v123lpdiy97ik",
+          "product": "soft_wheat",
+          "quantity": "44",
+          "unit": "TON",
+          "addressId": "cmgxfthai002p123ljwpxduc4",
+          "currentAddress": {
+            "street": "Industrial Complex 31",
+            "city": "cmgxflibo000vrluwrvdlrumv",
+            "postalCode": "5418",
+            "country": "Bulgaria",
+            "currentLat": 42.42394302738529,
+            "currentLng": 25.60038005161883
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthai002p123ljwpxduc4",
+          "type": "WAREHOUSE",
+          "street": "Industrial Complex 31",
+          "city": "cmgxflibo000vrluwrvdlrumv",
+          "postalCode": "5418",
+          "country": "Bulgaria",
+          "currentLat": 42.42394302738529,
+          "currentLng": 25.60038005161883,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthaj002w123l0fqgkzor",
+      "name": "Vidin Agricultural Trade",
+      "companyName": "Vidin Agro Trade",
+      "email": "buyer7@vidin-trade.bg",
+      "buyListings": [
+        {
+          "listingId": "cmgxfthal0032123l0zrebwsm",
+          "product": "sunflower",
+          "quantity": "35",
+          "unit": "TON",
+          "addressId": "cmgxfthal0030123l0gvnik0b",
+          "currentAddress": {
+            "street": "Industrial Complex 62",
+            "city": "cmgxfliba000brluw6m2wl3tq",
+            "postalCode": "6242",
+            "country": "Bulgaria",
+            "currentLat": 44.00364751045674,
+            "currentLng": 22.91419775066707
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthal0034123lwlp31frs",
+          "product": "rapeseed",
+          "quantity": "38",
+          "unit": "TON",
+          "addressId": "cmgxfthal0030123l0gvnik0b",
+          "currentAddress": {
+            "street": "Industrial Complex 62",
+            "city": "cmgxfliba000brluw6m2wl3tq",
+            "postalCode": "6242",
+            "country": "Bulgaria",
+            "currentLat": 44.00364751045674,
+            "currentLng": 22.91419775066707
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxftham0036123lfn6e5xor",
+          "product": "barley",
+          "quantity": "33",
+          "unit": "TON",
+          "addressId": "cmgxfthal0030123l0gvnik0b",
+          "currentAddress": {
+            "street": "Industrial Complex 62",
+            "city": "cmgxfliba000brluw6m2wl3tq",
+            "postalCode": "6242",
+            "country": "Bulgaria",
+            "currentLat": 44.00364751045674,
+            "currentLng": 22.91419775066707
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthal0030123l0gvnik0b",
+          "type": "WAREHOUSE",
+          "street": "Industrial Complex 62",
+          "city": "cmgxfliba000brluw6m2wl3tq",
+          "postalCode": "6242",
+          "country": "Bulgaria",
+          "currentLat": 44.00364751045674,
+          "currentLng": 22.91419775066707,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxftham0037123l2ocb1gcl",
+      "name": "Dobrich Grain Cooperative",
+      "companyName": "Dobrich Grain Co-op",
+      "email": "buyer8@dobrich-grain.bg",
+      "buyListings": [
+        {
+          "listingId": "cmgxfthao003d123lo3a5xdek",
+          "product": "corn_maize",
+          "quantity": "43",
+          "unit": "TON",
+          "addressId": "cmgxfthao003b123l02dcb0g0",
+          "currentAddress": {
+            "street": "Industrial Complex 34",
+            "city": "cmgxfliba000frluw8j9tlf3p",
+            "postalCode": "2613",
+            "country": "Bulgaria",
+            "currentLat": 43.58109531891659,
+            "currentLng": 27.87302657671918
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthap003f123lji34febw",
+          "product": "rapeseed",
+          "quantity": "31",
+          "unit": "TON",
+          "addressId": "cmgxfthao003b123l02dcb0g0",
+          "currentAddress": {
+            "street": "Industrial Complex 34",
+            "city": "cmgxfliba000frluw8j9tlf3p",
+            "postalCode": "2613",
+            "country": "Bulgaria",
+            "currentLat": 43.58109531891659,
+            "currentLng": 27.87302657671918
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthao003b123l02dcb0g0",
+          "type": "WAREHOUSE",
+          "street": "Industrial Complex 34",
+          "city": "cmgxfliba000frluw8j9tlf3p",
+          "postalCode": "2613",
+          "country": "Bulgaria",
+          "currentLat": 43.58109531891659,
+          "currentLng": 27.87302657671918,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthap003g123lpm9xtnui",
+      "name": "Blagoevgrad Foods Ltd.",
+      "companyName": "Blagoevgrad Foods",
+      "email": "buyer9@blagoevgrad-foods.bg",
+      "buyListings": [
+        {
+          "listingId": "cmgxfthar003m123lbmr2qpyw",
+          "product": "sunflower",
+          "quantity": "54",
+          "unit": "TON",
+          "addressId": "cmgxfthaq003k123lke5sbaxq",
+          "currentAddress": {
+            "street": "Industrial Complex 64",
+            "city": "cmgxflibo000yrluwm811push",
+            "postalCode": "7790",
+            "country": "Bulgaria",
+            "currentLat": 41.96987276218837,
+            "currentLng": 23.05166400050032
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthar003o123lfsvmm7eg",
+          "product": "soft_wheat",
+          "quantity": "44",
+          "unit": "TON",
+          "addressId": "cmgxfthaq003k123lke5sbaxq",
+          "currentAddress": {
+            "street": "Industrial Complex 64",
+            "city": "cmgxflibo000yrluwm811push",
+            "postalCode": "7790",
+            "country": "Bulgaria",
+            "currentLat": 41.96987276218837,
+            "currentLng": 23.05166400050032
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthaq003k123lke5sbaxq",
+          "type": "WAREHOUSE",
+          "street": "Industrial Complex 64",
+          "city": "cmgxflibo000yrluwm811push",
+          "postalCode": "7790",
+          "country": "Bulgaria",
+          "currentLat": 41.96987276218837,
+          "currentLng": 23.05166400050032,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthar003p123lt9sjfodn",
+      "name": "Premium Grain Solutions",
+      "companyName": "Premium Grain BG",
+      "email": "buyer10@premium-grain.bg",
+      "buyListings": [
+        {
+          "listingId": "cmgxfthat003v123l2e7ra9au",
+          "product": "soft_wheat",
+          "quantity": "63",
+          "unit": "TON",
+          "addressId": "cmgxfthat003t123l23rnkafy",
+          "currentAddress": {
+            "street": "Industrial Complex 63",
+            "city": "cmgxfliba0009rluwc1hwv3lc",
+            "postalCode": "4315",
+            "country": "Bulgaria",
+            "currentLat": 42.7439479956218,
+            "currentLng": 23.29806021743439
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthau003x123leb9ee2qq",
+          "product": "corn_maize",
+          "quantity": "43",
+          "unit": "TON",
+          "addressId": "cmgxfthat003t123l23rnkafy",
+          "currentAddress": {
+            "street": "Industrial Complex 63",
+            "city": "cmgxfliba0009rluwc1hwv3lc",
+            "postalCode": "4315",
+            "country": "Bulgaria",
+            "currentLat": 42.7439479956218,
+            "currentLng": 23.29806021743439
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthat003t123l23rnkafy",
+          "type": "WAREHOUSE",
+          "street": "Industrial Complex 63",
+          "city": "cmgxfliba0009rluwc1hwv3lc",
+          "postalCode": "4315",
+          "country": "Bulgaria",
+          "currentLat": 42.7439479956218,
+          "currentLng": 23.29806021743439,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthav003y123l4gds3cky",
+      "name": "Export Agricultural Hub",
+      "companyName": "Export Ag Hub",
+      "email": "buyer11@export-ag.bg",
+      "buyListings": [
+        {
+          "listingId": "cmgxfthax0044123l98x3q55l",
+          "product": "barley",
+          "quantity": "78",
+          "unit": "TON",
+          "addressId": "cmgxfthaw0042123ltl3hym3e",
+          "currentAddress": {
+            "street": "Industrial Complex 18",
+            "city": "cmgxflibp0011rluwpak16w2e",
+            "postalCode": "6679",
+            "country": "Bulgaria",
+            "currentLat": 43.20149286296369,
+            "currentLng": 27.91974238593126
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthaw0042123ltl3hym3e",
+          "type": "WAREHOUSE",
+          "street": "Industrial Complex 18",
+          "city": "cmgxflibp0011rluwpak16w2e",
+          "postalCode": "6679",
+          "country": "Bulgaria",
+          "currentLat": 43.20149286296369,
+          "currentLng": 27.91974238593126,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthax0045123lxfg0lxpk",
+      "name": "Montana Processing Center",
+      "companyName": "Montana Processing",
+      "email": "buyer12@montana-processing.bg",
+      "buyListings": [
+        {
+          "listingId": "cmgxfthaz004b123l5yofx73i",
+          "product": "soft_wheat",
+          "quantity": "41",
+          "unit": "TON",
+          "addressId": "cmgxfthay0049123livbcur0d",
+          "currentAddress": {
+            "street": "Industrial Complex 4",
+            "city": "cmgxfliba000arluwj7k5c5ko",
+            "postalCode": "8071",
+            "country": "Bulgaria",
+            "currentLat": 43.43092534384514,
+            "currentLng": 23.19335784827629
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthaz004d123l3ycc0390",
+          "product": "sunflower",
+          "quantity": "42",
+          "unit": "TON",
+          "addressId": "cmgxfthay0049123livbcur0d",
+          "currentAddress": {
+            "street": "Industrial Complex 4",
+            "city": "cmgxfliba000arluwj7k5c5ko",
+            "postalCode": "8071",
+            "country": "Bulgaria",
+            "currentLat": 43.43092534384514,
+            "currentLng": 23.19335784827629
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthb0004f123lv99n54c6",
+          "product": "sunflower",
+          "quantity": "32",
+          "unit": "TON",
+          "addressId": "cmgxfthay0049123livbcur0d",
+          "currentAddress": {
+            "street": "Industrial Complex 4",
+            "city": "cmgxfliba000arluwj7k5c5ko",
+            "postalCode": "8071",
+            "country": "Bulgaria",
+            "currentLat": 43.43092534384514,
+            "currentLng": 23.19335784827629
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthay0049123livbcur0d",
+          "type": "WAREHOUSE",
+          "street": "Industrial Complex 4",
+          "city": "cmgxfliba000arluwj7k5c5ko",
+          "postalCode": "8071",
+          "country": "Bulgaria",
+          "currentLat": 43.43092534384514,
+          "currentLng": 23.19335784827629,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmhhfgc200001g1rqxevtvi27",
+      "name": "Test Buyer",
+      "companyName": null,
+      "email": "buyer@test.com",
+      "buyListings": [],
+      "addresses": []
+    }
+  ],
+  "sellers": [
+    {
+      "userId": "cmgxfthb0004g123law3d7a2k",
+      "name": "Ivan Petrov",
+      "companyName": "Organic Farm Plovdiv",
+      "email": "seller1@organic-farm.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthb2004m123l366rdb67",
+          "product": "barley",
+          "quantity": "38",
+          "unit": "TON",
+          "addressId": "cmgxfthb2004k123ld38kuos4",
+          "currentAddress": {
+            "street": "Farm Road 31",
+            "city": "cmgxflibk000nrluwbqlbm92k",
+            "postalCode": "7294",
+            "country": "Bulgaria",
+            "currentLat": 42.10685253652389,
+            "currentLng": 24.79928461158822
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthb5004w123lreodg25k",
+          "product": "soft_wheat",
+          "quantity": "55",
+          "unit": "TON",
+          "addressId": "cmgxfthb2004k123ld38kuos4",
+          "currentAddress": {
+            "street": "Farm Road 31",
+            "city": "cmgxflibk000nrluwbqlbm92k",
+            "postalCode": "7294",
+            "country": "Bulgaria",
+            "currentLat": 42.10685253652389,
+            "currentLng": 24.79928461158822
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthb70056123lzzclyr4h",
+          "product": "barley",
+          "quantity": "25",
+          "unit": "TON",
+          "addressId": "cmgxfthb2004k123ld38kuos4",
+          "currentAddress": {
+            "street": "Farm Road 31",
+            "city": "cmgxflibk000nrluwbqlbm92k",
+            "postalCode": "7294",
+            "country": "Bulgaria",
+            "currentLat": 42.10685253652389,
+            "currentLng": 24.79928461158822
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthb2004k123ld38kuos4",
+          "type": "FARM",
+          "street": "Farm Road 31",
+          "city": "cmgxflibk000nrluwbqlbm92k",
+          "postalCode": "7294",
+          "country": "Bulgaria",
+          "currentLat": 42.10685253652389,
+          "currentLng": 24.79928461158822,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthb9005f123l3eqsfo0y",
+      "name": "Maria Dimitrova",
+      "companyName": "Premium Harvest Sofia",
+      "email": "seller2@premium-harvest.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthbb005l123l6d239zrc",
+          "product": "soft_wheat",
+          "quantity": "70",
+          "unit": "TON",
+          "addressId": "cmgxfthba005j123lvpepwqnp",
+          "currentAddress": {
+            "street": "Farm Road 59",
+            "city": "cmgxfliba0009rluwc1hwv3lc",
+            "postalCode": "2258",
+            "country": "Bulgaria",
+            "currentLat": 42.6924264592073,
+            "currentLng": 23.31304602275977
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthbd005v123lf48xgkct",
+          "product": "rapeseed",
+          "quantity": "44",
+          "unit": "TON",
+          "addressId": "cmgxfthba005j123lvpepwqnp",
+          "currentAddress": {
+            "street": "Farm Road 59",
+            "city": "cmgxfliba0009rluwc1hwv3lc",
+            "postalCode": "2258",
+            "country": "Bulgaria",
+            "currentLat": 42.6924264592073,
+            "currentLng": 23.31304602275977
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthba005j123lvpepwqnp",
+          "type": "FARM",
+          "street": "Farm Road 59",
+          "city": "cmgxfliba0009rluwc1hwv3lc",
+          "postalCode": "2258",
+          "country": "Bulgaria",
+          "currentLat": 42.6924264592073,
+          "currentLng": 23.31304602275977,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthbg0064123li798lhke",
+      "name": "Georgi Ivanov",
+      "companyName": "Varna Organic Farms",
+      "email": "seller3@varna-organic.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthbi006a123lttvzhizz",
+          "product": "rapeseed",
+          "quantity": "79",
+          "unit": "TON",
+          "addressId": "cmgxfthbi0068123liwqjg32t",
+          "currentAddress": {
+            "street": "Farm Road 44",
+            "city": "cmgxflibp0011rluwpak16w2e",
+            "postalCode": "5017",
+            "country": "Bulgaria",
+            "currentLat": 43.15909923505174,
+            "currentLng": 27.87077000050326
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthbl006k123lwyzgezte",
+          "product": "soft_wheat",
+          "quantity": "31",
+          "unit": "TON",
+          "addressId": "cmgxfthbi0068123liwqjg32t",
+          "currentAddress": {
+            "street": "Farm Road 44",
+            "city": "cmgxflibp0011rluwpak16w2e",
+            "postalCode": "5017",
+            "country": "Bulgaria",
+            "currentLat": 43.15909923505174,
+            "currentLng": 27.87077000050326
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthbi0068123liwqjg32t",
+          "type": "FARM",
+          "street": "Farm Road 44",
+          "city": "cmgxflibp0011rluwpak16w2e",
+          "postalCode": "5017",
+          "country": "Bulgaria",
+          "currentLat": 43.15909923505174,
+          "currentLng": 27.87077000050326,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthbn006t123lep6fityk",
+      "name": "Petar Stoyanov",
+      "companyName": "Ruse Agricultural Co.",
+      "email": "seller4@ruse-farms.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthbp006z123lr845xwmy",
+          "product": "barley",
+          "quantity": "26",
+          "unit": "TON",
+          "addressId": "cmgxfthbo006x123lprtru6to",
+          "currentAddress": {
+            "street": "Farm Road 154",
+            "city": "cmgxflibo000zrluwlhn866p6",
+            "postalCode": "7639",
+            "country": "Bulgaria",
+            "currentLat": 43.78643956025908,
+            "currentLng": 25.98655221231765
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthbr0079123l18je4v3b",
+          "product": "soft_wheat",
+          "quantity": "64",
+          "unit": "TON",
+          "addressId": "cmgxfthbo006x123lprtru6to",
+          "currentAddress": {
+            "street": "Farm Road 154",
+            "city": "cmgxflibo000zrluwlhn866p6",
+            "postalCode": "7639",
+            "country": "Bulgaria",
+            "currentLat": 43.78643956025908,
+            "currentLng": 25.98655221231765
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthbt007j123lcffcdpqt",
+          "product": "rapeseed",
+          "quantity": "20",
+          "unit": "TON",
+          "addressId": "cmgxfthbo006x123lprtru6to",
+          "currentAddress": {
+            "street": "Farm Road 154",
+            "city": "cmgxflibo000zrluwlhn866p6",
+            "postalCode": "7639",
+            "country": "Bulgaria",
+            "currentLat": 43.78643956025908,
+            "currentLng": 25.98655221231765
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthbo006x123lprtru6to",
+          "type": "FARM",
+          "street": "Farm Road 154",
+          "city": "cmgxflibo000zrluwlhn866p6",
+          "postalCode": "7639",
+          "country": "Bulgaria",
+          "currentLat": 43.78643956025908,
+          "currentLng": 25.98655221231765,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthbv007s123ldo570nf6",
+      "name": "Elena Georgieva",
+      "companyName": "Burgas Harvest Group",
+      "email": "seller5@burgas-harvest.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthbx007y123ldxx7iv4o",
+          "product": "soft_wheat",
+          "quantity": "24",
+          "unit": "TON",
+          "addressId": "cmgxfthbx007w123l1bqxkg2q",
+          "currentAddress": {
+            "street": "Farm Road 132",
+            "city": "cmgxflibp0013rluwg89rt2o5",
+            "postalCode": "9480",
+            "country": "Bulgaria",
+            "currentLat": 42.52006518579319,
+            "currentLng": 27.53204580248162
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthbz0088123lsxz7726c",
+          "product": "soft_wheat",
+          "quantity": "63",
+          "unit": "TON",
+          "addressId": "cmgxfthbx007w123l1bqxkg2q",
+          "currentAddress": {
+            "street": "Farm Road 132",
+            "city": "cmgxflibp0013rluwg89rt2o5",
+            "postalCode": "9480",
+            "country": "Bulgaria",
+            "currentLat": 42.52006518579319,
+            "currentLng": 27.53204580248162
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthc1008i123lznyp1to4",
+          "product": "rapeseed",
+          "quantity": "36",
+          "unit": "TON",
+          "addressId": "cmgxfthbx007w123l1bqxkg2q",
+          "currentAddress": {
+            "street": "Farm Road 132",
+            "city": "cmgxflibp0013rluwg89rt2o5",
+            "postalCode": "9480",
+            "country": "Bulgaria",
+            "currentLat": 42.52006518579319,
+            "currentLng": 27.53204580248162
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthc4008s123lgykra8i6",
+          "product": "sunflower",
+          "quantity": "29",
+          "unit": "TON",
+          "addressId": "cmgxfthbx007w123l1bqxkg2q",
+          "currentAddress": {
+            "street": "Farm Road 132",
+            "city": "cmgxflibp0013rluwg89rt2o5",
+            "postalCode": "9480",
+            "country": "Bulgaria",
+            "currentLat": 42.52006518579319,
+            "currentLng": 27.53204580248162
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthbx007w123l1bqxkg2q",
+          "type": "FARM",
+          "street": "Farm Road 132",
+          "city": "cmgxflibp0013rluwg89rt2o5",
+          "postalCode": "9480",
+          "country": "Bulgaria",
+          "currentLat": 42.52006518579319,
+          "currentLng": 27.53204580248162,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthc60091123lo0iyat0q",
+      "name": "Nikolay Krastev",
+      "companyName": "Pleven Agro Ltd.",
+      "email": "seller6@pleven-agro.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthc80097123lhcami8vy",
+          "product": "corn_maize",
+          "quantity": "21",
+          "unit": "TON",
+          "addressId": "cmgxfthc70095123lik64d93j",
+          "currentAddress": {
+            "street": "Farm Road 187",
+            "city": "cmgxfliba000hrluwdtbhkdq4",
+            "postalCode": "1950",
+            "country": "Bulgaria",
+            "currentLat": 43.46320084854391,
+            "currentLng": 24.53517625644514
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthca009h123lsfkrjw1y",
+          "product": "barley",
+          "quantity": "37",
+          "unit": "TON",
+          "addressId": "cmgxfthc70095123lik64d93j",
+          "currentAddress": {
+            "street": "Farm Road 187",
+            "city": "cmgxfliba000hrluwdtbhkdq4",
+            "postalCode": "1950",
+            "country": "Bulgaria",
+            "currentLat": 43.46320084854391,
+            "currentLng": 24.53517625644514
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthcc009r123lc4zs2ujc",
+          "product": "rapeseed",
+          "quantity": "55",
+          "unit": "TON",
+          "addressId": "cmgxfthc70095123lik64d93j",
+          "currentAddress": {
+            "street": "Farm Road 187",
+            "city": "cmgxfliba000hrluwdtbhkdq4",
+            "postalCode": "1950",
+            "country": "Bulgaria",
+            "currentLat": 43.46320084854391,
+            "currentLng": 24.53517625644514
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthce00a1123ln60hled2",
+          "product": "corn_maize",
+          "quantity": "57",
+          "unit": "TON",
+          "addressId": "cmgxfthc70095123lik64d93j",
+          "currentAddress": {
+            "street": "Farm Road 187",
+            "city": "cmgxfliba000hrluwdtbhkdq4",
+            "postalCode": "1950",
+            "country": "Bulgaria",
+            "currentLat": 43.46320084854391,
+            "currentLng": 24.53517625644514
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthc70095123lik64d93j",
+          "type": "FARM",
+          "street": "Farm Road 187",
+          "city": "cmgxfliba000hrluwdtbhkdq4",
+          "postalCode": "1950",
+          "country": "Bulgaria",
+          "currentLat": 43.46320084854391,
+          "currentLng": 24.53517625644514,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthcf00aa123lzbog49nt",
+      "name": "Dimitar Vasilev",
+      "companyName": "Stara Zagora Farm",
+      "email": "seller7@stara-zagora-farm.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthch00ag123lwauhej36",
+          "product": "corn_maize",
+          "quantity": "31",
+          "unit": "TON",
+          "addressId": "cmgxfthch00ae123lgsprs2sd",
+          "currentAddress": {
+            "street": "Farm Road 33",
+            "city": "cmgxflibo000vrluwrvdlrumv",
+            "postalCode": "9554",
+            "country": "Bulgaria",
+            "currentLat": 42.52434925051994,
+            "currentLng": 25.59757961027421
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthcj00aq123ldmacstsp",
+          "product": "soft_wheat",
+          "quantity": "56",
+          "unit": "TON",
+          "addressId": "cmgxfthch00ae123lgsprs2sd",
+          "currentAddress": {
+            "street": "Farm Road 33",
+            "city": "cmgxflibo000vrluwrvdlrumv",
+            "postalCode": "9554",
+            "country": "Bulgaria",
+            "currentLat": 42.52434925051994,
+            "currentLng": 25.59757961027421
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthcl00b0123lprfr2tyw",
+          "product": "rapeseed",
+          "quantity": "45",
+          "unit": "TON",
+          "addressId": "cmgxfthch00ae123lgsprs2sd",
+          "currentAddress": {
+            "street": "Farm Road 33",
+            "city": "cmgxflibo000vrluwrvdlrumv",
+            "postalCode": "9554",
+            "country": "Bulgaria",
+            "currentLat": 42.52434925051994,
+            "currentLng": 25.59757961027421
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthcm00ba123lbnqkwapr",
+          "product": "sunflower",
+          "quantity": "79",
+          "unit": "TON",
+          "addressId": "cmgxfthch00ae123lgsprs2sd",
+          "currentAddress": {
+            "street": "Farm Road 33",
+            "city": "cmgxflibo000vrluwrvdlrumv",
+            "postalCode": "9554",
+            "country": "Bulgaria",
+            "currentLat": 42.52434925051994,
+            "currentLng": 25.59757961027421
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthch00ae123lgsprs2sd",
+          "type": "FARM",
+          "street": "Farm Road 33",
+          "city": "cmgxflibo000vrluwrvdlrumv",
+          "postalCode": "9554",
+          "country": "Bulgaria",
+          "currentLat": 42.52434925051994,
+          "currentLng": 25.59757961027421,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthco00bj123l4tau5zox",
+      "name": "Stefan Todorov",
+      "companyName": "Vidin Grain Farm",
+      "email": "seller8@vidin-grain.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthcp00bp123lkc5ishaa",
+          "product": "soft_wheat",
+          "quantity": "76",
+          "unit": "TON",
+          "addressId": "cmgxfthcp00bn123lrdxfelxq",
+          "currentAddress": {
+            "street": "Farm Road 25",
+            "city": "cmgxfliba000brluw6m2wl3tq",
+            "postalCode": "3895",
+            "country": "Bulgaria",
+            "currentLat": 44.02676175565745,
+            "currentLng": 22.89258052375038
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthcr00bz123lvgw0e3zy",
+          "product": "sunflower",
+          "quantity": "44",
+          "unit": "TON",
+          "addressId": "cmgxfthcp00bn123lrdxfelxq",
+          "currentAddress": {
+            "street": "Farm Road 25",
+            "city": "cmgxfliba000brluw6m2wl3tq",
+            "postalCode": "3895",
+            "country": "Bulgaria",
+            "currentLat": 44.02676175565745,
+            "currentLng": 22.89258052375038
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthcs00c9123lja3ykyn4",
+          "product": "sunflower",
+          "quantity": "22",
+          "unit": "TON",
+          "addressId": "cmgxfthcp00bn123lrdxfelxq",
+          "currentAddress": {
+            "street": "Farm Road 25",
+            "city": "cmgxfliba000brluw6m2wl3tq",
+            "postalCode": "3895",
+            "country": "Bulgaria",
+            "currentLat": 44.02676175565745,
+            "currentLng": 22.89258052375038
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthcu00cj123lq37hkkj4",
+          "product": "rapeseed",
+          "quantity": "60",
+          "unit": "TON",
+          "addressId": "cmgxfthcp00bn123lrdxfelxq",
+          "currentAddress": {
+            "street": "Farm Road 25",
+            "city": "cmgxfliba000brluw6m2wl3tq",
+            "postalCode": "3895",
+            "country": "Bulgaria",
+            "currentLat": 44.02676175565745,
+            "currentLng": 22.89258052375038
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthcp00bn123lrdxfelxq",
+          "type": "FARM",
+          "street": "Farm Road 25",
+          "city": "cmgxfliba000brluw6m2wl3tq",
+          "postalCode": "3895",
+          "country": "Bulgaria",
+          "currentLat": 44.02676175565745,
+          "currentLng": 22.89258052375038,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthcv00cs123l6abzuwpl",
+      "name": "Todor Mihaylov",
+      "companyName": "Dobrich Fields Co.",
+      "email": "seller9@dobrich-fields.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthcx00cy123l4y2wfdgw",
+          "product": "soft_wheat",
+          "quantity": "72",
+          "unit": "TON",
+          "addressId": "cmgxfthcw00cw123lv4uz72kg",
+          "currentAddress": {
+            "street": "Farm Road 136",
+            "city": "cmgxfliba000frluw8j9tlf3p",
+            "postalCode": "6661",
+            "country": "Bulgaria",
+            "currentLat": 43.54275247610267,
+            "currentLng": 27.75006283338429
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthcy00d8123lqrosfg2x",
+          "product": "rapeseed",
+          "quantity": "39",
+          "unit": "TON",
+          "addressId": "cmgxfthcw00cw123lv4uz72kg",
+          "currentAddress": {
+            "street": "Farm Road 136",
+            "city": "cmgxfliba000frluw8j9tlf3p",
+            "postalCode": "6661",
+            "country": "Bulgaria",
+            "currentLat": 43.54275247610267,
+            "currentLng": 27.75006283338429
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthd600di123lgnz1w8id",
+          "product": "barley",
+          "quantity": "48",
+          "unit": "TON",
+          "addressId": "cmgxfthcw00cw123lv4uz72kg",
+          "currentAddress": {
+            "street": "Farm Road 136",
+            "city": "cmgxfliba000frluw8j9tlf3p",
+            "postalCode": "6661",
+            "country": "Bulgaria",
+            "currentLat": 43.54275247610267,
+            "currentLng": 27.75006283338429
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthd800ds123lnyve87tl",
+          "product": "rapeseed",
+          "quantity": "45",
+          "unit": "TON",
+          "addressId": "cmgxfthcw00cw123lv4uz72kg",
+          "currentAddress": {
+            "street": "Farm Road 136",
+            "city": "cmgxfliba000frluw8j9tlf3p",
+            "postalCode": "6661",
+            "country": "Bulgaria",
+            "currentLat": 43.54275247610267,
+            "currentLng": 27.75006283338429
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthcw00cw123lv4uz72kg",
+          "type": "FARM",
+          "street": "Farm Road 136",
+          "city": "cmgxfliba000frluw8j9tlf3p",
+          "postalCode": "6661",
+          "country": "Bulgaria",
+          "currentLat": 43.54275247610267,
+          "currentLng": 27.75006283338429,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthda00e1123lusajsvxq",
+      "name": "Vasil Angelov",
+      "companyName": "Montana Farm Products",
+      "email": "seller10@montana-farm.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthdc00e7123lo07odu0e",
+          "product": "soft_wheat",
+          "quantity": "73",
+          "unit": "TON",
+          "addressId": "cmgxfthdc00e5123ltvo2swk5",
+          "currentAddress": {
+            "street": "Farm Road 177",
+            "city": "cmgxfliba000arluwj7k5c5ko",
+            "postalCode": "6060",
+            "country": "Bulgaria",
+            "currentLat": 43.4988227546635,
+            "currentLng": 23.15446890254309
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthde00eh123l4ax7zfgj",
+          "product": "sunflower",
+          "quantity": "73",
+          "unit": "TON",
+          "addressId": "cmgxfthdc00e5123ltvo2swk5",
+          "currentAddress": {
+            "street": "Farm Road 177",
+            "city": "cmgxfliba000arluwj7k5c5ko",
+            "postalCode": "6060",
+            "country": "Bulgaria",
+            "currentLat": 43.4988227546635,
+            "currentLng": 23.15446890254309
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthdc00e5123ltvo2swk5",
+          "type": "FARM",
+          "street": "Farm Road 177",
+          "city": "cmgxfliba000arluwj7k5c5ko",
+          "postalCode": "6060",
+          "country": "Bulgaria",
+          "currentLat": 43.4988227546635,
+          "currentLng": 23.15446890254309,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthdg00eq123lokoo9tgu",
+      "name": "Hristo Petkov",
+      "companyName": "Sliven Agricultural",
+      "email": "seller11@sliven-agri.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthdi00ew123ljl12szxd",
+          "product": "rapeseed",
+          "quantity": "47",
+          "unit": "TON",
+          "addressId": "cmgxfthdh00eu123lca41is5l",
+          "currentAddress": {
+            "street": "Farm Road 77",
+            "city": "cmgxflibl000prluweb09dlhp",
+            "postalCode": "7144",
+            "country": "Bulgaria",
+            "currentLat": 42.76665455215777,
+            "currentLng": 26.40556620868701
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthdj00f6123lb03llprs",
+          "product": "sunflower",
+          "quantity": "68",
+          "unit": "TON",
+          "addressId": "cmgxfthdh00eu123lca41is5l",
+          "currentAddress": {
+            "street": "Farm Road 77",
+            "city": "cmgxflibl000prluweb09dlhp",
+            "postalCode": "7144",
+            "country": "Bulgaria",
+            "currentLat": 42.76665455215777,
+            "currentLng": 26.40556620868701
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthdl00fg123lp7e0febb",
+          "product": "rapeseed",
+          "quantity": "68",
+          "unit": "TON",
+          "addressId": "cmgxfthdh00eu123lca41is5l",
+          "currentAddress": {
+            "street": "Farm Road 77",
+            "city": "cmgxflibl000prluweb09dlhp",
+            "postalCode": "7144",
+            "country": "Bulgaria",
+            "currentLat": 42.76665455215777,
+            "currentLng": 26.40556620868701
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthdm00fq123lwzsakmcv",
+          "product": "sunflower",
+          "quantity": "48",
+          "unit": "TON",
+          "addressId": "cmgxfthdh00eu123lca41is5l",
+          "currentAddress": {
+            "street": "Farm Road 77",
+            "city": "cmgxflibl000prluweb09dlhp",
+            "postalCode": "7144",
+            "country": "Bulgaria",
+            "currentLat": 42.76665455215777,
+            "currentLng": 26.40556620868701
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthdh00eu123lca41is5l",
+          "type": "FARM",
+          "street": "Farm Road 77",
+          "city": "cmgxflibl000prluweb09dlhp",
+          "postalCode": "7144",
+          "country": "Bulgaria",
+          "currentLat": 42.76665455215777,
+          "currentLng": 26.40556620868701,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthdo00fz123lb60rpdf2",
+      "name": "Kamen Ivanov",
+      "companyName": "Veliko Tarnovo Farm",
+      "email": "seller12@veliko-tarnovo-farm.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthdp00g5123lt2cb635v",
+          "product": "corn_maize",
+          "quantity": "49",
+          "unit": "TON",
+          "addressId": "cmgxfthdp00g3123l1pnaptee",
+          "currentAddress": {
+            "street": "Farm Road 52",
+            "city": "cmgxfliba000grluw0bvtie6y",
+            "postalCode": "5566",
+            "country": "Bulgaria",
+            "currentLat": 43.13450321479095,
+            "currentLng": 25.65601958058259
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthdr00gf123lk8wsn4az",
+          "product": "rapeseed",
+          "quantity": "75",
+          "unit": "TON",
+          "addressId": "cmgxfthdp00g3123l1pnaptee",
+          "currentAddress": {
+            "street": "Farm Road 52",
+            "city": "cmgxfliba000grluw0bvtie6y",
+            "postalCode": "5566",
+            "country": "Bulgaria",
+            "currentLat": 43.13450321479095,
+            "currentLng": 25.65601958058259
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthds00gp123l6gegqx1g",
+          "product": "sunflower",
+          "quantity": "29",
+          "unit": "TON",
+          "addressId": "cmgxfthdp00g3123l1pnaptee",
+          "currentAddress": {
+            "street": "Farm Road 52",
+            "city": "cmgxfliba000grluw0bvtie6y",
+            "postalCode": "5566",
+            "country": "Bulgaria",
+            "currentLat": 43.13450321479095,
+            "currentLng": 25.65601958058259
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthdp00g3123l1pnaptee",
+          "type": "FARM",
+          "street": "Farm Road 52",
+          "city": "cmgxfliba000grluw0bvtie6y",
+          "postalCode": "5566",
+          "country": "Bulgaria",
+          "currentLat": 43.13450321479095,
+          "currentLng": 25.65601958058259,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthdu00gy123ldk0l1fhk",
+      "name": "Lyubomir Kolev",
+      "companyName": "Blagoevgrad Harvest",
+      "email": "seller13@blagoevgrad-harvest.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthdv00h4123lw1k0kpf4",
+          "product": "sunflower",
+          "quantity": "28",
+          "unit": "TON",
+          "addressId": "cmgxfthdv00h2123l1py664i4",
+          "currentAddress": {
+            "street": "Farm Road 112",
+            "city": "cmgxflibo000yrluwm811push",
+            "postalCode": "5121",
+            "country": "Bulgaria",
+            "currentLat": 42.02801648111198,
+            "currentLng": 23.07618678335728
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthdx00he123lnhkq15ch",
+          "product": "barley",
+          "quantity": "49",
+          "unit": "TON",
+          "addressId": "cmgxfthdv00h2123l1py664i4",
+          "currentAddress": {
+            "street": "Farm Road 112",
+            "city": "cmgxflibo000yrluwm811push",
+            "postalCode": "5121",
+            "country": "Bulgaria",
+            "currentLat": 42.02801648111198,
+            "currentLng": 23.07618678335728
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthdy00ho123l2pbttcfo",
+          "product": "rapeseed",
+          "quantity": "42",
+          "unit": "TON",
+          "addressId": "cmgxfthdv00h2123l1py664i4",
+          "currentAddress": {
+            "street": "Farm Road 112",
+            "city": "cmgxflibo000yrluwm811push",
+            "postalCode": "5121",
+            "country": "Bulgaria",
+            "currentLat": 42.02801648111198,
+            "currentLng": 23.07618678335728
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthdv00h2123l1py664i4",
+          "type": "FARM",
+          "street": "Farm Road 112",
+          "city": "cmgxflibo000yrluwm811push",
+          "postalCode": "5121",
+          "country": "Bulgaria",
+          "currentLat": 42.02801648111198,
+          "currentLng": 23.07618678335728,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthe000hx123lywh37b3g",
+      "name": "Veselin Petrov",
+      "companyName": "Shumen Grain Co.",
+      "email": "seller14@shumen-grain.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthe200i3123lgd88ttzl",
+          "product": "corn_maize",
+          "quantity": "53",
+          "unit": "TON",
+          "addressId": "cmgxfthe200i1123lpnk36vjt",
+          "currentAddress": {
+            "street": "Farm Road 130",
+            "city": "cmgxflibo000rrluwmn5aiese",
+            "postalCode": "9908",
+            "country": "Bulgaria",
+            "currentLat": 43.2521349517258,
+            "currentLng": 26.99037868054547
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthe300id123lua37kbnx",
+          "product": "barley",
+          "quantity": "35",
+          "unit": "TON",
+          "addressId": "cmgxfthe200i1123lpnk36vjt",
+          "currentAddress": {
+            "street": "Farm Road 130",
+            "city": "cmgxflibo000rrluwmn5aiese",
+            "postalCode": "9908",
+            "country": "Bulgaria",
+            "currentLat": 43.2521349517258,
+            "currentLng": 26.99037868054547
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthe500in123lg0gh448s",
+          "product": "barley",
+          "quantity": "66",
+          "unit": "TON",
+          "addressId": "cmgxfthe200i1123lpnk36vjt",
+          "currentAddress": {
+            "street": "Farm Road 130",
+            "city": "cmgxflibo000rrluwmn5aiese",
+            "postalCode": "9908",
+            "country": "Bulgaria",
+            "currentLat": 43.2521349517258,
+            "currentLng": 26.99037868054547
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthe700ix123l8acgav5g",
+          "product": "soft_wheat",
+          "quantity": "57",
+          "unit": "TON",
+          "addressId": "cmgxfthe200i1123lpnk36vjt",
+          "currentAddress": {
+            "street": "Farm Road 130",
+            "city": "cmgxflibo000rrluwmn5aiese",
+            "postalCode": "9908",
+            "country": "Bulgaria",
+            "currentLat": 43.2521349517258,
+            "currentLng": 26.99037868054547
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthe200i1123lpnk36vjt",
+          "type": "FARM",
+          "street": "Farm Road 130",
+          "city": "cmgxflibo000rrluwmn5aiese",
+          "postalCode": "9908",
+          "country": "Bulgaria",
+          "currentLat": 43.2521349517258,
+          "currentLng": 26.99037868054547,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthe800j6123lgihnfgrw",
+      "name": "Plamen Georgiev",
+      "companyName": "Yambol Fields Ltd.",
+      "email": "seller15@yambol-fields.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxftheb00jc123l1sutun6n",
+          "product": "corn_maize",
+          "quantity": "79",
+          "unit": "TON",
+          "addressId": "cmgxfthea00ja123l5ddf6vld",
+          "currentAddress": {
+            "street": "Farm Road 84",
+            "city": "cmgxflibp0015rluwwwblnrnv",
+            "postalCode": "8062",
+            "country": "Bulgaria",
+            "currentLat": 42.39864193233441,
+            "currentLng": 26.56622761648321
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthee00jm123lya6kycx6",
+          "product": "rapeseed",
+          "quantity": "73",
+          "unit": "TON",
+          "addressId": "cmgxfthea00ja123l5ddf6vld",
+          "currentAddress": {
+            "street": "Farm Road 84",
+            "city": "cmgxflibp0015rluwwwblnrnv",
+            "postalCode": "8062",
+            "country": "Bulgaria",
+            "currentLat": 42.39864193233441,
+            "currentLng": 26.56622761648321
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthea00ja123l5ddf6vld",
+          "type": "FARM",
+          "street": "Farm Road 84",
+          "city": "cmgxflibp0015rluwwwblnrnv",
+          "postalCode": "8062",
+          "country": "Bulgaria",
+          "currentLat": 42.39864193233441,
+          "currentLng": 26.56622761648321,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthef00jv123lghtpxnjx",
+      "name": "Boyan Ivanov",
+      "companyName": "Pernik Family Farm",
+      "email": "seller16@pernik-farm.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthei00k1123lfx9qwbcs",
+          "product": "corn_maize",
+          "quantity": "26",
+          "unit": "TON",
+          "addressId": "cmgxftheh00jz123lgucdabt8",
+          "currentAddress": {
+            "street": "Farm Road 2",
+            "city": "cmgxflibk000lrluwfely1rcv",
+            "postalCode": "6386",
+            "country": "Bulgaria",
+            "currentLat": 42.67044960170755,
+            "currentLng": 23.10691423393293
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthej00kb123lk62a9ngp",
+          "product": "corn_maize",
+          "quantity": "26",
+          "unit": "TON",
+          "addressId": "cmgxftheh00jz123lgucdabt8",
+          "currentAddress": {
+            "street": "Farm Road 2",
+            "city": "cmgxflibk000lrluwfely1rcv",
+            "postalCode": "6386",
+            "country": "Bulgaria",
+            "currentLat": 42.67044960170755,
+            "currentLng": 23.10691423393293
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxftheh00jz123lgucdabt8",
+          "type": "FARM",
+          "street": "Farm Road 2",
+          "city": "cmgxflibk000lrluwfely1rcv",
+          "postalCode": "6386",
+          "country": "Bulgaria",
+          "currentLat": 42.67044960170755,
+          "currentLng": 23.10691423393293,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxfthel00kk123ltvkw0drd",
+      "name": "Zdravko Petrov",
+      "companyName": "Kyustendil Grain",
+      "email": "seller17@kyustendil-grain.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthen00kq123lhnwang5g",
+          "product": "soft_wheat",
+          "quantity": "74",
+          "unit": "TON",
+          "addressId": "cmgxfthen00ko123l15ney01b",
+          "currentAddress": {
+            "street": "Farm Road 180",
+            "city": "cmgxflibo000trluw6ds77s8l",
+            "postalCode": "3065",
+            "country": "Bulgaria",
+            "currentLat": 42.2801771244567,
+            "currentLng": 22.71110188902469
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthep00l0123lz1zgsvsn",
+          "product": "barley",
+          "quantity": "31",
+          "unit": "TON",
+          "addressId": "cmgxfthen00ko123l15ney01b",
+          "currentAddress": {
+            "street": "Farm Road 180",
+            "city": "cmgxflibo000trluw6ds77s8l",
+            "postalCode": "3065",
+            "country": "Bulgaria",
+            "currentLat": 42.2801771244567,
+            "currentLng": 22.71110188902469
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfther00la123l27dm1yip",
+          "product": "soft_wheat",
+          "quantity": "79",
+          "unit": "TON",
+          "addressId": "cmgxfthen00ko123l15ney01b",
+          "currentAddress": {
+            "street": "Farm Road 180",
+            "city": "cmgxflibo000trluw6ds77s8l",
+            "postalCode": "3065",
+            "country": "Bulgaria",
+            "currentLat": 42.2801771244567,
+            "currentLng": 22.71110188902469
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthes00lk123lutehk4b3",
+          "product": "barley",
+          "quantity": "72",
+          "unit": "TON",
+          "addressId": "cmgxfthen00ko123l15ney01b",
+          "currentAddress": {
+            "street": "Farm Road 180",
+            "city": "cmgxflibo000trluw6ds77s8l",
+            "postalCode": "3065",
+            "country": "Bulgaria",
+            "currentLat": 42.2801771244567,
+            "currentLng": 22.71110188902469
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthen00ko123l15ney01b",
+          "type": "FARM",
+          "street": "Farm Road 180",
+          "city": "cmgxflibo000trluw6ds77s8l",
+          "postalCode": "3065",
+          "country": "Bulgaria",
+          "currentLat": 42.2801771244567,
+          "currentLng": 22.71110188902469,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    },
+    {
+      "userId": "cmgxftheu00lt123low1cbqc5",
+      "name": "Ivaylo Dimitrov",
+      "companyName": "Pazardzhik Harvest",
+      "email": "seller18@pazardzhik-harvest.bg",
+      "saleListings": [
+        {
+          "listingId": "cmgxfthew00lz123lsza0gp26",
+          "product": "rapeseed",
+          "quantity": "33",
+          "unit": "TON",
+          "addressId": "cmgxfthew00lx123l8kr658as",
+          "currentAddress": {
+            "street": "Farm Road 100",
+            "city": "cmgxflibe000jrluwrdfw17z2",
+            "postalCode": "8235",
+            "country": "Bulgaria",
+            "currentLat": 42.25173974989205,
+            "currentLng": 24.24512064121539
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthey00m9123las6mce3e",
+          "product": "rapeseed",
+          "quantity": "65",
+          "unit": "TON",
+          "addressId": "cmgxfthew00lx123l8kr658as",
+          "currentAddress": {
+            "street": "Farm Road 100",
+            "city": "cmgxflibe000jrluwrdfw17z2",
+            "postalCode": "8235",
+            "country": "Bulgaria",
+            "currentLat": 42.25173974989205,
+            "currentLng": 24.24512064121539
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        },
+        {
+          "listingId": "cmgxfthf000mj123ltqvvx08b",
+          "product": "sunflower",
+          "quantity": "72",
+          "unit": "TON",
+          "addressId": "cmgxfthew00lx123l8kr658as",
+          "currentAddress": {
+            "street": "Farm Road 100",
+            "city": "cmgxflibe000jrluwrdfw17z2",
+            "postalCode": "8235",
+            "country": "Bulgaria",
+            "currentLat": 42.25173974989205,
+            "currentLng": 24.24512064121539
+          },
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ],
+      "addresses": [
+        {
+          "addressId": "cmgxfthew00lx123l8kr658as",
+          "type": "FARM",
+          "street": "Farm Road 100",
+          "city": "cmgxflibe000jrluwrdfw17z2",
+          "postalCode": "8235",
+          "country": "Bulgaria",
+          "currentLat": 42.25173974989205,
+          "currentLng": 24.24512064121539,
+          "newLatitude": null,
+          "newLongitude": null
+        }
+      ]
+    }
+  ]
+}

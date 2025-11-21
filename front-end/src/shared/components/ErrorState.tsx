@@ -21,33 +21,18 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
   accessibilityLabel,
 }) => {
   return (
-    <View 
+    <View
       className="flex-1 items-center justify-center p-8"
       testID={testID}
       accessibilityLabel={accessibilityLabel}
     >
-      {icon && (
-        <View className="mb-4">
-          {icon}
-        </View>
-      )}
-      
-      <Text className="text-xl font-semibold text-gray-900 text-center mb-2">
-        {title}
-      </Text>
-      
-      <Text className="text-base text-gray-600 text-center mb-6 max-w-sm">
-        {message}
-      </Text>
-      
-      {onRetry && (
-        <Button
-          title={retryLabel}
-          onPress={onRetry}
-          variant="primary"
-          size="medium"
-        />
-      )}
+      {icon && <View className="mb-4">{icon}</View>}
+
+      <Text className="text-xl font-semibold text-gray-900 text-center mb-2">{title}</Text>
+
+      <Text className="text-base text-gray-600 text-center mb-6 max-w-sm">{message}</Text>
+
+      {onRetry && <Button title={retryLabel} onPress={onRetry} variant="primary" size="medium" />}
     </View>
   );
 };

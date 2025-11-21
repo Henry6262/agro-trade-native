@@ -22,18 +22,14 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     : 'items-center justify-center p-4';
 
   return (
-    <View 
+    <View
       className={containerClass}
       testID={testID}
       accessibilityLabel={accessibilityLabel || 'Loading'}
       accessibilityRole="progressbar"
     >
       <ActivityIndicator size={size} color={color} />
-      {message && (
-        <Text className="text-gray-600 mt-2 text-center">
-          {message}
-        </Text>
-      )}
+      {message && <Text className="text-gray-600 mt-2 text-center">{message}</Text>}
     </View>
   );
 };

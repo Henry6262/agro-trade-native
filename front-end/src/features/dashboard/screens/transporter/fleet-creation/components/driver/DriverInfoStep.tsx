@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, Pressable, TouchableOpacity, ScrollView } from 'react-native';
 import { X, ChevronLeft } from 'lucide-react-native';
-import { Input } from '../../../../../../../shared/components/Input';
-import { Button } from '../../../../../../../shared/components/Button';
+import { Input } from '@shared/components/Input';
+import { Button } from '@shared/components/Button';
 import { DriverInfo } from '../../types';
 
 interface DriverInfoStepProps {
@@ -37,15 +37,10 @@ export const DriverInfoStep: React.FC<DriverInfoStepProps> = ({
   };
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View className="flex-1 justify-end bg-black/50">
         <Pressable className="flex-1" onPress={onClose} />
-        
+
         <View className="bg-neutral-900 rounded-t-3xl max-h-[90%]">
           {/* Header */}
           <View className="flex-row items-center justify-between p-6 border-b border-neutral-800">
@@ -63,9 +58,7 @@ export const DriverInfoStep: React.FC<DriverInfoStepProps> = ({
           {/* Content - No progress indicator needed for single step */}
           <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 400 }}>
             <View className="p-6">
-              <Text className="text-lg font-semibold text-white mb-4">
-                Driver Information
-              </Text>
+              <Text className="text-lg font-semibold text-white mb-4">Driver Information</Text>
 
               {/* Full Name */}
               <View className="mb-4">
@@ -89,7 +82,9 @@ export const DriverInfoStep: React.FC<DriverInfoStepProps> = ({
                   maxLength={10}
                   className="bg-neutral-800 border-neutral-700"
                 />
-                <Text className="text-xs text-neutral-500 mt-1">10-digit Bulgarian National ID</Text>
+                <Text className="text-xs text-neutral-500 mt-1">
+                  10-digit Bulgarian National ID
+                </Text>
               </View>
 
               {/* Phone Number */}

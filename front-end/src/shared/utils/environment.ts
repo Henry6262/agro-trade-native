@@ -13,7 +13,7 @@ export const getAppUrl = (): string => {
       return window.location.origin;
     }
   }
-  
+
   // For mobile apps or fallback
   return process.env.EXPO_PUBLIC_APP_URL || 'http://localhost:8081';
 };
@@ -26,27 +26,27 @@ export const getApiUrl = (): string => {
   if (Platform.OS === 'android' && __DEV__) {
     return 'http://10.0.2.2:4000/api';
   }
-  
+
   // Use configured API URL if available
   if (process.env.EXPO_PUBLIC_API_URL) {
     return process.env.EXPO_PUBLIC_API_URL;
   }
-  
+
   // For web platform in production
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
     const host = window.location.hostname;
-    
+
     // If we're on a production domain
     if (host !== 'localhost' && !host.includes('127.0.0.1')) {
       // Check if we have an explicit production API URL
       if (process.env.EXPO_PUBLIC_API_URL_PRODUCTION) {
         return process.env.EXPO_PUBLIC_API_URL_PRODUCTION;
       }
-      
+
       // Assume the API is hosted on a similar domain with 'api' subdomain
       // or '-api' suffix for Vercel deployments
       const protocol = window.location.protocol;
-      
+
       // Check common patterns
       if (host.includes('vercel.app')) {
         // For Vercel deployments, the backend might be on a different subdomain
@@ -58,7 +58,7 @@ export const getApiUrl = (): string => {
       }
     }
   }
-  
+
   // Default to localhost for development
   return 'http://localhost:4000/api';
 };
@@ -76,7 +76,7 @@ export const getOAuthRedirectUrl = (): string => {
  */
 export const getGoogleOAuthUrl = (): string => {
   const apiUrl = getApiUrl();
-  
+
   // The backend will handle the redirect URL based on its environment
   return `${apiUrl}/auth/google`;
 };
@@ -88,12 +88,12 @@ export const isProduction = (): boolean => {
   if (process.env.EXPO_PUBLIC_ENVIRONMENT === 'production') {
     return true;
   }
-  
+
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
     const host = window.location.hostname;
     return host !== 'localhost' && !host.includes('127.0.0.1');
   }
-  
+
   return false;
 };
 

@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  Animated,
-  Alert,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Modal, Animated, Alert, ScrollView } from 'react-native';
 import {
   Check,
   X,
@@ -78,44 +70,44 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
   const getRiskAssessment = () => {
     const risks = [];
     const warnings = [];
-    
+
     // Price risk
     if (buyerRequest?.maxPricePerUnit && offer.pricePerUnit > buyerRequest.maxPricePerUnit) {
       risks.push({
         type: 'price',
         message: `Price exceeds your maximum by €${(offer.pricePerUnit - buyerRequest.maxPricePerUnit).toFixed(2)}`,
-        severity: 'high'
+        severity: 'high',
       });
     }
-    
+
     // Quantity risk
     if (buyerRequest?.quantity && offer.quantity < buyerRequest.quantity) {
       const shortage = buyerRequest.quantity - offer.quantity;
       warnings.push({
         type: 'quantity',
         message: `Quantity is ${shortage} ${offer.unit} less than requested`,
-        severity: 'medium'
+        severity: 'medium',
       });
     }
-    
+
     // Delivery risk
     if (offer.deliveryTerms?.deliveryTime > 14) {
       warnings.push({
         type: 'delivery',
         message: `Delivery time is ${offer.deliveryTerms.deliveryTime} days`,
-        severity: 'low'
+        severity: 'low',
       });
     }
-    
+
     // Seller verification
     if (!offer.seller?.verified) {
       warnings.push({
         type: 'seller',
         message: 'Seller is not verified on the platform',
-        severity: 'medium'
+        severity: 'medium',
       });
     }
-    
+
     return { risks, warnings };
   };
 
@@ -125,7 +117,7 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
     } else if (step === 'confirm') {
       onConfirm(offer.id, notes.trim() || undefined);
       setStep('success');
-      
+
       // Auto-close after success animation
       setTimeout(() => {
         onClose();
@@ -153,7 +145,10 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
       statusBarTranslucent={true}
       presentationStyle="overFullScreen"
     >
-      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)' }} className="justify-center items-center p-6">
+      <View
+        style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)' }}
+        className="justify-center items-center p-6"
+      >
         <Animated.View
           style={{
             transform: [{ scale: scaleAnim }],
@@ -170,7 +165,9 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                     <X color="#9CA3AF" size={24} />
                   </TouchableOpacity>
                 </View>
-                <Text className="text-neutral-400 mt-1">Review the offer details before accepting</Text>
+                <Text className="text-neutral-400 mt-1">
+                  Review the offer details before accepting
+                </Text>
               </View>
 
               <ScrollView className="max-h-96" showsVerticalScrollIndicator={false}>
@@ -187,7 +184,7 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                         </View>
                       )}
                     </View>
-                    
+
                     <View className="space-y-2">
                       {offer.seller?.location && (
                         <View className="flex-row items-center">
@@ -197,7 +194,7 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                           </Text>
                         </View>
                       )}
-                      
+
                       {offer.seller?.rating && (
                         <View className="flex-row items-center">
                           <Star size={14} color="#FBBF24" fill="#FBBF24" />
@@ -217,44 +214,52 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                   {/* Offer Summary */}
                   <View className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 mb-4 border border-green-500/30">
                     <Text className="text-green-400 font-semibold mb-3">Offer Summary</Text>
-                    
+
                     <View className="space-y-3">
                       <View className="flex-row justify-between items-center">
                         <View className="flex-row items-center">
                           <DollarSign size={16} color="#10B981" />
                           <Text className="text-neutral-300 ml-2">Price per unit</Text>
                         </View>
-                        <Text className="text-white font-semibold">€{offer.pricePerUnit.toFixed(2)}</Text>
+                        <Text className="text-white font-semibold">
+                          €{offer.pricePerUnit.toFixed(2)}
+                        </Text>
                       </View>
-                      
+
                       <View className="flex-row justify-between items-center">
                         <View className="flex-row items-center">
                           <Package size={16} color="#10B981" />
                           <Text className="text-neutral-300 ml-2">Quantity</Text>
                         </View>
-                        <Text className="text-white font-semibold">{offer.quantity} {offer.unit}</Text>
+                        <Text className="text-white font-semibold">
+                          {offer.quantity} {offer.unit}
+                        </Text>
                       </View>
-                      
+
                       {offer.deliveryTerms && (
                         <View className="flex-row justify-between items-center">
                           <View className="flex-row items-center">
                             <Truck size={16} color="#10B981" />
                             <Text className="text-neutral-300 ml-2">Delivery</Text>
                           </View>
-                          <Text className="text-white font-semibold">{offer.deliveryTerms.deliveryTime} days</Text>
+                          <Text className="text-white font-semibold">
+                            {offer.deliveryTerms.deliveryTime} days
+                          </Text>
                         </View>
                       )}
-                      
+
                       <View className="border-t border-green-500/20 pt-3">
                         <View className="flex-row justify-between items-center">
                           <Text className="text-green-300 font-semibold">Total Value</Text>
                           <Text className="text-green-400 font-bold text-lg">€{totalValue}</Text>
                         </View>
-                        
+
                         {savings && (
                           <View className="flex-row justify-between items-center mt-1">
                             <Text className="text-green-300 text-sm">You save</Text>
-                            <Text className="text-green-400 font-semibold">€{savings.toLocaleString()}</Text>
+                            <Text className="text-green-400 font-semibold">
+                              €{savings.toLocaleString()}
+                            </Text>
                           </View>
                         )}
                       </View>
@@ -265,19 +270,27 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                   {(risks.length > 0 || warnings.length > 0) && (
                     <View className="mb-4">
                       {risks.map((risk, index) => (
-                        <View key={index} className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-2">
+                        <View
+                          key={index}
+                          className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-2"
+                        >
                           <View className="flex-row items-start">
                             <AlertTriangle size={16} color="#EF4444" />
                             <Text className="text-red-400 text-sm ml-2 flex-1">{risk.message}</Text>
                           </View>
                         </View>
                       ))}
-                      
+
                       {warnings.map((warning, index) => (
-                        <View key={index} className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-2">
+                        <View
+                          key={index}
+                          className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-2"
+                        >
                           <View className="flex-row items-start">
                             <Info size={16} color="#FBBF24" />
-                            <Text className="text-yellow-400 text-sm ml-2 flex-1">{warning.message}</Text>
+                            <Text className="text-yellow-400 text-sm ml-2 flex-1">
+                              {warning.message}
+                            </Text>
                           </View>
                         </View>
                       ))}
@@ -289,7 +302,7 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                     <View className="flex-row items-start">
                       <Info size={16} color="#3B82F6" />
                       <Text className="text-blue-300 text-xs ml-2 flex-1">
-                        By accepting this offer, you agree to the seller's terms and conditions. 
+                        By accepting this offer, you agree to the seller's terms and conditions.
                         Payment will be processed according to the platform's payment policy.
                       </Text>
                     </View>
@@ -306,7 +319,7 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                   >
                     <Text className="text-white font-semibold">Cancel</Text>
                   </TouchableOpacity>
-                  
+
                   <TouchableOpacity
                     onPress={handleConfirm}
                     className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg py-3 items-center justify-center"
@@ -344,17 +357,18 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                   <View className="w-16 h-16 bg-green-500/20 rounded-full items-center justify-center mb-4">
                     <Check size={32} color="#10B981" />
                   </View>
-                  
+
                   <Text className="text-white font-bold text-lg text-center mb-2">
                     Accept Offer from {offer.seller?.name}
                   </Text>
-                  
+
                   <Text className="text-green-400 font-bold text-2xl text-center">
                     €{totalValue}
                   </Text>
-                  
+
                   <Text className="text-neutral-300 text-center mt-2">
-                    {offer.quantity} {offer.unit} at €{offer.pricePerUnit.toFixed(2)} per {offer.unit.toLowerCase()}
+                    {offer.quantity} {offer.unit} at €{offer.pricePerUnit.toFixed(2)} per{' '}
+                    {offer.unit.toLowerCase()}
                   </Text>
                 </View>
 
@@ -365,8 +379,8 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                     <View className="ml-3 flex-1">
                       <Text className="text-yellow-400 font-semibold mb-1">Important</Text>
                       <Text className="text-yellow-300 text-sm">
-                        Once you confirm, this acceptance is binding. Make sure you have 
-                        reviewed all terms and are ready to proceed with the transaction.
+                        Once you confirm, this acceptance is binding. Make sure you have reviewed
+                        all terms and are ready to proceed with the transaction.
                       </Text>
                     </View>
                   </View>
@@ -382,7 +396,7 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                   >
                     <Text className="text-white font-semibold">Back</Text>
                   </TouchableOpacity>
-                  
+
                   <TouchableOpacity
                     onPress={handleConfirm}
                     disabled={isLoading}
@@ -411,29 +425,29 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
             <View className="p-8 items-center">
               <Animated.View
                 style={{
-                  transform: [{
-                    scale: scaleAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.5, 1.1],
-                    })
-                  }]
+                  transform: [
+                    {
+                      scale: scaleAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.5, 1.1],
+                      }),
+                    },
+                  ],
                 }}
                 className="w-20 h-20 bg-green-500/20 rounded-full items-center justify-center mb-6"
               >
                 <Check size={40} color="#10B981" />
               </Animated.View>
-              
-              <Text className="text-white font-bold text-xl text-center mb-2">
-                Offer Accepted!
-              </Text>
-              
+
+              <Text className="text-white font-bold text-xl text-center mb-2">Offer Accepted!</Text>
+
               <Text className="text-green-400 text-center mb-4">
                 Your acceptance has been sent to the seller
               </Text>
-              
+
               <Text className="text-neutral-400 text-sm text-center">
-                You'll receive a confirmation email and the seller will be notified. 
-                Check your dashboard for updates.
+                You'll receive a confirmation email and the seller will be notified. Check your
+                dashboard for updates.
               </Text>
             </View>
           )}

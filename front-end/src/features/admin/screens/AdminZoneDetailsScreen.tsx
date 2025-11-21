@@ -1,173 +1,185 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, Alert, TextInput, Modal } from 'react-native'
-import { useNavigation, useRoute } from '@react-navigation/native'
-import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack'
-import type { RootStackParamList } from '../../../navigation/types'
-import { Ionicons } from '@expo/vector-icons'
-import { LoadingSpinner } from '../../../shared/components'
-import { apiClient } from '../../../services/api'
-import { Picker } from '@react-native-picker/picker'
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+  Alert,
+  TextInput,
+  Modal,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../../navigation/types';
+import { Ionicons } from '@expo/vector-icons';
+import { LoadingSpinner } from '../../../shared/components';
+import { apiClient } from '@services/api';
+import { Picker } from '@react-native-picker/picker';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'AdminZoneDetails'>
-type AdminNavigationProp = NativeStackNavigationProp<RootStackParamList>
+type Props = NativeStackScreenProps<RootStackParamList, 'AdminZoneDetails'>;
+type AdminNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface City {
-  id: string
-  name: string
-  latitude: number
-  longitude: number
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
   region: {
-    name: string
+    name: string;
     country: {
-      name: string
-      code: string
-      flagEmoji: string
-    }
-  }
-  pricingZones?: Array<{
-    id: string
+      name: string;
+      code: string;
+      flagEmoji: string;
+    };
+  };
+  pricingZones?: {
+    id: string;
     pricingZone: {
-      id: string
-      name: string
-    }
-    isDefault: boolean
-    priority: number
-  }>
+      id: string;
+      name: string;
+    };
+    isDefault: boolean;
+    priority: number;
+  }[];
 }
 
 interface PricingZone {
-  id: string
-  name: string
-  description?: string
-  color?: string
-  marketSize?: string
-  transportAccess?: string
-  storageCapacity?: string
-  isActive: boolean
-  cities: Array<{
-    id: string
-    city: City
-    isDefault: boolean
-    priority: number
-  }>
-  productPrices: Array<{
-    id: string
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  marketSize?: string;
+  transportAccess?: string;
+  storageCapacity?: string;
+  isActive: boolean;
+  cities: {
+    id: string;
+    city: City;
+    isDefault: boolean;
+    priority: number;
+  }[];
+  productPrices: {
+    id: string;
     product: {
-      id: string
-      displayName: string
-      category: string
-    }
-    minPrice: number
-    maxPrice: number
-    currency: string
-    unit: string
-    qualityGrade?: string
-    effectiveDate: string
-    expiresDate?: string
-  }>
+      id: string;
+      displayName: string;
+      category: string;
+    };
+    minPrice: number;
+    maxPrice: number;
+    currency: string;
+    unit: string;
+    qualityGrade?: string;
+    effectiveDate: string;
+    expiresDate?: string;
+  }[];
 }
 
 export function AdminZoneDetailsScreen({ route }: Props) {
-  const navigation = useNavigation<AdminNavigationProp>()
-  const { zoneId } = route.params
-  
-  const [zone, setZone] = useState<PricingZone | null>(null)
-  const [availableCities, setAvailableCities] = useState<City[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [showAddCityModal, setShowAddCityModal] = useState(false)
-  const [selectedCity, setSelectedCity] = useState('')
-  const [cityPriority, setCityPriority] = useState('1')
-  const [isDefaultCity, setIsDefaultCity] = useState(false)
-  const [isAssigningCity, setIsAssigningCity] = useState(false)
-  
-  const [editingZone, setEditingZone] = useState(false)
+  const navigation = useNavigation<AdminNavigationProp>();
+  const { zoneId } = route.params;
+
+  const [zone, setZone] = useState<PricingZone | null>(null);
+  const [availableCities, setAvailableCities] = useState<City[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showAddCityModal, setShowAddCityModal] = useState(false);
+  const [selectedCity, setSelectedCity] = useState('');
+  const [cityPriority, setCityPriority] = useState('1');
+  const [isDefaultCity, setIsDefaultCity] = useState(false);
+  const [isAssigningCity, setIsAssigningCity] = useState(false);
+
+  const [editingZone, setEditingZone] = useState(false);
   const [zoneForm, setZoneForm] = useState({
     name: '',
     description: '',
     marketSize: '',
     transportAccess: '',
     storageCapacity: '',
-  })
+  });
 
   useEffect(() => {
-    fetchZoneDetails()
-    fetchAvailableCities()
-  }, [zoneId])
+    fetchZoneDetails();
+    fetchAvailableCities();
+  }, [zoneId]);
 
   const fetchZoneDetails = async () => {
     try {
-      setIsLoading(true)
-      const response = await apiClient.get(`/admin/pricing-zones`)
-      const zones = response.data.data
-      const currentZone = zones.find((z: PricingZone) => z.id === zoneId)
-      
+      setIsLoading(true);
+      const response = await apiClient.get(`/admin/pricing-zones`);
+      const zones = response.data.data;
+      const currentZone = zones.find((z: PricingZone) => z.id === zoneId);
+
       if (currentZone) {
-        setZone(currentZone)
+        setZone(currentZone);
         setZoneForm({
           name: currentZone.name,
           description: currentZone.description || '',
           marketSize: currentZone.marketSize || '',
           transportAccess: currentZone.transportAccess || '',
           storageCapacity: currentZone.storageCapacity || '',
-        })
+        });
       }
     } catch (error) {
-      console.error('Failed to fetch zone details:', error)
-      Alert.alert('Error', 'Failed to load zone details')
+      console.error('Failed to fetch zone details:', error);
+      Alert.alert('Error', 'Failed to load zone details');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const fetchAvailableCities = async () => {
     try {
-      const response = await apiClient.get('/admin/cities')
-      setAvailableCities(response.data.data)
+      const response = await apiClient.get('/admin/cities');
+      setAvailableCities(response.data.data);
     } catch (error) {
-      console.error('Failed to fetch cities:', error)
+      console.error('Failed to fetch cities:', error);
     }
-  }
+  };
 
   const updateZoneInfo = async () => {
     try {
-      const response = await apiClient.put(`/admin/pricing-zones/${zoneId}`, zoneForm)
-      setZone(response.data.data)
-      setEditingZone(false)
-      Alert.alert('Success', 'Zone information updated successfully')
+      const response = await apiClient.put(`/admin/pricing-zones/${zoneId}`, zoneForm);
+      setZone(response.data.data);
+      setEditingZone(false);
+      Alert.alert('Success', 'Zone information updated successfully');
     } catch (error: any) {
-      console.error('Failed to update zone:', error)
-      Alert.alert('Error', error.response?.data?.message || 'Failed to update zone')
+      console.error('Failed to update zone:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to update zone');
     }
-  }
+  };
 
   const assignCityToZone = async () => {
     if (!selectedCity) {
-      Alert.alert('Error', 'Please select a city')
-      return
+      Alert.alert('Error', 'Please select a city');
+      return;
     }
 
     try {
-      setIsAssigningCity(true)
+      setIsAssigningCity(true);
       await apiClient.post('/admin/cities/assign-pricing-zone', {
         cityId: selectedCity,
         pricingZoneId: zoneId,
         priority: parseInt(cityPriority),
         isDefault: isDefaultCity,
-      })
-      
-      await fetchZoneDetails() // Refresh zone data
-      setSelectedCity('')
-      setCityPriority('1')
-      setIsDefaultCity(false)
-      setShowAddCityModal(false)
-      Alert.alert('Success', 'City assigned to zone successfully')
+      });
+
+      await fetchZoneDetails(); // Refresh zone data
+      setSelectedCity('');
+      setCityPriority('1');
+      setIsDefaultCity(false);
+      setShowAddCityModal(false);
+      Alert.alert('Success', 'City assigned to zone successfully');
     } catch (error: any) {
-      console.error('Failed to assign city:', error)
-      Alert.alert('Error', error.response?.data?.message || 'Failed to assign city to zone')
+      console.error('Failed to assign city:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to assign city to zone');
     } finally {
-      setIsAssigningCity(false)
+      setIsAssigningCity(false);
     }
-  }
+  };
 
   const removeCityFromZone = async (cityId: string, cityName: string) => {
     Alert.alert(
@@ -180,18 +192,21 @@ export function AdminZoneDetailsScreen({ route }: Props) {
           style: 'destructive',
           onPress: async () => {
             try {
-              await apiClient.delete(`/admin/cities/${cityId}/pricing-zones/${zoneId}`)
-              await fetchZoneDetails() // Refresh zone data
-              Alert.alert('Success', 'City removed from zone successfully')
+              await apiClient.delete(`/admin/cities/${cityId}/pricing-zones/${zoneId}`);
+              await fetchZoneDetails(); // Refresh zone data
+              Alert.alert('Success', 'City removed from zone successfully');
             } catch (error: any) {
-              console.error('Failed to remove city:', error)
-              Alert.alert('Error', error.response?.data?.message || 'Failed to remove city from zone')
+              console.error('Failed to remove city:', error);
+              Alert.alert(
+                'Error',
+                error.response?.data?.message || 'Failed to remove city from zone'
+              );
             }
           },
         },
       ]
-    )
-  }
+    );
+  };
 
   if (isLoading) {
     return (
@@ -199,7 +214,7 @@ export function AdminZoneDetailsScreen({ route }: Props) {
         <LoadingSpinner />
         <Text className="text-white mt-4">Loading zone details...</Text>
       </SafeAreaView>
-    )
+    );
   }
 
   if (!zone) {
@@ -208,26 +223,26 @@ export function AdminZoneDetailsScreen({ route }: Props) {
         <Ionicons name="location-outline" size={64} color="#4B5563" />
         <Text className="text-gray-400 text-lg mt-4">Zone not found</Text>
       </SafeAreaView>
-    )
+    );
   }
 
   // Filter out cities that are already assigned to this zone
-  const unassignedCities = availableCities.filter(city => 
-    !zone.cities.some(zoneCity => zoneCity.city.id === city.id)
-  )
+  const unassignedCities = availableCities.filter(
+    (city) => !zone.cities.some((zoneCity) => zoneCity.city.id === city.id)
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-gray-900">
       <View className="flex-1">
         {/* Header */}
         <View className="flex-row items-center justify-between p-6 border-b border-gray-700">
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => navigation.goBack()}
             className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center"
           >
             <Ionicons name="chevron-back" size={20} color="#9CA3AF" />
           </TouchableOpacity>
-          
+
           <View className="flex-1 mx-4">
             <View className="flex-row items-center">
               <View
@@ -238,7 +253,7 @@ export function AdminZoneDetailsScreen({ route }: Props) {
             </View>
             <Text className="text-gray-400 text-sm">Zone Details & Management</Text>
           </View>
-          
+
           <TouchableOpacity
             onPress={() => setEditingZone(true)}
             className="bg-blue-600 p-2 rounded-lg"
@@ -253,12 +268,16 @@ export function AdminZoneDetailsScreen({ route }: Props) {
             <View className="bg-gray-800 rounded-xl p-4 border border-gray-700 mb-6">
               <View className="flex-row items-center justify-between mb-4">
                 <Text className="text-white font-semibold text-lg">Zone Information</Text>
-                <View className={`px-3 py-1 rounded-full ${
-                  zone.isActive ? 'bg-green-900' : 'bg-red-900'
-                }`}>
-                  <Text className={`text-xs font-medium ${
-                    zone.isActive ? 'text-green-300' : 'text-red-300'
-                  }`}>
+                <View
+                  className={`px-3 py-1 rounded-full ${
+                    zone.isActive ? 'bg-green-900' : 'bg-red-900'
+                  }`}
+                >
+                  <Text
+                    className={`text-xs font-medium ${
+                      zone.isActive ? 'text-green-300' : 'text-red-300'
+                    }`}
+                  >
                     {zone.isActive ? 'Active' : 'Inactive'}
                   </Text>
                 </View>
@@ -311,37 +330,34 @@ export function AdminZoneDetailsScreen({ route }: Props) {
                   {zone.cities
                     .sort((a, b) => a.priority - b.priority)
                     .map((cityZone) => (
-                    <View
-                      key={cityZone.id}
-                      className="bg-gray-700 rounded-lg p-3 flex-row items-center justify-between"
-                    >
-                      <View className="flex-1">
-                        <View className="flex-row items-center mb-1">
-                          <Text className="mr-2">
-                            {cityZone.city.region.country.flagEmoji}
-                          </Text>
-                          <Text className="text-white font-medium">
-                            {cityZone.city.name}
-                          </Text>
-                          {cityZone.isDefault && (
-                            <View className="bg-blue-600 rounded-full px-2 py-0.5 ml-2">
-                              <Text className="text-white text-xs">Default</Text>
-                            </View>
-                          )}
-                        </View>
-                        <Text className="text-gray-400 text-sm">
-                          {cityZone.city.region.name}, {cityZone.city.region.country.name} • Priority: {cityZone.priority}
-                        </Text>
-                      </View>
-                      
-                      <TouchableOpacity
-                        onPress={() => removeCityFromZone(cityZone.city.id, cityZone.city.name)}
-                        className="p-2"
+                      <View
+                        key={cityZone.id}
+                        className="bg-gray-700 rounded-lg p-3 flex-row items-center justify-between"
                       >
-                        <Ionicons name="remove-circle-outline" size={20} color="#EF4444" />
-                      </TouchableOpacity>
-                    </View>
-                  ))}
+                        <View className="flex-1">
+                          <View className="flex-row items-center mb-1">
+                            <Text className="mr-2">{cityZone.city.region.country.flagEmoji}</Text>
+                            <Text className="text-white font-medium">{cityZone.city.name}</Text>
+                            {cityZone.isDefault && (
+                              <View className="bg-blue-600 rounded-full px-2 py-0.5 ml-2">
+                                <Text className="text-white text-xs">Default</Text>
+                              </View>
+                            )}
+                          </View>
+                          <Text className="text-gray-400 text-sm">
+                            {cityZone.city.region.name}, {cityZone.city.region.country.name} •
+                            Priority: {cityZone.priority}
+                          </Text>
+                        </View>
+
+                        <TouchableOpacity
+                          onPress={() => removeCityFromZone(cityZone.city.id, cityZone.city.name)}
+                          className="p-2"
+                        >
+                          <Ionicons name="remove-circle-outline" size={20} color="#EF4444" />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
                 </View>
               ) : (
                 <View className="items-center py-8">
@@ -369,18 +385,11 @@ export function AdminZoneDetailsScreen({ route }: Props) {
               {zone.productPrices.length > 0 ? (
                 <View className="space-y-2">
                   {zone.productPrices.slice(0, 5).map((price) => (
-                    <View
-                      key={price.id}
-                      className="bg-gray-700 rounded-lg p-3"
-                    >
+                    <View key={price.id} className="bg-gray-700 rounded-lg p-3">
                       <View className="flex-row items-center justify-between mb-1">
-                        <Text className="text-white font-medium">
-                          {price.product.displayName}
-                        </Text>
+                        <Text className="text-white font-medium">{price.product.displayName}</Text>
                         <View className="bg-gray-600 rounded-full px-2 py-0.5">
-                          <Text className="text-gray-300 text-xs">
-                            {price.product.category}
-                          </Text>
+                          <Text className="text-gray-300 text-xs">{price.product.category}</Text>
                         </View>
                       </View>
                       <View className="flex-row items-center justify-between">
@@ -403,7 +412,9 @@ export function AdminZoneDetailsScreen({ route }: Props) {
                 <View className="items-center py-8">
                   <Ionicons name="pricetag-outline" size={48} color="#4B5563" />
                   <Text className="text-gray-400 mt-2">No product prices set</Text>
-                  <Text className="text-gray-500 text-sm">Add prices for products in this zone</Text>
+                  <Text className="text-gray-500 text-sm">
+                    Add prices for products in this zone
+                  </Text>
                 </View>
               )}
             </View>
@@ -523,10 +534,10 @@ export function AdminZoneDetailsScreen({ route }: Props) {
                   >
                     <Picker.Item label="Choose a city..." value="" />
                     {unassignedCities.map((city) => (
-                      <Picker.Item 
-                        key={city.id} 
-                        label={`${city.region.country.flagEmoji} ${city.name}, ${city.region.country.name}`} 
-                        value={city.id} 
+                      <Picker.Item
+                        key={city.id}
+                        label={`${city.region.country.flagEmoji} ${city.name}, ${city.region.country.name}`}
+                        value={city.id}
                       />
                     ))}
                   </Picker>
@@ -551,14 +562,12 @@ export function AdminZoneDetailsScreen({ route }: Props) {
                       isDefaultCity ? 'bg-blue-600' : 'bg-gray-700'
                     }`}
                   >
-                    <Ionicons 
-                      name={isDefaultCity ? "checkbox" : "checkbox-outline"} 
-                      size={20} 
-                      color={isDefaultCity ? "white" : "#9CA3AF"} 
+                    <Ionicons
+                      name={isDefaultCity ? 'checkbox' : 'checkbox-outline'}
+                      size={20}
+                      color={isDefaultCity ? 'white' : '#9CA3AF'}
                     />
-                    <Text className={`ml-2 ${
-                      isDefaultCity ? 'text-white' : 'text-gray-300'
-                    }`}>
+                    <Text className={`ml-2 ${isDefaultCity ? 'text-white' : 'text-gray-300'}`}>
                       Default City
                     </Text>
                   </TouchableOpacity>
@@ -587,5 +596,5 @@ export function AdminZoneDetailsScreen({ route }: Props) {
         </View>
       </Modal>
     </SafeAreaView>
-  )
+  );
 }

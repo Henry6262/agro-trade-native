@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authService, RegisterWithCompanyDto, CompanyInfo } from '../services/authService';
+import { authService, RegisterWithCompanyDto, CompanyInfo } from '@services/authService';
 import { useAuthStore } from '@stores/auth.store';
 import type {
   OnboardingState,
@@ -22,28 +22,28 @@ interface OnboardingStore extends OnboardingState {
   isLoading: boolean;
   isSubmitting: boolean;
   error: string | null;
-  
+
   // Actions
   setRole: (role: UserRole) => void;
   nextStep: () => void;
   previousStep: () => void;
   setStep: (step: number) => void;
-  
+
   // Common product selection
   selectedProducts: string[];
   setSelectedProducts: (products: string[]) => void;
   selectedProductsMetadata: any[];
   setSelectedProductsMetadata: (metadata: any[]) => void;
-  
+
   // Additional store properties not in OnboardingState
   transportData?: TransportOnboardingData;
-  
+
   // Error handling
   setError: (error: string | null) => void;
   clearError: () => void;
   setLoading: (loading: boolean) => void;
   setSubmitting: (submitting: boolean) => void;
-  
+
   // Seller actions
   setSellerProducts: (products: ProductSelection[]) => void;
   addSellerProduct: (product: ProductSelection) => void;
@@ -54,7 +54,7 @@ interface OnboardingStore extends OnboardingState {
   updateSellerSpecification: (productId: string, specs: any) => void;
   setSellerBases: (bases: any[]) => void;
   setSellerDistributions: (distributions: any[]) => void;
-  
+
   // Buyer actions
   setBuyerRequirements: (requirements: ProductRequirement[]) => void;
   addBuyerRequirement: (requirement: ProductRequirement) => void;
@@ -64,29 +64,46 @@ interface OnboardingStore extends OnboardingState {
   updateBuyerSpecification: (productId: string, specs: any) => void;
   setBuyerBases: (bases: any[]) => void;
   setBuyerDistributions: (distributions: any[]) => void;
-  
+
   // Transport actions
   setFleetInfo: (fleetInfo: FleetInformation) => void;
   setServiceArea: (serviceArea: ServiceArea) => void;
   setJobPreferences: (preferences: JobPreferences) => void;
   setTransportOpportunities: (opportunities: TransportOpportunities) => void;
-  
+
   // Location
-  setLocation: (location: { latitude: number; longitude: number; address?: string; city?: string; region?: string; country?: string }) => void;
-  location?: { latitude: number; longitude: number; address?: string; city?: string; region?: string; country?: string };
-  
+  setLocation: (location: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    city?: string;
+    region?: string;
+    country?: string;
+  }) => void;
+  location?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    city?: string;
+    region?: string;
+    country?: string;
+  };
+
   // General actions
   completeOnboarding: () => void;
   resetOnboarding: () => void;
-  
+
   // API integration methods
   saveOnboardingData: () => Promise<void>;
   loadOnboardingData: () => Promise<void>;
-  submitOnboarding: (companyInfo?: CompanyInfo, userInfo?: { name: string; email: string; phone?: string }) => Promise<void>;
+  submitOnboarding: (
+    companyInfo?: CompanyInfo,
+    userInfo?: { name: string; email: string; phone?: string }
+  ) => Promise<void>;
   authenticateWithGoogle: (googleToken: string) => Promise<void>;
   setGoogleAuthData: (data: { name: string; email: string; isAuthenticated: boolean }) => void;
   googleAuthData?: { name: string; email: string; isAuthenticated: boolean };
-  
+
   // Computed properties
   getProgress: () => number;
   getCurrentStepData: () => any;
@@ -106,8 +123,19 @@ const getInitialState = () => ({
   selectedProductsMetadata: [] as any[],
   sellerSpecifications: {} as Record<string, any>,
   buyerSpecifications: {} as Record<string, any>,
-  googleAuthData: undefined as { name: string; email: string; isAuthenticated: boolean } | undefined,
-  location: undefined as { latitude: number; longitude: number; address?: string; city?: string; region?: string; country?: string } | undefined,
+  googleAuthData: undefined as
+    | { name: string; email: string; isAuthenticated: boolean }
+    | undefined,
+  location: undefined as
+    | {
+        latitude: number;
+        longitude: number;
+        address?: string;
+        city?: string;
+        region?: string;
+        country?: string;
+      }
+    | undefined,
   isLoading: false,
   isSubmitting: false,
   error: null,
@@ -117,10 +145,10 @@ export const useOnboardingStore = create<OnboardingStore>()(
   persist(
     immer((set, get) => ({
       ...getInitialState(),
-      
+
       // Transport data access
       transportData: undefined as TransportOnboardingData | undefined,
-      
+
       // Error and loading states
       isLoading: false,
       isSubmitting: false,
@@ -245,7 +273,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
         set((state) => {
           state.selectedProducts = products;
         }),
-      
+
       setSelectedProductsMetadata: (metadata: any[]) =>
         set((state) => {
           state.selectedProductsMetadata = metadata;
@@ -259,14 +287,14 @@ export const useOnboardingStore = create<OnboardingStore>()(
             ...specs,
           };
         }),
-      
+
       setSellerBases: (bases: any[]) =>
         set((state) => {
           if (state.sellerData) {
             state.sellerData.bases = bases;
           }
         }),
-      
+
       setSellerDistributions: (distributions: any[]) =>
         set((state) => {
           if (state.sellerData) {
@@ -274,7 +302,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
           }
         }),
 
-      // Buyer specifications  
+      // Buyer specifications
       updateBuyerSpecification: (productId: string, specs: any) =>
         set((state) => {
           state.buyerSpecifications[productId] = {
@@ -282,14 +310,14 @@ export const useOnboardingStore = create<OnboardingStore>()(
             ...specs,
           };
         }),
-      
+
       setBuyerBases: (bases: any[]) =>
         set((state) => {
           if (state.buyerData) {
             state.buyerData.bases = bases;
           }
         }),
-      
+
       setBuyerDistributions: (distributions: any[]) =>
         set((state) => {
           if (state.buyerData) {
@@ -368,7 +396,14 @@ export const useOnboardingStore = create<OnboardingStore>()(
         }),
 
       // Location
-      setLocation: (location: { latitude: number; longitude: number; address?: string; city?: string; region?: string; country?: string }) =>
+      setLocation: (location: {
+        latitude: number;
+        longitude: number;
+        address?: string;
+        city?: string;
+        region?: string;
+        country?: string;
+      }) =>
         set((state) => {
           state.location = location;
           console.log('Location updated:', location);
@@ -476,10 +511,10 @@ export const useOnboardingStore = create<OnboardingStore>()(
 
         // Map frontend roles to backend UserRole enum
         const roleMapping = {
-          'seller': 'FARMER',
-          'buyer': 'BUYER',
-          'transport': 'TRANSPORTER',
-          'admin': 'ADMIN'
+          seller: 'FARMER',
+          buyer: 'BUYER',
+          transport: 'TRANSPORTER',
+          admin: 'ADMIN',
         };
 
         const backendRole = roleMapping[state.selectedRole] || state.selectedRole.toUpperCase();
@@ -501,14 +536,14 @@ export const useOnboardingStore = create<OnboardingStore>()(
               companyInfo = {
                 companyName: '', // Will be filled from AuthModal form
               };
-              
+
               // Structure seller onboarding data from user inputs
               const sellerOnboardingData: any = {
                 // Products selected (just IDs from catalog)
                 selectedProductIds: state.selectedProducts,
-                
+
                 // Product specifications entered by user
-                productSpecifications: Object.keys(state.sellerSpecifications).map(productId => ({
+                productSpecifications: Object.keys(state.sellerSpecifications).map((productId) => ({
                   productId,
                   quantity: state.sellerSpecifications[productId].quantity || 0,
                   unit: state.sellerSpecifications[productId].unit || 'TON',
@@ -516,9 +551,9 @@ export const useOnboardingStore = create<OnboardingStore>()(
                   varieties: state.sellerSpecifications[productId].varieties || [],
                   qualitySpecs: state.sellerSpecifications[productId].qualitySpecs || [],
                 })),
-                
+
                 // Bases/locations created by user
-                bases: (state.sellerData.bases || []).map(base => ({
+                bases: (state.sellerData.bases || []).map((base) => ({
                   name: base.name,
                   type: base.type || 'WAREHOUSE',
                   address: base.address,
@@ -531,45 +566,47 @@ export const useOnboardingStore = create<OnboardingStore>()(
                   storageCapacity: base.capacity,
                   isPrimary: base.isPrimary || false,
                 })),
-                
+
                 // Distribution data (how much product at each base)
-                distributions: (state.sellerData.distributions || []).map(dist => ({
+                distributions: (state.sellerData.distributions || []).map((dist) => ({
                   productId: dist.productId,
-                  distributions: dist.distributions?.map((d: any) => ({
-                    baseId: d.baseId || d.baseName, // Use base identifier
-                    quantity: d.quantity,
-                    percentage: d.percentage,
-                  })) || [],
+                  distributions:
+                    dist.distributions?.map((d: any) => ({
+                      baseId: d.baseId || d.baseName, // Use base identifier
+                      quantity: d.quantity,
+                      percentage: d.percentage,
+                    })) || [],
                 })),
               };
-              
+
               (basePayload as any).onboardingData = sellerOnboardingData;
             }
             break;
-          
+
           case 'buyer':
             if (state.buyerData) {
               companyInfo = {
                 companyName: '', // Will be filled from AuthModal form
               };
-              
+
               // Structure buyer onboarding data from user inputs
               const buyerOnboardingData: any = {
                 // Products needed (just IDs from catalog)
                 requiredProductIds: state.selectedProducts,
-                
+
                 // Product requirements entered by user
-                productRequirements: Object.keys(state.buyerSpecifications).map(productId => ({
+                productRequirements: Object.keys(state.buyerSpecifications).map((productId) => ({
                   productId,
                   quantity: state.buyerSpecifications[productId].quantity || 0,
                   unit: state.buyerSpecifications[productId].unit || 'TON',
                   maxPricePerKilo: state.buyerSpecifications[productId].maxPrice,
                   deliveryFrequency: state.buyerSpecifications[productId].deliveryFrequency,
-                  qualityRequirements: state.buyerSpecifications[productId].qualityRequirements || [],
+                  qualityRequirements:
+                    state.buyerSpecifications[productId].qualityRequirements || [],
                 })),
-                
+
                 // Delivery locations/bases
-                bases: (state.buyerData.bases || []).map(base => ({
+                bases: (state.buyerData.bases || []).map((base) => ({
                   name: base.name,
                   type: base.type || 'DEPOT',
                   address: base.address,
@@ -582,28 +619,29 @@ export const useOnboardingStore = create<OnboardingStore>()(
                   storageCapacity: base.capacity,
                   isPrimary: base.isPrimary || false,
                 })),
-                
+
                 // Distribution requirements (how much needed at each base)
-                distributions: (state.buyerData.distributions || []).map(dist => ({
+                distributions: (state.buyerData.distributions || []).map((dist) => ({
                   productId: dist.productId,
-                  distributions: dist.distributions?.map((d: any) => ({
-                    baseId: d.baseId || d.baseName,
-                    quantity: d.quantity,
-                    percentage: d.percentage,
-                  })) || [],
+                  distributions:
+                    dist.distributions?.map((d: any) => ({
+                      baseId: d.baseId || d.baseName,
+                      quantity: d.quantity,
+                      percentage: d.percentage,
+                    })) || [],
                 })),
               };
-              
+
               (basePayload as any).onboardingData = buyerOnboardingData;
             }
             break;
-            
+
           case 'transport':
             if (state.transportData) {
               companyInfo = {
                 companyName: '', // Will be filled from AuthModal form
               };
-              
+
               // Structure transporter onboarding data from user inputs
               const transportOnboardingData: any = {
                 // Fleet information entered by user
@@ -613,23 +651,25 @@ export const useOnboardingStore = create<OnboardingStore>()(
                   totalCapacity: state.transportData.fleetInfo?.capacity?.total || 0,
                   capacityUnit: state.transportData.fleetInfo?.capacity?.unit || 'tons',
                 },
-                
+
                 // Base location for fleet
-                baseLocation: state.transportData.fleetInfo?.baseLocation ? {
-                  address: state.transportData.fleetInfo.baseLocation.address,
-                  city: state.transportData.fleetInfo.baseLocation.city,
-                  state: state.transportData.fleetInfo.baseLocation.state,
-                  country: state.transportData.fleetInfo.baseLocation.country,
-                  zipCode: state.transportData.fleetInfo.baseLocation.zipCode,
-                } : null,
-                
+                baseLocation: state.transportData.fleetInfo?.baseLocation
+                  ? {
+                      address: state.transportData.fleetInfo.baseLocation.address,
+                      city: state.transportData.fleetInfo.baseLocation.city,
+                      state: state.transportData.fleetInfo.baseLocation.state,
+                      country: state.transportData.fleetInfo.baseLocation.country,
+                      zipCode: state.transportData.fleetInfo.baseLocation.zipCode,
+                    }
+                  : null,
+
                 // Service area preferences
                 serviceArea: {
                   radius: state.transportData.serviceArea?.radius || 0,
                   preferredRegions: state.transportData.serviceArea?.preferredRegions || [],
                   coverage: state.transportData.serviceArea?.coverage || 'local',
                 },
-                
+
                 // Job preferences
                 jobPreferences: {
                   cargoTypes: state.transportData.jobPreferences?.cargoTypes || [],
@@ -637,7 +677,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
                   minDistance: state.transportData.jobPreferences?.minDistance || 0,
                 },
               };
-              
+
               (basePayload as any).onboardingData = transportOnboardingData;
             }
             break;
@@ -649,7 +689,10 @@ export const useOnboardingStore = create<OnboardingStore>()(
         };
       },
 
-      submitOnboarding: async (companyInfo?: CompanyInfo, userInfo?: { name: string; email: string; phone?: string }) => {
+      submitOnboarding: async (
+        companyInfo?: CompanyInfo,
+        userInfo?: { name: string; email: string; phone?: string }
+      ) => {
         const state = get();
         try {
           set((draft) => {
@@ -680,7 +723,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
           console.log('Submitting onboarding with payload:', finalPayload);
 
           const response = await authService.registerWithCompany(finalPayload);
-          
+
           // Update auth store with the response
           useAuthStore.getState().login(response.user, response.token, response.refreshToken);
 
@@ -692,10 +735,10 @@ export const useOnboardingStore = create<OnboardingStore>()(
 
           // Clear persisted onboarding data after successful submission
           await AsyncStorage.removeItem('onboarding-storage');
-          
         } catch (error: any) {
           console.error('Failed to submit onboarding data:', error);
-          const errorMessage = error?.response?.data?.message || error?.message || 'Failed to complete onboarding';
+          const errorMessage =
+            error?.response?.data?.message || error?.message || 'Failed to complete onboarding';
           set((draft) => {
             draft.error = errorMessage;
             draft.isSubmitting = false;
@@ -712,14 +755,14 @@ export const useOnboardingStore = create<OnboardingStore>()(
           });
 
           const response = await authService.googleAuth(googleToken);
-          
+
           // Create a User object with required fields
           const user = {
             ...response.user,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
-          
+
           // Update auth store
           useAuthStore.getState().login(user, response.accessToken, response.refreshToken);
 
@@ -728,7 +771,8 @@ export const useOnboardingStore = create<OnboardingStore>()(
           });
         } catch (error: any) {
           console.error('Google authentication failed:', error);
-          const errorMessage = error?.response?.data?.message || error?.message || 'Google authentication failed';
+          const errorMessage =
+            error?.response?.data?.message || error?.message || 'Google authentication failed';
           set((draft) => {
             draft.error = errorMessage;
             draft.isLoading = false;
@@ -772,28 +816,32 @@ export const useOnboardingStore = create<OnboardingStore>()(
       isStepValid: (step?: number): boolean => {
         const state = get();
         const targetStep = step ?? state.currentStep;
-        
+
         switch (state.selectedRole) {
           case 'seller':
             if (targetStep === 1) return (state.sellerData?.selectedProducts?.length ?? 0) > 0;
-            if (targetStep === 2) return state.sellerData?.selectedProducts?.every(p => 
-              p.varieties.length > 0 && p.quantity.amount > 0
-            ) ?? false;
+            if (targetStep === 2)
+              return (
+                state.sellerData?.selectedProducts?.every(
+                  (p) => p.varieties.length > 0 && p.quantity.amount > 0
+                ) ?? false
+              );
             break;
-            
+
           case 'buyer':
             if (targetStep === 1) return (state.buyerData?.requiredProducts?.length ?? 0) > 0;
-            if (targetStep === 2) return state.buyerData?.requiredProducts?.every(r => 
-              r.quantity.amount > 0
-            ) ?? false;
+            if (targetStep === 2)
+              return (
+                state.buyerData?.requiredProducts?.every((r) => r.quantity.amount > 0) ?? false
+              );
             break;
-            
+
           case 'transport':
             if (targetStep === 1) return (state.transportData?.fleetInfo?.vehicleCount ?? 0) > 0;
             if (targetStep === 2) return (state.transportData?.serviceArea?.radius ?? 0) > 0;
             break;
         }
-        
+
         return true;
       },
     })),

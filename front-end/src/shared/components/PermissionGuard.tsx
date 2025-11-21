@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Alert, Platform } from 'react-native';
 import * as Location from 'expo-location';
 import { MapPin, Shield, AlertCircle } from 'lucide-react-native';
-import { useOnboardingStore } from '../../stores/onboarding.store';
+import { useOnboardingStore } from '@stores/onboarding.store';
 
 interface PermissionGuardProps {
   children: React.ReactNode;
@@ -31,7 +31,7 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
   const checkLocationPermission = async () => {
     try {
       const { status } = await Location.getForegroundPermissionsAsync();
-      
+
       if (status === 'granted') {
         setLocationPermission(true);
         await getCurrentLocation();
@@ -47,7 +47,7 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
   const requestLocationPermission = async () => {
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
+
       if (status === 'granted') {
         setLocationPermission(true);
         await getCurrentLocation();
@@ -70,17 +70,17 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
-      
+
       // Get address from coordinates
       const [address] = await Location.reverseGeocodeAsync({
         latitude: location.coords.latitude,
         longitude: location.coords.longitude,
       });
-      
+
       const formattedAddress = address
         ? `${address.street || ''} ${address.city || ''} ${address.region || ''} ${address.country || ''}`.trim()
         : 'Location detected';
-      
+
       // Store location in the onboarding store
       setLocation({
         latitude: location.coords.latitude,
@@ -112,41 +112,33 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
             <View className="bg-emerald-500/20 p-4 rounded-full mb-4">
               <MapPin size={48} color="#10B981" />
             </View>
-            <Text className="text-white text-xl font-bold mb-2">
-              Enable Location Access
-            </Text>
+            <Text className="text-white text-xl font-bold mb-2">Enable Location Access</Text>
             <Text className="text-gray-400 text-center text-sm">
               We need your location to show accurate prices and connect you with nearby traders
             </Text>
           </View>
-          
+
           <View className="bg-blue-500/10 p-3 rounded-lg mb-4">
             <View className="flex-row items-start">
               <AlertCircle size={16} color="#3B82F6" />
               <View className="flex-1 ml-2">
                 <Text className="text-blue-400 text-xs">
-                  Your location data is only used to provide relevant market information and is never shared without your consent.
+                  Your location data is only used to provide relevant market information and is
+                  never shared without your consent.
                 </Text>
               </View>
             </View>
           </View>
-          
+
           <TouchableOpacity
             onPress={requestLocationPermission}
             className="bg-emerald-500 py-3 rounded-lg"
           >
-            <Text className="text-white text-center font-semibold">
-              Enable Location
-            </Text>
+            <Text className="text-white text-center font-semibold">Enable Location</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity
-            onPress={() => setLocationPermission(true)}
-            className="mt-3 py-3"
-          >
-            <Text className="text-gray-400 text-center text-sm">
-              Continue without location
-            </Text>
+
+          <TouchableOpacity onPress={() => setLocationPermission(true)} className="mt-3 py-3">
+            <Text className="text-gray-400 text-center text-sm">Continue without location</Text>
           </TouchableOpacity>
         </View>
       </View>

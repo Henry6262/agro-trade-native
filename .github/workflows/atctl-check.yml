@@ -1,0 +1,22 @@
+name: atctl-check
+
+on:
+  push:
+    branches: ["*"]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: |
+          npm install --prefix backend
+          npm install --prefix admin-dashboard
+          npm install --prefix front-end
+      - name: Run atctl check
+        run: node scripts/atctl.mjs check --auto

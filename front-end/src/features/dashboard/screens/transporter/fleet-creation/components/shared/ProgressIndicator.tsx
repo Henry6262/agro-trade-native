@@ -24,13 +24,13 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
                 index < currentStep
                   ? 'bg-green-500'
                   : index === currentStep
-                  ? 'bg-blue-500'
-                  : 'bg-neutral-700'
+                    ? 'bg-blue-500'
+                    : 'bg-neutral-700'
               }`}
             >
               <Text className="text-white text-xs font-bold">{index + 1}</Text>
             </View>
-            
+
             {/* Connector Line */}
             {index < totalSteps - 1 && (
               <View
@@ -42,7 +42,7 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
           </React.Fragment>
         ))}
       </View>
-      
+
       {/* Step Label */}
       {stepLabels[currentStep] && (
         <Text className="text-center text-sm text-neutral-400">

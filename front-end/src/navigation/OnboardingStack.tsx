@@ -18,8 +18,6 @@ export default function OnboardingStack() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: '#ffffff' },
-        
-        
       }}
     >
       <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />

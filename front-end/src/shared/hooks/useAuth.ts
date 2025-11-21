@@ -61,7 +61,10 @@ export const useAuth = () => {
 
   // Change password mutation
   const changePasswordMutation = useMutation({
-    mutationFn: ({ currentPassword, newPassword }: {
+    mutationFn: ({
+      currentPassword,
+      newPassword,
+    }: {
       currentPassword: string;
       newPassword: string;
     }) => authService.changePassword(currentPassword, newPassword),
@@ -70,7 +73,7 @@ export const useAuth = () => {
   // Get user profile query
   const useUserProfile = () => {
     const { isAuthenticated } = useAuthStore();
-    
+
     return useQuery({
       queryKey: ['user'],
       queryFn: authService.getProfile,
@@ -88,10 +91,10 @@ export const useAuth = () => {
     resetPassword: resetPasswordMutation,
     updateProfile: updateProfileMutation,
     changePassword: changePasswordMutation,
-    
+
     // Hooks
     useUserProfile,
-    
+
     // State
     ...useAuthStore(),
   };

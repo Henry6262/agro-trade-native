@@ -27,7 +27,9 @@ export const WebLayoutFix: React.FC<WebLayoutFixProps> = ({ children }) => {
         });
 
         // Fix the onboarding container specifically
-        const onboardingContainer = document.querySelector('[style*="flex: 1"][style*="background-color: rgb(17, 24, 39)"]');
+        const onboardingContainer = document.querySelector(
+          '[style*="flex: 1"][style*="background-color: rgb(17, 24, 39)"]'
+        );
         if (onboardingContainer) {
           const el = onboardingContainer as HTMLElement;
           el.style.height = '100vh';
@@ -46,7 +48,9 @@ export const WebLayoutFix: React.FC<WebLayoutFixProps> = ({ children }) => {
         }
 
         // Fix the main content area to account for sidebar
-        const mainContent = document.querySelector('[style*="flex: 1"]:has(.r-WebkitOverflowScrolling-150rngu)');
+        const mainContent = document.querySelector(
+          '[style*="flex: 1"]:has(.r-WebkitOverflowScrolling-150rngu)'
+        );
         if (mainContent) {
           const el = mainContent as HTMLElement;
           el.style.height = '100vh';
@@ -62,7 +66,9 @@ export const WebLayoutFix: React.FC<WebLayoutFixProps> = ({ children }) => {
         });
 
         // Fix the bottom navigation to be properly fixed
-        const bottomNav = document.querySelector('[style*="position: absolute"][style*="bottom: 0"][style*="z-index: 9999"]');
+        const bottomNav = document.querySelector(
+          '[style*="position: absolute"][style*="bottom: 0"][style*="z-index: 9999"]'
+        );
         if (bottomNav) {
           const el = bottomNav as HTMLElement;
           el.style.position = 'fixed';

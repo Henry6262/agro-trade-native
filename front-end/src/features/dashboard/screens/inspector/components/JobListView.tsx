@@ -16,7 +16,7 @@ export const JobListView: React.FC<JobListViewProps> = ({
         onPress={() => onJobSelect?.(item)}
         showAcceptButton={true}
         onAccept={(jobId) => {
-          const job = jobs.find(j => j.id === jobId);
+          const job = jobs.find((j) => j.id === jobId);
           if (job) onJobSelect?.(job);
         }}
       />

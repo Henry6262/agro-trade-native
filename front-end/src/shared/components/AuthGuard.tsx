@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
-import { useAuthStore } from '../../stores/auth.store';
+import { useAuthStore } from '@stores/auth.store';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -59,7 +59,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   if (requireAuth && isAuthenticated) {
     return <>{children}</>;
   }
-  
+
   if (!requireAuth && !isAuthenticated) {
     return <>{children}</>;
   }

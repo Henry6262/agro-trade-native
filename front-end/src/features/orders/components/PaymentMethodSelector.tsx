@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { PaymentMethod } from '../../../shared/types';
-import { Card } from '../../../shared/components';
+import { PaymentMethod } from '@shared/types';
+import { Card } from '@shared/components/Card';
 
 interface PaymentMethodSelectorProps {
   selectedMethod: PaymentMethod | null;
@@ -42,10 +42,8 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 }) => {
   return (
     <Card>
-      <Text className="text-lg font-semibold text-gray-900 mb-4">
-        Payment Method
-      </Text>
-      
+      <Text className="text-lg font-semibold text-gray-900 mb-4">Payment Method</Text>
+
       <View className="space-y-3">
         {paymentMethods.map((method) => (
           <TouchableOpacity
@@ -59,14 +57,10 @@ export const PaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           >
             <View className="flex-row items-center justify-between">
               <View className="flex-1">
-                <Text className="text-base font-semibold text-gray-900 mb-1">
-                  {method.label}
-                </Text>
-                <Text className="text-sm text-gray-600">
-                  {method.description}
-                </Text>
+                <Text className="text-base font-semibold text-gray-900 mb-1">{method.label}</Text>
+                <Text className="text-sm text-gray-600">{method.description}</Text>
               </View>
-              
+
               <View
                 className={`w-5 h-5 rounded-full border-2 ${
                   selectedMethod === method.value

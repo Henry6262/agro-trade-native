@@ -1,65 +1,73 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, Alert, TextInput } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
-import type { RootStackParamList } from '../../../navigation/types'
-import { Ionicons } from '@expo/vector-icons'
-import { LoadingSpinner } from '../../../shared/components'
-import { apiClient } from '../../../services/api'
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+  Alert,
+  TextInput,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../../navigation/types';
+import { Ionicons } from '@expo/vector-icons';
+import { LoadingSpinner } from '../../../shared/components';
+import { apiClient } from '@services/api';
 
-type AdminNavigationProp = NativeStackNavigationProp<RootStackParamList>
+type AdminNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface PricingZone {
-  id: string
-  name: string
-  description?: string
-  color?: string
-  marketSize?: string
-  transportAccess?: string
-  storageCapacity?: string
-  isActive: boolean
-  cities: Array<{
-    id: string
+  id: string;
+  name: string;
+  description?: string;
+  color?: string;
+  marketSize?: string;
+  transportAccess?: string;
+  storageCapacity?: string;
+  isActive: boolean;
+  cities: {
+    id: string;
     city: {
-      id: string
-      name: string
+      id: string;
+      name: string;
       region: {
-        name: string
+        name: string;
         country: {
-          name: string
-          code: string
-          flagEmoji: string
-        }
-      }
-    }
-    isDefault: boolean
-    priority: number
-  }>
-  productPrices: Array<{
-    id: string
+          name: string;
+          code: string;
+          flagEmoji: string;
+        };
+      };
+    };
+    isDefault: boolean;
+    priority: number;
+  }[];
+  productPrices: {
+    id: string;
     product: {
-      id: string
-      displayName: string
-      category: string
-    }
-    minPrice: number
-    maxPrice: number
-    currency: string
-    unit: string
-  }>
+      id: string;
+      displayName: string;
+      category: string;
+    };
+    minPrice: number;
+    maxPrice: number;
+    currency: string;
+    unit: string;
+  }[];
   _count: {
-    cities: number
-    productPrices: number
-  }
+    cities: number;
+    productPrices: number;
+  };
 }
 
 export function AdminPricingZonesScreen() {
-  const navigation = useNavigation<AdminNavigationProp>()
-  const [zones, setZones] = useState<PricingZone[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isCreating, setIsCreating] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [showCreateForm, setShowCreateForm] = useState(false)
+  const navigation = useNavigation<AdminNavigationProp>();
+  const [zones, setZones] = useState<PricingZone[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [newZone, setNewZone] = useState({
     name: '',
     description: '',
@@ -67,7 +75,7 @@ export function AdminPricingZonesScreen() {
     marketSize: '',
     transportAccess: '',
     storageCapacity: '',
-  })
+  });
 
   const zoneColors = [
     '#3B82F6', // Blue
@@ -79,35 +87,35 @@ export function AdminPricingZonesScreen() {
     '#84CC16', // Lime
     '#F97316', // Orange
     '#EC4899', // Pink
-  ]
+  ];
 
   useEffect(() => {
-    fetchPricingZones()
-  }, [])
+    fetchPricingZones();
+  }, []);
 
   const fetchPricingZones = async () => {
     try {
-      setIsLoading(true)
-      const response = await apiClient.get('/admin/pricing-zones')
-      setZones(response.data.data)
+      setIsLoading(true);
+      const response = await apiClient.get('/admin/pricing-zones');
+      setZones(response.data.data);
     } catch (error) {
-      console.error('Failed to fetch pricing zones:', error)
-      Alert.alert('Error', 'Failed to load pricing zones')
+      console.error('Failed to fetch pricing zones:', error);
+      Alert.alert('Error', 'Failed to load pricing zones');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const createPricingZone = async () => {
     if (!newZone.name.trim()) {
-      Alert.alert('Error', 'Zone name is required')
-      return
+      Alert.alert('Error', 'Zone name is required');
+      return;
     }
 
     try {
-      setIsCreating(true)
-      const response = await apiClient.post('/admin/pricing-zones', newZone)
-      setZones([...zones, response.data.data])
+      setIsCreating(true);
+      const response = await apiClient.post('/admin/pricing-zones', newZone);
+      setZones([...zones, response.data.data]);
       setNewZone({
         name: '',
         description: '',
@@ -115,32 +123,30 @@ export function AdminPricingZonesScreen() {
         marketSize: '',
         transportAccess: '',
         storageCapacity: '',
-      })
-      setShowCreateForm(false)
-      Alert.alert('Success', 'Pricing zone created successfully')
+      });
+      setShowCreateForm(false);
+      Alert.alert('Success', 'Pricing zone created successfully');
     } catch (error: any) {
-      console.error('Failed to create pricing zone:', error)
-      Alert.alert('Error', error.response?.data?.message || 'Failed to create pricing zone')
+      console.error('Failed to create pricing zone:', error);
+      Alert.alert('Error', error.response?.data?.message || 'Failed to create pricing zone');
     } finally {
-      setIsCreating(false)
+      setIsCreating(false);
     }
-  }
+  };
 
   const toggleZoneStatus = async (zoneId: string, currentStatus: boolean) => {
     try {
-      const response = await apiClient.put(`/admin/pricing-zones/${zoneId}`, {
-        isActive: !currentStatus
-      })
-      setZones(zones.map(zone => 
-        zone.id === zoneId 
-          ? { ...zone, isActive: !currentStatus }
-          : zone
-      ))
+      await apiClient.put(`/admin/pricing-zones/${zoneId}`, {
+        isActive: !currentStatus,
+      });
+      setZones(
+        zones.map((zone) => (zone.id === zoneId ? { ...zone, isActive: !currentStatus } : zone))
+      );
     } catch (error) {
-      console.error('Failed to update zone status:', error)
-      Alert.alert('Error', 'Failed to update zone status')
+      console.error('Failed to update zone status:', error);
+      Alert.alert('Error', 'Failed to update zone status');
     }
-  }
+  };
 
   const deleteZone = async (zoneId: string) => {
     Alert.alert(
@@ -153,23 +159,27 @@ export function AdminPricingZonesScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await apiClient.delete(`/admin/pricing-zones/${zoneId}`)
-              setZones(zones.filter(zone => zone.id !== zoneId))
-              Alert.alert('Success', 'Pricing zone deleted successfully')
+              await apiClient.delete(`/admin/pricing-zones/${zoneId}`);
+              setZones(zones.filter((zone) => zone.id !== zoneId));
+              Alert.alert('Success', 'Pricing zone deleted successfully');
             } catch (error: any) {
-              console.error('Failed to delete zone:', error)
-              Alert.alert('Error', error.response?.data?.message || 'Failed to delete pricing zone')
+              console.error('Failed to delete zone:', error);
+              Alert.alert(
+                'Error',
+                error.response?.data?.message || 'Failed to delete pricing zone'
+              );
             }
           },
         },
       ]
-    )
-  }
+    );
+  };
 
-  const filteredZones = zones.filter(zone =>
-    zone.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    zone.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredZones = zones.filter(
+    (zone) =>
+      zone.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      zone.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (isLoading) {
     return (
@@ -177,7 +187,7 @@ export function AdminPricingZonesScreen() {
         <LoadingSpinner />
         <Text className="text-white mt-4">Loading pricing zones...</Text>
       </SafeAreaView>
-    )
+    );
   }
 
   return (
@@ -185,18 +195,18 @@ export function AdminPricingZonesScreen() {
       <View className="flex-1">
         {/* Header */}
         <View className="flex-row items-center justify-between p-6 border-b border-gray-700">
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => navigation.goBack()}
             className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center"
           >
             <Ionicons name="chevron-back" size={20} color="#9CA3AF" />
           </TouchableOpacity>
-          
+
           <View className="flex-1 mx-4">
             <Text className="text-white text-xl font-semibold">Pricing Zones</Text>
             <Text className="text-gray-400 text-sm">Manage regional pricing zones</Text>
           </View>
-          
+
           <TouchableOpacity
             onPress={() => setShowCreateForm(true)}
             className="bg-blue-600 px-4 py-2 rounded-lg flex-row items-center"
@@ -285,15 +295,19 @@ export function AdminPricingZonesScreen() {
 
               <View>
                 <Text className="text-gray-300 text-sm mb-2">Zone Color</Text>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row space-x-2">
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  className="flex-row space-x-2"
+                >
                   {zoneColors.map((color) => (
                     <TouchableOpacity
                       key={color}
                       onPress={() => setNewZone({ ...newZone, color })}
                       className="w-8 h-8 rounded-full border-2"
-                      style={{ 
+                      style={{
                         backgroundColor: color,
-                        borderColor: newZone.color === color ? '#FFF' : 'transparent'
+                        borderColor: newZone.color === color ? '#FFF' : 'transparent',
                       }}
                     />
                   ))}
@@ -324,10 +338,7 @@ export function AdminPricingZonesScreen() {
         {/* Zones List */}
         <ScrollView className="flex-1 px-6">
           {filteredZones.map((zone) => (
-            <View
-              key={zone.id}
-              className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700"
-            >
+            <View key={zone.id} className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700">
               {/* Zone Header */}
               <View className="flex-row items-start justify-between mb-3">
                 <View className="flex-1">
@@ -336,23 +347,23 @@ export function AdminPricingZonesScreen() {
                       className="w-4 h-4 rounded-full mr-3"
                       style={{ backgroundColor: zone.color || '#3B82F6' }}
                     />
-                    <Text className="text-white font-semibold text-lg flex-1">
-                      {zone.name}
-                    </Text>
-                    <View className={`px-2 py-1 rounded-full ${
-                      zone.isActive ? 'bg-green-900' : 'bg-red-900'
-                    }`}>
-                      <Text className={`text-xs font-medium ${
-                        zone.isActive ? 'text-green-300' : 'text-red-300'
-                      }`}>
+                    <Text className="text-white font-semibold text-lg flex-1">{zone.name}</Text>
+                    <View
+                      className={`px-2 py-1 rounded-full ${
+                        zone.isActive ? 'bg-green-900' : 'bg-red-900'
+                      }`}
+                    >
+                      <Text
+                        className={`text-xs font-medium ${
+                          zone.isActive ? 'text-green-300' : 'text-red-300'
+                        }`}
+                      >
                         {zone.isActive ? 'Active' : 'Inactive'}
                       </Text>
                     </View>
                   </View>
                   {zone.description && (
-                    <Text className="text-gray-400 text-sm mb-2">
-                      {zone.description}
-                    </Text>
+                    <Text className="text-gray-400 text-sm mb-2">{zone.description}</Text>
                   )}
                 </View>
               </View>
@@ -386,18 +397,14 @@ export function AdminPricingZonesScreen() {
                         <Text className="text-xs mr-1">
                           {cityZone.city.region.country.flagEmoji}
                         </Text>
-                        <Text className="text-gray-300 text-xs">
-                          {cityZone.city.name}
-                        </Text>
+                        <Text className="text-gray-300 text-xs">{cityZone.city.name}</Text>
                         {cityZone.isDefault && (
                           <View className="w-2 h-2 bg-blue-400 rounded-full ml-1" />
                         )}
                       </View>
                     ))}
                     {zone.cities.length > 3 && (
-                      <Text className="text-gray-500 text-xs">
-                        +{zone.cities.length - 3} more
-                      </Text>
+                      <Text className="text-gray-500 text-xs">+{zone.cities.length - 3} more</Text>
                     )}
                   </View>
                 </View>
@@ -412,7 +419,7 @@ export function AdminPricingZonesScreen() {
                   <Ionicons name="eye-outline" size={16} color="white" />
                   <Text className="text-white font-medium ml-2">View Details</Text>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   onPress={() => toggleZoneStatus(zone.id, zone.isActive)}
                   className={`px-4 py-2 rounded-lg ${
@@ -441,15 +448,14 @@ export function AdminPricingZonesScreen() {
                 {searchTerm ? 'No zones found' : 'No pricing zones yet'}
               </Text>
               <Text className="text-gray-500 text-center mt-2 px-8">
-                {searchTerm 
+                {searchTerm
                   ? 'Try adjusting your search terms'
-                  : 'Create your first pricing zone to get started'
-                }
+                  : 'Create your first pricing zone to get started'}
               </Text>
             </View>
           )}
         </ScrollView>
       </View>
     </SafeAreaView>
-  )
+  );
 }

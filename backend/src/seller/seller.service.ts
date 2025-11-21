@@ -1,6 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateListingDto, ListingStatus, OfferType } from './dto/create-listing.dto';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
+import {
+  CreateListingDto,
+  ListingStatus,
+  OfferType,
+} from "./dto/create-listing.dto";
+import {
+  SellerTimelineEventDto,
+  SellerTimelineResponseDto,
+} from "./dto/timeline.dto";
 
 @Injectable()
 export class SellerService {
@@ -14,7 +26,9 @@ export class SellerService {
       });
 
       if (!product) {
-        throw new NotFoundException(`Product with ID ${createListingDto.productId} not found`);
+        throw new NotFoundException(
+          `Product with ID ${createListingDto.productId} not found`,
+        );
       }
 
       // First, create or get the address
@@ -23,15 +37,15 @@ export class SellerService {
         // Find or create region first
         let region = await this.prisma.region.findFirst({
           where: {
-            name: createListingDto.location.region || 'Default Region',
+            name: createListingDto.location.region || "Default Region",
           },
         });
 
         if (!region) {
           region = await this.prisma.region.create({
             data: {
-              name: createListingDto.location.region || 'Default Region',
-              country: createListingDto.location.country || 'Unknown',
+              name: createListingDto.location.region || "Default Region",
+              country: createListingDto.location.country || "Unknown",
             },
           });
         }
@@ -39,7 +53,7 @@ export class SellerService {
         // Find or create city
         let city = await this.prisma.city.findFirst({
           where: {
-            name: createListingDto.location.city || 'Unknown',
+            name: createListingDto.location.city || "Unknown",
             regionId: region.id,
           },
         });
@@ -47,7 +61,7 @@ export class SellerService {
         if (!city) {
           city = await this.prisma.city.create({
             data: {
-              name: createListingDto.location.city || 'Unknown',
+              name: createListingDto.location.city || "Unknown",
               regionId: region.id,
             },
           });
@@ -57,8 +71,8 @@ export class SellerService {
         const address = await this.prisma.address.create({
           data: {
             userId,
-            addressType: 'FARM',
-            label: 'Primary Location',
+            addressType: "FARM",
+            label: "Primary Location",
             street: createListingDto.location.address,
             cityId: city.id,
             country: createListingDto.location.country,
@@ -75,10 +89,10 @@ export class SellerService {
           sellerId: userId,
           productId: createListingDto.productId,
           quantity: createListingDto.quantity,
-          unit: (createListingDto.unit?.toUpperCase() as any) || 'TON',
+          unit: (createListingDto.unit?.toUpperCase() as any) || "TON",
           askingPrice: createListingDto.priceExpectation?.max || null,
           addressId,
-          status: createListingDto.status === 'active' ? 'ACTIVE' : 'PENDING',
+          status: createListingDto.status === "active" ? "ACTIVE" : "PENDING",
         },
         include: {
           product: true,
@@ -92,23 +106,34 @@ export class SellerService {
       });
 
       // If it's a custom offer, store specifications and create notification
-      if (createListingDto.offerType === OfferType.CUSTOM_OFFER && createListingDto.specifications) {
+      if (
+        createListingDto.offerType === OfferType.CUSTOM_OFFER &&
+        createListingDto.specifications
+      ) {
         // Get all specification types
         const specTypes = await this.prisma.specificationType.findMany();
 
         // Store specifications as ListingSpec entries
-        const specPromises = Object.entries(createListingDto.specifications).map(async ([key, value]) => {
+        const specPromises = Object.entries(
+          createListingDto.specifications,
+        ).map(async ([key, value]) => {
           // Try to find matching specification type by code or name
-          let specType = specTypes.find(st => st.code === key || st.name === key);
-          
+          let specType = specTypes.find(
+            (st) => st.code === key || st.name === key,
+          );
+
           // If not found, create a new specification type
           if (!specType) {
             specType = await this.prisma.specificationType.create({
               data: {
                 code: key,
                 name: key,
-                dataType: typeof value === 'number' ? 'NUMBER' : 
-                         typeof value === 'boolean' ? 'BOOLEAN' : 'TEXT',
+                dataType:
+                  typeof value === "number"
+                    ? "NUMBER"
+                    : typeof value === "boolean"
+                      ? "BOOLEAN"
+                      : "TEXT",
               },
             });
           }
@@ -119,10 +144,10 @@ export class SellerService {
           };
 
           // Store value based on data type
-          if (specType.dataType === 'NUMBER') {
+          if (specType.dataType === "NUMBER") {
             specData.valueNumber = parseFloat(String(value));
-          } else if (specType.dataType === 'BOOLEAN') {
-            specData.valueBool = value === 'true' || value === true;
+          } else if (specType.dataType === "BOOLEAN") {
+            specData.valueBool = value === "true" || value === true;
           } else {
             specData.valueText = String(value);
           }
@@ -131,28 +156,182 @@ export class SellerService {
             data: specData,
           });
         });
-        
-        const results = await Promise.all(specPromises);
-        const validSpecs = results.filter(r => r !== null);
-        
+
+        await Promise.all(specPromises);
+
         // Create notification for admin review
         await this.createCustomOfferNotification(listing.id, userId);
       }
 
       return {
         success: true,
-        message: createListingDto.offerType === OfferType.CUSTOM_OFFER 
-          ? 'Custom offer submitted successfully. You will receive a quote within 24 hours.'
-          : 'Listing created successfully and is now visible on the marketplace.',
+        message:
+          createListingDto.offerType === OfferType.CUSTOM_OFFER
+            ? "Custom offer submitted successfully. You will receive a quote within 24 hours."
+            : "Listing created successfully and is now visible on the marketplace.",
         data: listing,
       };
     } catch (error) {
-      console.error('Error creating listing:', error);
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      console.error("Error creating listing:", error);
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
-      throw new BadRequestException('Failed to create listing. Please try again.');
+      throw new BadRequestException(
+        "Failed to create listing. Please try again.",
+      );
     }
+  }
+
+  async getAllSellerListings(buyListingId?: string, tradeOperationId?: string) {
+    const tradeOperation = tradeOperationId
+      ? await this.prisma.tradeOperation.findUnique({
+          where: { id: tradeOperationId },
+          include: {
+            buyListing: true,
+            sellers: {
+              include: {
+                negotiation: true,
+              },
+            },
+          },
+        })
+      : buyListingId
+        ? await this.prisma.tradeOperation.findUnique({
+            where: { buyListingId },
+            include: {
+              buyListing: true,
+              sellers: {
+                include: {
+                  negotiation: true,
+                },
+              },
+            },
+          })
+        : null;
+
+    const buyListing = buyListingId
+      ? await this.prisma.buyListing.findUnique({
+          where: { id: buyListingId },
+        })
+      : tradeOperation?.buyListing || null;
+
+    const where: any = {};
+    if (buyListing) {
+      where.productId = buyListing.productId;
+      where.status = "ACTIVE";
+      where.quantity = {
+        gt: 0,
+      };
+
+      if (buyListing.maxPricePerUnit) {
+        where.askingPrice = {
+          lte: buyListing.maxPricePerUnit,
+        };
+      }
+    }
+
+    const listings = await this.prisma.saleListing.findMany({
+      where: Object.keys(where).length > 0 ? where : undefined,
+      include: {
+        product: {
+          select: {
+            id: true,
+            name: true,
+            displayName: true,
+            category: true,
+            description: true,
+            image: true,
+          },
+        },
+        seller: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            company: {
+              select: {
+                id: true,
+                legalName: true,
+                registrationNumber: true,
+                phoneNumber: true,
+                email: true,
+              },
+            },
+          },
+        },
+        address: {
+          select: {
+            id: true,
+            street: true,
+            country: true,
+            latitude: true,
+            longitude: true,
+            city: {
+              select: {
+                id: true,
+                name: true,
+                region: {
+                  select: {
+                    id: true,
+                    name: true,
+                    country: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        specifications: {
+          include: {
+            specificationType: {
+              select: {
+                id: true,
+                code: true,
+                name: true,
+                unit: true,
+                dataType: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    const tradeSellerMap = new Map<
+      string,
+      {
+        status: string;
+        negotiationStatus?: string;
+      }
+    >();
+
+    if (tradeOperation?.sellers) {
+      tradeOperation.sellers.forEach((seller) => {
+        tradeSellerMap.set(seller.saleListingId, {
+          status: seller.status,
+          negotiationStatus: seller.negotiation?.status,
+        });
+      });
+    }
+
+    return listings.map((listing) => {
+      const tradeContext = tradeSellerMap.get(listing.id);
+      if (!tradeContext) {
+        return listing;
+      }
+
+      return {
+        ...listing,
+        tradeSellerStatus: tradeContext.status,
+        negotiationStatus: tradeContext.negotiationStatus,
+      };
+    });
   }
 
   async getSellerListings(userId: string) {
@@ -168,7 +347,7 @@ export class SellerService {
         specifications: true,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
@@ -197,33 +376,36 @@ export class SellerService {
         },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
     // Transform listings to match frontend SellerProduct interface
-    return listings.map(listing => ({
+    return listings.map((listing) => ({
       id: listing.id,
       name: listing.product.name,
-      category: listing.product.category || 'General',
-      subcategory: '', // Product model doesn't have subcategory
+      category: listing.product.category || "General",
+      subcategory: "", // Product model doesn't have subcategory
       quantity: listing.quantity,
       unit: listing.unit.toLowerCase(),
       pricePerUnit: listing.askingPrice || 0,
-      currency: 'USD',
+      currency: "USD",
       location: {
-        address: listing.address?.street || '',
-        city: listing.address?.city?.name || '',
-        state: listing.address?.city?.region?.name || '',
-        country: listing.address?.country || '',
-        coordinates: listing.address?.latitude && listing.address?.longitude ? {
-          latitude: listing.address.latitude,
-          longitude: listing.address.longitude,
-        } : undefined,
+        address: listing.address?.street || "",
+        city: listing.address?.city?.name || "",
+        state: listing.address?.city?.region?.name || "",
+        country: listing.address?.country || "",
+        coordinates:
+          listing.address?.latitude && listing.address?.longitude
+            ? {
+                latitude: listing.address.latitude,
+                longitude: listing.address.longitude,
+              }
+            : undefined,
       },
       qualityTags: this.extractQualityTags(listing.specifications),
       certifications: [], // TODO: Add certifications support
-      description: listing.product.description || '',
+      description: listing.product.description || "",
       images: [], // TODO: Add images support
       status: this.mapListingStatus(listing.status),
       isVerified: false, // SaleListing model doesn't have isVerified field
@@ -236,57 +418,276 @@ export class SellerService {
 
   private extractQualityTags(specifications: any[]): string[] {
     const tags: string[] = [];
-    
-    specifications?.forEach(spec => {
+
+    specifications?.forEach((spec) => {
       if (spec.specificationType) {
-        const { name, code } = spec.specificationType;
-        let value = '';
-        
+        const { name } = spec.specificationType;
+        let value = "";
+
         if (spec.valueText) value = spec.valueText;
         else if (spec.valueNumber !== null) value = spec.valueNumber.toString();
-        else if (spec.valueBool !== null) value = spec.valueBool ? 'Yes' : 'No';
-        
+        else if (spec.valueBool !== null) value = spec.valueBool ? "Yes" : "No";
+
         if (value) {
           // Format as tag (e.g., "Organic", "Protein 15%", etc.)
-          if (name.toLowerCase().includes('organic') && spec.valueBool) {
-            tags.push('Organic');
-          } else if (name.toLowerCase().includes('gmo') && !spec.valueBool) {
-            tags.push('Non-GMO');
-          } else if (name.toLowerCase().includes('protein') && spec.valueNumber) {
+          if (name.toLowerCase().includes("organic") && spec.valueBool) {
+            tags.push("Organic");
+          } else if (name.toLowerCase().includes("gmo") && !spec.valueBool) {
+            tags.push("Non-GMO");
+          } else if (
+            name.toLowerCase().includes("protein") &&
+            spec.valueNumber
+          ) {
             tags.push(`Protein ${spec.valueNumber}%`);
-          } else if (name.toLowerCase().includes('grade')) {
+          } else if (name.toLowerCase().includes("grade")) {
             tags.push(`Grade ${value}`);
-          } else if (value !== 'No' && value !== 'false') {
+          } else if (value !== "No" && value !== "false") {
             tags.push(`${name}: ${value}`);
           }
         }
       }
     });
-    
+
     return tags;
   }
 
-  private mapListingStatus(status: string): 'active' | 'inactive' | 'sold_out' {
+  private mapListingStatus(status: string): "active" | "inactive" | "sold_out" {
     switch (status) {
-      case 'ACTIVE':
-        return 'active';
-      case 'EXPIRED':
-        return 'sold_out';
-      case 'PENDING':
+      case "ACTIVE":
+        return "active";
+      case "EXPIRED":
+        return "sold_out";
+      case "PENDING":
       default:
-        return 'inactive';
+        return "inactive";
     }
   }
 
-  // Get offers for seller's products (placeholder - implement when offer system is ready)
+  // Get offers for seller's products - fetch real negotiations
   async getSellerOffers(userId: string) {
-    // TODO: Implement proper offer fetching from database
-    // For now, return empty array to prevent frontend errors
-    return [];
+    try {
+      // Get all negotiations where this seller is involved
+      const negotiations = await this.prisma.offerNegotiation.findMany({
+        where: {
+          tradeSeller: {
+            sellerId: userId,
+          },
+        },
+        include: {
+          tradeSeller: {
+            include: {
+              seller: true,
+              saleListing: {
+                include: {
+                  product: true,
+                  address: true,
+                },
+              },
+            },
+          },
+          tradeOperation: {
+            include: {
+              admin: true,
+              buyListing: {
+                include: {
+                  product: true,
+                  buyer: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // Transform negotiations to match the frontend interface
+      const offers = negotiations.map((negotiation: any) => {
+        const tradeOperation = negotiation.tradeOperation;
+        const buyer = tradeOperation.buyListing?.buyer;
+        const buyListing = tradeOperation.buyListing;
+        const product =
+          buyListing?.product || negotiation.tradeSeller.saleListing?.product;
+
+        // Calculate hours until expiry
+        const expiryDate = new Date(negotiation.expiresAt);
+        const now = new Date();
+        const hoursUntilExpiry = Math.max(
+          0,
+          Math.ceil((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60)),
+        );
+        const isExpiringSoon = hoursUntilExpiry <= 24;
+
+        // Calculate estimated profit based on offer vs listing price
+        const currentPrice = negotiation.currentOffer?.price || 0;
+        const listingPrice =
+          negotiation.tradeSeller.saleListing?.askingPrice || 0;
+        const quantity = negotiation.currentOffer?.quantity || 0;
+        const estimatedProfit = (currentPrice - listingPrice) * quantity;
+
+        // Get buyer location info
+        const buyerLocation = buyListing?.address?.city
+          ? `${buyListing.address.city.name}, ${buyListing.address.city.region?.name || "Unknown"}`
+          : "Location not specified";
+
+        // Get quality requirements from buy listing or trade operation
+        const qualityRequirements = this.extractQualityRequirements(buyListing);
+
+        // Format for frontend
+        return {
+          id: negotiation.id,
+          product: product?.name || "Unknown Product",
+          quantity: negotiation.currentOffer?.quantity || 0,
+          offeredPricePerTon: negotiation.currentOffer?.price || 0,
+          totalValue:
+            (negotiation.currentOffer?.price || 0) *
+            (negotiation.currentOffer?.quantity || 0),
+          buyer: buyer?.name || "Unknown Buyer",
+          buyerLocation,
+          buyerFlag: this.getCountryFlag(buyListing?.address?.country),
+          adminNote:
+            negotiation.currentOffer?.terms || "No additional notes provided.",
+          deadline: negotiation.expiresAt,
+          responseTime: `${hoursUntilExpiry} hours`,
+          estimatedProfit: Math.max(0, estimatedProfit),
+          qualityRequirements,
+          status: negotiation.status.toLowerCase(),
+          negotiationId: negotiation.id,
+          tradeOperationId: negotiation.tradeOperationId,
+          isExpiringSoon,
+          hoursUntilExpiry,
+          counterOffer: negotiation.counterOffer,
+          offerHistory: negotiation.offerHistory || [],
+          createdAt: negotiation.createdAt,
+          updatedAt: negotiation.updatedAt,
+        };
+      });
+
+      // Calculate summary statistics
+      const stats = {
+        totalOffers: offers.length,
+        pendingOffers: offers.filter((o: any) => o.status === "pending").length,
+        acceptedThisMonth: offers.filter((o: any) => {
+          const offerDate = new Date(o.createdAt);
+          const now = new Date();
+          const firstDayOfMonth = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            1,
+          );
+          return o.status === "accepted" && offerDate >= firstDayOfMonth;
+        }).length,
+        averageOfferValue:
+          offers.length > 0
+            ? offers.reduce((sum: number, o: any) => sum + o.totalValue, 0) /
+              offers.length
+            : 0,
+        topRequestedProduct: this.getTopRequestedProduct(offers),
+        conversionRate: this.calculateConversionRate(offers),
+      };
+
+      return {
+        success: true,
+        data: {
+          offers,
+          stats,
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching seller offers:", error);
+      throw new BadRequestException(
+        "Failed to fetch offers. Please try again.",
+      );
+    }
+  }
+
+  private extractQualityRequirements(buyListing: any): string[] {
+    const requirements = [];
+
+    if (buyListing?.specifications) {
+      buyListing.specifications.forEach((spec: any) => {
+        if (spec.specificationType) {
+          const { name } = spec.specificationType;
+          let value = "";
+
+          if (spec.valueText) value = spec.valueText;
+          else if (spec.valueNumber !== null)
+            value = spec.valueNumber.toString();
+          else if (spec.valueBool !== null)
+            value = spec.valueBool ? "Yes" : "No";
+
+          if (value && value !== "No") {
+            if (name.toLowerCase().includes("organic") && spec.valueBool) {
+              requirements.push("Organic");
+            } else if (name.toLowerCase().includes("gmo") && !spec.valueBool) {
+              requirements.push("Non-GMO");
+            } else if (
+              name.toLowerCase().includes("protein") &&
+              spec.valueNumber
+            ) {
+              requirements.push(`Protein ${spec.valueNumber}%+`);
+            } else if (name.toLowerCase().includes("grade")) {
+              requirements.push(`Grade ${value}`);
+            } else {
+              requirements.push(`${name}: ${value}`);
+            }
+          }
+        }
+      });
+    }
+
+    // Default requirements if none specified
+    if (requirements.length === 0) {
+      requirements.push("Standard Quality");
+    }
+
+    return requirements;
+  }
+
+  private getCountryFlag(country: string | null | undefined): string {
+    const flagMap: { [key: string]: string } = {
+      "United States": "🇺🇸",
+      USA: "🇺🇸",
+      US: "🇺🇸",
+      Canada: "🇨🇦",
+      Germany: "🇩🇪",
+      France: "🇫🇷",
+      "United Kingdom": "🇬🇧",
+      UK: "🇬🇧",
+      Singapore: "🇸🇬",
+      Japan: "🇯🇵",
+      China: "🇨🇳",
+      Brazil: "🇧🇷",
+      Argentina: "🇦🇷",
+      Australia: "🇦🇺",
+      Netherlands: "🇳🇱",
+    };
+
+    return flagMap[country || ""] || "🌍";
+  }
+
+  private getTopRequestedProduct(offers: any[]): string {
+    const productCounts: { [key: string]: number } = {};
+
+    offers.forEach((offer) => {
+      productCounts[offer.product] = (productCounts[offer.product] || 0) + 1;
+    });
+
+    const topProduct = Object.entries(productCounts).sort(
+      ([, a], [, b]) => b - a,
+    )[0];
+
+    return topProduct ? topProduct[0] : "N/A";
+  }
+
+  private calculateConversionRate(offers: any[]): number {
+    if (offers.length === 0) return 0;
+
+    const acceptedOffers = offers.filter((o) => o.status === "accepted").length;
+    return (acceptedOffers / offers.length) * 100;
   }
 
   // Get active trades for seller (placeholder - implement when trade system is ready)
   async getSellerTrades(userId: string) {
+    void userId;
     // TODO: Implement proper trade fetching from database
     // For now, return empty array to prevent frontend errors
     return [];
@@ -298,20 +699,79 @@ export class SellerService {
       where: { sellerId: userId },
     });
 
-    const activeListings = listings.filter(l => l.status === 'ACTIVE').length;
+    const activeListings = listings.filter((l) => l.status === "ACTIVE").length;
     const totalProducts = listings.length;
 
-    // TODO: Implement proper statistics calculation
+    // Count actual offers from negotiations
+    const negotiations = await this.prisma.offerNegotiation.findMany({
+      where: {
+        tradeSeller: {
+          sellerId: userId,
+        },
+      },
+    });
+
+    const totalOffers = negotiations.length;
+    const pendingOffers = negotiations.filter(
+      (n) => n.status === "PENDING",
+    ).length;
+
+    // Count trades (TradeSeller represents seller participation in trades)
+    const trades = await this.prisma.tradeSeller.findMany({
+      where: { sellerId: userId },
+      include: {
+        tradeOperation: true,
+      },
+    });
+
+    const totalTrades = trades.length;
+    const completedTrades = trades.filter(
+      (t) => t.tradeOperation.status === "COMPLETED",
+    ).length;
+
+    // Calculate revenue from completed trades
+    const completedTradeOperations = trades.filter(
+      (t) => t.tradeOperation.status === "COMPLETED",
+    );
+
+    const totalRevenue = completedTradeOperations.reduce((sum, trade) => {
+      const quantity = trade.agreedQuantity?.toNumber() || 0;
+      const price = trade.agreedPrice?.toNumber() || 0;
+      return sum + quantity * price;
+    }, 0);
+
+    // Calculate monthly revenue (current month)
+    const now = new Date();
+    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const monthlyTradeOperations = trades.filter(
+      (t) =>
+        t.tradeOperation.status === "COMPLETED" &&
+        t.tradeOperation.completedAt &&
+        t.tradeOperation.completedAt >= firstDayOfMonth,
+    );
+
+    const monthlyRevenue = monthlyTradeOperations.reduce((sum, trade) => {
+      const quantity = trade.agreedQuantity?.toNumber() || 0;
+      const price = trade.agreedPrice?.toNumber() || 0;
+      return sum + quantity * price;
+    }, 0);
+
+    // Calculate average rating from completed trades with feedback
+    // Note: The database doesn't have a rating field on TradeSeller or TradeOperation yet
+    // So we'll return 0 for now. When rating system is added, update this calculation.
+    const averageRating = 0; // Placeholder until rating system is implemented in schema
+
     return {
       totalProducts,
       activeListings,
-      totalOffers: 0, // TODO: Count actual offers
-      pendingOffers: 0, // TODO: Count pending offers
-      totalTrades: 0, // TODO: Count completed trades
-      completedTrades: 0, // TODO: Count completed trades
-      totalRevenue: 0, // TODO: Calculate actual revenue
-      monthlyRevenue: 0, // TODO: Calculate monthly revenue
-      averageRating: 0, // TODO: Calculate average rating
+      totalOffers,
+      pendingOffers,
+      totalTrades,
+      completedTrades,
+      totalRevenue: Math.round(totalRevenue * 100) / 100, // Round to 2 decimals
+      monthlyRevenue: Math.round(monthlyRevenue * 100) / 100, // Round to 2 decimals
+      averageRating,
     };
   }
 
@@ -333,13 +793,17 @@ export class SellerService {
     });
 
     if (!listing) {
-      throw new NotFoundException('Listing not found');
+      throw new NotFoundException("Listing not found");
     }
 
     return listing;
   }
 
-  async updateListingStatus(listingId: string, status: ListingStatus, userId: string) {
+  async updateListingStatus(
+    listingId: string,
+    status: ListingStatus,
+    userId: string,
+  ) {
     const listing = await this.prisma.saleListing.findFirst({
       where: {
         id: listingId,
@@ -348,13 +812,18 @@ export class SellerService {
     });
 
     if (!listing) {
-      throw new NotFoundException('Listing not found');
+      throw new NotFoundException("Listing not found");
     }
 
     const updatedListing = await this.prisma.saleListing.update({
       where: { id: listingId },
-      data: { 
-        status: status === 'active' ? 'ACTIVE' : status === 'draft' ? 'PENDING' : 'EXPIRED'
+      data: {
+        status:
+          status === "active"
+            ? "ACTIVE"
+            : status === "draft"
+              ? "PENDING"
+              : "EXPIRED",
       },
       include: {
         product: true,
@@ -369,22 +838,114 @@ export class SellerService {
     return updatedListing;
   }
 
-  private async createCustomOfferNotification(listingId: string, sellerId: string) {
+  async getTimeline(
+    userId: string,
+    limit = 20,
+    cursor?: string,
+  ): Promise<SellerTimelineResponseDto> {
+    const take = Math.min(Math.max(limit, 1), 50);
+
+    const trades = await this.prisma.tradeOperation.findMany({
+      where: {
+        sellers: {
+          some: {
+            sellerId: userId,
+          },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+      take,
+      skip: cursor ? 1 : 0,
+      cursor: cursor ? { id: cursor } : undefined,
+      include: {
+        buyListing: {
+          select: {
+            id: true,
+            product: {
+              select: {
+                id: true,
+                displayName: true,
+              },
+            },
+            buyer: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        sellers: {
+          where: { sellerId: userId },
+          select: {
+            id: true,
+            status: true,
+            requestedQuantity: true,
+            agreedQuantity: true,
+          },
+        },
+        negotiations: {
+          where: {
+            tradeSeller: {
+              sellerId: userId,
+            },
+          },
+          orderBy: { updatedAt: "desc" },
+          take: 1,
+          select: {
+            id: true,
+            status: true,
+            updatedAt: true,
+          },
+        },
+      },
+    });
+
+    const events: SellerTimelineEventDto[] = trades.map((trade) => {
+      const sellerEntry = trade.sellers[0];
+      const latestNegotiation = trade.negotiations[0];
+
+      return {
+        id: trade.id,
+        type: latestNegotiation ? "NEGOTIATION" : "TRADE",
+        title: trade.buyListing?.product?.displayName ?? "Buyer opportunity",
+        status: sellerEntry?.status ?? trade.status,
+        timestamp: latestNegotiation?.updatedAt ?? trade.updatedAt,
+        description: trade.phase,
+        metadata: {
+          buyerName: trade.buyListing?.buyer?.name,
+          requestedQuantity: sellerEntry?.requestedQuantity ?? null,
+          agreedQuantity: sellerEntry?.agreedQuantity ?? null,
+          negotiationStatus: latestNegotiation?.status ?? null,
+        },
+      };
+    });
+
+    return {
+      events,
+      nextCursor: trades.length === take ? trades[trades.length - 1].id : null,
+    };
+  }
+
+  private async createCustomOfferNotification(
+    listingId: string,
+    sellerId: string,
+  ) {
     try {
       // For now, just log the notification
       // In production, this would integrate with a notification service
-      console.log('Custom offer notification:', {
-        type: 'CUSTOM_OFFER_REVIEW',
-        title: 'New Custom Offer Request',
+      console.log("Custom offer notification:", {
+        type: "CUSTOM_OFFER_REVIEW",
+        title: "New Custom Offer Request",
         message: `A seller has submitted a custom offer request for review.`,
         metadata: {
           listingId,
           sellerId,
         },
-        recipientRole: 'ADMIN',
+        recipientRole: "ADMIN",
       });
     } catch (error) {
-      console.error('Failed to create notification:', error);
+      console.error("Failed to create notification:", error);
       // Don't throw error as this is not critical for listing creation
     }
   }

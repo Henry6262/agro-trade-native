@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { OrderItem } from '../../../shared/types';
-import { Card } from '../../../shared/components';
-import { formatCurrency } from '../../../shared/utils';
+import { OrderItem } from '@shared/types';
+import { Card } from '@shared/components/Card';
+import { formatCurrency } from '@shared/utils';
 
 interface OrderItemCardProps {
   item: OrderItem;
@@ -31,9 +31,7 @@ export const OrderItemCard: React.FC<OrderItemCardProps> = ({
     <Card className="mb-3">
       <View className="flex-row items-center justify-between">
         <View className="flex-1 mr-4">
-          <Text className="text-lg font-semibold text-gray-900 mb-1">
-            {item.product.name}
-          </Text>
+          <Text className="text-lg font-semibold text-gray-900 mb-1">{item.product.name}</Text>
           <Text className="text-sm text-gray-600 mb-2">
             {formatCurrency(item.unitPrice)} per {item.product.unit}
           </Text>
@@ -41,7 +39,7 @@ export const OrderItemCard: React.FC<OrderItemCardProps> = ({
             {formatCurrency(item.totalPrice)}
           </Text>
         </View>
-        
+
         <View className="flex-row items-center">
           <TouchableOpacity
             onPress={handleDecrement}
@@ -49,11 +47,9 @@ export const OrderItemCard: React.FC<OrderItemCardProps> = ({
           >
             <Text className="text-lg font-bold text-gray-600">-</Text>
           </TouchableOpacity>
-          
-          <Text className="mx-4 text-lg font-semibold text-gray-900">
-            {item.quantity}
-          </Text>
-          
+
+          <Text className="mx-4 text-lg font-semibold text-gray-900">{item.quantity}</Text>
+
           <TouchableOpacity
             onPress={handleIncrement}
             className="w-8 h-8 bg-primary-600 rounded-full items-center justify-center"
@@ -62,14 +58,9 @@ export const OrderItemCard: React.FC<OrderItemCardProps> = ({
           </TouchableOpacity>
         </View>
       </View>
-      
-      <TouchableOpacity
-        onPress={onRemove}
-        className="mt-3 py-2"
-      >
-        <Text className="text-red-600 text-center font-medium">
-          Remove Item
-        </Text>
+
+      <TouchableOpacity onPress={onRemove} className="mt-3 py-2">
+        <Text className="text-red-600 text-center font-medium">Remove Item</Text>
       </TouchableOpacity>
     </Card>
   );

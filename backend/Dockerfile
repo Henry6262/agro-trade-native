@@ -12,8 +12,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install ALL dependencies (including dev dependencies needed for build)
+RUN npm ci && npm cache clean --force
 
 # Generate Prisma client
 RUN npx prisma generate

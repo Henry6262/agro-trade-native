@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "front-end",
-    "slug": "front-end",
+    "name": "AgroTrade",
+    "slug": "agro-trade",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -19,6 +19,7 @@
         "googleMapsApiKey": "AIzaSyCyufA02eE2szI8_Q2DSxIa5AabNSik3MA"
       },
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to help you add warehouse and storage locations for your agricultural products.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby bases and optimize delivery routes."
       }
@@ -47,6 +48,12 @@
     "scheme": "agrotrade",
     "plugins": [
       "expo-web-browser"
-    ]
+    ],
+    "owner": "henry6262",
+    "extra": {
+      "eas": {
+        "projectId": "9a2f3b44-4a6b-49e4-a05a-83c3f0a864db"
+      }
+    }
   }
 }

@@ -28,7 +28,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
         {displayItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
-          
+
           return (
             <TouchableOpacity
               key={item.id}
@@ -36,10 +36,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
               className="flex-1 items-center justify-center py-3 h-full"
               activeOpacity={0.7}
             >
-              <Icon
-                size={26}
-                color={isActive ? '#10B981' : '#6B7280'}
-              />
+              <Icon size={26} color={isActive ? '#10B981' : '#6B7280'} />
               <Text
                 className={`text-xs mt-1.5 font-medium ${
                   isActive ? 'text-green-500' : 'text-gray-500'

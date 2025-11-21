@@ -64,11 +64,11 @@ interface BuyerOffer {
     timeframe: string;
     method?: string;
   };
-  specifications?: Array<{
+  specifications?: {
     name: string;
     requirement: string;
     matches: boolean;
-  }>;
+  }[];
   matchScore: number;
   totalValue: number;
   message?: string;
@@ -101,12 +101,12 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
   const [slideAnim] = useState(new Animated.Value(0));
   const [contentAnim] = useState(new Animated.Value(1));
   const [filterBy, setFilterBy] = useState<'all' | 'pending'>('all');
-  
+
   // Unified view state
   const [currentView, setCurrentView] = useState<ViewType>('list');
   const [selectedOffer, setSelectedOffer] = useState<BuyerOffer | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-  
+
   // Form states
   const [counterPrice, setCounterPrice] = useState('');
   const [counterQuantity, setCounterQuantity] = useState('');
@@ -114,7 +114,9 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
   const [deliveryTerms, setDeliveryTerms] = useState('FOB');
   const [message, setMessage] = useState('');
   const [validDays, setValidDays] = useState('7');
-  const [negotiationType, setNegotiationType] = useState<'price' | 'quantity' | 'terms' | 'combined'>('price');
+  const [negotiationType, setNegotiationType] = useState<
+    'price' | 'quantity' | 'terms' | 'combined'
+  >('price');
   const [acceptNotes, setAcceptNotes] = useState('');
   const [rejectReason, setRejectReason] = useState('');
   const [rejectMessage, setRejectMessage] = useState('');
@@ -173,34 +175,33 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
   // Filter offers (no sorting)
   const processedOffers = React.useMemo(() => {
     let filtered = offers;
-    
+
     // Apply filters
     switch (filterBy) {
       case 'pending':
-        filtered = offers.filter(offer => offer.status === 'pending');
+        filtered = offers.filter((offer) => offer.status === 'pending');
         break;
       default:
         filtered = offers;
     }
-    
+
     // Return filtered results without sorting
     return filtered;
   }, [offers, filterBy]);
 
   // Calculate offer statistics
   const offerStats = React.useMemo(() => {
-    const pending = offers.filter(o => o.status === 'pending').length;
-    const avgPrice = offers.length > 0 ? 
-      offers.reduce((sum, o) => sum + o.offeredPrice, 0) / offers.length : 0;
-    const bestPrice = offers.length > 0 ? 
-      Math.max(...offers.map(o => o.offeredPrice)) : 0;
-    
+    const pending = offers.filter((o) => o.status === 'pending').length;
+    const avgPrice =
+      offers.length > 0 ? offers.reduce((sum, o) => sum + o.offeredPrice, 0) / offers.length : 0;
+    const bestPrice = offers.length > 0 ? Math.max(...offers.map((o) => o.offeredPrice)) : 0;
+
     return { pending, avgPrice, bestPrice };
   }, [offers]);
 
   const handleOfferAction = (action: 'accept' | 'reject' | 'negotiate', offerId: string) => {
     console.log('SellerOffersDrawer handleOfferAction called with:', action, offerId);
-    const offer = offers.find(o => o.id === offerId);
+    const offer = offers.find((o) => o.id === offerId);
     if (!offer) return;
 
     setSelectedOffer(offer);
@@ -213,11 +214,11 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
   const handleSubmitAccept = async () => {
     if (!selectedOffer) return;
-    
+
     setActionLoading(true);
     try {
       // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       Alert.alert('Success', 'Offer accepted successfully!');
       onClose();
     } catch (error) {
@@ -229,16 +230,16 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
   const handleSubmitReject = async () => {
     if (!selectedOffer) return;
-    
+
     if (!rejectReason.trim()) {
       Alert.alert('Validation Error', 'Please select a reason for rejection');
       return;
     }
-    
+
     setActionLoading(true);
     try {
       // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       Alert.alert('Offer Rejected', 'The buyer has been notified of your decision.');
       onClose();
     } catch (error) {
@@ -250,34 +251,37 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
   const handleSubmitNegotiation = async () => {
     if (!selectedOffer) return;
-    
+
     if (!counterPrice || parseFloat(counterPrice) <= 0) {
       Alert.alert('Validation Error', 'Please enter a valid counter price');
       return;
     }
-    
+
     if (!counterQuantity || parseFloat(counterQuantity) <= 0) {
       Alert.alert('Validation Error', 'Please enter a valid quantity');
       return;
     }
-    
+
     const counterQuantityNum = parseFloat(counterQuantity);
     const availableQuantity = sellerProduct?.quantity || 0;
-    
+
     if (counterQuantityNum > availableQuantity) {
-      Alert.alert('Validation Error', `Quantity cannot exceed your available stock (${availableQuantity} ${selectedOffer.unit})`);
+      Alert.alert(
+        'Validation Error',
+        `Quantity cannot exceed your available stock (${availableQuantity} ${selectedOffer.unit})`
+      );
       return;
     }
-    
+
     if (!message.trim()) {
       Alert.alert('Validation Error', 'Please add a message explaining your counter-offer');
       return;
     }
-    
+
     setActionLoading(true);
     try {
       // TODO: Implement actual API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       Alert.alert('Counter-Offer Sent', 'Your counter-offer has been sent to the buyer.');
       handleBack();
     } catch (error) {
@@ -315,13 +319,13 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
   const calculateProfitMargin = () => {
     const counterPriceNum = parseFloat(counterPrice) || 0;
     const marketMin = sellerProduct?.priceRangeMin || 0;
-    
+
     if (marketMin > 0 && counterPriceNum > 0) {
       const margin = counterPriceNum - marketMin;
       const marginPercentage = (margin / marketMin) * 100;
       return { margin, marginPercentage, isProfitable: margin > 0 };
     }
-    
+
     return { margin: 0, marginPercentage: 0, isProfitable: false };
   };
 
@@ -329,25 +333,33 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
   const renderHeader = () => {
     const getTitle = () => {
       switch (currentView) {
-        case 'negotiate': return 'Counter Offer';
-        case 'accept': return 'Accept Offer';
-        case 'reject': return 'Reject Offer';
-        default: return `${productName} Offers`;
+        case 'negotiate':
+          return 'Counter Offer';
+        case 'accept':
+          return 'Accept Offer';
+        case 'reject':
+          return 'Reject Offer';
+        default:
+          return `${productName} Offers`;
       }
     };
 
     const getSubtitle = () => {
       switch (currentView) {
-        case 'negotiate': return 'Negotiate terms with buyer';
-        case 'accept': return 'Confirm your acceptance';
-        case 'reject': return 'Provide rejection reason';
-        default: return `${offers.length} offer${offers.length !== 1 ? 's' : ''} received`;
+        case 'negotiate':
+          return 'Negotiate terms with buyer';
+        case 'accept':
+          return 'Confirm your acceptance';
+        case 'reject':
+          return 'Provide rejection reason';
+        default:
+          return `${offers.length} offer${offers.length !== 1 ? 's' : ''} received`;
       }
     };
 
     return (
       <View className="flex-row justify-between items-center p-6 border-b border-neutral-700/50">
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={currentView === 'list' ? onClose : handleBack}
           className="p-2 -m-2 bg-neutral-800/50 rounded-lg border border-neutral-700/50"
         >
@@ -379,9 +391,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               <Text className="text-xs text-green-300">Best Price</Text>
             </View>
             <View className="items-center flex-1">
-              <Text className="text-2xl font-bold text-yellow-400">
-                {offerStats.pending}
-              </Text>
+              <Text className="text-2xl font-bold text-yellow-400">{offerStats.pending}</Text>
               <Text className="text-xs text-yellow-300">Pending</Text>
             </View>
           </View>
@@ -404,16 +414,15 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                     : 'bg-neutral-800/50 border-neutral-600/50'
                 }`}
               >
-                <Text className={`text-xs ${
-                  filterBy === key ? 'text-green-400' : 'text-neutral-400'
-                }`}>
+                <Text
+                  className={`text-xs ${filterBy === key ? 'text-green-400' : 'text-neutral-400'}`}
+                >
                   {label}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
         </View>
-
 
         {/* Content */}
         {isLoading ? (
@@ -428,10 +437,9 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               No {filterBy !== 'all' ? filterBy : ''} Offers
             </Text>
             <Text className="text-gray-400 text-center mt-2">
-              {filterBy !== 'all' 
+              {filterBy !== 'all'
                 ? `No offers match the ${filterBy} filter criteria`
-                : 'No buyers have made offers for this product yet'
-              }
+                : 'No buyers have made offers for this product yet'}
             </Text>
           </View>
         ) : (
@@ -475,14 +483,20 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               <View className="flex-row justify-between items-center mb-4">
                 <Text className="text-blue-200 font-medium text-base">Offered Price</Text>
                 <View className="flex-row items-center">
-                  <Text className="text-blue-300 font-black text-2xl">€{selectedOffer.offeredPrice.toFixed(2)}</Text>
-                  <Text className="text-blue-400/70 ml-2 text-sm">/{selectedOffer.unit.toLowerCase()}</Text>
+                  <Text className="text-blue-300 font-black text-2xl">
+                    €{selectedOffer.offeredPrice.toFixed(2)}
+                  </Text>
+                  <Text className="text-blue-400/70 ml-2 text-sm">
+                    /{selectedOffer.unit.toLowerCase()}
+                  </Text>
                 </View>
               </View>
               <View className="h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent mb-4" />
               <View className="flex-row justify-between items-center">
                 <Text className="text-blue-200 font-medium text-base">Requested Quantity</Text>
-                <Text className="text-white font-bold text-lg">{selectedOffer.requestedQuantity} {selectedOffer.unit.toLowerCase()}</Text>
+                <Text className="text-white font-bold text-lg">
+                  {selectedOffer.requestedQuantity} {selectedOffer.unit.toLowerCase()}
+                </Text>
               </View>
             </View>
           </View>
@@ -498,7 +512,9 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
             <View className="rounded-2xl p-6 border border-green-500/40 bg-gradient-to-br from-green-500/20 to-emerald-600/10">
               <View className="flex-row justify-between items-center mb-4">
                 <Text className="text-green-200 font-medium text-base">Available Stock</Text>
-                <Text className="text-white font-bold text-lg">{sellerProduct?.quantity || 0} {selectedOffer.unit.toLowerCase()}</Text>
+                <Text className="text-white font-bold text-lg">
+                  {sellerProduct?.quantity || 0} {selectedOffer.unit.toLowerCase()}
+                </Text>
               </View>
               <View className="h-px bg-gradient-to-r from-transparent via-green-400/30 to-transparent mb-4" />
               <View className="flex-row justify-between items-center">
@@ -507,7 +523,9 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                   <Text className="text-green-300 font-black text-lg">
                     €{sellerProduct?.priceRangeMin || 0}-{sellerProduct?.priceRangeMax || 0}
                   </Text>
-                  <Text className="text-green-400/70 ml-2 text-sm">/{selectedOffer.unit.toLowerCase()}</Text>
+                  <Text className="text-green-400/70 ml-2 text-sm">
+                    /{selectedOffer.unit.toLowerCase()}
+                  </Text>
                 </View>
               </View>
             </View>
@@ -533,9 +551,11 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                   }`}
                 >
                   <Icon size={16} color={negotiationType === key ? '#F59E0B' : '#9CA3AF'} />
-                  <Text className={`ml-2 font-medium ${
-                    negotiationType === key ? 'text-yellow-400' : 'text-neutral-300'
-                  }`}>
+                  <Text
+                    className={`ml-2 font-medium ${
+                      negotiationType === key ? 'text-yellow-400' : 'text-neutral-300'
+                    }`}
+                  >
                     {label}
                   </Text>
                 </TouchableOpacity>
@@ -551,7 +571,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               </View>
               <Text className="text-yellow-400 font-bold text-xl">Your Counter Offer</Text>
             </View>
-            
+
             <View className="rounded-2xl border border-yellow-500/40 bg-gradient-to-br from-yellow-500/20 to-orange-600/10 p-6">
               {/* Price Input */}
               {(negotiationType === 'price' || negotiationType === 'combined') && (
@@ -568,10 +588,12 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                         className="text-white text-2xl font-black ml-3 flex-1 text-center"
                         keyboardType="decimal-pad"
                       />
-                      <Text className="text-yellow-400/80 text-lg font-medium">/{selectedOffer.unit.toLowerCase()}</Text>
+                      <Text className="text-yellow-400/80 text-lg font-medium">
+                        /{selectedOffer.unit.toLowerCase()}
+                      </Text>
                     </View>
                   </View>
-                  
+
                   {/* Real-time Price Analysis */}
                   {priceDiff.difference !== 0 && (
                     <View className="mt-4 bg-black/30 rounded-xl p-4 border border-yellow-400/20">
@@ -582,28 +604,37 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                           ) : (
                             <TrendingDown size={16} color="#EF4444" />
                           )}
-                          <Text className={`ml-2 text-sm font-bold ${
-                            priceDiff.isIncrease ? 'text-green-400' : 'text-red-400'
-                          }`}>
-                            {priceDiff.isIncrease ? '+' : ''}€{Math.abs(priceDiff.difference).toFixed(2)} per unit
+                          <Text
+                            className={`ml-2 text-sm font-bold ${
+                              priceDiff.isIncrease ? 'text-green-400' : 'text-red-400'
+                            }`}
+                          >
+                            {priceDiff.isIncrease ? '+' : ''}€
+                            {Math.abs(priceDiff.difference).toFixed(2)} per unit
                           </Text>
                         </View>
-                        <Text className={`text-sm font-bold ${
-                          priceDiff.isIncrease ? 'text-green-400' : 'text-red-400'
-                        }`}>
-                          ({priceDiff.isIncrease ? '+' : ''}{priceDiff.percentageChange.toFixed(1)}%)
+                        <Text
+                          className={`text-sm font-bold ${
+                            priceDiff.isIncrease ? 'text-green-400' : 'text-red-400'
+                          }`}
+                        >
+                          ({priceDiff.isIncrease ? '+' : ''}
+                          {priceDiff.percentageChange.toFixed(1)}%)
                         </Text>
                       </View>
-                      
+
                       {/* Profit Margin Analysis */}
                       {profitMargin.margin !== 0 && (
                         <View className="border-t border-yellow-400/20 pt-3 mt-3">
                           <View className="flex-row justify-between items-center">
                             <Text className="text-yellow-200 text-sm">Profit Margin:</Text>
-                            <Text className={`text-sm font-bold ${
-                              profitMargin.isProfitable ? 'text-green-400' : 'text-red-400'
-                            }`}>
-                              €{Math.abs(profitMargin.margin).toFixed(2)} ({profitMargin.marginPercentage.toFixed(1)}%)
+                            <Text
+                              className={`text-sm font-bold ${
+                                profitMargin.isProfitable ? 'text-green-400' : 'text-red-400'
+                              }`}
+                            >
+                              €{Math.abs(profitMargin.margin).toFixed(2)} (
+                              {profitMargin.marginPercentage.toFixed(1)}%)
                             </Text>
                           </View>
                         </View>
@@ -627,19 +658,24 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                         className="text-white text-2xl font-black flex-1 text-center"
                         keyboardType="numeric"
                       />
-                      <Text className="text-yellow-400/80 text-lg font-medium ml-3">{selectedOffer.unit.toLowerCase()}</Text>
+                      <Text className="text-yellow-400/80 text-lg font-medium ml-3">
+                        {selectedOffer.unit.toLowerCase()}
+                      </Text>
                     </View>
                   </View>
-                  
+
                   {/* Quantity Analysis */}
                   {quantityDiff.difference !== 0 && (
                     <View className="mt-4 bg-black/30 rounded-xl p-4 border border-yellow-400/20">
                       <View className="flex-row items-center justify-between">
                         <Text className="text-yellow-200 text-sm">Quantity Change:</Text>
-                        <Text className={`text-sm font-bold ${
-                          quantityDiff.isIncrease ? 'text-green-400' : 'text-red-400'
-                        }`}>
-                          {quantityDiff.isIncrease ? '+' : ''}{Math.abs(quantityDiff.difference)} {selectedOffer.unit.toLowerCase()}
+                        <Text
+                          className={`text-sm font-bold ${
+                            quantityDiff.isIncrease ? 'text-green-400' : 'text-red-400'
+                          }`}
+                        >
+                          {quantityDiff.isIncrease ? '+' : ''}
+                          {Math.abs(quantityDiff.difference)} {selectedOffer.unit.toLowerCase()}
                         </Text>
                       </View>
                     </View>
@@ -665,16 +701,18 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                                 : 'bg-neutral-800/50 border-neutral-600/50'
                             }`}
                           >
-                            <Text className={`text-center font-medium ${
-                              deliveryDays === days ? 'text-blue-400' : 'text-neutral-300'
-                            }`}>
+                            <Text
+                              className={`text-center font-medium ${
+                                deliveryDays === days ? 'text-blue-400' : 'text-neutral-300'
+                              }`}
+                            >
                               {days} days
                             </Text>
                           </TouchableOpacity>
                         ))}
                       </View>
                     </View>
-                    
+
                     <View>
                       <Text className="text-yellow-200 text-sm mb-2">Terms</Text>
                       <View className="flex-row gap-2">
@@ -688,9 +726,11 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                                 : 'bg-neutral-800/50 border-neutral-600/50'
                             }`}
                           >
-                            <Text className={`text-center text-sm font-medium ${
-                              deliveryTerms === term ? 'text-green-400' : 'text-neutral-300'
-                            }`}>
+                            <Text
+                              className={`text-center text-sm font-medium ${
+                                deliveryTerms === term ? 'text-green-400' : 'text-neutral-300'
+                              }`}
+                            >
                               {term}
                             </Text>
                           </TouchableOpacity>
@@ -741,9 +781,11 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                       : 'bg-gradient-to-br from-neutral-800/50 to-neutral-700/30 border-neutral-600/50'
                   }`}
                 >
-                  <Text className={`text-center font-semibold ${
-                    validDays === days ? 'text-blue-400' : 'text-neutral-300'
-                  }`}>
+                  <Text
+                    className={`text-center font-semibold ${
+                      validDays === days ? 'text-blue-400' : 'text-neutral-300'
+                    }`}
+                  >
                     {days} days
                   </Text>
                 </TouchableOpacity>
@@ -771,16 +813,22 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               </View>
               <View className="flex-row justify-between mb-3">
                 <Text className="text-neutral-300">Price</Text>
-                <Text className="text-green-400 font-bold">€{selectedOffer.offeredPrice.toFixed(2)}/{selectedOffer.unit.toLowerCase()}</Text>
+                <Text className="text-green-400 font-bold">
+                  €{selectedOffer.offeredPrice.toFixed(2)}/{selectedOffer.unit.toLowerCase()}
+                </Text>
               </View>
               <View className="flex-row justify-between mb-3">
                 <Text className="text-neutral-300">Quantity</Text>
-                <Text className="text-white font-semibold">{selectedOffer.requestedQuantity} {selectedOffer.unit.toLowerCase()}</Text>
+                <Text className="text-white font-semibold">
+                  {selectedOffer.requestedQuantity} {selectedOffer.unit.toLowerCase()}
+                </Text>
               </View>
               <View className="h-px bg-green-400/30 my-3" />
               <View className="flex-row justify-between">
                 <Text className="text-neutral-300">Total Value</Text>
-                <Text className="text-green-400 font-black text-xl">€{(selectedOffer.offeredPrice * selectedOffer.requestedQuantity).toLocaleString()}</Text>
+                <Text className="text-green-400 font-black text-xl">
+                  €{(selectedOffer.offeredPrice * selectedOffer.requestedQuantity).toLocaleString()}
+                </Text>
               </View>
             </View>
           </View>
@@ -805,7 +853,10 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               <Info size={20} color="#60A5FA" />
               <View className="ml-3 flex-1">
                 <Text className="text-blue-300 font-semibold mb-1">Important</Text>
-                <Text className="text-blue-200 text-sm">By accepting this offer, you agree to the buyer's terms and conditions. This action is binding and cannot be undone.</Text>
+                <Text className="text-blue-200 text-sm">
+                  By accepting this offer, you agree to the buyer's terms and conditions. This
+                  action is binding and cannot be undone.
+                </Text>
               </View>
             </View>
           </View>
@@ -836,7 +887,10 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
             <Text className="text-white font-bold text-lg mb-4">Rejecting offer from:</Text>
             <View className="bg-gradient-to-br from-red-500/20 to-orange-600/10 rounded-xl p-4 border border-red-500/40">
               <Text className="text-white font-semibold mb-2">{selectedOffer.buyer.name}</Text>
-              <Text className="text-neutral-300">€{selectedOffer.offeredPrice.toFixed(2)}/{selectedOffer.unit.toLowerCase()} • {selectedOffer.requestedQuantity} {selectedOffer.unit.toLowerCase()}</Text>
+              <Text className="text-neutral-300">
+                €{selectedOffer.offeredPrice.toFixed(2)}/{selectedOffer.unit.toLowerCase()} •{' '}
+                {selectedOffer.requestedQuantity} {selectedOffer.unit.toLowerCase()}
+              </Text>
             </View>
           </View>
 
@@ -854,9 +908,9 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                       : 'bg-neutral-800/50 border-neutral-700/50'
                   }`}
                 >
-                  <Text className={`${
-                    rejectReason === reason ? 'text-red-400' : 'text-neutral-300'
-                  }`}>
+                  <Text
+                    className={`${rejectReason === reason ? 'text-red-400' : 'text-neutral-300'}`}
+                  >
                     {reason}
                   </Text>
                 </TouchableOpacity>
@@ -896,7 +950,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               >
                 <Text className="text-white font-semibold">Cancel</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 onPress={handleSubmitNegotiation}
                 disabled={actionLoading}
@@ -918,7 +972,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               >
                 <Text className="text-white font-semibold">Cancel</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 onPress={handleSubmitAccept}
                 disabled={actionLoading}
@@ -940,7 +994,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               >
                 <Text className="text-white font-semibold">Cancel</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 onPress={handleSubmitReject}
                 disabled={actionLoading || !rejectReason}
@@ -960,9 +1014,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
     return (
       <View className="p-6 border-t border-neutral-700/50 bg-gradient-to-b from-neutral-900/80 to-black">
-        <View className="flex-row gap-4">
-          {getButtons()}
-        </View>
+        <View className="flex-row gap-4">{getButtons()}</View>
       </View>
     );
   };
@@ -984,23 +1036,25 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
             flex: 1,
             marginTop: 100,
             backgroundColor: '#0A0A0A',
-            transform: [{
-              translateY: slideAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [300, 0],
-              })
-            }]
+            transform: [
+              {
+                translateY: slideAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [300, 0],
+                }),
+              },
+            ],
           }}
           className="rounded-t-3xl"
         >
-          <KeyboardAvoidingView 
+          <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
             {renderHeader()}
-            
-            <Animated.View 
-              style={{ 
+
+            <Animated.View
+              style={{
                 flex: 1,
                 transform: [{ scale: contentAnim }],
               }}
@@ -1011,7 +1065,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               {currentView === 'accept' && renderAcceptView()}
               {currentView === 'reject' && renderRejectView()}
             </Animated.View>
-            
+
             {renderFooter()}
           </KeyboardAvoidingView>
         </Animated.View>

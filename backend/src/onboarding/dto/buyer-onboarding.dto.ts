@@ -1,7 +1,15 @@
-import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested, IsNumber } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ProductCategory, ProductUnit } from '@prisma/client';
-import { CompanyInfoDto } from './seller-onboarding.dto';
+import {
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateNested,
+  IsNumber,
+} from "class-validator";
+import { Type } from "class-transformer";
+import { ProductCategory, ProductUnit } from "@prisma/client";
+import { CompanyInfoDto } from "./seller-onboarding.dto";
 
 export class BuyerRequirementDto {
   @IsEnum(ProductCategory)

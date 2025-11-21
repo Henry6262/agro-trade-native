@@ -26,7 +26,7 @@ export default function OrderCreateScreen() {
   const route = useRoute();
   const navigation = useNavigation();
   const { productId } = (route.params as { productId?: string }) || {};
-  
+
   const {
     currentOrder,
     updateItemQuantity,
@@ -74,7 +74,7 @@ export default function OrderCreateScreen() {
 
       // Create the order
       const orderData = {
-        items: currentOrder.items.map(item => ({
+        items: currentOrder.items.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
         })),
@@ -87,7 +87,7 @@ export default function OrderCreateScreen() {
       };
 
       await createOrder.mutateAsync(orderData);
-      
+
       Alert.alert(
         'Order Placed Successfully!',
         'Your order has been submitted and is being processed.',
@@ -132,9 +132,7 @@ export default function OrderCreateScreen() {
               <OrderItemCard
                 key={item.id}
                 item={item}
-                onUpdateQuantity={(quantity) =>
-                  updateItemQuantity(item.productId, quantity)
-                }
+                onUpdateQuantity={(quantity) => updateItemQuantity(item.productId, quantity)}
                 onRemove={() => removeItemFromOrder(item.productId)}
               />
             ))}
@@ -142,10 +140,8 @@ export default function OrderCreateScreen() {
 
           {/* Delivery Information */}
           <View className="bg-white p-4 rounded-lg">
-            <Text className="text-lg font-semibold text-gray-900 mb-4">
-              Delivery Information
-            </Text>
-            
+            <Text className="text-lg font-semibold text-gray-900 mb-4">Delivery Information</Text>
+
             <View className="space-y-4">
               <Controller
                 name="address"
@@ -179,7 +175,7 @@ export default function OrderCreateScreen() {
                     )}
                   />
                 </View>
-                
+
                 <View className="flex-1">
                   <Controller
                     name="state"
@@ -237,10 +233,7 @@ export default function OrderCreateScreen() {
           />
 
           {/* Order Summary */}
-          <OrderSummary
-            subtotal={currentOrder.totalAmount}
-            total={currentOrder.totalAmount}
-          />
+          <OrderSummary subtotal={currentOrder.totalAmount} total={currentOrder.totalAmount} />
 
           {/* Place Order Button */}
           <Button
@@ -253,10 +246,8 @@ export default function OrderCreateScreen() {
           />
         </View>
       </ScrollView>
-      
-      {createOrder.isPending && (
-        <LoadingSpinner overlay message="Placing your order..." />
-      )}
+
+      {createOrder.isPending && <LoadingSpinner overlay message="Placing your order..." />}
     </SafeAreaView>
   );
 }

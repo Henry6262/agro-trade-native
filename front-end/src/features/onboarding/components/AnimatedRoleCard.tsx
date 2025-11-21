@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ShoppingCart, Wheat, Truck } from 'lucide-react-native';
 import Animated, {
@@ -22,7 +22,7 @@ interface AnimatedRoleCardProps {
   delay?: number;
 }
 
-const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   id,
@@ -79,14 +79,12 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   }, [isSelected, selected]);
 
   const animatedStyle = useAnimatedStyle(() => {
-    const pressScale = interpolate(pressed.value, [0, 1], [1, 0.98]);
+    const pressScale = interpolate(pressed.value, [0, 1], [1, 0.97]);
     const selectedScale = interpolate(selected.value, [0, 1], [1, 1.02]);
     const selectedElevation = interpolate(selected.value, [0, 1], [3, 6]);
 
     return {
-      transform: [
-        { scale: scale.value * pressScale * selectedScale },
-      ],
+      transform: [{ scale: scale.value * pressScale * selectedScale }],
       opacity: opacity.value,
       elevation: selectedElevation,
       // Remove shadow properties for Android compatibility
@@ -96,10 +94,7 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
 
   const iconAnimatedStyle = useAnimatedStyle(() => {
     return {
-      transform: [
-        { rotate: `${iconRotation.value}deg` },
-        { scale: iconScale.value },
-      ],
+      transform: [{ rotate: `${iconRotation.value}deg` }, { scale: iconScale.value }],
     };
   });
 
@@ -115,11 +110,11 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   });
 
   const handlePressIn = () => {
-    pressed.value = withSpring(1, { damping: 20, stiffness: 300 });
+    pressed.value = withSpring(1, { damping: 15, stiffness: 200 });
   };
 
   const handlePressOut = () => {
-    pressed.value = withSpring(0, { damping: 20, stiffness: 300 });
+    pressed.value = withSpring(0, { damping: 15, stiffness: 200 });
   };
 
   const getIcon = () => {
@@ -139,12 +134,11 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   };
 
   return (
-    <AnimatedTouchable
+    <AnimatedPressable
       style={[animatedStyle, { marginBottom: 16 }]}
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      activeOpacity={1}
     >
       <LinearGradient
         colors={isSelected ? gradient : ['#1F2937', '#111827']}
@@ -178,9 +172,7 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
               justifyContent: 'center',
             }}
           >
-            <Animated.View style={iconAnimatedStyle}>
-              {getIcon()}
-            </Animated.View>
+            <Animated.View style={iconAnimatedStyle}>{getIcon()}</Animated.View>
           </View>
 
           {/* Text content on the right */}
@@ -201,11 +193,11 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
                 fontSize: 14,
               }}
             >
-              {id === 'buyer' 
+              {id === 'buyer'
                 ? 'Purchase products'
-                : id === 'seller' 
-                ? 'List your products'
-                : 'Transport goods'}
+                : id === 'seller'
+                  ? 'List your products'
+                  : 'Transport goods'}
             </Text>
           </View>
 
@@ -222,9 +214,7 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
                 marginLeft: 12,
               }}
             >
-              <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>
-                ✓
-              </Text>
+              <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>✓</Text>
             </View>
           )}
         </View>
@@ -245,6 +235,6 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
           },
         ]}
       />
-    </AnimatedTouchable>
+    </AnimatedPressable>
   );
 };

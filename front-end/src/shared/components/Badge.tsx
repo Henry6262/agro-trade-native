@@ -37,19 +37,15 @@ export const Badge: React.FC<BadgeProps> = ({
     if (React.isValidElement(children)) {
       return children;
     }
-    
+
     // Convert everything else to string and wrap in Text
     const textContent = children === null || children === undefined ? '' : String(children);
-    
+
     if (!textContent) {
       return null;
     }
-    
-    return (
-      <Text className="text-center font-semibold text-xs text-white">
-        {textContent}
-      </Text>
-    );
+
+    return <Text className="text-center font-semibold text-xs text-white">{textContent}</Text>;
   };
 
   return (

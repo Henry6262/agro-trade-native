@@ -2,10 +2,7 @@
 
 export type CreationType = 'truck' | 'driver' | null;
 
-export type FleetCreationStep = 
-  | 'type-selection'
-  | 'truck-info'
-  | 'driver-info';
+export type FleetCreationStep = 'type-selection' | 'truck-info' | 'driver-info';
 
 // Truck Related Types - Simplified
 export interface TruckInfo {
