@@ -7,12 +7,9 @@ import {
   Param,
   Query,
   UseGuards,
-  Request,
   HttpStatus,
-  HttpCode,
   BadRequestException,
   ForbiddenException,
-  NotFoundException,
 } from "@nestjs/common";
 import {
   ApiTags,

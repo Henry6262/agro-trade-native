@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { transporterFleetService } from '../service';
 import type {
   FleetDriverStatus,
@@ -10,36 +11,27 @@ import type {
 } from '../types';
 
 export const useTransporterFleet = (): TransporterFleetHookResult => {
-  const [summary, setSummary] = useState<FleetSummary>({
-    totalTrucks: 0,
-    availableTrucks: 0,
-    inTransitTrucks: 0,
-    verifiedTrucks: 0,
-    availableDrivers: 0,
-    assignedDrivers: 0,
-  });
-  const [trucks, setTrucks] = useState<FleetTruck[]>([]);
-  const [drivers, setDrivers] = useState<FleetDriver[]>([]);
   const [truckTab, setTruckTab] = useState<FleetTruckStatus | 'in_transit'>('available');
   const [driverTab, setDriverTab] = useState<FleetDriverStatus>('available');
-  const [isLoading, setIsLoading] = useState(true);
   const [showFleetCreation, setShowFleetCreation] = useState(false);
 
-  const loadFleet = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const data = await transporterFleetService.fetchFleet();
-      setSummary(data.summary);
-      setTrucks(data.trucks);
-      setDrivers(data.drivers);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const fleetQuery = useQuery({
+    queryKey: ['transporter', 'fleet'],
+    queryFn: transporterFleetService.fetchFleet,
+  });
 
-  useEffect(() => {
-    loadFleet().catch((error) => console.error('Failed to load fleet data', error));
-  }, [loadFleet]);
+  const summary: FleetSummary =
+    fleetQuery.data?.summary ?? {
+      totalTrucks: 0,
+      availableTrucks: 0,
+      inTransitTrucks: 0,
+      verifiedTrucks: 0,
+      availableDrivers: 0,
+      assignedDrivers: 0,
+    };
+
+  const trucks: FleetTruck[] = fleetQuery.data?.trucks ?? [];
+  const drivers: FleetDriver[] = fleetQuery.data?.drivers ?? [];
 
   const filteredTrucks = useMemo(
     () =>
@@ -68,7 +60,7 @@ export const useTransporterFleet = (): TransporterFleetHookResult => {
     filteredDrivers,
     truckTab,
     driverTab,
-    isLoading,
+    isLoading: fleetQuery.isLoading,
     showFleetCreation,
     setTruckTab,
     setDriverTab,

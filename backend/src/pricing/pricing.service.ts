@@ -5,6 +5,12 @@ import {
   PriceRangeDto,
 } from "./dto/location-pricing.dto";
 
+export interface MarketData {
+  averagePrice: number;
+  trend: 'rising' | 'stable' | 'falling';
+  demandLevel: 'high' | 'medium' | 'low';
+}
+
 @Injectable()
 export class PricingService {
   constructor(private prisma: PrismaService) {}

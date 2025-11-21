@@ -890,12 +890,12 @@ export class SellerService {
               sellerId: userId,
             },
           },
-          orderBy: { updatedAt: "desc" },
+          orderBy: { startedAt: "desc" },
           take: 1,
           select: {
             id: true,
             status: true,
-            updatedAt: true,
+            startedAt: true,
           },
         },
       },
@@ -910,7 +910,7 @@ export class SellerService {
         type: latestNegotiation ? "NEGOTIATION" : "TRADE",
         title: trade.buyListing?.product?.displayName ?? "Buyer opportunity",
         status: sellerEntry?.status ?? trade.status,
-        timestamp: latestNegotiation?.updatedAt ?? trade.updatedAt,
+        timestamp: latestNegotiation?.startedAt ?? trade.updatedAt,
         description: trade.phase,
         metadata: {
           buyerName: trade.buyListing?.buyer?.name,

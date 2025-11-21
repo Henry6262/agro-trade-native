@@ -208,11 +208,11 @@ export class RegionsService {
     },
   ];
 
-  async getRegions(): Promise<Region[]> {
+  async getRegions(): Promise<RegionDto[]> {
     return this.regions;
   }
 
-  async getCities(regionId?: string): Promise<City[]> {
+  async getCities(regionId?: string): Promise<CityDto[]> {
     if (regionId) {
       return this.cities.filter((city) => city.regionId === regionId);
     }

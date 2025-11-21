@@ -769,7 +769,7 @@ export class TransportService {
         where: {
           transporterId,
           status: {
-            in: [TransportJobStatus.ASSIGNED, TransportJobStatus.IN_PROGRESS],
+            in: [TransportJobStatus.ASSIGNED, TransportJobStatus.STARTED, TransportJobStatus.IN_TRANSIT],
           },
         },
       }),

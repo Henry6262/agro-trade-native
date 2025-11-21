@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { Product, ProductCategory, ListingStatus } from "@prisma/client";
+import { Product, ProductCategory, ListingStatus, Importance } from "@prisma/client";
 import {
   ApiResponseDto,
   CategoryMetadataDto,
@@ -12,6 +12,16 @@ import {
 @Injectable()
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
+
+  // Helper to convert Importance enum to number
+  private importanceToNumber(importance: Importance): number {
+    const importanceMap = {
+      [Importance.CRITICAL]: 3,
+      [Importance.IMPORTANT]: 2,
+      [Importance.OPTIONAL]: 1,
+    };
+    return importanceMap[importance];
+  }
 
   // Get all products with their specifications (for metadata)
   async getProductMetadata(): Promise<ApiResponseDto<ProductMetadataDto[]>> {
@@ -39,8 +49,8 @@ export class ProductsService {
         image: product.image,
         harvestSeason: product.harvestSeason,
         storageRecommendations: product.storageRecommendations,
-        priceRangeMin: product.priceRangeMin,
-        priceRangeMax: product.priceRangeMax,
+        priceRangeMin: product.priceRangeMin?.toNumber() ?? null,
+        priceRangeMax: product.priceRangeMax?.toNumber() ?? null,
         defaultUnit: product.defaultUnit,
         // Include specifications with full details
         specifications: product.specTemplates.map((spec) => ({
@@ -49,7 +59,7 @@ export class ProductsService {
           name: spec.specificationType.name,
           unit: spec.specificationType.unit,
           dataType: spec.specificationType.dataType,
-          importance: spec.importance,
+          importance: this.importanceToNumber(spec.importance),
           displayOrder: spec.displayOrder,
           // Validation rules
           minValue: spec.specificationType.minValue,
@@ -107,13 +117,15 @@ export class ProductsService {
       success: true,
       data: {
         ...product,
+        priceRangeMin: product.priceRangeMin?.toNumber() ?? null,
+        priceRangeMax: product.priceRangeMax?.toNumber() ?? null,
         specifications: product.specTemplates.map((spec) => ({
           id: spec.specificationType.id,
           code: spec.specificationType.code,
           name: spec.specificationType.name,
           unit: spec.specificationType.unit,
           dataType: spec.specificationType.dataType,
-          importance: spec.importance,
+          importance: this.importanceToNumber(spec.importance),
           displayOrder: spec.displayOrder,
           minValue: spec.specificationType.minValue,
           maxValue: spec.specificationType.maxValue,
@@ -147,13 +159,15 @@ export class ProductsService {
       success: true,
       data: {
         ...product,
+        priceRangeMin: product.priceRangeMin?.toNumber() ?? null,
+        priceRangeMax: product.priceRangeMax?.toNumber() ?? null,
         specifications: product.specTemplates.map((spec) => ({
           id: spec.specificationType.id,
           code: spec.specificationType.code,
           name: spec.specificationType.name,
           unit: spec.specificationType.unit,
           dataType: spec.specificationType.dataType,
-          importance: spec.importance,
+          importance: this.importanceToNumber(spec.importance),
           displayOrder: spec.displayOrder,
           minValue: spec.specificationType.minValue,
           maxValue: spec.specificationType.maxValue,

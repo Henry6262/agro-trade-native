@@ -97,12 +97,9 @@ export class InspectorService {
         const distance = this.calculateDistance(
           filters.lat!,
           filters.lng!,
-          filters.lat!,
-          filters.lng!,
           job.location.latitude,
           job.location.longitude,
         );
-        return distance <= filters.radius!;
         return distance <= filters.radius!;
       });
     }
