@@ -28,6 +28,7 @@
 - [x] Move seller offers feed to `/seller/offers` via `sellerService` and keep mutations wired to negotiations endpoints (2025-11-17).
 - [x] Buyer Orders hook now fetches trade operations/statistics/offers via React Query + `buyerService`, replacing mock incoming offers (2025-11-17).
 - [x] Transporter Fleet feature + legacy tab now consume `/transport-company/me/fleet` (new backend endpoint) so trucks/drivers/statistics reflect live data (2025-11-17).
+- [x] Add fleet CRUD/assignment endpoints (`POST /transport-company/me/trucks`, `POST /transport-company/me/drivers`, `POST /transport-company/me/trucks/:id/assign-driver`) and wire RN mutations to refresh fleet data (2025-11-21: All 8 endpoints implemented + React Query mutations wired).
 - [ ] Update shared stores + design-system usage to align with rulebook.
 - [ ] Add/refresh tests + docs; update `status.md` progress + `DAILY_LOG.md` entries.
 

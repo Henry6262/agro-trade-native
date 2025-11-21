@@ -1,123 +1,101 @@
-import { Fleet, Truck } from '../types';
+import { transportService } from '../../../../../../../services/transportService';
+import { Fleet, Truck, Location } from '../types';
 
-// Mock fleet data for different transporters
-const mockFleets: Record<string, Fleet> = {
-  'transporter-001': {
-    transporterId: 'transporter-001',
-    trucks: [
-      {
-        id: 'truck-001',
-        registrationNumber: 'QTR-1234',
-        capacity: 40,
-        currentLocation: {
-          coordinates: { latitude: 25.2654, longitude: 51.52 },
-          address: {
-            city: 'Doha',
-            state: 'Ad Dawhah',
-            country: 'Qatar',
-          },
-          type: 'truck_location',
-        },
-        status: 'available',
-        lastUpdated: new Date(),
-      },
-      {
-        id: 'truck-002',
-        registrationNumber: 'QTR-5678',
-        capacity: 40,
-        currentLocation: {
-          coordinates: { latitude: 25.2754, longitude: 51.515 },
-          address: {
-            city: 'Doha',
-            state: 'Ad Dawhah',
-            country: 'Qatar',
-          },
-          type: 'truck_location',
-        },
-        status: 'available',
-        assignedDriver: 'driver-002',
-        lastUpdated: new Date(),
-      },
-      {
-        id: 'truck-003',
-        registrationNumber: 'QTR-9012',
-        capacity: 40,
-        currentLocation: {
-          coordinates: { latitude: 25.2554, longitude: 51.525 },
-          address: {
-            city: 'Doha',
-            state: 'Ad Dawhah',
-            country: 'Qatar',
-          },
-          type: 'truck_location',
-        },
-        status: 'in_transit',
-        assignedDriver: 'driver-003',
-        lastUpdated: new Date(),
-      },
-      {
-        id: 'truck-004',
-        registrationNumber: 'QTR-3456',
-        capacity: 50,
-        currentLocation: {
-          coordinates: { latitude: 25.2854, longitude: 51.51 },
-          address: {
-            city: 'Doha',
-            state: 'Ad Dawhah',
-            country: 'Qatar',
-          },
-          type: 'truck_location',
-        },
-        status: 'available',
-        lastUpdated: new Date(),
-      },
-    ],
-    totalCapacity: 170,
-    availableCapacity: 130,
-    stats: {
-      totalTrucks: 4,
-      availableTrucks: 3,
-      inTransitTrucks: 1,
-      maintenanceTrucks: 0,
+/**
+ * Parse location from string format (e.g., "lat,lng" or address string)
+ * Falls back to default location if parsing fails
+ */
+const parseLocation = (location: string): Location => {
+  // Default location (Qatar)
+  const defaultLocation: Location = {
+    coordinates: { latitude: 25.2854, longitude: 51.531 },
+    address: { city: 'Unknown', state: 'Unknown', country: 'Qatar' },
+    type: 'truck_location',
+  };
+
+  if (!location) return defaultLocation;
+
+  // Try to parse "lat,lng" format
+  const coords = location.split(',').map((s) => parseFloat(s.trim()));
+  if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+    return {
+      coordinates: { latitude: coords[0], longitude: coords[1] },
+      address: { city: 'Unknown', state: 'Unknown', country: 'Qatar' },
+      type: 'truck_location',
+    };
+  }
+
+  // If it's a text address, use default coordinates but keep the address
+  return {
+    ...defaultLocation,
+    address: {
+      city: location,
+      state: 'Unknown',
+      country: 'Qatar',
     },
-  },
-  'transporter-empty': {
-    transporterId: 'transporter-empty',
-    trucks: [],
-    totalCapacity: 0,
-    availableCapacity: 0,
-    stats: {
-      totalTrucks: 0,
-      availableTrucks: 0,
-      inTransitTrucks: 0,
-      maintenanceTrucks: 0,
-    },
-  },
+  };
 };
 
 /**
- * Fetch available fleet data for a transporter
- * Mock implementation for testing and development
+ * Map backend truck status to frontend status
  */
-export const fetchAvailableFleet = async (transporterId: string): Promise<Fleet> => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 100));
+const mapTruckStatus = (
+  status: 'available' | 'assigned' | 'maintenance'
+): 'available' | 'assigned' | 'in_transit' | 'maintenance' => {
+  // Backend only has 'available' | 'assigned' | 'maintenance'
+  // Map 'assigned' to 'assigned' (could be in_transit in reality)
+  return status;
+};
 
-  const fleet = mockFleets[transporterId];
+/**
+ * Fetch available fleet data for the current transporter
+ */
+export const fetchAvailableFleet = async (transporterId?: string): Promise<Fleet> => {
+  try {
+    const response = await transportService.getMyFleet();
 
-  if (!fleet) {
-    throw new Error('Transporter not found');
-  }
-
-  // Create a deep copy with fresh Date objects
-  const fleetCopy: Fleet = {
-    ...fleet,
-    trucks: fleet.trucks.map((truck) => ({
-      ...truck,
-      currentLocation: { ...truck.currentLocation },
+    // Map backend response to Fleet type
+    const trucks: Truck[] = response.trucks.map((truck) => ({
+      id: truck.id,
+      registrationNumber: truck.licensePlate,
+      capacity: truck.capacityTons,
+      currentLocation: parseLocation(truck.location),
+      status: mapTruckStatus(truck.status),
+      assignedDriver: truck.driver || undefined,
       lastUpdated: new Date(),
-    })),
-  };
+      specifications: {
+        model: truck.model,
+      },
+    }));
 
-  return fleetCopy;
+    // Calculate stats
+    const totalCapacity = trucks.reduce((sum, truck) => sum + truck.capacity, 0);
+    const availableTrucks = trucks.filter((t) => t.status === 'available').length;
+    const inTransitTrucks = trucks.filter((t) => t.status === 'in_transit').length;
+    const maintenanceTrucks = trucks.filter((t) => t.status === 'maintenance').length;
+    const assignedTrucks = trucks.filter((t) => t.status === 'assigned').length;
+
+    // Available capacity = capacity of available trucks
+    const availableCapacity = trucks
+      .filter((t) => t.status === 'available')
+      .reduce((sum, truck) => sum + truck.capacity, 0);
+
+    const fleet: Fleet = {
+      transporterId: transporterId || 'current',
+      trucks,
+      totalCapacity,
+      availableCapacity,
+      stats: {
+        totalTrucks: trucks.length,
+        availableTrucks,
+        inTransitTrucks: inTransitTrucks + assignedTrucks, // Count assigned as in transit for now
+        maintenanceTrucks,
+      },
+    };
+
+    return fleet;
+  } catch (error) {
+    console.error('Error fetching fleet data:', error);
+    throw error;
+  }
 };

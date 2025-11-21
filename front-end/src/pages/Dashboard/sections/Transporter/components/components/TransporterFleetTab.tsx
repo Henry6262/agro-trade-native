@@ -179,9 +179,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
               <Text className="text-white text-sm font-semibold">
                 {summary.availableDrivers} available
               </Text>
-              <Text className="text-neutral-400 text-xs">
-                {summary.assignedDrivers} assigned
-              </Text>
+              <Text className="text-neutral-400 text-xs">{summary.assignedDrivers} assigned</Text>
             </View>
           </View>
 

@@ -7,6 +7,10 @@ import {
   TruckInfo,
   DriverInfo,
 } from '../types';
+import {
+  useCreateTruck,
+  useCreateDriver,
+} from '../../../../../pages/Dashboard/sections/Transporter/features/Fleet/hooks';
 
 const initialState: FleetCreationState = {
   currentStep: 'type-selection',
@@ -23,6 +27,9 @@ const initialState: FleetCreationState = {
 
 export const useFleetCreation = () => {
   const [state, setState] = useState<FleetCreationState>(initialState);
+
+  const createTruckMutation = useCreateTruck();
+  const createDriverMutation = useCreateDriver();
 
   // Set creation type and move to info step
   const selectCreationType = useCallback((type: CreationType) => {
@@ -70,14 +77,23 @@ export const useFleetCreation = () => {
 
   // Submit functions
   const submitTruck = useCallback(async () => {
+    if (!state.truckData.info) {
+      setState((prev) => ({ ...prev, error: 'No truck data to submit' }));
+      return false;
+    }
+
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      // Mock API call - replace with actual API
-      console.log('Submitting truck:', state.truckData.info);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Transform frontend data to backend API format
+      const backendData = {
+        licensePlate: state.truckData.info.licensePlate,
+        model: state.truckData.info.trailerRegistrationNumber, // Using trailer reg as model
+        capacityTons: 10, // Default capacity - could be added to form later
+        vehicleType: state.truckData.info.vehicleType.toUpperCase(),
+      };
 
-      Alert.alert('Success', 'Truck added to fleet!');
+      await createTruckMutation.mutateAsync(backendData);
       setState((prev) => ({ ...prev, isLoading: false }));
       return true;
     } catch (error) {
@@ -88,17 +104,31 @@ export const useFleetCreation = () => {
       }));
       return false;
     }
-  }, [state.truckData]);
+  }, [state.truckData, createTruckMutation]);
 
   const submitDriver = useCallback(async () => {
+    if (!state.driverData.info) {
+      setState((prev) => ({ ...prev, error: 'No driver data to submit' }));
+      return false;
+    }
+
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      // Mock API call - replace with actual API
-      console.log('Submitting driver:', state.driverData.info);
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Transform frontend data to backend API format
+      const nameParts = state.driverData.info.fullName.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
 
-      Alert.alert('Success', 'Driver added to fleet!');
+      const backendData = {
+        firstName,
+        lastName,
+        licenseNumber: state.driverData.info.egn, // Using EGN as license number
+        phone: state.driverData.info.phoneNumber,
+        experienceYears: 5, // Default - could be added to form later
+      };
+
+      await createDriverMutation.mutateAsync(backendData);
       setState((prev) => ({ ...prev, isLoading: false }));
       return true;
     } catch (error) {
@@ -109,7 +139,7 @@ export const useFleetCreation = () => {
       }));
       return false;
     }
-  }, [state.driverData]);
+  }, [state.driverData, createDriverMutation]);
 
   const submitFleetItem = useCallback(async () => {
     if (state.creationType === 'truck') {

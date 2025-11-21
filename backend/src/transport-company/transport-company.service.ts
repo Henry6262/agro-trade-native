@@ -3,6 +3,7 @@ import {
   ConflictException,
   NotFoundException,
   BadRequestException,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import {
@@ -15,12 +16,15 @@ import {
   InviteTransporterDto,
   TransporterSearchDto,
 } from "./dto/link-transporter.dto";
+import { CreateTruckDto, UpdateTruckDto } from "./dto/truck.dto";
+import { CreateDriverDto, UpdateDriverDto } from "./dto/driver.dto";
 import {
   AdminLevel,
   CompanyType,
   UserRole,
   DriverType,
   DriverStatus,
+  TruckType,
 } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
@@ -711,5 +715,583 @@ export class TransportCompanyService {
       driverCount: company._count.drivers,
       truckCount: company._count.trucks,
     }));
+  }
+
+  // ==================== TRUCK CRUD METHODS ====================
+
+  async createTruck(userId: string, dto: CreateTruckDto) {
+    // Get user's company
+    const company = await this.getCompanyByAdminId(userId);
+    if (!company) {
+      throw new UnauthorizedException(
+        "You must be a company admin to create trucks",
+      );
+    }
+
+    // Check for duplicate license plate within company
+    const existingTruck = await this.prisma.truck.findFirst({
+      where: {
+        plateNumber: dto.licensePlate,
+        transportCompanyId: company.id,
+      },
+    });
+
+    if (existingTruck) {
+      throw new ConflictException(
+        "A truck with this license plate already exists in your company",
+      );
+    }
+
+    // Map vehicle type to enum
+    const truckType = this.mapVehicleTypeToEnum(dto.vehicleType);
+
+    // Create truck
+    const truck = await this.prisma.truck.create({
+      data: {
+        ownerId: userId,
+        transportCompanyId: company.id,
+        plateNumber: dto.licensePlate,
+        type: truckType,
+        capacity: dto.capacityTons,
+        currentLocation: dto.location?.address || null,
+        latitude: dto.location?.lat || null,
+        longitude: dto.location?.lng || null,
+        isAvailable: true,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Truck created successfully",
+      data: {
+        id: truck.id,
+        licensePlate: truck.plateNumber,
+        model: truck.type,
+        capacityTons: Number(truck.capacity),
+        location: truck.currentLocation || "Unknown location",
+        status: truck.isAvailable ? "available" : "assigned",
+      },
+    };
+  }
+
+  async updateTruck(userId: string, truckId: string, dto: UpdateTruckDto) {
+    // Get user's company
+    const company = await this.getCompanyByAdminId(userId);
+    if (!company) {
+      throw new UnauthorizedException(
+        "You must be a company admin to update trucks",
+      );
+    }
+
+    // Verify truck belongs to company
+    const truck = await this.prisma.truck.findFirst({
+      where: {
+        id: truckId,
+        transportCompanyId: company.id,
+      },
+    });
+
+    if (!truck) {
+      throw new NotFoundException(
+        "Truck not found or does not belong to your company",
+      );
+    }
+
+    // If updating license plate, check for duplicates
+    if (dto.licensePlate && dto.licensePlate !== truck.plateNumber) {
+      const existingTruck = await this.prisma.truck.findFirst({
+        where: {
+          plateNumber: dto.licensePlate,
+          transportCompanyId: company.id,
+          id: { not: truckId },
+        },
+      });
+
+      if (existingTruck) {
+        throw new ConflictException(
+          "A truck with this license plate already exists in your company",
+        );
+      }
+    }
+
+    // Build update data
+    const updateData: any = {};
+
+    if (dto.licensePlate) updateData.plateNumber = dto.licensePlate;
+    if (dto.model) updateData.type = this.mapVehicleTypeToEnum(dto.model);
+    if (dto.capacityTons) updateData.capacity = dto.capacityTons;
+    if (dto.location) {
+      updateData.currentLocation = dto.location.address || null;
+      updateData.latitude = dto.location.lat;
+      updateData.longitude = dto.location.lng;
+    }
+    if (dto.status === "available") {
+      updateData.isAvailable = true;
+    } else if (dto.status === "assigned" || dto.status === "maintenance") {
+      updateData.isAvailable = false;
+    }
+
+    // Update truck
+    const updated = await this.prisma.truck.update({
+      where: { id: truckId },
+      data: updateData,
+    });
+
+    return {
+      success: true,
+      message: "Truck updated successfully",
+      data: {
+        id: updated.id,
+        licensePlate: updated.plateNumber,
+        model: updated.type,
+        capacityTons: Number(updated.capacity),
+        location: updated.currentLocation || "Unknown location",
+        status: updated.isAvailable ? "available" : "assigned",
+      },
+    };
+  }
+
+  async deleteTruck(userId: string, truckId: string) {
+    // Get user's company
+    const company = await this.getCompanyByAdminId(userId);
+    if (!company) {
+      throw new UnauthorizedException(
+        "You must be a company admin to delete trucks",
+      );
+    }
+
+    // Verify truck belongs to company
+    const truck = await this.prisma.truck.findFirst({
+      where: {
+        id: truckId,
+        transportCompanyId: company.id,
+      },
+      include: {
+        currentDriver: true,
+      },
+    });
+
+    if (!truck) {
+      throw new NotFoundException(
+        "Truck not found or does not belong to your company",
+      );
+    }
+
+    // If truck has assigned driver, unassign them
+    if (truck.currentDriverId) {
+      await this.prisma.driver.update({
+        where: { id: truck.currentDriverId },
+        data: { currentJobId: null },
+      });
+    }
+
+    // Soft delete by marking as unavailable
+    await this.prisma.truck.delete({
+      where: { id: truckId },
+    });
+
+    return {
+      success: true,
+      message: "Truck deleted successfully",
+    };
+  }
+
+  // ==================== DRIVER CRUD METHODS ====================
+
+  async createDriver(userId: string, dto: CreateDriverDto) {
+    // Get user's company
+    const company = await this.getCompanyByAdminId(userId);
+    if (!company) {
+      throw new UnauthorizedException(
+        "You must be a company admin to create drivers",
+      );
+    }
+
+    // Check for duplicate license number within company
+    const existingDriver = await this.prisma.driver.findFirst({
+      where: {
+        licenseNumber: dto.licenseNumber,
+        transportCompanyId: company.id,
+      },
+    });
+
+    if (existingDriver) {
+      throw new ConflictException(
+        "A driver with this license number already exists in your company",
+      );
+    }
+
+    // Check for duplicate email or phone if provided
+    if (dto.email) {
+      const emailExists = await this.prisma.driver.findFirst({
+        where: {
+          email: dto.email,
+          transportCompanyId: company.id,
+        },
+      });
+      if (emailExists) {
+        throw new ConflictException(
+          "A driver with this email already exists in your company",
+        );
+      }
+    }
+
+    if (dto.phone) {
+      const phoneExists = await this.prisma.driver.findFirst({
+        where: {
+          phoneNumber: dto.phone,
+          transportCompanyId: company.id,
+        },
+      });
+      if (phoneExists) {
+        throw new ConflictException(
+          "A driver with this phone number already exists in your company",
+        );
+      }
+    }
+
+    // Create driver
+    const driver = await this.prisma.driver.create({
+      data: {
+        transportCompanyId: company.id,
+        driverType: DriverType.EXTERNAL,
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+        licenseNumber: dto.licenseNumber,
+        phoneNumber: dto.phone,
+        email: dto.email || null,
+        licenseClass: dto.licenseClasses || [],
+        licenseExpiryDate: new Date(
+          Date.now() + 365 * 24 * 60 * 60 * 1000,
+        ), // 1 year default
+        status: DriverStatus.AVAILABLE,
+        isAvailable: true,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Driver created successfully",
+      data: {
+        id: driver.id,
+        name: `${driver.firstName} ${driver.lastName}`,
+        license: driver.licenseNumber,
+        phone: driver.phoneNumber,
+        email: driver.email,
+        status: "available",
+        experienceYears: dto.experienceYears || 0,
+      },
+    };
+  }
+
+  async updateDriver(userId: string, driverId: string, dto: UpdateDriverDto) {
+    // Get user's company
+    const company = await this.getCompanyByAdminId(userId);
+    if (!company) {
+      throw new UnauthorizedException(
+        "You must be a company admin to update drivers",
+      );
+    }
+
+    // Verify driver belongs to company
+    const driver = await this.prisma.driver.findFirst({
+      where: {
+        id: driverId,
+        transportCompanyId: company.id,
+      },
+    });
+
+    if (!driver) {
+      throw new NotFoundException(
+        "Driver not found or does not belong to your company",
+      );
+    }
+
+    // Check for duplicate license number if updating
+    if (dto.licenseNumber && dto.licenseNumber !== driver.licenseNumber) {
+      const existingDriver = await this.prisma.driver.findFirst({
+        where: {
+          licenseNumber: dto.licenseNumber,
+          transportCompanyId: company.id,
+          id: { not: driverId },
+        },
+      });
+
+      if (existingDriver) {
+        throw new ConflictException(
+          "A driver with this license number already exists in your company",
+        );
+      }
+    }
+
+    // Check for duplicate email if updating
+    if (dto.email && dto.email !== driver.email) {
+      const emailExists = await this.prisma.driver.findFirst({
+        where: {
+          email: dto.email,
+          transportCompanyId: company.id,
+          id: { not: driverId },
+        },
+      });
+
+      if (emailExists) {
+        throw new ConflictException(
+          "A driver with this email already exists in your company",
+        );
+      }
+    }
+
+    // Check for duplicate phone if updating
+    if (dto.phone && dto.phone !== driver.phoneNumber) {
+      const phoneExists = await this.prisma.driver.findFirst({
+        where: {
+          phoneNumber: dto.phone,
+          transportCompanyId: company.id,
+          id: { not: driverId },
+        },
+      });
+
+      if (phoneExists) {
+        throw new ConflictException(
+          "A driver with this phone number already exists in your company",
+        );
+      }
+    }
+
+    // Build update data
+    const updateData: any = {};
+
+    if (dto.firstName) updateData.firstName = dto.firstName;
+    if (dto.lastName) updateData.lastName = dto.lastName;
+    if (dto.licenseNumber) updateData.licenseNumber = dto.licenseNumber;
+    if (dto.phone) updateData.phoneNumber = dto.phone;
+    if (dto.email !== undefined) updateData.email = dto.email;
+    if (dto.licenseClasses) updateData.licenseClass = dto.licenseClasses;
+
+    // Map status
+    if (dto.status) {
+      const statusMap: Record<string, DriverStatus> = {
+        available: DriverStatus.AVAILABLE,
+        assigned: DriverStatus.ASSIGNED,
+        offline: DriverStatus.OFFLINE,
+        on_break: DriverStatus.ON_BREAK,
+      };
+      updateData.status = statusMap[dto.status];
+      updateData.isAvailable = dto.status === "available";
+    }
+
+    // Update driver
+    const updated = await this.prisma.driver.update({
+      where: { id: driverId },
+      data: updateData,
+    });
+
+    return {
+      success: true,
+      message: "Driver updated successfully",
+      data: {
+        id: updated.id,
+        name: `${updated.firstName} ${updated.lastName}`,
+        license: updated.licenseNumber,
+        phone: updated.phoneNumber,
+        email: updated.email,
+        status: updated.isAvailable ? "available" : "assigned",
+      },
+    };
+  }
+
+  async deleteDriver(userId: string, driverId: string) {
+    // Get user's company
+    const company = await this.getCompanyByAdminId(userId);
+    if (!company) {
+      throw new UnauthorizedException(
+        "You must be a company admin to delete drivers",
+      );
+    }
+
+    // Verify driver belongs to company
+    const driver = await this.prisma.driver.findFirst({
+      where: {
+        id: driverId,
+        transportCompanyId: company.id,
+      },
+      include: {
+        assignedTruck: true,
+      },
+    });
+
+    if (!driver) {
+      throw new NotFoundException(
+        "Driver not found or does not belong to your company",
+      );
+    }
+
+    // If driver is assigned to a truck, unassign them
+    if (driver.assignedTruck) {
+      await this.prisma.truck.update({
+        where: { id: driver.assignedTruck.id },
+        data: { currentDriverId: null },
+      });
+    }
+
+    // Delete driver
+    await this.prisma.driver.delete({
+      where: { id: driverId },
+    });
+
+    return {
+      success: true,
+      message: "Driver deleted successfully",
+    };
+  }
+
+  // ==================== DRIVER ASSIGNMENT METHODS ====================
+
+  async assignDriverToTruck(
+    userId: string,
+    truckId: string,
+    driverId: string,
+  ) {
+    // Get user's company
+    const company = await this.getCompanyByAdminId(userId);
+    if (!company) {
+      throw new UnauthorizedException(
+        "You must be a company admin to assign drivers",
+      );
+    }
+
+    // Verify truck belongs to company
+    const truck = await this.prisma.truck.findFirst({
+      where: {
+        id: truckId,
+        transportCompanyId: company.id,
+      },
+    });
+
+    if (!truck) {
+      throw new NotFoundException(
+        "Truck not found or does not belong to your company",
+      );
+    }
+
+    // Verify driver belongs to company
+    const driver = await this.prisma.driver.findFirst({
+      where: {
+        id: driverId,
+        transportCompanyId: company.id,
+      },
+      include: {
+        assignedTruck: true,
+      },
+    });
+
+    if (!driver) {
+      throw new NotFoundException(
+        "Driver not found or does not belong to your company",
+      );
+    }
+
+    // Check if driver is already assigned to another truck
+    if (driver.assignedTruck && driver.assignedTruck.id !== truckId) {
+      throw new BadRequestException(
+        `Driver is already assigned to truck ${driver.assignedTruck.plateNumber}. Unassign them first.`,
+      );
+    }
+
+    // Check if driver is already assigned to this truck
+    if (driver.assignedTruck && driver.assignedTruck.id === truckId) {
+      return {
+        success: true,
+        message: "Driver is already assigned to this truck",
+        data: {
+          truckId: truck.id,
+          driverId: driver.id,
+        },
+      };
+    }
+
+    // Assign driver to truck
+    await this.prisma.truck.update({
+      where: { id: truckId },
+      data: { currentDriverId: driverId },
+    });
+
+    return {
+      success: true,
+      message: "Driver assigned to truck successfully",
+      data: {
+        truckId: truck.id,
+        driverId: driver.id,
+        truckLicensePlate: truck.plateNumber,
+        driverName: `${driver.firstName} ${driver.lastName}`,
+      },
+    };
+  }
+
+  async unassignDriverFromTruck(userId: string, truckId: string) {
+    // Get user's company
+    const company = await this.getCompanyByAdminId(userId);
+    if (!company) {
+      throw new UnauthorizedException(
+        "You must be a company admin to unassign drivers",
+      );
+    }
+
+    // Verify truck belongs to company
+    const truck = await this.prisma.truck.findFirst({
+      where: {
+        id: truckId,
+        transportCompanyId: company.id,
+      },
+      include: {
+        currentDriver: true,
+      },
+    });
+
+    if (!truck) {
+      throw new NotFoundException(
+        "Truck not found or does not belong to your company",
+      );
+    }
+
+    if (!truck.currentDriverId) {
+      return {
+        success: true,
+        message: "No driver is assigned to this truck",
+      };
+    }
+
+    // Unassign driver
+    await this.prisma.truck.update({
+      where: { id: truckId },
+      data: { currentDriverId: null },
+    });
+
+    return {
+      success: true,
+      message: "Driver unassigned from truck successfully",
+      data: {
+        truckId: truck.id,
+        previousDriverId: truck.currentDriverId,
+      },
+    };
+  }
+
+  // ==================== HELPER METHODS ====================
+
+  private mapVehicleTypeToEnum(vehicleType?: string): TruckType {
+    if (!vehicleType) return TruckType.FLATBED;
+
+    const typeMap: Record<string, TruckType> = {
+      FLATBED: TruckType.FLATBED,
+      REFRIGERATED: TruckType.REFRIGERATED,
+      TANKER: TruckType.TANKER,
+      CONTAINER: TruckType.CONTAINER,
+      CURTAIN_SIDE: TruckType.CURTAIN_SIDE,
+      BOX_TRUCK: TruckType.BOX_TRUCK,
+      OTHER: TruckType.OTHER,
+    };
+
+    return typeMap[vehicleType.toUpperCase()] || TruckType.FLATBED;
   }
 }

@@ -379,6 +379,126 @@ export const transportService = {
       throw error;
     }
   },
+
+  // ==================== TRUCK CRUD OPERATIONS ====================
+
+  async createTruck(data: {
+    licensePlate: string;
+    model: string;
+    capacityTons: number;
+    location?: { lat: number; lng: number; address?: string };
+    vehicleType?: string;
+  }): Promise<TransportFleetTruck> {
+    try {
+      const response = await apiClient.post('/transport-company/me/trucks', data);
+      return response.data?.data ?? response.data;
+    } catch (error) {
+      console.error('Error creating truck:', error);
+      throw error;
+    }
+  },
+
+  async updateTruck(
+    truckId: string,
+    data: {
+      licensePlate?: string;
+      model?: string;
+      capacityTons?: number;
+      location?: { lat: number; lng: number; address?: string };
+      vehicleType?: string;
+      status?: 'available' | 'assigned' | 'maintenance';
+    }
+  ): Promise<TransportFleetTruck> {
+    try {
+      const response = await apiClient.put(`/transport-company/me/trucks/${truckId}`, data);
+      return response.data?.data ?? response.data;
+    } catch (error) {
+      console.error('Error updating truck:', error);
+      throw error;
+    }
+  },
+
+  async deleteTruck(truckId: string): Promise<void> {
+    try {
+      await apiClient.delete(`/transport-company/me/trucks/${truckId}`);
+    } catch (error) {
+      console.error('Error deleting truck:', error);
+      throw error;
+    }
+  },
+
+  // ==================== DRIVER CRUD OPERATIONS ====================
+
+  async createDriver(data: {
+    firstName: string;
+    lastName: string;
+    licenseNumber: string;
+    phone: string;
+    experienceYears?: number;
+    email?: string;
+    licenseClasses?: string[];
+  }): Promise<TransportFleetDriver> {
+    try {
+      const response = await apiClient.post('/transport-company/me/drivers', data);
+      return response.data?.data ?? response.data;
+    } catch (error) {
+      console.error('Error creating driver:', error);
+      throw error;
+    }
+  },
+
+  async updateDriver(
+    driverId: string,
+    data: {
+      firstName?: string;
+      lastName?: string;
+      licenseNumber?: string;
+      phone?: string;
+      experienceYears?: number;
+      email?: string;
+      licenseClasses?: string[];
+      status?: 'available' | 'assigned' | 'offline' | 'on_break';
+    }
+  ): Promise<TransportFleetDriver> {
+    try {
+      const response = await apiClient.put(`/transport-company/me/drivers/${driverId}`, data);
+      return response.data?.data ?? response.data;
+    } catch (error) {
+      console.error('Error updating driver:', error);
+      throw error;
+    }
+  },
+
+  async deleteDriver(driverId: string): Promise<void> {
+    try {
+      await apiClient.delete(`/transport-company/me/drivers/${driverId}`);
+    } catch (error) {
+      console.error('Error deleting driver:', error);
+      throw error;
+    }
+  },
+
+  // ==================== DRIVER ASSIGNMENT OPERATIONS ====================
+
+  async assignDriver(truckId: string, driverId: string): Promise<void> {
+    try {
+      await apiClient.post(`/transport-company/me/trucks/${truckId}/assign-driver`, {
+        driverId,
+      });
+    } catch (error) {
+      console.error('Error assigning driver:', error);
+      throw error;
+    }
+  },
+
+  async unassignDriver(truckId: string): Promise<void> {
+    try {
+      await apiClient.delete(`/transport-company/me/trucks/${truckId}/unassign-driver`);
+    } catch (error) {
+      console.error('Error unassigning driver:', error);
+      throw error;
+    }
+  },
 };
 
 export default transportService;

@@ -23,11 +23,13 @@ import {
   InviteTransporterDto,
   TransporterSearchDto,
 } from "./dto/link-transporter.dto";
+import { CreateTruckDto, UpdateTruckDto, AssignDriverDto } from "./dto/truck.dto";
+import { CreateDriverDto, UpdateDriverDto } from "./dto/driver.dto";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
-import { ApiOkResponse } from "@nestjs/swagger";
+import { ApiOkResponse, ApiOperation } from "@nestjs/swagger";
 import { FleetResponseDto } from "./dto/fleet.dto";
 
 @Controller("transport-company")
@@ -219,5 +221,101 @@ export class TransportCompanyController {
     }
 
     return this.transportCompanyService.inviteTransporter(companyId, dto);
+  }
+
+  // ==================== FLEET CRUD ENDPOINTS ====================
+
+  // TRUCK ENDPOINTS
+
+  @Post("me/trucks")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Create a new truck for the company" })
+  async createTruck(@Request() req: any, @Body() dto: CreateTruckDto) {
+    return this.transportCompanyService.createTruck(req.user.userId, dto);
+  }
+
+  @Put("me/trucks/:id")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Update truck details" })
+  async updateTruck(
+    @Request() req: any,
+    @Param("id") truckId: string,
+    @Body() dto: UpdateTruckDto,
+  ) {
+    return this.transportCompanyService.updateTruck(
+      req.user.userId,
+      truckId,
+      dto,
+    );
+  }
+
+  @Delete("me/trucks/:id")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Delete a truck" })
+  async deleteTruck(@Request() req: any, @Param("id") truckId: string) {
+    return this.transportCompanyService.deleteTruck(req.user.userId, truckId);
+  }
+
+  // DRIVER ENDPOINTS
+
+  @Post("me/drivers")
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Create a new driver for the company" })
+  async createDriver(@Request() req: any, @Body() dto: CreateDriverDto) {
+    return this.transportCompanyService.createDriver(req.user.userId, dto);
+  }
+
+  @Put("me/drivers/:id")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Update driver details" })
+  async updateDriver(
+    @Request() req: any,
+    @Param("id") driverId: string,
+    @Body() dto: UpdateDriverDto,
+  ) {
+    return this.transportCompanyService.updateDriver(
+      req.user.userId,
+      driverId,
+      dto,
+    );
+  }
+
+  @Delete("me/drivers/:id")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Delete a driver" })
+  async deleteDriver(@Request() req: any, @Param("id") driverId: string) {
+    return this.transportCompanyService.deleteDriver(req.user.userId, driverId);
+  }
+
+  // DRIVER ASSIGNMENT ENDPOINTS
+
+  @Post("me/trucks/:truckId/assign-driver")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Assign a driver to a truck" })
+  async assignDriverToTruck(
+    @Request() req: any,
+    @Param("truckId") truckId: string,
+    @Body() dto: AssignDriverDto,
+  ) {
+    return this.transportCompanyService.assignDriverToTruck(
+      req.user.userId,
+      truckId,
+      dto.driverId,
+    );
+  }
+
+  @Delete("me/trucks/:truckId/unassign-driver")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Unassign driver from a truck" })
+  async unassignDriverFromTruck(
+    @Request() req: any,
+    @Param("truckId") truckId: string,
+  ) {
+    return this.transportCompanyService.unassignDriverFromTruck(
+      req.user.userId,
+      truckId,
+    );
   }
 }

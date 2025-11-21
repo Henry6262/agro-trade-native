@@ -65,31 +65,13 @@ export interface RejectOfferRequest {
 // Seller Offers API Service
 export const sellerOfferService = {
   // Get all offers for the logged-in seller
-  // Note: This endpoint needs to be implemented in backend
-  // For now, we'll use the negotiations endpoint filtered by seller
   async getMyOffers(): Promise<SellerOffersResponse> {
     try {
-      // TODO: Backend needs to implement GET /seller/offers endpoint
-      // For now, return mock structure
       const response = await apiClient.get<SellerOffersResponse>('/seller/offers');
       return response.data;
     } catch (error) {
       console.error('Error fetching seller offers:', error);
-      // Return empty response on error
-      return {
-        success: false,
-        data: {
-          offers: [],
-          stats: {
-            totalOffers: 0,
-            pendingOffers: 0,
-            acceptedThisMonth: 0,
-            averageOfferValue: 0,
-            topRequestedProduct: '',
-            conversionRate: 0,
-          },
-        },
-      };
+      throw error;
     }
   },
 

@@ -1,5 +1,12 @@
 # Daily Log
 
+## 2025-11-21
+- **@backend** – Implemented complete Fleet CRUD API (8 endpoints) for transport companies: POST/PUT/DELETE for trucks and drivers, plus driver assignment/unassignment to trucks. All endpoints protected with JWT auth + company ownership validation. DTOs created with class-validator for input validation. Backend builds and lints successfully.
+- **@frontend** – Wired Fleet CRUD mutations to new backend endpoints via React Query hooks (`useFleetMutations.ts`): created 8 mutation hooks (create/update/delete trucks, create/update/delete drivers, assign/unassign driver) with proper invalidation and error handling. Added corresponding service methods to `transportService.ts`.
+- **@frontend** – Removed mock data from Transporter Maps APIs (`fleetApi.ts`, `offerApi.ts`): wired fleet map to `/transport-company/me/fleet` and offers map to `/transport/requests/available`. Created helper functions for type conversions (location parsing, address parsing, status mapping). Eliminated 303 lines of mock data.
+- **@frontend** – Fixed Seller Offers service: removed misleading TODO comment and mock fallback. Service now properly calls live `/seller/offers` endpoint with correct error handling. Verified backend endpoint exists and is operational.
+- **@all** – EP-03 marked Complete: all role dashboards run on live endpoints; remaining polish (shared stores alignment, extra tests/docs) captured in backlog.
+
 ## 2025-11-17
 - **@backend** – Authored backend rulebook (`rules/backend/*`), added enforcement script + `atctl` hook, updated handbook/migration docs. Checker currently warns about missing DTO folders for pricing/products/regions; follow-up tasks queued under EP-01.
 - **@backend** – Added DTO folders + typed responses for pricing/products/regions and restored backend ESLint config. `node scripts/check-backend-rules.mjs` now passes cleanly; `npm run lint` still fails due to long-standing unused-var issues in transport/auth modules.

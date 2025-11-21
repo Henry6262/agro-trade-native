@@ -1,428 +1,148 @@
-import { MapOffer } from '../types';
+import { transportService } from '../../../../../../../services/transportService';
+import type { TransportRequest } from '../../../../../../../services/transportService';
+import { MapOffer, Location } from '../types';
 
-// Mock offer data for different scenarios
-const mockOffers: Record<string, MapOffer> = {
-  // Support both IO-prefixed IDs (from TransporterTransfersTab) and T-prefixed IDs (from BiddingTab)
-  T001: {
-    id: 'T001',
-    quantity: 25,
-    pickup: {
-      coordinates: { latitude: 25.2744, longitude: 51.5111 },
-      address: {
-        street: 'Farm Road 45',
-        city: 'Iowa',
-        state: 'IA',
-        country: 'USA',
-      },
-      name: 'Iowa Farm Co.',
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.2854, longitude: 51.531 },
-      address: {
-        city: 'Chicago',
-        state: 'IL',
-        country: 'USA',
-      },
-      name: 'Chicago Grain Terminal',
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 48 * 60 * 60 * 1000),
-    status: 'pending',
-    estimatedValue: 3200,
-    productType: 'grains',
-  },
-  T002: {
-    id: 'T002',
-    quantity: 40,
-    pickup: {
-      coordinates: { latitude: 25.3144, longitude: 51.4911 },
-      address: {
-        street: 'Harvest Road',
-        city: 'Nebraska',
-        state: 'NE',
-        country: 'USA',
-      },
-      name: 'Nebraska Harvest',
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.2654, longitude: 51.541 },
-      address: {
-        city: 'Kansas',
-        state: 'KS',
-        country: 'USA',
-      },
-      name: 'Kansas Processing',
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 72 * 60 * 60 * 1000),
-    status: 'pending',
-    estimatedValue: 4800,
-    productType: 'grains',
-  },
-  T003: {
-    id: 'T003',
-    quantity: 15,
-    pickup: {
-      coordinates: { latitude: 25.1844, longitude: 51.5011 },
-      address: {
-        street: 'Organic Way',
-        city: 'Illinois',
-        state: 'IL',
-        country: 'USA',
-      },
-      name: 'Illinois Organic',
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.3254, longitude: 51.521 },
-      address: {
-        city: 'Milwaukee',
-        state: 'WI',
-        country: 'USA',
-      },
-      name: 'Milwaukee Port',
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 36 * 60 * 60 * 1000),
-    status: 'pending',
-    estimatedValue: 2400,
-    productType: 'vegetables',
-  },
-  IO001: {
-    id: 'IO001',
-    quantity: 30,
-    pickup: {
-      coordinates: { latitude: 25.2744, longitude: 51.5111 },
-      address: {
-        street: 'Farm Road 45',
-        city: 'Iowa',
-        state: 'IA',
-        country: 'USA',
-      },
-      name: 'Iowa Premium Farms',
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.2854, longitude: 51.531 },
-      address: {
-        city: 'Chicago',
-        state: 'IL',
-        country: 'USA',
-      },
-      name: 'Chicago Grain Terminal',
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 48 * 60 * 60 * 1000),
-    status: 'pending',
-    estimatedValue: 3800,
-    productType: 'grains',
-  },
-  IO002: {
-    id: 'IO002',
-    quantity: 22,
-    pickup: {
-      coordinates: { latitude: 25.3144, longitude: 51.4911 },
-      address: {
-        street: 'Organic Way',
-        city: 'Nebraska',
-        state: 'NE',
-        country: 'USA',
-      },
-      name: 'Nebraska Organic Co.',
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.2654, longitude: 51.541 },
-      address: {
-        city: 'Kansas',
-        state: 'KS',
-        country: 'USA',
-      },
-      name: 'Kansas Processing Hub',
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 72 * 60 * 60 * 1000),
-    status: 'pending',
-    estimatedValue: 2950,
-    productType: 'vegetables',
-  },
-  'offer-001': {
-    id: 'offer-001',
-    quantity: 120,
-    pickup: {
-      coordinates: { latitude: 25.2744, longitude: 51.5111 },
-      address: {
-        street: 'Farm Road 45',
-        city: 'Al Khor',
-        state: 'Al Khor',
-        country: 'Qatar',
-      },
-      name: 'Green Valley Farm',
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.2854, longitude: 51.531 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      name: 'Central Market',
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours from now
-    status: 'pending',
-    estimatedValue: 50000,
-    productType: 'vegetables',
-  },
-  'offer-002': {
-    id: 'offer-002',
-    quantity: 80,
-    pickup: {
-      coordinates: { latitude: 25.3144, longitude: 51.4911 },
-      address: {
-        street: 'Industrial Area',
-        city: 'Al Rayyan',
-        state: 'Al Rayyan',
-        country: 'Qatar',
-      },
-      name: 'Desert Rose Farm',
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.2654, longitude: 51.541 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      name: 'West Bay Market',
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 72 * 60 * 60 * 1000), // 72 hours from now
-    status: 'pending',
-    estimatedValue: 35000,
-    productType: 'fruits',
-  },
-  'offer-003': {
-    id: 'offer-003',
-    quantity: 200,
-    pickup: {
-      coordinates: { latitude: 25.1844, longitude: 51.5011 },
-      address: {
-        city: 'Al Wakrah',
-        state: 'Al Wakrah',
-        country: 'Qatar',
-      },
-      name: 'Coastal Grains Co.',
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.3254, longitude: 51.521 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      name: 'North Distribution Center',
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 96 * 60 * 60 * 1000), // 96 hours from now
-    status: 'pending',
-    estimatedValue: 75000,
-    productType: 'grains',
-  },
-  'offer-small': {
-    id: 'offer-small',
-    quantity: 30,
-    pickup: {
-      coordinates: { latitude: 25.2544, longitude: 51.5211 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.2754, longitude: 51.511 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
-    status: 'pending',
-    estimatedValue: 12000,
-    productType: 'dairy',
-  },
-  'offer-medium': {
-    id: 'offer-medium',
-    quantity: 120,
-    pickup: {
-      coordinates: { latitude: 25.2644, longitude: 51.5111 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.2854, longitude: 51.521 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 36 * 60 * 60 * 1000),
-    status: 'pending',
-    estimatedValue: 48000,
-    productType: 'vegetables',
-  },
-  'offer-large': {
-    id: 'offer-large',
-    quantity: 200,
-    pickup: {
-      coordinates: { latitude: 25.2744, longitude: 51.5011 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.2954, longitude: 51.531 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 60 * 60 * 60 * 1000),
-    status: 'pending',
-    estimatedValue: 85000,
-    productType: 'grains',
-  },
-  'offer-pending': {
-    id: 'offer-pending',
-    quantity: 60,
-    pickup: {
-      coordinates: { latitude: 25.2844, longitude: 51.5111 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.3054, longitude: 51.521 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
-    status: 'pending',
-    estimatedValue: 25000,
-    productType: 'meat',
-  },
-  'offer-accepted': {
-    id: 'offer-accepted',
-    quantity: 80,
-    pickup: {
-      coordinates: { latitude: 25.2944, longitude: 51.5011 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.3154, longitude: 51.531 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 12 * 60 * 60 * 1000),
-    status: 'accepted',
-    estimatedValue: 32000,
-    productType: 'fruits',
-  },
-  'offer-transit': {
-    id: 'offer-transit',
-    quantity: 100,
-    pickup: {
-      coordinates: { latitude: 25.3044, longitude: 51.4911 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      type: 'pickup',
-    },
-    delivery: {
-      coordinates: { latitude: 25.3254, longitude: 51.541 },
-      address: {
-        city: 'Doha',
-        state: 'Ad Dawhah',
-        country: 'Qatar',
-      },
-      type: 'delivery',
-    },
-    deadline: new Date(Date.now() + 6 * 60 * 60 * 1000),
-    status: 'in_transit',
-    estimatedValue: 42000,
-    productType: 'vegetables',
-  },
+/**
+ * Parse address string into structured address object
+ * Expected format: "street, city, state, country" or variations
+ */
+const parseAddress = (
+  addressString?: string
+): { street?: string; city: string; state: string; country: string } => {
+  if (!addressString) {
+    return { city: 'Unknown', state: 'Unknown', country: 'Unknown' };
+  }
+
+  // Split by comma and trim whitespace
+  const parts = addressString.split(',').map((p) => p.trim());
+
+  if (parts.length >= 3) {
+    return {
+      street: parts[0],
+      city: parts[1] || 'Unknown',
+      state: parts[2] || 'Unknown',
+      country: parts[3] || 'Unknown',
+    };
+  } else if (parts.length === 2) {
+    return {
+      city: parts[0] || 'Unknown',
+      state: parts[1] || 'Unknown',
+      country: 'Unknown',
+    };
+  } else if (parts.length === 1) {
+    return {
+      city: parts[0] || 'Unknown',
+      state: 'Unknown',
+      country: 'Unknown',
+    };
+  }
+
+  return { city: addressString, state: 'Unknown', country: 'Unknown' };
 };
 
 /**
- * Get map data for a single offer
- * Mock implementation for testing and development
+ * Map TransportRequest status to MapOffer status
  */
-export const getOfferMapData = async (offerId: string): Promise<MapOffer> => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 50));
-
-  const offer = mockOffers[offerId];
-
-  if (!offer) {
-    throw new Error('Offer not found');
+const mapOfferStatus = (
+  requestStatus: string
+): 'pending' | 'accepted' | 'in_transit' | 'delivered' => {
+  switch (requestStatus?.toLowerCase()) {
+    case 'open':
+    case 'pending':
+      return 'pending';
+    case 'accepted':
+    case 'assigned':
+      return 'accepted';
+    case 'in_transit':
+    case 'in_progress':
+      return 'in_transit';
+    case 'delivered':
+    case 'completed':
+      return 'delivered';
+    default:
+      return 'pending';
   }
+};
 
-  // Create a deep copy with proper Date object
-  const offerCopy: MapOffer = {
-    ...offer,
-    pickup: { ...offer.pickup },
-    delivery: { ...offer.delivery },
-    deadline: new Date(offer.deadline),
+/**
+ * Convert TransportRequest to MapOffer
+ * Handles pickup points array - uses first pickup point for map visualization
+ */
+const mapTransportRequestToMapOffer = (request: TransportRequest): MapOffer => {
+  // Use first pickup point (transport requests can have multiple pickups)
+  const firstPickup = request.pickupPoints?.[0];
+
+  const pickup: Location = {
+    coordinates: {
+      latitude: firstPickup?.lat || 25.2854,
+      longitude: firstPickup?.lng || 51.531,
+    },
+    address: parseAddress(firstPickup?.address),
+    name: firstPickup?.sellerName || 'Pickup Location',
+    type: 'pickup',
   };
 
-  return offerCopy;
+  const delivery: Location = {
+    coordinates: {
+      latitude: request.deliveryPoint?.lat || 25.2854,
+      longitude: request.deliveryPoint?.lng || 51.531,
+    },
+    address: parseAddress(request.deliveryPoint?.address),
+    name: 'Delivery Location',
+    type: 'delivery',
+  };
+
+  // Extract product type from trade operation if available
+  const productType =
+    request.tradeOperation?.buyListing?.product?.category ||
+    request.tradeOperation?.buyListing?.product?.name ||
+    'Unknown';
+
+  const mapOffer: MapOffer = {
+    id: request.id,
+    quantity: request.totalWeight || 0,
+    pickup,
+    delivery,
+    deadline: new Date(request.biddingDeadline),
+    status: mapOfferStatus(request.status),
+    estimatedValue: request.lowestBid || request.maxBudget || 0,
+    productType,
+  };
+
+  return mapOffer;
+};
+
+/**
+ * Get map data for a single offer by ID
+ * Fetches from live backend API
+ */
+export const getOfferMapData = async (offerId: string): Promise<MapOffer> => {
+  try {
+    const request = await transportService.getRequestById(offerId);
+    return mapTransportRequestToMapOffer(request);
+  } catch (error) {
+    console.error('Error fetching offer map data:', error);
+    throw error;
+  }
 };
 
 /**
  * Get map data for multiple offers
- * Mock implementation for testing and development
+ * Fetches available transport requests from live backend API
  */
-export const getMultipleOffersMapData = async (offerIds: string[]): Promise<MapOffer[]> => {
-  // Fetch offers in parallel for efficiency
-  const offerPromises = offerIds.map((id) => getOfferMapData(id));
-  return Promise.all(offerPromises);
+export const getMultipleOffersMapData = async (offerIds?: string[]): Promise<MapOffer[]> => {
+  try {
+    // If specific IDs provided, fetch them individually
+    if (offerIds && offerIds.length > 0) {
+      const offerPromises = offerIds.map((id) => getOfferMapData(id));
+      return Promise.all(offerPromises);
+    }
+
+    // Otherwise, fetch all available requests
+    const requests = await transportService.getAvailableRequests();
+    return requests.map(mapTransportRequestToMapOffer);
+  } catch (error) {
+    console.error('Error fetching multiple offers map data:', error);
+    throw error;
+  }
 };

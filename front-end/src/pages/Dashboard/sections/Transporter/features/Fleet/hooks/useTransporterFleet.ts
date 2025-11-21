@@ -20,15 +20,14 @@ export const useTransporterFleet = (): TransporterFleetHookResult => {
     queryFn: transporterFleetService.fetchFleet,
   });
 
-  const summary: FleetSummary =
-    fleetQuery.data?.summary ?? {
-      totalTrucks: 0,
-      availableTrucks: 0,
-      inTransitTrucks: 0,
-      verifiedTrucks: 0,
-      availableDrivers: 0,
-      assignedDrivers: 0,
-    };
+  const summary: FleetSummary = fleetQuery.data?.summary ?? {
+    totalTrucks: 0,
+    availableTrucks: 0,
+    inTransitTrucks: 0,
+    verifiedTrucks: 0,
+    availableDrivers: 0,
+    assignedDrivers: 0,
+  };
 
   const trucks: FleetTruck[] = fleetQuery.data?.trucks ?? [];
   const drivers: FleetDriver[] = fleetQuery.data?.drivers ?? [];
