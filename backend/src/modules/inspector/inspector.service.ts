@@ -6,7 +6,7 @@ export class InspectorService {
   // Mock data storage
   private jobs = new Map();
   private inspectorProfiles = new Map();
-  private locationUpdates = [];
+  private locationUpdates: Array<LocationUpdateDto & { id: string; createdAt: Date }> = [];
   private verificationResults = new Map();
 
   constructor() {
@@ -77,16 +77,16 @@ export class InspectorService {
       filteredJobs = filteredJobs.filter(job => job.status === filters.status);
     }
 
-    if (filters.lat && filters.lng && filters.radius) {
+    if (filters.lat !== undefined && filters.lng !== undefined && filters.radius !== undefined) {
       // Simple distance filter (would use proper geospatial query in real implementation)
       filteredJobs = filteredJobs.filter(job => {
         const distance = this.calculateDistance(
-          filters.lat,
-          filters.lng,
+          filters.lat!,
+          filters.lng!,
           job.location.latitude,
           job.location.longitude
         );
-        return distance <= filters.radius;
+        return distance <= filters.radius!;
       });
     }
 

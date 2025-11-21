@@ -22,7 +22,7 @@ export class OnboardingService {
 
     // Check onboarding completion based on role requirements
     let isComplete = false;
-    let missingFields = [];
+    const missingFields = [];
 
     // Basic requirements for all users
     if (!user.name) missingFields.push('name');
