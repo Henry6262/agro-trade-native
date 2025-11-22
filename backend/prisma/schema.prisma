@@ -1,6 +1,8 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -8,574 +10,1532 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model base_demands {
-  id                 String          @id
-  base_id            String
-  user_id            String
-  product_id         String
-  required_quantity  Decimal         @db.Decimal(10, 2)
-  unit               ProductUnit
-  urgency            String?
-  quality_grade      String?
-  specifications     Json?
-  max_price_per_unit Decimal?        @db.Decimal(10, 2)
-  needed_by          DateTime?
-  valid_until        DateTime?
-  fulfilled_quantity Decimal?        @db.Decimal(10, 2)
-  remaining_quantity Decimal?        @db.Decimal(10, 2)
-  created_at         DateTime        @default(now())
-  updated_at         DateTime
-  bases              bases           @relation(fields: [base_id], references: [id], onDelete: Cascade)
-  product_catalog    product_catalog @relation(fields: [product_id], references: [id])
-  users              users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+// ==================== USERS & AUTH ====================
 
-  @@index([base_id])
-  @@index([product_id])
+model User {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  password            String?
+  name                String?
+  phoneNumber         String?   @unique @map("phone_number")
+  role                UserRole  @default(BUYER)
+  isActive            Boolean   @default(true) @map("is_active")
+  isEmailVerified     Boolean   @default(false) @map("is_email_verified")
+  isPhoneVerified     Boolean   @default(false) @map("is_phone_verified")
+  onboardingCompleted Boolean   @default(false) @map("onboarding_completed")
+  lastLogin           DateTime? @map("last_login")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  company   Company?
+  addresses Address[]
+  trucks    Truck[] // For transporters
+
+  // New driver management relations
+  companyAdmin  CompanyAdmin? // If user is a company admin
+  driverProfile Driver? // If user is an internal driver
+
+  // Marketplace activities
+  saleListings SaleListing[] @relation("SellerListings")
+  buyListings  BuyListing[]  @relation("BuyerListings")
+
+  // Trade operation relations
+  tradeOperationsManaged    TradeOperation[]           @relation("TradeAdmin")
+  tradeSellers              TradeSeller[]
+  tradeTransporters         TradeTransporter[]
+  inspectionAssignments     InspectionRequest[]        @relation("InspectorAssignments")
+  transportBids             TransportBid[]
+  transportJobs             TransportJob[]
+  tradeStateChanges         TradeStateHistory[]
+  tradeNotes                TradeNote[]
+  transportCostCalculations TransportCostCalculation[]
+  profitEstimations         ProfitEstimation[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
 }
 
-model base_stocks {
-  id               String          @id
-  base_id          String
-  user_id          String
-  product_id       String
-  quantity         Decimal         @db.Decimal(10, 2)
-  unit             ProductUnit
-  status           StockStatus     @default(AVAILABLE)
-  quality_grade    String?
-  harvest_date     DateTime?
-  expiry_date      DateTime?
-  batch_number     String?
-  storage_location String?
-  temperature      Float?
-  humidity         Float?
-  price_per_unit   Decimal?        @db.Decimal(10, 2)
-  notes            String?
-  last_inspection  DateTime?
-  created_at       DateTime        @default(now())
-  updated_at       DateTime
-  bases            bases           @relation(fields: [base_id], references: [id], onDelete: Cascade)
-  product_catalog  product_catalog @relation(fields: [product_id], references: [id])
-  users            users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+model Company {
+  id String @id @default(cuid())
 
-  @@unique([base_id, product_id, batch_number])
-  @@index([base_id])
-  @@index([product_id])
-  @@index([status])
+  // Link to user
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Company details
+  legalName          String  @map("legal_name")
+  registrationNumber String? @map("registration_number")
+  vatNumber          String? @map("vat_number")
+  phoneNumber        String? @map("phone_number")
+  email              String?
+  website            String?
+
+  // Relations
+  addresses Address[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("companies")
 }
 
-model bases {
-  id               String             @id
-  user_id          String
-  name             String
-  code             String?
-  type             BaseType
-  is_primary       Boolean            @default(false)
-  is_active        Boolean            @default(true)
-  address          String
-  city             String
-  region           String?
-  country          String             @default("Bulgaria")
-  postal_code      String?
-  latitude         Float
-  longitude        Float
-  contact_person   String?
-  contact_phone    String?
-  contact_email    String?
-  storage_capacity Decimal?           @db.Decimal(10, 2)
-  current_usage    Decimal?           @db.Decimal(10, 2)
-  features         Json?
-  certifications   Json?
-  operating_hours  Json?
-  created_at       DateTime           @default(now())
-  updated_at       DateTime
-  base_demands     base_demands[]
-  base_stocks      base_stocks[]
-  users            users              @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  product_listings product_listings[]
+// ==================== ADDRESSES ====================
 
-  @@unique([user_id, code])
-  @@index([is_active])
-  @@index([latitude, longitude])
-  @@index([user_id])
+model Address {
+  id String @id @default(cuid())
+
+  // Relations (an address can belong to different entities)
+  userId String? @map("user_id")
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  companyId String?  @map("company_id")
+  company   Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Address details
+  addressType AddressType @map("address_type")
+  label       String? // "Main Farm", "Warehouse #2", etc.
+
+  street     String?
+  cityId     String? @map("city_id")
+  city       City?   @relation(fields: [cityId], references: [id])
+  postalCode String? @map("postal_code")
+  country    String?
+
+  latitude  Float?
+  longitude Float?
+
+  isDefault Boolean @default(false) @map("is_default")
+
+  // Used by
+  saleListings SaleListing[] @relation("ListingAddress")
+  buyListings  BuyListing[]  @relation("DeliveryAddress")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([companyId])
+  @@map("addresses")
 }
 
-model buyer_profiles {
-  user_id         String   @id
-  company_name    String?
-  vat_id          String?
-  billing_address Json?
-  payment_method  Json?
-  created_at      DateTime @default(now())
-  updated_at      DateTime
-  users           users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+// ==================== LOCATION HIERARCHY ====================
+
+model Region {
+  id       String  @id @default(cuid())
+  name     String // Northwestern, North Central, etc.
+  country  String // Bulgaria, Greece
+  isActive Boolean @default(true) @map("is_active")
+
+  // Cities in this region
+  cities City[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([name, country])
+  @@index([country])
+  @@map("regions")
 }
 
-model cities {
-  id                     String                   @id
-  region_id              String
-  name                   String
-  latitude               Float
-  longitude              Float
-  population             Int?
-  is_capital             Boolean                  @default(false)
-  is_active              Boolean                  @default(true)
-  created_at             DateTime                 @default(now())
-  updated_at             DateTime
-  regions                regions                  @relation(fields: [region_id], references: [id], onDelete: Cascade)
-  city_pricing_zones     city_pricing_zones[]
-  user_location_profiles user_location_profiles[]
+model City {
+  id   String @id @default(cuid())
+  name String // Sofia, Plovdiv, Varna, etc.
 
-  @@unique([region_id, name])
-  @@index([latitude, longitude])
-  @@index([region_id])
+  regionId String @map("region_id")
+  region   Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
+
+  // Relations
+  addresses      Address[]
+  regionalPrices RegionalPrice[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([name, regionId])
+  @@index([regionId])
+  @@map("cities")
 }
 
-model city_pricing_zones {
-  city_id         String
-  pricing_zone_id String
-  priority        Int           @default(1)
-  is_default      Boolean       @default(false)
-  created_at      DateTime      @default(now())
-  cities          cities        @relation(fields: [city_id], references: [id], onDelete: Cascade)
-  pricing_zones   pricing_zones @relation(fields: [pricing_zone_id], references: [id], onDelete: Cascade)
+// ==================== PRODUCT DEFINITIONS ====================
 
-  @@id([city_id, pricing_zone_id])
-  @@index([city_id])
-  @@index([pricing_zone_id])
-}
+model Product {
+  id          String          @id @default(cuid())
+  category    ProductCategory @unique
+  name        String          @unique
+  displayName String          @map("display_name")
+  description String?         @db.Text
+  image       String? // Cloudinary URL
 
-model company_info {
-  user_id          String   @id
-  company_name     String
-  vat_number       String?
-  business_license String?
-  company_address  Json?
-  website          String?
-  established_year Int?
-  created_at       DateTime @default(now())
-  updated_at       DateTime
-  users            users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
-}
+  // Product characteristics
+  harvestSeason          String? @map("harvest_season")
+  storageRecommendations String? @map("storage_recommendations") @db.Text
 
-model countries {
-  id            String    @id
-  name          String    @unique
-  code          String    @unique
-  flag_emoji    String
-  currency_code String
-  is_active     Boolean   @default(true)
-  sort_order    Int       @default(0)
-  created_at    DateTime  @default(now())
-  updated_at    DateTime
-  regions       regions[]
-}
+  // Price guidance
+  priceRangeMin Decimal?    @map("price_range_min") @db.Decimal(10, 2)
+  priceRangeMax Decimal?    @map("price_range_max") @db.Decimal(10, 2)
+  defaultUnit   ProductUnit @default(TON) @map("default_unit")
 
-model farmer_profiles {
-  user_id          String   @id
-  farm_name        String?
-  location_address String?
-  location_lat     Float?
-  location_lng     Float?
-  business_id      String?
-  iban             String?
-  certifications   Json?
-  created_at       DateTime @default(now())
-  updated_at       DateTime
-  users            users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
-}
+  isActive  Boolean @default(true) @map("is_active")
+  sortOrder Int?    @map("sort_order")
 
-model fleet_vehicles {
-  id               String    @id
-  transporter_id   String
-  plate_number     String
-  vehicle_type     TruckType
-  capacity_kg      Int
-  year             Int?
-  make             String?
-  model            String?
-  fuel_type        String?
-  active           Boolean   @default(true)
-  registration_doc String?
-  insurance_doc    String?
-  license_doc      String?
-  created_at       DateTime  @default(now())
-  updated_at       DateTime
-  users            users     @relation(fields: [transporter_id], references: [id], onDelete: Cascade)
+  // Relations
+  specTemplates  ProductSpecTemplate[]
+  saleListings   SaleListing[]
+  buyListings    BuyListing[]
+  regionalPrices RegionalPrice[]
 
-  @@index([transporter_id])
-}
-
-model kyc_documents {
-  id           String             @id
-  user_id      String
-  doc_type     DocumentType
-  doc_url      String
-  status       VerificationStatus @default(PENDING)
-  submitted_at DateTime           @default(now())
-  reviewed_at  DateTime?
-  review_notes String?
-  users        users              @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@index([status])
-  @@index([user_id])
-}
-
-model market_conditions {
-  id              String        @id
-  pricing_zone_id String
-  date            DateTime      @db.Date
-  supply_level    Int
-  demand_level    Int
-  weather_impact  Float?
-  transport_cost  Float?
-  notes           String?
-  data_source     String?
-  created_at      DateTime      @default(now())
-  updated_by      String?
-  pricing_zones   pricing_zones @relation(fields: [pricing_zone_id], references: [id], onDelete: Cascade)
-
-  @@unique([pricing_zone_id, date])
-  @@index([date])
-  @@index([pricing_zone_id])
-}
-
-model pricing_zones {
-  id                 String               @id
-  name               String               @unique
-  description        String?
-  color              String?
-  is_active          Boolean              @default(true)
-  market_size        String?
-  transport_access   String?
-  storage_capacity   String?
-  created_at         DateTime             @default(now())
-  updated_at         DateTime
-  city_pricing_zones city_pricing_zones[]
-  market_conditions  market_conditions[]
-  product_prices     product_prices[]
-  seasonal_pricing   seasonal_pricing[]
-
-  @@index([is_active])
-}
-
-model product_catalog {
-  id                      String             @id
-  category                ProductCategory    @unique
-  name                    String
-  display_name            String
-  description             String?
-  image                   String?
-  nutritional_info        String?
-  use_cases               Json?
-  harvest_season          String?
-  storage_recommendations String?
-  price_range_min         Decimal?           @db.Decimal(10, 2)
-  price_range_max         Decimal?           @db.Decimal(10, 2)
-  default_unit            ProductUnit        @default(TON)
-  quality_grades          Json?
-  certifications          Json?
-  specifications          Json?
-  is_active               Boolean            @default(true)
-  sort_order              Int                @default(0)
-  created_at              DateTime           @default(now())
-  updated_at              DateTime
-  base_demands            base_demands[]
-  base_stocks             base_stocks[]
-  product_listings        product_listings[]
-  product_prices          product_prices[]
-  seasonal_pricing        seasonal_pricing[]
-
-  @@index([is_active])
-  @@index([sort_order])
-}
-
-model product_listings {
-  id                 String          @id
-  product_id         String
-  user_id            String
-  listing_type       ListingType
-  title              String?
-  description        String?
-  quantity           Decimal         @db.Decimal(10, 2)
-  unit               ProductUnit
-  price_per_unit     Decimal         @db.Decimal(10, 2)
-  total_value        Decimal         @db.Decimal(12, 2)
-  negotiable         Boolean         @default(true)
-  quality_grade      String?
-  certifications     Json?
-  specifications     Json?
-  location_address   String?
-  location_lat       Float?
-  location_lng       Float?
-  available_from     DateTime?
-  available_to       DateTime?
-  harvest_date       DateTime?
-  delivery_by        DateTime?
-  status             ListingStatus   @default(DRAFT)
-  view_count         Int             @default(0)
-  images             Json?
-  documents          Json?
-  created_at         DateTime        @default(now())
-  updated_at         DateTime
-  expires_at         DateTime?
-  base_id            String?
-  delivery_options   Json?
-  min_order_quantity Decimal?        @db.Decimal(10, 2)
-  split_delivery     Boolean         @default(false)
-  bases              bases?          @relation(fields: [base_id], references: [id])
-  product_catalog    product_catalog @relation(fields: [product_id], references: [id])
-  users              users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@index([base_id])
-  @@index([created_at])
-  @@index([listing_type])
-  @@index([product_id])
-  @@index([status])
-  @@index([user_id])
-}
-
-model product_prices {
-  id               String          @id
-  product_id       String
-  pricing_zone_id  String
-  min_price        Decimal         @db.Decimal(10, 2)
-  max_price        Decimal         @db.Decimal(10, 2)
-  currency         String          @default("EUR")
-  unit             ProductUnit     @default(TON)
-  effective_date   DateTime        @default(now())
-  expires_date     DateTime?
-  quality_grade    String?
-  confidence_level Float?
-  data_source      String?
-  created_at       DateTime        @default(now())
-  updated_at       DateTime
-  created_by       String?
-  pricing_zones    pricing_zones   @relation(fields: [pricing_zone_id], references: [id], onDelete: Cascade)
-  product_catalog  product_catalog @relation(fields: [product_id], references: [id], onDelete: Cascade)
-
-  @@unique([product_id, pricing_zone_id, quality_grade, effective_date])
-  @@index([effective_date])
-  @@index([product_id, pricing_zone_id])
-}
-
-model products {
-  id             String          @id
-  farmer_id      String
-  category       ProductCategory
-  name           String
-  description    String?
-  quantity       Decimal         @db.Decimal(10, 2)
-  unit           ProductUnit     @default(TON)
-  price_per_unit Decimal         @db.Decimal(10, 2)
-  location       String?
-  harvest_date   DateTime?
-  status         ProductStatus   @default(AVAILABLE)
-  created_at     DateTime        @default(now())
-  updated_at     DateTime
-  users          users           @relation(fields: [farmer_id], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([category])
-  @@index([farmer_id])
+  @@index([isActive])
+  @@map("products")
+}
+
+// ==================== FLEXIBLE SPECIFICATION SYSTEM ====================
+
+model SpecificationType {
+  id       String   @id @default(cuid())
+  code     String   @unique // moisture, protein, oil_content, test_weight, etc.
+  name     String // "Moisture Content", "Protein Content", etc.
+  unit     String? // "%", "kg/hl", "ppm", etc.
+  dataType DataType // NUMBER, TEXT, BOOLEAN, ENUM
+
+  // For ENUM types, store options
+  enumOptions Json? // ["Grade A", "Grade B", "Feed Grade"]
+
+  // Validation rules
+  minValue Float?
+  maxValue Float?
+
+  // Used in specifications
+  productSpecTemplates ProductSpecTemplate[]
+  listingSpecs         ListingSpec[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("specification_types")
+}
+
+model ProductSpecTemplate {
+  id String @id @default(cuid())
+
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  specTypeId        String            @map("spec_type_id")
+  specificationType SpecificationType @relation(fields: [specTypeId], references: [id])
+
+  // How important is this spec for this product?
+  importance Importance // CRITICAL, IMPORTANT, OPTIONAL
+
+  displayOrder Int @default(0) @map("display_order") // Order in UI forms
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([productId, specTypeId])
+  @@index([productId])
+  @@map("product_spec_templates")
+}
+
+// ==================== MARKETPLACE LISTINGS ====================
+
+model SaleListing {
+  id String @id @default(cuid())
+
+  // What product is being sold
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id])
+
+  // Who is selling
+  sellerId String @map("seller_id")
+  seller   User   @relation("SellerListings", fields: [sellerId], references: [id], onDelete: Cascade)
+
+  // Location
+  addressId String?  @map("address_id")
+  address   Address? @relation("ListingAddress", fields: [addressId], references: [id])
+
+  // Listing details
+  quantity Decimal     @db.Decimal(10, 2)
+  unit     ProductUnit @default(TON)
+
+  // Seller's asking price (optional - platform can suggest)
+  askingPrice Decimal? @map("asking_price") @db.Decimal(10, 2)
+
+  // Product specifics
+  harvestDate DateTime? @map("harvest_date")
+
+  // Quality specifications (flexible - seller provides what they know)
+  specifications ListingSpec[]
+
+  // Platform-calculated quality assessment
+  qualityScore Int?    @map("quality_score") // 0-100 based on provided specs
+  qualityGrade String? @map("quality_grade") // "Premium", "Standard", "Feed"
+
+  // Status and visibility
+  status    ListingStatus @default(ACTIVE)
+  viewCount Int           @default(0) @map("view_count")
+
+  // Offers made for this listing
+  offers Offer[]
+
+  // Trade operation relations
+  tradeSellers       TradeSeller[]
+  inspectionRequests InspectionRequest[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([sellerId])
+  @@index([productId])
+  @@index([addressId])
   @@index([status])
+  @@map("sale_listings")
 }
 
-model regions {
-  id         String    @id
-  country_id String
-  name       String
-  code       String?
-  is_active  Boolean   @default(true)
-  created_at DateTime  @default(now())
-  updated_at DateTime
-  cities     cities[]
-  countries  countries @relation(fields: [country_id], references: [id], onDelete: Cascade)
+model BuyListing {
+  id String @id @default(cuid())
 
-  @@unique([country_id, name])
-  @@index([country_id])
+  // What product is needed
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id])
+
+  // Who is buying
+  buyerId String @map("buyer_id")
+  buyer   User   @relation("BuyerListings", fields: [buyerId], references: [id], onDelete: Cascade)
+
+  // Delivery location
+  deliveryAddressId String?  @map("delivery_address_id")
+  deliveryAddress   Address? @relation("DeliveryAddress", fields: [deliveryAddressId], references: [id])
+
+  // Purchase details
+  quantity Decimal     @db.Decimal(10, 2)
+  unit     ProductUnit @default(TON)
+
+  // Budget
+  maxPricePerUnit Decimal? @map("max_price_per_unit") @db.Decimal(10, 2)
+
+  // Timeline
+  neededBy DateTime? @map("needed_by")
+
+  // Required specifications
+  specifications ListingSpec[]
+
+  // Status
+  status RequestStatus @default(ACTIVE)
+
+  // Offers received for this request
+  offers Offer[]
+
+  // Trade operation relation
+  tradeOperation TradeOperation? // One-to-one: one buy listing can have one trade operation
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([buyerId])
+  @@index([productId])
+  @@index([deliveryAddressId])
+  @@index([status])
+  @@map("buy_listings")
 }
 
-model seasonal_pricing {
-  id               String          @id
-  product_id       String
-  pricing_zone_id  String
-  season           String
-  start_month      Int
-  end_month        Int
-  price_multiplier Float
-  description      String?
-  is_active        Boolean         @default(true)
-  created_at       DateTime        @default(now())
-  updated_at       DateTime
-  pricing_zones    pricing_zones   @relation(fields: [pricing_zone_id], references: [id], onDelete: Cascade)
-  product_catalog  product_catalog @relation(fields: [product_id], references: [id], onDelete: Cascade)
+// ==================== UNIFIED SPECIFICATION VALUES ====================
 
-  @@unique([product_id, pricing_zone_id, season])
-  @@index([product_id, pricing_zone_id])
+model ListingSpec {
+  id String @id @default(cuid())
+
+  // Can belong to either sale or buy listing
+  saleListingId String?      @map("sale_listing_id")
+  saleListing   SaleListing? @relation(fields: [saleListingId], references: [id], onDelete: Cascade)
+
+  buyListingId String?     @map("buy_listing_id")
+  buyListing   BuyListing? @relation(fields: [buyListingId], references: [id], onDelete: Cascade)
+
+  specTypeId        String            @map("spec_type_id")
+  specificationType SpecificationType @relation(fields: [specTypeId], references: [id])
+
+  // For sale listings: actual values
+  // For buy listings: exact requirements or midpoint of range
+  valueNumber Float?   @map("value_number")
+  valueText   String?  @map("value_text")
+  valueBool   Boolean? @map("value_bool")
+
+  // For buy listings: acceptable ranges
+  minValue Float? @map("min_value")
+  maxValue Float? @map("max_value")
+
+  // Platform assessment (for sale listings)
+  qualityImpact QualityImpact? @map("quality_impact") // POSITIVE, NEUTRAL, NEGATIVE
+
+  // How strict is this requirement (for buy listings)
+  strictness Strictness? // MANDATORY, PREFERRED, OPTIONAL
+
+  // Price impact for variations (for buy listings)
+  priceAdjustmentPerUnit Decimal? @map("price_adjustment_per_unit") @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([saleListingId, specTypeId])
+  @@unique([buyListingId, specTypeId])
+  @@index([saleListingId])
+  @@index([buyListingId])
+  @@map("listing_specs")
 }
 
-model transporter_profiles {
-  user_id               String   @id
-  company_name          String?
-  license_number        String?
-  base_location_address String?
-  base_location_lat     Float?
-  base_location_lng     Float?
-  insurance_doc_url     String?
-  iban                  String?
-  created_at            DateTime @default(now())
-  updated_at            DateTime
-  users                 users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+// ==================== MATCHING & OFFERS ====================
+
+model Offer {
+  id String @id @default(cuid())
+
+  // Linking supply and demand
+  saleListingId String?      @map("sale_listing_id")
+  saleListing   SaleListing? @relation(fields: [saleListingId], references: [id], onDelete: Cascade)
+
+  buyListingId String?     @map("buy_listing_id")
+  buyListing   BuyListing? @relation(fields: [buyListingId], references: [id], onDelete: Cascade)
+
+  // Offer details
+  offeredPrice Decimal     @map("offered_price") @db.Decimal(10, 2)
+  quantity     Decimal     @db.Decimal(10, 2)
+  unit         ProductUnit @default(TON)
+
+  // Quality match assessment
+  matchScore   Int   @map("match_score") // 0-100 based on spec alignment
+  matchDetails Json? @map("match_details") // Detailed breakdown of spec matches
+
+  // Price calculation breakdown
+  basePrice         Decimal  @map("base_price") @db.Decimal(10, 2)
+  qualityAdjustment Decimal? @map("quality_adjustment") @db.Decimal(10, 2)
+  quantityDiscount  Decimal? @map("quantity_discount") @db.Decimal(10, 2)
+  transportCost     Decimal? @map("transport_cost") @db.Decimal(10, 2)
+  finalPrice        Decimal  @map("final_price") @db.Decimal(10, 2)
+
+  // Terms
+  validUntil    DateTime @map("valid_until")
+  deliveryTerms String?  @map("delivery_terms")
+  paymentTerms  String?  @map("payment_terms")
+
+  // Status tracking
+  status          OfferStatus @default(PENDING)
+  rejectionReason String?     @map("rejection_reason")
+
+  // Who created the offer
+  createdBy OfferCreator @map("created_by") // PLATFORM, SELLER, BUYER
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([saleListingId])
+  @@index([buyListingId])
+  @@index([status])
+  @@map("offers")
 }
 
-model trucks {
-  id             String    @id
-  transporter_id String
-  plate_number   String
-  capacity_kg    Int
-  type           TruckType
-  active         Boolean   @default(true)
-  created_at     DateTime  @default(now())
-  updated_at     DateTime
-  users          users     @relation(fields: [transporter_id], references: [id], onDelete: Cascade)
+// ==================== REGIONAL PRICING ====================
 
-  @@index([transporter_id])
+model RegionalPrice {
+  id String @id @default(cuid())
+
+  cityId String @map("city_id")
+  city   City   @relation(fields: [cityId], references: [id], onDelete: Cascade)
+
+  productId String  @map("product_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  pricePerUnit Decimal     @map("price_per_unit") @db.Decimal(10, 2)
+  currency     String      @default("EUR")
+  unit         ProductUnit @default(TON)
+
+  // Track price changes
+  lastUpdated DateTime @default(now()) @map("last_updated")
+
+  @@unique([cityId, productId])
+  @@index([cityId])
+  @@index([productId])
+  @@map("regional_prices")
 }
 
-model user_location_profiles {
-  user_id                String    @id
-  city_id                String?
-  latitude               Float?
-  longitude              Float?
-  address                String?
-  detected_city          String?
-  detected_region        String?
-  detected_country       String?
-  geocoding_source       String?
-  geocoding_accuracy     String?
-  prefers_metric_units   Boolean   @default(true)
-  prefers_local_currency Boolean   @default(true)
-  last_location_update   DateTime?
-  created_at             DateTime  @default(now())
-  updated_at             DateTime
-  cities                 cities?   @relation(fields: [city_id], references: [id])
-  users                  users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+// ==================== TRANSPORT ====================
 
-  @@index([city_id])
+model Truck {
+  id String @id @default(cuid())
+
+  // Owner (must be a transporter)
+  ownerId String @map("owner_id")
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  // Ownership type
+  ownerType OwnerType @default(INDIVIDUAL) @map("owner_type")
+
+  // For company-owned trucks
+  transportCompanyId String?           @map("transport_company_id")
+  transportCompany   TransportCompany? @relation(fields: [transportCompanyId], references: [id])
+
+  // Current driver
+  currentDriverId String? @unique @map("current_driver_id")
+  currentDriver   Driver? @relation("CurrentDriver", fields: [currentDriverId], references: [id])
+
+  plateNumber String      @unique @map("plate_number")
+  capacity    Float // in tons
+  unit        ProductUnit @default(TON)
+  type        TruckType
+
+  // Current status
+  currentLocation String? @map("current_location")
+  latitude        Float?
+  longitude       Float?
+  isAvailable     Boolean @default(true) @map("is_available")
+
+  // Trade operation relations
+  tradeTransporters TradeTransporter[]
+  transportBids     TransportBid[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([ownerId])
+  @@map("trucks")
 }
 
-model users {
-  id                     String                  @id
-  google_id              String?                 @unique
-  email                  String                  @unique
-  name                   String?
-  phone                  String?
-  role                   UserRole
-  created_at             DateTime                @default(now())
-  updated_at             DateTime
-  base_demands           base_demands[]
-  base_stocks            base_stocks[]
-  bases                  bases[]
-  buyer_profiles         buyer_profiles?
-  company_info           company_info?
-  farmer_profiles        farmer_profiles?
-  fleet_vehicles         fleet_vehicles[]
-  kyc_documents          kyc_documents[]
-  product_listings       product_listings[]
-  products               products[]
-  transporter_profiles   transporter_profiles?
-  trucks                 trucks[]
-  user_location_profiles user_location_profiles?
+// ==================== ENUMS ====================
+
+enum UserRole {
+  ADMIN
+  FARMER
+  BUYER
+  TRANSPORTER
+  COMPANY_ADMIN  // Transport company administrators
+  INSPECTOR
 }
 
-enum BaseType {
-  WAREHOUSE
-  SILO
-  DEPOT
-  OFFICE
-  PORT
-  FACTORY
+enum AddressType {
+  BILLING
+  SHIPPING
   FARM
-}
-
-enum DocumentType {
-  ID_CARD
-  BUSINESS_LICENSE
-  VAT_CERT
-  INSURANCE
+  WAREHOUSE
+  OFFICE
+  PICKUP
+  DELIVERY
   OTHER
-}
-
-enum ListingStatus {
-  DRAFT
-  ACTIVE
-  RESERVED
-  SOLD
-  EXPIRED
-  CANCELLED
-}
-
-enum ListingType {
-  SELL
-  BUY
-}
-
-enum NegotiationStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
-  COUNTERED
-  EXPIRED
-  WITHDRAWN
 }
 
 enum ProductCategory {
-  WHEAT
-  CORN
-  SUNFLOWER
-  BARLEY
-  OATS
-  RAPESEED
-  PEAS
-  SOYBEAN_MEAL
-  WHEAT_BRAN
-  ALFALFA
-  OTHER
-}
-
-enum ProductStatus {
-  AVAILABLE
-  OUT_OF_STOCK
-  PENDING
+  SOFT_WHEAT // Pastry/cake flour grade
+  DURUM_WHEAT // Pasta production grade
+  CORN_MAIZE // Feed and processing
+  BARLEY // Malting and feed
+  OATS // Milling and feed
+  SUNFLOWER // High oleic oil production
+  RAPESEED // Oil and biodiesel
+  PEAS // Food and feed grade
+  SOYBEAN_MEAL // High protein feed
+  WHEAT_BRAN // Animal feed
+  ALFALFA // Livestock feed
+  OTHER // Various cereals & oilseeds
 }
 
 enum ProductUnit {
   TON
   KG
+  LITER
+  PIECE
 }
 
-enum StockStatus {
-  AVAILABLE
-  RESERVED
+enum DataType {
+  NUMBER
+  TEXT
+  BOOLEAN
+  ENUM
+}
+
+enum Importance {
+  CRITICAL // Must have for this product type
+  IMPORTANT // Should have for pricing
+  OPTIONAL // Nice to have
+}
+
+enum QualityImpact {
+  POSITIVE // Better than standard
+  NEUTRAL // Within standard range
+  NEGATIVE // Below standard
+}
+
+enum Strictness {
+  MANDATORY // Must meet requirement
+  PREFERRED // Should meet, but flexible
+  OPTIONAL // Nice to have
+}
+
+enum ListingStatus {
+  ACTIVE
   SOLD
-  IN_TRANSIT
+  PENDING
+  EXPIRED
+  CANCELLED
+}
+
+enum RequestStatus {
+  ACTIVE
+  FULFILLED
+  PARTIALLY_FULFILLED
+  EXPIRED
+  CANCELLED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  WITHDRAWN
+  NEGOTIATING
+}
+
+enum OfferCreator {
+  PLATFORM // Auto-generated by matching algorithm
+  SELLER // Direct offer from seller
+  BUYER // Counter-offer from buyer
 }
 
 enum TruckType {
   FLATBED
+  REFRIGERATED
   TANKER
-  REEFER
+  CONTAINER
+  CURTAIN_SIDE
+  BOX_TRUCK
   OTHER
 }
 
-enum UserRole {
-  FARMER
-  BUYER
-  TRANSPORTER
-  ADMIN
+// ==================== TRADE OPERATIONS MODELS ====================
+
+model TradeOperation {
+  id              String @id @default(cuid())
+  operationNumber String @unique @map("operation_number")
+
+  // Admin managing this operation
+  adminId String @map("admin_id")
+  admin   User   @relation("TradeAdmin", fields: [adminId], references: [id])
+
+  // Link to the BuyListing being fulfilled (REQUIRED - this is the source of requirements)
+  buyListingId String     @unique @map("buy_listing_id") // UNIQUE: one listing = one operation
+  buyListing   BuyListing @relation(fields: [buyListingId], references: [id])
+
+  // Trade details
+  phase    TradePhase  @default(INITIATION)
+  status   TradeStatus @default(ACTIVE)
+  currency String      @default("EUR")
+
+  // Buying side (what we pay to sellers)
+  totalPurchaseCost Decimal? @map("total_purchase_cost") @db.Decimal(10, 2)
+  avgPurchasePrice  Decimal? @map("avg_purchase_price") @db.Decimal(10, 2)
+
+  // Selling side (what buyer pays us)
+  sellingPrice Decimal? @map("selling_price") @db.Decimal(10, 2)
+  totalRevenue Decimal? @map("total_revenue") @db.Decimal(10, 2)
+
+  // Transport costs
+  estimatedTransportCost Decimal? @map("estimated_transport_cost") @db.Decimal(10, 2)
+  actualTransportCost    Decimal? @map("actual_transport_cost") @db.Decimal(10, 2)
+  totalDistanceKm        Float?   @map("total_distance_km")
+
+  // Profit metrics
+  estimatedProfit Decimal? @map("estimated_profit") @db.Decimal(10, 2)
+  actualProfit    Decimal? @map("actual_profit") @db.Decimal(10, 2)
+  profitMargin    Float?   @map("profit_margin")
+
+  // Dates
+  initiatedAt DateTime  @default(now()) @map("initiated_at")
+  completedAt DateTime? @map("completed_at")
+
+  // Flexible metadata
+  metadata Json?
+
+  // Relations
+  sellers                   TradeSeller[]
+  transporters              TradeTransporter[]
+  negotiations              OfferNegotiation[]
+  inspections               InspectionRequest[]
+  transportRequest          TransportRequest?
+  transportBids             TransportBid[]
+  transportJobs             TransportJob[]
+  stateHistory              TradeStateHistory[]
+  notes                     TradeNote[]
+  transportCostCalculations TransportCostCalculation[]
+  profitEstimations         ProfitEstimation[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([adminId])
+  @@index([buyListingId])
+  @@index([phase])
+  @@index([status])
+  @@map("trade_operations")
 }
 
-enum VerificationStatus {
-  PENDING
-  APPROVED
+model TradeSeller {
+  id String @id @default(cuid())
+
+  tradeOperationId String         @map("trade_operation_id")
+  tradeOperation   TradeOperation @relation(fields: [tradeOperationId], references: [id], onDelete: Cascade)
+
+  sellerId String @map("seller_id")
+  seller   User   @relation(fields: [sellerId], references: [id])
+
+  saleListingId String      @map("sale_listing_id") // REQUIRED - we always select from existing listings
+  saleListing   SaleListing @relation(fields: [saleListingId], references: [id])
+
+  // Quantities
+  requestedQuantity Decimal     @map("requested_quantity") @db.Decimal(10, 2) // What buyer needs
+  offeredQuantity   Decimal     @map("offered_quantity") @db.Decimal(10, 2) // What seller has
+  agreedQuantity    Decimal?    @map("agreed_quantity") @db.Decimal(10, 2) // Final agreed
+  unit              ProductUnit @default(TON)
+  agreedPrice       Decimal?    @map("agreed_price") @db.Decimal(10, 2)
+
+  // Verification (linked to SaleListing verification status)
+  isVerified Boolean @default(false) @map("is_verified")
+
+  // Match quality
+  matchScore Int? @map("match_score") // 0-100 based on spec alignment
+
+  status SellerStatus @default(INVITED)
+
+  // Negotiation for this seller
+  negotiation OfferNegotiation?
+
+  joinedAt    DateTime  @default(now()) @map("joined_at")
+  confirmedAt DateTime? @map("confirmed_at")
+
+  @@unique([tradeOperationId, saleListingId]) // Can't add same listing twice
+  @@index([tradeOperationId])
+  @@index([sellerId])
+  @@index([saleListingId])
+  @@index([status])
+  @@map("trade_sellers")
+}
+
+model TradeTransporter {
+  id String @id @default(cuid())
+
+  tradeOperationId String         @map("trade_operation_id")
+  tradeOperation   TradeOperation @relation(fields: [tradeOperationId], references: [id], onDelete: Cascade)
+
+  transporterId String @map("transporter_id")
+  transporter   User   @relation(fields: [transporterId], references: [id])
+
+  // Route details
+  pickupSellerId    String?  @map("pickup_seller_id")
+  route             Json?
+  estimatedDistance Float?   @map("estimated_distance")
+  estimatedDuration Int?     @map("estimated_duration") // in minutes
+  agreedPrice       Decimal? @map("agreed_price") @db.Decimal(10, 2)
+
+  vehicleId String? @map("vehicle_id")
+  vehicle   Truck?  @relation(fields: [vehicleId], references: [id])
+
+  status TransporterStatus @default(INVITED)
+
+  assignedAt  DateTime  @default(now()) @map("assigned_at")
+  confirmedAt DateTime? @map("confirmed_at")
+  deliveredAt DateTime? @map("delivered_at")
+
+  @@unique([tradeOperationId, transporterId])
+  @@index([tradeOperationId])
+  @@index([transporterId])
+  @@index([status])
+  @@map("trade_transporters")
+}
+
+model OfferNegotiation {
+  id String @id @default(cuid())
+
+  tradeOperationId String         @map("trade_operation_id")
+  tradeOperation   TradeOperation @relation(fields: [tradeOperationId], references: [id], onDelete: Cascade)
+
+  // Link to the specific TradeSeller being negotiated with
+  tradeSellerId String      @unique @map("trade_seller_id")
+  tradeSeller   TradeSeller @relation(fields: [tradeSellerId], references: [id])
+
+  // Negotiation status
+  status NegotiationStatus @default(PENDING)
+
+  // Current offer from admin
+  currentOffer Json @map("current_offer") // {price, quantity, terms}
+
+  // Counter-offer from seller (if any)
+  counterOffer Json? @map("counter_offer") // {price, quantity, terms, receivedAt}
+
+  // History of all offers
+  offerHistory Json[] @default([]) @map("offer_history")
+
+  // Final agreed terms (when status = ACCEPTED)
+  finalPrice    Decimal? @map("final_price") @db.Decimal(10, 2)
+  finalQuantity Decimal? @map("final_quantity") @db.Decimal(10, 2)
+
+  unit ProductUnit @default(TON)
+
+  // Timing
+  startedAt   DateTime  @default(now()) @map("started_at")
+  respondedAt DateTime? @map("responded_at") // When seller responded
+  concludedAt DateTime? @map("concluded_at") // When negotiation finished
+  expiresAt   DateTime  @map("expires_at") // 48 hours from creation
+
+  // Offer rounds for detailed tracking
+  offerRounds OfferRound[]
+
+  @@index([tradeOperationId])
+  @@index([tradeSellerId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("offer_negotiations")
+}
+
+model OfferRound {
+  id String @id @default(cuid())
+
+  negotiationId String           @map("negotiation_id")
+  negotiation   OfferNegotiation @relation(fields: [negotiationId], references: [id], onDelete: Cascade)
+
+  roundNumber Int        @map("round_number")
+  offeredBy   OfferParty @map("offered_by")
+
+  price    Decimal @db.Decimal(10, 2)
+  quantity Decimal @db.Decimal(10, 2)
+  terms    String? @db.Text
+
+  response     OfferResponse?
+  responseNote String?        @map("response_note")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  respondedAt DateTime? @map("responded_at")
+
+  @@unique([negotiationId, roundNumber])
+  @@index([negotiationId])
+  @@map("offer_rounds")
+}
+
+model InspectionRequest {
+  id String @id @default(cuid())
+
+  tradeOperationId String?         @map("trade_operation_id")
+  tradeOperation   TradeOperation? @relation(fields: [tradeOperationId], references: [id])
+
+  saleListingId String      @map("sale_listing_id")
+  saleListing   SaleListing @relation(fields: [saleListingId], references: [id])
+
+  inspectorId String? @map("inspector_id")
+  inspector   User?   @relation("InspectorAssignments", fields: [inspectorId], references: [id])
+
+  // Priority and scheduling
+  priority      InspectionPriority @default(MEDIUM)
+  requestedDate DateTime?          @map("requested_date")
+  scheduledDate DateTime?          @map("scheduled_date")
+  completedDate DateTime?          @map("completed_date")
+
+  // Location
+  latitude  Float
+  longitude Float
+  address   String?
+
+  // Results
+  status             InspectionStatus @default(PENDING)
+  qualityScore       Int?             @map("quality_score")
+  verificationResult Json?            @map("verification_result")
+  notes              String?          @db.Text
+  photos             String[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([tradeOperationId])
+  @@index([saleListingId])
+  @@index([inspectorId])
+  @@index([status])
+  @@index([priority])
+  @@map("inspection_requests")
+}
+
+model TransportRequest {
+  id            String @id @default(cuid())
+  requestNumber String @unique @map("request_number")
+
+  tradeOperationId String         @unique @map("trade_operation_id") // One request per trade
+  tradeOperation   TradeOperation @relation(fields: [tradeOperationId], references: [id], onDelete: Cascade)
+
+  // Transport requirements
+  totalWeight         Float      @map("total_weight") // Total tons to transport
+  requiredVehicleType TruckType? @map("required_vehicle_type")
+  specialRequirements String[]   @map("special_requirements")
+
+  // Route information
+  pickupPoints      Json   @map("pickup_points") // Array of {lat, lng, sellerId, quantity, address}
+  deliveryPoint     Json   @map("delivery_point") // {lat, lng, addressId, address}
+  estimatedDistance Float? @map("estimated_distance") // Total km
+
+  // Timeline
+  pickupWindowStart DateTime?    @map("pickup_window_start")
+  pickupWindowEnd   DateTime?    @map("pickup_window_end")
+  deliveryDeadline  DateTime?    @map("delivery_deadline")
+  urgencyLevel      UrgencyLevel @default(STANDARD) @map("urgency_level")
+
+  // Status and bidding
+  status          TransportRequestStatus @default(OPEN)
+  biddingDeadline DateTime               @map("bidding_deadline")
+  maxBudget       Decimal?               @map("max_budget") @db.Decimal(10, 2)
+
+  // Selected bid (when assigned)
+  selectedBidId String?       @unique @map("selected_bid_id")
+  selectedBid   TransportBid? @relation("SelectedBid", fields: [selectedBidId], references: [id])
+
+  // Related bids
+  bids TransportBid[] @relation("RequestBids")
+
+  // Transport job (when assigned)
+  transportJob TransportJob?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([urgencyLevel])
+  @@index([biddingDeadline])
+  @@map("transport_requests")
+}
+
+model TransportBid {
+  id String @id @default(cuid())
+
+  transportRequestId String           @map("transport_request_id")
+  transportRequest   TransportRequest @relation("RequestBids", fields: [transportRequestId], references: [id], onDelete: Cascade)
+
+  tradeOperationId String         @map("trade_operation_id")
+  tradeOperation   TradeOperation @relation(fields: [tradeOperationId], references: [id], onDelete: Cascade)
+
+  transporterId String @map("transporter_id")
+  transporter   User   @relation(fields: [transporterId], references: [id])
+
+  // Link to transport company (for external bids)
+  transportCompanyId String?           @map("transport_company_id")
+  transportCompany   TransportCompany? @relation(fields: [transportCompanyId], references: [id])
+
+  // Bid details
+  bidAmount         Decimal   @map("bid_amount") @db.Decimal(10, 2)
+  estimatedDuration Int       @map("estimated_duration") // in hours
+  vehicleType       TruckType @map("vehicle_type")
+  vehicleCapacity   Float     @map("vehicle_capacity")
+
+  // Vehicle assignment
+  assignedTruckId String? @map("assigned_truck_id")
+  assignedTruck   Truck?  @relation(fields: [assignedTruckId], references: [id])
+
+  specialEquipment  String[] @map("special_equipment")
+  insuranceCoverage Decimal? @map("insurance_coverage") @db.Decimal(10, 2)
+  proposedRoute     Json?    @map("proposed_route")
+  pickupSchedule    Json?    @map("pickup_schedule") // Detailed schedule for multiple pickups
+
+  status BidStatus @default(PENDING)
+
+  // Bid lifecycle
+  submittedAt DateTime  @default(now()) @map("submitted_at")
+  expiresAt   DateTime  @map("expires_at")
+  evaluatedAt DateTime? @map("evaluated_at")
+  acceptedAt  DateTime? @map("accepted_at")
+
+  // If this bid is selected
+  selectedRequest TransportRequest? @relation("SelectedBid")
+
+  // Transport job (when bid is accepted)
+  transportJob TransportJob?
+
+  @@index([transportRequestId])
+  @@index([tradeOperationId])
+  @@index([transporterId])
+  @@index([status])
+  @@map("transport_bids")
+}
+
+model TransportJob {
+  id        String @id @default(cuid())
+  jobNumber String @unique @map("job_number")
+
+  transportRequestId String           @unique @map("transport_request_id")
+  transportRequest   TransportRequest @relation(fields: [transportRequestId], references: [id])
+
+  transportBidId String       @unique @map("transport_bid_id")
+  transportBid   TransportBid @relation(fields: [transportBidId], references: [id])
+
+  tradeOperationId String         @map("trade_operation_id")
+  tradeOperation   TradeOperation @relation(fields: [tradeOperationId], references: [id])
+
+  transporterId String @map("transporter_id")
+  transporter   User   @relation(fields: [transporterId], references: [id])
+
+  // Driver assignment
+  assignedDriverId String? @map("assigned_driver_id")
+  assignedDriver   Driver? @relation("DriverJobHistory", fields: [assignedDriverId], references: [id])
+
+  // Current driver job (opposite relation)
+  currentDriverJob Driver? @relation("CurrentDriverJob")
+
+  // Company tracking (for external jobs)
+  transportCompanyId String?           @map("transport_company_id")
+  transportCompany   TransportCompany? @relation(fields: [transportCompanyId], references: [id])
+
+  // Job status and timeline
+  status TransportJobStatus @default(ASSIGNED)
+
+  // Pickup tracking
+  pickupsCompleted   Json    @default("[]") @map("pickups_completed") // Array of completed pickup records
+  allPickupsComplete Boolean @default(false) @map("all_pickups_complete")
+
+  // Delivery tracking  
+  currentLocation  Json?     @map("current_location") // {lat, lng, timestamp, address}
+  estimatedArrival DateTime? @map("estimated_arrival")
+  actualDelivery   DateTime? @map("actual_delivery")
+
+  // Documentation
+  pickupPhotos    String[] @map("pickup_photos")
+  deliveryPhotos  String[] @map("delivery_photos")
+  proofOfDelivery String?  @map("proof_of_delivery") // Document URL
+
+  // Performance metrics
+  onTimePickup   Boolean? @map("on_time_pickup")
+  onTimeDelivery Boolean? @map("on_time_delivery")
+  customerRating Int?     @map("customer_rating") // 1-5 stars
+  notes          String?  @db.Text
+
+  startedAt   DateTime? @map("started_at")
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([transporterId])
+  @@index([tradeOperationId])
+  @@map("transport_jobs")
+}
+
+model TradeStateHistory {
+  id String @id @default(cuid())
+
+  tradeOperationId String         @map("trade_operation_id")
+  tradeOperation   TradeOperation @relation(fields: [tradeOperationId], references: [id], onDelete: Cascade)
+
+  fromPhase  TradePhase?  @map("from_phase")
+  toPhase    TradePhase   @map("to_phase")
+  fromStatus TradeStatus? @map("from_status")
+  toStatus   TradeStatus? @map("to_status")
+
+  changedBy String @map("changed_by")
+  user      User   @relation(fields: [changedBy], references: [id])
+
+  reason   String?
+  metadata Json?
+
+  changedAt DateTime @default(now()) @map("changed_at")
+
+  @@index([tradeOperationId])
+  @@index([changedBy])
+  @@index([changedAt])
+  @@map("trade_state_history")
+}
+
+model TradeNote {
+  id String @id @default(cuid())
+
+  tradeOperationId String         @map("trade_operation_id")
+  tradeOperation   TradeOperation @relation(fields: [tradeOperationId], references: [id], onDelete: Cascade)
+
+  authorId String @map("author_id")
+  author   User   @relation(fields: [authorId], references: [id])
+
+  content     String   @db.Text
+  isInternal  Boolean  @default(true) @map("is_internal")
+  attachments String[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([tradeOperationId])
+  @@index([authorId])
+  @@map("trade_notes")
+}
+
+// ==================== PROFIT CALCULATION MODELS ====================
+
+model TransportCostCalculation {
+  id String @id @default(cuid())
+
+  tradeOperationId String         @map("trade_operation_id")
+  tradeOperation   TradeOperation @relation(fields: [tradeOperationId], references: [id], onDelete: Cascade)
+
+  // Route details
+  pickupPoints  Json  @map("pickup_points") // Array of {lat, lng, sellerId, quantity}
+  deliveryPoint Json  @map("delivery_point") // {lat, lng, addressId}
+  optimalRoute  Json? @map("optimal_route") // Calculated optimal sequence
+  totalDistance Float @map("total_distance") // Total km
+
+  // Cost breakdown
+  baseRatePerKm    Decimal    @map("base_rate_per_km") @db.Decimal(10, 4) // €0.15 default
+  vehicleType      TruckType? @map("vehicle_type")
+  distanceCost     Decimal    @map("distance_cost") @db.Decimal(10, 2)
+  loadingCosts     Decimal?   @map("loading_costs") @db.Decimal(10, 2)
+  urgencySurcharge Decimal?   @map("urgency_surcharge") @db.Decimal(10, 2)
+  totalCost        Decimal    @map("total_cost") @db.Decimal(10, 2)
+
+  // Metadata
+  calculatedBy String   @map("calculated_by")
+  user         User     @relation(fields: [calculatedBy], references: [id])
+  calculatedAt DateTime @default(now()) @map("calculated_at")
+
+  @@index([tradeOperationId])
+  @@map("transport_cost_calculations")
+}
+
+model ProfitEstimation {
+  id String @id @default(cuid())
+
+  tradeOperationId String         @map("trade_operation_id")
+  tradeOperation   TradeOperation @relation(fields: [tradeOperationId], references: [id], onDelete: Cascade)
+
+  // Snapshot of negotiation state
+  proposedBuyerPrice   Decimal @map("proposed_buyer_price") @db.Decimal(10, 2)
+  proposedSellerPrices Json    @map("proposed_seller_prices") // Array of {sellerId, price, quantity}
+
+  // Calculated metrics
+  estimatedRevenue       Decimal @map("estimated_revenue") @db.Decimal(10, 2)
+  estimatedPurchaseCost  Decimal @map("estimated_purchase_cost") @db.Decimal(10, 2)
+  estimatedTransportCost Decimal @map("estimated_transport_cost") @db.Decimal(10, 2)
+  estimatedProfit        Decimal @map("estimated_profit") @db.Decimal(10, 2)
+  profitMargin           Float   @map("profit_margin") // Percentage
+
+  // Risk assessment
+  priceVolatilityRisk Float? @map("price_volatility_risk") // 0-100
+  qualityRisk         Float? @map("quality_risk") // 0-100
+  transportRisk       Float? @map("transport_risk") // 0-100
+  overallRisk         Float? @map("overall_risk") // 0-100
+
+  // Metadata
+  notes     String?  @db.Text
+  createdBy String   @map("created_by")
+  user      User     @relation(fields: [createdBy], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([tradeOperationId])
+  @@index([createdAt])
+  @@map("profit_estimations")
+}
+
+model TransportCostSettings {
+  id String @id @default(cuid())
+
+  // Base rates
+  baseRatePerKm Decimal @default(0.15) @map("base_rate_per_km") @db.Decimal(10, 4)
+
+  // Vehicle type multipliers
+  flatbedMultiplier      Float @default(1.0) @map("flatbed_multiplier")
+  refrigeratedMultiplier Float @default(1.3) @map("refrigerated_multiplier")
+  tankerMultiplier       Float @default(1.2) @map("tanker_multiplier")
+  containerMultiplier    Float @default(1.1) @map("container_multiplier")
+
+  // Distance-based pricing tiers
+  tier1MaxKm Int     @default(50) @map("tier1_max_km")
+  tier1Rate  Decimal @default(0.15) @map("tier1_rate") @db.Decimal(10, 4)
+  tier2MaxKm Int     @default(200) @map("tier2_max_km")
+  tier2Rate  Decimal @default(0.13) @map("tier2_rate") @db.Decimal(10, 4)
+  tier3Rate  Decimal @default(0.11) @map("tier3_rate") @db.Decimal(10, 4) // 200km+
+
+  // Additional costs
+  loadingCostPerTon Decimal @default(0.50) @map("loading_cost_per_ton") @db.Decimal(10, 2)
+  urgencySurcharge  Float   @default(0.3) @map("urgency_surcharge") // 30% for express
+
+  // Validity period
+  effectiveFrom DateTime  @default(now()) @map("effective_from")
+  effectiveTo   DateTime? @map("effective_to")
+
+  isActive Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, effectiveFrom])
+  @@map("transport_cost_settings")
+}
+
+// ==================== TRANSPORT COMPANY & DRIVER MANAGEMENT MODELS ====================
+
+model TransportCompany {
+  id String @id @default(cuid())
+
+  // Company Profile
+  companyName        String  @unique @map("company_name")
+  registrationNumber String  @unique @map("registration_number")
+  vatNumber          String? @unique @map("vat_number")
+
+  // Contact Information
+  mainEmail String  @unique @map("main_email")
+  mainPhone String  @map("main_phone")
+  website   String?
+
+  // Company Type
+  companyType CompanyType @default(EXTERNAL) @map("company_type")
+  isVerified  Boolean     @default(false) @map("is_verified")
+  verifiedAt  DateTime?   @map("verified_at")
+  verifiedBy  String?     @map("verified_by") // Admin user ID who verified
+
+  // Operating Information
+  operatingRegions String[] @map("operating_regions") // e.g., ["Sofia", "Plovdiv", "Varna"]
+  specializations  String[] // Types of goods they transport
+  fleetSize        Int      @default(0) @map("fleet_size")
+
+  // Performance Metrics
+  totalJobsCompleted Int    @default(0) @map("total_jobs_completed")
+  averageRating      Float? @map("average_rating")
+  onTimeDeliveryRate Float? @map("on_time_delivery_rate")
+
+  // Financial
+  creditLimit    Decimal? @map("credit_limit") @db.Decimal(10, 2)
+  currentBalance Decimal? @map("current_balance") @db.Decimal(10, 2)
+
+  // Relations
+  admins        CompanyAdmin[]
+  drivers       Driver[]
+  trucks        Truck[]
+  transportBids TransportBid[]
+  transportJobs TransportJob[]
+  documents     CompanyDocument[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([companyType])
+  @@index([isVerified])
+  @@map("transport_companies")
+}
+
+model CompanyAdmin {
+  id String @id @default(cuid())
+
+  // Link to User account
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Link to Company
+  transportCompanyId String           @map("transport_company_id")
+  transportCompany   TransportCompany @relation(fields: [transportCompanyId], references: [id], onDelete: Cascade)
+
+  // Admin Level
+  adminLevel AdminLevel @default(MANAGER) @map("admin_level")
+
+  // Permissions
+  canManageDrivers  Boolean @default(true) @map("can_manage_drivers")
+  canManageFleet    Boolean @default(true) @map("can_manage_fleet")
+  canSubmitBids     Boolean @default(true) @map("can_submit_bids")
+  canManageFinances Boolean @default(false) @map("can_manage_finances")
+  canViewReports    Boolean @default(true) @map("can_view_reports")
+
+  // Activity
+  lastActiveAt DateTime? @map("last_active_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([userId, transportCompanyId])
+  @@index([transportCompanyId])
+  @@map("company_admins")
+}
+
+model Driver {
+  id String @id @default(cuid())
+
+  // Driver can be either internal or external
+  driverType DriverType @map("driver_type")
+
+  // For INTERNAL drivers - direct link to User
+  userId String? @unique @map("user_id")
+  user   User?   @relation(fields: [userId], references: [id])
+
+  // For EXTERNAL drivers - link to transport company
+  transportCompanyId String?           @map("transport_company_id")
+  transportCompany   TransportCompany? @relation(fields: [transportCompanyId], references: [id])
+
+  // Driver Profile (for external drivers who don't have user accounts)
+  email       String? @unique
+  phoneNumber String? @unique @map("phone_number")
+  firstName   String? @map("first_name")
+  lastName    String? @map("last_name")
+
+  // License & Compliance
+  licenseNumber     String   @unique @map("license_number")
+  licenseClass      String[] @map("license_class") // ["C", "C+E", "ADR"]
+  licenseExpiryDate DateTime @map("license_expiry_date")
+
+  // Medical & Safety
+  medicalCertificateExpiry DateTime? @map("medical_certificate_expiry")
+  lastSafetyTraining       DateTime? @map("last_safety_training")
+
+  // Current Status
+  status             DriverStatus @default(OFFLINE)
+  isAvailable        Boolean      @default(false) @map("is_available")
+  currentLocation    Json?        @map("current_location") // {lat, lng, timestamp, address}
+  lastLocationUpdate DateTime?    @map("last_location_update")
+
+  // Current Assignment
+  currentJobId String?       @unique @map("current_job_id")
+  currentJob   TransportJob? @relation("CurrentDriverJob", fields: [currentJobId], references: [id])
+
+  // Performance
+  totalJobs     Int    @default(0) @map("total_jobs")
+  totalDistance Float  @default(0) @map("total_distance") // km
+  averageRating Float? @map("average_rating")
+  onTimeRate    Float? @map("on_time_rate")
+
+  // Working Hours (simplified - full compliance tracking can be added later)
+  weeklyHoursWorked Float     @default(0) @map("weekly_hours_worked")
+  lastRestPeriod    DateTime? @map("last_rest_period")
+
+  // Relations
+  assignedTruck Truck?           @relation("CurrentDriver")
+  jobHistory    TransportJob[]   @relation("DriverJobHistory")
+  documents     DriverDocument[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([driverType])
+  @@index([transportCompanyId])
+  @@index([status])
+  @@index([isAvailable])
+  @@map("drivers")
+}
+
+model CompanyDocument {
+  id String @id @default(cuid())
+
+  transportCompanyId String           @map("transport_company_id")
+  transportCompany   TransportCompany @relation(fields: [transportCompanyId], references: [id], onDelete: Cascade)
+
+  // Document details
+  documentType   CompanyDocumentType @map("document_type")
+  documentNumber String?             @map("document_number")
+  documentUrl    String              @map("document_url") // Cloudinary URL
+
+  // Validity
+  issuedDate DateTime? @map("issued_date")
+  expiryDate DateTime? @map("expiry_date")
+
+  // Verification
+  isVerified Boolean   @default(false) @map("is_verified")
+  verifiedAt DateTime? @map("verified_at")
+  verifiedBy String?   @map("verified_by") // Admin user ID
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([transportCompanyId])
+  @@index([documentType])
+  @@map("company_documents")
+}
+
+model DriverDocument {
+  id String @id @default(cuid())
+
+  driverId String @map("driver_id")
+  driver   Driver @relation(fields: [driverId], references: [id], onDelete: Cascade)
+
+  // Document details
+  documentType   DriverDocumentType @map("document_type")
+  documentNumber String?            @map("document_number")
+  documentUrl    String             @map("document_url") // Cloudinary URL
+
+  // Validity
+  issuedDate DateTime? @map("issued_date")
+  expiryDate DateTime? @map("expiry_date")
+
+  // Verification
+  isVerified Boolean   @default(false) @map("is_verified")
+  verifiedAt DateTime? @map("verified_at")
+  verifiedBy String?   @map("verified_by")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([driverId])
+  @@index([documentType])
+  @@map("driver_documents")
+}
+
+// ==================== NEW TRADE OPERATION ENUMS ====================
+
+enum TradePhase {
+  INITIATION
+  SELLER_MATCHING
+  SELLER_NEGOTIATION
+  INSPECTION_PENDING
+  TRANSPORT_MATCHING
+  TRANSPORT_BIDDING
+  IN_TRANSIT
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+enum TradeStatus {
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+  DISPUTED
+}
+
+enum SellerStatus {
+  INVITED
+  NEGOTIATING
+  ACCEPTED
   REJECTED
+  CONFIRMED
+  WITHDRAWN
+  FAILED_INSPECTION
+}
+
+enum TransporterStatus {
+  INVITED
+  BIDDING
+  SELECTED
+  CONFIRMED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+enum NegotiationStatus {
+  PENDING // Initial offer sent, awaiting response
+  ACCEPTED // Seller accepted the offer
+  REJECTED // Seller rejected the offer
+  COUNTERED // Seller made a counter-offer
+  EXPIRED // 48 hours passed without response
+  WITHDRAWN // Admin cancelled the offer
+}
+
+enum OfferParty {
+  BUYER
+  SELLER
+  PLATFORM
+}
+
+enum OfferResponse {
+  ACCEPTED
+  REJECTED
+  COUNTERED
+}
+
+enum InspectionPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum InspectionStatus {
+  PENDING
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  WITHDRAWN
+}
+
+enum TransportRequestStatus {
+  OPEN // Accepting bids
+  BIDDING // Active bidding period
+  EVALUATING // Admin reviewing bids
+  ASSIGNED // Transporter selected
+  IN_PROGRESS // Transport started
+  COMPLETED // Delivery completed
+  CANCELLED // Request cancelled
+}
+
+enum UrgencyLevel {
+  STANDARD // Normal timeline
+  URGENT // Fast delivery needed
+  EXPRESS // Same day/next day
+  EMERGENCY // Critical emergency transport
+}
+
+enum TransportJobStatus {
+  ASSIGNED // Job assigned to transporter
+  STARTED // Transporter started journey
+  PICKING_UP // Currently at pickup locations
+  IN_TRANSIT // Transporting goods
+  DELIVERING // At delivery location
+  COMPLETED // Successfully delivered
+  DELAYED // Behind schedule
+  CANCELLED // Job cancelled
+}
+
+// ==================== TRANSPORT COMPANY & DRIVER MANAGEMENT ENUMS ====================
+
+enum CompanyType {
+  INTERNAL // Agro-Trade's own fleet
+  EXTERNAL // Partner transport companies
+}
+
+enum DriverType {
+  INTERNAL // Agro-Trade employee drivers
+  EXTERNAL // Drivers from partner companies
+}
+
+enum AdminLevel {
+  OWNER // Company owner
+  MANAGER // Fleet manager
+  DISPATCHER // Can assign drivers
+  VIEWER // Read-only access
+}
+
+enum OwnerType {
+  AGROTRADE // Owned by Agro-Trade
+  COMPANY // Owned by transport company
+  INDIVIDUAL // Owner-operator
+}
+
+enum DriverStatus {
+  OFFLINE
+  AVAILABLE
+  ON_BREAK
+  ASSIGNED
+  EN_ROUTE
+  AT_PICKUP
+  IN_TRANSIT
+  AT_DELIVERY
+  COMPLETED
+}
+
+enum CompanyDocumentType {
+  REGISTRATION_CERTIFICATE
+  OPERATING_LICENSE
+  INSURANCE_CERTIFICATE
+  TAX_CERTIFICATE
+  SAFETY_CERTIFICATE
+  OTHER
+}
+
+enum DriverDocumentType {
+  DRIVING_LICENSE
+  MEDICAL_CERTIFICATE
+  TRAINING_CERTIFICATE
+  IDENTITY_CARD
+  OTHER
 }
