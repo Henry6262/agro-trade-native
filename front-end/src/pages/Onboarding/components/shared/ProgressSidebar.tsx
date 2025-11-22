@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, Animated, Platform } from 'react-native';
+import { View, Text, Animated } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Check, Leaf } from 'lucide-react-native';
 import type { OnboardingStep } from '@shared/types/onboarding';
 
@@ -13,9 +14,10 @@ interface ProgressSidebarProps {
 export function ProgressSidebar({
   steps,
   currentStepIndex,
-  progressLineHeight,
-  isAnimating,
+  progressLineHeight: _progressLineHeight,
+  isAnimating: _isAnimating,
 }: ProgressSidebarProps) {
+  const insets = useSafeAreaInsets();
   const progressAnimation = useRef(new Animated.Value(0)).current;
   const pulseAnimation = useRef(new Animated.Value(1)).current;
   const glowAnimation = useRef(new Animated.Value(0)).current;
@@ -280,22 +282,10 @@ export function ProgressSidebar({
                     fontWeight: isCurrent ? '600' : '500',
                     color: isCompleted ? '#22C55E' : isCurrent ? '#FBBF24' : '#9CA3AF',
                     textAlign: 'center',
-                    marginBottom: 2,
                   }}
                   numberOfLines={2}
                 >
                   {step.title}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 8,
-                    color: isCurrent ? '#9CA3AF' : '#6B7280',
-                    textAlign: 'center',
-                    opacity: isCurrent ? 1 : 0.7,
-                  }}
-                  numberOfLines={2}
-                >
-                  {step.description}
                 </Text>
               </View>
             </View>
@@ -307,7 +297,7 @@ export function ProgressSidebar({
       <View
         style={{
           position: 'absolute',
-          bottom: 24,
+          bottom: insets.bottom + 24,
           alignItems: 'center',
         }}
       >

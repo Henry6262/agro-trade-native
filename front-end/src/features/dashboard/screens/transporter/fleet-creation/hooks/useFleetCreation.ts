@@ -10,7 +10,7 @@ import {
 import {
   useCreateTruck,
   useCreateDriver,
-} from '../../../../../pages/Dashboard/sections/Transporter/features/Fleet/hooks';
+} from '../../../../../../pages/Dashboard/sections/Transporter/features/Fleet/hooks';
 
 const initialState: FleetCreationState = {
   currentStep: 'type-selection',

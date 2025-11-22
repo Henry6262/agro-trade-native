@@ -8,6 +8,7 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ContainerProps {
   children: React.ReactNode;
@@ -51,6 +52,7 @@ export const Container: React.FC<ContainerProps> = ({
   noPadding = false,
   backgroundColor = '#000000',
 }) => {
+  const insets = useSafeAreaInsets();
   const { width: screenWidth } = Dimensions.get('window');
 
   const containerStyle: StyleProp<ViewStyle> = [
@@ -66,7 +68,7 @@ export const Container: React.FC<ContainerProps> = ({
       flexGrow: 1,
       paddingHorizontal: noPadding ? 0 : Platform.OS === 'web' && screenWidth > 768 ? 24 : 16,
       paddingVertical: noPadding ? 0 : 16,
-      paddingBottom: noPadding ? 0 : Platform.OS === 'ios' ? 34 : 16, // Account for iPhone bottom safe area
+      paddingBottom: noPadding ? 0 : insets.bottom + 16, // Dynamic safe area handling
     },
     centered && {
       alignItems: 'center',
@@ -79,7 +81,6 @@ export const Container: React.FC<ContainerProps> = ({
     contentContainerStyle,
   ];
 
-  const ContentWrapper = scroll ? ScrollView : View;
   const WrapperComponent = safeArea ? SafeAreaView : View;
 
   if (scroll) {

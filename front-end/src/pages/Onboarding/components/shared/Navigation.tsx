@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, Platform, Dimensions } from 'react-native';
+import { View, TouchableOpacity, Text, Dimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 
 interface NavigationProps {
@@ -19,6 +20,7 @@ export function Navigation({
   onBack,
   onNext,
 }: NavigationProps) {
+  const insets = useSafeAreaInsets();
   const isBackDisabled = currentStepIndex === 0 || isAnimating;
   const isNextDisabled = !canProceedToNext || currentStepIndex === totalSteps - 1 || isAnimating;
   const { width } = Dimensions.get('window');
@@ -28,10 +30,10 @@ export function Navigation({
     <View
       className={`
         absolute bottom-0 left-0 right-0 z-[9999] border-t border-gray-600/80 bg-gray-900/[0.98]
-        ${isMobile ? 'px-3 py-3 pb-3' : 'px-4 py-4'}
-        ${Platform.OS === 'ios' ? 'pb-6' : ''}
+        ${isMobile ? 'px-3 py-3' : 'px-4 py-4'}
       `}
       style={{
+        paddingBottom: insets.bottom + 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.5,
@@ -39,7 +41,7 @@ export function Navigation({
         elevation: 20,
       }}
     >
-      <View className="flex-row justify-between max-w-4xl self-center w-full">
+      <View className="flex-row justify-between w-full">
         <TouchableOpacity
           className={`
             flex-row items-center bg-gray-800/90 border border-gray-600

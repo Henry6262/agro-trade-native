@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, ScrollView, Dimensions, ViewStyle } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface OnboardingLayoutProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   style,
   contentStyle,
 }) => {
+  const insets = useSafeAreaInsets();
   const { width } = Dimensions.get('window');
 
   // Calculate 10% margins for left and right
@@ -28,8 +30,8 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   const contentContainerStyle: ViewStyle = {
     flexGrow: 1,
     paddingHorizontal: horizontalMargin,
-    paddingTop: 20,
-    paddingBottom: 120, // Increased to account for navigation buttons
+    paddingTop: insets.top + 20,
+    paddingBottom: 120, // Space for navigation buttons (already has safe area in Navigation component)
     ...contentStyle,
   };
 
