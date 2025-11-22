@@ -1,0 +1,581 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model base_demands {
+  id                 String          @id
+  base_id            String
+  user_id            String
+  product_id         String
+  required_quantity  Decimal         @db.Decimal(10, 2)
+  unit               ProductUnit
+  urgency            String?
+  quality_grade      String?
+  specifications     Json?
+  max_price_per_unit Decimal?        @db.Decimal(10, 2)
+  needed_by          DateTime?
+  valid_until        DateTime?
+  fulfilled_quantity Decimal?        @db.Decimal(10, 2)
+  remaining_quantity Decimal?        @db.Decimal(10, 2)
+  created_at         DateTime        @default(now())
+  updated_at         DateTime
+  bases              bases           @relation(fields: [base_id], references: [id], onDelete: Cascade)
+  product_catalog    product_catalog @relation(fields: [product_id], references: [id])
+  users              users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([base_id])
+  @@index([product_id])
+}
+
+model base_stocks {
+  id               String          @id
+  base_id          String
+  user_id          String
+  product_id       String
+  quantity         Decimal         @db.Decimal(10, 2)
+  unit             ProductUnit
+  status           StockStatus     @default(AVAILABLE)
+  quality_grade    String?
+  harvest_date     DateTime?
+  expiry_date      DateTime?
+  batch_number     String?
+  storage_location String?
+  temperature      Float?
+  humidity         Float?
+  price_per_unit   Decimal?        @db.Decimal(10, 2)
+  notes            String?
+  last_inspection  DateTime?
+  created_at       DateTime        @default(now())
+  updated_at       DateTime
+  bases            bases           @relation(fields: [base_id], references: [id], onDelete: Cascade)
+  product_catalog  product_catalog @relation(fields: [product_id], references: [id])
+  users            users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([base_id, product_id, batch_number])
+  @@index([base_id])
+  @@index([product_id])
+  @@index([status])
+}
+
+model bases {
+  id               String             @id
+  user_id          String
+  name             String
+  code             String?
+  type             BaseType
+  is_primary       Boolean            @default(false)
+  is_active        Boolean            @default(true)
+  address          String
+  city             String
+  region           String?
+  country          String             @default("Bulgaria")
+  postal_code      String?
+  latitude         Float
+  longitude        Float
+  contact_person   String?
+  contact_phone    String?
+  contact_email    String?
+  storage_capacity Decimal?           @db.Decimal(10, 2)
+  current_usage    Decimal?           @db.Decimal(10, 2)
+  features         Json?
+  certifications   Json?
+  operating_hours  Json?
+  created_at       DateTime           @default(now())
+  updated_at       DateTime
+  base_demands     base_demands[]
+  base_stocks      base_stocks[]
+  users            users              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product_listings product_listings[]
+
+  @@unique([user_id, code])
+  @@index([is_active])
+  @@index([latitude, longitude])
+  @@index([user_id])
+}
+
+model buyer_profiles {
+  user_id         String   @id
+  company_name    String?
+  vat_id          String?
+  billing_address Json?
+  payment_method  Json?
+  created_at      DateTime @default(now())
+  updated_at      DateTime
+  users           users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model cities {
+  id                     String                   @id
+  region_id              String
+  name                   String
+  latitude               Float
+  longitude              Float
+  population             Int?
+  is_capital             Boolean                  @default(false)
+  is_active              Boolean                  @default(true)
+  created_at             DateTime                 @default(now())
+  updated_at             DateTime
+  regions                regions                  @relation(fields: [region_id], references: [id], onDelete: Cascade)
+  city_pricing_zones     city_pricing_zones[]
+  user_location_profiles user_location_profiles[]
+
+  @@unique([region_id, name])
+  @@index([latitude, longitude])
+  @@index([region_id])
+}
+
+model city_pricing_zones {
+  city_id         String
+  pricing_zone_id String
+  priority        Int           @default(1)
+  is_default      Boolean       @default(false)
+  created_at      DateTime      @default(now())
+  cities          cities        @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  pricing_zones   pricing_zones @relation(fields: [pricing_zone_id], references: [id], onDelete: Cascade)
+
+  @@id([city_id, pricing_zone_id])
+  @@index([city_id])
+  @@index([pricing_zone_id])
+}
+
+model company_info {
+  user_id          String   @id
+  company_name     String
+  vat_number       String?
+  business_license String?
+  company_address  Json?
+  website          String?
+  established_year Int?
+  created_at       DateTime @default(now())
+  updated_at       DateTime
+  users            users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model countries {
+  id            String    @id
+  name          String    @unique
+  code          String    @unique
+  flag_emoji    String
+  currency_code String
+  is_active     Boolean   @default(true)
+  sort_order    Int       @default(0)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime
+  regions       regions[]
+}
+
+model farmer_profiles {
+  user_id          String   @id
+  farm_name        String?
+  location_address String?
+  location_lat     Float?
+  location_lng     Float?
+  business_id      String?
+  iban             String?
+  certifications   Json?
+  created_at       DateTime @default(now())
+  updated_at       DateTime
+  users            users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model fleet_vehicles {
+  id               String    @id
+  transporter_id   String
+  plate_number     String
+  vehicle_type     TruckType
+  capacity_kg      Int
+  year             Int?
+  make             String?
+  model            String?
+  fuel_type        String?
+  active           Boolean   @default(true)
+  registration_doc String?
+  insurance_doc    String?
+  license_doc      String?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime
+  users            users     @relation(fields: [transporter_id], references: [id], onDelete: Cascade)
+
+  @@index([transporter_id])
+}
+
+model kyc_documents {
+  id           String             @id
+  user_id      String
+  doc_type     DocumentType
+  doc_url      String
+  status       VerificationStatus @default(PENDING)
+  submitted_at DateTime           @default(now())
+  reviewed_at  DateTime?
+  review_notes String?
+  users        users              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([user_id])
+}
+
+model market_conditions {
+  id              String        @id
+  pricing_zone_id String
+  date            DateTime      @db.Date
+  supply_level    Int
+  demand_level    Int
+  weather_impact  Float?
+  transport_cost  Float?
+  notes           String?
+  data_source     String?
+  created_at      DateTime      @default(now())
+  updated_by      String?
+  pricing_zones   pricing_zones @relation(fields: [pricing_zone_id], references: [id], onDelete: Cascade)
+
+  @@unique([pricing_zone_id, date])
+  @@index([date])
+  @@index([pricing_zone_id])
+}
+
+model pricing_zones {
+  id                 String               @id
+  name               String               @unique
+  description        String?
+  color              String?
+  is_active          Boolean              @default(true)
+  market_size        String?
+  transport_access   String?
+  storage_capacity   String?
+  created_at         DateTime             @default(now())
+  updated_at         DateTime
+  city_pricing_zones city_pricing_zones[]
+  market_conditions  market_conditions[]
+  product_prices     product_prices[]
+  seasonal_pricing   seasonal_pricing[]
+
+  @@index([is_active])
+}
+
+model product_catalog {
+  id                      String             @id
+  category                ProductCategory    @unique
+  name                    String
+  display_name            String
+  description             String?
+  image                   String?
+  nutritional_info        String?
+  use_cases               Json?
+  harvest_season          String?
+  storage_recommendations String?
+  price_range_min         Decimal?           @db.Decimal(10, 2)
+  price_range_max         Decimal?           @db.Decimal(10, 2)
+  default_unit            ProductUnit        @default(TON)
+  quality_grades          Json?
+  certifications          Json?
+  specifications          Json?
+  is_active               Boolean            @default(true)
+  sort_order              Int                @default(0)
+  created_at              DateTime           @default(now())
+  updated_at              DateTime
+  base_demands            base_demands[]
+  base_stocks             base_stocks[]
+  product_listings        product_listings[]
+  product_prices          product_prices[]
+  seasonal_pricing        seasonal_pricing[]
+
+  @@index([is_active])
+  @@index([sort_order])
+}
+
+model product_listings {
+  id                 String          @id
+  product_id         String
+  user_id            String
+  listing_type       ListingType
+  title              String?
+  description        String?
+  quantity           Decimal         @db.Decimal(10, 2)
+  unit               ProductUnit
+  price_per_unit     Decimal         @db.Decimal(10, 2)
+  total_value        Decimal         @db.Decimal(12, 2)
+  negotiable         Boolean         @default(true)
+  quality_grade      String?
+  certifications     Json?
+  specifications     Json?
+  location_address   String?
+  location_lat       Float?
+  location_lng       Float?
+  available_from     DateTime?
+  available_to       DateTime?
+  harvest_date       DateTime?
+  delivery_by        DateTime?
+  status             ListingStatus   @default(DRAFT)
+  view_count         Int             @default(0)
+  images             Json?
+  documents          Json?
+  created_at         DateTime        @default(now())
+  updated_at         DateTime
+  expires_at         DateTime?
+  base_id            String?
+  delivery_options   Json?
+  min_order_quantity Decimal?        @db.Decimal(10, 2)
+  split_delivery     Boolean         @default(false)
+  bases              bases?          @relation(fields: [base_id], references: [id])
+  product_catalog    product_catalog @relation(fields: [product_id], references: [id])
+  users              users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([base_id])
+  @@index([created_at])
+  @@index([listing_type])
+  @@index([product_id])
+  @@index([status])
+  @@index([user_id])
+}
+
+model product_prices {
+  id               String          @id
+  product_id       String
+  pricing_zone_id  String
+  min_price        Decimal         @db.Decimal(10, 2)
+  max_price        Decimal         @db.Decimal(10, 2)
+  currency         String          @default("EUR")
+  unit             ProductUnit     @default(TON)
+  effective_date   DateTime        @default(now())
+  expires_date     DateTime?
+  quality_grade    String?
+  confidence_level Float?
+  data_source      String?
+  created_at       DateTime        @default(now())
+  updated_at       DateTime
+  created_by       String?
+  pricing_zones    pricing_zones   @relation(fields: [pricing_zone_id], references: [id], onDelete: Cascade)
+  product_catalog  product_catalog @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_id, pricing_zone_id, quality_grade, effective_date])
+  @@index([effective_date])
+  @@index([product_id, pricing_zone_id])
+}
+
+model products {
+  id             String          @id
+  farmer_id      String
+  category       ProductCategory
+  name           String
+  description    String?
+  quantity       Decimal         @db.Decimal(10, 2)
+  unit           ProductUnit     @default(TON)
+  price_per_unit Decimal         @db.Decimal(10, 2)
+  location       String?
+  harvest_date   DateTime?
+  status         ProductStatus   @default(AVAILABLE)
+  created_at     DateTime        @default(now())
+  updated_at     DateTime
+  users          users           @relation(fields: [farmer_id], references: [id], onDelete: Cascade)
+
+  @@index([category])
+  @@index([farmer_id])
+  @@index([status])
+}
+
+model regions {
+  id         String    @id
+  country_id String
+  name       String
+  code       String?
+  is_active  Boolean   @default(true)
+  created_at DateTime  @default(now())
+  updated_at DateTime
+  cities     cities[]
+  countries  countries @relation(fields: [country_id], references: [id], onDelete: Cascade)
+
+  @@unique([country_id, name])
+  @@index([country_id])
+}
+
+model seasonal_pricing {
+  id               String          @id
+  product_id       String
+  pricing_zone_id  String
+  season           String
+  start_month      Int
+  end_month        Int
+  price_multiplier Float
+  description      String?
+  is_active        Boolean         @default(true)
+  created_at       DateTime        @default(now())
+  updated_at       DateTime
+  pricing_zones    pricing_zones   @relation(fields: [pricing_zone_id], references: [id], onDelete: Cascade)
+  product_catalog  product_catalog @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([product_id, pricing_zone_id, season])
+  @@index([product_id, pricing_zone_id])
+}
+
+model transporter_profiles {
+  user_id               String   @id
+  company_name          String?
+  license_number        String?
+  base_location_address String?
+  base_location_lat     Float?
+  base_location_lng     Float?
+  insurance_doc_url     String?
+  iban                  String?
+  created_at            DateTime @default(now())
+  updated_at            DateTime
+  users                 users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model trucks {
+  id             String    @id
+  transporter_id String
+  plate_number   String
+  capacity_kg    Int
+  type           TruckType
+  active         Boolean   @default(true)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime
+  users          users     @relation(fields: [transporter_id], references: [id], onDelete: Cascade)
+
+  @@index([transporter_id])
+}
+
+model user_location_profiles {
+  user_id                String    @id
+  city_id                String?
+  latitude               Float?
+  longitude              Float?
+  address                String?
+  detected_city          String?
+  detected_region        String?
+  detected_country       String?
+  geocoding_source       String?
+  geocoding_accuracy     String?
+  prefers_metric_units   Boolean   @default(true)
+  prefers_local_currency Boolean   @default(true)
+  last_location_update   DateTime?
+  created_at             DateTime  @default(now())
+  updated_at             DateTime
+  cities                 cities?   @relation(fields: [city_id], references: [id])
+  users                  users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([city_id])
+}
+
+model users {
+  id                     String                  @id
+  google_id              String?                 @unique
+  email                  String                  @unique
+  name                   String?
+  phone                  String?
+  role                   UserRole
+  created_at             DateTime                @default(now())
+  updated_at             DateTime
+  base_demands           base_demands[]
+  base_stocks            base_stocks[]
+  bases                  bases[]
+  buyer_profiles         buyer_profiles?
+  company_info           company_info?
+  farmer_profiles        farmer_profiles?
+  fleet_vehicles         fleet_vehicles[]
+  kyc_documents          kyc_documents[]
+  product_listings       product_listings[]
+  products               products[]
+  transporter_profiles   transporter_profiles?
+  trucks                 trucks[]
+  user_location_profiles user_location_profiles?
+}
+
+enum BaseType {
+  WAREHOUSE
+  SILO
+  DEPOT
+  OFFICE
+  PORT
+  FACTORY
+  FARM
+}
+
+enum DocumentType {
+  ID_CARD
+  BUSINESS_LICENSE
+  VAT_CERT
+  INSURANCE
+  OTHER
+}
+
+enum ListingStatus {
+  DRAFT
+  ACTIVE
+  RESERVED
+  SOLD
+  EXPIRED
+  CANCELLED
+}
+
+enum ListingType {
+  SELL
+  BUY
+}
+
+enum NegotiationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COUNTERED
+  EXPIRED
+  WITHDRAWN
+}
+
+enum ProductCategory {
+  WHEAT
+  CORN
+  SUNFLOWER
+  BARLEY
+  OATS
+  RAPESEED
+  PEAS
+  SOYBEAN_MEAL
+  WHEAT_BRAN
+  ALFALFA
+  OTHER
+}
+
+enum ProductStatus {
+  AVAILABLE
+  OUT_OF_STOCK
+  PENDING
+}
+
+enum ProductUnit {
+  TON
+  KG
+}
+
+enum StockStatus {
+  AVAILABLE
+  RESERVED
+  SOLD
+  IN_TRANSIT
+}
+
+enum TruckType {
+  FLATBED
+  TANKER
+  REEFER
+  OTHER
+}
+
+enum UserRole {
+  FARMER
+  BUYER
+  TRANSPORTER
+  ADMIN
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
