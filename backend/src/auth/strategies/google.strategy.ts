@@ -10,21 +10,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
     private configService: ConfigService,
     private authService: AuthService,
   ) {
-    // Determine callback URL based on environment
-    let callbackURL = configService.get("GOOGLE_CALLBACK_URL");
-
-    // In production, use the proper callback URL
-    if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
-      callbackURL = process.env.API_PRODUCTION_URL
-        ? `${process.env.API_PRODUCTION_URL}/auth/google/callback`
-        : "https://be-agro-trade-native.vercel.app/api/auth/google/callback";
-    }
+    // Construct callback URL dynamically from APP_URL
+    const appUrl = configService.get("APP_URL") || "http://localhost:4000";
+    const callbackPath = "/api/auth/google/callback";
+    const callbackURL = `${appUrl}${callbackPath}`;
 
     super({
       clientID: configService.get("GOOGLE_CLIENT_ID"),
       clientSecret: configService.get("GOOGLE_CLIENT_SECRET"),
-      callbackURL:
-        callbackURL || "http://localhost:4000/api/auth/google/callback",
+      callbackURL,
       scope: ["email", "profile"],
     });
   }
