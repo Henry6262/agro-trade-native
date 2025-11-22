@@ -7,6 +7,10 @@
 - **@frontend** – Fixed Seller Offers service: removed misleading TODO comment and mock fallback. Service now properly calls live `/seller/offers` endpoint with correct error handling. Verified backend endpoint exists and is operational.
 - **@all** – EP-03 marked Complete: all role dashboards run on live endpoints; remaining polish (shared stores alignment, extra tests/docs) captured in backlog.
 
+## 2025-11-22
+- **@orchestrator** – Kicked off EP-04 audit: no existing cron/queue/puppeteer automation found under `backend/src`; need blueprint for jobs (timelines, fleet/inspection freshness) and monitoring. Status unchanged; next steps are to draft automation blueprint and infra checklist before implementation.
+- **@mobile** – Pointed production mobile env to Railway backend: `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_API_URL_PRODUCTION` now set to `https://agro-trade-native-production.up.railway.app/api` in `front-end/.env.production` for builds/TestFlight.
+
 ## 2025-11-17
 - **@backend** – Authored backend rulebook (`rules/backend/*`), added enforcement script + `atctl` hook, updated handbook/migration docs. Checker currently warns about missing DTO folders for pricing/products/regions; follow-up tasks queued under EP-01.
 - **@backend** – Added DTO folders + typed responses for pricing/products/regions and restored backend ESLint config. `node scripts/check-backend-rules.mjs` now passes cleanly; `npm run lint` still fails due to long-standing unused-var issues in transport/auth modules.
