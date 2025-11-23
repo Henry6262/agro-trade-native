@@ -47,13 +47,31 @@
     },
     "scheme": "agrotrade",
     "plugins": [
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "agrotrade",
+          "project": "react-native"
+        }
+      ]
     ],
     "owner": "henry6262",
     "extra": {
       "eas": {
         "projectId": "9a2f3b44-4a6b-49e4-a05a-83c3f0a864db"
       }
+    },
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "agrotrade",
+            "project": "react-native"
+          }
+        }
+      ]
     }
   }
 }
