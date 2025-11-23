@@ -88,13 +88,17 @@ export function BuyerMarketRequest({
           </Text>
         </View>
 
-        {/* Delivery Location */}
+        {/* ===== SECTION 1: DELIVERY LOCATION ===== */}
         {userLocation && (
-          <View className="bg-gray-800 rounded-xl p-4 mb-6 border border-gray-700">
+          <View className="bg-gray-800/30 rounded-2xl p-5 mb-6 border border-gray-700/50">
+            <View className="flex-row items-center mb-4">
+              <MapPin size={22} color="#3B82F6" />
+              <Text className="text-white text-xl font-bold ml-2">Delivery Location</Text>
+            </View>
             <View className="flex-row items-center">
               <MapPin size={20} color="#3b82f6" />
               <View className="ml-3 flex-1">
-                <Text className="text-gray-400 text-sm">Delivery Location</Text>
+                <Text className="text-gray-400 text-sm">Delivery To</Text>
                 <Text className="text-white font-semibold">
                   {userLocation.city}
                   {userLocation.country && `, ${userLocation.country}`}
@@ -104,8 +108,14 @@ export function BuyerMarketRequest({
           </View>
         )}
 
-        {/* Product Card with all details */}
-        <View className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 mb-6">
+        {/* ===== SECTION 2: PURCHASE REQUEST DETAILS ===== */}
+        <View className="bg-gray-800/30 rounded-2xl overflow-hidden border border-gray-700/50 mb-6">
+          <View className="p-5 pb-0">
+            <View className="flex-row items-center mb-4">
+              <ShoppingCart size={22} color="#3B82F6" />
+              <Text className="text-white text-xl font-bold ml-2">Purchase Request</Text>
+            </View>
+          </View>
           {/* Product Image */}
           {imageUrl && (
             <View className="relative">
@@ -197,18 +207,16 @@ export function BuyerMarketRequest({
           </View>
         </View>
 
-        {/* Information Notice */}
-        <View className="bg-blue-900/20 rounded-xl p-4 mb-6 border border-blue-700/30">
-          <View className="flex-row">
-            <Info size={20} color="#60a5fa" />
-            <View className="ml-3 flex-1">
-              <Text className="text-blue-400 font-semibold mb-1">How it Works</Text>
-              <Text className="text-blue-300 text-sm">
-                Once submitted, your purchase request will be sent to verified sellers. You'll
-                receive quotes within 24-48 hours and can choose the best offer.
-              </Text>
-            </View>
+        {/* ===== SECTION 3: INFORMATION ===== */}
+        <View className="bg-gray-800/30 rounded-2xl p-5 mb-6 border border-gray-700/50">
+          <View className="flex-row items-center mb-4">
+            <Info size={22} color="#3B82F6" />
+            <Text className="text-white text-xl font-bold ml-2">How it Works</Text>
           </View>
+          <Text className="text-gray-300 text-sm">
+            Once submitted, your purchase request will be sent to verified sellers. You'll
+            receive quotes within 24-48 hours and can choose the best offer.
+          </Text>
         </View>
 
         {/* Action Button */}

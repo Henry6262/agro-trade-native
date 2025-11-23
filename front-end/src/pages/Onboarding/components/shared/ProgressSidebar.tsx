@@ -90,7 +90,7 @@ export function ProgressSidebar({
     <View
       ref={containerRef}
       style={{
-        width: 75,
+        width: 60,
         height: '100%',
         backgroundColor: '#1F2937',
         borderRightWidth: 1,
@@ -100,6 +100,8 @@ export function ProgressSidebar({
         alignItems: 'center',
         position: 'relative',
         overflow: 'hidden',
+        marginLeft: '1%',
+        marginTop: '1%',
       }}
       onLayout={(event) => {
         const { height } = event.nativeEvent.layout;

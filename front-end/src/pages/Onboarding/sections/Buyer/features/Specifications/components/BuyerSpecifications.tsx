@@ -145,8 +145,12 @@ export function BuyerSpecifications({
           </Text>
         </View>
 
-        {/* Product Card */}
-        <View className="bg-gray-800/50 rounded-2xl p-5 mb-6 border border-gray-700">
+        {/* ===== SECTION 1: PRODUCT INFO ===== */}
+        <View className="bg-gray-800/30 rounded-2xl p-5 mb-6 border border-gray-700/50">
+          <View className="flex-row items-center mb-4">
+            <Package size={22} color="#3B82F6" />
+            <Text className="text-white text-xl font-bold ml-2">Selected Product</Text>
+          </View>
           <View className="flex-row items-center">
             {imageUrl ? (
               <Image
@@ -168,10 +172,13 @@ export function BuyerSpecifications({
           </View>
         </View>
 
-        {/* Product Specifications */}
+        {/* ===== SECTION 2: PRODUCT SPECIFICATIONS ===== */}
         {productSpecs && productSpecs.length > 0 ? (
-          <View className="mb-6">
-            <Text className="text-lg font-semibold text-white mb-4">Product Requirements</Text>
+          <View className="bg-gray-800/30 rounded-2xl p-5 mb-6 border border-gray-700/50">
+            <View className="flex-row items-center mb-4">
+              <Package size={22} color="#3B82F6" />
+              <Text className="text-white text-xl font-bold ml-2">Product Requirements</Text>
+            </View>
             <Text className="text-sm text-gray-400 mb-4">
               Specify your requirements for each specification
             </Text>
@@ -189,31 +196,36 @@ export function BuyerSpecifications({
             })}
           </View>
         ) : (
-          <View className="bg-gray-800/50 rounded-xl p-4 mb-6 border border-gray-700">
+          <View className="bg-gray-800/30 rounded-2xl p-5 mb-6 border border-gray-700/50">
+            <View className="flex-row items-center mb-4">
+              <Package size={22} color="#3B82F6" />
+              <Text className="text-white text-xl font-bold ml-2">Product Requirements</Text>
+            </View>
             <Text className="text-gray-400 text-center">
               No specifications available for this product
             </Text>
           </View>
         )}
 
-        {/* Additional Requirements */}
-        <View className="mb-6">
-          <Text className="text-lg font-semibold text-white mb-4">Additional Requirements</Text>
-          <View className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700/50">
-            <Text className="text-white text-sm font-semibold mb-3">
-              Additional Notes or Special Requirements
-            </Text>
-            <TextInput
-              value={additionalNotes}
-              onChangeText={handleNotesChange}
-              placeholder="Enter any additional requirements, quality standards, certification needs, etc."
-              placeholderTextColor="#9CA3AF"
-              multiline
-              numberOfLines={4}
-              className="bg-white rounded-xl px-4 py-3 text-gray-900 min-h-[100px]"
-              textAlignVertical="top"
-            />
+        {/* ===== SECTION 3: ADDITIONAL REQUIREMENTS ===== */}
+        <View className="bg-gray-800/30 rounded-2xl p-5 mb-6 border border-gray-700/50">
+          <View className="flex-row items-center mb-4">
+            <Package size={22} color="#3B82F6" />
+            <Text className="text-white text-xl font-bold ml-2">Additional Requirements</Text>
           </View>
+          <Text className="text-white text-sm font-semibold mb-3">
+            Additional Notes or Special Requirements
+          </Text>
+          <TextInput
+            value={additionalNotes}
+            onChangeText={handleNotesChange}
+            placeholder="Enter any additional requirements, quality standards, certification needs, etc."
+            placeholderTextColor="#9CA3AF"
+            multiline
+            numberOfLines={4}
+            className="bg-white rounded-xl px-4 py-3 text-gray-900 min-h-[100px]"
+            textAlignVertical="top"
+          />
         </View>
       </ScrollView>
     </OnboardingLayout>
