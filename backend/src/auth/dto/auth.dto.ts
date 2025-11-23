@@ -250,3 +250,23 @@ export class AuthProfileResponseDto {
   @ApiPropertyOptional({ type: Object })
   companyContext?: Record<string, any>;
 }
+
+export class PrivyAuthDto {
+  @ApiProperty()
+  @IsString()
+  privyToken: string;
+
+  @ApiProperty()
+  @IsString()
+  role: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsEmail()
+  email?: string | null;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  name?: string | null;
+}

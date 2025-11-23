@@ -52,8 +52,7 @@ export function TransporterListing({ onComplete }: TransporterListingProps) {
             Ready to Transport
           </Text>
           <Text style={{ color: '#9CA3AF', maxWidth: 600, textAlign: 'center', fontSize: 16 }}>
-            Your transportation profile is ready! Review your details and create your listing to
-            start connecting with buyers and sellers.
+            Review your profile and get started
           </Text>
         </View>
 
@@ -303,7 +302,7 @@ export function TransporterListing({ onComplete }: TransporterListingProps) {
             </Text>
           </TouchableOpacity>
           <Text style={{ fontSize: 14, color: '#9CA3AF', marginTop: 12, textAlign: 'center' }}>
-            Sign in with Google to complete your profile and start receiving transport requests
+            Complete setup to start receiving transport requests
           </Text>
         </View>
       </OnboardingLayout>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Modal, Pressable } from 'react-native';
-import { Plus, Truck, Trash2, ChevronDown } from 'lucide-react-native';
+import { Plus, Truck, Trash2, ChevronDown, Minus } from 'lucide-react-native';
 import { Card } from '@shared/components/Card';
 import { Badge } from '@shared/components/Badge';
 import { useOnboardingStore } from '@stores/onboarding.store';
@@ -25,6 +25,8 @@ const truckTypes = [
   'Livestock',
 ];
 
+const PRESET_CAPACITIES = [5, 10, 15, 20, 25];
+
 export function FleetInformation() {
   const { transportData, setFleetInfo } = useOnboardingStore();
   const [newTruck, setNewTruck] = useState({
@@ -35,6 +37,7 @@ export function FleetInformation() {
   const [batchMode, setBatchMode] = useState(true); // Always active
   const [batchCount, setBatchCount] = useState('1');
   const [showTruckTypeModal, setShowTruckTypeModal] = useState(false);
+  const [showCustomCapacity, setShowCustomCapacity] = useState(false);
 
   // Get current fleet from store or initialize empty
   const currentFleet = transportData?.fleetInfo?.vehicleTypes || [];
@@ -97,7 +100,8 @@ export function FleetInformation() {
       });
 
       setNewTruck({ capacity: '', unit: 'tons', type: 'Standard' });
-      setBatchCount('');
+      setBatchCount('1');
+      setShowCustomCapacity(false);
     }
   };
 
@@ -154,8 +158,7 @@ export function FleetInformation() {
             Fleet Information
           </Text>
           <Text style={{ color: '#9CA3AF', maxWidth: 600, textAlign: 'center', fontSize: 16 }}>
-            Tell us about your transportation fleet. Add details about each truck including capacity
-            to help buyers find the right transporter.
+            Add your fleet vehicles
           </Text>
         </View>
 
@@ -218,55 +221,176 @@ export function FleetInformation() {
               </View>
             </View>
 
-            <View style={{ flexDirection: 'row', marginBottom: 16 }}>
-              <View style={{ flex: 1, marginRight: 16 }}>
-                <Text
-                  style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}
-                >
-                  Capacity (tons)
-                </Text>
-                <TextInput
-                  keyboardType="numeric"
-                  placeholder="e.g., 10"
-                  value={newTruck.capacity}
-                  onChangeText={(text) => setNewTruck({ ...newTruck, capacity: text })}
-                  style={{
-                    fontSize: 16,
-                    borderWidth: 1,
-                    borderColor: '#374151',
-                    borderRadius: 8,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    backgroundColor: '#111827',
-                    color: '#FFFFFF',
-                  }}
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
+            {/* Capacity Selection */}
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}>
+                Capacity (tons)
+              </Text>
+              {!showCustomCapacity ? (
+                <View>
+                  {/* Preset Capacities */}
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 8 }}>
+                    {PRESET_CAPACITIES.map((capacity) => (
+                      <TouchableOpacity
+                        key={capacity}
+                        onPress={() => {
+                          setNewTruck({ ...newTruck, capacity: capacity.toString() });
+                          setShowCustomCapacity(false);
+                        }}
+                        style={{
+                          paddingVertical: 12,
+                          paddingHorizontal: 16,
+                          borderRadius: 8,
+                          borderWidth: 2,
+                          borderColor:
+                            newTruck.capacity === capacity.toString() ? '#ea580c' : '#374151',
+                          backgroundColor:
+                            newTruck.capacity === capacity.toString()
+                              ? 'rgba(234, 88, 12, 0.2)'
+                              : '#111827',
+                          marginRight: 8,
+                          marginBottom: 8,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color:
+                              newTruck.capacity === capacity.toString() ? '#ea580c' : '#9CA3AF',
+                            fontWeight: newTruck.capacity === capacity.toString() ? '600' : '400',
+                            fontSize: 16,
+                          }}
+                        >
+                          {capacity}t
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  {/* Custom Option */}
+                  <TouchableOpacity
+                    onPress={() => {
+                      setShowCustomCapacity(true);
+                      setNewTruck({ ...newTruck, capacity: '' });
+                    }}
+                    style={{
+                      paddingVertical: 10,
+                      paddingHorizontal: 16,
+                      borderRadius: 8,
+                      borderWidth: 1,
+                      borderColor: '#374151',
+                      backgroundColor: '#111827',
+                    }}
+                  >
+                    <Text style={{ color: '#9CA3AF', fontSize: 14, textAlign: 'center' }}>
+                      Custom Amount
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <View>
+                  <TextInput
+                    keyboardType="numeric"
+                    placeholder="Enter capacity in tons"
+                    value={newTruck.capacity}
+                    onChangeText={(text) => setNewTruck({ ...newTruck, capacity: text })}
+                    style={{
+                      fontSize: 16,
+                      borderWidth: 2,
+                      borderColor: '#ea580c',
+                      borderRadius: 8,
+                      paddingHorizontal: 12,
+                      paddingVertical: 8,
+                      backgroundColor: '#111827',
+                      color: '#FFFFFF',
+                      marginBottom: 8,
+                    }}
+                    placeholderTextColor="#9CA3AF"
+                    autoFocus
+                  />
+                  <TouchableOpacity
+                    onPress={() => {
+                      setShowCustomCapacity(false);
+                      setNewTruck({ ...newTruck, capacity: '' });
+                    }}
+                    style={{ paddingVertical: 4 }}
+                  >
+                    <Text style={{ color: '#9CA3AF', fontSize: 12, textAlign: 'center' }}>
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
 
-              <View style={{ width: 80, marginRight: 16 }}>
-                <Text
-                  style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}
-                >
-                  Quantity
-                </Text>
-                <TextInput
-                  keyboardType="numeric"
-                  placeholder="1"
-                  value={batchCount}
-                  onChangeText={setBatchCount}
-                  style={{
-                    fontSize: 16,
-                    borderWidth: 1,
-                    borderColor: '#374151',
-                    borderRadius: 8,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    backgroundColor: '#111827',
-                    color: '#FFFFFF',
+            {/* Quantity Counter */}
+            <View style={{ marginBottom: 16 }}>
+              <Text style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}>
+                Quantity
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  backgroundColor: '#111827',
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: '#374151',
+                  paddingVertical: 8,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => {
+                    const currentCount = Number.parseInt(batchCount) || 1;
+                    if (currentCount > 1) {
+                      setBatchCount((currentCount - 1).toString());
+                    }
                   }}
-                  placeholderTextColor="#9CA3AF"
-                />
+                  disabled={Number.parseInt(batchCount) <= 1}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor:
+                      Number.parseInt(batchCount) <= 1 ? 'transparent' : 'rgba(234, 88, 12, 0.2)',
+                    borderRadius: 8,
+                  }}
+                >
+                  <Minus
+                    size={20}
+                    color={Number.parseInt(batchCount) <= 1 ? '#4B5563' : '#ea580c'}
+                  />
+                </TouchableOpacity>
+
+                <Text
+                  style={{
+                    fontSize: 24,
+                    fontWeight: 'bold',
+                    color: '#FFFFFF',
+                    marginHorizontal: 32,
+                    minWidth: 40,
+                    textAlign: 'center',
+                  }}
+                >
+                  {batchCount || '1'}
+                </Text>
+
+                <TouchableOpacity
+                  onPress={() => {
+                    const currentCount = Number.parseInt(batchCount) || 1;
+                    setBatchCount((currentCount + 1).toString());
+                  }}
+                  style={{
+                    width: 40,
+                    height: 40,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'rgba(234, 88, 12, 0.2)',
+                    borderRadius: 8,
+                  }}
+                >
+                  <Plus size={20} color="#ea580c" />
+                </TouchableOpacity>
               </View>
             </View>
 

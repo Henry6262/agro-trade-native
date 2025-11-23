@@ -9,16 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import {
-  MapPin,
-  Package,
-  Edit2,
-  ChevronRight,
-  DollarSign,
-  ShoppingCart,
-  Sparkles,
-  Weight,
-} from 'lucide-react-native';
+import { MapPin, Edit2, DollarSign, Weight } from 'lucide-react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
 import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
@@ -183,41 +174,117 @@ export function QuantityPricingStep() {
           <Text className="text-gray-400">Set your supply quantity and confirm your location</Text>
         </View>
 
-        {/* Product Info */}
-        {product && (
-          <View className="bg-gray-800/50 rounded-xl p-4 mb-6 flex-row items-center">
-            {product.image && (
-              <Image
-                source={{
-                  uri: product.image.startsWith('http')
-                    ? product.image
-                    : `${getApiUrl().replace('/api', '')}/static/${product.image}`,
-                }}
-                style={{ width: 60, height: 60 }}
-                className="rounded-xl mr-4"
-                resizeMode="cover"
-              />
-            )}
-            <View className="flex-1">
-              <Text className="text-white text-lg font-semibold">
-                {product.displayName || product.name}
-              </Text>
-              <Text className="text-gray-400 text-sm">{product.category.replace(/_/g, ' ')}</Text>
-            </View>
+        {/* ===== SECTION 1: QUANTITY ===== */}
+        <View className="bg-gray-800/30 rounded-2xl p-5 mb-6 border border-gray-700/50">
+          <View className="flex-row items-center mb-4">
+            <Weight size={22} color="#10B981" />
+            <Text className="text-white text-xl font-bold ml-2">Supply Quantity</Text>
           </View>
-        )}
 
-        {/* Location Section */}
-        <View className="mb-6">
-          <Text className="text-white text-base font-semibold mb-3">Your Location</Text>
+          {/* Product Info */}
+          {product && (
+            <View className="bg-gray-900/50 rounded-xl p-4 mb-4 flex-row items-center">
+              {product.image && (
+                <Image
+                  source={{
+                    uri: product.image.startsWith('http')
+                      ? product.image
+                      : `${getApiUrl().replace('/api', '')}/static/${product.image}`,
+                  }}
+                  style={{ width: 60, height: 60 }}
+                  className="rounded-xl mr-4"
+                  resizeMode="cover"
+                />
+              )}
+              <View className="flex-1">
+                <Text className="text-white text-lg font-semibold">
+                  {product.displayName || product.name}
+                </Text>
+                <Text className="text-gray-400 text-sm">{product.category.replace(/_/g, ' ')}</Text>
+              </View>
+            </View>
+          )}
+
+          {/* Quantity Selection */}
+          <View>
+            <Text className="text-gray-300 text-sm mb-3">How much can you supply?</Text>
+
+            {/* Preset Quantities */}
+            <View className="flex-row mb-3">
+              {PRESET_QUANTITIES.map((qty) => (
+                <TouchableOpacity
+                  key={qty}
+                  onPress={() => handleQuantitySelect(qty)}
+                  className="flex-1 mx-1"
+                >
+                  <View
+                    className={`py-4 rounded-2xl border-2 ${
+                      selectedQuantity === qty && !showCustomInput
+                        ? 'bg-emerald-600/20 border-emerald-500'
+                        : 'bg-gray-900/50 border-gray-800'
+                    }`}
+                  >
+                    <Text
+                      className={`text-center text-lg font-bold ${
+                        selectedQuantity === qty && !showCustomInput
+                          ? 'text-emerald-400'
+                          : 'text-gray-300'
+                      }`}
+                    >
+                      {qty}/t
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Custom Amount */}
+            {!showCustomInput ? (
+              <TouchableOpacity onPress={handleCustomQuantity}>
+                <View className="py-4 rounded-2xl border-2 bg-gray-900/50 border-gray-800">
+                  <Text className="text-center text-gray-400 font-medium">Custom Amount</Text>
+                </View>
+              </TouchableOpacity>
+            ) : (
+              <View>
+                <TextInput
+                  value={customQuantity}
+                  onChangeText={handleCustomQuantityChange}
+                  placeholder="Enter quantity in tons..."
+                  placeholderTextColor="#6B7280"
+                  keyboardType="numeric"
+                  className="bg-gray-900/50 border-2 border-emerald-500/30 rounded-2xl px-4 py-4 text-white text-center"
+                  autoFocus
+                  returnKeyType="done"
+                />
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowCustomInput(false);
+                    setCustomQuantity('');
+                    setSelectedQuantity(null);
+                  }}
+                  className="mt-2"
+                >
+                  <Text className="text-center text-gray-500 text-sm">Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* ===== SECTION 2: LOCATION ===== */}
+        <View className="bg-gray-800/30 rounded-2xl p-5 mb-6 border border-gray-700/50">
+          <View className="flex-row items-center mb-4">
+            <MapPin size={22} color="#10B981" />
+            <Text className="text-white text-xl font-bold ml-2">Your Location</Text>
+          </View>
 
           {!showManualLocation ? (
             <TouchableOpacity
               onPress={() => setShowManualLocation(true)}
-              className="bg-gray-800/50 rounded-xl p-4 flex-row items-center justify-between"
+              className="bg-gray-900/50 rounded-xl p-4 flex-row items-center justify-between"
             >
               <View className="flex-row items-center flex-1">
-                <MapPin size={20} color="#10B981" />
                 <View className="ml-3 flex-1">
                   {loadingLocation ? (
                     <ActivityIndicator size="small" color="#10B981" />
@@ -237,17 +304,19 @@ export function QuantityPricingStep() {
                   )}
                 </View>
               </View>
-              <Edit2 size={18} color="#6B7280" />
+              <Edit2 size={18} color="#10B981" />
             </TouchableOpacity>
           ) : (
-            <View className="bg-gray-800/50 rounded-xl p-4">
+            <View className="bg-gray-900/50 rounded-xl p-4">
               <TextInput
                 value={manualLocation}
                 onChangeText={setManualLocation}
                 placeholder="Enter your city or region..."
                 placeholderTextColor="#6B7280"
-                className="bg-gray-900/50 rounded-xl px-4 py-3 text-white mb-3"
+                className="bg-gray-800 rounded-xl px-4 py-3 text-white mb-3"
                 autoFocus
+                returnKeyType="done"
+                onSubmitEditing={handleManualLocation}
               />
               <View className="flex-row space-x-3">
                 <TouchableOpacity
@@ -265,104 +334,21 @@ export function QuantityPricingStep() {
               </View>
             </View>
           )}
-        </View>
 
-        {/* Price Display (if location is set) */}
-        {location && priceOffer && (
-          <View className="items-center mb-6">
-            <View className="bg-emerald-600 rounded-full px-6 py-3 flex-row items-center">
-              <DollarSign size={20} color="white" />
-              <Text className="text-white text-xl font-bold mx-2">
-                {priceOffer.min} - {priceOffer.max}
-              </Text>
-              <Text className="text-emerald-100 text-sm">/{product?.defaultUnit || 'TON'}</Text>
-            </View>
-            <Text className="text-gray-400 text-xs mt-2">Price range for your region</Text>
-          </View>
-        )}
-
-        {/* Quantity Selection */}
-        <View className="mb-6">
-          <View className="flex-row items-center mb-3">
-            <Weight size={20} color="white" />
-            <Text className="text-white text-base font-semibold ml-2">
-              How much can you supply?
-            </Text>
-          </View>
-
-          {/* Preset Quantities */}
-          <View className="flex-row mb-3">
-            {PRESET_QUANTITIES.map((qty) => (
-              <TouchableOpacity
-                key={qty}
-                onPress={() => handleQuantitySelect(qty)}
-                className="flex-1 mx-1"
-              >
-                <View
-                  className={`py-4 rounded-2xl border-2 ${
-                    selectedQuantity === qty && !showCustomInput
-                      ? 'bg-emerald-600/20 border-emerald-500'
-                      : 'bg-gray-900/50 border-gray-800'
-                  }`}
-                >
-                  <Text
-                    className={`text-center text-lg font-bold ${
-                      selectedQuantity === qty && !showCustomInput
-                        ? 'text-emerald-400'
-                        : 'text-gray-300'
-                    }`}
-                  >
-                    {qty}/t
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-
-          {/* Custom Amount */}
-          {!showCustomInput ? (
-            <TouchableOpacity onPress={handleCustomQuantity} className="mb-3">
-              <View className="py-4 rounded-2xl border-2 bg-gray-900/50 border-gray-800">
-                <Text className="text-center text-gray-400 font-medium">Custom Amount</Text>
+          {/* Price Display (if location is set) */}
+          {location && priceOffer && (
+            <View className="mt-4 items-center">
+              <View className="bg-emerald-600 rounded-full px-6 py-3 flex-row items-center">
+                <DollarSign size={20} color="white" />
+                <Text className="text-white text-xl font-bold mx-2">
+                  {priceOffer.min} - {priceOffer.max}
+                </Text>
+                <Text className="text-emerald-100 text-sm">/{product?.defaultUnit || 'TON'}</Text>
               </View>
-            </TouchableOpacity>
-          ) : (
-            <View className="mb-3">
-              <TextInput
-                value={customQuantity}
-                onChangeText={handleCustomQuantityChange}
-                placeholder="Enter quantity in tons..."
-                placeholderTextColor="#6B7280"
-                keyboardType="numeric"
-                className="bg-gray-900/50 border-2 border-emerald-500/30 rounded-2xl px-4 py-4 text-white text-center"
-                autoFocus
-              />
-              <TouchableOpacity
-                onPress={() => {
-                  setShowCustomInput(false);
-                  setCustomQuantity('');
-                  setSelectedQuantity(null);
-                }}
-                className="mt-2"
-              >
-                <Text className="text-center text-gray-500 text-sm">Cancel</Text>
-              </TouchableOpacity>
+              <Text className="text-gray-400 text-xs mt-2">Price range for your region</Text>
             </View>
           )}
         </View>
-
-        {/* Continue Button */}
-        {isFormValid() && (
-          <TouchableOpacity
-            onPress={handleContinue}
-            className="bg-emerald-600 rounded-xl py-4 mb-4"
-          >
-            <View className="flex-row items-center justify-center">
-              <Text className="text-white font-semibold text-base mr-2">Continue</Text>
-              <ChevronRight size={20} color="white" />
-            </View>
-          </TouchableOpacity>
-        )}
       </ScrollView>
     </OnboardingLayout>
   );

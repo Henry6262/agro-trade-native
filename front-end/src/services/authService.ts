@@ -114,7 +114,7 @@ export const authService = {
       .then((response) => response.data);
   },
 
-  // Native Google Sign-In
+  // Native Google Sign-In (DEPRECATED - use privyLogin instead)
   googleSignIn: async (data: {
     idToken: string;
     role: string;
@@ -125,6 +125,18 @@ export const authService = {
   }): Promise<LoginResponse> => {
     return apiClient
       .post<ApiResponse<LoginResponse>>('/auth/google/native', data)
+      .then((response) => response.data);
+  },
+
+  // Privy Authentication
+  privyLogin: async (data: {
+    privyToken: string;
+    role: string;
+    email?: string | null;
+    name?: string | null;
+  }): Promise<GoogleAuthResponse> => {
+    return apiClient
+      .post<ApiResponse<GoogleAuthResponse>>('/auth/privy/login', data)
       .then((response) => response.data);
   },
 

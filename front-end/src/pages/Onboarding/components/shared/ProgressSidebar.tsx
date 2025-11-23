@@ -41,7 +41,7 @@ export function ProgressSidebar({
       Animated.sequence([
         Animated.parallel([
           Animated.timing(pulseAnimation, {
-            toValue: 1.2,
+            toValue: 1.1,
             duration: 1000,
             useNativeDriver: true,
           }),
@@ -70,12 +70,12 @@ export function ProgressSidebar({
     return () => pulse.stop();
   }, [currentStepIndex, pulseAnimation, glowAnimation]);
 
-  // Calculate centered positioning for steps with 60% coverage
+  // Calculate centered positioning for steps with 50% coverage
   const [containerHeight, setContainerHeight] = useState(600); // Default height
   const containerRef = useRef<View>(null);
 
   // Calculate dimensions
-  const availableHeight = containerHeight * 0.6; // Use 60% of container height
+  const availableHeight = containerHeight * 0.5; // Use 50% of container height
   const stepSpacing = steps.length > 1 ? availableHeight / (steps.length - 1) : 0;
   const progressHeight = steps.length > 1 ? availableHeight : 0;
 
@@ -95,8 +95,11 @@ export function ProgressSidebar({
         backgroundColor: '#1F2937',
         borderRightWidth: 1,
         borderRightColor: '#4B5563',
+        borderTopLeftRadius: 100,
+        borderTopRightRadius: 100,
         alignItems: 'center',
         position: 'relative',
+        overflow: 'hidden',
       }}
       onLayout={(event) => {
         const { height } = event.nativeEvent.layout;
@@ -201,26 +204,26 @@ export function ProgressSidebar({
             >
               {/* Step Circle Container */}
               <View
-                style={{ alignItems: 'center', justifyContent: 'center', width: 40, height: 40 }}
+                style={{ alignItems: 'center', justifyContent: 'center', width: 32, height: 32 }}
               >
                 {/* Glow effect for current step */}
                 {isCurrent && (
                   <Animated.View
                     style={{
                       position: 'absolute',
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
+                      width: 32,
+                      height: 32,
+                      borderRadius: 16,
                       backgroundColor: '#FBBF24',
                       opacity: glowAnimation.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [0.3, 0.6],
+                        outputRange: [0.15, 0.3],
                       }),
                       transform: [
                         {
                           scale: glowAnimation.interpolate({
                             inputRange: [0, 1],
-                            outputRange: [1, 1.5],
+                            outputRange: [1, 1.3],
                           }),
                         },
                       ],
@@ -232,9 +235,9 @@ export function ProgressSidebar({
                 <Animated.View
                   style={[
                     {
-                      width: 32,
-                      height: 32,
-                      borderRadius: 16,
+                      width: 28,
+                      height: 28,
+                      borderRadius: 14,
                       alignItems: 'center',
                       justifyContent: 'center',
                       backgroundColor: isCompleted ? '#22C55E' : isCurrent ? '#FBBF24' : '#4B5563',
@@ -252,11 +255,11 @@ export function ProgressSidebar({
                   ]}
                 >
                   {isCompleted ? (
-                    <Check size={16} color="white" strokeWidth={3} />
+                    <Check size={14} color="white" strokeWidth={3} />
                   ) : (
                     <Text
                       style={{
-                        fontSize: 14,
+                        fontSize: 12,
                         fontWeight: 'bold',
                         color: isCurrent ? '#92400E' : isPending ? '#6B7280' : '#D1D5DB',
                       }}
@@ -271,7 +274,7 @@ export function ProgressSidebar({
               <View
                 style={{
                   position: 'absolute',
-                  top: 40,
+                  top: 34,
                   width: 80,
                   alignItems: 'center',
                 }}

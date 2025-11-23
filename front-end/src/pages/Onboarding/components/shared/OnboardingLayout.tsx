@@ -30,7 +30,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   const contentContainerStyle: ViewStyle = {
     flexGrow: 1,
     paddingHorizontal: horizontalMargin,
-    paddingTop: insets.top + 20,
+    paddingTop: insets.top,
     paddingBottom: 120, // Space for navigation buttons (already has safe area in Navigation component)
     ...contentStyle,
   };

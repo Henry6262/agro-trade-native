@@ -23,7 +23,7 @@ import {
   ChevronLeft,
 } from 'lucide-react-native';
 import { ProductSpecificationInput } from '@pages/Onboarding/components/shared/ProductSpecificationInput';
-import { GoogleAuthNative } from '@pages/Onboarding/components/shared/GoogleAuthNative';
+import { PrivyAuthNative } from '@pages/Onboarding/components/shared/PrivyAuthNative';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
 import { useAuthStore } from '@stores/auth.store';
@@ -407,7 +407,7 @@ export function SellOptionsDrawer({
     if (showAuth) {
       return (
         <View className="flex-1">
-          <GoogleAuthNative
+          <PrivyAuthNative
             onComplete={handleAuthComplete}
             userRole={selectedRole || 'seller'}
             mode="inline"

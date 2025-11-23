@@ -12,7 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { X, ShoppingCart, Check, AlertCircle } from 'lucide-react-native';
-import { GoogleAuthNative } from '@pages/Onboarding/components/shared/GoogleAuthNative';
+import { PrivyAuthNative } from '@pages/Onboarding/components/shared/PrivyAuthNative';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useAuthStore } from '@stores/auth.store';
 import { apiClient } from '@services/api';
@@ -273,7 +273,7 @@ export function BuyerSubmitDrawer({
     if (showAuth) {
       return (
         <View className="flex-1">
-          <GoogleAuthNative onComplete={handleAuthComplete} userRole="buyer" mode="inline" />
+          <PrivyAuthNative onComplete={handleAuthComplete} userRole="buyer" mode="inline" />
         </View>
       );
     }

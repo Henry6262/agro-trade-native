@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,11 +8,13 @@ import {
   TouchableOpacity,
   Modal,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
-import { MapPin, Plus, X, Truck } from 'lucide-react-native';
+import { MapPin, Plus, X, Truck, Edit2 } from 'lucide-react-native';
 import { Badge } from '@shared/components/Badge';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
+import * as Location from 'expo-location';
 
 interface BaseLocation {
   id: string;
@@ -50,6 +52,15 @@ export function LocationInformation() {
     return [];
   });
 
+  const [loadingLocation, setLoadingLocation] = useState(false);
+  const [detectedLocation, setDetectedLocation] = useState<{
+    city: string;
+    state: string;
+    country: string;
+    address: string;
+  } | null>(null);
+  const [showManualInput, setShowManualInput] = useState(false);
+  const [manualCity, setManualCity] = useState('');
   const [showAddBaseModal, setShowAddBaseModal] = useState(false);
   const [showTruckAssignmentModal, setShowTruckAssignmentModal] = useState(false);
   const [selectedBaseForAssignment, setSelectedBaseForAssignment] = useState<string | null>(null);
@@ -66,6 +77,113 @@ export function LocationInformation() {
 
   // Get available trucks from fleet
   const availableFleet = transportData?.fleetInfo?.vehicleTypes || [];
+
+  // Auto-detect location on mount
+  useEffect(() => {
+    if (bases.length === 0 && !detectedLocation) {
+      requestLocationPermission();
+    }
+  }, []);
+
+  const requestLocationPermission = async () => {
+    try {
+      setLoadingLocation(true);
+      const { status } = await Location.requestForegroundPermissionsAsync();
+
+      if (status === 'granted') {
+        const currentLocation = await Location.getCurrentPositionAsync({});
+        const reverseGeocode = await Location.reverseGeocodeAsync({
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+        });
+
+        if (reverseGeocode && reverseGeocode[0]) {
+          const locationData = reverseGeocode[0];
+          const detected = {
+            city: locationData.city || '',
+            state: locationData.region || '',
+            country: locationData.country || '',
+            address:
+              `${locationData.street || ''} ${locationData.city || ''} ${locationData.region || ''} ${locationData.country || ''}`.trim(),
+          };
+          setDetectedLocation(detected);
+
+          // Automatically create main base from detected location
+          if (detected.city && detected.country) {
+            const mainBase: BaseLocation = {
+              id: 'base-1',
+              name: 'Main Base',
+              address: detected.address,
+              city: detected.city,
+              state: detected.state,
+              country: detected.country,
+              zipCode: '',
+              assignedTrucks: [],
+              isMainBase: true,
+            };
+
+            setBases([mainBase]);
+            setFleetInfo({
+              ...transportData?.fleetInfo,
+              baseLocation: {
+                id: mainBase.id,
+                address: mainBase.address,
+                city: mainBase.city,
+                state: mainBase.state,
+                country: mainBase.country,
+                zipCode: mainBase.zipCode,
+              },
+              vehicleCount: transportData?.fleetInfo?.vehicleCount || 0,
+              vehicleTypes: transportData?.fleetInfo?.vehicleTypes || [],
+              capacity: transportData?.fleetInfo?.capacity || { total: 0, unit: 'tons' },
+              bases: [mainBase],
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error getting location:', error);
+    } finally {
+      setLoadingLocation(false);
+    }
+  };
+
+  const handleManualLocation = () => {
+    if (!manualCity.trim()) {
+      Alert.alert('Error', 'Please enter a city');
+      return;
+    }
+
+    const mainBase: BaseLocation = {
+      id: 'base-1',
+      name: 'Main Base',
+      address: manualCity,
+      city: manualCity.split(',')[0]?.trim() || manualCity,
+      state: '',
+      country: '',
+      zipCode: '',
+      assignedTrucks: [],
+      isMainBase: true,
+    };
+
+    setBases([mainBase]);
+    setFleetInfo({
+      ...transportData?.fleetInfo,
+      baseLocation: {
+        id: mainBase.id,
+        address: mainBase.address,
+        city: mainBase.city,
+        state: mainBase.state,
+        country: mainBase.country,
+        zipCode: mainBase.zipCode,
+      },
+      vehicleCount: transportData?.fleetInfo?.vehicleCount || 0,
+      vehicleTypes: transportData?.fleetInfo?.vehicleTypes || [],
+      capacity: transportData?.fleetInfo?.capacity || { total: 0, unit: 'tons' },
+      bases: [mainBase],
+    });
+    setShowManualInput(false);
+  };
 
   const handleLocationChange = (field: string, value: string) => {
     // Update the main base if it exists
@@ -296,90 +414,121 @@ export function LocationInformation() {
               marginBottom: 12,
             }}
           >
-            Business Locations
+            Business Location
           </Text>
           <Text style={{ color: '#9CA3AF', maxWidth: 600, textAlign: 'center', fontSize: 16 }}>
-            Set up your main base and additional locations. Assign trucks to each base for better
-            service coverage.
+            Confirm your main base location
           </Text>
         </View>
 
-        {/* Add Base Button */}
-        <TouchableOpacity
+        {/* Location Display */}
+        <View
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#2563eb',
-            borderRadius: 8,
-            paddingVertical: 12,
-            paddingHorizontal: 24,
-            marginBottom: 24,
+            backgroundColor: '#1F2937',
+            borderRadius: 16,
+            padding: 20,
+            borderWidth: 1,
+            borderColor: '#374151',
           }}
-          onPress={() => setShowAddBaseModal(true)}
         >
-          <Plus size={20} color="#FFFFFF" />
-          <Text style={{ color: '#FFFFFF', fontWeight: '600', marginLeft: 8 }}>Add New Base</Text>
-        </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+            <MapPin size={22} color="#ea580c" />
+            <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF', marginLeft: 8 }}>
+              Main Base Location
+            </Text>
+          </View>
 
-        {/* Bases List */}
-        {bases.map((base, index) => (
-          <View key={base.id} style={{ padding: 20, marginBottom: 16 }}>
-            <View
+          {loadingLocation ? (
+            <View style={{ paddingVertical: 32, alignItems: 'center' }}>
+              <ActivityIndicator size="large" color="#ea580c" />
+              <Text style={{ color: '#9CA3AF', marginTop: 12 }}>Detecting your location...</Text>
+            </View>
+          ) : !showManualInput && bases.length > 0 ? (
+            <TouchableOpacity
+              onPress={() => setShowManualInput(true)}
               style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                marginBottom: 16,
+                backgroundColor: '#111827',
+                borderRadius: 12,
+                padding: 16,
+                borderWidth: 1,
+                borderColor: '#374151',
               }}
             >
-              <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                  <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF' }}>
-                    {base.name}
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '500', marginBottom: 4 }}
+                  >
+                    {bases[0].city || bases[0].address}
                   </Text>
-                  {base.isMainBase && (
-                    <Badge style={{ backgroundColor: '#2563eb', marginLeft: 8 }}>
-                      <Text style={{ color: '#FFFFFF', fontSize: 10 }}>MAIN</Text>
-                    </Badge>
+                  {bases[0].state && bases[0].country && (
+                    <Text style={{ color: '#9CA3AF', fontSize: 14 }}>
+                      {bases[0].state}, {bases[0].country}
+                    </Text>
                   )}
                 </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                  <MapPin size={16} color="#9CA3AF" />
-                  <Text style={{ color: '#9CA3AF', marginLeft: 8 }}>
-                    {base.city}, {base.state}, {base.country}
-                  </Text>
-                </View>
+                <Edit2 size={18} color="#ea580c" />
               </View>
-
-              {!base.isMainBase && (
-                <TouchableOpacity onPress={() => removeBase(base.id)} style={{ padding: 8 }}>
-                  <X size={16} color="#dc2626" />
+            </TouchableOpacity>
+          ) : (
+            <View>
+              <TextInput
+                value={manualCity}
+                onChangeText={setManualCity}
+                placeholder="Enter your city or region..."
+                placeholderTextColor="#9CA3AF"
+                style={{
+                  backgroundColor: '#111827',
+                  borderRadius: 12,
+                  padding: 16,
+                  color: '#FFFFFF',
+                  fontSize: 16,
+                  borderWidth: 2,
+                  borderColor: '#ea580c',
+                  marginBottom: 12,
+                }}
+                autoFocus
+              />
+              <View style={{ flexDirection: 'row', gap: 12 }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowManualInput(false);
+                    setManualCity('');
+                  }}
+                  style={{
+                    flex: 1,
+                    backgroundColor: '#374151',
+                    borderRadius: 8,
+                    paddingVertical: 12,
+                  }}
+                >
+                  <Text style={{ color: '#9CA3AF', textAlign: 'center', fontWeight: '500' }}>
+                    Cancel
+                  </Text>
                 </TouchableOpacity>
-              )}
+                <TouchableOpacity
+                  onPress={handleManualLocation}
+                  style={{
+                    flex: 1,
+                    backgroundColor: '#ea580c',
+                    borderRadius: 8,
+                    paddingVertical: 12,
+                  }}
+                >
+                  <Text style={{ color: '#FFFFFF', textAlign: 'center', fontWeight: '600' }}>
+                    Set Location
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        ))}
-
-        {bases.length === 0 && (
-          <View style={{ padding: 32, alignItems: 'center' }}>
-            <MapPin size={48} color="#9CA3AF" />
-            <Text
-              style={{
-                color: '#FFFFFF',
-                fontSize: 18,
-                fontWeight: '600',
-                marginTop: 16,
-                marginBottom: 8,
-              }}
-            >
-              No Bases Added
-            </Text>
-            <Text style={{ color: '#9CA3AF', textAlign: 'center' }}>
-              Add your first base to get started with location management
-            </Text>
-          </View>
-        )}
+          )}
+        </View>
       </OnboardingLayout>
 
       {/* Add Base Modal */}

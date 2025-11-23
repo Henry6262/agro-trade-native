@@ -21,6 +21,7 @@ import {
   RefreshTokenDto,
   GoogleMobileAuthDto,
   GoogleNativeAuthDto,
+  PrivyAuthDto,
   AuthSuccessResponseDto,
   RefreshTokenResponseDto,
   TransporterRegistrationResponseDto,
@@ -239,6 +240,56 @@ export class AuthController {
       console.error("Native Google auth error:", error);
       throw new BadRequestException(
         error?.message || "Failed to authenticate with Google",
+      );
+    }
+  }
+
+  @Public()
+  @Post("privy/login")
+  @ApiOperation({ summary: "Authenticate with Privy OAuth token" })
+  @ApiBody({ type: PrivyAuthDto })
+  @ApiOkResponse({ type: AuthSuccessResponseDto })
+  async privyLogin(@Body() body: PrivyAuthDto) {
+    try {
+      const { privyToken, role, email, name } = body;
+
+      // Log the Privy auth attempt
+      console.log("Privy auth attempt:", {
+        email,
+        role,
+        hasToken: !!privyToken,
+      });
+
+      // Verify the Privy token and extract user information
+      const verifiedToken = await this.authService.verifyPrivyToken(privyToken);
+
+      console.log("Privy token verified:", {
+        sub: verifiedToken.sub,
+        iss: verifiedToken.iss,
+      });
+
+      // Validate or create user in database
+      const user = await this.authService.validatePrivyUser(
+        verifiedToken.sub,
+        email || undefined,
+        name || undefined,
+        role,
+      );
+
+      // Generate our app's tokens
+      const result = await this.authService.login(user);
+
+      console.log("Privy login successful:", {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+      });
+
+      return this.serializeAuthResult(result, "Privy authentication successful");
+    } catch (error: any) {
+      console.error("Privy auth error:", error);
+      throw new BadRequestException(
+        error?.message || "Failed to authenticate with Privy",
       );
     }
   }

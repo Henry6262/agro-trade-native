@@ -81,17 +81,13 @@ export const SentryTestButton: React.FC = () => {
       }}
     >
       <TouchableOpacity onPress={testSentry}>
-        <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }}>
-          🧪 Test Sentry
-        </Text>
+        <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }}>🧪 Test Sentry</Text>
       </TouchableOpacity>
 
       <View style={{ height: 8 }} />
 
       <TouchableOpacity onPress={testCrash}>
-        <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }}>
-          💥 Test Crash
-        </Text>
+        <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12 }}>💥 Test Crash</Text>
       </TouchableOpacity>
 
       <Text style={{ color: 'white', fontSize: 10, marginTop: 8, opacity: 0.8 }}>

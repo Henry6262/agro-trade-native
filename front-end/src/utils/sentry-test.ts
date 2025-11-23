@@ -26,7 +26,9 @@ export const sendTestError = () => {
   try {
     Sentry.captureException(new Error('Test error from AgroTrade app - ignore this'));
     console.log('✅ Test error sent to Sentry successfully');
-    console.log('Check your Sentry dashboard at: https://sentry.io/organizations/agrotrade/issues/');
+    console.log(
+      'Check your Sentry dashboard at: https://sentry.io/organizations/agrotrade/issues/'
+    );
   } catch (error) {
     console.error('❌ Failed to send test error to Sentry:', error);
   }

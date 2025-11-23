@@ -2,12 +2,15 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../prisma/prisma.service";
 import { User, UserRole } from "@prisma/client";
 import * as bcrypt from "bcrypt";
+import * as jwt from "jsonwebtoken";
+import axios from "axios";
 
 export interface JwtPayload {
   sub: string;
@@ -21,6 +24,13 @@ export interface GoogleProfile {
   firstName: string;
   lastName: string;
   picture: string;
+}
+
+export interface PrivyTokenPayload {
+  sub: string;
+  iss: string;
+  iat: number;
+  exp: number;
 }
 
 @Injectable()
@@ -179,5 +189,136 @@ export class AuthService {
     return this.prisma.user.findUnique({
       where: { id: userId },
     });
+  }
+
+  /**
+   * Verify Privy JWT token and extract user information
+   * This method fetches Privy's public keys and verifies the token signature
+   */
+  async verifyPrivyToken(token: string): Promise<PrivyTokenPayload> {
+    try {
+      // Decode token to get the kid (key ID)
+      const decoded: any = jwt.decode(token, { complete: true });
+      if (!decoded || !decoded.header.kid) {
+        throw new BadRequestException("Invalid token: missing key ID");
+      }
+
+      const kid = decoded.header.kid;
+      const privyAppId = this.configService.get<string>("PRIVY_APP_ID");
+
+      // Fetch JWKS from Privy
+      const jwksUrl = `https://auth.privy.io/api/v1/apps/${privyAppId}/.well-known/jwks.json`;
+      const jwksResponse = await axios.get(jwksUrl);
+      const jwks = jwksResponse.data;
+
+      // Find the signing key that matches the kid
+      const signingKey = jwks.keys.find((key: any) => key.kid === kid);
+      if (!signingKey) {
+        throw new UnauthorizedException(
+          "No matching signing key found for token",
+        );
+      }
+
+      // Convert JWK to PEM format for verification
+      const publicKey = this.jwkToPem(signingKey);
+
+      // Verify the token
+      const verifiedToken = jwt.verify(token, publicKey, {
+        issuer: "privy.io",
+        audience: privyAppId,
+        algorithms: ["RS256"],
+      }) as PrivyTokenPayload;
+
+      return verifiedToken;
+    } catch (error: any) {
+      console.error("Privy token verification failed:", error);
+      if (error instanceof BadRequestException || error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException("Invalid or expired Privy token");
+    }
+  }
+
+  /**
+   * Convert JWK to PEM format
+   * Simple implementation for RS256 keys
+   */
+  private jwkToPem(jwk: any): string {
+    // For production, use a library like jwk-to-pem
+    // For now, we'll construct a basic PEM from the JWK modulus and exponent
+    const { n, e } = jwk;
+
+    // This is a simplified version - in production you'd use a proper library
+    // or the full conversion algorithm
+    if (!n || !e) {
+      throw new Error("Invalid JWK: missing modulus or exponent");
+    }
+
+    // Use require to load jwk-to-pem if available, otherwise throw error
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const jwkToPem = require("jwk-to-pem");
+      return jwkToPem(jwk);
+    } catch {
+      throw new Error(
+        "jwk-to-pem library required for JWT verification. Run: npm install jwk-to-pem",
+      );
+    }
+  }
+
+  /**
+   * Validate Privy user and create/update in database
+   * Similar to validateGoogleUser but for Privy authentication
+   */
+  async validatePrivyUser(
+    privyUserId: string,
+    email?: string,
+    name?: string,
+    role?: string,
+  ): Promise<User> {
+    // If email is provided, try to find existing user by email
+    let user: User | null = null;
+
+    if (email) {
+      user = await this.prisma.user.findUnique({
+        where: { email },
+      });
+    }
+
+    // Map frontend role names to backend UserRole enum
+    let mappedRole: UserRole = UserRole.FARMER; // Default role
+    if (role) {
+      const roleMap: Record<string, UserRole> = {
+        seller: UserRole.FARMER,
+        farmer: UserRole.FARMER,
+        buyer: UserRole.BUYER,
+        transporter: UserRole.TRANSPORTER,
+        admin: UserRole.ADMIN,
+      };
+      mappedRole = roleMap[role.toLowerCase()] || UserRole.FARMER;
+    }
+
+    if (!user) {
+      // Create new user with Privy authentication
+      user = await this.prisma.user.create({
+        data: {
+          email: email || `privy-${privyUserId}@temp.local`, // Fallback email if none provided
+          name: name || "Privy User",
+          role: mappedRole,
+          isEmailVerified: !!email, // If email provided, consider it verified
+          isActive: true,
+        },
+      });
+    } else {
+      // Update existing user's role if provided and different
+      if (role && user.role !== mappedRole) {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data: { role: mappedRole },
+        });
+      }
+    }
+
+    return user;
   }
 }
