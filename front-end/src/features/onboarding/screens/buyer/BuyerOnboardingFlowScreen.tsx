@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, StatusBar, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useEffect } from 'react';
+import { View, StatusBar } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../../../navigation/types';
-import { AuthModal } from '@pages/Onboarding/components/shared/AuthModal';
 import { BuyerOnboarding } from '@pages/Onboarding/sections/Buyer/components/BuyerOnboarding';
 import { useOnboardingStore } from '@stores/onboarding.store';
 
@@ -18,7 +16,6 @@ interface Props {
 }
 
 export const BuyerOnboardingFlowScreen: React.FC<Props> = ({ navigation }) => {
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const onboardingStore = useOnboardingStore();
 
   useEffect(() => {
@@ -27,31 +24,11 @@ export const BuyerOnboardingFlowScreen: React.FC<Props> = ({ navigation }) => {
 
     // Save onboarding data when component mounts
     onboardingStore.saveOnboardingData?.().catch(console.error);
-
-    // Check if we're returning from Google OAuth
-    const googleAuthData = onboardingStore.googleAuthData;
-    if (googleAuthData?.isAuthenticated) {
-      console.log('Returning from Google OAuth, showing modal with pre-filled data');
-      // Show the auth modal with the second step (business details)
-      setShowAuthModal(true);
-    }
   }, []);
 
-  const handleComplete = async () => {
-    try {
-      // Save current onboarding data before showing auth modal
-      await onboardingStore.saveOnboardingData?.();
-      // Show authentication modal instead of directly navigating
-      setShowAuthModal(true);
-    } catch (error) {
-      console.error('Failed to save onboarding data:', error);
-      // Still show auth modal even if save fails
-      setShowAuthModal(true);
-    }
-  };
-
-  const handleAuthComplete = () => {
-    setShowAuthModal(false);
+  const handleComplete = () => {
+    // Authentication happens inside BuyerOnboarding via the drawer
+    // Navigate to completion screen after successful auth
     navigation.navigate('OnboardingComplete');
   };
 
@@ -59,12 +36,6 @@ export const BuyerOnboardingFlowScreen: React.FC<Props> = ({ navigation }) => {
     <View style={{ flex: 1, backgroundColor: '#111827' }}>
       <StatusBar barStyle="light-content" backgroundColor="#111827" />
       <BuyerOnboarding onComplete={handleComplete} />
-      <AuthModal
-        visible={showAuthModal}
-        onClose={() => setShowAuthModal(false)}
-        onComplete={handleAuthComplete}
-        userRole="buyer"
-      />
     </View>
   );
 };

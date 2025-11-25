@@ -8,25 +8,18 @@ import {
   Alert,
   Platform,
   ToastAndroid,
-  ActivityIndicator,
 } from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../navigation/types';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Users, ShoppingBag, Truck, LogIn } from 'lucide-react-native';
+import { LogIn } from 'lucide-react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useAuthStore } from '@stores/auth.store';
 import { AnimatedRoleCard } from '../components/AnimatedRoleCard';
 import { AuthGuard } from '@shared/components/AuthGuard';
-import {
-  GoogleSignin,
-  statusCodes,
-  isErrorWithCode,
-  isSuccessResponse,
-} from '@react-native-google-signin/google-signin';
+import { useLoginWithOAuth, usePrivy, OAuthProviderType } from '@privy-io/expo';
 import { apiClient } from '@services/api';
-import configureGoogleSignIn from '../../../config/googleSignIn';
 
 type RoleSelectionScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -36,9 +29,13 @@ type RoleSelectionScreenNavigationProp = NativeStackNavigationProp<
 export const RoleSelectionScreen: React.FC = () => {
   const navigation = useNavigation<RoleSelectionScreenNavigationProp>();
   const { setRole } = useOnboardingStore();
-  const { setTokens, setUser, isAuthenticated, user } = useAuthStore();
+  const { setTokens, setUser, isAuthenticated, user, login } = useAuthStore();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'buyer' | 'seller' | 'transport' | null>(null);
+
+  // Privy hooks
+  const { getAccessToken } = usePrivy();
+  const { login: loginWithOAuth, state: oauthState } = useLoginWithOAuth({});
 
   // Redirect to main app if already authenticated
   useEffect(() => {
@@ -110,86 +107,52 @@ export const RoleSelectionScreen: React.FC = () => {
         const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000/api';
         window.location.href = `${apiUrl.replace('/api', '')}/api/auth/google`;
       } else {
-        // Ensure Google Sign-In SDK is configured
-        configureGoogleSignIn();
+        // Mobile platform - use Privy OAuth
+        await loginWithOAuth({ provider: 'google' as OAuthProviderType });
 
-        // Mobile platform - use native Google Sign-In SDK
-        try {
-          await GoogleSignin.signOut();
-        } catch {
-          // ignore if no previous session
+        // Get Privy access token
+        const privyToken = await getAccessToken();
+        if (!privyToken) {
+          throw new Error('Failed to get Privy access token');
         }
-        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-        const response = await GoogleSignin.signIn();
 
-        if (isSuccessResponse(response)) {
-          const { idToken } = await GoogleSignin.getTokens();
-          const userInfo = response.data;
+        // Send to backend for authentication (no role for existing users)
+        const authResponse = await apiClient.post<{
+          success: boolean;
+          access_token: string;
+          refresh_token: string;
+          user: any;
+        }>('/auth/privy/login', {
+          privyToken,
+        });
 
-          // Send to backend for authentication (no role for existing users)
-          const authResponse = await apiClient.post<{
-            success: boolean;
-            access_token: string;
-            user: any;
-          }>('/auth/google/native', {
-            idToken,
-            userInfo: {
-              id: userInfo.user.id,
-              email: userInfo.user.email,
-              name: userInfo.user.name,
-              givenName: userInfo.user.givenName,
-              familyName: userInfo.user.familyName,
-              photo: userInfo.user.photo,
-            },
-          });
+        if (authResponse?.data?.access_token) {
+          const { access_token, refresh_token, user: userData } = authResponse.data;
 
-          if (authResponse?.data?.success) {
-            const { access_token, user } = authResponse.data;
+          // Store auth data
+          login(userData, access_token, refresh_token);
 
-            // Store auth data
-            setTokens(access_token, access_token);
-            setUser(user);
-
-            // Navigate to main app
-            navigation.dispatch(
-              CommonActions.reset({
-                index: 0,
-                routes: [{ name: 'Main' }],
-              })
-            );
-          } else {
-            showToast('Authentication failed. Please try again.');
-          }
+          // Navigate to main app
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'Main' }],
+            })
+          );
+        } else {
+          showToast('Authentication failed. Please try again.');
         }
       }
-    } catch (error: any) {
-      if (isErrorWithCode(error)) {
-        switch (error.code) {
-          case statusCodes.SIGN_IN_CANCELLED:
-            console.log('User cancelled sign in');
-            break;
-          case statusCodes.IN_PROGRESS:
-            console.log('Sign in already in progress');
-            break;
-          case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
-            Alert.alert('Error', 'Google Play Services is not available');
-            break;
-          default:
-            Alert.alert('Error', 'Something went wrong with sign in');
-        }
-      } else {
-        console.error('Google authentication failed:', error);
-        showToast('Failed to sign in with Google. Please try again.');
-      }
+    } catch (error: unknown) {
+      console.error('Privy authentication failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      showToast(`Failed to sign in. ${errorMessage}`);
     } finally {
       setIsSigningIn(false);
     }
   };
 
-  // Initialize Google Sign-In on component mount
-  useEffect(() => {
-    configureGoogleSignIn();
-  }, []);
+  const isPending = isSigningIn || oauthState.status === 'loading';
 
   return (
     <AuthGuard requireAuth={false} redirectTo="Main">
@@ -233,9 +196,10 @@ export const RoleSelectionScreen: React.FC = () => {
             {/* Sign In Button for Existing Users - More prominent */}
             <TouchableOpacity
               onPress={handleExistingUserSignIn}
-              disabled={isSigningIn}
+              disabled={isPending}
               style={{
                 marginBottom: 32,
+                opacity: isPending ? 0.7 : 1,
               }}
             >
               <LinearGradient
@@ -263,7 +227,7 @@ export const RoleSelectionScreen: React.FC = () => {
                     fontWeight: 'bold',
                   }}
                 >
-                  {isSigningIn ? 'Signing in...' : 'Sign In'}
+                  {isPending ? 'Signing in...' : 'Sign In'}
                 </Text>
               </LinearGradient>
             </TouchableOpacity>

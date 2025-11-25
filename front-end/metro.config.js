@@ -4,11 +4,8 @@ const { withNativeWind } = require('nativewind/metro');
 
 const config = getDefaultConfig(__dirname);
 
-// Keep package exports enabled for other packages
-config.resolver.unstable_enablePackageExports = true;
-
-// Add platform-specific extensions and aliases for web compatibility
-config.resolver.resolveRequest = (context, moduleName, platform) => {
+// Resolve jose package with browser conditions for React Native
+const resolveRequestWithPackageExports = (context, moduleName, platform) => {
   // Redirect react-native-maps to a web shim on web platform
   if (platform === 'web' && moduleName === 'react-native-maps') {
     return {
@@ -17,9 +14,44 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     };
   }
 
-  // Default resolution for other modules
+  // Force jose to use browser bundle (avoids Node.js crypto)
+  if (moduleName === 'jose') {
+    const ctx = {
+      ...context,
+      unstable_conditionNames: ['browser'],
+    };
+    return ctx.resolveRequest(ctx, moduleName, platform);
+  }
+
+  // Disable package exports for isows
+  if (moduleName === 'isows') {
+    const ctx = {
+      ...context,
+      unstable_enablePackageExports: false,
+    };
+    return ctx.resolveRequest(ctx, moduleName, platform);
+  }
+
   return context.resolveRequest(context, moduleName, platform);
 };
+
+// Keep package exports enabled for other packages
+config.resolver.unstable_enablePackageExports = true;
+
+// Add polyfills for Node.js modules used by Privy
+config.resolver.extraNodeModules = {
+  ...config.resolver.extraNodeModules,
+  url: require.resolve('empty-module'),
+  crypto: require.resolve('./cryptoPolyfill'),
+  stream: require.resolve('stream-browserify'),
+  buffer: require.resolve('buffer'),
+  http: require.resolve('http-browserify'),
+  https: require.resolve('https-browserify'),
+  zlib: require.resolve('empty-module'),
+  events: require.resolve('eventemitter3'),
+};
+
+config.resolver.resolveRequest = resolveRequestWithPackageExports;
 
 // Enable NativeWind without CSS file import
 module.exports = withNativeWind(config, {
