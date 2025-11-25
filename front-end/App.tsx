@@ -58,13 +58,12 @@ const queryClient = new QueryClient();
 
 // Privy configuration
 const privyAppId = process.env.EXPO_PUBLIC_PRIVY_APP_ID || '';
-const privyClientId = process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID || '';
 
 function App() {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <PrivyProvider appId={privyAppId} clientId={privyClientId}>
+        <PrivyProvider appId={privyAppId}>
           <StatusBar style="auto" />
           <AppBootstrap>{(appState) => <RootNavigator appState={appState} />}</AppBootstrap>
         </PrivyProvider>
