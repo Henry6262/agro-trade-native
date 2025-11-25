@@ -1,9 +1,23 @@
 import React from 'react';
 import { View, ScrollView, Dimensions, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import type { OnboardingStep } from '@shared/types/onboarding';
+import { ProgressSidebar } from './ProgressSidebar';
+import { Navigation } from './Navigation';
 
 interface OnboardingLayoutProps {
   children: React.ReactNode;
+  // Progress sidebar props
+  steps?: OnboardingStep[];
+  currentStepIndex?: number;
+  progressLineHeight?: number;
+  isAnimating?: boolean;
+  // Navigation props
+  showNavigation?: boolean;
+  canProceedToNext?: boolean;
+  onNext?: () => void;
+  onBack?: () => void;
+  // Layout customization
   scrollable?: boolean;
   style?: ViewStyle;
   contentStyle?: ViewStyle;
@@ -11,6 +25,14 @@ interface OnboardingLayoutProps {
 
 export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   children,
+  steps,
+  currentStepIndex = 0,
+  progressLineHeight = 0,
+  isAnimating = false,
+  showNavigation = true,
+  canProceedToNext = true,
+  onNext,
+  onBack,
   scrollable = true,
   style,
   contentStyle,
@@ -35,6 +57,51 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     ...contentStyle,
   };
 
+  // If steps are provided, render with ProgressSidebar (dashboard mode)
+  if (steps && steps.length > 0) {
+    return (
+      <View className="flex-1 flex-row bg-gray-900">
+        {/* Fixed Progress Sidebar */}
+        <ProgressSidebar
+          steps={steps}
+          currentStepIndex={currentStepIndex}
+          progressLineHeight={progressLineHeight}
+          isAnimating={isAnimating}
+        />
+
+        {/* Main Content Area */}
+        <View className="flex-1">
+          {scrollable ? (
+            <ScrollView
+              contentContainerStyle={contentContainerStyle}
+              showsVerticalScrollIndicator={false}
+              bounces={true}
+              scrollEnabled={true}
+              keyboardShouldPersistTaps="handled"
+            >
+              {children}
+            </ScrollView>
+          ) : (
+            <View style={contentContainerStyle}>{children}</View>
+          )}
+
+          {/* Navigation */}
+          {showNavigation && onNext && onBack && (
+            <Navigation
+              currentStepIndex={currentStepIndex}
+              totalSteps={steps.length}
+              canProceedToNext={canProceedToNext}
+              isAnimating={isAnimating}
+              onBack={onBack}
+              onNext={onNext}
+            />
+          )}
+        </View>
+      </View>
+    );
+  }
+
+  // Fallback: Simple content wrapper (backward compatibility)
   if (scrollable) {
     return (
       <View style={containerStyle}>

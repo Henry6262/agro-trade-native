@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, ScrollView, Text } from 'react-native';
 import type { OnboardingStep, ProductSpecification } from '@shared/types/onboarding';
 import { simplifiedRoleSteps } from '@shared/constants/simplifiedOnboarding';
-import { ProgressSidebar } from '@pages/Onboarding/components/shared/ProgressSidebar';
-import { Navigation } from '@pages/Onboarding/components/shared/Navigation';
+import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import { ProductSelectionUnified } from '@pages/Onboarding/features/shared/ProductSelection';
 import { BuyerQuantityLocation } from '@pages/Onboarding/sections/Buyer/features/Quantity/components/BuyerQuantityLocation';
 import { BuyerSpecifications } from '@pages/Onboarding/sections/Buyer/features/Specifications/components/BuyerSpecifications';
@@ -269,28 +268,17 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
   };
 
   return (
-    <View className="flex-1 flex-row bg-gray-900">
-      {/* Fixed Progress Sidebar */}
-      <ProgressSidebar
-        steps={steps}
-        currentStepIndex={currentStepIndex}
-        progressLineHeight={progressLineHeight}
-        isAnimating={isAnimating}
-      />
-
-      {/* Main Content */}
-      <View className="flex-1">
-        {renderStepContent()}
-
-        <Navigation
-          currentStepIndex={currentStepIndex}
-          totalSteps={steps.length}
-          canProceedToNext={canProceedToNext()}
-          isAnimating={isAnimating}
-          onBack={handleBack}
-          onNext={handleNext}
-        />
-      </View>
-    </View>
+    <OnboardingLayout
+      steps={steps}
+      currentStepIndex={currentStepIndex}
+      progressLineHeight={progressLineHeight}
+      isAnimating={isAnimating}
+      canProceedToNext={canProceedToNext()}
+      onNext={handleNext}
+      onBack={handleBack}
+      scrollable={false}
+    >
+      {renderStepContent()}
+    </OnboardingLayout>
   );
 }

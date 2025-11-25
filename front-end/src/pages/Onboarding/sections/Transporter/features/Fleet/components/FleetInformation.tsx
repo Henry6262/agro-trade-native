@@ -4,7 +4,6 @@ import { Plus, Truck, Trash2, ChevronDown, Minus } from 'lucide-react-native';
 import { Card } from '@shared/components/Card';
 import { Badge } from '@shared/components/Badge';
 import { useOnboardingStore } from '@stores/onboarding.store';
-import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 
 interface TruckInfo {
   id: string;
@@ -131,8 +130,7 @@ export function FleetInformation() {
 
   return (
     <>
-      <OnboardingLayout>
-        <View style={{ alignItems: 'center', marginBottom: 32 }}>
+      <View style={{ alignItems: 'center', marginBottom: 32 }}>
           <View
             style={{
               width: 64,
@@ -529,7 +527,6 @@ export function FleetInformation() {
             </Text>
           </View>
         )}
-      </OnboardingLayout>
 
       {/* Truck Type Modal */}
       <Modal

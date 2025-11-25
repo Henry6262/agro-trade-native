@@ -4,7 +4,6 @@ import { Truck, MapPin, Package, Users, TrendingUp } from 'lucide-react-native';
 import { Card } from '@shared/components/Card';
 import { Badge } from '@shared/components/Badge';
 import { useOnboardingStore } from '@stores/onboarding.store';
-import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 
 interface TransporterListingProps {
   onComplete?: () => void;
@@ -25,8 +24,7 @@ export function TransporterListing({ onComplete }: TransporterListingProps) {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
-      <OnboardingLayout>
-        <View style={{ alignItems: 'center', marginBottom: 32 }}>
+      <View style={{ alignItems: 'center', marginBottom: 32 }}>
           <View
             style={{
               width: 64,
@@ -305,7 +303,6 @@ export function TransporterListing({ onComplete }: TransporterListingProps) {
             Complete setup to start receiving transport requests
           </Text>
         </View>
-      </OnboardingLayout>
     </SafeAreaView>
   );
 }

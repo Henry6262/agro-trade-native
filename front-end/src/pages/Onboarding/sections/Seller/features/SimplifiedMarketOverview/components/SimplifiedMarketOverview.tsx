@@ -14,7 +14,6 @@ import {
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
 import { useAuthStore } from '@stores/auth.store';
-import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import { SellOptionsDrawer } from '@pages/Onboarding/sections/Seller/features/SellOptions/components/SellOptionsDrawer';
 import { APP_CONFIG } from '@shared/constants';
 
@@ -170,18 +169,16 @@ export function SimplifiedMarketOverview({
   // Handle case when no product is selected
   if (!productId || !product) {
     return (
-      <OnboardingLayout>
-        <View className="flex-1 justify-center items-center">
-          <Text className="text-gray-400 text-center">
-            No product selected. Please go back and select a product.
-          </Text>
-        </View>
-      </OnboardingLayout>
+      <View className="flex-1 justify-center items-center">
+        <Text className="text-gray-400 text-center">
+          No product selected. Please go back and select a product.
+        </Text>
+      </View>
     );
   }
 
   return (
-    <OnboardingLayout>
+    <>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="mb-6">
@@ -378,6 +375,6 @@ export function SimplifiedMarketOverview({
           onComplete={handleDrawerComplete}
         />
       )}
-    </OnboardingLayout>
+    </>
   );
 }

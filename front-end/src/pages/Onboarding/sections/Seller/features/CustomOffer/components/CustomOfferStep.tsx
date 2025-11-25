@@ -3,7 +3,6 @@ import { View, Text, TextInput, ScrollView, TouchableOpacity, Image, Alert } fro
 import { Package, Info, ChevronRight } from 'lucide-react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
-import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import { getApiUrl } from '@shared/utils/environment';
 
 export function CustomOfferStep() {
@@ -114,8 +113,7 @@ export function CustomOfferStep() {
   };
 
   return (
-    <OnboardingLayout>
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-white mb-2">Product Specifications</Text>
@@ -235,6 +233,5 @@ export function CustomOfferStep() {
           </View>
         </TouchableOpacity>
       </ScrollView>
-    </OnboardingLayout>
   );
 }

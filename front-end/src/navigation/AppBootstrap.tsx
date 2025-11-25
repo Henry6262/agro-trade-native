@@ -1,6 +1,5 @@
 import React, { useEffect, useState, ReactNode } from 'react';
 import { useAuthStore } from '@stores/auth.store';
-import configureGoogleSignIn from '../config/googleSignIn';
 
 type AppState = {
   isAuthenticated: boolean;
@@ -20,12 +19,7 @@ export function AppBootstrap({ children }: AppBootstrapProps) {
   });
 
   useEffect(() => {
-    try {
-      configureGoogleSignIn();
-    } catch (error) {
-      console.warn('Failed to configure Google Sign-In', error);
-    }
-
+    // Privy is configured via PrivyProvider in App.tsx
     const initAuthState = async () => {
       try {
         const authState = useAuthStore.getState();

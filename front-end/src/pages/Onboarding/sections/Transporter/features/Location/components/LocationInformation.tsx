@@ -13,7 +13,6 @@ import {
 import { MapPin, Plus, X, Truck, Edit2 } from 'lucide-react-native';
 import { Badge } from '@shared/components/Badge';
 import { useOnboardingStore } from '@stores/onboarding.store';
-import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import * as Location from 'expo-location';
 
 interface BaseLocation {
@@ -390,8 +389,7 @@ export function LocationInformation() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
-      <OnboardingLayout>
-        <View style={{ alignItems: 'center', marginBottom: 32 }}>
+      <View style={{ alignItems: 'center', marginBottom: 32 }}>
           <View
             style={{
               width: 64,
@@ -529,7 +527,6 @@ export function LocationInformation() {
             </View>
           )}
         </View>
-      </OnboardingLayout>
 
       {/* Add Base Modal */}
       <Modal visible={showAddBaseModal} transparent animationType="fade">

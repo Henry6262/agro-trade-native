@@ -12,7 +12,6 @@ import {
 import { MapPin, Package, Edit2, Weight, DollarSign } from 'lucide-react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
-import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import { getApiUrl } from '@shared/utils/environment';
 import * as Location from 'expo-location';
 
@@ -159,8 +158,7 @@ export function BuyerQuantityLocation() {
     : null;
 
   return (
-    <OnboardingLayout>
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-blue-500 mb-2">Quantity & Location</Text>
@@ -394,6 +392,5 @@ export function BuyerQuantityLocation() {
           </View>
         )}
       </ScrollView>
-    </OnboardingLayout>
   );
 }

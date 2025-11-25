@@ -4,7 +4,6 @@ import { MapPin, ShoppingCart, Info } from 'lucide-react-native';
 import type { ProductSpecification } from '@shared/types/onboarding';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
-import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import { getApiUrl } from '@shared/utils/environment';
 import { BuyerSubmitDrawer } from './BuyerSubmitDrawer';
 
@@ -76,7 +75,7 @@ export function BuyerMarketRequest({
     'Unknown Product';
 
   return (
-    <OnboardingLayout>
+    <>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         <View className="mb-6">
@@ -239,6 +238,6 @@ export function BuyerMarketRequest({
           onComplete={handleDrawerComplete}
         />
       )}
-    </OnboardingLayout>
+    </>
   );
 }

@@ -12,7 +12,6 @@ import {
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
-import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import { productSelectionService } from './service';
 import type { ProductSelectionRole } from './types';
 
@@ -78,17 +77,15 @@ export const ProductSelectionUnified: React.FC = () => {
 
   if (isLoadingProducts) {
     return (
-      <OnboardingLayout>
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#10B981" />
-          <Text className="mt-4 text-gray-400">Loading products...</Text>
-        </View>
-      </OnboardingLayout>
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#10B981" />
+        <Text className="mt-4 text-gray-400">Loading products...</Text>
+      </View>
     );
   }
 
   return (
-    <OnboardingLayout>
+    <View className="flex-1">
       {/* Header */}
       <View className="mb-6">
         <Text className="text-3xl font-bold text-primary-500 mb-2">
@@ -180,6 +177,6 @@ export const ProductSelectionUnified: React.FC = () => {
           </View>
         )}
       </ScrollView>
-    </OnboardingLayout>
+    </View>
   );
 };

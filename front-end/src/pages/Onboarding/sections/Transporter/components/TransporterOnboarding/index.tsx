@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, SafeAreaView, Text } from 'react-native';
+import { View, Text } from 'react-native';
 import type { OnboardingStep } from '@shared/types/onboarding';
 import { simplifiedRoleSteps } from '@shared/constants/simplifiedOnboarding';
-import { ProgressSidebar } from '@pages/Onboarding/components/shared/ProgressSidebar';
-import { Navigation } from '@pages/Onboarding/components/shared/Navigation';
+import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import { FleetInformation } from '@pages/Onboarding/sections/Transporter/features/Fleet/components/FleetInformation';
 import { LocationInformation } from '@pages/Onboarding/sections/Transporter/features/Location/components/LocationInformation';
 import { TransporterListing } from '@pages/Onboarding/sections/Transporter/features/Listing/components/TransporterListing';
@@ -140,36 +139,17 @@ export function TransporterOnboarding({ onComplete }: TransporterOnboardingProps
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900">
-      <View className="flex-1 flex-row bg-gray-900 relative">
-        {/* Fixed Progress Sidebar */}
-        <ProgressSidebar
-          steps={steps}
-          currentStepIndex={currentStepIndex}
-          progressLineHeight={progressLineHeight}
-          isAnimating={isAnimating}
-        />
-
-        {/* Main Content */}
-        <View className="flex-1 relative">
-          <ScrollView
-            className="flex-1"
-            contentContainerStyle={{ paddingBottom: 100 }}
-            showsVerticalScrollIndicator={false}
-          >
-            <View className="max-w-4xl self-center w-full">{renderStepContent()}</View>
-          </ScrollView>
-
-          <Navigation
-            currentStepIndex={currentStepIndex}
-            totalSteps={steps.length}
-            canProceedToNext={canProceedToNext()}
-            isAnimating={isAnimating}
-            onBack={handleBack}
-            onNext={handleNext}
-          />
-        </View>
-      </View>
-    </SafeAreaView>
+    <OnboardingLayout
+      steps={steps}
+      currentStepIndex={currentStepIndex}
+      progressLineHeight={progressLineHeight}
+      isAnimating={isAnimating}
+      canProceedToNext={canProceedToNext()}
+      onNext={handleNext}
+      onBack={handleBack}
+      scrollable={true}
+    >
+      {renderStepContent()}
+    </OnboardingLayout>
   );
 }

@@ -3,7 +3,7 @@ import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { PrivyProvider, PrivyConfig } from '@privy-io/expo';
+import { PrivyProvider } from '@privy-io/expo';
 import RootNavigator from './src/navigation/RootNavigator';
 import { AppBootstrap } from './src/navigation/AppBootstrap';
 import * as Sentry from '@sentry/react-native';
@@ -60,17 +60,11 @@ const queryClient = new QueryClient();
 const privyAppId = process.env.EXPO_PUBLIC_PRIVY_APP_ID || '';
 const privyClientId = process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID || '';
 
-const privyConfig: PrivyConfig = {
-  appearance: {
-    showWalletLoginFirst: false,
-  },
-};
-
 function App() {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
-        <PrivyProvider appId={privyAppId} clientId={privyClientId} config={privyConfig}>
+        <PrivyProvider appId={privyAppId} clientId={privyClientId}>
           <StatusBar style="auto" />
           <AppBootstrap>{(appState) => <RootNavigator appState={appState} />}</AppBootstrap>
         </PrivyProvider>

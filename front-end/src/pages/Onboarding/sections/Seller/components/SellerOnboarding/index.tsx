@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, SafeAreaView } from 'react-native';
 import type { OnboardingStep, ProductSpecification } from '@shared/types/onboarding';
 import { simplifiedRoleSteps } from '@shared/constants/simplifiedOnboarding';
-import { ProgressSidebar } from '@pages/Onboarding/components/shared/ProgressSidebar';
-import { Navigation } from '@pages/Onboarding/components/shared/Navigation';
+import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import { ProductSelectionUnified } from '@pages/Onboarding/features/shared/ProductSelection';
 import { QuantityPricingStep } from '@pages/Onboarding/sections/Seller/features/QuantityPricing/components/QuantityPricingStep';
 import { CustomOfferStep } from '@pages/Onboarding/sections/Seller/features/CustomOffer/components/CustomOfferStep';
@@ -242,31 +241,18 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
 
   return (
     <PermissionGuard requireLocation={true}>
-      <SafeAreaView className="flex-1 bg-gray-900">
-        <View className="flex-1 flex-row bg-gray-900 relative">
-          {/* Fixed Progress Sidebar */}
-          <ProgressSidebar
-            steps={steps}
-            currentStepIndex={currentStepIndex}
-            progressLineHeight={progressLineHeight}
-            isAnimating={isAnimating}
-          />
-
-          {/* Main Content */}
-          <View className="flex-1 relative">
-            {renderStepContent()}
-
-            <Navigation
-              currentStepIndex={currentStepIndex}
-              totalSteps={steps.length}
-              canProceedToNext={canProceedToNext()}
-              isAnimating={isAnimating}
-              onBack={handleBack}
-              onNext={handleNext}
-            />
-          </View>
-        </View>
-      </SafeAreaView>
+      <OnboardingLayout
+        steps={steps}
+        currentStepIndex={currentStepIndex}
+        progressLineHeight={progressLineHeight}
+        isAnimating={isAnimating}
+        canProceedToNext={canProceedToNext()}
+        onNext={handleNext}
+        onBack={handleBack}
+        scrollable={false}
+      >
+        {renderStepContent()}
+      </OnboardingLayout>
     </PermissionGuard>
   );
 }

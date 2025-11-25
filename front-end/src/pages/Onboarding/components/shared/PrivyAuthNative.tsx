@@ -37,10 +37,13 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
   const { login } = useAuthStore();
   const onboardingStore = useOnboardingStore();
   const { selectedRole } = onboardingStore;
-  const { user, getAccessToken } = usePrivy();
+  const { getAccessToken } = usePrivy();
+
+  // Privy OAuth hook - no callbacks in options
+  const { login: loginWithOAuth, state: oauthState } = useLoginWithOAuth({});
 
   // Handle successful profile creation animation
-  const showProfileCreatedAnimation = () => {
+  const showProfileCreatedAnimation = useCallback(() => {
     setProfileCreated(true);
 
     // Start animations in sequence
@@ -78,13 +81,16 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
         onComplete();
       }, 1000);
     });
-  };
+  }, [fadeAnim, scaleAnim, checkmarkScale, textOpacity, onComplete]);
 
-  const handlePrivyLoginSuccess = useCallback(async () => {
+  const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
 
-      // Get Privy access token
+      // Initiate OAuth flow with Privy
+      await loginWithOAuth({ provider: 'google' as OAuthProviderType });
+
+      // After successful OAuth, get the Privy access token
       const privyToken = await getAccessToken();
       if (!privyToken) {
         throw new Error('Failed to get Privy access token');
@@ -95,16 +101,14 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
       const response = await apiClient.post('/auth/privy/login', {
         privyToken,
         role: roleToUse,
-        email: user?.email?.address,
-        name: user?.google?.name || user?.apple?.name || user?.twitter?.name,
       });
 
       if (response.data.access_token) {
-        // Store tokens and login
-        await login(
+        // Store tokens and login (order: user, token, refreshToken)
+        login(
+          response.data.user,
           response.data.access_token,
-          response.data.refresh_token,
-          response.data.user
+          response.data.refresh_token
         );
 
         // Show success animation
@@ -112,38 +116,16 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
       } else {
         throw new Error('No access token received from backend');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Privy login error:', error);
       setIsLoading(false);
-      Alert.alert(
-        'Authentication Failed',
-        error.response?.data?.message || error.message || 'Please try again later.'
-      );
-    }
-  }, [user, userRole, selectedRole, getAccessToken, login, onComplete]);
 
-  const handlePrivyLoginError = useCallback((error: any) => {
-    console.error('Privy OAuth error:', error);
-    setIsLoading(false);
-    Alert.alert(
-      'Sign in Failed',
-      'Unable to complete sign in. Please try again.'
-    );
-  }, []);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Please try again later.';
 
-  const { login: loginWithGoogle, state: oauthState } = useLoginWithOAuth({
-    onLoginSuccess: handlePrivyLoginSuccess,
-    onError: handlePrivyLoginError,
-  });
-
-  const handleGoogleSignIn = async () => {
-    try {
-      setIsLoading(true);
-      await loginWithGoogle({ provider: 'google' as OAuthProviderType });
-    } catch (error) {
-      console.error('Error initiating Google sign in:', error);
-      setIsLoading(false);
-      Alert.alert('Error', 'Failed to initiate Google sign in');
+      Alert.alert('Authentication Failed', errorMessage);
     }
   };
 
@@ -195,12 +177,14 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
     );
   }
 
+  const isPending = isLoading || oauthState.status === 'loading';
+
   // Sign in UI
   return (
     <View style={mode === 'inline' ? { marginTop: 24 } : { padding: 20 }}>
       <TouchableOpacity
         onPress={handleGoogleSignIn}
-        disabled={isLoading || oauthState.status === 'initial-loading'}
+        disabled={isPending}
         style={{
           backgroundColor: '#FFFFFF',
           borderRadius: 12,
@@ -214,11 +198,11 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
           shadowOpacity: 0.1,
           shadowRadius: 4,
           elevation: 3,
-          opacity: isLoading || oauthState.status === 'initial-loading' ? 0.6 : 1,
+          opacity: isPending ? 0.6 : 1,
         }}
         activeOpacity={0.8}
       >
-        {isLoading || oauthState.status === 'initial-loading' ? (
+        {isPending ? (
           <ActivityIndicator size="small" color="#4285F4" />
         ) : (
           <>

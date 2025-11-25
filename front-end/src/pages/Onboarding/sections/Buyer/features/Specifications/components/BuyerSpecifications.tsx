@@ -4,7 +4,6 @@ import { Package } from 'lucide-react-native';
 import type { ProductSpecification } from '@shared/types/onboarding';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
-import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import { ProductSpecificationInput } from '@pages/Onboarding/components/shared/ProductSpecificationInput';
 import { getApiUrl } from '@shared/utils/environment';
 
@@ -101,28 +100,24 @@ export function BuyerSpecifications({
 
   if (loading) {
     return (
-      <OnboardingLayout>
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#10B981" />
-          <Text className="text-gray-400 mt-4">Loading product specifications...</Text>
-        </View>
-      </OnboardingLayout>
+      <View className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color="#10B981" />
+        <Text className="text-gray-400 mt-4">Loading product specifications...</Text>
+      </View>
     );
   }
 
   if (!selectedProduct) {
     return (
-      <OnboardingLayout>
-        <View className="bg-gray-800 border border-gray-700 rounded-lg p-8 items-center">
-          <View className="w-16 h-16 bg-gray-700 rounded-full items-center justify-center mb-4">
-            <Package size={32} color="#6B7280" />
-          </View>
-          <Text className="text-lg font-semibold text-white mb-2">No Product Selected</Text>
-          <Text className="text-sm text-gray-400 text-center">
-            Please go back and select a product first
-          </Text>
+      <View className="bg-gray-800 border border-gray-700 rounded-lg p-8 items-center">
+        <View className="w-16 h-16 bg-gray-700 rounded-full items-center justify-center mb-4">
+          <Package size={32} color="#6B7280" />
         </View>
-      </OnboardingLayout>
+        <Text className="text-lg font-semibold text-white mb-2">No Product Selected</Text>
+        <Text className="text-sm text-gray-400 text-center">
+          Please go back and select a product first
+        </Text>
+      </View>
     );
   }
 
@@ -135,8 +130,7 @@ export function BuyerSpecifications({
     : null;
 
   return (
-    <OnboardingLayout>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-blue-500 mb-3">Product Specifications</Text>
@@ -228,6 +222,5 @@ export function BuyerSpecifications({
           />
         </View>
       </ScrollView>
-    </OnboardingLayout>
   );
 }
