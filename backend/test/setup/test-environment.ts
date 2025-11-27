@@ -26,6 +26,9 @@ export class TestEnvironment {
     // Create application
     this.app = this.moduleRef.createNestApplication();
 
+    // Add global prefix (matching main.ts)
+    this.app.setGlobalPrefix("api");
+
     // Add global pipes
     this.app.useGlobalPipes(
       new ValidationPipe({

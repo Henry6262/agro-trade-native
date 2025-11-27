@@ -659,6 +659,13 @@ export class NegotiationService {
       throw new BadRequestException("Negotiation has expired");
     }
 
+    // Check if offer has actually expired (time-based validation)
+    const now = new Date();
+    const expiresAt = new Date(negotiation.expiresAt);
+    if (now > expiresAt) {
+      throw new BadRequestException("Negotiation has expired");
+    }
+
     // Determine final price and quantity
     const finalOffer =
       negotiation.status === NegotiationStatus.COUNTERED

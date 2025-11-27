@@ -33,9 +33,15 @@ export const RoleSelectionScreen: React.FC = () => {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'buyer' | 'seller' | 'transport' | null>(null);
 
-  // Privy hooks
-  const { getAccessToken } = usePrivy();
-  const { login: loginWithOAuth, state: oauthState } = useLoginWithOAuth({});
+  // Privy hooks - TEMPORARILY DISABLED until bundle ID is configured in Privy dashboard
+  // TODO: Re-enable after adding com.agrotrade.app to Privy dashboard
+  // const { getAccessToken } = usePrivy();
+  // const { login: loginWithOAuth, state: oauthState } = useLoginWithOAuth({});
+
+  // Dummy implementations to allow role selection to work
+  const getAccessToken = async () => null;
+  const loginWithOAuth = async () => {};
+  const oauthState = { status: 'initial' as const };
 
   // Redirect to main app if already authenticated
   useEffect(() => {

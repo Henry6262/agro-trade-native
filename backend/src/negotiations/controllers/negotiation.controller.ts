@@ -297,35 +297,20 @@ export class NegotiationController {
   /**
    * Get single negotiation details
    */
-  @Get("negotiations/:negotiationId")
+  @Get(":negotiationId")
   @ApiOperation({ summary: "Get single negotiation details" })
   @ApiParam({ name: "negotiationId", description: "Negotiation ID" })
-  @ApiResponse({ status: HttpStatus.OK, type: NegotiationResponseWrapperDto })
+  @ApiResponse({ status: HttpStatus.OK, type: NegotiationWithDetailsDto })
   async getNegotiationById(
     @Param("negotiationId") negotiationId: string,
-  ): Promise<NegotiationResponseWrapperDto> {
-    try {
-      const negotiation =
-        await this.negotiationService.getNegotiationById(negotiationId);
-      return {
-        success: true,
-        data: negotiation as any,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: {
-          code: "NEGOTIATION_NOT_FOUND",
-          message: error.message,
-        },
-      };
-    }
+  ): Promise<NegotiationWithDetailsDto> {
+    return await this.negotiationService.getNegotiationById(negotiationId);
   }
 
   /**
    * Counter an offer
    */
-  @Post("negotiations/:negotiationId/counter")
+  @Post(":negotiationId/counter")
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: "Counter an offer" })
   @ApiParam({ name: "negotiationId", description: "Negotiation ID" })
@@ -365,40 +350,28 @@ export class NegotiationController {
   /**
    * Accept an offer
    */
-  @Post("negotiations/:negotiationId/accept")
+  @Post(":negotiationId/accept")
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Accept an offer" })
   @ApiParam({ name: "negotiationId", description: "Negotiation ID" })
-  @ApiResponse({ status: HttpStatus.OK, type: NegotiationResponseWrapperDto })
+  @ApiResponse({ status: HttpStatus.OK, type: NegotiationWithDetailsDto })
   async acceptOffer(
     @Param("negotiationId") negotiationId: string,
     @Body(ValidationPipe) dto: AcceptOfferDto,
     @Request() req?: any,
-  ): Promise<NegotiationResponseWrapperDto> {
-    try {
-      const negotiation = await this.negotiationService.acceptOffer(
-        negotiationId,
-        dto.acceptanceNote,
-        req?.user?.id,
-      );
-      return {
-        success: true,
-        data: negotiation as any,
-      };
-    } catch (error) {
-      return {
-        success: false,
-        error: {
-          code: "ACCEPT_FAILED",
-          message: error.message,
-        },
-      };
-    }
+  ): Promise<NegotiationWithDetailsDto> {
+    return await this.negotiationService.acceptOffer(
+      negotiationId,
+      dto.acceptanceNote,
+      req?.user?.id,
+    );
   }
 
   /**
    * Reject an offer
    */
-  @Post("negotiations/:negotiationId/reject")
+  @Post(":negotiationId/reject")
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Reject an offer" })
   @ApiParam({ name: "negotiationId", description: "Negotiation ID" })
   @ApiResponse({ status: HttpStatus.OK, type: NegotiationResponseWrapperDto })
@@ -438,7 +411,8 @@ export class NegotiationController {
   /**
    * Withdraw an offer (admin only)
    */
-  @Post("negotiations/:negotiationId/withdraw")
+  @Post(":negotiationId/withdraw")
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Withdraw an offer" })
   @ApiParam({ name: "negotiationId", description: "Negotiation ID" })
   @ApiResponse({ status: HttpStatus.OK, type: NegotiationResponseWrapperDto })
@@ -471,7 +445,8 @@ export class NegotiationController {
   /**
    * Extend negotiation expiry
    */
-  @Post("negotiations/:negotiationId/extend")
+  @Post(":negotiationId/extend")
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Extend negotiation expiry" })
   @ApiParam({ name: "negotiationId", description: "Negotiation ID" })
   @ApiResponse({ status: HttpStatus.OK, type: ExtendExpiryResponseDto })

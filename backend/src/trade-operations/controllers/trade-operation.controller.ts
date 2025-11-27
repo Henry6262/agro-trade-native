@@ -106,8 +106,8 @@ export class TradeOperationController {
     @Body() createDto: CreateTradeOperationWithOffersDto,
     @Request() req: any,
   ): Promise<any> {
-    // Use default admin ID if no user is authenticated
-    const adminId = req.user?.id || "cmhhfgc1u0000g1rqjcd4y1lx"; // Default admin from DB (admin@test.com)
+    // Use admin ID from DTO, or from authenticated user, or default
+    const adminId = createDto.adminId || req.user?.id || "cmhhfgc1u0000g1rqjcd4y1lx"; // Default admin from DB (admin@test.com)
 
     // Validate buy listing exists
     const buyListing = await this.prisma.buyListing.findUnique({

@@ -76,7 +76,7 @@ export function BuyerMarketRequest({
 
   return (
     <>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         {/* Header Section */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-primary-500 text-center mb-2">

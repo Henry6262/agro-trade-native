@@ -386,9 +386,9 @@ export class SellerService {
       name: listing.product.name,
       category: listing.product.category || "General",
       subcategory: "", // Product model doesn't have subcategory
-      quantity: listing.quantity,
+      quantity: listing.quantity ? Number(listing.quantity) : 0,
       unit: listing.unit.toLowerCase(),
-      pricePerUnit: listing.askingPrice || 0,
+      pricePerUnit: listing.askingPrice ? Number(listing.askingPrice) : 0,
       currency: "USD",
       location: {
         address: listing.address?.street || "",
@@ -398,8 +398,8 @@ export class SellerService {
         coordinates:
           listing.address?.latitude && listing.address?.longitude
             ? {
-                latitude: listing.address.latitude,
-                longitude: listing.address.longitude,
+                latitude: Number(listing.address.latitude),
+                longitude: Number(listing.address.longitude),
               }
             : undefined,
       },

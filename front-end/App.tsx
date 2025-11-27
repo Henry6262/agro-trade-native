@@ -3,7 +3,9 @@ import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { PrivyProvider } from '@privy-io/expo';
+import { PrivyElements } from '@privy-io/expo/ui';
 import RootNavigator from './src/navigation/RootNavigator';
 import { AppBootstrap } from './src/navigation/AppBootstrap';
 import * as Sentry from '@sentry/react-native';
@@ -58,17 +60,21 @@ const queryClient = new QueryClient();
 
 // Privy configuration
 const privyAppId = process.env.EXPO_PUBLIC_PRIVY_APP_ID || '';
+const privyClientId = process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID || '';
 
 function App() {
   return (
-    <SafeAreaProvider>
-      <QueryClientProvider client={queryClient}>
-        <PrivyProvider appId={privyAppId}>
-          <StatusBar style="auto" />
-          <AppBootstrap>{(appState) => <RootNavigator appState={appState} />}</AppBootstrap>
-        </PrivyProvider>
-      </QueryClientProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <QueryClientProvider client={queryClient}>
+          <PrivyProvider appId={privyAppId} clientId={privyClientId}>
+            <StatusBar style="auto" />
+            <AppBootstrap>{(appState) => <RootNavigator appState={appState} />}</AppBootstrap>
+            <PrivyElements />
+          </PrivyProvider>
+        </QueryClientProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
 

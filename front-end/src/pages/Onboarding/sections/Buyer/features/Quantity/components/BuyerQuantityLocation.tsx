@@ -158,7 +158,7 @@ export function BuyerQuantityLocation() {
     : null;
 
   return (
-    <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-blue-500 mb-2">Quantity & Location</Text>

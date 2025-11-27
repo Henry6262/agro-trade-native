@@ -165,7 +165,7 @@ export function QuantityPricingStep() {
     : null;
 
   return (
-    <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-white mb-2">Quantity & Location</Text>

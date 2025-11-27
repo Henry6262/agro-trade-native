@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -27,6 +27,8 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [profileCreated, setProfileCreated] = useState(false);
+  const [backendAuthInProgress, setBackendAuthInProgress] = useState(false);
+  const hasCompletedBackendAuth = useRef(false);
 
   // Animation values
   const fadeAnim = new Animated.Value(0);
@@ -37,12 +39,16 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
   const { login } = useAuthStore();
   const onboardingStore = useOnboardingStore();
   const { selectedRole } = onboardingStore;
-  const { getAccessToken } = usePrivy();
+  // Get Privy auth state - isAuthenticated tells us if user is logged into Privy
+  const { getAccessToken, isReady: privyReady, user: privyUser } = usePrivy();
 
   // Privy OAuth hook - no callbacks in options
   const { login: loginWithOAuth, state: oauthState } = useLoginWithOAuth({});
 
-  // Handle successful profile creation animation
+  // Check if user is authenticated with Privy (has a user object)
+  const isPrivyAuthenticated = privyReady && !!privyUser;
+
+  // Handle successful profile creation animation (defined first, used by completeBackendAuth)
   const showProfileCreatedAnimation = useCallback(() => {
     setProfileCreated(true);
 
@@ -83,17 +89,37 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
     });
   }, [fadeAnim, scaleAnim, checkmarkScale, textOpacity, onComplete]);
 
-  const handleGoogleSignIn = async () => {
+  // Helper function to get access token with retry
+  const getAccessTokenWithRetry = useCallback(async (maxRetries = 3, delayMs = 500): Promise<string | null> => {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      console.log(`Getting Privy access token (attempt ${attempt}/${maxRetries})...`);
+      const token = await getAccessToken();
+      if (token) {
+        console.log('Successfully got Privy access token');
+        return token;
+      }
+      if (attempt < maxRetries) {
+        console.log(`Token not available, waiting ${delayMs}ms before retry...`);
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    }
+    return null;
+  }, [getAccessToken]);
+
+  // Function to complete authentication with our backend after Privy auth
+  const completeBackendAuth = useCallback(async () => {
+    if (hasCompletedBackendAuth.current || backendAuthInProgress) {
+      return;
+    }
+
     try {
-      setIsLoading(true);
+      setBackendAuthInProgress(true);
+      hasCompletedBackendAuth.current = true;
 
-      // Initiate OAuth flow with Privy
-      await loginWithOAuth({ provider: 'google' as OAuthProviderType });
-
-      // After successful OAuth, get the Privy access token
-      const privyToken = await getAccessToken();
+      // Get the Privy access token with retry logic
+      const privyToken = await getAccessTokenWithRetry(3, 1000);
       if (!privyToken) {
-        throw new Error('Failed to get Privy access token');
+        throw new Error('Failed to get Privy access token. Please try signing in again.');
       }
 
       // Send Privy token to backend for verification and app token generation
@@ -104,7 +130,7 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
       });
 
       if (response.data.access_token) {
-        // Store tokens and login (order: user, token, refreshToken)
+        // Store tokens and login
         login(
           response.data.user,
           response.data.access_token,
@@ -117,8 +143,54 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
         throw new Error('No access token received from backend');
       }
     } catch (error: unknown) {
+      console.error('Backend auth error:', error);
+      hasCompletedBackendAuth.current = false;
+      setBackendAuthInProgress(false);
+      setIsLoading(false);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Please try again later.';
+
+      Alert.alert('Authentication Failed', errorMessage);
+    }
+  }, [getAccessTokenWithRetry, userRole, selectedRole, login, showProfileCreatedAnimation, backendAuthInProgress]);
+
+  // Effect: When user becomes authenticated with Privy, complete backend auth
+  useEffect(() => {
+    if (isPrivyAuthenticated && isLoading && !hasCompletedBackendAuth.current) {
+      console.log('Privy auth detected, completing backend auth...');
+      completeBackendAuth();
+    }
+  }, [isPrivyAuthenticated, isLoading, completeBackendAuth]);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      hasCompletedBackendAuth.current = false;
+
+      // Check if user is already authenticated with Privy
+      if (isPrivyAuthenticated) {
+        console.log('Already authenticated with Privy, completing backend auth...');
+        // Already logged in with Privy, just complete backend auth
+        await completeBackendAuth();
+        return;
+      }
+
+      // Not authenticated - initiate OAuth flow with Privy
+      // The useEffect will detect when Privy becomes authenticated
+      // and call completeBackendAuth automatically
+      console.log('Starting Privy OAuth flow...');
+      await loginWithOAuth({ provider: 'google' as OAuthProviderType });
+
+      // Note: loginWithOAuth returns after initiating the flow,
+      // but actual auth completion happens asynchronously.
+      // The useEffect watching isPrivyAuthenticated will handle the rest.
+    } catch (error: unknown) {
       console.error('Privy login error:', error);
       setIsLoading(false);
+      hasCompletedBackendAuth.current = false;
 
       const errorMessage =
         error instanceof Error

@@ -99,7 +99,7 @@ export const ProductSelectionUnified: React.FC = () => {
       </View>
 
       {/* Product Grid - Fixed 2 columns */}
-      <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+      <ScrollView showsVerticalScrollIndicator={false} className="flex-1" contentContainerStyle={{ paddingBottom: 140 }}>
         {products && products.length > 0 ? (
           <View>
             {/* Create rows of 2 items each */}

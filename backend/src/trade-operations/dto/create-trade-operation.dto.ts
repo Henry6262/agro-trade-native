@@ -135,6 +135,15 @@ export class CreateTradeOperationWithOffersDto {
   buyListingId: string;
 
   @ApiProperty({
+    description: "ID of the admin creating the trade operation (optional for testing)",
+    example: "cmhhfgc1u0000g1rqjcd4y1lx",
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  adminId?: string;
+
+  @ApiProperty({
     description: "List of sellers to send initial offers to",
     type: [SellerOfferDto],
   })

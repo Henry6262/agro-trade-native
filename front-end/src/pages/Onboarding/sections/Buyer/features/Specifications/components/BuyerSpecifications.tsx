@@ -130,7 +130,7 @@ export function BuyerSpecifications({
     : null;
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false}>
+    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
         {/* Header */}
         <View className="mb-6">
           <Text className="text-3xl font-bold text-blue-500 mb-3">Product Specifications</Text>

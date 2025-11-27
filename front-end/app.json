@@ -54,7 +54,8 @@
           "organization": "agrotrade",
           "project": "react-native"
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "owner": "henry6262",
     "extra": {

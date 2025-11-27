@@ -49,6 +49,7 @@ config.resolver.extraNodeModules = {
   https: require.resolve('https-browserify'),
   zlib: require.resolve('empty-module'),
   events: require.resolve('eventemitter3'),
+  util: require.resolve('util'),
 };
 
 config.resolver.resolveRequest = resolveRequestWithPackageExports;

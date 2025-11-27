@@ -9,7 +9,9 @@ import {
   Request,
   BadRequestException,
   Query,
+  UseGuards,
 } from "@nestjs/common";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import {
   ApiBody,
   ApiOkResponse,
@@ -40,6 +42,7 @@ interface AuthRequest {
 
 @ApiTags("Buyer")
 @Controller("buyer")
+@UseGuards(JwtAuthGuard)
 export class BuyerController {
   constructor(private readonly buyerService: BuyerService) {}
 

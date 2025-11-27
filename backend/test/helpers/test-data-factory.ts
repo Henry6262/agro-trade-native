@@ -326,14 +326,17 @@ export class TestDataFactory {
     const buyerPrice = options?.buyerPrice || 350;
     const withAddresses = options?.withAddresses !== false;
 
+    // Generate unique email suffix for this test scenario
+    const uniqueSuffix = Date.now() + Math.random().toString(36).substring(7);
+
     // Create product
     const product = await this.createTestProduct({ category: "SOFT_WHEAT" });
 
     // Create admin
-    const admin = await this.createTestAdmin({ email: "admin@test.com" });
+    const admin = await this.createTestAdmin({ email: `admin-${uniqueSuffix}@test.com` });
 
     // Create buyer
-    const buyer = await this.createTestBuyer({ email: "buyer@test.com" });
+    const buyer = await this.createTestBuyer({ email: `buyer-${uniqueSuffix}@test.com` });
     let buyerAddress = null;
     if (withAddresses) {
       buyerAddress = await this.createTestAddress(buyer.id, {
@@ -356,7 +359,7 @@ export class TestDataFactory {
     const saleListings = [];
     for (let i = 0; i < sellerCount; i++) {
       const seller = await this.createTestSeller({
-        email: `seller${i + 1}@test.com`,
+        email: `seller${i + 1}-${uniqueSuffix}@test.com`,
         verified: options?.withVerifiedSellers?.[i] || false,
       });
       sellers.push(seller);
@@ -393,7 +396,7 @@ export class TestDataFactory {
 
     // Create transporter
     const transporter = await this.createTestTransporter({
-      email: "transporter@test.com",
+      email: `transporter-${uniqueSuffix}@test.com`,
     });
     const transportCompany = await this.createTestTransportCompany();
     const truck = await this.createTestTruck(transporter.id, {
@@ -404,7 +407,7 @@ export class TestDataFactory {
 
     // Create inspector
     const inspector = await this.createTestInspector({
-      email: "inspector@test.com",
+      email: `inspector-${uniqueSuffix}@test.com`,
     });
 
     return {

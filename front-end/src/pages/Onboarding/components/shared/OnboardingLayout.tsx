@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, Dimensions, ViewStyle } from 'react-native';
+import { View, ScrollView, Dimensions, ViewStyle, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { OnboardingStep } from '@shared/types/onboarding';
 import { ProgressSidebar } from './ProgressSidebar';
@@ -38,7 +38,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   contentStyle,
 }) => {
   const insets = useSafeAreaInsets();
-  const { width } = Dimensions.get('window');
+  const { width, height: windowHeight } = useWindowDimensions();
 
   // Calculate 10% margins for left and right
   const horizontalMargin = width * 0.1;
@@ -60,7 +60,16 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   // If steps are provided, render with ProgressSidebar (dashboard mode)
   if (steps && steps.length > 0) {
     return (
-      <View className="flex-1 flex-row bg-gray-900">
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+          backgroundColor: '#111827',
+          height: windowHeight, // Explicit height to prevent overflow
+          maxHeight: windowHeight, // Ensure it doesn't exceed screen
+          overflow: 'hidden', // Clip any overflow
+        }}
+      >
         {/* Fixed Progress Sidebar */}
         <ProgressSidebar
           steps={steps}
@@ -70,7 +79,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         />
 
         {/* Main Content Area */}
-        <View className="flex-1">
+        <View style={{ flex: 1, overflow: 'hidden' }}>
           {scrollable ? (
             <ScrollView
               contentContainerStyle={contentContainerStyle}
@@ -82,7 +91,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
               {children}
             </ScrollView>
           ) : (
-            <View style={contentContainerStyle}>{children}</View>
+            <View style={{ flex: 1, paddingHorizontal: horizontalMargin, paddingTop: insets.top, overflow: 'hidden' }}>{children}</View>
           )}
 
           {/* Navigation */}

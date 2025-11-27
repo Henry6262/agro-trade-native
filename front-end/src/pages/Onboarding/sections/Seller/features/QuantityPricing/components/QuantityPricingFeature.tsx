@@ -20,7 +20,7 @@ export function QuantityPricingFeature() {
   }
 
   return (
-    <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+    <ScrollView showsVerticalScrollIndicator={false} className="flex-1" contentContainerStyle={{ paddingBottom: 140 }}>
       <PresetQuantitySelector state={state} />
       <CustomQuantityInput state={state} />
       <LocationPicker state={state} />
