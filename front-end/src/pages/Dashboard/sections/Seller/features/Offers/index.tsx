@@ -163,10 +163,10 @@ export default function SellerOffersFeature() {
               offers.map((offer) => (
                 <SellerOfferCard
                   key={offer.id}
-                  offer={offer}
-                  onAccept={(o) => openModal('accept', o)}
-                  onReject={(o) => openModal('reject', o)}
-                  onCounter={(o) => openModal('counter', o)}
+                  offer={offer as SellerOffer}
+                  onAccept={(o: any) => openModal('accept', o)}
+                  onReject={(o: any) => openModal('reject', o)}
+                  onCounter={(o: any) => openModal('counter', o)}
                   isProcessing={isProcessing}
                 />
               ))

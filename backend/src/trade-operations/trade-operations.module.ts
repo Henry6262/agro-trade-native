@@ -1,5 +1,6 @@
 import { Module, forwardRef } from "@nestjs/common";
 import { PrismaModule } from "../prisma/prisma.module";
+import { AuthModule } from "../auth/auth.module";
 import { TransportModule } from "../transport/transport.module";
 import { NegotiationsModule } from "../negotiations/negotiations.module";
 
@@ -17,8 +18,9 @@ import { TestController } from "./controllers/test.controller";
 @Module({
   imports: [
     PrismaModule,
-    TransportModule, // Import TransportModule for transport services
-    forwardRef(() => NegotiationsModule), // Import NegotiationsModule for negotiation services
+    AuthModule,
+    TransportModule,
+    forwardRef(() => NegotiationsModule),
   ],
   providers: [
     TradeOperationService,

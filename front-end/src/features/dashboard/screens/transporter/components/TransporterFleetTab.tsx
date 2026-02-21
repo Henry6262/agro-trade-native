@@ -300,7 +300,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
 
                 {/* Actions */}
                 <View className="flex-row justify-end mt-3">
-                  <Button size="sm" variant="ghost" onPress={() => console.log('Edit truck')}>
+                  <Button size="sm" variant="ghost" onPress={() => {}}>
                     <Text className="text-neutral-400">EDIT</Text>
                   </Button>
                 </View>
@@ -382,7 +382,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
                     >
                       {driver.status.toUpperCase()}
                     </Badge>
-                    <Button size="sm" variant="ghost" onPress={() => console.log('Edit driver')}>
+                    <Button size="sm" variant="ghost" onPress={() => {}}>
                       <Text className="text-neutral-400">EDIT</Text>
                     </Button>
                   </View>
@@ -405,7 +405,6 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
         visible={showFleetCreation}
         onClose={() => setShowFleetCreation(false)}
         onSuccess={(data) => {
-          console.log('Fleet item added:', data);
           // TODO: Refresh fleet data
           // Don't need to set false here as onClose will be called
         }}

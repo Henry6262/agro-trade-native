@@ -207,7 +207,7 @@ export const useProductCreation = () => {
           longitude: location!.longitude,
         },
         status: 'active',
-        offerType: 'listing', // Changed from 'STANDARD' to match backend enum
+        offerType: 'listing' as any, // Changed from 'STANDARD' to match backend enum
       };
 
       // Send to backend

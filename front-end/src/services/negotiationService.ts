@@ -5,6 +5,11 @@ export interface Negotiation {
   id: string;
   tradeOperationId: string;
   tradeSellerId: string;
+  type?: string;
+  offeredPrice?: number;
+  quantity?: number;
+  message?: string;
+  roundNumber?: number;
   status: 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'COUNTERED' | 'EXPIRED' | 'WITHDRAWN';
   currentOffer: {
     price: number;
@@ -226,8 +231,12 @@ export const negotiationService = {
   async counterOffer(
     negotiationId: string,
     params: {
-      counterPrice: number;
+      counterPrice?: number;
+      price?: number;
+      quantity?: number;
       message?: string;
+      terms?: string;
+      reason?: string;
     }
   ): Promise<
     Negotiation & {
@@ -243,8 +252,15 @@ export const negotiationService = {
     }
   > {
     try {
-      const response = await apiClient.post(`/negotiations/${negotiationId}/counter`, params);
-      return response.data;
+      // Map counterPrice to price for backend compatibility
+      const requestData = {
+        price: params.price || params.counterPrice,
+        quantity: params.quantity,
+        terms: params.terms || params.message,
+        reason: params.reason,
+      };
+      const response = await apiClient.post(`/negotiations/${negotiationId}/counter`, requestData);
+      return response.data.data || response.data;
     } catch (error) {
       console.error('Error creating counter offer:', error);
       throw error;

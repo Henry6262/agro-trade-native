@@ -8,6 +8,9 @@ import { PrivyProvider } from '@privy-io/expo';
 import { PrivyElements } from '@privy-io/expo/ui';
 import RootNavigator from './src/navigation/RootNavigator';
 import { AppBootstrap } from './src/navigation/AppBootstrap';
+import { SocketProvider } from './src/providers/SocketProvider';
+import { NotificationProvider } from './src/providers/NotificationProvider';
+import { NotificationBanner } from './src/shared/components/NotificationBanner';
 import * as Sentry from '@sentry/react-native';
 
 // Initialize Sentry
@@ -67,11 +70,16 @@ function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <PrivyProvider appId={privyAppId} clientId={privyClientId}>
-            <StatusBar style="auto" />
-            <AppBootstrap>{(appState) => <RootNavigator appState={appState} />}</AppBootstrap>
-            <PrivyElements />
-          </PrivyProvider>
+          <SocketProvider>
+            <NotificationProvider>
+              <PrivyProvider appId={privyAppId} clientId={privyClientId}>
+                <StatusBar style="auto" />
+                <AppBootstrap>{(appState) => <RootNavigator appState={appState} />}</AppBootstrap>
+                <PrivyElements />
+                <NotificationBanner />
+              </PrivyProvider>
+            </NotificationProvider>
+          </SocketProvider>
         </QueryClientProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

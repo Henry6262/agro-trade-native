@@ -94,6 +94,7 @@ export interface TradeSeller {
   unit: ProductUnit;
   status: SellerStatus;
   finalPrice?: number;
+  isVerified?: boolean;
 }
 
 export interface SaleListing {

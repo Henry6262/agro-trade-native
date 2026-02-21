@@ -17,7 +17,7 @@ import { useOnboardingStore } from '@stores/onboarding.store';
 import { useAuthStore } from '@stores/auth.store';
 import { apiClient } from '@services/api';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp as StackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@navigation/types';
 import PendingListingService from '@services/pendingListingService';
 
@@ -88,16 +88,11 @@ export function BuyerSubmitDrawer({
   };
 
   const handleAuthComplete = async () => {
-    console.log('Authentication complete callback triggered');
     setShowAuth(false);
 
     // Wait a moment for auth state to update in store
     setTimeout(() => {
       const currentAuth = useAuthStore.getState();
-      console.log('Auth state after delay:', {
-        isAuthenticated: currentAuth.isAuthenticated,
-        user: currentAuth.user?.email,
-      });
 
       if (currentAuth.isAuthenticated) {
         handleSubmit();
@@ -111,7 +106,6 @@ export function BuyerSubmitDrawer({
     // Get fresh auth state
     const currentAuth = useAuthStore.getState();
     if (!currentAuth.isAuthenticated) {
-      console.log('User not authenticated, showing auth modal');
 
       // Store the pending buyer listing data before authentication
       const buyerSpec = buyerSpecifications[productId] || specifications;
@@ -131,7 +125,6 @@ export function BuyerSubmitDrawer({
       return;
     }
 
-    console.log('User is authenticated, proceeding with submission');
 
     setIsSubmitting(true);
     try {
@@ -169,24 +162,14 @@ export function BuyerSubmitDrawer({
         status: 'ACTIVE',
       };
 
-      console.log('=== Buy Listing Submission Debug ===');
-      console.log('buyerSpec:', buyerSpec);
-      console.log('specifications prop:', specifications);
-      console.log('specifications keys:', Object.keys(specifications || {}));
-      console.log('Final specifications being sent:', buyListingData.specifications);
-      console.log('Full buyListingData:', JSON.stringify(buyListingData, null, 2));
 
       // WORKAROUND: Skip onboarding completely for now
       // The onboarding endpoint expects different data than what we have
-      console.log('Skipping onboarding step - proceeding directly to listing creation');
 
       // Create the buy listing regardless of role
-      console.log('Calling /buyer/listings with data:', buyListingData);
-      console.log('Auth token present:', !!currentAuth.token);
 
       const response = await apiClient.post('/buyer/listings', buyListingData);
 
-      console.log('Buy listing created successfully:', response.data);
       setRequestCreated(true);
 
       // Show success animation

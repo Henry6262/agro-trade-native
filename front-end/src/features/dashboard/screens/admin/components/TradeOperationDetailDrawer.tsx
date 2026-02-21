@@ -70,7 +70,7 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
     try {
       // Fetch main operation data
       const operationData = await tradeOperationService.getTradeOperation(operationId);
-      setOperation(operationData);
+      setOperation(operationData as any);
 
       // Fetch negotiations
       const negotiationsData = await negotiationService.getTradeNegotiations(operationId);
@@ -315,7 +315,7 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
             <TouchableOpacity
               onPress={async () => {
                 if (!operation) return;
-                const unverifiedSellers = operation.sellers.filter(
+                const unverifiedSellers = (operation.sellers || []).filter(
                   (s) => s.status === 'ACCEPTED' && !s.isVerified
                 );
                 if (unverifiedSellers.length === 0) {

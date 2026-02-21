@@ -232,7 +232,7 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
                   <View className="mb-3">
                     <View className="flex-row items-center justify-between mb-2">
                       <Text className="text-white font-bold">Job #{job.jobNumber}</Text>
-                      <Badge text={job.status} className={`${statusColor} bg-gray-800/50`} />
+                      <Badge className={`${statusColor} bg-gray-800/50`}>{job.status}</Badge>
                     </View>
 
                     {/* Job Details */}

@@ -11,7 +11,7 @@ import {
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
-import { API_URL } from '@shared/constants';
+import { getApiUrl } from '@shared/utils/environment';
 import { useOnboardingStore } from '@stores/onboarding.store';
 
 interface SimplifiedLocationStepProps {
@@ -24,7 +24,7 @@ interface SimplifiedLocationStepProps {
 }
 
 export function SimplifiedLocationStep({ onLocationSet }: SimplifiedLocationStepProps) {
-  const { updateLocation } = useOnboardingStore();
+  const { setLocation } = useOnboardingStore();
   const [loading, setLoading] = useState(false);
   const [locationText, setLocationText] = useState('');
   const [detectedLocation, setDetectedLocation] = useState<any>(null);
@@ -52,7 +52,7 @@ export function SimplifiedLocationStep({ onLocationSet }: SimplifiedLocationStep
 
       // Reverse geocode to get city and country
       try {
-        const response = await axios.post(`${API_URL}/location/reverse-geocode`, {
+        const response = await axios.post(`${getApiUrl()}/location/reverse-geocode`, {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
@@ -66,7 +66,7 @@ export function SimplifiedLocationStep({ onLocationSet }: SimplifiedLocationStep
 
         setDetectedLocation(locationData);
         setLocationText(`${response.data.city}, ${response.data.country}`);
-        updateLocation(locationData);
+        setLocation(locationData);
         onLocationSet?.(locationData);
       } catch (error) {
         console.error('Reverse geocoding failed:', error);
@@ -75,7 +75,7 @@ export function SimplifiedLocationStep({ onLocationSet }: SimplifiedLocationStep
           longitude: location.coords.longitude,
         };
         setDetectedLocation(locationData);
-        updateLocation(locationData);
+        setLocation(locationData);
         onLocationSet?.(locationData);
       }
     } catch (error) {
@@ -95,7 +95,7 @@ export function SimplifiedLocationStep({ onLocationSet }: SimplifiedLocationStep
     }
 
     try {
-      const response = await axios.get(`${API_URL}/location/cities/search`, {
+      const response = await axios.get(`${getApiUrl()}/location/cities/search`, {
         params: { q: query },
       });
       setSearchResults(response.data.data || []);
@@ -115,7 +115,7 @@ export function SimplifiedLocationStep({ onLocationSet }: SimplifiedLocationStep
     setDetectedLocation(locationData);
     setLocationText(`${city.name}, ${city.country}`);
     setSearchResults([]);
-    updateLocation(locationData);
+    setLocation(locationData);
     onLocationSet?.(locationData);
   };
 

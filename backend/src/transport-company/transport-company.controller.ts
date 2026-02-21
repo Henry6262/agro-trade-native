@@ -48,7 +48,7 @@ export class TransportCompanyController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   async verifyCompany(@Body() dto: VerifyCompanyDto, @Request() req: any) {
-    return this.transportCompanyService.verifyCompany(dto, req.user.userId);
+    return this.transportCompanyService.verifyCompany(dto, req.user.id);
   }
 
   @Get("unverified")
@@ -68,7 +68,7 @@ export class TransportCompanyController {
   @UseGuards(JwtAuthGuard)
   async getMyCompany(@Request() req: any) {
     const company = await this.transportCompanyService.getCompanyByAdminId(
-      req.user.userId,
+      req.user.id,
     );
     if (!company) {
       return {
@@ -86,7 +86,7 @@ export class TransportCompanyController {
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: FleetResponseDto })
   async getMyFleet(@Request() req: any) {
-    return this.transportCompanyService.getFleetForUser(req.user.userId);
+    return this.transportCompanyService.getFleetForUser(req.user.id);
   }
 
   @Put("profile/:id")
@@ -98,7 +98,7 @@ export class TransportCompanyController {
   ) {
     // TODO: Add authorization check - only company admins can update their company
     const company = await this.transportCompanyService.getCompanyByAdminId(
-      req.user.userId,
+      req.user.id,
     );
     if (!company || company.id !== id) {
       return {
@@ -134,7 +134,7 @@ export class TransportCompanyController {
   ) {
     // Verify requester is company admin
     const company = await this.transportCompanyService.getCompanyByAdminId(
-      req.user.userId,
+      req.user.id,
     );
     if (!company || company.id !== companyId) {
       return {
@@ -155,7 +155,7 @@ export class TransportCompanyController {
   ) {
     // Verify requester is company admin
     const company = await this.transportCompanyService.getCompanyByAdminId(
-      req.user.userId,
+      req.user.id,
     );
     if (!company || company.id !== companyId) {
       return {
@@ -175,7 +175,7 @@ export class TransportCompanyController {
   ) {
     // Verify requester has access to company
     const company = await this.transportCompanyService.getCompanyByAdminId(
-      req.user.userId,
+      req.user.id,
     );
     if (!company || company.id !== companyId) {
       // Check if user is admin
@@ -211,7 +211,7 @@ export class TransportCompanyController {
   ) {
     // Verify requester is company admin
     const company = await this.transportCompanyService.getCompanyByAdminId(
-      req.user.userId,
+      req.user.id,
     );
     if (!company || company.id !== companyId) {
       return {
@@ -232,7 +232,7 @@ export class TransportCompanyController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: "Create a new truck for the company" })
   async createTruck(@Request() req: any, @Body() dto: CreateTruckDto) {
-    return this.transportCompanyService.createTruck(req.user.userId, dto);
+    return this.transportCompanyService.createTruck(req.user.id, dto);
   }
 
   @Put("me/trucks/:id")
@@ -244,7 +244,7 @@ export class TransportCompanyController {
     @Body() dto: UpdateTruckDto,
   ) {
     return this.transportCompanyService.updateTruck(
-      req.user.userId,
+      req.user.id,
       truckId,
       dto,
     );
@@ -254,7 +254,7 @@ export class TransportCompanyController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: "Delete a truck" })
   async deleteTruck(@Request() req: any, @Param("id") truckId: string) {
-    return this.transportCompanyService.deleteTruck(req.user.userId, truckId);
+    return this.transportCompanyService.deleteTruck(req.user.id, truckId);
   }
 
   // DRIVER ENDPOINTS
@@ -264,7 +264,7 @@ export class TransportCompanyController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: "Create a new driver for the company" })
   async createDriver(@Request() req: any, @Body() dto: CreateDriverDto) {
-    return this.transportCompanyService.createDriver(req.user.userId, dto);
+    return this.transportCompanyService.createDriver(req.user.id, dto);
   }
 
   @Put("me/drivers/:id")
@@ -276,7 +276,7 @@ export class TransportCompanyController {
     @Body() dto: UpdateDriverDto,
   ) {
     return this.transportCompanyService.updateDriver(
-      req.user.userId,
+      req.user.id,
       driverId,
       dto,
     );
@@ -286,7 +286,7 @@ export class TransportCompanyController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: "Delete a driver" })
   async deleteDriver(@Request() req: any, @Param("id") driverId: string) {
-    return this.transportCompanyService.deleteDriver(req.user.userId, driverId);
+    return this.transportCompanyService.deleteDriver(req.user.id, driverId);
   }
 
   // DRIVER ASSIGNMENT ENDPOINTS
@@ -300,7 +300,7 @@ export class TransportCompanyController {
     @Body() dto: AssignDriverDto,
   ) {
     return this.transportCompanyService.assignDriverToTruck(
-      req.user.userId,
+      req.user.id,
       truckId,
       dto.driverId,
     );
@@ -314,7 +314,7 @@ export class TransportCompanyController {
     @Param("truckId") truckId: string,
   ) {
     return this.transportCompanyService.unassignDriverFromTruck(
-      req.user.userId,
+      req.user.id,
       truckId,
     );
   }

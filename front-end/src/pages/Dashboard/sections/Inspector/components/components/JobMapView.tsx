@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import MapView, { Marker, Circle, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
-import { JobMapViewProps } from '@features/dashboard/screens/inspector/types/index';
+import { JobMapViewProps } from '@features/dashboard/screens/inspector/types';
 import { JobPriorityBadge } from './JobPriorityBadge';
 import { JobMarker } from './JobMarker';
 import { CurrentLocationMarker } from './CurrentLocationMarker';
@@ -125,12 +125,6 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
 
         {/* Job Markers or Clusters */}
         {(() => {
-          console.log('JobMapView rendering:', {
-            jobsCount: jobs.length,
-            shouldCluster,
-            firstJob: jobs[0],
-          });
-
           if (shouldCluster && clusters) {
             return clusters.map((cluster) => (
               <Marker
@@ -159,14 +153,7 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
               </Marker>
             ));
           } else {
-            const currentZoomLevel = getZoomLevel();
             return jobs.map((job, index) => {
-              console.log(
-                `Rendering marker ${index}:`,
-                job.id,
-                job.location,
-                `zoom: ${currentZoomLevel}`
-              );
               return (
                 <Marker
                   key={job.id}
@@ -178,7 +165,7 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
                   onPress={() => handleMarkerPress(job)}
                   anchor={{ x: 0.5, y: 1 }} // Pin point at bottom center
                 >
-                  <JobMarker job={job} size="medium" zoomLevel={currentZoomLevel} />
+                  <JobMarker job={job} size="medium" zoomLevel={getZoomLevel()} />
 
                   <Callout testID="job-callout" onPress={() => onJobSelect?.(job)}>
                     <View className="p-3 min-w-[220px] bg-white rounded-lg">

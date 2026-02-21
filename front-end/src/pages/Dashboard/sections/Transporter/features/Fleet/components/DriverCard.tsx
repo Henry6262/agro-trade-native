@@ -30,13 +30,14 @@ export const DriverCard: React.FC<DriverCardProps> = ({ driver }) => {
         <Text className="text-white font-semibold flex-1">{driver.name}</Text>
         <View className="flex-row items-center gap-2">
           <Badge
-            text={driver.status === 'available' ? 'Available' : 'Assigned'}
             className={
               driver.status === 'available'
                 ? 'text-green-400 bg-green-500/10'
                 : 'text-orange-400 bg-orange-500/10'
             }
-          />
+          >
+            {driver.status === 'available' ? 'Available' : 'Assigned'}
+          </Badge>
           <TouchableOpacity onPress={() => setShowActions(!showActions)}>
             <MoreVertical size={20} color="#9CA3AF" />
           </TouchableOpacity>

@@ -30,8 +30,9 @@ import {
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
 import { useAuthStore } from '@stores/auth.store';
-import { getApiUrl } from '../../@pages/Onboarding/components/shared/utils/environment';
-import { InlineAuth } from './shared/InlineAuth';
+import { getApiUrl } from '@shared/utils/environment';
+// TODO: InlineAuth component not yet implemented
+// import { InlineAuth } from './shared/InlineAuth';
 
 interface ProductDetailDrawerProps {
   visible: boolean;
@@ -689,12 +690,12 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                         )}
                       </View>
 
-                      {/* InlineAuth Component */}
-                      <InlineAuth
-                        onClose={() => setCurrentStep('specifications')}
-                        onComplete={handleAuthComplete}
-                        userRole={selectedRole || 'seller'}
-                      />
+                      {/* TODO: InlineAuth component not yet implemented */}
+                      <View className="bg-gray-800/50 rounded-xl p-4">
+                        <Text className="text-gray-400 text-center">
+                          Authentication required. Please sign in to continue.
+                        </Text>
+                      </View>
                     </View>
                   </>
                 ) : null}

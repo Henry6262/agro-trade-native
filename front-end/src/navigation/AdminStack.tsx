@@ -3,12 +3,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AdminStackParamList } from './types';
 
 // Import admin screens
-import { AdminDashboardScreen } from '../features/admin/screens/AdminDashboardScreen';
-import { AdminPricingZonesScreen } from '../features/admin/screens/AdminPricingZonesScreen';
-import { AdminZoneDetailsScreen } from '../features/admin/screens/AdminZoneDetailsScreen';
-import { AdminProductPricesScreen } from '../features/admin/screens/AdminProductPricesScreen';
-import BulkPriceUpdateScreen from '../features/admin/screens/BulkPriceUpdateScreen';
-import { AdminMapView } from '../features/admin/screens/AdminMapView';
+import { AdminDashboardScreen } from '../pages/Admin/screens/AdminDashboardScreen';
+import { AdminPricingZonesScreen } from '../pages/Admin/screens/AdminPricingZonesScreen';
+import { AdminZoneDetailsScreen } from '../pages/Admin/screens/AdminZoneDetailsScreen';
+import { AdminProductPricesScreen } from '../pages/Admin/screens/AdminProductPricesScreen';
+import BulkPriceUpdateScreen from '../pages/Admin/screens/BulkPriceUpdateScreen';
+import { AdminMapView } from '../pages/Admin/screens/AdminMapView';
 
 const Stack = createNativeStackNavigator<AdminStackParamList>();
 
@@ -20,9 +20,8 @@ export default function AdminStack() {
         headerShown: true,
         headerStyle: {
           backgroundColor: '#ffffff',
-          shadowColor: 'transparent',
-          elevation: 0,
         },
+        headerShadowVisible: false,
         headerTintColor: '#333333',
         headerTitleStyle: {
           fontWeight: '600',

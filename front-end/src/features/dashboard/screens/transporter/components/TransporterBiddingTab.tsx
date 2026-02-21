@@ -124,8 +124,10 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
     }
 
     try {
+      const request = transportRequests.find((r) => r.id === requestId);
       await transportService.submitBid({
         transportRequestId: requestId,
+        tradeOperationId: request?.tradeOperationId || '',
         bidAmount: amount,
         estimatedDuration: 24,
         vehicleType: 'FLATBED',

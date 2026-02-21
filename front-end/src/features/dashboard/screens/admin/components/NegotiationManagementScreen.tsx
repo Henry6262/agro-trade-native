@@ -113,7 +113,7 @@ export const NegotiationManagementScreen: React.FC<Props> = ({
     try {
       // Load trade operation details
       const opDetails = await tradeOperationService.getTradeOperation(tradeOperationId);
-      setTradeOperation(opDetails);
+      setTradeOperation(opDetails as any);
 
       // Load negotiations with summary
       const response = await negotiationService.getNegotiations(

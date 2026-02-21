@@ -25,7 +25,7 @@ export const RequestsList: React.FC<RequestsListProps> = ({ requests, onOpenOffe
           </View>
 
           <BuyerRequestCard
-            request={{
+            buyerRequest={{
               id: request.id,
               product: request.product,
               quantity: request.quantity,
@@ -38,7 +38,6 @@ export const RequestsList: React.FC<RequestsListProps> = ({ requests, onOpenOffe
               bestOffer: request.bestOffer ?? undefined,
               status: request.status,
             }}
-            onViewOffers={() => onOpenOffers(request)}
           />
 
           <View className="flex-row justify-between text-sm text-neutral-400 mt-2">

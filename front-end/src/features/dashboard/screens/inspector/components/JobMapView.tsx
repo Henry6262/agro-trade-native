@@ -125,12 +125,6 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
 
         {/* Job Markers or Clusters */}
         {(() => {
-          console.log('JobMapView rendering:', {
-            jobsCount: jobs.length,
-            shouldCluster,
-            firstJob: jobs[0],
-          });
-
           if (shouldCluster && clusters) {
             return clusters.map((cluster) => (
               <Marker
@@ -161,12 +155,6 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
           } else {
             const currentZoomLevel = getZoomLevel();
             return jobs.map((job, index) => {
-              console.log(
-                `Rendering marker ${index}:`,
-                job.id,
-                job.location,
-                `zoom: ${currentZoomLevel}`
-              );
               return (
                 <Marker
                   key={job.id}

@@ -173,12 +173,16 @@ export interface SellerOnboardingData {
   selectedProducts: ProductSelection[];
   marketInsights?: MarketInsights;
   businessInfo?: SellerBusinessInfo;
+  bases?: any[];
+  distributions?: any[];
 }
 
 export interface BuyerOnboardingData {
   requiredProducts: ProductRequirement[];
   deliveryPreferences?: DeliveryPreferences;
   purchasingPower?: PurchasingPower;
+  bases?: any[];
+  distributions?: any[];
 }
 
 export interface TransportOnboardingData {
@@ -231,6 +235,9 @@ export interface VehicleType {
   name: string;
   capacity: number;
   suitable_for: string[];
+  unit?: string;
+  type?: string;
+  count?: number;
 }
 
 export interface VehicleCapacity {

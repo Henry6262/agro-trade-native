@@ -146,6 +146,8 @@ export interface TradeOperation {
   totalPurchaseCost?: number;
   estimatedTransportCost?: number;
   finalRevenue?: number;
+  sellingPrice?: number;
+  expectedDeliveryDate?: string;
   metadata?: Record<string, string | number | boolean | null>;
   createdAt: string;
   updatedAt: string;

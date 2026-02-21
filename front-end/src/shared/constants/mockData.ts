@@ -8,7 +8,7 @@ import type {
   RouteInfo,
   Location,
   VehicleType,
-} from '../shared/types';
+} from '../types';
 
 // Role selection cards
 export const ROLE_CARDS: OnboardingCard[] = [

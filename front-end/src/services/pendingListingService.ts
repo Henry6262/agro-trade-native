@@ -23,7 +23,6 @@ export class PendingListingService {
       } else {
         await AsyncStorage.setItem(PENDING_LISTING_KEY, data);
       }
-      console.log('Saved pending buyer listing');
     } catch (error) {
       console.error('Failed to save pending listing:', error);
     }
@@ -63,7 +62,6 @@ export class PendingListingService {
       } else {
         await AsyncStorage.removeItem(PENDING_LISTING_KEY);
       }
-      console.log('Cleared pending buyer listing');
     } catch (error) {
       console.error('Failed to clear pending listing:', error);
     }
@@ -75,17 +73,14 @@ export class PendingListingService {
 
       // Only process if user is authenticated
       if (!authState.isAuthenticated) {
-        console.log('User not authenticated, skipping pending listing processing');
         return false;
       }
 
       const pending = await this.getPendingListing();
       if (!pending) {
-        console.log('No pending listing found');
         return false;
       }
 
-      console.log('Processing pending buyer listing:', pending);
 
       // Create the buyer listing
       const buyerSpec = pending.specifications;
@@ -120,7 +115,6 @@ export class PendingListingService {
         status: 'ACTIVE',
       };
 
-      console.log('Submitting pending buy listing:', buyListingData);
 
       // Skip onboarding for authenticated users
       const currentUser = authState.user;
@@ -143,7 +137,6 @@ export class PendingListingService {
 
       // Create the listing
       const response = await apiClient.post('/buyer/listings', buyListingData);
-      console.log('Pending buyer listing created successfully:', response.data);
 
       // Clear the pending listing
       await this.clearPendingListing();

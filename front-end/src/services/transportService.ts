@@ -65,6 +65,7 @@ export interface TransportRequestSummary {
   urgencyLevel?: string;
   biddingDeadline: string;
   maxBudget?: number;
+  isVerified?: boolean;
   createdAt?: string;
   updatedAt?: string;
   bidsCount?: number;

@@ -88,7 +88,7 @@ export const useFleetCreation = () => {
       // Transform frontend data to backend API format
       const backendData = {
         licensePlate: state.truckData.info.licensePlate,
-        model: state.truckData.info.trailerRegistrationNumber, // Using trailer reg as model
+        model: state.truckData.info.model || state.truckData.info.trailerRegistrationNumber || '',
         capacityTons: 10, // Default capacity - could be added to form later
         vehicleType: state.truckData.info.vehicleType.toUpperCase(),
       };
@@ -123,7 +123,7 @@ export const useFleetCreation = () => {
       const backendData = {
         firstName,
         lastName,
-        licenseNumber: state.driverData.info.egn, // Using EGN as license number
+        licenseNumber: state.driverData.info.egn || '', // Using EGN as license number
         phone: state.driverData.info.phoneNumber,
         experienceYears: 5, // Default - could be added to form later
       };

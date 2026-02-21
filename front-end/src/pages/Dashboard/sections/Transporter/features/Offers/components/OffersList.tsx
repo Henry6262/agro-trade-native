@@ -43,11 +43,11 @@ export const OffersList: React.FC<OffersListProps> = ({
                 {request.tradeOperation?.buyListing?.product?.name}
               </Text>
               <Text className="text-neutral-400 text-sm">
-                {request.tradeOperation?.buyListing?.buyer?.company}
+                {request.tradeOperation?.buyListing?.buyer?.name}
               </Text>
             </View>
             <Badge className="bg-orange-500 text-white px-2 py-1 rounded">
-              {request.urgency || 'STANDARD'}
+              {request.urgencyLevel || 'STANDARD'}
             </Badge>
           </View>
 

@@ -1,5 +1,5 @@
 import { apiClient } from './api';
-import { Order, OrderCreateForm, ApiResponse, PaginatedResponse } from '../shared/types';
+import { Order, OrderCreateForm, PaginatedResponse } from '../shared/types';
 
 export interface OrdersListParams {
   page?: number;
@@ -21,27 +21,29 @@ export const orderService = {
       }
     });
 
-    return apiClient.get<PaginatedResponse<Order>>(`/orders?${queryParams.toString()}`);
+    return apiClient
+      .get<PaginatedResponse<Order>>(`/orders?${queryParams.toString()}`)
+      .then((response) => response.data);
   },
 
   // Get single order
   getOrder: async (orderId: string): Promise<Order> => {
     return apiClient
-      .get<ApiResponse<Order>>(`/orders/${orderId}`)
+      .get<Order>(`/orders/${orderId}`)
       .then((response) => response.data);
   },
 
   // Create new order
   createOrder: async (orderData: OrderCreateForm): Promise<Order> => {
     return apiClient
-      .post<ApiResponse<Order>>('/orders', orderData)
+      .post<Order>('/orders', orderData)
       .then((response) => response.data);
   },
 
   // Update order status (usually for sellers)
   updateOrderStatus: async (orderId: string, status: string, notes?: string): Promise<Order> => {
     return apiClient
-      .patch<ApiResponse<Order>>(`/orders/${orderId}/status`, {
+      .patch<Order>(`/orders/${orderId}/status`, {
         status,
         notes,
       })
@@ -51,7 +53,7 @@ export const orderService = {
   // Cancel order
   cancelOrder: async (orderId: string, reason?: string): Promise<Order> => {
     return apiClient
-      .patch<ApiResponse<Order>>(`/orders/${orderId}/cancel`, {
+      .patch<Order>(`/orders/${orderId}/cancel`, {
         reason,
       })
       .then((response) => response.data);
@@ -73,13 +75,13 @@ export const orderService = {
     }[];
   }> => {
     return apiClient
-      .get<ApiResponse<any>>(`/orders/${orderId}/tracking`)
+      .get<any>(`/orders/${orderId}/tracking`)
       .then((response) => response.data);
   },
 
   // Request refund
   requestRefund: async (orderId: string, reason: string, amount?: number): Promise<void> => {
-    return apiClient.post(`/orders/${orderId}/refund`, {
+    await apiClient.post(`/orders/${orderId}/refund`, {
       reason,
       amount,
     });
@@ -87,7 +89,7 @@ export const orderService = {
 
   // Rate order/seller
   rateOrder: async (orderId: string, rating: number, review?: string): Promise<void> => {
-    return apiClient.post(`/orders/${orderId}/rating`, {
+    await apiClient.post(`/orders/${orderId}/rating`, {
       rating,
       review,
     });
@@ -101,13 +103,15 @@ export const orderService = {
     cancelled: number;
     totalSpent: number;
   }> => {
-    return apiClient.get<ApiResponse<any>>('/orders/stats').then((response) => response.data);
+    return apiClient.get<any>('/orders/stats').then((response) => response.data);
   },
 
   // Download order invoice
   downloadInvoice: async (orderId: string): Promise<Blob> => {
-    return apiClient.get(`/orders/${orderId}/invoice`, {
-      responseType: 'blob',
-    });
+    return apiClient
+      .get<Blob>(`/orders/${orderId}/invoice`, {
+        responseType: 'blob',
+      })
+      .then((response) => response.data);
   },
 };

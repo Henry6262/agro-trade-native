@@ -9,7 +9,9 @@ import {
   Request,
   HttpStatus,
   HttpCode,
+  UseGuards,
   BadRequestException,
+  ForbiddenException,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -18,6 +20,8 @@ import {
   ApiBearerAuth,
   ApiParam,
 } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../../auth/guards/roles.guard";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
 import { TransportBiddingService } from "../services/transport-bidding.service";
@@ -38,7 +42,7 @@ import {
 
 @ApiTags("Transport Bidding")
 @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard, RolesGuard)  // Temporarily disabled for testing
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller("transport")
 export class TransportBiddingController {
   constructor(
@@ -49,7 +53,7 @@ export class TransportBiddingController {
   // ==================== TRANSPORT REQUESTS ====================
 
   @Post("requests")
-  // @Roles(UserRole.ADMIN)  // Temporarily disabled for testing
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: "Create a transport request for a trade operation" })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -127,7 +131,7 @@ export class TransportBiddingController {
       req.user.id,
     );
     if (!canBid) {
-      throw new Error("User not authorized to submit transport bids");
+      throw new ForbiddenException("User not authorized to submit transport bids");
     }
 
     return await this.transportBiddingService.createTransportBid(

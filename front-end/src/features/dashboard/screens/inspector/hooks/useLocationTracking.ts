@@ -60,8 +60,7 @@ export const useLocationTracking = (): UseLocationTrackingReturn => {
       // Get initial position
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
-        maximumAge: 10000, // Accept cached location up to 10s old
-      });
+      } as any);
 
       setCurrentLocation({
         latitude: location.coords.latitude,
@@ -89,7 +88,6 @@ export const useLocationTracking = (): UseLocationTrackingReturn => {
         }
       );
 
-      console.log('Started real-time location tracking');
     } catch (err) {
       console.error('Location tracking error:', err);
       setError(err instanceof Error ? err.message : 'Unknown location error');
@@ -103,7 +101,6 @@ export const useLocationTracking = (): UseLocationTrackingReturn => {
       watchSubscription.current.remove();
       watchSubscription.current = null;
     }
-    console.log('Stopped location tracking');
   };
 
   const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {

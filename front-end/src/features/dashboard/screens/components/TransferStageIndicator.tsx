@@ -39,7 +39,7 @@ export const TransferStageIndicator: React.FC<TransferStageIndicatorProps> = ({
         className="absolute top-4 left-8 h-0.5 bg-green-500 z-0 transition-all duration-500"
         style={{
           width: `${Math.max(0, Math.min(100, (currentStage / (stagesList.length - 1)) * 100))}%`,
-          right: '2rem',
+          right: 32,
         }}
       />
 

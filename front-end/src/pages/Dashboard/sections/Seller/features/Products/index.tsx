@@ -12,7 +12,8 @@ import { SellerProductCard } from './components';
 import { useSellerProducts } from './hooks';
 import { sellerProductsService } from './service';
 import { getOfferSummary, getProductImage } from './utils';
-import type { BuyerOffer, ProductMetadata, SellerOfferMock, SellerProduct } from './types';
+import type { ProductMetadata, SellerOfferMock, SellerProduct } from './types';
+type BuyerOffer = SellerOfferMock;
 
 export default function SellerProductsFeature() {
   const navigation = useNavigation();
@@ -124,7 +125,7 @@ export default function SellerProductsFeature() {
   return (
     <View className="flex-1 bg-black">
       <FlatList
-        data={sellerProducts}
+        data={sellerProducts as any as SellerProduct[]}
         renderItem={renderProductCard}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
@@ -141,7 +142,7 @@ export default function SellerProductsFeature() {
             </View>
             <View className="flex-row justify-between items-center">
               <TouchableOpacity
-                onPress={() => navigation.navigate('BaseManagement' as never)}
+                onPress={() => Alert.alert('Manage Bases', 'You can manage your bases from your Profile settings. Tap your avatar in the top bar to open your profile.')}
                 className="bg-neutral-700 text-white py-2 px-4 rounded flex-row items-center gap-2"
               >
                 <Building2 color="#ffffff" size={16} />
@@ -197,7 +198,7 @@ export default function SellerProductsFeature() {
             setShowOffersDrawer(false);
             setSelectedProduct(null);
           }}
-          offers={selectedProduct.offers as BuyerOffer[]}
+          offers={selectedProduct.offers as any[]}
           sellerProduct={selectedProduct.product}
           productName={selectedProduct.product.name}
           productId={selectedProduct.product.id}

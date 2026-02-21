@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { X, Send, AlertCircle, DollarSign, Package } from 'lucide-react-native';
-import { MatchingSeller, TradeOperation } from '../../../../../types/trade-operations';
+import { MatchingSeller, TradeOperation, TradeSeller } from '../../../../../types/trade-operations';
 import { negotiationService } from '@services/negotiationService';
 import { apiClient } from '@services/api';
 
@@ -81,9 +81,9 @@ export const OfferModal: React.FC<OfferModalProps> = ({
       errors.push(`Price exceeds buyer's maximum (€${buyerMaxPrice})`);
     }
 
-    if (quantity > (seller?.availableQuantity || 0)) {
+    if (seller && quantity > (seller.availableQuantity || 0)) {
       errors.push(
-        `Quantity exceeds available (${seller?.availableQuantity} ${seller?.saleListing?.unit || 'units'})`
+        `Quantity exceeds available (${seller.availableQuantity} ${(seller.saleListing as any)?.unit || 'units'})`
       );
     }
 
@@ -107,26 +107,26 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
     try {
       // First check if this seller is already added to the trade operation
-      let tradeSeller = tradeOperation?.sellers?.find((ts) => ts.sellerId === seller.sellerId);
+      let tradeSeller = tradeOperation?.sellers?.find((ts) => ts.sellerId === seller?.sellerId);
 
       // If seller is not added to trade operation yet, add them first
       if (!tradeSeller) {
-        console.log('Seller not in trade operation yet, adding them first...');
 
         try {
           // Add the seller to the trade operation
           const response = await apiClient.post(`/trade-operations/${tradeOperationId}/sellers`, {
             sellers: [
               {
-                sellerId: seller.sellerId,
-                saleListingId: seller.saleListingId,
+                sellerId: seller?.sellerId,
+                saleListingId: seller?.saleListingId,
                 requestedQuantity: parseFloat(offerQuantity),
+                unit: (seller?.saleListing as any)?.unit || 'kg',
+                status: 'PENDING' as const,
               },
             ],
           });
 
           const result = response.data;
-          console.log('Seller added successfully:', result);
 
           // Now the seller should have a TradeSeller ID
           // We need to get it from the response or refresh the trade operation
@@ -135,7 +135,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
           } else {
             // If the response doesn't include the TradeSeller details, we'll use the sellerId directly
             // The backend negotiation endpoint should handle both TradeSeller ID and regular seller ID
-            tradeSeller = { id: seller.sellerId, sellerId: seller.sellerId };
+            tradeSeller = { id: seller?.sellerId || '', sellerId: seller?.sellerId || '' } as TradeSeller;
           }
         } catch (error) {
           console.error('Error adding seller to trade:', error);
@@ -147,7 +147,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
       // Now send the offer using the TradeSeller ID
       await negotiationService.sendOffer(tradeOperationId, {
-        tradeSellerId: sellerId || tradeSeller.id || seller.sellerId, // Use provided sellerId or fallback
+        tradeSellerId: sellerId || tradeSeller?.id || seller?.sellerId || '', // Use provided sellerId or fallback
         price: parseFloat(offerPrice),
         quantity: parseFloat(offerQuantity),
         terms: terms || undefined,
@@ -155,7 +155,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
       Alert.alert(
         'Offer Sent',
-        `Your offer of €${offerPrice} for ${offerQuantity} units has been sent to ${seller.sellerName}.`,
+        `Your offer of €${offerPrice} for ${offerQuantity} units has been sent to ${seller?.sellerName || 'seller'}.`,
         [
           {
             text: 'OK',
@@ -182,7 +182,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   if (!seller && !sellerId) return null;
 
   const profitMargin = calculateProfitMargin();
-  const isProfitable = parseFloat(profitMargin) >= 5; // 5% minimum margin
+  const isProfitable = parseFloat(profitMargin || '0') >= 5; // 5% minimum margin
 
   return (
     <Modal
@@ -220,7 +220,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                     Location: {seller.location?.displayName || 'Unknown'}
                   </Text>
                   <Text className="text-blue-700 text-sm">
-                    Available: {seller.availableQuantity} {seller.saleListing?.unit || 'units'}
+                    Available: {seller.availableQuantity} {(seller.saleListing as any)?.unit || 'units'}
                   </Text>
                   <Text className="text-blue-700 text-sm">
                     Asking Price: €{seller.askingPrice}/unit
@@ -248,7 +248,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                   <TextInput
                     value={offerPrice}
                     onChangeText={setOfferPrice}
-                    placeholder={seller.askingPrice?.toString() || '0'}
+                    placeholder={seller?.askingPrice?.toString() || '0'}
                     keyboardType="numeric"
                     className="flex-1 ml-2 text-gray-800"
                   />
@@ -267,14 +267,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                   <TextInput
                     value={offerQuantity}
                     onChangeText={setOfferQuantity}
-                    placeholder={seller.availableQuantity?.toString() || '0'}
+                    placeholder={seller?.availableQuantity?.toString() || '0'}
                     keyboardType="numeric"
                     className="flex-1 ml-2 text-gray-800"
                   />
-                  <Text className="text-gray-600">{seller.saleListing?.unit || 'units'}</Text>
+                  <Text className="text-gray-600">{(seller?.saleListing as any)?.unit || 'units'}</Text>
                 </View>
                 <Text className="text-xs text-gray-500 mt-1">
-                  Available: {seller.availableQuantity} | Required: {requiredQuantity}
+                  Available: {seller?.availableQuantity} | Required: {requiredQuantity}
                 </Text>
               </View>
 

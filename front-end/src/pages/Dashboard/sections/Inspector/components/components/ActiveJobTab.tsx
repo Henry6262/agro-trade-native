@@ -173,7 +173,7 @@ export const ActiveJobTab: React.FC<ActiveJobTabProps> = ({
         {showVerificationForm && (
           <View testID="verification-form" className="mt-4">
             <VerificationForm
-              job={activeJob}
+              job={activeJob as any}
               onSubmit={handleSubmitVerification}
               onCancel={() => setShowVerificationForm(false)}
             />

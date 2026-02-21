@@ -15,7 +15,7 @@ export const WebScrollView: React.FC<ScrollViewProps> = ({
   const webStyle =
     Platform.OS === 'web'
       ? {
-          height: '100%',
+          height: '100%' as any,
           overflow: 'auto' as any,
           WebkitOverflowScrolling: 'touch' as any,
         }

@@ -3,8 +3,10 @@ import {
   ProductCategory,
   DataType,
   Importance,
-  ProductUnit
+  ProductUnit,
+  UserRole
 } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -660,6 +662,26 @@ async function main() {
       }
     }),
   ]);
+
+  // ==================== SYSTEM ADMIN USER ====================
+  // A system admin user is required so that system-generated TradeNotes
+  // (notifications) have a valid authorId (FK constraint on TradeNote.authorId).
+  console.log('👤 Creating system admin user...');
+  const systemAdminPassword = await bcrypt.hash('system-admin-placeholder', 10);
+  await prisma.user.upsert({
+    where: { email: 'system@agrotrade.internal' },
+    update: {},
+    create: {
+      email: 'system@agrotrade.internal',
+      name: 'System',
+      password: systemAdminPassword,
+      role: UserRole.ADMIN,
+      isActive: true,
+      isEmailVerified: true,
+      onboardingCompleted: true,
+    },
+  });
+  console.log('   ✅ System admin user ready (system@agrotrade.internal)');
 
   // ==================== SUMMARY ====================
   const regionCount = await prisma.region.count();

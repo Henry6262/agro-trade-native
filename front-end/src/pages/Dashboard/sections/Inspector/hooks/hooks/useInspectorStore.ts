@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { InspectorStore, VerificationJob, InspectorProfile } from '../types';
+import type { InspectorStore, VerificationJob, InspectorProfile } from '../types';
 
 export const useInspectorStore = create<InspectorStore>((set, get) => ({
   // Initial state

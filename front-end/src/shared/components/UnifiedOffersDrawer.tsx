@@ -35,6 +35,7 @@ import { Offer, NegotiationOffer } from '../types';
 import { OfferCard } from './OfferCard';
 import { BuyerRequestCard } from './BuyerRequestCard';
 import { Badge } from './Badge';
+import buyerService from '@services/buyerService';
 
 interface UnifiedOffersDrawerProps {
   visible: boolean;
@@ -206,8 +207,11 @@ export const UnifiedOffersDrawer: React.FC<UnifiedOffersDrawerProps> = ({
 
     setIsLoading(true);
     try {
-      // TODO: Implement actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await buyerService.counterOffer(
+        selectedOffer.id,
+        parseFloat(counterPrice),
+        selectedOffer.quantity
+      );
       Alert.alert('Success', 'Your counter-offer has been sent to the seller!');
       handleBack();
     } catch (error) {
@@ -222,8 +226,7 @@ export const UnifiedOffersDrawer: React.FC<UnifiedOffersDrawerProps> = ({
 
     setIsLoading(true);
     try {
-      // TODO: Implement actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await buyerService.acceptOffer(selectedOffer.id);
       Alert.alert('Success', 'Offer accepted successfully!');
       onClose();
     } catch (error) {
@@ -243,8 +246,7 @@ export const UnifiedOffersDrawer: React.FC<UnifiedOffersDrawerProps> = ({
 
     setIsLoading(true);
     try {
-      // TODO: Implement actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await buyerService.rejectOffer(selectedOffer.id, rejectReason);
       Alert.alert('Offer Rejected', 'The seller has been notified of your decision.');
       onClose();
     } catch (error) {

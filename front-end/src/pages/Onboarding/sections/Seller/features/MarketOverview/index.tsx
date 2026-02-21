@@ -1,1 +1,1 @@
-export { default as MarketOverviewFeature } from './components/MarketOverviewFeature';
+export { MarketOverview as MarketOverviewFeature } from './components/MarketOverview';

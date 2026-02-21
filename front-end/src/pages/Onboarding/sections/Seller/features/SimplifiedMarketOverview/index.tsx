@@ -1,1 +1,1 @@
-export { default as SimplifiedMarketOverviewFeature } from './components/SimplifiedMarketOverviewFeature';
+export { SimplifiedMarketOverview as SimplifiedMarketOverviewFeature } from './components/SimplifiedMarketOverview';

@@ -33,7 +33,7 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
 
   // Ensure products is always an array, handle both direct array and response object
   const productsRaw = useProductStore((state) => state.products);
-  const products = Array.isArray(productsRaw) ? productsRaw : productsRaw?.data || [];
+  const products = Array.isArray(productsRaw) ? productsRaw : (productsRaw as any)?.data || [];
   const isLoadingProducts = useProductStore((state) => state.isLoadingProducts) || false;
   const fetchAllData = useProductStore((state) => state.fetchAllData);
 
@@ -41,7 +41,7 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
     // Fetch products only when drawer opens and products aren't loaded
     if (visible && !isLoadingProducts) {
       // Check if we need to fetch products
-      const currentProducts = Array.isArray(productsRaw) ? productsRaw : productsRaw?.data || [];
+      const currentProducts = Array.isArray(productsRaw) ? productsRaw : (productsRaw as any)?.data || [];
       if (currentProducts.length === 0) {
         fetchAllData().catch((error) => {
           console.error('Error fetching products:', error);
@@ -55,7 +55,7 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
   }, [selectedProducts]);
 
   const handleProductSelect = (productId: string) => {
-    const product = products.find((p) => p.id === productId);
+    const product = products.find((p: any) => p.id === productId);
     if (!product) return;
 
     if (mode === 'single') {
@@ -82,7 +82,7 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
 
   // Group products by category
   const groupedProducts = (products || []).reduce(
-    (acc, product) => {
+    (acc: Record<string, any[]>, product: any) => {
       const category = product.category || 'Other';
       if (!acc[category]) {
         acc[category] = [];
@@ -90,7 +90,7 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
       acc[category].push(product);
       return acc;
     },
-    {} as Record<string, typeof products>
+    {} as Record<string, any[]>
   );
 
   const getCategoryDisplayName = (category: string) => {
@@ -179,7 +179,7 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
                       {getCategoryDisplayName(category)}
                     </Text>
                     <View className="space-y-3">
-                      {categoryProducts.map((product) => (
+                      {(categoryProducts as any[]).map((product: any) => (
                         <TouchableOpacity
                           key={product.id}
                           onPress={() => handleProductSelect(product.id)}

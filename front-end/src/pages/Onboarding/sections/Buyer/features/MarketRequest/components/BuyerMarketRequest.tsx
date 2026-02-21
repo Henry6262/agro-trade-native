@@ -20,13 +20,12 @@ export function BuyerMarketRequest({
   onSpecificationsChange,
   onComplete,
 }: BuyerMarketRequestProps) {
-  const { selectedProductsMetadata, userLocation, buyerSpecifications } = useOnboardingStore();
+  const { selectedProductsMetadata, location: userLocation, buyerSpecifications } = useOnboardingStore();
 
   const { products, getProductSpecifications } = useProductStore();
   const [showSubmitDrawer, setShowSubmitDrawer] = useState(false);
 
   const handleComplete = () => {
-    console.log('Opening submit drawer for purchase request');
     setShowSubmitDrawer(true);
   };
 

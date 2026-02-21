@@ -4,6 +4,7 @@ export type InspectorJobPriority = 'LOW' | 'MEDIUM' | 'HIGH';
 
 export type InspectorJobStatus =
   | 'PENDING'
+  | 'ASSIGNED'
   | 'SCHEDULED'
   | 'IN_PROGRESS'
   | 'COMPLETED'
@@ -35,12 +36,15 @@ export interface InspectorProductDetails {
 export interface InspectorVerificationJob {
   id: string;
   jobNumber: string;
+  sellerListingId?: string;
   priority: InspectorJobPriority;
   status: InspectorJobStatus;
   location: InspectorLocationCoordinates;
   productDetails: InspectorProductDetails;
   estimatedDuration?: number;
   distance?: number;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
 
 export interface InspectorVerificationFormValues {

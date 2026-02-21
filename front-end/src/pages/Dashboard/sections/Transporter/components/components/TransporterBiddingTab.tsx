@@ -26,8 +26,8 @@ import { Badge } from '@shared/components/Badge';
 import { Input } from '@shared/components/Input';
 import { MetricCard } from '../../components/MetricCard';
 import { BaseComponentProps } from '@shared/types';
-import { MapDrawer } from '@features/dashboard/screens/transporter/maps/components/MapDrawer';
-import { MapOffer } from '@features/dashboard/screens/transporter/maps/types';
+import { MapDrawer } from '@pages/Dashboard/sections/Transporter/features/maps/components/MapDrawer';
+import { MapOffer } from '@pages/Dashboard/sections/Transporter/features/maps/types';
 import { useAuthStore } from '@stores/auth.store';
 import transportService, {
   TransportBid,

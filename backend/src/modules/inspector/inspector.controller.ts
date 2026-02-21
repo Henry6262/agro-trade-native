@@ -8,7 +8,10 @@ import {
   Request,
   HttpCode,
   HttpStatus,
+  UseGuards,
+  UnauthorizedException,
 } from "@nestjs/common";
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
 import { InspectorService } from "./inspector.service";
 import {
   AcceptJobDto,
@@ -17,6 +20,7 @@ import {
   JobFilterDto,
 } from "./dto";
 
+@UseGuards(JwtAuthGuard)
 @Controller("api/inspector")
 export class InspectorController {
   constructor(private readonly inspectorService: InspectorService) {}
@@ -105,10 +109,12 @@ export class InspectorController {
   }
 
   @Get("profile")
-  async getProfile(@Request() req?: any) {
+  async getProfile(@Request() req: any) {
     try {
-      // In real implementation, would get user ID from auth token
-      const userId = req?.user?.id || "user-123";
+      if (!req.user?.id) {
+        throw new UnauthorizedException("Authentication required");
+      }
+      const userId = req.user.id;
       const profile = await this.inspectorService.getInspectorProfile(userId);
       return {
         success: true,

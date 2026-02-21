@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { MapPin } from 'lucide-react-native';
-import { MapOffer } from '@features/dashboard/screens/transporter/maps/types';
+import { MapOffer } from '@pages/Dashboard/sections/Transporter/features/maps/types';
 
 interface OfferCardProps {
   offer: MapOffer;

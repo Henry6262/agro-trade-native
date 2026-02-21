@@ -3,11 +3,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { OnboardingStackParamList } from './types';
 
 // Import onboarding screens
-import { RoleSelectionScreen } from '../features/onboarding/screens/RoleSelectionScreen';
-import { BuyerOnboardingFlowScreen } from '../features/onboarding/screens/buyer/BuyerOnboardingFlowScreen';
-import { SellerOnboardingFlowScreen } from '../features/onboarding/screens/seller/SellerOnboardingFlowScreen';
-import { TransporterOnboardingFlowScreen } from '../features/onboarding/screens/transporter/TransporterOnboardingFlowScreen';
-import { OnboardingCompleteScreen } from '../features/onboarding/screens/OnboardingCompleteScreen';
+import { RoleSelectionScreen } from '../pages/Onboarding/screens/RoleSelectionScreen';
+import { BuyerOnboardingFlowScreen } from '../pages/Onboarding/screens/buyer/BuyerOnboardingFlowScreen';
+import { SellerOnboardingFlowScreen } from '../pages/Onboarding/screens/seller/SellerOnboardingFlowScreen';
+import { TransporterOnboardingFlowScreen } from '../pages/Onboarding/screens/transporter/TransporterOnboardingFlowScreen';
+import { OnboardingCompleteScreen } from '../pages/Onboarding/screens/OnboardingCompleteScreen';
 
 const Stack = createNativeStackNavigator<OnboardingStackParamList>();
 

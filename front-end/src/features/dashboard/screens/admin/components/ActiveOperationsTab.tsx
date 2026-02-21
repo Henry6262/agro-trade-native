@@ -118,7 +118,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
         })
       );
 
-      setOperations(opsWithNegotiations);
+      setOperations(opsWithNegotiations as any);
     } catch (error) {
       console.error('Failed to load operations:', error);
       Alert.alert('Error', 'Failed to load active operations');
@@ -352,13 +352,13 @@ export const ActiveOperationsTab: React.FC<Props> = ({
         )}
 
         {/* Sellers without negotiations */}
-        {operation.sellers?.filter(
+        {(operation.sellers || []).filter(
           (s) => !operation.negotiations?.find((n) => n.tradeSellerId === s.id)
         )?.length > 0 && (
           <View className="bg-blue-50 rounded-lg p-2 mb-2">
             <Text className="text-xs text-blue-800 font-medium">
               {
-                operation.sellers.filter(
+                (operation.sellers || []).filter(
                   (s) => !operation.negotiations?.find((n) => n.tradeSellerId === s.id)
                 ).length
               }{' '}

@@ -92,14 +92,11 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
   // Helper function to get access token with retry
   const getAccessTokenWithRetry = useCallback(async (maxRetries = 3, delayMs = 500): Promise<string | null> => {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      console.log(`Getting Privy access token (attempt ${attempt}/${maxRetries})...`);
       const token = await getAccessToken();
       if (token) {
-        console.log('Successfully got Privy access token');
         return token;
       }
       if (attempt < maxRetries) {
-        console.log(`Token not available, waiting ${delayMs}ms before retry...`);
         await new Promise(resolve => setTimeout(resolve, delayMs));
       }
     }
@@ -160,7 +157,6 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
   // Effect: When user becomes authenticated with Privy, complete backend auth
   useEffect(() => {
     if (isPrivyAuthenticated && isLoading && !hasCompletedBackendAuth.current) {
-      console.log('Privy auth detected, completing backend auth...');
       completeBackendAuth();
     }
   }, [isPrivyAuthenticated, isLoading, completeBackendAuth]);
@@ -172,7 +168,6 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
 
       // Check if user is already authenticated with Privy
       if (isPrivyAuthenticated) {
-        console.log('Already authenticated with Privy, completing backend auth...');
         // Already logged in with Privy, just complete backend auth
         await completeBackendAuth();
         return;
@@ -181,7 +176,6 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
       // Not authenticated - initiate OAuth flow with Privy
       // The useEffect will detect when Privy becomes authenticated
       // and call completeBackendAuth automatically
-      console.log('Starting Privy OAuth flow...');
       await loginWithOAuth({ provider: 'google' as OAuthProviderType });
 
       // Note: loginWithOAuth returns after initiating the flow,

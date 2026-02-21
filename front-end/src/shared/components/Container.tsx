@@ -73,11 +73,11 @@ export const Container: React.FC<ContainerProps> = ({
     centered && {
       alignItems: 'center',
     },
-    maxWidth && {
+    maxWidth ? {
       maxWidth,
-      width: '100%',
-      alignSelf: 'center',
-    },
+      width: '100%' as const,
+      alignSelf: 'center' as const,
+    } : undefined,
     contentContainerStyle,
   ];
 

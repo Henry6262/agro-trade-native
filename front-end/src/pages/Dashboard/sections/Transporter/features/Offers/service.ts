@@ -15,6 +15,7 @@ export const transporterOffersService = {
   ) =>
     transportService.submitBid({
       transportRequestId,
+      tradeOperationId: '', // TODO: pass actual tradeOperationId from request
       bidAmount,
       estimatedDuration: options?.duration ?? 24,
       vehicleType: options?.vehicleType ?? 'FLATBED',

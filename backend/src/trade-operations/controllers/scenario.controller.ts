@@ -6,6 +6,7 @@ import {
   Param,
   Query,
   HttpStatus,
+  UseGuards,
   BadRequestException,
 } from "@nestjs/common";
 import {
@@ -16,6 +17,8 @@ import {
   ApiParam,
   ApiQuery,
 } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../../auth/guards/roles.guard";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
 import { PriceScenarioService } from "../services/price-scenario.service";
@@ -33,7 +36,7 @@ import {
 
 @ApiTags("Price Scenarios")
 @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard, RolesGuard) // Temporarily disabled for testing
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller("scenarios")
 export class ScenarioController {
   constructor(private readonly priceScenarioService: PriceScenarioService) {}

@@ -41,10 +41,8 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
 
   // Fetch product data on mount
   useEffect(() => {
-    console.log('BuyerOnboarding: Fetching product data...');
     fetchAllData()
       .then(() => {
-        console.log('BuyerOnboarding: Product data fetched successfully');
       })
       .catch((error) => {
         console.error('BuyerOnboarding: Failed to fetch product data:', error);

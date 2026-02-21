@@ -47,13 +47,13 @@ const BuyerRequestCreationFlowComponent: React.FC<BuyerRequestCreationFlowProps>
     }
   }, [error, onError]);
 
-  const handleProductSelect = (productId: string, productData: ProductData) => {
+  const handleProductSelect = (productId: string, productData: any) => {
     updateProductData(productData);
     goToNextStep();
   };
 
   // Handle quantity and price specifications
-  const handleQuantityPriceSave = (specs: BuyerSpecifications[]) => {
+  const handleQuantityPriceSave = (specs: any[]) => {
     if (specs && specs.length > 0) {
       const spec = specs[0];
       // Convert from drawer format to hook format
@@ -73,13 +73,13 @@ const BuyerRequestCreationFlowComponent: React.FC<BuyerRequestCreationFlowProps>
   };
 
   // Handle product specifications
-  const handleProductSpecsSave = (specs: ProductSpecifications) => {
+  const handleProductSpecsSave = (specs: any) => {
     updateProductSpecifications(specs);
     goToNextStep();
   };
 
   // Handle location confirmation
-  const handleLocationConfirm = (location: LocationData) => {
+  const handleLocationConfirm = (location: any) => {
     updateLocation(location);
     goToNextStep();
   };

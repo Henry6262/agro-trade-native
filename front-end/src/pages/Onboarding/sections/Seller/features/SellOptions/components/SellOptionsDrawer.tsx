@@ -29,7 +29,7 @@ import { useProductStore } from '@stores/product.store';
 import { useAuthStore } from '@stores/auth.store';
 import { apiClient } from '@services/api';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@navigation/types';
 
 interface SellOptionsDrawerProps {
@@ -52,7 +52,7 @@ export function SellOptionsDrawer({
   productId,
   onComplete,
 }: SellOptionsDrawerProps) {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [offerType, setOfferType] = useState<OfferType>(null);
   const [specifications, setSpecifications] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -70,24 +70,10 @@ export function SellOptionsDrawer({
   const { products } = useProductStore();
   const { isAuthenticated, user } = useAuthStore();
 
-  console.log(
-    'SellOptionsDrawer - Available products:',
-    products.length,
-    'first product specs:',
-    products[0]?.specifications?.length
-  );
   const product = products.find((p) => p.id === productId);
   const currentSpecs = sellerSpecifications[productId] || {};
 
   useEffect(() => {
-    console.log('SellOptionsDrawer - productId:', productId);
-    console.log(
-      'SellOptionsDrawer - found product:',
-      product?.name,
-      'specifications:',
-      product?.specifications?.length
-    );
-
     if (visible) {
       Animated.spring(slideAnim, {
         toValue: 0,
@@ -264,7 +250,7 @@ export function SellOptionsDrawer({
         listingData
       );
 
-      if (response?.success) {
+      if (response?.data?.success) {
         return true;
       }
       return false;
@@ -306,15 +292,6 @@ export function SellOptionsDrawer({
   };
 
   const renderContent = () => {
-    console.log('SellOptionsDrawer renderContent:', {
-      showAuth,
-      offerType,
-      visible,
-      productId,
-      product: product?.name,
-    });
-
-    // Debug: Always show content for testing
     if (!productId) {
       return (
         <View className="p-6">
@@ -493,12 +470,6 @@ export function SellOptionsDrawer({
 
           {product?.specifications && product.specifications.length > 0 ? (
             <View>
-              {console.log(
-                'Rendering specifications:',
-                product.specifications.length,
-                'specs:',
-                product.specifications
-              )}
               {product.specifications
                 .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
                 .map((spec) => {

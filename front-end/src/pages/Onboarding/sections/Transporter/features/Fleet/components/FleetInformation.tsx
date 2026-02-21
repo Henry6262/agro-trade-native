@@ -4,14 +4,9 @@ import { Plus, Truck, Trash2, ChevronDown, Minus } from 'lucide-react-native';
 import { Card } from '@shared/components/Card';
 import { Badge } from '@shared/components/Badge';
 import { useOnboardingStore } from '@stores/onboarding.store';
+import type { VehicleType } from '@shared/types';
 
-interface TruckInfo {
-  id: string;
-  capacity: number;
-  unit: 'tons' | 'kg';
-  type: string;
-  count?: number; // Add count for grouped trucks
-}
+type TruckInfo = VehicleType;
 
 const truckTypes = [
   'Standard',
@@ -68,7 +63,9 @@ export function FleetInformation() {
         // Add new truck with count
         const newTruckInfo: TruckInfo = {
           id: `truck-${Date.now()}`,
+          name: newTruck.type,
           capacity: Number.parseFloat(newTruck.capacity),
+          suitable_for: [],
           unit: newTruck.unit,
           type: newTruck.type,
           count: count > 1 ? count : undefined,

@@ -82,7 +82,7 @@ export default function BuyerRequestsTab() {
         <BuyerRequestCreationFlow
           visible={showRequestCreation}
           onClose={closeRequestCreation}
-          onCompleted={refresh}
+          onSuccess={refresh}
         />
       )}
 

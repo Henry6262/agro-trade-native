@@ -6,7 +6,7 @@ import { Badge } from '@shared/components/Badge';
 import { MetricCard } from '../../components/MetricCard';
 import { BaseComponentProps } from '@shared/types';
 import { FleetCreationFlow } from '@features/dashboard/screens/transporter/fleet-creation';
-import { useTransporterFleet } from '../../../features/Fleet/hooks';
+import { useTransporterFleet } from '../../features/Fleet/hooks';
 
 interface TransporterFleetTabProps extends BaseComponentProps {
   id?: string;

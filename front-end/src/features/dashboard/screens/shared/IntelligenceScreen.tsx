@@ -21,9 +21,24 @@ interface IntelligenceScreenProps {
   id?: string;
 }
 
+interface Report {
+  id: string;
+  title: string;
+  category: string;
+  source: string;
+  region: string;
+  date: string;
+  status: string;
+  impact: string;
+  summary: string;
+  tags: string[];
+  priceChange: string;
+  confidence: number;
+}
+
 export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {}) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedReport, setSelectedReport] = useState(null);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
   const reports = [
     {

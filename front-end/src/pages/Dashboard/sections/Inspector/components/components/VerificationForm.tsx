@@ -4,7 +4,7 @@ import { Camera, FileText, CheckCircle, XCircle } from 'lucide-react-native';
 import {
   VerificationFormProps,
   VerificationStatus,
-} from '@features/dashboard/screens/inspector/types/index';
+} from '@features/dashboard/screens/inspector/types';
 
 export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmit, onCancel }) => {
   const [verifiedSpecs, setVerifiedSpecs] = useState<Record<string, string>>({});

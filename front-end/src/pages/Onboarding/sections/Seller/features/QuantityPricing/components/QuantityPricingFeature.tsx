@@ -1,14 +1,10 @@
-import React, { useState } from 'react';
-import { View, ScrollView, ActivityIndicator, Text } from 'react-native';
-import { PresetQuantitySelector } from './QuantityPricingStep/PresetQuantitySelector';
-import { CustomQuantityInput } from './QuantityPricingStep/CustomQuantityInput';
-import { LocationPicker } from './QuantityPricingStep/LocationPicker';
-import { SummaryCard } from './QuantityPricingStep/SummaryCard';
-import { ActionButtons } from './QuantityPricingStep/ActionButtons';
-import { useQuantityPricing } from '../hooks/useQuantityPricing';
+import React from 'react';
+import { View, ActivityIndicator, Text } from 'react-native';
+import { QuantityPricingStep } from './QuantityPricingStep';
 
 export function QuantityPricingFeature() {
-  const state = useQuantityPricing();
+  const [isInitializing] = React.useState(false);
+  const state = { isInitializing };
 
   if (state.isInitializing) {
     return (
@@ -19,15 +15,7 @@ export function QuantityPricingFeature() {
     );
   }
 
-  return (
-    <ScrollView showsVerticalScrollIndicator={false} className="flex-1" contentContainerStyle={{ paddingBottom: 140 }}>
-      <PresetQuantitySelector state={state} />
-      <CustomQuantityInput state={state} />
-      <LocationPicker state={state} />
-      <SummaryCard state={state} />
-      <ActionButtons state={state} />
-    </ScrollView>
-  );
+  return <QuantityPricingStep />;
 }
 
 export default QuantityPricingFeature;

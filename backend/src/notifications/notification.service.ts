@@ -160,6 +160,33 @@ export class NotificationService {
   }
 
   /**
+   * Get or cache the system/admin user ID for use as authorId in TradeNote.
+   * Using a real user ID avoids FK violations on the author relation.
+   */
+  private systemUserId: string | null = null;
+
+  private async getSystemUserId(): Promise<string | null> {
+    if (this.systemUserId) return this.systemUserId;
+
+    // Look up an admin user to serve as the system author
+    const adminUser = await this.prisma.user.findFirst({
+      where: { role: UserRole.ADMIN },
+      select: { id: true },
+    });
+
+    if (adminUser) {
+      this.systemUserId = adminUser.id;
+      return this.systemUserId;
+    }
+
+    this.logger.warn(
+      "No ADMIN user found in the database. System notifications will not be persisted. " +
+        "Please ensure an ADMIN user exists in the seed data.",
+    );
+    return null;
+  }
+
+  /**
    * Store notification in database
    */
   private async storeNotification(notification: NotificationPayload) {
@@ -167,6 +194,17 @@ export class NotificationService {
       // Since we don't have a Notification table in the schema,
       // we'll store it in the TradeNote table as a workaround
       if (notification.tradeOperationId) {
+        const systemAuthorId = await this.getSystemUserId();
+
+        if (!systemAuthorId) {
+          // Cannot store without a valid authorId (FK constraint).
+          // Log only — do not throw so the app keeps running.
+          this.logger.warn(
+            "Skipping notification persistence: no valid system author found.",
+          );
+          return;
+        }
+
         const notificationDetails = JSON.stringify({
           type: "notification",
           notificationType: notification.type,
@@ -180,7 +218,7 @@ export class NotificationService {
           data: {
             tradeOperationId: notification.tradeOperationId,
             content: `[${notification.priority}] ${notification.title}: ${notification.message} | Details: ${notificationDetails}`,
-            authorId: "system", // System-generated note
+            authorId: systemAuthorId, // Use a real user ID to satisfy FK constraint
           },
         });
       }
@@ -200,11 +238,16 @@ export class NotificationService {
   }) {
     const { tradeOperationId, limit = 20 } = params;
 
+    // Notifications are stored with priority prefix: [HIGH], [URGENT], [MEDIUM], [LOW]
+    // Match any of these prefixes used by the storeNotification method.
+    // authorId is the real admin user ID (not "system") to satisfy the FK constraint.
     const where: any = {
-      authorId: "system",
-      content: {
-        contains: "[notification]",
-      },
+      OR: [
+        { content: { contains: "[HIGH]" } },
+        { content: { contains: "[URGENT]" } },
+        { content: { contains: "[MEDIUM]" } },
+        { content: { contains: "[LOW]" } },
+      ],
     };
 
     if (tradeOperationId) {

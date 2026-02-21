@@ -54,7 +54,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
           />
         </View>
       </ScrollView>
-      {showFleetCreation && <FleetCreationFlow onClose={closeFleetCreation} />}
+      {showFleetCreation && <FleetCreationFlow visible={showFleetCreation} onClose={closeFleetCreation} />}
     </>
   );
 };

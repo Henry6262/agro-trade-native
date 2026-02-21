@@ -121,7 +121,6 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
         <Animated.View
           testID="map-drawer"
           {...panResponder.panHandlers}
-          onSwipeDown={closeDrawer}
           className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl"
           style={{
             height: DRAWER_HEIGHT,
@@ -161,7 +160,7 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
             ) : error ? (
               <View className="flex-1 items-center justify-center py-20">
                 <Text className="text-red-500 text-center">Failed to load map data</Text>
-                <TouchableOpacity onPress={loadMapData} className="mt-4">
+                <TouchableOpacity onPress={() => offer && loadMapData(offer)} className="mt-4">
                   <Text className="text-blue-500">Retry</Text>
                 </TouchableOpacity>
               </View>

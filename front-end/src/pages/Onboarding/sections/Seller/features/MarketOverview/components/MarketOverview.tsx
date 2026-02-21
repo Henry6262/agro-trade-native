@@ -22,7 +22,7 @@ import { Card } from '@shared/components/Card';
 import { Badge } from '@shared/components/Badge';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import axios from 'axios';
-import { API_URL } from '@shared/constants';
+import { APP_CONFIG } from '@shared/constants';
 
 interface MarketOverviewProps {
   selectedProducts: string[];
@@ -35,7 +35,7 @@ export function MarketOverview({
   specifications,
   onComplete,
 }: MarketOverviewProps) {
-  const { userLocation } = useOnboardingStore();
+  const { location: userLocation } = useOnboardingStore();
   const [pricingData, setPricingData] = useState<any[]>([]);
   const [loadingPrices, setLoadingPrices] = useState(false);
 
@@ -48,7 +48,7 @@ export function MarketOverview({
   const fetchPricingData = async () => {
     try {
       setLoadingPrices(true);
-      const response = await axios.post(`${API_URL}/location/pricing`, {
+      const response = await axios.post(`${APP_CONFIG.API_URL}/location/pricing`, {
         latitude: userLocation?.latitude,
         longitude: userLocation?.longitude,
         productIds: selectedProducts,
@@ -63,7 +63,6 @@ export function MarketOverview({
 
   const handleCreateSellRequest = () => {
     // Handle sell request creation
-    console.log('Creating sell request with:', { selectedProducts, specifications, userLocation });
     onComplete?.();
   };
 

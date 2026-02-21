@@ -38,17 +38,17 @@ export const Modal: React.FC<ModalProps> = ({
       case 'small':
         return {
           width: Math.min(300, screenWidth * 0.8),
-          maxHeight: '70%',
+          maxHeight: screenHeight * 0.7,
         };
       case 'large':
         return {
           width: Math.min(600, screenWidth * 0.9),
-          maxHeight: '85%',
+          maxHeight: screenHeight * 0.85,
         };
       case 'full':
         return {
           width: screenWidth * 0.95,
-          maxHeight: '90%',
+          maxHeight: screenHeight * 0.9,
         };
       default: // medium
         return {

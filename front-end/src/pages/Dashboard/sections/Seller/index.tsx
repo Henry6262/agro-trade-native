@@ -1,10 +1,9 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import type { SellerDashboardSectionProps } from './types';
-// Temporary bridge: reuse legacy seller tabs for offers/trades until full migration lands
 import SellerProductsFeature from './features/Products';
-import SellerOffersTab from '../../../../features/dashboard/screens/seller/SellerOffersTab';
-import SellerTradesTab from '../../../../features/dashboard/screens/seller/SellerTradesTab';
+import SellerOffersTab from './features/Offers';
+import SellerTradesTab from './features/Trades';
 
 export function SellerDashboardSection({ activeTab = 'products' }: SellerDashboardSectionProps) {
   if (activeTab === 'offers') {

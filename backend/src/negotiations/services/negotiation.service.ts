@@ -521,7 +521,6 @@ export class NegotiationService {
     dto: CounterOfferDto,
     userId?: string,
   ): Promise<NegotiationWithDetails> {
-    void userId;
     const negotiation = await this.prisma.offerNegotiation.findUnique({
       where: { id: negotiationId },
       include: {
@@ -568,7 +567,7 @@ export class NegotiationService {
       terms: dto.terms || "Counter offer",
       reason: dto.reason,
       receivedAt: new Date().toISOString(),
-      offeredBy: this.determineOfferedBy(negotiation),
+      offeredBy: this.determineOfferedBy(negotiation, userId),
     };
 
     // Add to offer history
@@ -1222,17 +1221,18 @@ export class NegotiationService {
     }));
   }
 
-  private determineOfferedBy(negotiation: any): string {
-    // TODO: Implement proper user role detection
-    // For now, simple logic based on negotiation state
-    if (negotiation.status === NegotiationStatus.PENDING) {
-      return "BUYER";
+  private determineOfferedBy(negotiation: any, userId?: string): string {
+    // If we have a userId, check against the seller on the negotiation
+    if (userId && negotiation.tradeSeller?.sellerId) {
+      return userId === negotiation.tradeSeller.sellerId ? "SELLER" : "BUYER";
     }
-    if (negotiation.status === NegotiationStatus.COUNTERED) {
-      return negotiation.counterOffer?.offeredBy === "SELLER"
-        ? "BUYER"
-        : "SELLER";
+
+    // Fallback: if the last counter was from SELLER, this one is from BUYER, and vice versa
+    if (negotiation.status === NegotiationStatus.COUNTERED && negotiation.counterOffer?.offeredBy) {
+      return negotiation.counterOffer.offeredBy === "SELLER" ? "BUYER" : "SELLER";
     }
+
+    // Default: initial offers come from the buyer/admin side
     return "BUYER";
   }
 

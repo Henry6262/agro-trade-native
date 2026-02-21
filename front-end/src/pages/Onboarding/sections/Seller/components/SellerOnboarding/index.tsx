@@ -37,10 +37,8 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
 
   // Fetch product data on mount
   useEffect(() => {
-    console.log('SellerOnboarding: Fetching product data...');
     fetchAllData()
       .then(() => {
-        console.log('SellerOnboarding: Product data fetched successfully');
       })
       .catch((error) => {
         console.error('SellerOnboarding: Failed to fetch product data:', error);

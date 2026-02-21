@@ -23,6 +23,6 @@ module.exports = {
     '!src/**/index.ts',
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|@react-navigation|react-native-.*|expo|expo-.*|@expo|@expo/.*|lottie-react-native|react-native-web|@react-native-google-signin|lucide-react-native|nativewind)/)',
+    'node_modules/(?!(react-native|@react-native|@react-navigation|react-native-.*|expo|expo-.*|@expo|@expo/.*|react-native-web|@react-native-google-signin|lucide-react-native|nativewind)/)',
   ],
 };

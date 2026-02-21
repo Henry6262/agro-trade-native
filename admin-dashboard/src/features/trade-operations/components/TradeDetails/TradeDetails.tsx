@@ -8,8 +8,8 @@ import {
 } from '../../../../services/api';
 import { TransportManagement } from '../../../transport/components/TransportManagement/TransportManagement';
 import { OverviewTab, SellersTab, NegotiationsTab, InspectionsTab } from './tabs';
-import { BulkOfferModal, CounterOfferModal } from './modals';
-import { X } from 'lucide-react';
+import { BulkOfferModal, CounterOfferModal, EditTradeModal, CancelTradeModal } from './modals';
+import { X, Edit2, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Props {
@@ -27,6 +27,8 @@ export const TradeDetails: React.FC<Props> = ({ operation, onClose, onUpdate }) 
   const [showCounterModal, setShowCounterModal] = useState<Types.Negotiation | null>(null);
   const [profitData, setProfitData] = useState<any>(null);
   const [showReplacementFinder, setShowReplacementFinder] = useState<Types.TradeSeller | null>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   useEffect(() => {
     if (operation) {
@@ -142,6 +144,43 @@ export const TradeDetails: React.FC<Props> = ({ operation, onClose, onUpdate }) 
     }
   };
 
+  const handleUpdateTrade = async (updateDto: any) => {
+    if (!operation) return;
+    
+    setLoading(true);
+    try {
+      await tradeOperationService.update(operation.id, updateDto);
+      await onUpdate();
+      setShowEditModal(false);
+    } catch (error) {
+      console.error('Failed to update trade operation:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelTrade = async (reason: string) => {
+    if (!operation) return;
+    
+    setLoading(true);
+    try {
+      await tradeOperationService.cancel(operation.id, reason);
+      await onUpdate();
+      setShowCancelModal(false);
+      onClose(); // Close the details modal after cancellation
+    } catch (error) {
+      console.error('Failed to cancel trade operation:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Check if trade can be edited or cancelled
+  const canEdit = operation && !['COMPLETED', 'CANCELLED'].includes(operation.status);
+  const canCancel = operation && operation.status !== 'COMPLETED' && operation.status !== 'CANCELLED';
+
   const getPhaseColor = (phase: Types.TradePhase) => {
     switch (phase) {
       case Types.TradePhase.INITIATION: return 'bg-gray-100 text-gray-800';
@@ -180,9 +219,31 @@ export const TradeDetails: React.FC<Props> = ({ operation, onClose, onUpdate }) 
               Created {format(new Date(operation.createdAt), 'MMM dd, yyyy')}
             </p>
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center space-x-2">
+            {canEdit && (
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center space-x-1"
+                title="Edit trade details"
+              >
+                <Edit2 className="w-4 h-4" />
+                <span>Edit</span>
+              </button>
+            )}
+            {canCancel && (
+              <button
+                onClick={() => setShowCancelModal(true)}
+                className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 flex items-center space-x-1"
+                title="Cancel trade operation"
+              >
+                <XCircle className="w-4 h-4" />
+                <span>Cancel</span>
+              </button>
+            )}
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -258,6 +319,22 @@ export const TradeDetails: React.FC<Props> = ({ operation, onClose, onUpdate }) 
           negotiation={showCounterModal}
           onSubmit={(response) => handleRespondToNegotiation(showCounterModal.id, response)}
           onClose={() => setShowCounterModal(null)}
+        />
+      )}
+
+      {showEditModal && (
+        <EditTradeModal
+          operation={operation}
+          onUpdate={handleUpdateTrade}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
+
+      {showCancelModal && (
+        <CancelTradeModal
+          operationNumber={operation.operationNumber}
+          onConfirm={handleCancelTrade}
+          onClose={() => setShowCancelModal(false)}
         />
       )}
     </div>

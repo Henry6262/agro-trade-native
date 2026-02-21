@@ -109,7 +109,7 @@ export const TradeCreationDrawer: React.FC<TradeCreationDrawerProps> = ({
 
   // Offer modal state
   const [showOfferModal, setShowOfferModal] = useState(false);
-  const [selectedSellerForOffer, setSelectedSellerForOffer] = useState<MatchingSeller | null>(null);
+  const [selectedSellerForOffer, setSelectedSellerForOffer] = useState<MatchingSeller | null | undefined>(null);
 
   // Reset when drawer opens
   useEffect(() => {
@@ -127,9 +127,6 @@ export const TradeCreationDrawer: React.FC<TradeCreationDrawerProps> = ({
     if (!buyListing) return;
 
     // Debug log to check the buyListing structure
-    console.log('Buy Listing data:', JSON.stringify(buyListing, null, 2));
-    console.log('Buy Listing ID:', buyListing.id);
-    console.log('Buy Listing ID type:', typeof buyListing.id);
 
     if (!buyListing.id) {
       Alert.alert('Error', 'Buy listing ID is missing');
@@ -181,10 +178,6 @@ export const TradeCreationDrawer: React.FC<TradeCreationDrawerProps> = ({
 
         // Reduce remaining quantity for next seller
         remainingQuantity -= requestedQty;
-
-        console.log(
-          `Seller ${seller.sellerId}: Available: ${sellerAvailability}, Taking: ${requestedQty}, Remaining needed: ${remainingQuantity}`
-        );
 
         return {
           sellerId: seller.sellerId,
@@ -549,10 +542,9 @@ export const TradeCreationDrawer: React.FC<TradeCreationDrawerProps> = ({
                         <View className="flex-row items-center mt-1">
                           <MapPin size={10} color="#6B7280" />
                           <Text className="text-gray-500 text-xs ml-1">
-                            {seller.location?.displayName ||
-                              (seller.location?.city
-                                ? `${seller.location.city} • ${seller.distance}km`
-                                : 'Location N/A')}
+                            {seller.location?.city
+                              ? `${seller.location.city} • ${seller.distance}km`
+                              : 'Location N/A'}
                           </Text>
                         </View>
                       </View>
@@ -659,13 +651,13 @@ export const TradeCreationDrawer: React.FC<TradeCreationDrawerProps> = ({
 
                 <View className="flex-row justify-between mb-2">
                   <Text className="text-gray-600">Distance:</Text>
-                  <Text className="font-semibold">{transportEstimate.distance} km</Text>
+                  <Text className="font-semibold">{transportEstimate?.distance} km</Text>
                 </View>
 
                 <View className="flex-row justify-between mb-2">
                   <Text className="text-gray-600">Duration:</Text>
                   <Text className="font-semibold">
-                    {Math.round(transportEstimate.duration / 60)} hours
+                    {transportEstimate?.duration ? Math.round(transportEstimate.duration / 60) : 0} hours
                   </Text>
                 </View>
 
@@ -679,7 +671,7 @@ export const TradeCreationDrawer: React.FC<TradeCreationDrawerProps> = ({
                 <View className="flex-row justify-between">
                   <Text className="text-gray-800 font-semibold">Transport Cost:</Text>
                   <Text className="font-bold text-blue-600">
-                    ${transportEstimate.costs.totalCost.toFixed(2)}
+                    ${transportEstimate?.costs?.totalCost?.toFixed(2) || '0.00'}
                   </Text>
                 </View>
               </View>
@@ -737,14 +729,14 @@ export const TradeCreationDrawer: React.FC<TradeCreationDrawerProps> = ({
             <View className="flex-row justify-between mb-2">
               <Text className="text-gray-600">Purchase Cost:</Text>
               <Text className="font-semibold">
-                ${profitCalculation.costs.purchaseCost.toFixed(2)}
+                ${profitCalculation.costs.purchases.totalCost.toFixed(2)}
               </Text>
             </View>
 
             <View className="flex-row justify-between mb-2">
               <Text className="text-gray-600">Transport Cost:</Text>
               <Text className="font-semibold">
-                ${profitCalculation.costs.transportCost.toFixed(2)}
+                ${profitCalculation.costs.transport.estimatedCost.toFixed(2)}
               </Text>
             </View>
 
@@ -981,9 +973,9 @@ export const TradeCreationDrawer: React.FC<TradeCreationDrawerProps> = ({
             setShowOfferModal(false);
             setSelectedSellerForOffer(null);
           }}
-          seller={selectedSellerForOffer}
+          seller={selectedSellerForOffer as any}
           tradeOperationId={tradeOperation.id}
-          tradeOperation={tradeOperation}
+          tradeOperation={tradeOperation as any}
           onOfferSent={() => {
             setShowOfferModal(false);
             setSelectedSellerForOffer(null);

@@ -1,1 +1,1 @@
-export { default as SellOptionsFeature } from './components/SellOptionsFeature';
+export { SellOptionsDrawer as SellOptionsFeature } from './components/SellOptionsDrawer';

@@ -1,1 +1,1 @@
-export { default as ProductSpecificationsFeature } from './components/ProductSpecificationsFeature';
+export { ProductSpecifications as ProductSpecificationsFeature } from './components/ProductSpecifications';

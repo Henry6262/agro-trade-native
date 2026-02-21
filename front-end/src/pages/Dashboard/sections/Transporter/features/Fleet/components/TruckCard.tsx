@@ -49,13 +49,14 @@ export const TruckCard: React.FC<TruckCardProps> = ({ truck, onAssignDriver }) =
         </View>
         <View className="flex-row items-center gap-2">
           <Badge
-            text={truck.status === 'available' ? 'Available' : 'Assigned'}
             className={
               truck.status === 'available'
                 ? 'text-green-400 bg-green-500/10'
                 : 'text-yellow-400 bg-yellow-500/10'
             }
-          />
+          >
+            {truck.status === 'available' ? 'Available' : 'Assigned'}
+          </Badge>
           <TouchableOpacity onPress={() => setShowActions(!showActions)}>
             <MoreVertical size={20} color="#9CA3AF" />
           </TouchableOpacity>

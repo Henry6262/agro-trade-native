@@ -7,7 +7,7 @@ import type {
   TransportBid,
   TransporterPerformance,
 } from '../types';
-import type { MapOffer } from '../maps/types';
+import type { MapOffer } from '../../maps/types';
 import { buildBiddingSummary, buildMapOfferFromRequest, mapRequestsToView } from '../utils';
 
 export const useTransporterBidding = (): TransporterBiddingHookResult => {
@@ -92,8 +92,10 @@ export const useTransporterBidding = (): TransporterBiddingHookResult => {
 
       setIsSubmitting(true);
       try {
+        const matchedRequest = requests.find((r) => r.id === requestId);
         await transporterBiddingService.submitBid({
           transportRequestId: requestId,
+          tradeOperationId: matchedRequest?.tradeOperationId || '',
           bidAmount: numericAmount,
         });
         cancelSelection();

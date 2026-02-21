@@ -1,1 +1,1 @@
-export { default as CustomOfferFeature } from './components/CustomOfferFeature';
+export { CustomOfferStep as CustomOfferFeature } from './components/CustomOfferStep';

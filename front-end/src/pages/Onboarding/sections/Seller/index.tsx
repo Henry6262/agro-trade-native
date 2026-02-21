@@ -1,5 +1,5 @@
 import React from 'react';
-import { SellerOnboarding } from '@/features/onboarding/components/seller/SellerOnboarding';
+import { SellerOnboarding } from './components/SellerOnboarding';
 
 export function SellerOnboardingSection() {
   return <SellerOnboarding />;

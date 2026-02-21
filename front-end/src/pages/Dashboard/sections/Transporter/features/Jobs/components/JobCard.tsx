@@ -19,7 +19,7 @@ export const TransporterJobCard: React.FC<TransporterJobCardProps> = ({
       <View className="mb-3">
         <View className="flex-row items-center justify-between mb-2">
           <Text className="text-white font-bold">Job #{job.jobNumber}</Text>
-          <Badge text={job.status} className={`${job.statusColorClass} bg-gray-800/50`} />
+          <Badge className={`${job.statusColorClass} bg-gray-800/50`}>{job.status}</Badge>
         </View>
         <View className="flex-row items-center justify-between mb-2">
           <View className="flex-row items-center">

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { MapPin, Weight, Calendar } from 'lucide-react-native';
+import { MapPin, Weight, Calendar, Package, Truck, CheckCircle, Navigation } from 'lucide-react-native';
 import { Badge } from '@shared/components/Badge';
 import type { TransfersJobView } from '../types';
 import { TransferStageIndicator } from '@features/dashboard/screens/components/TransferStageIndicator';
@@ -22,12 +22,12 @@ export const TransferJobCard: React.FC<TransferJobCardProps> = ({ job, onViewRou
     </View>
 
     <TransferStageIndicator
-      currentStageIndex={job.stageIndex}
+      currentStage={job.stageIndex}
       stages={[
-        { name: 'Assigned', description: 'Awaiting pickup' },
-        { name: 'Started', description: 'Driver en route' },
-        { name: 'In Transit', description: 'Picked up' },
-        { name: 'Completed', description: 'Delivered' },
+        { name: 'Assigned', description: 'Awaiting pickup', icon: Package },
+        { name: 'Started', description: 'Driver en route', icon: Navigation },
+        { name: 'In Transit', description: 'Picked up', icon: Truck },
+        { name: 'Completed', description: 'Delivered', icon: CheckCircle },
       ]}
     />
 

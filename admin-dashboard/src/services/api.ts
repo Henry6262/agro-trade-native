@@ -96,6 +96,22 @@ export const tradeOperationService = {
     return data;
   },
 
+  async update(id: string, updateDto: Partial<{
+    phase: Types.TradePhase;
+    status: Types.TradeStatus;
+    sellingPrice: number;
+    targetProfitMargin: number;
+    expectedDeliveryDate: Date;
+    transportOptimized: boolean;
+    adminNotes: string;
+  }>): Promise<Types.TradeOperation> {
+    const { data } = await api.patch(
+      API_ENDPOINTS.tradeOperations.byId(id),
+      updateDto,
+    );
+    return data;
+  },
+
   async updatePhase(id: string, phase: string): Promise<Types.TradeOperation> {
     const { data } = await api.patch(
       `${API_ENDPOINTS.tradeOperations.byId(id)}/phase`,
@@ -108,6 +124,24 @@ export const tradeOperationService = {
     const { data } = await api.patch(
       `${API_ENDPOINTS.tradeOperations.byId(id)}/status`,
       { status },
+    );
+    return data;
+  },
+
+  async cancel(id: string, reason?: string): Promise<{
+    success: boolean;
+    message: string;
+    data: {
+      id: string;
+      operationNumber: string;
+      status: string;
+      phase: string;
+      completedAt: string;
+    };
+  }> {
+    const { data } = await api.post(
+      `${API_ENDPOINTS.tradeOperations.byId(id)}/cancel`,
+      { reason },
     );
     return data;
   },

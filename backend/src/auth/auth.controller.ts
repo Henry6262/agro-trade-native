@@ -3,10 +3,15 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
+  Param,
   Req,
   Res,
   UseGuards,
   BadRequestException,
+  ConflictException,
+  NotFoundException,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { ConfigService } from "@nestjs/config";
@@ -27,10 +32,16 @@ import {
   TransporterRegistrationResponseDto,
   LogoutResponseDto,
   AuthProfileResponseDto,
+  UpdateProfileDto,
+  UpdateProfileResponseDto,
+  UpdateCompanyDto,
+  CompanyResponseDto,
+  CreateBaseDto,
+  BaseResponseDto,
 } from "./dto/auth.dto";
 import { CurrentUser } from "./decorators/current-user.decorator";
 import { Public } from "./decorators/public.decorator";
-import { User, UserRole } from "@prisma/client";
+import { User, UserRole, AddressType } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import * as bcrypt from "bcrypt";
 import {
@@ -135,10 +146,6 @@ export class AuthController {
       // Exchange the authorization code for tokens using Google's OAuth2 API
       const { code, redirectUri, role } = body;
 
-      // This would typically call Google's token endpoint to exchange the code
-      // For now, we'll implement a simplified version
-      // In production, you'd use Google's OAuth2 client library
-
       // Log the mobile auth attempt
       console.log("Mobile Google auth attempt:", {
         code: code.substring(0, 10) + "...",
@@ -146,17 +153,51 @@ export class AuthController {
         role,
       });
 
-      // For demo purposes, create or find a user
-      // In production, you'd verify the code with Google and get user info
+      // Verify the ID token with Google's tokeninfo endpoint
+      // Note: for mobile auth code flow, the 'code' field is expected to be a Google ID token
+      const tokenInfoResponse = await fetch(
+        `https://oauth2.googleapis.com/tokeninfo?id_token=${code}`,
+      );
+      const tokenPayload = await tokenInfoResponse.json();
+
+      if (tokenPayload.error) {
+        throw new BadRequestException(
+          `Invalid Google token: ${tokenPayload.error_description || tokenPayload.error}`,
+        );
+      }
+
+      // Extract user information from the verified token payload
       const googleProfile = {
-        id: "google-" + Date.now(),
-        email: "mobile.user@example.com",
-        firstName: "Mobile",
-        lastName: "User",
-        picture: "",
+        id: tokenPayload.sub,
+        email: tokenPayload.email,
+        firstName: tokenPayload.given_name || tokenPayload.name?.split(" ")[0] || "",
+        lastName:
+          tokenPayload.family_name ||
+          tokenPayload.name?.split(" ").slice(1).join(" ") ||
+          "",
+        picture: tokenPayload.picture || "",
       };
 
-      const user = await this.authService.validateGoogleUser(googleProfile);
+      let user = await this.authService.validateGoogleUser(googleProfile);
+
+      // Apply role if provided
+      if (role) {
+        const roleMap: Record<string, any> = {
+          seller: "FARMER",
+          farmer: "FARMER",
+          buyer: "BUYER",
+          transporter: "TRANSPORTER",
+          admin: "ADMIN",
+        };
+        const mappedRole = roleMap[role.toLowerCase()];
+        if (mappedRole && user.role !== mappedRole) {
+          user = await this.prisma.user.update({
+            where: { id: user.id },
+            data: { role: mappedRole },
+          });
+        }
+      }
+
       const result = await this.authService.login(user);
 
       return this.serializeAuthResult(result);
@@ -175,25 +216,28 @@ export class AuthController {
   @ApiOkResponse({ type: AuthSuccessResponseDto })
   async googleNativeAuth(@Body() body: GoogleNativeAuthDto) {
     try {
-      const { idToken, role, userInfo } = body;
+      const { idToken, role } = body;
 
       // Log the native auth attempt
       console.log("Native Google auth attempt:", {
-        email: userInfo?.email,
-        role,
         hasIdToken: !!idToken,
+        role,
       });
 
-      // In production, you would:
-      // 1. Verify the ID token with Google's API
-      // 2. Extract user information from the verified token
-      // 3. Create or update user in your database
+      if (!idToken) {
+        throw new BadRequestException("Google ID token is required");
+      }
 
-      // For now, we'll trust the userInfo provided
-      // WARNING: In production, ALWAYS verify the ID token!
+      // Verify the ID token with Google's tokeninfo endpoint
+      const tokenInfoResponse = await fetch(
+        `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`,
+      );
+      const tokenPayload = await tokenInfoResponse.json();
 
-      if (!userInfo?.email) {
-        throw new Error("Email is required");
+      if (tokenPayload.error) {
+        throw new BadRequestException(
+          `Invalid Google token: ${tokenPayload.error_description || tokenPayload.error}`,
+        );
       }
 
       // Map frontend role names to backend UserRole enum
@@ -209,19 +253,19 @@ export class AuthController {
         mappedRole = roleMap[role.toLowerCase()];
       }
 
-      // Create or find user based on email
+      // Build Google profile from verified token payload
       const googleProfile = {
-        id: userInfo.id,
-        email: userInfo.email,
-        firstName: userInfo.givenName || userInfo.name?.split(" ")[0] || "",
+        id: tokenPayload.sub,
+        email: tokenPayload.email,
+        firstName: tokenPayload.given_name || tokenPayload.name?.split(" ")[0] || "",
         lastName:
-          userInfo.familyName ||
-          userInfo.name?.split(" ").slice(1).join(" ") ||
+          tokenPayload.family_name ||
+          tokenPayload.name?.split(" ").slice(1).join(" ") ||
           "",
-        picture: userInfo.photo || "",
+        picture: tokenPayload.picture || "",
       };
 
-      // Use the existing Google user validation with role
+      // Create or find user based on verified token data
       const user = await this.authService.validateGoogleUser(googleProfile);
 
       // Update user role if provided and different
@@ -467,11 +511,272 @@ export class AuthController {
   @ApiOperation({ summary: "Get authenticated user profile" })
   @ApiOkResponse({ type: AuthProfileResponseDto })
   async getProfile(@CurrentUser() user: User) {
-    const companyContext = await this.permissionsService.getUserCompanyContext(
-      user.id,
-    );
-    return this.serializeProfile(user, companyContext);
+    const [companyContext, company, bases] = await Promise.all([
+      this.permissionsService.getUserCompanyContext(user.id),
+      this.prisma.company.findUnique({ where: { userId: user.id } }),
+      this.prisma.address.findMany({
+        where: { userId: user.id },
+        orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+      }),
+    ]);
+    return this.serializeProfile(user, companyContext, company, bases);
   }
+
+  @Patch("me")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Update authenticated user profile" })
+  @ApiBody({ type: UpdateProfileDto })
+  @ApiOkResponse({ type: UpdateProfileResponseDto })
+  async updateProfile(
+    @CurrentUser() user: User,
+    @Body() updateDto: UpdateProfileDto,
+  ) {
+    // Check if email is being changed and if it's already in use
+    if (updateDto.email && updateDto.email !== user.email) {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: updateDto.email },
+      });
+      if (existingUser) {
+        throw new ConflictException("Email already in use");
+      }
+    }
+
+    // Check if phone number is being changed and if it's already in use
+    if (updateDto.phoneNumber && updateDto.phoneNumber !== user.phoneNumber) {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { phoneNumber: updateDto.phoneNumber },
+      });
+      if (existingUser) {
+        throw new ConflictException("Phone number already in use");
+      }
+    }
+
+    // Update the user
+    const updatedUser = await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        name: updateDto.name,
+        email: updateDto.email,
+        phoneNumber: updateDto.phoneNumber,
+      },
+    });
+
+    const companyContext = await this.permissionsService.getUserCompanyContext(
+      updatedUser.id,
+    );
+
+    return this.serializeUpdateProfile(updatedUser, companyContext);
+  }
+
+  // ==================== Company Endpoints ====================
+
+  @Get("me/company")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get authenticated user's company" })
+  @ApiOkResponse({ type: CompanyResponseDto })
+  async getCompany(@CurrentUser() user: User) {
+    const company = await this.prisma.company.findUnique({
+      where: { userId: user.id },
+      include: { addresses: true },
+    });
+
+    if (!company) {
+      return { success: true, company: null };
+    }
+
+    return { success: true, company };
+  }
+
+  @Patch("me/company")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Create or update authenticated user's company" })
+  @ApiBody({ type: UpdateCompanyDto })
+  @ApiOkResponse({ type: CompanyResponseDto })
+  async upsertCompany(
+    @CurrentUser() user: User,
+    @Body() dto: UpdateCompanyDto,
+  ) {
+    const company = await this.prisma.company.upsert({
+      where: { userId: user.id },
+      update: {
+        legalName: dto.legalName,
+        registrationNumber: dto.registrationNumber,
+        vatNumber: dto.vatNumber,
+        phoneNumber: dto.phoneNumber,
+        email: dto.email,
+        website: dto.website,
+      },
+      create: {
+        userId: user.id,
+        legalName: dto.legalName || "",
+        registrationNumber: dto.registrationNumber,
+        vatNumber: dto.vatNumber,
+        phoneNumber: dto.phoneNumber,
+        email: dto.email,
+        website: dto.website,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Company updated successfully",
+      company,
+    };
+  }
+
+  // ==================== Base (Address) Endpoints ====================
+
+  @Get("me/bases")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get authenticated user's bases (addresses)" })
+  @ApiOkResponse({ type: [BaseResponseDto] })
+  async getBases(@CurrentUser() user: User) {
+    const bases = await this.prisma.address.findMany({
+      where: { userId: user.id },
+      orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+    });
+
+    return { success: true, bases };
+  }
+
+  @Post("me/bases")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Add a new base (address) for authenticated user" })
+  @ApiBody({ type: CreateBaseDto })
+  @ApiOkResponse({ type: BaseResponseDto })
+  async createBase(
+    @CurrentUser() user: User,
+    @Body() dto: CreateBaseDto,
+  ) {
+    // Validate addressType against enum
+    const validTypes = Object.values(AddressType);
+    if (!validTypes.includes(dto.addressType as AddressType)) {
+      throw new BadRequestException(
+        `Invalid addressType. Must be one of: ${validTypes.join(", ")}`,
+      );
+    }
+
+    // If this base is set as default, unset other defaults
+    if (dto.isDefault) {
+      await this.prisma.address.updateMany({
+        where: { userId: user.id, isDefault: true },
+        data: { isDefault: false },
+      });
+    }
+
+    const base = await this.prisma.address.create({
+      data: {
+        userId: user.id,
+        label: dto.label,
+        addressType: dto.addressType as AddressType,
+        street: dto.street,
+        cityId: dto.cityId,
+        postalCode: dto.postalCode,
+        country: dto.country,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        isDefault: dto.isDefault ?? false,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Base added successfully",
+      base,
+    };
+  }
+
+  @Patch("me/bases/:baseId")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Update a base (address)" })
+  @ApiBody({ type: CreateBaseDto })
+  @ApiOkResponse({ type: BaseResponseDto })
+  async updateBase(
+    @CurrentUser() user: User,
+    @Param("baseId") baseId: string,
+    @Body() dto: CreateBaseDto,
+  ) {
+    // Verify the base belongs to this user
+    const existing = await this.prisma.address.findFirst({
+      where: { id: baseId, userId: user.id },
+    });
+
+    if (!existing) {
+      throw new NotFoundException("Base not found");
+    }
+
+    // Validate addressType if provided
+    if (dto.addressType) {
+      const validTypes = Object.values(AddressType);
+      if (!validTypes.includes(dto.addressType as AddressType)) {
+        throw new BadRequestException(
+          `Invalid addressType. Must be one of: ${validTypes.join(", ")}`,
+        );
+      }
+    }
+
+    // If this base is being set as default, unset other defaults
+    if (dto.isDefault) {
+      await this.prisma.address.updateMany({
+        where: { userId: user.id, isDefault: true, id: { not: baseId } },
+        data: { isDefault: false },
+      });
+    }
+
+    const base = await this.prisma.address.update({
+      where: { id: baseId },
+      data: {
+        label: dto.label,
+        addressType: dto.addressType as AddressType,
+        street: dto.street,
+        cityId: dto.cityId,
+        postalCode: dto.postalCode,
+        country: dto.country,
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        isDefault: dto.isDefault,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Base updated successfully",
+      base,
+    };
+  }
+
+  @Delete("me/bases/:baseId")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Delete a base (address)" })
+  async deleteBase(
+    @CurrentUser() user: User,
+    @Param("baseId") baseId: string,
+  ) {
+    // Verify the base belongs to this user
+    const existing = await this.prisma.address.findFirst({
+      where: { id: baseId, userId: user.id },
+    });
+
+    if (!existing) {
+      throw new NotFoundException("Base not found");
+    }
+
+    await this.prisma.address.delete({ where: { id: baseId } });
+
+    return {
+      success: true,
+      message: "Base deleted successfully",
+    };
+  }
+
+  // ==================== Private Serializers ====================
 
   private serializeAuthResult(
     result: any,
@@ -552,6 +857,8 @@ export class AuthController {
   private serializeProfile(
     user: User,
     companyContext?: Record<string, any> | null,
+    company?: Record<string, any> | null,
+    bases?: Record<string, any>[] | null,
   ): AuthProfileResponseDto {
     return plainToInstance(
       AuthProfileResponseDto,
@@ -564,6 +871,23 @@ export class AuthController {
         createdAt: user.createdAt?.toISOString?.() ?? new Date().toISOString(),
         updatedAt: user.updatedAt?.toISOString?.() ?? new Date().toISOString(),
         companyContext,
+        company: company || null,
+        bases: bases || [],
+      },
+      { excludeExtraneousValues: false },
+    );
+  }
+
+  private serializeUpdateProfile(
+    user: User,
+    companyContext?: Record<string, any> | null,
+  ): UpdateProfileResponseDto {
+    return plainToInstance(
+      UpdateProfileResponseDto,
+      {
+        success: true,
+        message: "Profile updated successfully",
+        user: this.serializeProfile(user, companyContext),
       },
       { excludeExtraneousValues: false },
     );

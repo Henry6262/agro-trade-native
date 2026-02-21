@@ -406,7 +406,6 @@ export const useOnboardingStore = create<OnboardingStore>()(
       }) =>
         set((state) => {
           state.location = location;
-          console.log('Location updated:', location);
         }),
 
       // Error handling actions
@@ -436,7 +435,6 @@ export const useOnboardingStore = create<OnboardingStore>()(
 
       // API integration methods
       saveOnboardingData: async () => {
-        const state = get();
         try {
           set((draft) => {
             draft.isLoading = true;
@@ -445,12 +443,6 @@ export const useOnboardingStore = create<OnboardingStore>()(
 
           // Save data to AsyncStorage (handled by persist middleware)
           // This is a placeholder for any additional local storage logic
-          console.log('Onboarding data saved locally', {
-            role: state.selectedRole,
-            sellerData: state.sellerData,
-            buyerData: state.buyerData,
-            transportData: state.transportData,
-          });
 
           set((draft) => {
             draft.isLoading = false;
@@ -474,14 +466,6 @@ export const useOnboardingStore = create<OnboardingStore>()(
 
           // Data is automatically loaded by persist middleware
           // This is a placeholder for any additional loading logic
-          const state = get();
-          console.log('Onboarding data loaded', {
-            role: state.selectedRole,
-            currentStep: state.currentStep,
-            hasSellerData: !!state.sellerData,
-            hasBuyerData: !!state.buyerData,
-            hasTransportData: !!state.transportData,
-          });
 
           set((draft) => {
             draft.isLoading = false;
@@ -501,7 +485,6 @@ export const useOnboardingStore = create<OnboardingStore>()(
           // Store Google auth data temporarily for use in the modal
           // This will be used to pre-fill the auth form
           draft.googleAuthData = data;
-          console.log('Google auth data stored:', data);
         });
       },
 
@@ -719,8 +702,6 @@ export const useOnboardingStore = create<OnboardingStore>()(
           if (onboardingData) {
             (finalPayload as any).onboardingData = onboardingData;
           }
-
-          console.log('Submitting onboarding with payload:', finalPayload);
 
           const response = await authService.registerWithCompany(finalPayload);
 

@@ -24,6 +24,7 @@ export const transporterBiddingService = {
     mapAnalyticsToPerformance(await transportService.getMyAnalytics()),
   submitBid: (payload: {
     transportRequestId: string;
+    tradeOperationId?: string;
     bidAmount: number;
     estimatedDuration?: number;
     vehicleType?: string;
@@ -33,6 +34,7 @@ export const transporterBiddingService = {
       estimatedDuration: 24,
       vehicleType: 'FLATBED',
       vehicleCapacity: 40,
+      tradeOperationId: '',
       ...payload,
     }),
 };

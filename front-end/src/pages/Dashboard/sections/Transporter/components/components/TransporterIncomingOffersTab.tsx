@@ -17,8 +17,8 @@ import { Button } from '@shared/components/Button';
 import { Badge } from '@shared/components/Badge';
 import { MetricCard } from '../../components/MetricCard';
 import { BaseComponentProps } from '@shared/types';
-import { MapDrawer } from '@features/dashboard/screens/transporter/maps/components/MapDrawer';
-import { MapOffer } from '@features/dashboard/screens/transporter/maps/types';
+import { MapDrawer } from '@pages/Dashboard/sections/Transporter/features/maps/components/MapDrawer';
+import { MapOffer } from '@pages/Dashboard/sections/Transporter/features/maps/types';
 import transportService, {
   TransportRequest,
   TransportBid,
@@ -87,8 +87,10 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
       setSubmittingBid(requestId);
 
       // For now, submit a basic bid - in production, you'd show a modal for bid details
+      const request = transportRequests.find((r) => r.id === requestId);
       const bidData = {
         transportRequestId: requestId,
+        tradeOperationId: request?.tradeOperationId || '',
         bidAmount: 3500, // Mock amount - would come from user input
         estimatedDuration: 24, // hours
         vehicleType: 'FLATBED',
@@ -295,10 +297,9 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
                         <Text className="text-white font-bold">
                           Request #{request.requestNumber}
                         </Text>
-                        <Badge
-                          text={request.urgencyLevel}
-                          className={`${urgencyColor} bg-gray-800/50`}
-                        />
+                        <Badge className={`${urgencyColor} bg-gray-800/50`}>
+                          {request.urgencyLevel}
+                        </Badge>
                       </View>
 
                       {/* Key Metrics Row */}

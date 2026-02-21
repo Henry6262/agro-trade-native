@@ -53,7 +53,7 @@ export default function DashboardWrapper({
   // Ensure authenticated users stay on dashboard
   React.useEffect(() => {
     if (!isAuthenticated) {
-      navigation.navigate('RoleSelection' as never);
+      navigation.navigate('Onboarding' as never);
     }
   }, [isAuthenticated]);
 
@@ -274,7 +274,7 @@ export default function DashboardWrapper({
           {/* Dynamic Content Based on Active Section */}
           <View className="flex-1">
             {React.Children.map(children, (child) => {
-              if (React.isValidElement(child) && child.props.id === activeSection) {
+              if (React.isValidElement(child) && (child as React.ReactElement<any>).props.id === activeSection) {
                 return child;
               }
               return null;

@@ -1,4 +1,4 @@
-import type { MapOffer } from '../../../maps/types';
+import type { MapOffer } from '../maps/types';
 import type {
   TransportBid,
   TransportDeliveryPoint,

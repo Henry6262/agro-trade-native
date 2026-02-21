@@ -1,0 +1,1 @@
+export { BuyerSpecifications } from './BuyerSpecifications';

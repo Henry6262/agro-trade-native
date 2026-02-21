@@ -76,7 +76,7 @@ class BuyerService {
   async getMyBuyListings(): Promise<BuyListing[]> {
     try {
       const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/buyer/buy-listings`, {
+      const response = await fetch(`${API_URL}/buyer/listings`, {
         method: 'GET',
         headers,
       });
@@ -97,7 +97,7 @@ class BuyerService {
   async getMyTradeOperations(): Promise<TradeOperation[]> {
     try {
       const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/buyer/trade-operations`, {
+      const response = await fetch(`${API_URL}/buyer/trades`, {
         method: 'GET',
         headers,
       });
@@ -118,7 +118,7 @@ class BuyerService {
   async getTradeOperationDetails(operationId: string): Promise<TradeOperation> {
     try {
       const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/buyer/trade-operations/${operationId}`, {
+      const response = await fetch(`${API_URL}/trade-operations/${operationId}`, {
         method: 'GET',
         headers,
       });
@@ -138,7 +138,7 @@ class BuyerService {
   async acceptOffer(negotiationId: string): Promise<any> {
     try {
       const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/buyer/negotiations/${negotiationId}/accept`, {
+      const response = await fetch(`${API_URL}/negotiations/${negotiationId}/accept`, {
         method: 'POST',
         headers,
       });
@@ -158,7 +158,7 @@ class BuyerService {
   async rejectOffer(negotiationId: string, reason?: string): Promise<any> {
     try {
       const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/buyer/negotiations/${negotiationId}/reject`, {
+      const response = await fetch(`${API_URL}/negotiations/${negotiationId}/reject`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ reason }),
@@ -183,7 +183,7 @@ class BuyerService {
   ): Promise<any> {
     try {
       const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/buyer/negotiations/${negotiationId}/counter`, {
+      const response = await fetch(`${API_URL}/negotiations/${negotiationId}/counter`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ counterPrice, counterQuantity }),
@@ -204,7 +204,7 @@ class BuyerService {
   async getMyStatistics(): Promise<BuyerStats> {
     try {
       const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/buyer/statistics`, {
+      const response = await fetch(`${API_URL}/buyer/stats`, {
         method: 'GET',
         headers,
       });
@@ -220,11 +220,11 @@ class BuyerService {
     }
   }
 
-  // Track delivery status
-  async getDeliveryStatus(transportJobId: string): Promise<any> {
+  // Track delivery status via transport request
+  async getDeliveryStatus(transportRequestId: string): Promise<any> {
     try {
       const headers = await this.getHeaders();
-      const response = await fetch(`${API_URL}/buyer/delivery-status/${transportJobId}`, {
+      const response = await fetch(`${API_URL}/transport/requests/${transportRequestId}`, {
         method: 'GET',
         headers,
       });

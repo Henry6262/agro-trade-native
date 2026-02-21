@@ -171,7 +171,7 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
         type: 'delivery',
       },
       deadline: job.estimatedArrival ? new Date(job.estimatedArrival) : new Date(),
-      status: job.status?.toLowerCase() ?? 'assigned',
+      status: (job.status?.toLowerCase() ?? 'assigned') as any,
       estimatedValue: job.transportRequest?.maxBudget ?? 0,
       productType:
         job.transportRequest?.tradeOperation?.buyListing?.product?.name || 'Transport Job',

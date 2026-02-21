@@ -11,10 +11,10 @@ import DashboardStack from './DashboardStack';
 import AdminStack from './AdminStack';
 
 // Import individual screens that are not in stacks
-import OrderCreateScreen from '../features/orders/screens/OrderCreateScreen';
-import OrderDetailScreen from '../features/orders/screens/OrderDetailScreen';
-import ProductDetailScreen from '../features/marketplace/screens/ProductDetailScreen';
-import { OAuthCallbackScreen } from '../features/auth/screens/OAuthCallbackScreen';
+import OrderCreateScreen from '../pages/Orders/screens/OrderCreateScreen';
+import OrderDetailScreen from '../pages/Orders/screens/OrderDetailScreen';
+import ProductDetailScreen from '../pages/Marketplace/screens/ProductDetailScreen';
+import { OAuthCallbackScreen } from '../pages/Auth/screens/OAuthCallbackScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -67,9 +67,8 @@ export default function RootNavigator({ appState }: RootNavigatorProps) {
             title: 'Create Order',
             headerStyle: {
               backgroundColor: '#ffffff',
-              shadowColor: 'transparent',
-              elevation: 0,
             },
+            headerShadowVisible: false,
             headerTitleStyle: {
               fontSize: 18,
               fontWeight: '600',
@@ -86,9 +85,8 @@ export default function RootNavigator({ appState }: RootNavigatorProps) {
             title: 'Order Details',
             headerStyle: {
               backgroundColor: '#ffffff',
-              shadowColor: 'transparent',
-              elevation: 0,
             },
+            headerShadowVisible: false,
             headerTitleStyle: {
               fontSize: 18,
               fontWeight: '600',
@@ -105,9 +103,8 @@ export default function RootNavigator({ appState }: RootNavigatorProps) {
             title: 'Product Details',
             headerStyle: {
               backgroundColor: '#ffffff',
-              shadowColor: 'transparent',
-              elevation: 0,
             },
+            headerShadowVisible: false,
             headerTitleStyle: {
               fontSize: 18,
               fontWeight: '600',

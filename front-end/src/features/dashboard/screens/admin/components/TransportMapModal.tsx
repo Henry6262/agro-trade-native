@@ -161,22 +161,22 @@ export const TransportMapModal: React.FC<TransportMapModalProps> = ({
                 <View className="flex-row justify-between">
                   <Text className="text-gray-600">Base Rate</Text>
                   <Text className="text-gray-800">
-                    ${transportEstimate.breakdown.baseRate.toFixed(2)}
+                    ${transportEstimate.breakdown.baseRate?.toFixed(2) || '0.00'}
                   </Text>
                 </View>
 
                 <View className="flex-row justify-between">
                   <Text className="text-gray-600">Distance Charge</Text>
                   <Text className="text-gray-800">
-                    ${transportEstimate.breakdown.distanceCharge.toFixed(2)}
+                    ${transportEstimate.breakdown.distanceCharge?.toFixed(2) || '0.00'}
                   </Text>
                 </View>
 
-                {transportEstimate.breakdown.multiPickupSurcharge > 0 && (
+                {(transportEstimate.breakdown.multiPickupSurcharge ?? 0) > 0 && (
                   <View className="flex-row justify-between">
                     <Text className="text-gray-600">Multi-Pickup Surcharge</Text>
                     <Text className="text-gray-800">
-                      ${transportEstimate.breakdown.multiPickupSurcharge.toFixed(2)}
+                      ${transportEstimate.breakdown.multiPickupSurcharge?.toFixed(2) || '0.00'}
                     </Text>
                   </View>
                 )}

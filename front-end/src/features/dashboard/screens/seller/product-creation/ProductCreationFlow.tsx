@@ -103,7 +103,7 @@ const ProductCreationFlowComponent: React.FC<ProductCreationFlowProps> = ({
           visible={true}
           onClose={handleClose}
           onNext={handleProductSelect}
-          productMetadata={productMetadata}
+          productMetadata={productMetadata as any}
         />
       )}
 

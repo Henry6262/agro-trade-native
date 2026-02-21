@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { UseVerificationJobsReturn, VerificationJob } from '../types';
+import type { UseVerificationJobsReturn, VerificationJob } from '../types';
 import { inspectionService } from '@services/inspectionService';
-import { useAuthStore } from '@shared/stores/useAuthStore';
+import { useAuthStore } from '../../../../../stores/auth.store';
 
 export const useVerificationJobs = (): UseVerificationJobsReturn => {
   const [jobs, setJobs] = useState<VerificationJob[]>([]);
@@ -83,7 +83,6 @@ export const useVerificationJobs = (): UseVerificationJobsReturn => {
         )
       );
 
-      console.log(`Job ${jobId} accepted by ${inspectorId}`);
       void missionsQuery.refetch();
     } catch (err) {
       console.error('Error accepting job:', err);
@@ -106,7 +105,6 @@ export const useVerificationJobs = (): UseVerificationJobsReturn => {
       // Update local state - mark job as completed
       setJobs((prev) => prev.filter((job) => job.id !== jobId));
 
-      console.log(`Job ${jobId} completed`, result);
       void missionsQuery.refetch();
     } catch (err) {
       console.error('Error completing job:', err);

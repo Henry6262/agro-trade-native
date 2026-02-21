@@ -1,6 +1,6 @@
 import React from 'react';
 import { FlatList, RefreshControl, View, Text } from 'react-native';
-import { JobListViewProps } from '@features/dashboard/screens/inspector/types/index';
+import { JobListViewProps } from '@features/dashboard/screens/inspector/types';
 import { JobCard } from './JobCard';
 
 export const JobListView: React.FC<JobListViewProps> = ({

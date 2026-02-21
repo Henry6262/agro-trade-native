@@ -31,7 +31,6 @@ const DRAWER_HEIGHT = SCREEN_HEIGHT * 0.9; // Increased from 0.75 to 0.9
  * Map drawer component with route visualization
  */
 export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) => {
-  console.log('MapDrawer rendered - isOpen:', isOpen, 'offer:', offer);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fleet, setFleet] = useState<Fleet | null>(null);

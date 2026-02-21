@@ -1,10 +1,10 @@
 import React from 'react';
 import type { TransporterDashboardSectionProps } from './types';
 import TransporterOffersFeature from './features/Offers';
-import TransporterJobsFeature from './features/Jobs';
+import { TransporterActiveJobsTab as TransporterJobsFeature } from './features/Jobs';
 import TransporterTransfersFeature from './features/Transfers';
-import TransporterFleetFeature from './features/Fleet';
-import TransporterBiddingFeature from './features/Bidding';
+import { TransporterFleetTab as TransporterFleetFeature } from './features/Fleet';
+import { TransporterBiddingTab as TransporterBiddingFeature } from './features/Bidding';
 
 export function TransporterDashboardSection({
   activeTab = 'offers',

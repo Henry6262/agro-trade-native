@@ -81,7 +81,7 @@ export default function DashboardMainScreen() {
   // Ensure authenticated users stay on dashboard
   React.useEffect(() => {
     if (!isAuthenticated) {
-      navigation.navigate('RoleSelection' as never);
+      navigation.navigate('Onboarding' as never);
     }
 
     // Check if we're coming from onboarding with success animation
@@ -93,11 +93,7 @@ export default function DashboardMainScreen() {
     // Check for pending buyer listings after authentication
     if (isAuthenticated) {
       const checkPendingListing = async () => {
-        const processed = await PendingListingService.processPendingListing();
-        if (processed) {
-          console.log('Successfully processed pending buyer listing');
-          // Optionally show a success message
-        }
+        await PendingListingService.processPendingListing();
       };
       checkPendingListing();
     }
@@ -166,15 +162,6 @@ export default function DashboardMainScreen() {
 
   const navigationItems = getNavigationItems();
 
-  // Debug logging
-  console.log('Dashboard State:', {
-    userRole,
-    activeSection,
-    navigationItems: navigationItems.map((i) => i.id),
-    isAuthenticated,
-    user: user?.email,
-  });
-
   const renderContent = () => {
     if (userRole === 'seller') {
       if (activeSection === 'intelligence') {
@@ -195,7 +182,7 @@ export default function DashboardMainScreen() {
       if (activeSection === 'intelligence') {
         return <IntelligenceScreen />;
       }
-      return <TransporterDashboardScreen activeTab={activeSection} />;
+      return <TransporterDashboardScreen activeTab={activeSection as any} />;
     }
     if (userRole === 'inspector') {
       // Inspector doesn't need activeTab - it handles its own tabs internally
@@ -231,14 +218,16 @@ export default function DashboardMainScreen() {
               <Text className="text-green-500 font-bold text-lg tracking-wider">AGRI TRADE</Text>
             </View>
             <View className="flex-row items-center gap-4">
-              {/* Dashboard Switcher Button */}
-              <TouchableOpacity
-                onPress={() => setShowDashboardSwitcher(!showDashboardSwitcher)}
-                className="flex-row items-center bg-neutral-700 px-3 py-2 rounded-lg"
-              >
-                <LayoutGrid color="#9CA3AF" size={16} />
-                <Text className="text-neutral-300 text-sm ml-2">Switch Dashboard</Text>
-              </TouchableOpacity>
+              {/* Dashboard Switcher Button - DEV only */}
+              {__DEV__ && (
+                <TouchableOpacity
+                  onPress={() => setShowDashboardSwitcher(!showDashboardSwitcher)}
+                  className="flex-row items-center bg-neutral-700 px-3 py-2 rounded-lg"
+                >
+                  <LayoutGrid color="#9CA3AF" size={16} />
+                  <Text className="text-neutral-300 text-sm ml-2">Switch Dashboard</Text>
+                </TouchableOpacity>
+              )}
 
               <TouchableOpacity className="p-2">
                 <Bell color="#9CA3AF" size={16} />
@@ -254,8 +243,8 @@ export default function DashboardMainScreen() {
             </View>
           </View>
 
-          {/* Dashboard Switcher Dropdown */}
-          {showDashboardSwitcher && (
+          {/* Dashboard Switcher Dropdown - DEV only */}
+          {__DEV__ && showDashboardSwitcher && (
             <View
               className="absolute top-16 right-6 bg-neutral-900 border border-neutral-700 rounded-lg p-2 z-50"
               style={{ minWidth: 200 }}

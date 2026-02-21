@@ -24,7 +24,7 @@ export const ScrollFix: React.FC<{ children: React.ReactNode }> = ({ children })
             if (scrollableChild) {
               scrollableChild.style.height = '100%';
               scrollableChild.style.overflow = 'auto';
-              scrollableChild.style.webkitOverflowScrolling = 'touch';
+              (scrollableChild.style as any).webkitOverflowScrolling = 'touch';
             }
           }
         });
@@ -35,7 +35,7 @@ export const ScrollFix: React.FC<{ children: React.ReactNode }> = ({ children })
           const el = element as HTMLElement;
           // Force proper scrolling
           el.style.overflow = 'auto';
-          el.style.webkitOverflowScrolling = 'touch';
+          (el.style as any).webkitOverflowScrolling = 'touch';
           el.style.height = '100%';
           el.style.maxHeight = '100vh';
         });

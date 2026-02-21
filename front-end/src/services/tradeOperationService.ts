@@ -24,6 +24,7 @@ export interface BuyListing {
   };
   neededBy?: string;
   requirements?: string[];
+  specifications?: any[];
   urgency?: 'low' | 'medium' | 'high' | 'critical';
   status: string;
   createdAt: string;
@@ -67,6 +68,7 @@ export interface TradeOperation {
   buyListingId: string;
   buyListing: BuyListing;
   status: 'ACTIVE' | 'IN_PROGRESS' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  phase?: string;
   targetProfitMargin: number;
   sellingPrice?: number;
   totalRevenue?: number;
@@ -77,6 +79,7 @@ export interface TradeOperation {
   actualProfit?: number;
   profitMargin?: number;
   selectedSellers?: TradeSeller[];
+  sellers?: TradeSeller[];
   createdAt: string;
   updatedAt: string;
 }
@@ -84,11 +87,14 @@ export interface TradeOperation {
 export interface TradeSeller {
   id: string;
   sellerId: string;
+  tradeOperationId?: string;
   saleListingId: string;
   saleListing: SaleListing;
   requestedQuantity: number;
+  unit?: string;
   agreedPrice?: number;
   status: 'PENDING' | 'NEGOTIATING' | 'AGREED' | 'REJECTED';
+  isVerified?: boolean;
 }
 
 export interface ProfitCalculation {
@@ -130,6 +136,7 @@ export interface ProfitCalculation {
 export interface TransportEstimate {
   distance: number;
   duration: number;
+  vehicleType?: string;
   costs: {
     baseCost: number;
     fuelSurcharge: number;
@@ -140,6 +147,9 @@ export interface TransportEstimate {
     costPerKm: number;
     costPerTon: number;
     costPerTonKm: number;
+    baseRate?: number;
+    distanceCharge?: number;
+    multiPickupSurcharge?: number;
   };
   route?: {
     waypoints: {
@@ -162,6 +172,11 @@ export interface MatchingSeller {
   availability: number;
   qualityScore?: number;
   reasons: string[];
+  location?: {
+    city?: string;
+    latitude?: number;
+    longitude?: number;
+  };
 }
 
 // Trade Operations API Service
@@ -170,11 +185,9 @@ export const tradeOperationService = {
   async getActiveBuyListings(): Promise<BuyListing[]> {
     try {
       const response = await apiClient.get<BuyListing[]>('/buyer/listings');
-      console.log('Raw buy listings response:', response.data);
 
       // Filter for active listings and ensure they have proper IDs
       const activeListings = response.data.filter((listing) => listing.status === 'ACTIVE');
-      console.log('Active buy listings:', activeListings);
 
       return activeListings;
     } catch (error) {
@@ -419,6 +432,20 @@ export const tradeOperationService = {
   // Get trade operations by status (convenience method for ActiveOperationsTab)
   async getTradeOperations(status?: string): Promise<TradeOperation[]> {
     return this.getAllTradeOperations(status ? { status } : undefined);
+  },
+
+  // Update trade operation
+  async updateTradeOperation(
+    id: string,
+    data: Partial<Pick<TradeOperation, 'status' | 'phase' | 'sellingPrice'>>
+  ): Promise<TradeOperation> {
+    try {
+      const response = await apiClient.patch<TradeOperation>(`/trade-operations/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating trade operation:', error);
+      throw error;
+    }
   },
 
   // Update trade operation status

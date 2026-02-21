@@ -74,7 +74,6 @@ export function SimplifiedMarketOverview({
 
   // Build the DTO
   const handleSellClick = () => {
-    console.log('handleSellClick - productId:', productId, 'product:', product?.name);
     if (!productId) {
       console.error('No product ID available when sell button clicked');
     }
@@ -281,9 +280,9 @@ export function SimplifiedMarketOverview({
             </View>
 
             <View className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
-              {product.specifications.length > 0 ? (
+              {(product?.specifications?.length ?? 0) > 0 ? (
                 <View className="space-y-3">
-                  {product.specifications.map((spec) => {
+                  {product?.specifications?.map((spec) => {
                     const specKey = spec.code || spec.id;
                     const value = productSpecs.specifications?.[specKey];
                     const hasValue = value?.trim() !== '';

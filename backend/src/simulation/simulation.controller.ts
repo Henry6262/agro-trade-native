@@ -8,6 +8,9 @@ import {
   HttpCode,
   HttpStatus,
   Delete,
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -82,7 +85,7 @@ export class SimulationController {
     });
 
     if (!user || user.role !== UserRole.BUYER) {
-      throw new Error("User is not a buyer");
+      throw new ForbiddenException("User is not a buyer");
     }
 
     return this.prisma.buyListing.create({
@@ -121,11 +124,11 @@ export class SimulationController {
     });
 
     if (!negotiation) {
-      throw new Error("Negotiation not found");
+      throw new NotFoundException("Negotiation not found");
     }
 
     if (negotiation.tradeSeller.sellerId !== userId) {
-      throw new Error("User is not authorized for this negotiation");
+      throw new ForbiddenException("User is not authorized for this negotiation");
     }
 
     // Update negotiation to ACCEPTED
@@ -178,11 +181,11 @@ export class SimulationController {
     });
 
     if (!negotiation) {
-      throw new Error("Negotiation not found");
+      throw new NotFoundException("Negotiation not found");
     }
 
     if (negotiation.tradeSeller.sellerId !== userId) {
-      throw new Error("User is not authorized for this negotiation");
+      throw new ForbiddenException("User is not authorized for this negotiation");
     }
 
     // Get quantity from currentOffer JSON
@@ -225,11 +228,11 @@ export class SimulationController {
     });
 
     if (!negotiation) {
-      throw new Error("Negotiation not found");
+      throw new NotFoundException("Negotiation not found");
     }
 
     if (negotiation.tradeSeller.sellerId !== userId) {
-      throw new Error("User is not authorized for this negotiation");
+      throw new ForbiddenException("User is not authorized for this negotiation");
     }
 
     // Update negotiation to REJECTED
@@ -273,7 +276,7 @@ export class SimulationController {
     });
 
     if (!user || user.role !== UserRole.TRANSPORTER) {
-      throw new Error("User is not a transporter");
+      throw new ForbiddenException("User is not a transporter");
     }
 
     const request = await this.prisma.transportRequest.findUnique({
@@ -281,7 +284,7 @@ export class SimulationController {
     });
 
     if (!request) {
-      throw new Error("Transport request not found");
+      throw new NotFoundException("Transport request not found");
     }
 
     return this.prisma.transportBid.create({
@@ -312,7 +315,7 @@ export class SimulationController {
     });
 
     if (!user || user.role !== UserRole.TRANSPORTER) {
-      throw new Error("User is not a transporter");
+      throw new ForbiddenException("User is not a transporter");
     }
 
     const job = await this.prisma.transportJob.findUnique({
@@ -320,11 +323,11 @@ export class SimulationController {
     });
 
     if (!job) {
-      throw new Error("Transport job not found");
+      throw new NotFoundException("Transport job not found");
     }
 
     if (job.transporterId !== userId) {
-      throw new Error("User is not authorized for this job");
+      throw new ForbiddenException("User is not authorized for this job");
     }
 
     await this.prisma.transportJob.update({
@@ -350,7 +353,7 @@ export class SimulationController {
     });
 
     if (!user || user.role !== UserRole.TRANSPORTER) {
-      throw new Error("User is not a transporter");
+      throw new ForbiddenException("User is not a transporter");
     }
 
     const job = await this.prisma.transportJob.findUnique({
@@ -358,11 +361,11 @@ export class SimulationController {
     });
 
     if (!job) {
-      throw new Error("Transport job not found");
+      throw new NotFoundException("Transport job not found");
     }
 
     if (job.transporterId !== userId) {
-      throw new Error("User is not authorized for this job");
+      throw new ForbiddenException("User is not authorized for this job");
     }
 
     await this.prisma.transportJob.update({
@@ -398,7 +401,7 @@ export class SimulationController {
     });
 
     if (!user || user.role !== UserRole.INSPECTOR) {
-      throw new Error("User is not an inspector");
+      throw new ForbiddenException("User is not an inspector");
     }
 
     await this.prisma.inspectionRequest.update({
@@ -430,7 +433,7 @@ export class SimulationController {
     });
 
     if (!user || user.role !== UserRole.INSPECTOR) {
-      throw new Error("User is not an inspector");
+      throw new ForbiddenException("User is not an inspector");
     }
 
     const inspection = await this.prisma.inspectionRequest.findUnique({
@@ -442,7 +445,7 @@ export class SimulationController {
     });
 
     if (!inspection) {
-      throw new Error("Inspection not found");
+      throw new NotFoundException("Inspection not found");
     }
 
     // Update inspection

@@ -166,7 +166,7 @@ export const useBuyerRequestCreation = () => {
 
   const getProductImage = useCallback(
     (productName: string, category: string) =>
-      resolveProductImage(productMetadata, productName, category),
+      resolveProductImage(productMetadata as any, productName, category),
     [productMetadata]
   );
 

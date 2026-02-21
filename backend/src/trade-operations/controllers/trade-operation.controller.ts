@@ -13,6 +13,7 @@ import {
   HttpCode,
   BadRequestException,
   NotFoundException,
+  UseGuards,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -22,6 +23,7 @@ import {
   ApiQuery,
   ApiParam,
 } from "@nestjs/swagger";
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import {
   UserRole,
@@ -59,7 +61,7 @@ import {
 
 @ApiTags("Trade Operations")
 @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard) // Temporarily disabled for testing
+@UseGuards(JwtAuthGuard)
 @Controller("trade-operations")
 export class TradeOperationController {
   constructor(
@@ -71,7 +73,7 @@ export class TradeOperationController {
   ) {}
 
   @Post()
-  // @Roles(UserRole.ADMIN) // Temporarily disabled for testing
+  @Roles(UserRole.ADMIN)
   @ApiOperation({
     summary: "Create a new trade operation with initial offers to sellers",
     description:
@@ -106,8 +108,11 @@ export class TradeOperationController {
     @Body() createDto: CreateTradeOperationWithOffersDto,
     @Request() req: any,
   ): Promise<any> {
-    // Use admin ID from DTO, or from authenticated user, or default
-    const adminId = createDto.adminId || req.user?.id || "cmhhfgc1u0000g1rqjcd4y1lx"; // Default admin from DB (admin@test.com)
+    // Use admin ID from DTO or from authenticated user; never fall back to a hardcoded ID
+    const adminId = createDto.adminId || req.user?.id;
+    if (!adminId) {
+      throw new BadRequestException("Admin ID is required to create a trade operation");
+    }
 
     // Validate buy listing exists
     const buyListing = await this.prisma.buyListing.findUnique({
@@ -175,7 +180,7 @@ export class TradeOperationController {
   }
 
   @Get()
-  // @Roles(UserRole.ADMIN) // Temporarily disabled for testing
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: "Get all trade operations with filters" })
   @ApiQuery({ name: "phase", enum: TradePhase, required: false })
   @ApiQuery({ name: "status", enum: TradeStatus, required: false })
@@ -398,7 +403,7 @@ export class TradeOperationController {
   }
 
   @Get(":id/profit")
-  // @Roles(UserRole.ADMIN) // Temporarily disabled for testing
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: "Get profit data for a trade operation" })
   @ApiParam({ name: "id", description: "Trade operation ID" })
   @ApiResponse({
@@ -437,7 +442,7 @@ export class TradeOperationController {
     }
   }
 
-  @Put(":id")
+  @Patch(":id")
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: "Update a trade operation" })
   @ApiParam({ name: "id", description: "Trade operation ID" })
@@ -446,18 +451,44 @@ export class TradeOperationController {
     description: "Trade operation updated successfully",
     type: TradeOperationResponseDto,
   })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: "Invalid update or business rule violation",
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: "Trade operation not found",
+  })
   async update(
     @Param("id") id: string,
     @Body() updateDto: UpdateTradeOperationDto,
+    @Request() req: any,
   ): Promise<TradeOperationResponseDto> {
-    void id;
-    void updateDto;
-    // This would need to be implemented in the service
-    throw new BadRequestException("Update method not yet implemented");
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        throw new BadRequestException("User ID is required");
+      }
+
+      const updatedTrade = await this.tradeOperationService.updateTradeOperation(
+        id,
+        updateDto,
+        userId,
+      );
+
+      // Return the updated trade operation summary
+      const summary = await this.tradeOperationService.getTradeOperationSummary(id);
+      return this.mapToResponseDto(summary);
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(`Failed to update trade operation: ${error.message}`);
+    }
   }
 
   @Patch(":id/phase")
-  // @Roles(UserRole.ADMIN) // Temporarily disabled for testing
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: "Update the phase of a trade operation" })
   @ApiParam({ name: "id", description: "Trade operation ID" })
   @ApiResponse({
@@ -501,7 +532,7 @@ export class TradeOperationController {
   }
 
   @Post(":id/sellers")
-  // @Roles(UserRole.ADMIN) // Temporarily disabled for testing
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: "Add sellers to a trade operation" })
   @ApiParam({ name: "id", description: "Trade operation ID" })
   @ApiResponse({
@@ -525,7 +556,7 @@ export class TradeOperationController {
   }
 
   @Get(":id/matching-sellers")
-  // @Roles(UserRole.ADMIN) // Temporarily disabled for testing
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: "Find matching sellers for a trade operation" })
   @ApiParam({ name: "id", description: "Trade operation ID" })
   @ApiQuery({
@@ -731,19 +762,70 @@ export class TradeOperationController {
     return result;
   }
 
-  @Delete(":id")
+  @Post(":id/cancel")
   @Roles(UserRole.ADMIN)
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Cancel a trade operation" })
   @ApiParam({ name: "id", description: "Trade operation ID" })
   @ApiResponse({
-    status: HttpStatus.NO_CONTENT,
-    description: "Trade operation cancelled",
+    status: HttpStatus.OK,
+    description: "Trade operation cancelled successfully",
+    schema: {
+      example: {
+        success: true,
+        message: "Trade operation cancelled successfully",
+        data: {
+          id: "trade123",
+          operationNumber: "OP-1234567890",
+          status: "CANCELLED",
+          phase: "CANCELLED",
+          completedAt: "2025-02-20T00:00:00Z",
+        },
+      },
+    },
   })
-  async cancel(@Param("id") id: string): Promise<void> {
-    void id;
-    // This would need to be implemented in the service
-    throw new BadRequestException("Cancel method not yet implemented");
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: "Cannot cancel trade operation (business rule violation)",
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: "Trade operation not found",
+  })
+  async cancel(
+    @Param("id") id: string,
+    @Body() body: { reason?: string },
+    @Request() req: any,
+  ): Promise<any> {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        throw new BadRequestException("User ID is required");
+      }
+
+      const cancelledTrade = await this.tradeOperationService.cancelTradeOperation(
+        id,
+        userId,
+        body.reason,
+      );
+
+      return {
+        success: true,
+        message: "Trade operation cancelled successfully",
+        data: {
+          id: cancelledTrade.id,
+          operationNumber: cancelledTrade.operationNumber,
+          status: cancelledTrade.status,
+          phase: cancelledTrade.phase,
+          completedAt: cancelledTrade.completedAt,
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new BadRequestException(`Failed to cancel trade operation: ${error.message}`);
+    }
   }
 
   /**
@@ -807,7 +889,7 @@ export class TradeOperationController {
   }
 
   @Post(":id/request-inspections")
-  // @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: "Request inspections for selected sellers" })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -835,7 +917,7 @@ export class TradeOperationController {
   }
 
   @Post("calculate-transport")
-  // @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Calculate transport costs for selected sellers to buyer address",

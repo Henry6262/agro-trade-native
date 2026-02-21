@@ -38,9 +38,11 @@ import {
 } from 'lucide-react-native';
 
 import { SellerOfferCard } from './SellerOfferCard';
+import { sellerOfferService } from '@services/sellerOfferService';
 
 interface BuyerOffer {
   id: string;
+  negotiationId?: string;
   buyer: {
     id: string;
     name: string;
@@ -200,7 +202,6 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
   }, [offers]);
 
   const handleOfferAction = (action: 'accept' | 'reject' | 'negotiate', offerId: string) => {
-    console.log('SellerOffersDrawer handleOfferAction called with:', action, offerId);
     const offer = offers.find((o) => o.id === offerId);
     if (!offer) return;
 
@@ -208,7 +209,6 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
     setCounterPrice(offer.offeredPrice.toString());
     setCounterQuantity(offer.requestedQuantity.toString());
     // Change view to show the appropriate content (negotiate/accept/reject)
-    console.log('Changing view to:', action);
     animateViewChange(action);
   };
 
@@ -217,8 +217,8 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
     setActionLoading(true);
     try {
-      // TODO: Implement actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const offerId = selectedOffer.negotiationId || selectedOffer.id;
+      await sellerOfferService.acceptOffer(offerId, { acceptanceNote: acceptNotes || undefined });
       Alert.alert('Success', 'Offer accepted successfully!');
       onClose();
     } catch (error) {
@@ -238,8 +238,8 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
     setActionLoading(true);
     try {
-      // TODO: Implement actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const offerId = selectedOffer.negotiationId || selectedOffer.id;
+      await sellerOfferService.rejectOffer(offerId, { reason: rejectReason });
       Alert.alert('Offer Rejected', 'The buyer has been notified of your decision.');
       onClose();
     } catch (error) {
@@ -280,8 +280,12 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
     setActionLoading(true);
     try {
-      // TODO: Implement actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const offerId = selectedOffer.negotiationId || selectedOffer.id;
+      await sellerOfferService.counterOffer(offerId, {
+        counterPrice: parseFloat(counterPrice),
+        quantity: parseFloat(counterQuantity),
+        message: message.trim(),
+      });
       Alert.alert('Counter-Offer Sent', 'Your counter-offer has been sent to the buyer.');
       handleBack();
     } catch (error) {
@@ -1059,7 +1063,6 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                 transform: [{ scale: contentAnim }],
               }}
             >
-              {console.log('Current view in SellerOffersDrawer:', currentView)}
               {currentView === 'list' && renderListView()}
               {currentView === 'negotiate' && renderNegotiationView()}
               {currentView === 'accept' && renderAcceptView()}

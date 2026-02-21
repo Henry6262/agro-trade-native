@@ -100,7 +100,7 @@ export function TransporterOnboarding({ onComplete }: TransporterOnboardingProps
 
     switch (currentStep.id) {
       case 'fleet':
-        return transportData?.fleetInfo?.vehicleCount > 0;
+        return (transportData?.fleetInfo?.vehicleCount ?? 0) > 0;
       case 'coverage':
         // Allow proceeding without requiring coverage data for now
         return true;

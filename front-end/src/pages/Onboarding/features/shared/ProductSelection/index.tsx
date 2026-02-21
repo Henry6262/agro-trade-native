@@ -44,10 +44,8 @@ export const ProductSelectionUnified: React.FC = () => {
   }, []);
 
   const toggleProduct = (productId: string) => {
-    console.log('Toggle product:', productId, 'Role:', role);
     if (role === 'seller' || role === 'buyer') {
       // For both sellers and buyers: directly select and move to next step
-      console.log('Selecting product and moving to next step:', productId);
 
       // Update selected products
       setSelectedProductIds([productId]);

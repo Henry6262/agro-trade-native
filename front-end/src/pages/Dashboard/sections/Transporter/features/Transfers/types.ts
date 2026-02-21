@@ -1,5 +1,5 @@
 import type { TransportJob } from '@services/transportService';
-import type { MapOffer } from '../../maps/types';
+import type { MapOffer } from '../maps/types';
 
 export type TransfersJobStatus = TransportJob['status'];
 

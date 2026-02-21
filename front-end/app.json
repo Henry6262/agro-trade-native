@@ -21,7 +21,10 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to help you add warehouse and storage locations for your agricultural products.",
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby bases and optimize delivery routes."
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby bases and optimize delivery routes.",
+        "NSCameraUsageDescription": "This app uses the camera to take photos of your agricultural products.",
+        "NSPhotoLibraryUsageDescription": "This app accesses your photo library to upload product images.",
+        "UIBackgroundModes": ["remote-notification"]
       }
     },
     "android": {
@@ -38,7 +41,8 @@
       },
       "permissions": [
         "ACCESS_COARSE_LOCATION",
-        "ACCESS_FINE_LOCATION"
+        "ACCESS_FINE_LOCATION",
+        "POST_NOTIFICATIONS"
       ]
     },
     "web": {
@@ -55,7 +59,15 @@
           "project": "react-native"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-notifications",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow AgroTrade to access your photos for product images.",
+          "cameraPermission": "Allow AgroTrade to use the camera to take product photos."
+        }
+      ]
     ],
     "owner": "henry6262",
     "extra": {

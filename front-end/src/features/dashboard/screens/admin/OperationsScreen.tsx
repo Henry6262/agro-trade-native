@@ -67,6 +67,7 @@ export default function OperationsScreen() {
     findMatchingSellers,
     selectSellers,
     calculateProfit,
+    estimateTransportCost,
     sendBulkOffers,
 
     // Error handling

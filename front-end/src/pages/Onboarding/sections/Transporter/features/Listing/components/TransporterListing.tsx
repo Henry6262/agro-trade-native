@@ -18,7 +18,6 @@ export function TransporterListing({ onComplete }: TransporterListingProps) {
   const location = fleetInfo?.baseLocation;
 
   const handleCreateListing = () => {
-    console.log('Creating transporter listing...');
     onComplete?.();
   };
 

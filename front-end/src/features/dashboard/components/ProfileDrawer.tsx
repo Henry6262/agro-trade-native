@@ -11,6 +11,9 @@ import {
   Animated,
   Dimensions,
   Easing,
+  ToastAndroid,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {
   X,
@@ -33,6 +36,7 @@ import {
 } from 'lucide-react-native';
 import { useAuthStore } from '@stores/auth.store';
 import { useNavigation } from '@react-navigation/native';
+import { authService } from '@services/authService';
 
 interface ProfileDrawerProps {
   visible: boolean;
@@ -44,8 +48,11 @@ interface Base {
   id: string;
   name: string;
   location: string;
-  type: 'warehouse' | 'distribution' | 'collection';
+  type: string;
   capacity: string;
+  addressType?: string;
+  isDefault?: boolean;
+  isNew?: boolean; // Flag for locally-added bases not yet saved
 }
 
 export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
@@ -53,11 +60,12 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   onClose,
   showSuccessAnimation = false,
 }) => {
-  const { user, logout } = useAuthStore();
+  const { user, logout, setUser } = useAuthStore();
   const navigation = useNavigation();
   const [editMode, setEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState<'personal' | 'company' | 'bases'>('personal');
   const [showSuccess, setShowSuccess] = useState(showSuccessAnimation);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Animation values
   const slideAnim = new Animated.Value(Dimensions.get('window').width);
@@ -137,7 +145,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   const [personalInfo, setPersonalInfo] = useState({
     name: user?.name || '',
     email: user?.email || '',
-    phone: user?.phoneNumber || '',
+    phone: user?.phone || '',
     role: user?.role || 'buyer',
   });
 
@@ -150,15 +158,35 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     establishedYear: '',
   });
 
-  const [bases, setBases] = useState<Base[]>([
-    {
-      id: '1',
-      name: 'Main Warehouse',
-      location: 'Sofia, Bulgaria',
-      type: 'warehouse',
-      capacity: '5000 tons',
-    },
-  ]);
+  const [bases, setBases] = useState<Base[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch company and bases data when drawer opens
+  useEffect(() => {
+    if (visible) {
+      setIsLoading(true);
+      Promise.all([
+        authService.getCompany().catch(() => ({ success: false, company: null })),
+        authService.getBases().catch(() => ({ success: false, bases: [] })),
+      ])
+        .then(([companyRes, basesRes]) => {
+          if (companyRes.company) {
+            setCompanyInfo({
+              companyName: companyRes.company.companyName || '',
+              vatNumber: companyRes.company.vatNumber || '',
+              businessType: '',
+              companyAddress: '',
+              website: companyRes.company.website || '',
+              establishedYear: '',
+            });
+          }
+          if (basesRes.bases) {
+            setBases(basesRes.bases);
+          }
+        })
+        .finally(() => setIsLoading(false));
+    }
+  }, [visible]);
 
   const handleLogout = async () => {
     // Clear the auth session (now async)
@@ -180,26 +208,97 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     });
   };
 
-  const handleSave = () => {
-    // Save profile information
-    console.log('Saving profile:', { personalInfo, companyInfo, bases });
-    setEditMode(false);
-    // TODO: API call to save data
+  const showToast = (message: string) => {
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(message, ToastAndroid.LONG);
+    } else {
+      Alert.alert('Success', message);
+    }
+  };
+
+  const showError = (message: string) => {
+    if (Platform.OS === 'android') {
+      ToastAndroid.show(message, ToastAndroid.LONG);
+    } else {
+      Alert.alert('Error', message);
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+
+      // Save personal info
+      const updatedUser = await authService.updateProfile({
+        name: personalInfo.name,
+        email: personalInfo.email,
+        phone: personalInfo.phone,
+      });
+
+      // Update Zustand store with new user data
+      setUser(updatedUser);
+
+      // Save company info
+      if (companyInfo.companyName) {
+        await authService.updateCompany({
+          companyName: companyInfo.companyName,
+          vatNumber: companyInfo.vatNumber || undefined,
+          website: companyInfo.website || undefined,
+        });
+      }
+
+      // Save new bases (ones added locally that don't exist on backend yet)
+      for (const base of bases) {
+        if (base.isNew) {
+          await authService.createBase({
+            label: base.name,
+            addressType: base.addressType || 'WAREHOUSE',
+            street: base.location,
+            isDefault: base.isDefault,
+          });
+        }
+      }
+
+      // Refresh bases from server to get real IDs
+      const basesRes = await authService.getBases().catch(() => ({ bases: [] }));
+      setBases(basesRes.bases || []);
+
+      setEditMode(false);
+      showToast('Profile updated successfully!');
+    } catch (error: any) {
+      console.error('Profile save error:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to save profile';
+      showError(errorMessage);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const addBase = () => {
     const newBase: Base = {
-      id: Date.now().toString(),
+      id: `new-${Date.now()}`,
       name: 'New Base',
       location: '',
       type: 'warehouse',
       capacity: '',
+      addressType: 'WAREHOUSE',
+      isNew: true,
     };
     setBases([...bases, newBase]);
   };
 
-  const removeBase = (id: string) => {
-    setBases(bases.filter((base) => base.id !== id));
+  const removeBase = async (id: string) => {
+    const base = bases.find((b) => b.id === id);
+    if (base && !base.isNew) {
+      try {
+        await authService.deleteBase(id);
+        showToast('Base removed');
+      } catch (error: any) {
+        showError('Failed to remove base');
+        return;
+      }
+    }
+    setBases(bases.filter((b) => b.id !== id));
   };
 
   const renderPersonalTab = () => (
@@ -255,7 +354,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
             <Text className="text-gray-500 text-sm mb-1">Account Type</Text>
             <View className="flex-row items-center gap-2">
               {(() => {
-                const roleIcons = {
+                const roleIcons: Record<string, { icon: any; color: string; bg: string }> = {
                   seller: { icon: Package, color: '#10b981', bg: '#dcfce7' },
                   buyer: { icon: ShoppingCart, color: '#3b82f6', bg: '#dbeafe' },
                   transporter: { icon: Truck, color: '#8b5cf6', bg: '#ede9fe' },
@@ -571,14 +670,17 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                 <TouchableOpacity
                   onPress={() => (editMode ? handleSave() : setEditMode(true))}
                   className="p-2"
+                  disabled={isSaving}
                 >
-                  {editMode ? (
+                  {isSaving ? (
+                    <ActivityIndicator size="small" color="#10b981" />
+                  ) : editMode ? (
                     <Save size={24} color="#10b981" />
                   ) : (
                     <Edit2 size={24} color="#6b7280" />
                   )}
                 </TouchableOpacity>
-                <TouchableOpacity onPress={onClose} className="p-2">
+                <TouchableOpacity onPress={onClose} className="p-2" disabled={isSaving}>
                   <X size={24} color="#6b7280" />
                 </TouchableOpacity>
               </View>

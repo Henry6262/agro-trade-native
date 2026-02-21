@@ -271,9 +271,6 @@ export default function OperationsScreenRefactored() {
               <TouchableOpacity
                 key={listing.id}
                 onPress={() => {
-                  console.log('Selected buy listing:', JSON.stringify(listing, null, 2));
-                  console.log('Buy listing ID:', listing.id);
-                  console.log('Buy listing ID type:', typeof listing.id);
                   setSelectedBuyListing(listing);
                   setShowCreationDrawer(true);
                 }}

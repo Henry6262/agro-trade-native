@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { JobPriorityBadgeProps } from '@features/dashboard/screens/inspector/types/index';
+import { JobPriorityBadgeProps } from '@features/dashboard/screens/inspector/types';
 
 export const JobPriorityBadge: React.FC<JobPriorityBadgeProps> = ({
   priority,

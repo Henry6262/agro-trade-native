@@ -1,4 +1,4 @@
-import React, { useEffect, useState, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { useAuthStore } from '@stores/auth.store';
 
 type AppState = {
@@ -12,36 +12,19 @@ interface AppBootstrapProps {
 }
 
 export function AppBootstrap({ children }: AppBootstrapProps) {
-  const [state, setState] = useState<AppState>({
-    isAuthenticated: false,
-    needsOnboarding: false,
-    isReady: false,
-  });
+  const hasHydrated = useAuthStore((s) => s._hasHydrated);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const user = useAuthStore((s) => s.user);
 
-  useEffect(() => {
-    // Privy is configured via PrivyProvider in App.tsx
-    const initAuthState = async () => {
-      try {
-        const authState = useAuthStore.getState();
-        const isAuthenticated = authState.isAuthenticated;
-        const user = authState.user;
-
-        setState({
-          isAuthenticated,
-          needsOnboarding: isAuthenticated && !user?.onboardingComplete,
-          isReady: true,
-        });
-      } catch (error) {
-        setState({ isAuthenticated: false, needsOnboarding: false, isReady: true });
-      }
-    };
-
-    initAuthState();
-  }, []);
-
-  if (!state.isReady) {
+  if (!hasHydrated) {
     return null;
   }
+
+  const state: AppState = {
+    isAuthenticated,
+    needsOnboarding: isAuthenticated && !user?.onboardingComplete,
+    isReady: true,
+  };
 
   return <>{children(state)}</>;
 }

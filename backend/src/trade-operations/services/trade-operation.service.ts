@@ -291,7 +291,7 @@ export class TradeOperationService {
 
       // Price score (lower is better)
       const priceRatio =
-        listing.askingPrice?.toNumber() || 0 / matchParams.maxPricePerUnit;
+        (listing.askingPrice?.toNumber() || 0) / matchParams.maxPricePerUnit;
       score += (1 - priceRatio) * 40;
 
       // Distance score (closer is better)
@@ -1180,5 +1180,222 @@ export class TradeOperationService {
     }
 
     return inspectionRequests;
+  }
+
+  /**
+   * Update a trade operation with business logic validation
+   */
+  async updateTradeOperation(
+    tradeOperationId: string,
+    updateDto: Partial<{
+      phase: TradePhase;
+      status: TradeStatus;
+      sellingPrice: number;
+      targetProfitMargin: number;
+      expectedDeliveryDate: Date;
+      transportOptimized: boolean;
+      adminNotes: string;
+    }>,
+    userId: string,
+  ): Promise<TradeOperation> {
+    // Validate trade operation exists
+    const existingTrade = await this.prisma.tradeOperation.findUnique({
+      where: { id: tradeOperationId },
+      include: {
+        sellers: true,
+        negotiations: {
+          where: { status: { in: ["PENDING", "COUNTERED"] } },
+        },
+      },
+    });
+
+    if (!existingTrade) {
+      throw new NotFoundException("Trade operation not found");
+    }
+
+    // Business logic validations
+    // 1. Can only update own trades (admin must be the owner)
+    if (existingTrade.adminId !== userId) {
+      throw new BadRequestException(
+        "You can only update trade operations you manage",
+      );
+    }
+
+    // 2. Can't update trades with active negotiations
+    if (updateDto.sellingPrice && existingTrade.negotiations.length > 0) {
+      throw new BadRequestException(
+        "Cannot update pricing while there are active negotiations. Please complete or cancel negotiations first.",
+      );
+    }
+
+    // 3. Can't update completed or cancelled trades
+    if (
+      ["COMPLETED", "CANCELLED"].includes(existingTrade.status) &&
+      updateDto.status !== existingTrade.status
+    ) {
+      throw new BadRequestException(
+        `Cannot update a ${existingTrade.status.toLowerCase()} trade operation`,
+      );
+    }
+
+    // 4. Validate phase transition if phase is being updated
+    if (updateDto.phase && updateDto.phase !== existingTrade.phase) {
+      const validTransitions = this.getValidPhaseTransitions(
+        existingTrade.phase,
+      );
+      if (!validTransitions.includes(updateDto.phase)) {
+        throw new BadRequestException(
+          `Invalid phase transition from ${existingTrade.phase} to ${updateDto.phase}. Valid transitions: ${validTransitions.join(", ")}`,
+        );
+      }
+    }
+
+    // Perform the update
+    const updatedTrade = await this.prisma.tradeOperation.update({
+      where: { id: tradeOperationId },
+      data: {
+        ...(updateDto.phase && { phase: updateDto.phase }),
+        ...(updateDto.status && { status: updateDto.status }),
+        ...(updateDto.sellingPrice && { sellingPrice: updateDto.sellingPrice }),
+        updatedAt: new Date(),
+      },
+    });
+
+    // Log state change for audit trail
+    await this.prisma.tradeStateHistory.create({
+      data: {
+        tradeOperationId,
+        fromPhase: existingTrade.phase,
+        toPhase: updatedTrade.phase,
+        fromStatus: existingTrade.status,
+        toStatus: updatedTrade.status,
+        changedBy: userId,
+        reason: updateDto.adminNotes || "Trade operation updated",
+        metadata: {
+          updateFields: Object.keys(updateDto),
+          timestamp: new Date().toISOString(),
+        },
+      },
+    });
+
+    this.logger.log(
+      `Trade operation ${tradeOperationId} updated by user ${userId}`,
+    );
+
+    return updatedTrade;
+  }
+
+  /**
+   * Cancel a trade operation with business logic validation
+   */
+  async cancelTradeOperation(
+    tradeOperationId: string,
+    userId: string,
+    reason?: string,
+  ): Promise<TradeOperation> {
+    // Validate trade operation exists
+    const existingTrade = await this.prisma.tradeOperation.findUnique({
+      where: { id: tradeOperationId },
+      include: {
+        sellers: true,
+        negotiations: true,
+        transportJobs: true,
+      },
+    });
+
+    if (!existingTrade) {
+      throw new NotFoundException("Trade operation not found");
+    }
+
+    // Business logic validations
+    // 1. Can only cancel own trades
+    if (existingTrade.adminId !== userId) {
+      throw new BadRequestException(
+        "You can only cancel trade operations you manage",
+      );
+    }
+
+    // 2. Can't cancel already completed trades
+    if (existingTrade.status === TradeStatus.COMPLETED) {
+      throw new BadRequestException(
+        "Cannot cancel a completed trade operation",
+      );
+    }
+
+    // 3. Can't cancel if already cancelled
+    if (existingTrade.status === TradeStatus.CANCELLED) {
+      throw new BadRequestException("Trade operation is already cancelled");
+    }
+
+    // 4. Check if there are active transport jobs in progress
+    const activeTransportJobs = existingTrade.transportJobs.filter((job) =>
+      ["STARTED", "IN_TRANSIT", "DELIVERING"].includes(job.status),
+    );
+
+    if (activeTransportJobs.length > 0) {
+      throw new BadRequestException(
+        "Cannot cancel trade operation with active transport jobs. Please complete or cancel transport jobs first.",
+      );
+    }
+
+    // Perform cancellation in a transaction
+    const cancelledTrade = await this.prisma.$transaction(async (tx) => {
+      // 1. Update trade operation status
+      const updated = await tx.tradeOperation.update({
+        where: { id: tradeOperationId },
+        data: {
+          status: TradeStatus.CANCELLED,
+          phase: TradePhase.CANCELLED,
+          completedAt: new Date(),
+          updatedAt: new Date(),
+        },
+      });
+
+      // 2. Log state change for audit trail
+      await tx.tradeStateHistory.create({
+        data: {
+          tradeOperationId,
+          fromPhase: existingTrade.phase,
+          toPhase: TradePhase.CANCELLED,
+          fromStatus: existingTrade.status,
+          toStatus: TradeStatus.CANCELLED,
+          changedBy: userId,
+          reason: reason || "Trade operation cancelled",
+          metadata: {
+            cancelledAt: new Date().toISOString(),
+            activeNegotiations: existingTrade.negotiations.length,
+            activeSellers: existingTrade.sellers.length,
+          },
+        },
+      });
+
+      // 3. Update buy listing to ACTIVE so it can be used for another trade
+      await tx.buyListing.update({
+        where: { id: existingTrade.buyListingId },
+        data: {
+          status: "ACTIVE",
+        },
+      });
+
+      // 4. Expire all active negotiations
+      await tx.offerNegotiation.updateMany({
+        where: {
+          tradeOperationId,
+          status: { in: ["PENDING", "COUNTERED"] },
+        },
+        data: {
+          status: "WITHDRAWN",
+          concludedAt: new Date(),
+        },
+      });
+
+      return updated;
+    });
+
+    this.logger.log(
+      `Trade operation ${tradeOperationId} cancelled by user ${userId}. Reason: ${reason || "Not specified"}`,
+    );
+
+    return cancelledTrade;
   }
 }

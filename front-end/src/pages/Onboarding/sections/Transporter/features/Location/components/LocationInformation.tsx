@@ -135,7 +135,6 @@ export function LocationInformation() {
               vehicleCount: transportData?.fleetInfo?.vehicleCount || 0,
               vehicleTypes: transportData?.fleetInfo?.vehicleTypes || [],
               capacity: transportData?.fleetInfo?.capacity || { total: 0, unit: 'tons' },
-              bases: [mainBase],
             });
           }
         }
@@ -179,7 +178,6 @@ export function LocationInformation() {
       vehicleCount: transportData?.fleetInfo?.vehicleCount || 0,
       vehicleTypes: transportData?.fleetInfo?.vehicleTypes || [],
       capacity: transportData?.fleetInfo?.capacity || { total: 0, unit: 'tons' },
-      bases: [mainBase],
     });
     setShowManualInput(false);
   };
@@ -206,7 +204,6 @@ export function LocationInformation() {
         vehicleCount: transportData?.fleetInfo?.vehicleCount || 0,
         vehicleTypes: transportData?.fleetInfo?.vehicleTypes || [],
         capacity: transportData?.fleetInfo?.capacity || { total: 0, unit: 'tons' },
-        bases: updatedBases,
       });
     }
   };
@@ -224,23 +221,26 @@ export function LocationInformation() {
       setBases(updatedBases);
 
       // Update store
-      setFleetInfo({
-        ...transportData?.fleetInfo,
-        baseLocation: base.isMainBase
-          ? {
-              id: base.id,
-              address: base.address,
-              city: base.city,
-              state: base.state,
-              country: base.country,
-              zipCode: base.zipCode,
-            }
-          : transportData?.fleetInfo?.baseLocation,
-        vehicleCount: transportData?.fleetInfo?.vehicleCount || 0,
-        vehicleTypes: transportData?.fleetInfo?.vehicleTypes || [],
-        capacity: transportData?.fleetInfo?.capacity || { total: 0, unit: 'tons' },
-        bases: updatedBases,
-      });
+      const mainBaseLocation = base.isMainBase
+        ? {
+            id: base.id,
+            address: base.address,
+            city: base.city,
+            state: base.state,
+            country: base.country,
+            zipCode: base.zipCode,
+          }
+        : transportData?.fleetInfo?.baseLocation;
+
+      if (mainBaseLocation) {
+        setFleetInfo({
+          ...transportData?.fleetInfo,
+          baseLocation: mainBaseLocation,
+          vehicleCount: transportData?.fleetInfo?.vehicleCount || 0,
+          vehicleTypes: transportData?.fleetInfo?.vehicleTypes || [],
+          capacity: transportData?.fleetInfo?.capacity || { total: 0, unit: 'tons' },
+        });
+      }
 
       setNewBase({ name: '', address: '', city: '', state: '', country: '', zipCode: '' });
       setShowAddBaseModal(false);
@@ -257,11 +257,7 @@ export function LocationInformation() {
     const updatedBases = bases.filter((b) => b.id !== baseId);
     setBases(updatedBases);
 
-    // Update store
-    setFleetInfo({
-      ...transportData?.fleetInfo,
-      bases: updatedBases,
-    });
+    // No need to update store with bases field
   };
 
   const assignTrucksToBase = (baseId: string, truckIds: string[]) => {
@@ -277,10 +273,7 @@ export function LocationInformation() {
     });
 
     setBases(updatedBases);
-    setFleetInfo({
-      ...transportData?.fleetInfo,
-      bases: updatedBases,
-    });
+    // No need to update store with bases field
   };
 
   const TruckAssignmentModal = () => {

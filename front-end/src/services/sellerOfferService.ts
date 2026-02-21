@@ -113,9 +113,9 @@ export const sellerOfferService = {
   async counterOffer(negotiationId: string, request: CounterOfferRequest): Promise<SellerOffer> {
     try {
       const response = await apiClient.post(`/negotiations/${negotiationId}/counter`, {
-        counterPrice: request.counterPrice,
+        price: request.counterPrice,
         quantity: request.quantity,
-        message: request.message,
+        terms: request.message,
       });
       return response.data.data || response.data;
     } catch (error) {

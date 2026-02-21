@@ -116,11 +116,8 @@ export const useProductStore = create<ProductStore>()(
       const hasSpecifications =
         state.products.length > 0 && state.products[0]?.specifications !== undefined;
       if (state.isCacheValid() && hasSpecifications) {
-        console.log('Using cached products data with specifications');
         return;
       }
-
-      console.log('Fetching fresh products data - cache invalid or missing specifications');
 
       set((draft) => {
         draft.isLoadingProducts = true;
@@ -129,8 +126,6 @@ export const useProductStore = create<ProductStore>()(
 
       try {
         const response = await productService.getProductMetadata();
-        console.log('Fetched products with specifications:', response);
-        console.log('First product specs:', response[0]?.specifications);
 
         set((draft) => {
           draft.products = response as ProductWithSpecs[];
@@ -152,7 +147,6 @@ export const useProductStore = create<ProductStore>()(
 
       // Check cache validity
       if (state.isCacheValid() && state.regions.length > 0) {
-        console.log('Using cached regions data');
         return;
       }
 
@@ -163,7 +157,6 @@ export const useProductStore = create<ProductStore>()(
 
       try {
         const response = await apiClient.get<any>('/products/regions');
-        console.log('Fetched regions:', response);
 
         set((draft) => {
           draft.regions = response.data || [];
@@ -184,7 +177,6 @@ export const useProductStore = create<ProductStore>()(
 
       // Check cache validity
       if (state.isCacheValid() && state.specificationTypes.length > 0) {
-        console.log('Using cached specification types');
         return;
       }
 
@@ -195,7 +187,6 @@ export const useProductStore = create<ProductStore>()(
 
       try {
         const response = await apiClient.get<any>('/products/specifications');
-        console.log('Fetched specification types:', response);
 
         set((draft) => {
           draft.specificationTypes = response.data || [];
@@ -221,11 +212,8 @@ export const useProductStore = create<ProductStore>()(
         state.regions.length > 0 &&
         state.specificationTypes.length > 0
       ) {
-        console.log('Using cached data for all resources');
         return;
       }
-
-      console.log('Fetching all product data...');
 
       // Fetch all data in parallel, but don't let one failure stop the others
       // Use the methods directly from the state to avoid creating new references
@@ -235,13 +223,11 @@ export const useProductStore = create<ProductStore>()(
         state.fetchSpecificationTypes(),
       ]);
 
-      // Log results
+      // Log errors
       results.forEach((result, index) => {
         const dataType = ['products', 'regions', 'specifications'][index];
         if (result.status === 'rejected') {
           console.error(`Failed to fetch ${dataType}:`, result.reason);
-        } else {
-          console.log(`Successfully fetched ${dataType}`);
         }
       });
 
@@ -250,8 +236,6 @@ export const useProductStore = create<ProductStore>()(
       if (!productsLoaded) {
         throw new Error('Failed to load products data');
       }
-
-      console.log('Product data fetch completed');
     },
 
     // Getters

@@ -34,7 +34,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
 
   // Ensure products is always an array, handle both direct array and response object
   const productsRaw = useProductStore((state) => state.products);
-  const products = Array.isArray(productsRaw) ? productsRaw : productsRaw?.data || [];
+  const products = Array.isArray(productsRaw) ? productsRaw : (productsRaw as any)?.data || [];
   const isLoadingProducts = useProductStore((state) => state.isLoadingProducts) || false;
   const fetchAllData = useProductStore((state) => state.fetchAllData);
 
@@ -43,7 +43,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
     // Check isLoadingProducts to prevent multiple simultaneous fetches
     if (visible && !isLoadingProducts) {
       // Check if we need to fetch products
-      const currentProducts = Array.isArray(productsRaw) ? productsRaw : productsRaw?.data || [];
+      const currentProducts = Array.isArray(productsRaw) ? productsRaw : (productsRaw as any)?.data || [];
       if (currentProducts.length === 0) {
         fetchAllData().catch((error) => {
           console.error('Error fetching products:', error);
@@ -57,7 +57,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
   }, [selectedProducts]);
 
   const handleProductSelect = (productId: string) => {
-    const product = products.find((p) => p.id === productId);
+    const product = products.find((p: any) => p.id === productId);
     if (!product) return;
 
     if (mode === 'single') {
@@ -84,7 +84,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
 
   const handleConfirmMultiple = () => {
     const selectedProductsData = selectedProductIds.map((id) => {
-      const product = products.find((p) => p.id === id);
+      const product = products.find((p: any) => p.id === id);
       return {
         id: product?.id,
         category: product?.category,
@@ -104,7 +104,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
 
   // Group products by category - handle undefined/null products array
   const groupedProducts = (products || []).reduce(
-    (acc, product) => {
+    (acc: Record<string, any[]>, product: any) => {
       const category = product.category || 'Other';
       if (!acc[category]) {
         acc[category] = [];
@@ -112,7 +112,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
       acc[category].push(product);
       return acc;
     },
-    {} as Record<string, typeof products>
+    {} as Record<string, any[]>
   );
 
   const getCategoryDisplayName = (category: string) => {
@@ -198,7 +198,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
                   </Text>
 
                   <View className="flex-row flex-wrap px-4">
-                    {categoryProducts.map((product) => {
+                    {(categoryProducts as any[]).map((product: any) => {
                       const isSelected = selectedProductIds.includes(product.id);
 
                       return (

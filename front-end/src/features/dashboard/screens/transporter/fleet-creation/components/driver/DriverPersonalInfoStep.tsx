@@ -4,7 +4,7 @@ import { X, ChevronLeft } from 'lucide-react-native';
 import { Input } from '@shared/components/Input';
 import { Button } from '@shared/components/Button';
 import { ProgressIndicator } from '../shared/ProgressIndicator';
-import { DriverPersonalInfo } from '../../types';
+import { DriverInfo as DriverPersonalInfo } from '../../types';
 
 interface DriverPersonalInfoStepProps {
   visible: boolean;

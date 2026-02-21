@@ -3,7 +3,6 @@ import { useOnboardingStore } from '@stores/onboarding.store';
 import { useAuthStore } from '@stores/auth.store';
 import { authService } from './authService';
 import type {
-  ApiResponse,
   SellerOnboardingData,
   BuyerOnboardingData,
   TransportOnboardingData,
@@ -46,7 +45,7 @@ export const onboardingService = {
    */
   submitOnboardingData: async (data: OnboardingSubmissionData): Promise<OnboardingResponse> => {
     return apiClient
-      .post<ApiResponse<OnboardingResponse>>('/onboarding/submit', data)
+      .post<OnboardingResponse>('/onboarding/submit', data)
       .then((response) => response.data);
   },
 
@@ -59,13 +58,11 @@ export const onboardingService = {
     currentStep: string;
   }> => {
     return apiClient
-      .get<
-        ApiResponse<{
-          isComplete: boolean;
-          completedSteps: string[];
-          currentStep: string;
-        }>
-      >('/onboarding/progress')
+      .get<{
+        isComplete: boolean;
+        completedSteps: string[];
+        currentStep: string;
+      }>('/onboarding/progress')
       .then((response) => response.data);
   },
 
@@ -73,7 +70,7 @@ export const onboardingService = {
    * Save draft onboarding data (for persistence across sessions)
    */
   saveDraftData: async (data: Partial<OnboardingSubmissionData>): Promise<void> => {
-    return apiClient.post('/onboarding/draft', data);
+    await apiClient.post('/onboarding/draft', data);
   },
 
   /**
@@ -82,7 +79,7 @@ export const onboardingService = {
   getDraftData: async (): Promise<Partial<OnboardingSubmissionData> | null> => {
     try {
       return apiClient
-        .get<ApiResponse<Partial<OnboardingSubmissionData>>>('/onboarding/draft')
+        .get<Partial<OnboardingSubmissionData>>('/onboarding/draft')
         .then((response) => response.data);
     } catch (error: any) {
       if (error?.response?.status === 404) {

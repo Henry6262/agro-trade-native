@@ -4,7 +4,7 @@ import { X, ChevronLeft } from 'lucide-react-native';
 import { Input } from '@shared/components/Input';
 import { Button } from '@shared/components/Button';
 import { ProgressIndicator } from '../shared/ProgressIndicator';
-import { TruckBasicInfo } from '../../types';
+import { TruckInfo as TruckBasicInfo } from '../../types';
 
 interface TruckBasicInfoStepProps {
   visible: boolean;

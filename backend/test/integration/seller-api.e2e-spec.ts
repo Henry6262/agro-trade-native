@@ -135,11 +135,12 @@ describe("Seller API Integration Tests", () => {
           productId: "non-existent-product-id",
           quantity: 50,
           unit: "ton",
-          offerType: "MARKET",
+          offerType: "listing",
           location: {
+            latitude: 42.6977,
+            longitude: 23.3219,
             region: "Test Region",
             city: "Test City",
-            coordinates: { lat: 42.6977, lng: 23.3219 },
           },
         };
 
@@ -493,6 +494,7 @@ describe("Seller Offer Flow Integration", () => {
   let tradeOperationId: string;
   let tradeSellerId: string;
   let negotiationId: string;
+  let adminToken: string;
 
   beforeAll(async () => {
     env = new TestEnvironment();
@@ -507,11 +509,25 @@ describe("Seller Offer Flow Integration", () => {
       withAddresses: true,
     });
 
+    // Generate admin token from the actual admin user created by the scenario
+    // (env.tokens.admin uses sub:"test-user-123" which doesn't exist in this DB context)
+    const { JwtService } = await import("@nestjs/jwt");
+    const jwtService = env.moduleRef.get<JwtService>(JwtService);
+    adminToken = jwtService.sign(
+      {
+        sub: testData.admin.id,
+        email: testData.admin.email,
+        role: "ADMIN",
+        name: testData.admin.name,
+      },
+      { expiresIn: "1h" },
+    );
+
     // Create a trade operation with sellers in one call
     // The POST /api/trade-operations uses CreateTradeOperationWithOffersDto
     const response = await request(env.app.getHttpServer())
       .post("/api/trade-operations")
-      .set("Authorization", `Bearer ${env.tokens.admin}`)
+      .set("Authorization", `Bearer ${adminToken}`)
       .send({
         buyListingId: testData.buyListing.id,
         sellers: [
@@ -550,7 +566,7 @@ describe("Seller Offer Flow Integration", () => {
 
       const response = await request(env.app.getHttpServer())
         .post(`/api/negotiations/trade-operations/${tradeOperationId}/offers`)
-        .set("Authorization", `Bearer ${env.tokens.admin}`)
+        .set("Authorization", `Bearer ${adminToken}`)
         .send(offerDto)
         .expect(201);
 
@@ -589,7 +605,7 @@ describe("Seller Offer Flow Integration", () => {
       // AcceptOfferDto only has optional acceptanceNote
       const response = await request(env.app.getHttpServer())
         .post(`/api/negotiations/${negotiationId}/accept`)
-        .set("Authorization", `Bearer ${env.tokens.admin}`)
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({
           acceptanceNote: "Accepted - terms agreed",
         })

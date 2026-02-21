@@ -4,7 +4,7 @@ import type {
   TransportPickupPoint,
   TransportDeliveryPoint,
 } from '@services/transportService';
-import type { MapOffer } from '@features/dashboard/screens/transporter/maps/types';
+import type { MapOffer } from '@pages/Dashboard/sections/Transporter/features/maps/types';
 import type { TransfersJobView, TransfersSummary } from '../types';
 
 const DEFAULT_COORDS = { lat: 42.6977, lng: 23.3219 };

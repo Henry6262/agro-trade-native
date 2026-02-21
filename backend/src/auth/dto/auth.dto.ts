@@ -270,3 +270,170 @@ export class PrivyAuthDto {
   @IsString()
   name?: string | null;
 }
+
+export class UpdateProfileDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  phoneNumber?: string;
+}
+
+export class UpdateProfileResponseDto {
+  @ApiProperty()
+  success: boolean;
+
+  @ApiProperty()
+  message: string;
+
+  @ApiProperty({ type: () => AuthProfileResponseDto })
+  user: AuthProfileResponseDto;
+}
+
+// ==================== Company DTOs ====================
+
+export class UpdateCompanyDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  legalName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  registrationNumber?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  vatNumber?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  phoneNumber?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  website?: string;
+}
+
+export class CompanyResponseDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  legalName: string;
+
+  @ApiPropertyOptional()
+  registrationNumber?: string | null;
+
+  @ApiPropertyOptional()
+  vatNumber?: string | null;
+
+  @ApiPropertyOptional()
+  phoneNumber?: string | null;
+
+  @ApiPropertyOptional()
+  email?: string | null;
+
+  @ApiPropertyOptional()
+  website?: string | null;
+
+  @ApiProperty({ type: String, format: "date-time" })
+  createdAt: string;
+
+  @ApiProperty({ type: String, format: "date-time" })
+  updatedAt: string;
+}
+
+// ==================== Base (Address) DTOs ====================
+
+export class CreateBaseDto {
+  @ApiProperty()
+  @IsString()
+  label: string;
+
+  @ApiProperty({ enum: ["WAREHOUSE", "FARM", "OFFICE", "PICKUP", "DELIVERY", "OTHER"] })
+  @IsString()
+  addressType: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  street?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  cityId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  postalCode?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  country?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  latitude?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  longitude?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  isDefault?: boolean;
+}
+
+export class BaseResponseDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  label: string;
+
+  @ApiProperty()
+  addressType: string;
+
+  @ApiPropertyOptional()
+  street?: string | null;
+
+  @ApiPropertyOptional()
+  cityId?: string | null;
+
+  @ApiPropertyOptional()
+  postalCode?: string | null;
+
+  @ApiPropertyOptional()
+  country?: string | null;
+
+  @ApiPropertyOptional()
+  latitude?: number | null;
+
+  @ApiPropertyOptional()
+  longitude?: number | null;
+
+  @ApiProperty()
+  isDefault: boolean;
+}
