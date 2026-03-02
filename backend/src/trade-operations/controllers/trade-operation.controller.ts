@@ -2,9 +2,7 @@ import {
   Controller,
   Get,
   Post,
-  Put,
   Patch,
-  Delete,
   Body,
   Param,
   Query,
@@ -470,7 +468,7 @@ export class TradeOperationController {
         throw new BadRequestException("User ID is required");
       }
 
-      const updatedTrade = await this.tradeOperationService.updateTradeOperation(
+      await this.tradeOperationService.updateTradeOperation(
         id,
         updateDto,
         userId,

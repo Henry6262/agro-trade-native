@@ -1,14 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, View, Text, TouchableOpacity } from 'react-native';
-import {
-  MapPin,
-  Weight,
-  DollarSign,
-  Truck,
-  Package,
-  Clock,
-  CheckCircle2,
-} from 'lucide-react-native';
+import { Weight, Clock, CheckCircle2 } from 'lucide-react-native';
 import { format } from 'date-fns';
 import { Card, CardContent } from '@shared/components/Card';
 import { Badge } from '@shared/components/Badge';

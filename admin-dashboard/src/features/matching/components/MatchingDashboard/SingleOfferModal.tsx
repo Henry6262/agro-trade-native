@@ -150,7 +150,7 @@ const SingleOfferModal: React.FC<SingleOfferModalProps> = ({
         });
 
         const updated = await tradeOperationService.getById(tradeOperationId);
-        const newTradeSeller = updated.sellers?.find((ts: any) => {
+        const newTradeSeller = updated.sellers?.find((ts: { id?: string; saleListingId?: string; saleListing?: { id?: string; saleListingId?: string } }) => {
           const saleListingId =
             ts?.saleListingId || ts?.saleListing?.id || ts?.saleListing?.saleListingId;
           return saleListingId === seller.id;
@@ -213,7 +213,7 @@ const SingleOfferModal: React.FC<SingleOfferModalProps> = ({
 
   const disableSubmit = submitting || price <= 0 || quantity <= 0 || !tradeOperationId;
 
-  const formatLocationString = (address: any) => {
+  const formatLocationString = (address: { city?: string; region?: string } | null | undefined) => {
     if (!address) return 'Unknown location';
     return [address.city, address.region].filter(Boolean).join(', ');
   };

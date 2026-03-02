@@ -100,7 +100,7 @@ export const OffersTrackingPanel: React.FC<OffersTrackingPanelProps> = ({ onView
       };
 
       return summary;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(`Error fetching negotiations for ${tradeOperationId}:`, err);
       return { pending: 0, accepted: 0, rejected: 0, total: 0 };
     }
@@ -140,11 +140,12 @@ export const OffersTrackingPanel: React.FC<OffersTrackingPanelProps> = ({ onView
           description: `Found ${ops.length} active operation(s)`,
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching trade operations:', err);
-      const errorMsg = err.response?.data?.message || 'Failed to fetch trade operations';
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      const errorMsg = axiosErr.response?.data?.message || 'Failed to fetch trade operations';
       setError(errorMsg);
-      handleApiError(err, 'Failed to fetch trade operations');
+      handleApiError(err as Error, 'Failed to fetch trade operations');
     } finally {
       setLoading(false);
       setIsRefreshing(false);

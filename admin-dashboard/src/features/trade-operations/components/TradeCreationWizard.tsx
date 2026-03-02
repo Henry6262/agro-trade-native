@@ -5,10 +5,8 @@ import {
   saleListingService, 
   tradeOperationService 
 } from '../../../services/api';
-import { 
-  Package, 
-  Users, 
-  Check, 
+import {
+  Check,
   X,
   ChevronRight,
   ChevronLeft,

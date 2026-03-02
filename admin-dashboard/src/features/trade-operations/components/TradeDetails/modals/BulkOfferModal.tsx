@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import * as Types from '../../../../../types';
 
 interface BulkOfferModalProps {
-  sellers: any[];
+  sellers: { id: string; name?: string; sellerId?: string }[];
   onSubmit: (offers: Types.CreateNegotiationDto[]) => void;
   onClose: () => void;
 }

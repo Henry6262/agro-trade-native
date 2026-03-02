@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NegotiationStatus } from '../../../../types';
-import type { Negotiation, TradeSeller } from '../../../../types';
+import type { Negotiation } from '../../../../types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -42,9 +42,10 @@ export const NegotiationsDetailPanel: React.FC<NegotiationsDetailPanelProps> = (
           description: `Found ${response.data.data?.length || 0} negotiation(s)`,
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching negotiations:', err);
-      const errorMsg = err.response?.data?.message || 'Failed to fetch negotiations';
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      const errorMsg = axiosErr.response?.data?.message || 'Failed to fetch negotiations';
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {
@@ -118,8 +119,9 @@ export const NegotiationsDetailPanel: React.FC<NegotiationsDetailPanelProps> = (
       await api.post(`/negotiations/${negotiationId}/accept`, {});
       toast.success('Counter-offer accepted successfully');
       fetchNegotiations();
-    } catch (err: any) {
-      const msg = err.response?.data?.message || 'Failed to accept counter-offer';
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string } } };
+      const msg = axiosErr.response?.data?.message || 'Failed to accept counter-offer';
       toast.error(msg);
     } finally {
       setAcceptingId(null);

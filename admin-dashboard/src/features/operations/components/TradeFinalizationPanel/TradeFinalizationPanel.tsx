@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +14,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import api from '../../../../services/api';
 import { API_ENDPOINTS } from '../../../../config/api';
-import type { TradeOperation, Offer } from '../../../../types/listings';
+import type { TradeOperation } from '../../../../types/listings';
 import {
   validateWorkflowComplete,
   calculateInspectionSummary,
@@ -34,8 +34,8 @@ import { AnimatedNumber, Confetti, EnhancedTooltip } from '../../../../component
 interface TradeFinalizationPanelProps {
   tradeOperationId: string;
   operation: TradeOperation;
-  inspections: any[];
-  transportData: any | null;
+  inspections: Record<string, unknown>[];
+  transportData: Record<string, unknown> | null;
   onFinalized: () => void;
 }
 

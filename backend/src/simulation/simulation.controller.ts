@@ -8,7 +8,6 @@ import {
   HttpCode,
   HttpStatus,
   Delete,
-  BadRequestException,
   ForbiddenException,
   NotFoundException,
 } from "@nestjs/common";
