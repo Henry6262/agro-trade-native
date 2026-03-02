@@ -681,15 +681,15 @@ export class TradeOperationService {
       };
     }
 
-    // Update trade status
+    // Update trade status to COMPLETED
     await this.prisma.tradeOperation.update({
       where: { id: tradeOperationId },
       data: {
-        phase: "IN_TRANSIT", // Use IN_TRANSIT instead of EXECUTION
-        status: "ACTIVE", // Use ACTIVE instead of CONFIRMED
+        phase: "COMPLETED",
+        status: "COMPLETED",
         actualProfit: profitCalc.profit.netProfit,
-        profitMargin: profitCalc.profit.profitMargin, // Use profitMargin not actualProfitMargin
-        // confirmedAt field doesn't exist
+        profitMargin: profitCalc.profit.profitMargin,
+        completedAt: new Date(),
       },
     });
 

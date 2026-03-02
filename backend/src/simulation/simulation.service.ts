@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { UserRole, TransportRequestStatus } from "@prisma/client";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class SimulationService {
@@ -273,7 +273,6 @@ export class SimulationService {
       sellerCommission: number;
     },
   ) {
-    void data;
     const buyListing = await this.prisma.buyListing.findUnique({
       where: { id: buyListingId },
       include: { product: true },
@@ -292,6 +291,12 @@ export class SimulationService {
       throw new Error("No admin user found");
     }
 
+    // Compute selling price from buyer's max price and admin margin
+    const maxPricePerUnit = Number(buyListing.maxPricePerUnit) || 0;
+    const sellingPrice = maxPricePerUnit * (1 + data.adminMargin / 100);
+    const quantity = Number(buyListing.quantity) || 0;
+    const totalRevenue = sellingPrice * quantity;
+
     // Create trade operation
     const operationNumber = `OP-${Date.now()}`;
     const tradeOp = await this.prisma.tradeOperation.create({
@@ -301,6 +306,9 @@ export class SimulationService {
         buyListingId,
         phase: "SELLER_MATCHING",
         status: "ACTIVE",
+        sellingPrice,
+        totalRevenue,
+        profitMargin: data.adminMargin,
       },
     });
 
@@ -309,6 +317,7 @@ export class SimulationService {
 
   /**
    * Send offers to multiple farmers (create TradeSeller + OfferNegotiation)
+   * FIXED: Now returns standardized response with negotiation IDs
    */
   async sendOffersToFarmers(
     tradeOperationId: string,
@@ -319,7 +328,7 @@ export class SimulationService {
       offeredPrice: number;
     }>,
   ) {
-    const results = [];
+    const negotiations = [];
 
     for (const offer of offers) {
       // Create TradeSeller
@@ -350,10 +359,23 @@ export class SimulationService {
         },
       });
 
-      results.push({ tradeSeller, negotiation });
+      // Return standardized negotiation data with IDs
+      negotiations.push({
+        id: negotiation.id,
+        farmerId: offer.farmerId,
+        tradeSellerStatus: tradeSeller.status,
+        status: negotiation.status,
+        requestedQuantity: offer.requestedQuantity,
+        offeredPrice: offer.offeredPrice,
+        expiresAt: negotiation.expiresAt,
+      });
     }
 
-    return results;
+    // Return standardized format with success flag
+    return {
+      success: true,
+      negotiations,
+    };
   }
 
   /**
