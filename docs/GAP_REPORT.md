@@ -367,3 +367,255 @@ The `accept-job` call in Scenario 4 uses the ID from the `assign-inspector` resp
 | P2 | `assign-inspector` creates duplicate inspections | Medium (refactor to upsert) | Data integrity |
 | P2 | Only 1 transporter in seed data | Low (add user in seed) | Realistic bidding test |
 | P2 | Phase-only cancel doesn't set status=CANCELLED | Low (service logic) | UX consistency |
+
+---
+
+## MOBILE APP — Screen Coverage Audit
+
+*Audited: 2026-03-02*
+*Auditor: AgroTrade Mobile App Auditor*
+*Scope: `front-end/src/` — all role dashboards, onboarding flows, navigation*
+
+---
+
+### Role Journey Coverage
+
+| Role | Onboarding | Core Dashboard | All API Calls Wired | Status |
+|------|-----------|---------------|---------------------|--------|
+| Buyer | Present (BuyerOnboardingFlow) | BuyerRequestsTab + BuyerOrdersTab | Mostly — missing delivery confirm | PARTIAL |
+| Seller/Farmer | Present (SellerOnboardingFlow) | SellerOffersTab + SellerTradesTab + ProductsTab | BROKEN — role check prevents data load | BROKEN |
+| Transporter | Present (TransporterOnboardingFlow) | BiddingTab + ActiveJobsTab | Mostly — missing GPS updates, incomplete bid form | PARTIAL |
+| Inspector | MISSING | AvailableJobsTab + ActiveJobTab | BROKEN — wrong endpoints, hardcoded quality score | BROKEN |
+| Admin (mobile) | N/A | CommandCenter + Operations + AgentNetwork | Limited — no offer-sending flow | PARTIAL |
+
+---
+
+### Mobile Gap 1 — Seller Offers Query Never Fires (Role Check Bug)
+
+**File:** `front-end/src/shared/hooks/useSellerOffers.ts`
+
+**Severity:** P0 — Sellers see an empty offers screen. No offer can be accepted, rejected, or countered from mobile.
+
+**Root Cause:** The TanStack Query `enabled` guard checks `user?.role === 'seller'`, but the backend stores the role as `FARMER` (all-caps). When a farmer user logs in, `user.role` is `'FARMER'`, so the condition evaluates to `false` and the query is silently skipped.
+
+```typescript
+// CURRENT — query never fires for real users
+queryFn: () => sellerService.getMyOffers(),
+enabled: isAuthenticated && user?.role === 'seller',  // BUG: backend role is 'FARMER'
+```
+
+The `DashboardMainScreen` correctly normalizes `FARMER → seller` for display logic, but this normalization is NOT applied to the `useAuthStore` user object that `useSellerOffers` reads.
+
+**Fix:** Change the role check to `user?.role === 'FARMER'` or `['seller', 'FARMER'].includes(user?.role ?? '')`.
+
+---
+
+### Mobile Gap 2 — Inspector AvailableJobsTab Calls Wrong Endpoint
+
+**File:** `front-end/src/pages/Dashboard/sections/Inspector/features/AvailableJobs/service.ts`
+
+**Severity:** P0 — Inspectors see jobs already assigned to them, not unassigned open jobs. The workflow premise (inspector browses open jobs and accepts one) is broken.
+
+**Root Cause:** `inspectorAvailableJobsService.fetchJobs()` calls `inspectionService.getInspectorMissions(inspectorId)` which resolves to `GET /inspections/inspector/:id`. This endpoint returns inspections that have the given inspector already set in `inspectorId` — i.e., missions already assigned. The correct endpoint for browsing open/available jobs is `GET /api/inspector/jobs` (no path parameter, returns unassigned jobs).
+
+```typescript
+// CURRENT — returns already-assigned missions, not open jobs
+const inspections = await inspectionService.getInspectorMissions(inspectorId);
+
+// CORRECT — returns open unassigned jobs
+const jobs = await apiClient.get('/inspector/jobs');
+```
+
+Additionally, there is no "Accept Job" button rendered in the pages/Inspector `AvailableJobsTab`. The accept action exists only in the legacy `features/dashboard/` hooks (which call the wrong admin-facing `PUT /inspections/:id/assign` endpoint anyway).
+
+---
+
+### Mobile Gap 3 — Inspector Quality Score Hardcoded to 90
+
+**File:** `front-end/src/pages/Dashboard/sections/Inspector/features/ActiveJob/service.ts`
+
+**Severity:** P0 — The quality score an inspector enters in the VerificationForm has no effect. Every inspection result is submitted with `qualityScore: 90` regardless of what the inspector reported.
+
+```typescript
+// CURRENT — ignores actual inspection data
+const toSubmitPayload = (jobId: string, values: VerificationFormValues): SubmitInspectionResultsDto => ({
+  qualityScore: 90,       // HARDCODED — never reads values.qualityScore
+  result: values.status === 'VERIFIED' ? 'PASSED' : 'FAILED',
+  notes: values.notes ?? '',
+  photos: values.evidence?.map(e => e.url) ?? [],
+});
+```
+
+**Fix:** Map `values.qualityScore` to the payload. The `VerificationForm` component has a quality score input field — it just isn't connected to the submission payload.
+
+---
+
+### Mobile Gap 4 — No Inspector Onboarding Flow
+
+**Files:**
+- `front-end/src/navigation/OnboardingStack.tsx`
+- `front-end/src/pages/Onboarding/screens/RoleSelectionScreen.tsx`
+
+**Severity:** P0 — An inspector user who downloads the app for the first time cannot complete onboarding. The `RoleSelectionScreen` only offers three options (`buyer`, `seller`, `transport`). The `OnboardingStack` registers `BuyerOnboardingFlow`, `SellerOnboardingFlow`, `TransporterOnboardingFlow` but no `InspectorOnboardingFlow`.
+
+If an inspector user is invited by an admin and opens the app, they will be stuck — either stuck on the role selection screen with no inspector option, or directed to the Main tab without completing any inspector-specific profile setup.
+
+**Fix:** Add inspector as a fourth option in `RoleSelectionScreen` and create a minimal `InspectorOnboardingFlow` that collects certification credentials, region of operation, and vehicle/equipment info.
+
+---
+
+### Mobile Gap 5 — No Inspector "Accept Job" Action in Pages UI
+
+**Files:**
+- `front-end/src/pages/Dashboard/sections/Inspector/features/AvailableJobs/index.tsx`
+- `front-end/src/pages/Dashboard/sections/Inspector/features/ActiveJob/hooks/useInspectorActiveJob.ts`
+
+**Severity:** P0 — Even if the endpoint is fixed (Gap 2 above), the AvailableJobsTab renders job cards with no "Accept" button. The accept-job API call (`POST /inspector/jobs/:id/accept`) is not invoked anywhere in the current pages/ Inspector implementation.
+
+The legacy `useVerificationJobs` hook in `features/dashboard/screens/inspector/hooks/` has an `acceptJob` function, but it calls the wrong admin endpoint (`PUT /inspections/:id/assign`) and is not connected to the pages/ UI tree.
+
+**Fix:** Add an "Accept Job" button to each job card in `AvailableJobsTab`. Wire it to call `POST /inspector/jobs/:id/accept` (the inspector-specific endpoint, not the admin assign endpoint).
+
+---
+
+### Mobile Gap 6 — Photo Capture Creates Mock URLs
+
+**File:** `front-end/src/pages/Dashboard/sections/Inspector/features/ActiveJob/components/VerificationForm.tsx`
+
+**Severity:** P1 — When an inspector taps "Add Photo" or "Upload Evidence", the app creates a fake URL pointing to `https://example.com/photo-{timestamp}.jpg`. These mock URLs are submitted to the backend as inspection photo evidence. The backend may store these invalid URLs, and they will fail when the admin tries to view inspection photos.
+
+```typescript
+// CURRENT — mock photo, not a real upload
+const addMockPhoto = (source: string) => {
+  setEvidence(prev => [...prev, {
+    type: 'photo',
+    url: `https://example.com/photo-${Date.now()}.jpg`,   // MOCK URL
+    caption: `Evidence from ${source}`,
+    capturedAt: new Date(),
+  }]);
+};
+```
+
+**Fix:** Integrate `expo-image-picker` (or `expo-camera`) to capture a real photo, then upload to the backend storage endpoint before appending the returned URL to the evidence array.
+
+---
+
+### Mobile Gap 7 — Buyer Cannot Confirm Delivery
+
+**File:** `front-end/src/pages/Dashboard/sections/Buyer/features/Orders/index.tsx`
+
+**Severity:** P1 — The documented user journey states the buyer should confirm receipt of goods after delivery. There is no "Confirm Delivery" or "Confirm Receipt" button anywhere in the buyer's Orders screen. The trade phase `DELIVERED → COMPLETED` transition (which requires buyer confirmation) cannot be initiated from the mobile app.
+
+The BuyerOrdersTab shows order status, incoming offers, and a timeline — but the only interactive elements are related to reviewing incoming sell-side proposals, not confirming delivered orders.
+
+**Fix:** Add a "Confirm Delivery" action to orders in `DELIVERED` phase status. Wire it to `POST /trade-operations/:id/finalize` (or a dedicated buyer confirmation endpoint if one exists).
+
+---
+
+### Mobile Gap 8 — Seller Has No Inspection Status Visibility
+
+**Files:**
+- `front-end/src/pages/Dashboard/sections/Seller/features/Trades/index.tsx`
+- `front-end/src/services/sellerService.ts`
+
+**Severity:** P1 — When an admin schedules an inspection for a seller's listing, the seller receives no notification or status update in the mobile app. The `SellerTradesTab` shows trade details (phase, agreed price, quantity) but does not surface the `InspectionRequest.status` field or any inspection result.
+
+The `GET /seller/trades` endpoint returns trade operations but it's unclear whether the response includes nested inspection data. Even if it does, the `SellerTradesTab` component does not render it.
+
+**Fix:** Include inspection status in the seller trades data (verify the API response includes it, add it to the UI if not displayed). Show the inspector's quality score and PASSED/FAILED result to the seller once the inspection is complete.
+
+---
+
+### Mobile Gap 9 — Transport Bid Submission Missing Required Fields
+
+**File:** `front-end/src/pages/Dashboard/sections/Transporter/features/Bidding/hooks/useTransporterBidding.ts`
+
+**Severity:** P1 — The bid submission form only collects a bid price from the transporter. The API call hardcodes `estimatedDuration: 24` (hours), `vehicleType: 'FLATBED'`, and `vehicleCapacity: 40`. No `expiresAt` is passed, which may be required by the backend schema.
+
+The transport request cards in the UI show distance and pickup/delivery locations, but the bidding form has no fields for duration, vehicle type, or capacity — critical data a buyer uses to evaluate competing bids.
+
+**Fix:** Add vehicle type selector, estimated duration input, and capacity input to the bid submission form. Populate `expiresAt` (e.g., bid expires in 24 hours from submission).
+
+---
+
+### Mobile Gap 10 — GPS Location Updates Not Implemented for Transporter
+
+**Files:**
+- `front-end/src/pages/Dashboard/sections/Transporter/features/Jobs/hooks/useTransporterJobs.ts`
+- `front-end/src/services/transportService.ts`
+
+**Severity:** P2 — The documented user journey states the transporter's GPS location should be tracked during active delivery so the buyer/admin can see real-time position. The API has a `PUT /transport/jobs/:id/location` endpoint (from API_REFERENCE.md). This endpoint is never called from the mobile app — there is no location polling or background location tracking implemented.
+
+**Fix:** On job start, begin a location polling interval (e.g., every 30 seconds) that calls `PUT /transport/jobs/:id/location` with the device's current coordinates using `expo-location`.
+
+---
+
+### Mobile Gap 11 — Buyer Cannot See Matched Sellers
+
+**File:** `front-end/src/pages/Dashboard/sections/Buyer/features/Orders/index.tsx`
+
+**Severity:** P2 — Once the admin matches a seller to a buyer's trade operation, the buyer has no way to see who the seller is, their farm location, or the agreed price. The `BuyerOrdersTab` shows trade phase and status but does not display the sellers array or any seller details from the trade operation.
+
+**Fix:** Add a "Matched Sellers" section to the order detail view, showing each matched seller's name, location, quantity, agreed price, and verification status.
+
+---
+
+### Mobile Gap 12 — Inspector "Navigate to Location" Is Display Only
+
+**File:** `front-end/src/pages/Dashboard/sections/Inspector/features/AvailableJobs/index.tsx`
+
+**Severity:** P2 — Job cards show a farm location (city/region), but tapping the location does not open a map application. The UX expectation for a field inspector is that they can tap a job card address and get turn-by-turn directions.
+
+**Fix:** Use `Linking.openURL` with a Google Maps / Apple Maps deep link to open navigation to the inspection location. On Android: `https://maps.google.com/?daddr=lat,lng`. On iOS: `maps://app?daddr=lat,lng`.
+
+---
+
+### Mobile Gap Summary Table
+
+| # | Severity | Role | Description | File |
+|---|----------|------|-------------|------|
+| MG-1 | P0 | Seller | Offers query silently skipped — role check `'seller'` vs backend `'FARMER'` | `shared/hooks/useSellerOffers.ts` |
+| MG-2 | P0 | Inspector | AvailableJobsTab fetches already-assigned missions via wrong endpoint | `Inspector/features/AvailableJobs/service.ts` |
+| MG-3 | P0 | Inspector | Quality score hardcoded to 90 — inspector's actual assessment ignored | `Inspector/features/ActiveJob/service.ts` |
+| MG-4 | P0 | Inspector | No Inspector onboarding flow — inspectors cannot complete new user registration | `navigation/OnboardingStack.tsx`, `RoleSelectionScreen.tsx` |
+| MG-5 | P0 | Inspector | No "Accept Job" button in pages/Inspector UI — accept-job API never called | `Inspector/features/AvailableJobs/index.tsx` |
+| MG-6 | P1 | Inspector | Photo capture creates mock `example.com` URLs, not real uploads | `Inspector/features/ActiveJob/components/VerificationForm.tsx` |
+| MG-7 | P1 | Buyer | No "Confirm Delivery" action — buyer cannot trigger DELIVERED → COMPLETED | `Buyer/features/Orders/index.tsx` |
+| MG-8 | P1 | Seller | Inspection status not shown — seller unaware when inspection is scheduled/completed | `Seller/features/Trades/index.tsx` |
+| MG-9 | P1 | Transporter | Bid form uses hardcoded vehicle defaults, no `expiresAt` field | `Transporter/features/Bidding/hooks/useTransporterBidding.ts` |
+| MG-10 | P2 | Transporter | GPS location tracking not implemented — `PUT /transport/jobs/:id/location` never called | `Transporter/features/Jobs/hooks/useTransporterJobs.ts` |
+| MG-11 | P2 | Buyer | Matched sellers not visible — buyer cannot see who is fulfilling their order | `Buyer/features/Orders/index.tsx` |
+| MG-12 | P2 | Inspector | "Navigate to location" is display only — no map deep link integration | `Inspector/features/AvailableJobs/index.tsx` |
+
+---
+
+### What Works Correctly (Mobile)
+
+1. **Seller negotiation modals** — `SellerAcceptOfferModal`, `SellerRejectOfferModal`, and `SellerCounterOfferModal` are all fully implemented with correct API calls to `/negotiations/:id/accept`, `/negotiations/:id/reject`, and `/negotiations/:id/counter`. The modals just never render because MG-1 prevents offers from loading.
+2. **Buyer request creation** — `BuyerRequestCreationFlow` correctly calls `POST /buyer/listings` with all required fields including `deliveryLocation`.
+3. **Transporter active job actions** — `startJob` (`POST /transport/jobs/:id/start`), `completePickup` (`POST /transport/jobs/:id/pickup`), and `completeDelivery` (`POST /transport/jobs/:id/delivery`) are all correctly wired.
+4. **Transporter bidding** — `GET /transport/requests/available` and `POST /transport/bids` are called correctly (aside from the hardcoded defaults in MG-9).
+5. **DashboardMainScreen role routing** — The `FARMER → seller` normalization is correct. All 5 role dashboards are mounted based on the normalized role.
+6. **Authentication (Privy OAuth)** — `loginWithOAuth` → `getAccessToken` → `POST /auth/privy/login` → store tokens flow is correctly implemented.
+7. **Auth guard and redirect** — `AppBootstrap` correctly handles auth state and routes authenticated users past onboarding.
+8. **Inspector verification form** — Status selection (VERIFIED/FAILED), notes input, and evidence list UI are all correctly built. Only the submission payload (MG-3) and photo capture (MG-6) are broken.
+9. **Seller product management** — Full CRUD via `ProductCreationFlow` is functional.
+
+---
+
+### Mobile Fix Priority Matrix
+
+| Priority | Gap | Effort | Impact |
+|----------|-----|--------|--------|
+| P0 | MG-1: Fix seller offers role check (`'FARMER'` not `'seller'`) | Trivial (1 line) | Unblocks entire seller negotiation flow |
+| P0 | MG-3: Map `values.qualityScore` in inspector submission payload | Low (connect form field) | Makes inspection results meaningful |
+| P0 | MG-4: Add Inspector onboarding flow and role option | High (new flow + navigation) | Allows inspectors to register |
+| P0 | MG-5: Add "Accept Job" button wired to `POST /inspector/jobs/:id/accept` | Medium (button + mutation) | Enables inspector job acceptance |
+| P0 | MG-2: Fix AvailableJobsTab to call `GET /inspector/jobs` | Low (change endpoint) | Shows correct unassigned jobs |
+| P1 | MG-6: Integrate `expo-image-picker` for real photo capture | Medium (new dependency + upload) | Makes inspection evidence real |
+| P1 | MG-7: Add "Confirm Delivery" button for buyer orders in DELIVERED state | Low (button + mutation) | Enables trade completion from mobile |
+| P1 | MG-8: Surface inspection status in seller trades view | Low (add field to render) | Seller awareness of inspection |
+| P1 | MG-9: Add vehicle type/duration/capacity inputs to bid form, set `expiresAt` | Medium (form expansion) | Competitive bidding data quality |
+| P2 | MG-10: Implement GPS polling via `expo-location` on job start | Medium (background location) | Real-time tracking for buyer/admin |
+| P2 | MG-11: Show matched sellers in buyer order detail | Low (render sellers array) | Buyer transparency |
+| P2 | MG-12: Add `Linking.openURL` map deep link to inspector job cards | Trivial (1 function call) | Usability for field inspectors |
