@@ -5,7 +5,7 @@
  * Makes it easy to change backend URL or add new endpoints.
  */
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 export const API_ENDPOINTS = {
   // Authentication
@@ -38,6 +38,7 @@ export const API_ENDPOINTS = {
   tradeOperations: {
     base: '/trade-operations',
     byId: (id: string) => `/trade-operations/${id}`,
+    finalize: (id: string) => `/trade-operations/${id}/finalize`,
     calculateTransport: '/trade-operations/calculate-transport',
     createOffers: (id: string) => `/trade-operations/${id}/offers`,
     matchingSellers: (id: string) => `/trade-operations/${id}/matching-sellers`,

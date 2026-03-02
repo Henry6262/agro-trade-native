@@ -51,6 +51,8 @@ export const TradeFinalizationPanel: React.FC<TradeFinalizationPanelProps> = ({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [actualTransportCost, setActualTransportCost] = useState<string>('');
+  const [finalNotes, setFinalNotes] = useState<string>('');
 
   // Calculate summaries
   const inspectionSummary: InspectionSummary = calculateInspectionSummary(inspections);
@@ -112,10 +114,10 @@ export const TradeFinalizationPanel: React.FC<TradeFinalizationPanelProps> = ({
       setIsProcessing(true);
       setError(null);
 
-      // Update operation status to COMPLETED
-      await api.patch(API_ENDPOINTS.tradeOperations.byId(tradeOperationId), {
-        status: 'COMPLETED',
-        phase: 'COMPLETED',
+      // Call the dedicated finalize endpoint with required fields
+      await api.post(API_ENDPOINTS.tradeOperations.finalize(tradeOperationId), {
+        actualTransportCost: actualTransportCost ? Number(actualTransportCost) : undefined,
+        finalNotes: finalNotes || 'Trade completed successfully',
       });
 
       setShowConfirmation(false);
@@ -425,6 +427,37 @@ export const TradeFinalizationPanel: React.FC<TradeFinalizationPanelProps> = ({
                 </div>
               </div>
             )}
+
+            {/* Finalization Fields */}
+            <div className="bg-gray-50 border-2 border-gray-200 rounded-lg p-4 space-y-4">
+              <h3 className="text-sm font-bold text-gray-900">FINALIZATION DETAILS</h3>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Actual Transport Cost (€)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={actualTransportCost}
+                  onChange={(e) => setActualTransportCost(e.target.value)}
+                  placeholder="Enter actual transport cost"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Final Notes
+                </label>
+                <textarea
+                  value={finalNotes}
+                  onChange={(e) => setFinalNotes(e.target.value)}
+                  placeholder="Add any final notes for this trade operation..."
+                  rows={3}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-400 resize-none"
+                />
+              </div>
+            </div>
 
             {/* Ready to Finalize */}
             {validation.canFinalize && (
