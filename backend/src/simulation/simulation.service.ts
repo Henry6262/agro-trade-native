@@ -186,12 +186,11 @@ export class SimulationService {
               bidStatus: b.status,
             }))
           : [],
-        inspectors:
-          (operation as any).inspectionRequests?.map((i: any) => ({
-            inspector: i.inspector,
-            inspectionStatus: i.status,
-            verificationResult: i.verificationResult,
-          })) || [],
+        inspectors: operation.inspections?.map((i: any) => ({
+          inspector: i.inspector,
+          inspectionStatus: i.status,
+          verificationResult: i.verificationResult,
+        })) || [],
       },
     };
   }
@@ -432,18 +431,37 @@ export class SimulationService {
     const inspections = [];
 
     for (const ts of tradeSellers) {
-      const inspection = await this.prisma.inspectionRequest.create({
-        data: {
-          saleListingId: ts.saleListingId,
+      const existing = await this.prisma.inspectionRequest.findFirst({
+        where: {
           tradeOperationId,
-          inspectorId,
-          status: "SCHEDULED",
-          scheduledDate: new Date(),
-          latitude: 24.4539, // Default Abu Dhabi coordinates for simulation
-          longitude: 54.3773,
-          address: "Farm Location",
+          saleListingId: ts.saleListingId,
         },
       });
+
+      let inspection;
+      if (existing) {
+        inspection = await this.prisma.inspectionRequest.update({
+          where: { id: existing.id },
+          data: {
+            inspectorId,
+            status: "SCHEDULED",
+            scheduledDate: new Date(),
+          },
+        });
+      } else {
+        inspection = await this.prisma.inspectionRequest.create({
+          data: {
+            saleListingId: ts.saleListingId,
+            tradeOperationId,
+            inspectorId,
+            status: "SCHEDULED",
+            scheduledDate: new Date(),
+            latitude: 24.4539, // Default Abu Dhabi coordinates for simulation
+            longitude: 54.3773,
+            address: "Farm Location",
+          },
+        });
+      }
 
       inspections.push(inspection);
     }

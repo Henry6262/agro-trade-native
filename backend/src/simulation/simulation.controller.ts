@@ -31,6 +31,7 @@ import {
 import { SimulationService } from "./simulation.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateTestUserDto } from "./dto/create-test-user.dto";
+import { successResponse } from "../common/utils/response.util";
 
 @ApiTags("Simulation (Admin Only)")
 @ApiBearerAuth()
@@ -49,7 +50,8 @@ export class SimulationController {
   @ApiOperation({ summary: "Get all users by role for simulation" })
   @ApiResponse({ status: 200, description: "List of users for the role" })
   async getUsersByRole(@Param("role") role: UserRole) {
-    return this.simulationService.getUsersByRole(role);
+    const users = await this.simulationService.getUsersByRole(role);
+    return successResponse(users, `Found ${users.length} ${role} users`);
   }
 
   @Get("trade-operation/:id/full-state")
@@ -407,8 +409,7 @@ export class SimulationController {
     await this.prisma.inspectionRequest.update({
       where: { id: dto.inspectionId },
       data: {
-        inspectorId: userId,
-        status: InspectionStatus.SCHEDULED,
+        status: InspectionStatus.IN_PROGRESS,
       },
     });
 
