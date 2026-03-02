@@ -886,3 +886,93 @@ The following functionality is correctly wired and working:
 | P1 | AD-8: Call `GET /trade-operations/:id/profit` in TradeFinalizationPanel before submit | Low (add fetch) | Shows backend-validated margin |
 | P1 | AD-9: Return created operation ID from `onSuccess` and navigate to detail page | Low (pass ID in callback) | UX: direct navigation after creation |
 | P2 | AD-10: Add price history to NegotiationsTab (round-by-round progression) | Medium (data model + render) | Admin visibility into negotiation history |
+
+---
+
+## FINAL VALIDATION — 2026-03-02
+
+### Scenario Re-Run Results
+
+| # | Scenario | Before | After | Notes |
+|---|----------|--------|-------|-------|
+| 1 | Happy Path (no inspection) | FAIL | PASS | sellingPrice + finalize fix resolved |
+| 2 | Counter-offer (multi-round negotiation) | FAIL | PASS | Accept counter-offer endpoint fixed |
+| 3 | Seller Rejects Offer | PASS | PASS | unchanged |
+| 4 | Inspection Required (Pass) | PASS | PASS | unchanged |
+| 5 | Inspection Fail | PASS | PASS | unchanged |
+| 6 | Transport Bidding Competition | PASS | PASS | unchanged |
+| 7 | Cancel Trade Operation | PASS | PASS | unchanged |
+| 8 | Negotiation Expiry (Automated — Cron) | SKIP | SKIP | requires DB time manipulation, not API-testable |
+| 9 | Pricing Update (Quality Dispute) | FAIL | PASS | pricing update + finalize fix resolved |
+| 10 | Cleanup Test Data | PASS | PASS | unchanged |
+
+**Final score: 9 PASS / 0 FAIL / 1 SKIP (67/67 steps passed)**
+
+---
+
+### Issues Fixed in This Session
+
+#### P0 — Backend
+- [x] P0-1: `createTradeOperation()` now sets `sellingPrice`, `totalRevenue`, `profitMargin`
+- [x] P0-2: `finalizeTrade()` now sets `phase = COMPLETED`, `status = COMPLETED`
+
+#### P0 — Mobile
+- [x] P0-3: Seller offers enabled guard: `'seller'` → `'FARMER'`
+- [x] P0-4: Inspector `getAvailableJobs()` calls correct endpoint `/inspector/jobs`
+- [x] P0-5: Inspector quality score now reads from form state, not hardcoded `90`
+- [x] P0-6: Inspector skips onboarding flow (admin-created accounts)
+- [x] P0-7: Inspector job cards now have working Accept button
+
+#### P0 — Dashboard
+- [x] P0-8: `TradeFinalizationPanel` calls `POST /finalize` with `actualTransportCost` + `finalNotes`
+
+#### P1 — Backend
+- [x] P1-1: Docs corrected (`POST /phase` → `PATCH /trade-operations/:id`)
+- [x] P1-2: `accept-job` sets `IN_PROGRESS` not `SCHEDULED`
+- [x] P1-3: `getFullTradeState` inspectors uses correct field `inspections`
+- [x] P1-4: `assignInspector` uses upsert to prevent duplicates
+
+#### P1 — Dashboard
+- [x] P1-5: `SingleOfferModal`/`BulkOfferModal` field names corrected
+- [x] P1-6: `NegotiationsDetailPanel` has Accept Counter button
+- [x] P1-7: `OffersTrackingPanel` enum values corrected
+- [x] P1-8: `TradeCreationWizard` passes operation ID to `onSuccess`
+
+#### P1 — Mobile
+- [x] P1-9: Inspector photo picker uses real `expo-image-picker`
+- [x] P1-10: Buyer gets Confirm Delivery button on DELIVERED orders
+
+---
+
+### Remaining Known Issues (P2 — Deferred)
+
+| ID | Issue | Location | Notes |
+|----|-------|----------|-------|
+| MG-10 | GPS tracking not implemented | Mobile / Transporter | `PUT /transport/jobs/:id/location` never called |
+| MG-11 | Buyer cannot see matched sellers | Mobile / Buyer | UI-only, no API gap |
+| MG-12 | Inspector job map deep link | Mobile / Inspector | UX improvement |
+| AD-9 | Negotiation round history not shown | Dashboard / Negotiations tab | UX improvement |
+| Backend | Only 1 transporter in seed data | Seed data | Run `add-more-sellers.ts` analog for transporters |
+| Backend | Buyer delivery confirmation needs own endpoint | Backend | `POST /trade-operations/:id/finalize` is ADMIN-only |
+
+---
+
+### Lint Status (After P0/P1 Fix Pass)
+
+| App | Errors in P0/P1 Files | Errors Introduced | Pre-existing (not introduced by fixes) |
+|-----|----------------------|-------------------|---------------------------------------|
+| Backend | 0 errors, 0 warnings | 0 | 0 (clean) |
+| Mobile (front-end) | 0 errors in touched files | 0 | 345 errors across 247 files (pre-existing) |
+| Dashboard (admin-dashboard) | 0 errors in touched files | 0 | 251 errors across 58 files (pre-existing) |
+
+All files modified in the P0/P1 fix session are lint-clean. The pre-existing errors across the wider codebase are predominantly `@typescript-eslint/no-explicit-any`, `@typescript-eslint/no-unused-vars`, and `prettier/prettier` formatting issues that existed before this session.
+
+---
+
+### Agent Persona Files Created
+- `.claude/agents/scenario-test-lead.md`
+- `.claude/agents/admin-agent.md`
+- `.claude/agents/seller-agent.md`
+- `.claude/agents/buyer-agent.md`
+- `.claude/agents/transporter-agent.md`
+- `.claude/agents/inspector-agent.md`
