@@ -197,9 +197,12 @@ export const inspectionService = {
     inspectorId: string,
     status?: 'PENDING' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED'
   ): Promise<InspectionRequest[]> {
-    const params = status ? { status } : {};
-    const response = await apiClient.get(`/inspections/inspector/${inspectorId}`, { params });
-    return response.data;
+    const params: Record<string, string> = {};
+    if (status) params.status = status;
+    if (inspectorId) params.inspectorId = inspectorId;
+    const response = await apiClient.get('/inspector/jobs', { params });
+    // API returns { success: true, data: jobs[] }
+    return response.data?.data ?? response.data ?? [];
   },
 
   async getInspectorActiveMission(inspectorId: string): Promise<InspectionRequest | null> {
@@ -211,6 +214,16 @@ export const inspectionService = {
   async getInspection(inspectionId: string): Promise<InspectionRequest> {
     const response = await apiClient.get(`/inspections/${inspectionId}`);
     return response.data;
+  },
+
+  // Accept an available inspection job
+  async acceptJob(
+    inspectionId: string,
+    data: { inspectorId: string; estimatedArrival?: string }
+  ): Promise<InspectionRequest> {
+    const response = await apiClient.post(`/inspector/jobs/${inspectionId}/accept`, data);
+    // API returns { success: true, data: job }
+    return response.data?.data ?? response.data;
   },
 
   // Get inspection statistics

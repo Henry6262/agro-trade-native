@@ -53,7 +53,7 @@ const toSubmitPayload = (
   jobId: string,
   values: InspectorVerificationFormValues
 ): SubmitInspectionResultsDto => ({
-  qualityScore: 90,
+  qualityScore: values.qualityScore,
   verificationResult: {
     actualQuantity: Number(values.verifiedSpecs.quantity) || undefined,
     actualQuality: values.verifiedSpecs.grade,

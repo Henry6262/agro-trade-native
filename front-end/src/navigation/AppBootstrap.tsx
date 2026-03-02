@@ -20,9 +20,12 @@ export function AppBootstrap({ children }: AppBootstrapProps) {
     return null;
   }
 
+  // Inspectors are created by admins — they never go through onboarding
+  const isInspector = user?.role === 'INSPECTOR';
+
   const state: AppState = {
     isAuthenticated,
-    needsOnboarding: isAuthenticated && !user?.onboardingComplete,
+    needsOnboarding: isAuthenticated && !user?.onboardingComplete && !isInspector,
     isReady: true,
   };
 

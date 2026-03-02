@@ -50,6 +50,7 @@ export interface InspectorVerificationJob {
 export interface InspectorVerificationFormValues {
   verifiedSpecs: Record<string, string>;
   testMethods: Record<string, string>;
+  qualityScore: number;
   notes?: string;
   correctedSpecs?: {
     variety?: string;

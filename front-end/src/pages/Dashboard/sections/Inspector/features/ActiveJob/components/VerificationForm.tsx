@@ -7,6 +7,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
   const [verifiedSpecs, setVerifiedSpecs] = useState<Record<string, string>>({});
   const [correctedSpecs, setCorrectedSpecs] = useState<Record<string, string>>({});
   const [testMethods, setTestMethods] = useState<Record<string, string>>({});
+  const [qualityScore, setQualityScore] = useState<string>('');
   const [notes, setNotes] = useState('');
   const [evidence, setEvidence] = useState<
     { type: 'photo' | 'document' | 'video'; url: string; caption?: string; timestamp: Date }[]
@@ -61,6 +62,10 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
     if (verificationStatus === 'FAILED' && !notes.trim()) {
       nextErrors.notes = 'Notes are required for failed verification';
     }
+    const scoreNum = Number(qualityScore);
+    if (!qualityScore || isNaN(scoreNum) || scoreNum < 0 || scoreNum > 100) {
+      nextErrors.qualityScore = 'Quality score must be a number between 0 and 100';
+    }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };
@@ -74,6 +79,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
     onSubmit({
       verifiedSpecs,
       testMethods,
+      qualityScore: Number(qualityScore),
       notes,
       correctedSpecs,
       evidence,
@@ -182,6 +188,26 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
                 </View>
               ))}
             </ScrollView>
+          )}
+        </View>
+
+        <View>
+          <Text className="text-sm font-semibold text-gray-700 mb-2">Quality Score (0–100)</Text>
+          <TextInput
+            placeholder="Enter quality score (e.g. 85)"
+            value={qualityScore}
+            onChangeText={(value) => {
+              setQualityScore(value);
+              setErrors((prev) => ({ ...prev, qualityScore: '' }));
+            }}
+            className={`bg-white border ${
+              errors.qualityScore ? 'border-red-500' : 'border-gray-300'
+            } rounded px-3 py-2`}
+            keyboardType="numeric"
+            maxLength={3}
+          />
+          {errors.qualityScore && (
+            <Text className="text-red-500 text-xs mt-1">{errors.qualityScore}</Text>
           )}
         </View>
 

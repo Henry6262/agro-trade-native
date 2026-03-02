@@ -26,7 +26,7 @@ export const useSellerOffers = () => {
   } = useQuery<SellerOffersPayload>({
     queryKey: ['seller-offers', user?.id],
     queryFn: () => sellerService.getMyOffers(),
-    enabled: isAuthenticated && user?.role === 'seller',
+    enabled: isAuthenticated && user?.role === 'FARMER',
     staleTime: 15 * 1000, // 15 seconds
     refetchInterval: 30 * 1000, // Refetch every 30 seconds
     refetchOnWindowFocus: true,
