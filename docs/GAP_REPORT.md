@@ -619,3 +619,270 @@ The transport request cards in the UI show distance and pickup/delivery location
 | P2 | MG-10: Implement GPS polling via `expo-location` on job start | Medium (background location) | Real-time tracking for buyer/admin |
 | P2 | MG-11: Show matched sellers in buyer order detail | Low (render sellers array) | Buyer transparency |
 | P2 | MG-12: Add `Linking.openURL` map deep link to inspector job cards | Trivial (1 function call) | Usability for field inspectors |
+
+---
+
+## ADMIN DASHBOARD — UI Audit
+
+*Audited: 2026-03-02*
+*Auditor: Admin Dashboard Code Audit*
+*Scope: `admin-dashboard/src/` — all routes, trade lifecycle components, transport management, inspection management, scenario runner*
+*Question: Can an admin take a trade from INITIATION to COMPLETED using only the dashboard UI?*
+
+---
+
+### Route Coverage
+
+| Route | Component | Phase(s) Covered |
+|-------|-----------|-----------------|
+| `/` | DashboardPage | Overview/stats |
+| `/operations` | OperationsPage | INITIATION — create trade, list operations |
+| `/operations/:id` | OperationDetailPage | All phases — detail view, tabs |
+| `/matching` | MatchingPage | SELLER_MATCHING → SELLER_NEGOTIATION |
+| `/inspections` | InspectionsPage | INSPECTION_PENDING |
+| `/transport` | TransportPage | TRANSPORT_MATCHING → TRANSPORT_BIDDING → IN_TRANSIT |
+| `/scenarios` | ScenariosPage → ProfessionalScenarioRunner | Full lifecycle (simulation) |
+
+**No route exists for:** explicit phase transition controls, transport request creation, or a standalone finalization confirmation page.
+
+---
+
+### Phase-by-Phase Coverage
+
+| Phase | UI Present | API Call Correct | Blockers |
+|-------|-----------|-----------------|---------|
+| INITIATION | TradeCreationWizard | `POST /trade-operations` — correct | None (see P1 note on returned ID) |
+| SELLER_MATCHING | MatchingDashboard, BuyerOrdersPanel | `GET /buyer/listings?includeTradeOps=true` — correct | No explicit `PATCH phase=SELLER_MATCHING` trigger |
+| SELLER_NEGOTIATION | SingleOfferModal, BulkOfferModal, NegotiationsTab | Negotiation endpoint field mismatch (P1) | Admin cannot respond to counter-offers from NegotiationsDetailPanel |
+| INSPECTION_PENDING | InspectionsTab, InspectionQueuePanel | `POST /trade-operations/:id/request-inspections` — wired via callback | No inspector assignment UI in operation detail tabs |
+| TRANSPORT_MATCHING | TransportManagement | No transport request creation UI present (P0) | Admin cannot initiate transport request |
+| TRANSPORT_BIDDING | BidReviewModal | `PUT /transport/bids/:id/accept` — correctly wired via callback chain | None |
+| IN_TRANSIT | TransportManagement list | No live tracking/map for active jobs | No way to monitor position |
+| DELIVERED | No UI | `POST /transport/jobs/:id/deliver` exists in backend but no admin trigger visible | — |
+| COMPLETED | TradeFinalizationPanel | Wrong endpoint — calls `PATCH /trade-operations/:id` instead of `POST /finalize` (P0) | Wrong endpoint, missing fields |
+
+---
+
+### Scenario Runner Status
+
+**Route:** `/scenarios`
+**Component rendered:** `ProfessionalScenarioRunner` (NOT `ScenarioOrchestrator`)
+**Status: REAL — makes actual backend API calls via `simulationApi` and `stepExecutor`**
+
+The scenario runner at `/scenarios` is a fully functional simulation tool that:
+- Calls real backend endpoints via `simulationApi.*` (not mocks)
+- Supports 8 pre-defined scenarios (happy-path, inspection-failure, multi-counter, partial-rejection, transport-bidding, rush-order, quality-dispute, multi-buyer)
+- Provides step-by-step and auto-run modes with breakpoints
+- Shows `EnhancedTradeFlowDiagram` and `DatabaseStatePanel` live views
+- Calls `simulationApi.cleanupTestData()` on reset
+
+Note: `ScenarioOrchestrator` (in `features/scenarios/components/ScenarioOrchestrator/`) is a separate, also-real implementation that is NOT rendered by any current route.
+
+---
+
+### Admin Dashboard Gap 1 — TradeFinalizationPanel Calls Wrong Endpoint
+
+**File:** `admin-dashboard/src/features/operations/components/TradeFinalizationPanel/TradeFinalizationPanel.tsx`
+
+**Severity:** P0 — The finalize action will silently fail or produce incorrect state. No trade can be properly completed from the admin dashboard.
+
+**What it does:**
+```typescript
+// CURRENT — wrong endpoint, wrong method
+await apiClient.patch(`/trade-operations/${tradeOperationId}`, {
+  status: 'COMPLETED',
+  phase: 'COMPLETED',
+});
+```
+
+**What it should do:**
+```typescript
+// CORRECT — per API_REFERENCE.md and STATE_MACHINES.md
+await apiClient.post(`/trade-operations/${tradeOperationId}/finalize`, {
+  actualTransportCost: formValues.actualTransportCost,
+  finalNotes: formValues.finalNotes,
+  actualDeliveryDate: formValues.actualDeliveryDate,
+});
+```
+
+**Additional issues:**
+- Does not send `actualTransportCost`, `finalNotes`, or `actualDeliveryDate` fields
+- `PATCH /trade-operations/:id` with `{phase: 'COMPLETED'}` is not a valid transition — the backend's `updateTradeOperation` method validates phase transitions and would reject this with a 400
+
+---
+
+### Admin Dashboard Gap 2 — No Transport Request Creation UI
+
+**File:** `admin-dashboard/src/features/transport/components/TransportManagement/TransportManagement.tsx`
+
+**Severity:** P0 — The admin cannot initiate the TRANSPORT_MATCHING phase from the dashboard. `TransportManagement` only shows a read-only list of existing transport requests. There is no "Create Transport Request" button anywhere in the transport-related UI.
+
+**Required API call (missing):**
+```
+POST /transport/requests
+Body: { tradeOperationId, pickupPoints, deliveryPoint, requiredDeliveryDate, biddingDeadline, cargoDescription, totalWeight }
+```
+
+**Impact:** To advance a trade to `TRANSPORT_MATCHING`, the admin must currently use the scenario runner or make a direct API call. The transport management page is display-only.
+
+---
+
+### Admin Dashboard Gap 3 — No Phase Transition Controls
+
+**Severity:** P0 — There is no UI anywhere in the admin dashboard that calls `PATCH /trade-operations/:id` with a `{phase: "..."}` body to manually advance a trade operation's phase. The phase advances only implicitly when certain actions complete (e.g., all sellers accept → TRANSPORT_MATCHING, bid accepted → IN_TRANSIT). But explicit admin overrides (e.g., manually advancing to INSPECTION_PENDING) are not available.
+
+**The operation detail page** (`/operations/:id`) shows the current phase but provides no "Advance Phase" control or dropdown.
+
+**Impact:** If automatic phase transitions fail (e.g., all sellers accept but the cascade doesn't fire), the admin has no recovery path from the UI.
+
+---
+
+### Admin Dashboard Gap 4 — SingleOfferModal Field Name Mismatch
+
+**File:** `admin-dashboard/src/features/matching/components/MatchingDashboard/SingleOfferModal.tsx`
+
+**Severity:** P1 — Negotiation offers sent from the SingleOfferModal will fail or send incorrect data.
+
+**What it sends:**
+```typescript
+negotiationService.create(tradeOperationId, {
+  tradeSellerId,
+  offeredPrice,      // wrong field name
+  offeredQuantity,   // wrong field name
+  terms,
+})
+```
+
+**What the API expects (`POST /negotiations/trade-operations/:id/offers`):**
+```typescript
+{
+  tradeSellerId,
+  price,             // correct field name
+  quantity,          // correct field name
+  terms,
+}
+```
+
+**Impact:** The backend may ignore `offeredPrice`/`offeredQuantity` (treating them as unknown fields), resulting in a negotiation with `price: undefined` and `quantity: undefined`. The negotiation record is created but with null/zero values.
+
+---
+
+### Admin Dashboard Gap 5 — NegotiationsDetailPanel Has No Action Buttons
+
+**File:** `admin-dashboard/src/features/matching/components/MatchingDashboard/NegotiationsDetailPanel.tsx`
+
+**Severity:** P1 — The admin can view negotiation status (PENDING, COUNTERED, ACCEPTED, etc.) but cannot take any action. There are no Accept, Reject, or Counter buttons in this panel.
+
+**What exists:** Status badge, expiry timestamp, negotiation history display.
+**What is missing:** Action buttons for `POST /negotiations/:id/accept`, `POST /negotiations/:id/reject`, `POST /negotiations/:id/counter`.
+
+**Note:** The `CounterOfferModal` component exists and is fully implemented — it just is not mounted or triggered from this panel.
+
+---
+
+### Admin Dashboard Gap 6 — OffersTrackingPanel References Non-Existent Enum Values
+
+**File:** `admin-dashboard/src/features/matching/components/MatchingDashboard/OffersTrackingPanel.tsx`
+
+**Severity:** P1 — The component references `TradeStatus.DRAFT`, `TradeStatus.PAUSED`, `TradePhase.DELIVERY`, and `TradePhase.PAYMENT`. None of these values exist in the documented state machines or backend Prisma schema.
+
+**Impact:** Any conditional logic or display that branches on these enum values will either never match (silently incorrect UI) or throw a runtime error when TypeScript types are mismatched. For example, a trade in `ACTIVE` status will not match `TradeStatus.DRAFT` filters, potentially hiding it from certain views.
+
+---
+
+### Admin Dashboard Gap 7 — PricingModal Creates Trade Op Without Sellers
+
+**File:** `admin-dashboard/src/features/matching/components/MatchingDashboard/PricingModal.tsx`
+
+**Severity:** P1 — The PricingModal creates the trade operation in two separate API calls rather than one atomic request. First it calls `POST /trade-operations` with `{buyListingId, targetProfitMargin: 7, qualityPreference: 'ANY', notes}` (no sellers). Then on success it adds sellers via `POST /trade-operations/:id/sellers`.
+
+**Issues:**
+1. `targetProfitMargin` is hardcoded to `7` — the value the user enters in the form is ignored
+2. Between the two calls, a partial trade operation exists with no sellers (briefly visible in `GET /trade-operations` lists)
+3. Never calls `GET /trade-operations/:id/profit` — profit is calculated entirely client-side, not validated against backend rules
+
+---
+
+### Admin Dashboard Gap 8 — Profit Endpoint Never Called
+
+**Severity:** P1 — The API has a `GET /trade-operations/:id/profit` endpoint that calculates server-side profit margins with validated pricing. This endpoint is never called anywhere in the admin dashboard. All profit/margin calculations visible in the UI (PricingModal, SingleOfferModal inline display) are computed client-side with hardcoded formulas.
+
+**Impact:** The admin cannot see the backend-validated profit calculation (which enforces the minimum 5% margin) before finalizing a trade. The client-side calculation may diverge from what the backend calculates in `finalizeTrade()`.
+
+---
+
+### Admin Dashboard Gap 9 — TradeCreationWizard Doesn't Retain Created Operation ID
+
+**File:** `admin-dashboard/src/features/trade-operations/components/TradeCreationWizard.tsx`
+
+**Severity:** P1 — After `POST /trade-operations` succeeds, the wizard calls `onSuccess()` without passing the created trade operation's ID to the parent. The success handler:
+
+```typescript
+tradeOperationService.create(dto).then(() => {
+  onSuccess();  // ID from response not captured or surfaced
+});
+```
+
+**Impact:** After creating a trade, the admin is returned to the trade list with no direct link or navigation to the newly created operation. They must manually locate it in the list. A better UX would call `onSuccess(createdOperation.id)` so the parent can navigate directly to the new operation detail page.
+
+---
+
+### Admin Dashboard Gap 10 — NegotiationsTab Missing Price History
+
+**File:** `admin-dashboard/src/features/trade-operations/components/TradeDetails/tabs/NegotiationsTab.tsx`
+
+**Severity:** P2 — The tab shows current negotiation status and expiry but does not display the price history across negotiation rounds. When a seller counters at a different price, the admin cannot see the progression (original offer → counter → admin response) in this view.
+
+**What exists:** Status badge, expiry badge (for PENDING), "Respond" button (for COUNTERED status via callback).
+**What is missing:** Round-by-round price history showing `original price → counter price → accepted price`.
+
+---
+
+### Admin Dashboard — Correctly Implemented Items
+
+The following functionality is correctly wired and working:
+
+1. **BuyerOrdersPanel** — `GET /buyer/listings?includeTradeOps=true` correctly fetches active buyer orders with trade operation summaries.
+2. **ReplacementSellerFinder** — `GET /trade-operations/:id/matching-sellers` and `POST /trade-operations/:id/sellers` are correctly called when adding replacement sellers after inspection failure.
+3. **BidReviewModal** — Accept/reject bid actions correctly call `transportAdminService.approveBid(bidId)` / `transportAdminService.rejectBid(bidId)` via the callback chain.
+4. **InspectionResultsPanel** — `GET /inspections/trade-operation/:id` is correctly called and results (quality score, verification result, notes, photos) are displayed.
+5. **TradeCreationWizard** — `POST /trade-operations` with `{buyListingId, sellers[]}` correctly creates the trade operation and associated sellers in one call.
+6. **BulgariaMap integration** — Seller and buyer locations are displayed on the map in SingleOfferModal, correctly using coordinates from the API response.
+7. **ProfessionalScenarioRunner** (at `/scenarios`) — Makes real API calls, supports all 8 scenarios, provides live database state visibility.
+8. **TransportManagement list** — `GET /transport/requests` correctly fetches all transport requests with bid counts and deadlines for monitoring.
+9. **TradeFinalizationPanel checklist** — Pre-finalization validation guard (`validation.canFinalize`) correctly checks offers accepted, inspections complete, transport complete, and quantity fulfilled before enabling the finalize button.
+10. **NegotiationsTab expiry badge** — Shows remaining time for PENDING negotiations (48h TTL enforced by backend cron).
+
+---
+
+### Admin Dashboard Gap Summary Table
+
+| # | Severity | Phase | Description | File |
+|---|----------|-------|-------------|------|
+| AD-1 | P0 | COMPLETED | TradeFinalizationPanel calls `PATCH /trade-operations/:id` instead of `POST /finalize`; omits `actualTransportCost`, `finalNotes` | `operations/components/TradeFinalizationPanel/TradeFinalizationPanel.tsx` |
+| AD-2 | P0 | TRANSPORT_MATCHING | No transport request creation UI — admin cannot create a transport request from the dashboard | `transport/components/TransportManagement/TransportManagement.tsx` |
+| AD-3 | P0 | All phases | No manual phase transition controls anywhere in the dashboard | `app/Router.tsx`, `operations/:id` |
+| AD-4 | P1 | SELLER_NEGOTIATION | SingleOfferModal sends `offeredPrice`/`offeredQuantity` but API expects `price`/`quantity` | `matching/components/MatchingDashboard/SingleOfferModal.tsx` |
+| AD-5 | P1 | SELLER_NEGOTIATION | NegotiationsDetailPanel is read-only — no accept/reject/counter buttons | `matching/components/MatchingDashboard/NegotiationsDetailPanel.tsx` |
+| AD-6 | P1 | SELLER_NEGOTIATION | OffersTrackingPanel references non-existent enum values (`DRAFT`, `PAUSED`, `DELIVERY`, `PAYMENT`) | `matching/components/MatchingDashboard/OffersTrackingPanel.tsx` |
+| AD-7 | P1 | INITIATION | PricingModal hardcodes `targetProfitMargin: 7`, ignores user input; never calls `GET /profit` endpoint | `matching/components/MatchingDashboard/PricingModal.tsx` |
+| AD-8 | P1 | All phases | `GET /trade-operations/:id/profit` never called — profit validated client-side only | Multiple files |
+| AD-9 | P1 | INITIATION | TradeCreationWizard doesn't pass created operation ID to `onSuccess` callback | `trade-operations/components/TradeCreationWizard.tsx` |
+| AD-10 | P2 | SELLER_NEGOTIATION | NegotiationsTab missing round-by-round price history display | `trade-operations/components/TradeDetails/tabs/NegotiationsTab.tsx` |
+
+---
+
+### Admin Dashboard Fix Priority Matrix
+
+| Priority | Gap | Effort | Impact |
+|----------|-----|--------|--------|
+| P0 | AD-1: Fix TradeFinalizationPanel to call `POST /finalize` with correct fields | Low (change endpoint + add fields) | Unblocks trade completion |
+| P0 | AD-2: Add "Create Transport Request" button/modal to TransportManagement | Medium (new modal + form) | Enables TRANSPORT_MATCHING phase |
+| P0 | AD-3: Add phase transition control to operation detail page | Medium (dropdown or button set) | Admin recovery path for stuck phases |
+| P1 | AD-4: Fix SingleOfferModal field names (`price`/`quantity` not `offeredPrice`/`offeredQuantity`) | Trivial (rename 2 fields) | Negotiation offers sent correctly |
+| P1 | AD-5: Add action buttons to NegotiationsDetailPanel (accept/reject/counter) | Medium (wire CounterOfferModal) | Admin can respond to negotiations |
+| P1 | AD-6: Remove/fix non-existent enum references in OffersTrackingPanel | Low (delete dead code) | Prevents silent filter bugs |
+| P1 | AD-7: Connect `targetProfitMargin` form field; call `GET /profit` after creation | Low (wire form value + fetch) | Accurate server-validated profit display |
+| P1 | AD-8: Call `GET /trade-operations/:id/profit` in TradeFinalizationPanel before submit | Low (add fetch) | Shows backend-validated margin |
+| P1 | AD-9: Return created operation ID from `onSuccess` and navigate to detail page | Low (pass ID in callback) | UX: direct navigation after creation |
+| P2 | AD-10: Add price history to NegotiationsTab (round-by-round progression) | Medium (data model + render) | Admin visibility into negotiation history |
