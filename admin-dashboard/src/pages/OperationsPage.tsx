@@ -25,9 +25,15 @@ export function OperationsPage() {
       {showCreation && (
         <TradeCreationWizard
           onClose={() => setShowCreation(false)}
-          onSuccess={() => {
+          onSuccess={(tradeOpId?: string) => {
             setShowCreation(false);
             handleRefresh();
+            // tradeOpId is available here for navigation to the newly created operation
+            if (tradeOpId) {
+              // Refresh will show the new operation in the list; it can be selected from there.
+              // Future: navigate directly via router to /operations/:tradeOpId
+              console.info('Created trade operation:', tradeOpId);
+            }
           }}
         />
       )}

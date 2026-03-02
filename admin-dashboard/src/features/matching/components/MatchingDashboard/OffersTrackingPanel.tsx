@@ -200,13 +200,13 @@ export const OffersTrackingPanel: React.FC<OffersTrackingPanelProps> = ({ onView
     switch (status) {
       case TradeStatus.ACTIVE:
         return 'bg-green-100 text-green-800 border-green-300';
-      case TradeStatus.DRAFT:
+      case TradeStatus.ON_HOLD:
         return 'bg-yellow-100 text-yellow-800 border-yellow-300';
       case TradeStatus.COMPLETED:
         return 'bg-blue-100 text-blue-800 border-blue-300';
       case TradeStatus.CANCELLED:
         return 'bg-red-100 text-red-800 border-red-300';
-      case TradeStatus.PAUSED:
+      case TradeStatus.DISPUTED:
         return 'bg-orange-100 text-orange-800 border-orange-300';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-300';
@@ -218,18 +218,24 @@ export const OffersTrackingPanel: React.FC<OffersTrackingPanelProps> = ({ onView
     switch (phase) {
       case TradePhase.INITIATION:
         return 'bg-purple-100 text-purple-800 border-purple-300';
+      case TradePhase.SELLER_MATCHING:
+        return 'bg-violet-100 text-violet-800 border-violet-300';
       case TradePhase.SELLER_NEGOTIATION:
         return 'bg-blue-100 text-blue-800 border-blue-300';
+      case TradePhase.INSPECTION_PENDING:
+        return 'bg-yellow-100 text-yellow-800 border-yellow-300';
       case TradePhase.TRANSPORT_MATCHING:
         return 'bg-cyan-100 text-cyan-800 border-cyan-300';
+      case TradePhase.TRANSPORT_BIDDING:
+        return 'bg-sky-100 text-sky-800 border-sky-300';
       case TradePhase.IN_TRANSIT:
         return 'bg-orange-100 text-orange-800 border-orange-300';
-      case TradePhase.DELIVERY:
+      case TradePhase.DELIVERED:
         return 'bg-teal-100 text-teal-800 border-teal-300';
-      case TradePhase.PAYMENT:
-        return 'bg-green-100 text-green-800 border-green-300';
       case TradePhase.COMPLETED:
         return 'bg-gray-100 text-gray-800 border-gray-300';
+      case TradePhase.CANCELLED:
+        return 'bg-red-100 text-red-800 border-red-300';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-300';
     }

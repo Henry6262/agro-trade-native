@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, RefreshCw, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, RefreshCw, Clock, CheckCircle2, XCircle, ThumbsUp } from 'lucide-react';
 import { toast } from 'sonner';
 import api from '../../../../services/api';
 import { API_ENDPOINTS } from '../../../../config/api';
@@ -23,6 +23,7 @@ export const NegotiationsDetailPanel: React.FC<NegotiationsDetailPanelProps> = (
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [acceptingId, setAcceptingId] = useState<string | null>(null);
 
   // Fetch negotiations for the trade operation
   const fetchNegotiations = async (showToast = false) => {
@@ -108,6 +109,21 @@ export const NegotiationsDetailPanel: React.FC<NegotiationsDetailPanelProps> = (
   // Check if expired
   const isExpired = (expiresAt: string) => {
     return new Date(expiresAt) < new Date();
+  };
+
+  // Accept a counter-offer
+  const handleAcceptCounter = async (negotiationId: string) => {
+    try {
+      setAcceptingId(negotiationId);
+      await api.post(`/negotiations/${negotiationId}/accept`, {});
+      toast.success('Counter-offer accepted successfully');
+      fetchNegotiations();
+    } catch (err: any) {
+      const msg = err.response?.data?.message || 'Failed to accept counter-offer';
+      toast.error(msg);
+    } finally {
+      setAcceptingId(null);
+    }
   };
 
   // Calculate summary statistics
@@ -282,10 +298,26 @@ export const NegotiationsDetailPanel: React.FC<NegotiationsDetailPanelProps> = (
                     </div>
 
                     {/* Actions */}
-                    <div className="ml-4">
-                      <code className="text-xs bg-gray-100 px-2 py-1 rounded block mb-2">
+                    <div className="ml-4 flex flex-col items-end gap-2">
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded block">
                         {negotiation.id.substring(0, 8)}...
                       </code>
+                      {negotiation.status === NegotiationStatus.COUNTERED && (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="gap-1 bg-green-600 hover:bg-green-700"
+                          disabled={acceptingId === negotiation.id}
+                          onClick={() => handleAcceptCounter(negotiation.id)}
+                        >
+                          {acceptingId === negotiation.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <ThumbsUp className="w-3 h-3" />
+                          )}
+                          Accept Counter
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>

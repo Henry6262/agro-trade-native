@@ -19,7 +19,7 @@ import {
 
 interface Props {
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (tradeOpId?: string) => void;
 }
 
 export const TradeCreationWizard: React.FC<Props> = ({ onClose, onSuccess }) => {
@@ -160,8 +160,8 @@ export const TradeCreationWizard: React.FC<Props> = ({ onClose, onSuccess }) => 
         sellers,
       };
 
-      await tradeOperationService.create(dto);
-      onSuccess();
+      const result = await tradeOperationService.create(dto);
+      onSuccess(result?.tradeOperationId);
     } catch (error) {
       console.error('Failed to create operation:', error);
       alert('Failed to create trade operation. Please try again.');

@@ -21,8 +21,8 @@ export const BulkOfferModal: React.FC<BulkOfferModalProps> = ({ sellers, onSubmi
     const newOffers = new Map(offers);
     newOffers.set(sellerId, {
       tradeSellerId: sellerId,
-      offeredPrice: price,
-      offeredQuantity: quantity,
+      price,
+      quantity,
       expiresInHours: 48,
     });
     setOffers(newOffers);
@@ -58,7 +58,7 @@ export const BulkOfferModal: React.FC<BulkOfferModalProps> = ({ sellers, onSubmi
                       defaultValue={seller.requestedQuantity}
                       onChange={(e) => {
                         const offer = offers.get(seller.id);
-                        updateOffer(seller.id, offer?.offeredPrice || 0, Number(e.target.value));
+                        updateOffer(seller.id, offer?.price || 0, Number(e.target.value));
                       }}
                       className="w-full px-3 py-1 border rounded"
                     />

@@ -1,20 +1,23 @@
 // Trade Operation Types
 export enum TradePhase {
   INITIATION = 'INITIATION',
+  SELLER_MATCHING = 'SELLER_MATCHING',
   SELLER_NEGOTIATION = 'SELLER_NEGOTIATION',
+  INSPECTION_PENDING = 'INSPECTION_PENDING',
   TRANSPORT_MATCHING = 'TRANSPORT_MATCHING',
+  TRANSPORT_BIDDING = 'TRANSPORT_BIDDING',
   IN_TRANSIT = 'IN_TRANSIT',
-  DELIVERY = 'DELIVERY',
-  PAYMENT = 'PAYMENT',
-  COMPLETED = 'COMPLETED'
+  DELIVERED = 'DELIVERED',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED'
 }
 
 export enum TradeStatus {
-  DRAFT = 'DRAFT',
   ACTIVE = 'ACTIVE',
-  PAUSED = 'PAUSED',
+  ON_HOLD = 'ON_HOLD',
   CANCELLED = 'CANCELLED',
-  COMPLETED = 'COMPLETED'
+  COMPLETED = 'COMPLETED',
+  DISPUTED = 'DISPUTED'
 }
 
 export enum NegotiationStatus {
@@ -31,7 +34,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: string;
+  role?: string;
   phoneNumber?: string;
   city?: string;
   region?: string;
@@ -45,8 +48,8 @@ export interface User {
 export interface Product {
   id: string;
   name: string;
-  type: string;
-  category: string;
+  type?: string;
+  category?: string;
   description?: string;
   specifications?: Record<string, string | number | boolean>;
   quality?: string;
@@ -66,6 +69,19 @@ export interface BuyListing {
   updatedAt: string;
   buyer?: User;
   product?: Product;
+  specifications?: Array<{
+    id: string;
+    valueNumber?: number | null;
+    valueText?: string | null;
+    valueBool?: boolean | null;
+    specificationType: {
+      id: string;
+      code: string;
+      name: string;
+      unit?: string;
+      dataType: 'NUMBER' | 'TEXT' | 'BOOLEAN' | 'ENUM';
+    };
+  }>;
 }
 
 export interface SaleListing {
@@ -75,6 +91,7 @@ export interface SaleListing {
   quantity: number;
   unit: string;
   pricePerUnit: number;
+  askingPrice?: number;
   availableDate: string;
   description?: string;
   status: string;
@@ -155,6 +172,19 @@ export interface TradeOperation {
   sellers?: TradeSeller[];
   admin?: User;
   transport?: TransportSummary;
+  offers?: Array<{
+    id: string;
+    tradeOperationId: string;
+    saleListingId: string;
+    buyListingId: string;
+    quantity: number;
+    pricePerUnit: number;
+    totalPrice: number;
+    status: 'pending' | 'accepted' | 'rejected' | 'countered' | 'expired';
+    expiresAt?: string;
+    createdAt: string;
+    updatedAt?: string;
+  }>;
 }
 
 export interface VerificationResult {
@@ -255,6 +285,9 @@ export interface TransportRequestSummary {
   biddingDeadline?: string | null;
   deliveryDeadline?: string | null;
   urgencyLevel?: string;
+  tradeOperationId?: string;
+  createdAt?: string;
+  updatedAt?: string;
   tradeOperation?: {
     id?: string;
     operationNumber?: string;
@@ -291,10 +324,20 @@ export interface TransportBidSummary {
   transporterId?: string;
   transporterName?: string;
   transportCompanyName?: string;
+  transportCompanyId?: string;
+  transportCompany?: {
+    id: string;
+    companyName: string;
+    mainEmail?: string;
+    mainPhone?: string;
+  };
   vehicleType?: string;
   vehicleCapacity?: number;
   estimatedDuration?: number;
   submittedAt?: string;
+  truckCount?: number;
+  totalCapacity?: number;
+  transportRequestId?: string;
 }
 
 export interface TransportJobSummary {
@@ -370,8 +413,8 @@ export interface CreateTradeOperationResponse {
 
 export interface CreateNegotiationDto {
   tradeSellerId: string;
-  offeredPrice: number;
-  offeredQuantity: number;
+  price: number;
+  quantity: number;
   terms?: string;
   expiresInHours?: number;
 }

@@ -165,8 +165,8 @@ const SingleOfferModal: React.FC<SingleOfferModalProps> = ({
 
       await negotiationService.create(tradeOperationId, {
         tradeSellerId,
-        offeredPrice: price,
-        offeredQuantity: quantity,
+        price,
+        quantity,
         terms,
       });
 
