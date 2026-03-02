@@ -1,7 +1,8 @@
-import React, { useCallback } from 'react';
-import { ActivityIndicator, RefreshControl, ScrollView, Text, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useBuyerOrders, useBuyerTimeline } from './hooks';
 import { OrdersStatsGrid, ActiveOrdersList, IncomingOffersList, BuyerTimeline } from './components';
+import { tradeOperationService } from '@services/tradeOperationService';
 
 export default function BuyerOrdersTab() {
   const {
@@ -20,9 +21,51 @@ export default function BuyerOrdersTab() {
     refresh: refreshTimeline,
   } = useBuyerTimeline();
 
+  const [confirmingDeliveryId, setConfirmingDeliveryId] = useState<string | null>(null);
+
   const handleRefresh = useCallback(async () => {
     await Promise.all([refreshOrders(), refreshTimeline()]);
   }, [refreshOrders, refreshTimeline]);
+
+  const handleConfirmDelivery = useCallback(
+    async (orderId: string) => {
+      // TODO: Backend needs a buyer-specific delivery confirmation endpoint.
+      // POST /trade-operations/:id/finalize is currently ADMIN-only.
+      // Once a buyer-facing endpoint (e.g. POST /buyer/orders/:id/confirm-receipt) is added,
+      // replace this call with that endpoint.
+      Alert.alert(
+        'Confirm Delivery',
+        'Confirm that you have received the goods in satisfactory condition?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Confirm Receipt',
+            style: 'default',
+            onPress: async () => {
+              try {
+                setConfirmingDeliveryId(orderId);
+                await tradeOperationService.finalizeTradeOperation(orderId, {
+                  finalSellingPrice: 0,
+                  finalPurchasePrices: [],
+                  actualTransportCost: 0,
+                });
+                Alert.alert('Success', 'Delivery confirmed. Trade operation completed.');
+                await handleRefresh();
+              } catch (err: any) {
+                Alert.alert(
+                  'Error',
+                  err?.message ?? 'Failed to confirm delivery. Please try again.'
+                );
+              } finally {
+                setConfirmingDeliveryId(null);
+              }
+            },
+          },
+        ]
+      );
+    },
+    [handleRefresh]
+  );
 
   if (isLoading && !isRefreshing) {
     return (
@@ -54,6 +97,8 @@ export default function BuyerOrdersTab() {
             orders={orders}
             expandedOrderId={expandedOrderId}
             onToggle={toggleOrderExpand}
+            onConfirmDelivery={handleConfirmDelivery}
+            confirmingDeliveryId={confirmingDeliveryId}
           />
         </View>
         <View className="space-y-3">

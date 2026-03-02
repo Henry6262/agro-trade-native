@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Camera, CheckCircle, FileText, XCircle } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 import type { VerificationFormProps, InspectorVerificationStatus } from '../types';
 
 export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmit, onCancel }) => {
@@ -29,22 +30,62 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
     setErrors((prev) => ({ ...prev, [`method-${key}`]: '' }));
   };
 
-  const addMockPhoto = (source: string) => {
-    setEvidence((prev) => [
-      ...prev,
-      {
-        type: 'photo',
-        url: `https://example.com/photo-${Date.now()}.jpg`,
-        caption: `Photo from ${source}`,
-        timestamp: new Date(),
-      },
-    ]);
+  const pickPhotoFromSource = async (useCamera: boolean) => {
+    try {
+      if (useCamera) {
+        const permission = await ImagePicker.requestCameraPermissionsAsync();
+        if (!permission.granted) {
+          Alert.alert('Permission Required', 'Camera access is needed to take photos.');
+          return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          quality: 0.7,
+          base64: false,
+        });
+        if (!result.canceled && result.assets[0]) {
+          setEvidence((prev) => [
+            ...prev,
+            {
+              type: 'photo',
+              url: result.assets[0].uri,
+              caption: 'Photo from camera',
+              timestamp: new Date(),
+            },
+          ]);
+        }
+      } else {
+        const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permission.granted) {
+          Alert.alert('Permission Required', 'Photo library access is needed to select photos.');
+          return;
+        }
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          quality: 0.7,
+          base64: false,
+        });
+        if (!result.canceled && result.assets[0]) {
+          setEvidence((prev) => [
+            ...prev,
+            {
+              type: 'photo',
+              url: result.assets[0].uri,
+              caption: 'Photo from gallery',
+              timestamp: new Date(),
+            },
+          ]);
+        }
+      }
+    } catch {
+      Alert.alert('Error', 'Failed to capture photo. Please try again.');
+    }
   };
 
   const handleAddPhoto = () => {
     Alert.alert('Add Photo Evidence', 'Choose photo source', [
-      { text: 'Camera', onPress: () => addMockPhoto('camera') },
-      { text: 'Gallery', onPress: () => addMockPhoto('gallery') },
+      { text: 'Camera', onPress: () => pickPhotoFromSource(true) },
+      { text: 'Gallery', onPress: () => pickPhotoFromSource(false) },
       { text: 'Cancel', style: 'cancel' },
     ]);
   };

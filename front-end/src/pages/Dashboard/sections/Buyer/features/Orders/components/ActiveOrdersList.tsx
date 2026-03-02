@@ -1,6 +1,14 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { MapPin, Weight, DollarSign, Truck, Package, Clock } from 'lucide-react-native';
+import { ActivityIndicator, View, Text, TouchableOpacity } from 'react-native';
+import {
+  MapPin,
+  Weight,
+  DollarSign,
+  Truck,
+  Package,
+  Clock,
+  CheckCircle2,
+} from 'lucide-react-native';
 import { format } from 'date-fns';
 import { Card, CardContent } from '@shared/components/Card';
 import { Badge } from '@shared/components/Badge';
@@ -11,12 +19,16 @@ interface ActiveOrdersListProps {
   orders: BuyerOrder[];
   expandedOrderId: string | null;
   onToggle: (orderId: string) => void;
+  onConfirmDelivery?: (orderId: string) => void;
+  confirmingDeliveryId?: string | null;
 }
 
 export const ActiveOrdersList: React.FC<ActiveOrdersListProps> = ({
   orders,
   expandedOrderId,
   onToggle,
+  onConfirmDelivery,
+  confirmingDeliveryId,
 }) => (
   <View className="space-y-4">
     {orders.map((order) => (
@@ -65,6 +77,23 @@ export const ActiveOrdersList: React.FC<ActiveOrdersListProps> = ({
               {expandedOrderId === order.id ? 'Hide Details' : 'View Details'}
             </Text>
           </TouchableOpacity>
+
+          {order.phase === 'DELIVERED' && onConfirmDelivery && (
+            <TouchableOpacity
+              onPress={() => onConfirmDelivery(order.id)}
+              disabled={confirmingDeliveryId === order.id}
+              className="mt-3 flex-row items-center justify-center bg-green-600 rounded-xl py-3 px-4"
+            >
+              {confirmingDeliveryId === order.id ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <>
+                  <CheckCircle2 size={16} color="#fff" />
+                  <Text className="text-white font-semibold ml-2">Confirm Delivery</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          )}
 
           {expandedOrderId === order.id && (
             <View className="mt-3 border-t border-neutral-800 pt-3 space-y-3">
