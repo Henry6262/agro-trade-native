@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -20,10 +18,10 @@ import {
   TrendingDown,
   TrendingUp,
 } from 'lucide-react-native';
-import { GlassCard, GlassBadge, GlassButton } from '../../../../design-system';
-import { COLORS } from '../../../../design-system/tokens';
+import { GlassCard, GlassBadge, GlassButton, GlassInput } from '../../../../design-system';
+import { COLORS, GLASS } from '../../../../design-system/tokens';
 import { useMarketStore, PriceAlert } from '../../../../stores/market.store';
-import { CommoditySymbol } from '../../../../services/marketDataService';
+import { CommoditySymbol } from '../../../../services';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -34,7 +32,9 @@ interface IntelligenceScreenProps {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatTimeAgo(isoString: string): string {
+  if (!isoString) return 'unknown';
   const ms = Date.now() - new Date(isoString).getTime();
+  if (isNaN(ms)) return 'unknown';
   const mins = Math.floor(ms / 60000);
   if (mins < 1) return 'just now';
   if (mins < 60) return `${mins}m ago`;
@@ -300,6 +300,13 @@ const AlertsSection: React.FC = () => {
           </View>
 
           <Text style={styles.addAlertLabel}>Threshold (USD)</Text>
+          <GlassInput
+            placeholder="e.g. 7.50"
+            value={newThreshold}
+            onChangeText={setNewThreshold}
+            keyboardType="decimal-pad"
+            containerStyle={styles.thresholdInput}
+          />
           <View style={styles.thresholdRow}>
             <GlassButton
               label="Cancel"
@@ -406,7 +413,7 @@ const styles = StyleSheet.create({
   },
   condChip: {
     alignItems: 'center',
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.12)', // glass border muted
     borderRadius: 8,
     borderWidth: 1,
     flexDirection: 'row',
@@ -415,7 +422,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   condChipActive: {
-    borderColor: 'rgba(255,255,255,0.3)',
+    borderColor: 'rgba(255,255,255,0.3)', // glass border active
   },
   condChipText: {
     color: COLORS.textMuted,
@@ -510,14 +517,14 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   symbolChip: {
-    borderColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.12)', // glass border muted
     borderRadius: 8,
     borderWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
   symbolChipActive: {
-    backgroundColor: 'rgba(74,222,128,0.14)',
+    backgroundColor: 'rgba(74,222,128,0.14)', // COLORS.accentGreen at 14% opacity
     borderColor: COLORS.accentGreen,
   },
   symbolChipText: {
@@ -533,6 +540,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 6,
     marginBottom: 8,
+  },
+  thresholdInput: {
+    marginBottom: 0,
+    marginTop: 4,
   },
   thresholdRow: {
     flexDirection: 'row',
@@ -569,7 +580,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   tickerSeparator: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: GLASS.subtle.fill, // matches rgba(255,255,255,0.08)
     height: '60%',
     width: 1,
   },
