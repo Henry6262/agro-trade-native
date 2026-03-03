@@ -66,8 +66,10 @@ api.interceptors.response.use(
       }
     }
 
-    // Log error for debugging
-    console.error('API Error:', error.response?.data || error.message);
+    // Log unexpected errors — 404 is expected ("no records yet") and handled per-service
+    if (error.response?.status !== 404) {
+      console.error('API Error:', error.response?.data || error.message);
+    }
 
     return Promise.reject(error);
   }

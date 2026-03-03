@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, StyleSheet } from 'react-native';
-import { Search, Filter, MapPin, Users, Truck, ShoppingCart, Wheat, X } from 'lucide-react-native';
-import {
-  GlassCard,
-  GlassBadge,
-  GlassButton,
-  GlassInput,
-  StatCard,
-} from '../../../../design-system';
+import { Filter, MapPin, Search, ShoppingCart, Truck, Users, Wheat, X } from 'lucide-react-native';
+import { GlassBadge, GlassButton, GlassCard, GlassInput } from '../../../../design-system';
 import { COLORS } from '../../../../design-system';
 
 const DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 4 };
@@ -112,11 +106,11 @@ export default function AgentNetworkScreen() {
   const getUserTypeIcon = (type: string, size = 16) => {
     switch (type) {
       case 'farmer':
-        return <Wheat width={size} height={size} color={COLORS.accentGreen} />;
+        return <Wheat width={size} height={size} color={COLORS.textSecondary} />;
       case 'buyer':
-        return <ShoppingCart width={size} height={size} color={COLORS.info} />;
+        return <ShoppingCart width={size} height={size} color={COLORS.textSecondary} />;
       case 'transporter':
-        return <Truck width={size} height={size} color="#f97316" />;
+        return <Truck width={size} height={size} color={COLORS.textSecondary} />;
       default:
         return <Users width={size} height={size} color={COLORS.textMuted} />;
     }
@@ -124,10 +118,14 @@ export default function AgentNetworkScreen() {
 
   return (
     <View style={styles.root}>
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {/* Header actions */}
         <View style={styles.headerRow}>
-          <View>
+          <View style={styles.headerLeft}>
             <Text style={styles.title}>NETWORK</Text>
             <Text style={styles.subtitle}>Manage farmers, buyers, and transporters</Text>
           </View>
@@ -143,33 +141,25 @@ export default function AgentNetworkScreen() {
           </View>
         </View>
 
-        {/* Stats row */}
-        <View style={styles.statsRow}>
-          <StatCard
-            label="Farmers"
-            value={247}
-            color={COLORS.accentGreen}
-            icon={<Wheat size={16} color={COLORS.accentGreen} />}
-            style={styles.statCard}
-            delay={0}
-          />
-          <StatCard
-            label="Buyers"
-            value={183}
-            color={COLORS.info}
-            icon={<ShoppingCart size={16} color={COLORS.info} />}
-            style={styles.statCard}
-            delay={60}
-          />
-          <StatCard
-            label="Transport"
-            value={45}
-            color="#f97316"
-            icon={<Truck size={16} color="#f97316" />}
-            style={styles.statCard}
-            delay={120}
-          />
-        </View>
+        {/* Compact stats strip */}
+        <GlassCard tier="subtle" style={styles.statsStrip} animate={false}>
+          <View style={styles.statsInner}>
+            <View style={styles.statCell}>
+              <Text style={[styles.statValue, styles.statValueGreen]}>247</Text>
+              <Text style={styles.statLabel}>FARMERS</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statCell}>
+              <Text style={styles.statValue}>183</Text>
+              <Text style={styles.statLabel}>BUYERS</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statCell}>
+              <Text style={styles.statValue}>45</Text>
+              <Text style={styles.statLabel}>TRANSPORT</Text>
+            </View>
+          </View>
+        </GlassCard>
 
         {/* Search */}
         <GlassInput
@@ -177,7 +167,6 @@ export default function AgentNetworkScreen() {
           value={searchTerm}
           onChangeText={setSearchTerm}
           leftIcon={<Search size={16} color={COLORS.textMuted} />}
-          containerStyle={styles.searchInput}
         />
 
         {/* User list */}
@@ -282,13 +271,7 @@ export default function AgentNetworkScreen() {
                 <Text style={styles.fieldLabel}>PRODUCTS / SERVICES</Text>
                 <View style={styles.tagsRow}>
                   {selectedUser?.products.map((product: string, idx: number) => (
-                    <GlassBadge
-                      key={idx}
-                      label={product}
-                      variant="muted"
-                      size="sm"
-                      style={styles.tag}
-                    />
+                    <GlassBadge key={idx} label={product} variant="muted" size="sm" />
                   ))}
                 </View>
               </View>
@@ -327,36 +310,7 @@ export default function AgentNetworkScreen() {
 }
 
 const styles = StyleSheet.create({
-  headerButtons: { flexDirection: 'row', gap: 8 },
-  headerRow: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-  },
-  root: { backgroundColor: 'transparent', flex: 1 },
-  scroll: { flex: 1, padding: 16 },
-  searchInput: { marginBottom: 16 },
-  statCard: { flex: 1 },
-  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
-  subtitle: { color: COLORS.textSecondary, fontSize: 12, marginTop: 2 },
-  title: { color: COLORS.textPrimary, fontSize: 22, fontWeight: '800', letterSpacing: 1 },
-  // eslint-disable-next-line react-native/sort-styles
-  dirHeader: { paddingBottom: 10, paddingHorizontal: 16, paddingTop: 14 },
-  dirTitle: {
-    color: COLORS.textSecondary,
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-  },
-  tableHeader: {
-    borderBottomColor: 'rgba(255,255,255,0.08)',
-    borderBottomWidth: 1,
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
+  closeBtn: { padding: 4 },
   colLabel: {
     color: COLORS.textMuted,
     fontSize: 10,
@@ -364,45 +318,18 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
-  colType: { justifyContent: 'center', width: 40 },
-  colName: { flex: 2, paddingHorizontal: 6 },
   colLoc: { flex: 2, paddingHorizontal: 6 },
+  colName: { flex: 2, paddingHorizontal: 6 },
   colNum: { alignItems: 'center', flexDirection: 'row', width: 56 },
-  userRow: {
-    alignItems: 'center',
-    borderBottomColor: 'rgba(255,255,255,0.06)',
-    borderBottomWidth: 1,
-    flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  colType: { justifyContent: 'center', width: 40 },
+  dirHeader: { paddingBottom: 10, paddingHorizontal: 16, paddingTop: 14 },
+  dirTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 1.0,
+    textTransform: 'uppercase',
   },
-  userName: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '600' },
-  userId: { color: COLORS.textMuted, fontFamily: 'monospace', fontSize: 10, marginTop: 1 },
-  locationRow: { alignItems: 'center', flexDirection: 'row', gap: 4 },
-  locationText: { color: COLORS.textSecondary, fontSize: 12 },
-  goldNum: { color: COLORS.accentGold, fontFamily: 'monospace', fontSize: 13, fontWeight: '700' },
-  star: { color: COLORS.accentGold, fontSize: 11 },
-  // Modal
-  modalOverlay: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    flex: 1,
-    justifyContent: 'center',
-    padding: 20,
-  },
-  modalCard: { maxWidth: 480, width: '100%' },
-  modalHeader: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  modalName: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '800' },
-  modalId: { color: COLORS.textMuted, fontFamily: 'monospace', fontSize: 11, marginTop: 2 },
-  closeBtn: { padding: 4 },
-  modalBody: { gap: 12, marginVertical: 12 },
-  modalRow: { flexDirection: 'row', gap: 16 },
-  modalField: { flex: 1 },
   fieldLabel: {
     color: COLORS.textMuted,
     fontSize: 10,
@@ -413,10 +340,89 @@ const styles = StyleSheet.create({
   },
   fieldRow: { alignItems: 'center', flexDirection: 'row' },
   fieldValue: { color: COLORS.textPrimary, fontSize: 13 },
-  goldValue: { color: COLORS.accentGold, fontFamily: 'monospace', fontSize: 16, fontWeight: '800' },
-  tagsSection: { gap: 6 },
-  tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  tag: {},
+  goldNum: { color: COLORS.accentGold, fontFamily: 'monospace', fontSize: 13, fontWeight: '700' },
+  goldValue: {
+    color: COLORS.accentGold,
+    fontFamily: 'monospace',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  headerButtons: { flexDirection: 'row', gap: 8 },
+  headerLeft: { flex: 1, marginRight: 12 },
+  headerRow: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  locationRow: { alignItems: 'center', flexDirection: 'row', gap: 4 },
+  locationText: { color: COLORS.textSecondary, fontSize: 12 },
   modalActions: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  modalBody: { gap: 12, marginVertical: 12 },
   modalBtn: { flex: 1 },
+  modalCard: { maxWidth: 480, width: '100%' },
+  modalField: { flex: 1 },
+  modalHeader: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  modalId: { color: COLORS.textMuted, fontFamily: 'monospace', fontSize: 11, marginTop: 2 },
+  modalName: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '800' },
+  modalOverlay: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalRow: { flexDirection: 'row', gap: 16 },
+  root: { backgroundColor: 'transparent', flex: 1 },
+  scroll: { flex: 1 },
+  scrollContent: { gap: 16, padding: 16, paddingBottom: 100 },
+  star: { color: COLORS.accentGold, fontSize: 11 },
+  statCell: { alignItems: 'center', flex: 1, paddingVertical: 10 },
+  statDivider: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    height: 32,
+    width: 1,
+  },
+  statLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    marginTop: 2,
+    textTransform: 'uppercase',
+  },
+  statValue: {
+    color: COLORS.textPrimary,
+    fontFamily: 'monospace',
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  statValueGreen: { color: COLORS.accentGreen },
+  statsInner: { alignItems: 'center', flexDirection: 'row' },
+  statsStrip: { paddingVertical: 0 },
+  subtitle: { color: COLORS.textSecondary, fontSize: 12, marginTop: 2 },
+  tableHeader: {
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  tagsSection: { gap: 6 },
+  title: { color: COLORS.textPrimary, fontSize: 22, fontWeight: '800', letterSpacing: 1 },
+  userId: { color: COLORS.textMuted, fontFamily: 'monospace', fontSize: 10, marginTop: 1 },
+  userName: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '600' },
+  userRow: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
 });

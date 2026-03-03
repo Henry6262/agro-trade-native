@@ -140,7 +140,11 @@ export default function CommandCenterScreen() {
   };
 
   return (
-    <View style={styles.root}>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.rootContent}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Compact stats strip */}
       <GlassCard tier="subtle" style={styles.statsStrip} animate={false}>
         <View style={styles.statsInner}>
@@ -257,7 +261,7 @@ export default function CommandCenterScreen() {
           </View>
         </View>
       </GlassCard>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -354,8 +358,12 @@ const styles = StyleSheet.create({
   },
   root: {
     backgroundColor: 'transparent',
+    flex: 1,
+  },
+  rootContent: {
     gap: 16,
     padding: 16,
+    paddingBottom: 100,
   },
   rowId: {
     color: COLORS.textMuted,

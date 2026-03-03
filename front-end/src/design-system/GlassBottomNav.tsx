@@ -1,7 +1,14 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import React, { useEffect } from 'react';
+import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
+import Animated, {
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { COLORS } from './tokens';
 
 interface NavItem {
@@ -11,10 +18,84 @@ interface NavItem {
 }
 
 interface GlassBottomNavProps {
-  items: NavItem[];
   activeId: string;
+  items: NavItem[];
   onSelect: (id: string) => void;
 }
+
+interface AnimatedTabProps {
+  isActive: boolean;
+  isFirst: boolean;
+  isLast: boolean;
+  item: NavItem;
+  onPress: (id: string) => void;
+}
+
+const AnimatedTab: React.FC<AnimatedTabProps> = ({ item, isActive, isFirst, isLast, onPress }) => {
+  const Icon = item.icon;
+  const progress = useSharedValue(isActive ? 1 : 0);
+  const scale = useSharedValue(isActive ? 1.06 : 1);
+
+  useEffect(() => {
+    progress.value = withTiming(isActive ? 1 : 0, { duration: 220 });
+    scale.value = withSpring(isActive ? 1.06 : 1, { damping: 14, stiffness: 220 });
+  }, [isActive, progress, scale]);
+
+  const bgStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      ['rgba(74,222,128,0)', 'rgba(74,222,128,0.14)']
+    ),
+    borderColor: interpolateColor(
+      progress.value,
+      [0, 1],
+      ['rgba(74,222,128,0)', 'rgba(74,222,128,0.25)']
+    ),
+    borderWidth: 1,
+  }));
+
+  const scaleStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const activeIconStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    position: 'absolute',
+  }));
+
+  const inactiveIconStyle = useAnimatedStyle(() => ({
+    opacity: 1 - progress.value,
+  }));
+
+  const labelStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(progress.value, [0, 1], ['rgba(255,255,255,0.38)', COLORS.accentGreen]),
+  }));
+
+  return (
+    <TouchableOpacity
+      style={[styles.tab, isFirst && styles.tabFirst, isLast && styles.tabLast]}
+      onPress={() => onPress(item.id)}
+      activeOpacity={0.7}
+    >
+      <Animated.View style={[styles.tabInner, bgStyle]}>
+        <Animated.View style={scaleStyle}>
+          <View style={styles.iconContainer}>
+            <Animated.View style={inactiveIconStyle}>
+              <Icon size={24} color="rgba(255,255,255,0.4)" />
+            </Animated.View>
+            <Animated.View style={[styles.iconAbsolute, activeIconStyle]}>
+              <Icon size={24} color={COLORS.accentGreen} />
+            </Animated.View>
+          </View>
+        </Animated.View>
+        <Animated.Text style={[styles.tabLabel, labelStyle]} numberOfLines={1}>
+          {item.label}
+        </Animated.Text>
+      </Animated.View>
+    </TouchableOpacity>
+  );
+};
 
 export const GlassBottomNav: React.FC<GlassBottomNavProps> = ({ items, activeId, onSelect }) => {
   const insets = useSafeAreaInsets();
@@ -28,48 +109,41 @@ export const GlassBottomNav: React.FC<GlassBottomNavProps> = ({ items, activeId,
   };
 
   return (
-    <View style={[styles.wrapper, { paddingBottom: insets.bottom || 16 }]}>
+    <View style={[styles.wrapper, { paddingBottom: insets.bottom > 0 ? insets.bottom : 4 }]}>
       <View style={styles.pill}>
-        {displayItems.map((item, index) => {
-          const Icon = item.icon;
-          const isActive = item.id === activeId;
-          return (
-            <TouchableOpacity
-              key={item.id}
-              style={[styles.tab, index === 0 && styles.tabFirst, index === displayItems.length - 1 && styles.tabLast]}
-              onPress={() => handlePress(item.id)}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.tabInner, isActive && styles.tabActive]}>
-                <Icon size={24} color={isActive ? COLORS.accentGreen : 'rgba(255,255,255,0.4)'} />
-                <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]} numberOfLines={1}>
-                  {item.label}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          );
-        })}
+        {displayItems.map((item, index) => (
+          <AnimatedTab
+            key={item.id}
+            item={item}
+            isActive={item.id === activeId}
+            isFirst={index === 0}
+            isLast={index === displayItems.length - 1}
+            onPress={handlePress}
+          />
+        ))}
       </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  wrapper: {
-    alignItems: 'center',
+  iconAbsolute: {
     bottom: 0,
     left: 0,
-    paddingHorizontal: 20,
-    paddingTop: 8,
     position: 'absolute',
     right: 0,
+    top: 0,
+  },
+  iconContainer: {
+    height: 24,
+    width: 24,
   },
   pill: {
     alignItems: 'center',
-    backgroundColor: 'rgba(5,20,10,0.88)',
-    borderColor: 'rgba(255,255,255,0.12)',
+    backgroundColor: 'rgba(5,20,10,0.92)',
+    borderColor: 'rgba(255,255,255,0.22)',
     borderRadius: 44,
-    borderWidth: 1,
+    borderWidth: 1.5,
     elevation: 24,
     flexDirection: 'row',
     overflow: 'hidden',
@@ -89,10 +163,6 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 34,
     borderTopLeftRadius: 34,
   },
-  tabLast: {
-    borderBottomRightRadius: 34,
-    borderTopRightRadius: 34,
-  },
   tabInner: {
     alignItems: 'center',
     borderRadius: 36,
@@ -100,24 +170,24 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     width: '100%',
   },
-  tabActive: {
-    backgroundColor: 'rgba(74,222,128,0.14)',
-    borderColor: 'rgba(74,222,128,0.25)',
-    borderWidth: 1,
-    shadowColor: '#4ADE80',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-  },
   tabLabel: {
-    color: 'rgba(255,255,255,0.38)',
     fontSize: 9,
     fontWeight: '700',
     letterSpacing: 0.5,
     marginTop: 4,
     textAlign: 'center',
   },
-  tabLabelActive: {
-    color: COLORS.accentGreen,
+  tabLast: {
+    borderBottomRightRadius: 34,
+    borderTopRightRadius: 34,
+  },
+  wrapper: {
+    alignItems: 'center',
+    bottom: 0,
+    left: 0,
+    paddingHorizontal: 20,
+    paddingTop: 4,
+    position: 'absolute',
+    right: 0,
   },
 });

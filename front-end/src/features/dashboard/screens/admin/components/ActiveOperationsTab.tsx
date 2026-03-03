@@ -106,6 +106,15 @@ const getNegotiationBadgeVariant = (status: string): NegotiationBadgeVariant => 
   }
 };
 
+// "soft_wheat" → "Soft Wheat"
+const formatProductName = (name?: string): string => {
+  if (!name) return 'Product';
+  return name.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+// "OP-1772440681414" → "#681414"
+const formatOpRef = (opNumber: string): string => `#${opNumber.slice(-6)}`;
+
 export const ActiveOperationsTab: React.FC<Props> = ({
   onSelectOperation,
   onSendOffer,
@@ -129,9 +138,24 @@ export const ActiveOperationsTab: React.FC<Props> = ({
               negotiations: negotiations.negotiations,
               negotiationSummary: negotiations.summary,
             };
-          } catch (error) {
-            console.error(`Failed to load negotiations for ${op.id}:`, error);
-            return op;
+          } catch (error: any) {
+            // 404 = operation has no negotiations yet — normal for new ops, not an error
+            if (error?.response?.status !== 404) {
+              console.error(`Failed to load negotiations for ${op.id}:`, error);
+            }
+            return {
+              ...op,
+              negotiations: [],
+              negotiationSummary: {
+                accepted: 0,
+                countered: 0,
+                expired: 0,
+                pending: 0,
+                rejected: 0,
+                total: 0,
+                withdrawn: 0,
+              },
+            };
           }
         })
       );
@@ -227,7 +251,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
                   ]}
                 >
                   {' '}
-                  Margin: {negotiation.profitImpact.profitMargin.toFixed(1)}%
+                  Margin: {(negotiation.profitImpact.profitMargin ?? 0).toFixed(1)}%
                   {negotiation.profitImpact.warning ? ' ⚠' : ''}
                 </Text>
               </View>
@@ -271,7 +295,9 @@ export const ActiveOperationsTab: React.FC<Props> = ({
           <View style={styles.opHeader}>
             <View style={styles.opHeaderLeft}>
               <View style={styles.opTitleRow}>
-                <Text style={styles.opNumber}>{operation.operationNumber}</Text>
+                <Text style={styles.opProductName}>
+                  {formatProductName(operation.buyListing?.product?.name)}
+                </Text>
                 {hasUrgentItems && (
                   <GlassBadge
                     label="Action Required"
@@ -281,9 +307,9 @@ export const ActiveOperationsTab: React.FC<Props> = ({
                   />
                 )}
               </View>
-              <Text style={styles.opSubtitle}>
-                {operation.buyListing?.product?.name || 'Product'} -{' '}
-                {operation.buyListing?.quantity || 0} units
+              <Text style={styles.opMeta}>
+                {operation.buyListing?.quantity || 0} units ·{' '}
+                {formatOpRef(operation.operationNumber)}
               </Text>
             </View>
 
@@ -303,26 +329,20 @@ export const ActiveOperationsTab: React.FC<Props> = ({
             <View style={styles.summaryRow}>
               {summary.pending > 0 && (
                 <View style={styles.summaryChip}>
-                  <Clock size={12} color="#F59E0B" />
-                  <Text style={[styles.summaryChipText, { color: COLORS.textSecondary }]}>
-                    {' '}
-                    {summary.pending} Pending
-                  </Text>
+                  <Clock size={12} color={COLORS.textMuted} />
+                  <Text style={styles.summaryChipText}> {summary.pending} Pending</Text>
                 </View>
               )}
               {summary.countered > 0 && (
                 <View style={styles.summaryChip}>
-                  <MessageSquare size={12} color={COLORS.info} />
-                  <Text style={[styles.summaryChipText, { color: COLORS.textSecondary }]}>
-                    {' '}
-                    {summary.countered} Countered
-                  </Text>
+                  <MessageSquare size={12} color={COLORS.textMuted} />
+                  <Text style={styles.summaryChipText}> {summary.countered} Countered</Text>
                 </View>
               )}
               {summary.accepted > 0 && (
                 <View style={styles.summaryChip}>
                   <CheckCircle size={12} color={COLORS.accentGreen} />
-                  <Text style={[styles.summaryChipText, { color: COLORS.textSecondary }]}>
+                  <Text style={[styles.summaryChipText, styles.summaryChipGreen]}>
                     {' '}
                     {summary.accepted} Accepted
                   </Text>
@@ -331,7 +351,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
               {summary.rejected > 0 && (
                 <View style={styles.summaryChip}>
                   <XCircle size={12} color={COLORS.danger} />
-                  <Text style={[styles.summaryChipText, { color: COLORS.textSecondary }]}>
+                  <Text style={[styles.summaryChipText, styles.summaryChipDanger]}>
                     {' '}
                     {summary.rejected} Rejected
                   </Text>
@@ -346,7 +366,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
               <TrendingUp size={14} color={COLORS.textMuted} />
               <Text style={styles.profitLabel}> Target Margin: {operation.profitMargin || 0}%</Text>
             </View>
-            {operation.estimatedProfit !== undefined && (
+            {operation.estimatedProfit != null && (
               <Text
                 style={[
                   styles.profitValue,
@@ -396,7 +416,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
               }}
               style={styles.sendOffersBtn}
             >
-              <Send size={13} color={COLORS.info} />
+              <Send size={13} color={COLORS.accentGreen} />
               <Text style={styles.sendOffersText}> Send Offers</Text>
             </TouchableOpacity>
           </GlassCard>
@@ -455,7 +475,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
       <View style={styles.inner}>
         <View style={styles.listHeader}>
           <Text style={styles.listTitle}>Active Trade Operations</Text>
-          <GlassBadge label={`${operations.length} Active`} variant="info" size="sm" />
+          <GlassBadge label={`${operations.length} Active`} variant="muted" size="sm" />
         </View>
 
         {operations.map(renderOperation)}
@@ -471,7 +491,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 10,
   },
-  awaitingText: { color: COLORS.info, flex: 1, fontSize: 12, fontWeight: '600' },
+  awaitingText: { color: COLORS.textSecondary, flex: 1, fontSize: 12, fontWeight: '600' },
 
   centerContainer: {
     alignItems: 'center',
@@ -555,8 +575,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   opHeaderLeft: { flex: 1 },
-  opNumber: { color: COLORS.textPrimary, fontSize: 16, fontWeight: '800' },
-  opSubtitle: { color: COLORS.textSecondary, fontSize: 13 },
+  opMeta: {
+    color: COLORS.textMuted,
+    fontFamily: 'monospace',
+    fontSize: 11,
+    marginTop: 2,
+  },
+  opProductName: {
+    color: COLORS.textPrimary,
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
   opTitleRow: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -579,9 +609,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
-  sendOffersText: { color: COLORS.info, fontSize: 12, fontWeight: '600' },
+  sendOffersText: { color: COLORS.accentGreen, fontSize: 12, fontWeight: '600' },
   summaryChip: { alignItems: 'center', flexDirection: 'row' },
-  summaryChipText: { fontSize: 12 },
+  summaryChipDanger: { color: COLORS.danger },
+  summaryChipGreen: { color: COLORS.accentGreen },
+  summaryChipText: { color: COLORS.textMuted, fontSize: 12 },
   summaryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 10 },
   urgentBadge: {},
   verifiedRow: { alignItems: 'center', flexDirection: 'row', marginTop: 2 },

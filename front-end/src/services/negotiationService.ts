@@ -518,8 +518,11 @@ export const negotiationService = {
         {}
       );
       return response.data.data || response.data;
-    } catch (error) {
-      console.error('Error getting negotiations:', error);
+    } catch (error: any) {
+      // 404 = no negotiations yet, expected for new operations — don't log
+      if (error?.response?.status !== 404) {
+        console.error('Error getting negotiations:', error);
+      }
       throw error;
     }
   },
