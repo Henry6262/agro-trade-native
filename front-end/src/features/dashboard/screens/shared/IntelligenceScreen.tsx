@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   Linking,
   RefreshControl,
   ScrollView,
@@ -10,11 +11,20 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   Bell,
   BellOff,
   ChevronDown,
   ChevronUp,
+  ImageIcon,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react-native';
@@ -49,6 +59,30 @@ function formatLastUpdated(timestamp: number): string {
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
+
+const SkeletonNewsCard: React.FC = () => {
+  const opacity = useSharedValue(0.3);
+
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(withTiming(0.7, { duration: 700 }), withTiming(0.3, { duration: 700 })),
+      -1,
+      false
+    );
+  }, [opacity]);
+
+  const animStyle = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return (
+    <Animated.View style={[styles.skeletonCard, animStyle]}>
+      <View style={styles.skeletonImage} />
+      <View style={styles.skeletonBody}>
+        <View style={styles.skeletonLineFull} />
+        <View style={styles.skeletonLineHalf} />
+      </View>
+    </Animated.View>
+  );
+};
 
 const PriceTicker: React.FC = () => {
   const prices = useMarketStore((s) => s.prices);
@@ -143,14 +177,16 @@ const NewsSection: React.FC = () => {
       <Text style={styles.sectionTitle}>📰 LIVE NEWS</Text>
 
       {isLoading && news.length === 0 && (
-        <GlassCard tier="subtle">
-          <ActivityIndicator color={COLORS.accentGreen} />
-        </GlassCard>
+        <>
+          <SkeletonNewsCard />
+          <SkeletonNewsCard />
+          <SkeletonNewsCard />
+        </>
       )}
 
       {!isLoading && news.length === 0 && (
         <GlassCard tier="subtle">
-          <Text style={styles.emptyText}>Check back soon</Text>
+          <Text style={styles.emptyText}>No agricultural news — pull to refresh</Text>
         </GlassCard>
       )}
 
@@ -161,19 +197,40 @@ const NewsSection: React.FC = () => {
           activeOpacity={0.75}
           style={styles.newsCardWrapper}
         >
-          <GlassCard tier="subtle" animate delay={index * 40}>
-            <View style={styles.newsCardHeader}>
-              <GlassBadge label={article.source} variant="muted" />
-              <Text style={styles.newsTime}>{formatTimeAgo(article.publishedAt)}</Text>
+          <GlassCard tier="subtle" noPadding animate delay={index * 50}>
+            <View style={styles.newsImageContainer}>
+              {article.imageUrl ? (
+                <Image
+                  source={{ uri: article.imageUrl }}
+                  style={styles.newsImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={styles.newsImagePlaceholder}>
+                  <ImageIcon size={22} color={COLORS.textMuted} />
+                </View>
+              )}
+              <LinearGradient
+                colors={['transparent', 'rgba(0,0,0,0.45)']}
+                style={StyleSheet.absoluteFillObject}
+                pointerEvents="none"
+              />
             </View>
-            <Text style={styles.newsTitle} numberOfLines={2}>
-              {article.title}
-            </Text>
-            {!!article.description && (
-              <Text style={styles.newsDescription} numberOfLines={2}>
-                {article.description}
+
+            <View style={styles.newsContent}>
+              <View style={styles.newsCardHeader}>
+                <GlassBadge label={article.source} variant="muted" />
+                <Text style={styles.newsTime}>{formatTimeAgo(article.publishedAt)}</Text>
+              </View>
+              <Text style={styles.newsTitle} numberOfLines={2}>
+                {article.title}
               </Text>
-            )}
+              {!!article.description && (
+                <Text style={styles.newsDescription} numberOfLines={2}>
+                  {article.description}
+                </Text>
+              )}
+            </View>
           </GlassCard>
         </TouchableOpacity>
       ))}
@@ -457,13 +514,32 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   newsCardWrapper: {
-    marginBottom: 8,
+    marginBottom: 10,
+  },
+  newsContent: {
+    padding: 12,
   },
   newsDescription: {
     color: COLORS.textMuted,
     fontSize: 12,
     lineHeight: 17,
     marginTop: 4,
+  },
+  newsImage: {
+    height: 140,
+    width: '100%',
+  },
+  newsImageContainer: {
+    height: 140,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  newsImagePlaceholder: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    height: 140,
+    justifyContent: 'center',
+    width: '100%',
   },
   newsTime: {
     color: COLORS.textMuted,
@@ -491,6 +567,35 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: 8,
     textTransform: 'uppercase',
+  },
+  skeletonBody: {
+    gap: 8,
+    padding: 12,
+  },
+  skeletonCard: {
+    backgroundColor: GLASS.subtle.fill,
+    borderColor: GLASS.subtle.border,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 10,
+    overflow: 'hidden',
+  },
+  skeletonImage: {
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    height: 140,
+    width: '100%',
+  },
+  skeletonLineFull: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 4,
+    height: 12,
+    width: '90%',
+  },
+  skeletonLineHalf: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 4,
+    height: 10,
+    width: '60%',
   },
   statDot: {
     backgroundColor: COLORS.textMuted,
