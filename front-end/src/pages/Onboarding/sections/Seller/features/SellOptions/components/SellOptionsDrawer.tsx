@@ -46,12 +46,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-export function SellOptionsDrawer({
-  visible,
-  onClose,
-  productId,
-  onComplete,
-}: SellOptionsDrawerProps) {
+export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDrawerProps) {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [offerType, setOfferType] = useState<OfferType>(null);
   const [specifications, setSpecifications] = useState<Record<string, string>>({});
@@ -59,7 +54,7 @@ export function SellOptionsDrawer({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [listingCreated, setListingCreated] = useState(false);
+  const [_listingCreated, setListingCreated] = useState(false);
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').height)).current;
   const [drawerHeight, setDrawerHeight] = useState(Dimensions.get('window').height * 0.4);
   const successAnimScale = useRef(new Animated.Value(0)).current;
@@ -68,7 +63,7 @@ export function SellOptionsDrawer({
   const { sellerSpecifications, updateSellerSpecification, location, selectedRole } =
     useOnboardingStore();
   const { products } = useProductStore();
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
 
   const product = products.find((p) => p.id === productId);
   const currentSpecs = sellerSpecifications[productId] || {};

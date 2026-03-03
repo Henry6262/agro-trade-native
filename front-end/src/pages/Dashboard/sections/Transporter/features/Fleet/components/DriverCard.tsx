@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import { Users, MapPin, Trash2, MoreVertical } from 'lucide-react-native';
+import { Users, MapPin, MoreVertical } from 'lucide-react-native';
 import { Badge } from '@shared/components/Badge';
 import type { FleetDriver } from '../types';
 import { useDeleteDriver } from '../hooks';

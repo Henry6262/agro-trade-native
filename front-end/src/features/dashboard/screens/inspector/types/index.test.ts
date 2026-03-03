@@ -1,6 +1,5 @@
 import {
   VerificationJob,
-  InspectorProfile,
   LocationUpdate,
   VerificationResult,
   JobPriority,

@@ -14,7 +14,6 @@ const ProductCreationFlowComponent: React.FC<ProductCreationFlowProps> = ({
   const {
     currentStep,
     data,
-    isLoading,
     error,
     productMetadata,
     goToNextStep,

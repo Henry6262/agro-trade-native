@@ -1,5 +1,5 @@
 import { apiClient } from './api';
-import { Product, ProductCategory, ApiResponse, PaginatedResponse } from '../shared/types';
+import { Product, ProductCategory, PaginatedResponse } from '../shared/types';
 
 export interface ProductsListParams {
   page?: number;

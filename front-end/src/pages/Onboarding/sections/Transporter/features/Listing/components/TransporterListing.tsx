@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView } from 'react-native';
 import { Truck, MapPin, Package, Users, TrendingUp } from 'lucide-react-native';
 import { Card } from '@shared/components/Card';
 import { Badge } from '@shared/components/Badge';

@@ -1,15 +1,6 @@
 import React from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
-import {
-  Weight,
-  DollarSign,
-  MapPin,
-  Calendar,
-  CheckCircle,
-  X,
-  Clock,
-  AlertTriangle,
-} from 'lucide-react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { Weight, DollarSign, MapPin, Calendar, Clock, AlertTriangle } from 'lucide-react-native';
 import { GlassCard, GlassBadge, GlassButton, COLORS } from '../../../../../../../design-system';
 import type { SellerOffer } from '../types';
 

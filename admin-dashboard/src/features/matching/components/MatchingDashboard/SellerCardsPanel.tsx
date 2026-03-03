@@ -702,7 +702,7 @@ const SellerCard: React.FC<SellerCardProps> = ({
 
             {isSelected && (
               <div className="flex-shrink-0 text-primary">
-                <Checkbox checked readOnly className="w-5 h-5 border-primary" />
+                <Checkbox checked disabled className="w-5 h-5 border-primary" />
               </div>
             )}
           </div>

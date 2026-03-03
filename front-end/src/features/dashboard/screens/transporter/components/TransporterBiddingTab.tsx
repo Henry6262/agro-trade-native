@@ -22,7 +22,7 @@ import {
   Calendar,
   Navigation,
 } from 'lucide-react-native';
-import { GlassCard, GlassBadge, GlassButton, GlassInput } from '../../../../../design-system';
+import { GlassCard, GlassButton, GlassInput } from '../../../../../design-system';
 import { BaseComponentProps } from '@shared/types';
 import { MapDrawer } from '../maps/components/MapDrawer';
 import { MapOffer } from '../maps/types';

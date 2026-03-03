@@ -75,7 +75,7 @@ export function ProductSpecifications({
     setExpandedCards(newExpanded);
   };
 
-  const renderSpecificationCard = (productId: string, index: number) => {
+  const renderSpecificationCard = (productId: string, _index: number) => {
     // Use metadata from store
     const product = selectedProductsMetadata.find((p) => p.category === productId);
     const spec = specifications.find((s) => s.productId === productId);

@@ -24,11 +24,7 @@ import {
   Calculator,
   ArrowUpDown,
   Truck,
-  Calendar,
-  MessageSquare,
 } from 'lucide-react-native';
-
-import { Badge } from './Badge';
 
 interface BuyerOffer {
   id: string;

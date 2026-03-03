@@ -1,5 +1,4 @@
 import React from 'react';
-import { View } from 'react-native';
 import SellerProductsTab from './SellerProductsTab';
 import SellerTradesTab from './SellerTradesTab';
 import SellerOffersTab from './SellerOffersTab';

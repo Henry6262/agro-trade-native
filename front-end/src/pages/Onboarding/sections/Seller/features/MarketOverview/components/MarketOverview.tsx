@@ -7,15 +7,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
 } from 'react-native';
-import {
-  TrendingUp,
-  Users,
-  Zap,
-  ShoppingCart,
-  MapPin,
-  DollarSign,
-  Building2,
-} from 'lucide-react-native';
+import { Users, Zap, ShoppingCart, MapPin, DollarSign, Building2 } from 'lucide-react-native';
 import { products } from '@shared/constants/onboarding';
 import type { ProductSpecification } from '@shared/types/onboarding';
 import { Card } from '@shared/components/Card';

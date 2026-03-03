@@ -3,7 +3,7 @@ import * as Types from '../types';
 import { API_ENDPOINTS } from '../config/api';
 
 // Configure axios defaults
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4001/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

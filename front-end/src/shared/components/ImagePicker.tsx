@@ -84,7 +84,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
       if (newUrls.length > 0) {
         onImagesChange([...images, ...newUrls]);
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Upload failed', 'Could not upload one or more images. Please try again.');
     } finally {
       setUploading(false);

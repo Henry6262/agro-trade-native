@@ -17,7 +17,6 @@ interface BuyerMarketRequestProps {
 export function BuyerMarketRequest({
   selectedProducts,
   specifications,
-  onSpecificationsChange,
   onComplete,
 }: BuyerMarketRequestProps) {
   const {

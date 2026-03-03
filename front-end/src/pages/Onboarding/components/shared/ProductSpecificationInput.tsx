@@ -23,7 +23,6 @@ export function ProductSpecificationInput({
   onChange,
   error,
 }: SpecificationInputProps) {
-  const specKey = spec.code || spec.id || '';
   const isRequired = spec.importance === 'CRITICAL' || spec.importance === 'IMPORTANT';
 
   const handleChange = (text: string) => {

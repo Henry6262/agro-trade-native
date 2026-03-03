@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, Dimensions, ViewStyle, useWindowDimensions } from 'react-native';
+import { View, ScrollView, ViewStyle, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { OnboardingStep } from '@shared/types/onboarding';
 import { ProgressSidebar } from './ProgressSidebar';

@@ -1,3 +1,13 @@
+// Catch fatal errors BEFORE any module loads (e.g. native module crashes)
+process.on("uncaughtException", (err) => {
+  console.error("FATAL uncaughtException:", err);
+  process.exit(1);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("FATAL unhandledRejection:", reason);
+  process.exit(1);
+});
+
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { AppModule } from "./app.module";
@@ -5,7 +15,10 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { setupSwagger } from "./swagger";
 
 async function createApp() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  console.log("Creating NestJS application...");
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: ["error", "warn", "log"],
+  });
 
   // Enable CORS with environment-based configuration
   const corsOrigins =

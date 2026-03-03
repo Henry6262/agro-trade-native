@@ -6,7 +6,6 @@ export const LocationConfirmationStep: React.FC<LocationConfirmationStepProps> =
   visible,
   onClose,
   onNext,
-  onBack,
   initialLocation,
 }) => {
   const handleLocationConfirm = (location: any) => {

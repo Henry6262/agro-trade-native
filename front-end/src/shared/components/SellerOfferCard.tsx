@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, Animated, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Animated } from 'react-native';
 import {
   MapPin,
   Star,
@@ -10,13 +10,7 @@ import {
   Check,
   X,
   MessageSquare,
-  DollarSign,
-  Package,
-  Building2,
-  User,
 } from 'lucide-react-native';
-
-import { Badge } from './Badge';
 
 interface BuyerOffer {
   id: string;

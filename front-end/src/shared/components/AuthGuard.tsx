@@ -21,7 +21,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   requireAuth = false,
 }) => {
   const navigation = useNavigation();
-  const { isAuthenticated, user, isLoading } = useAuthStore();
+  const { isAuthenticated, isLoading } = useAuthStore();
 
   useEffect(() => {
     if (isLoading) return; // Wait for auth state to be determined

@@ -12,7 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
-import { X, MapPin, Truck, Clock, Route, Package, Flag, Navigation } from 'lucide-react-native';
+import { X, Truck, Clock, Route, Package, Flag } from 'lucide-react-native';
 import { MapOffer } from '../types';
 import { useTransporterMapDrawer } from '../hooks';
 
@@ -210,7 +210,7 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
                 )}
 
                 {/* Detailed Truck Routes */}
-                {routes.map((route, index) => (
+                {routes.map((route, _index) => (
                   <View
                     key={route.truckId}
                     className="bg-white dark:bg-white border-2 rounded-xl p-4 mb-3 shadow-sm"
@@ -325,7 +325,7 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
                       </Marker>
 
                       {/* Truck Markers */}
-                      {routes.map((route, index) => {
+                      {routes.map((route, _index) => {
                         const truck = fleet?.trucks.find((t) => t.id === route.truckId);
                         if (!truck) return null;
 

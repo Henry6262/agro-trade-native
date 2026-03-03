@@ -16,6 +16,8 @@ import { NotificationModule } from "./notifications/notification.module";
 import { TransportCompanyModule } from "./transport-company/transport-company.module";
 import { SimulationModule } from "./simulation/simulation.module";
 import { RegionsModule } from "./regions/regions.module";
+import { OrdersModule } from "./orders/orders.module";
+import { LocationModule } from "./location/location.module";
 import { CacheModule } from "./cache/cache.module";
 import { ResponseTimeMiddleware } from "./common/middleware/response-time.middleware";
 
@@ -42,6 +44,8 @@ import { ResponseTimeMiddleware } from "./common/middleware/response-time.middle
     NotificationModule,
     SimulationModule,
     RegionsModule,
+    OrdersModule,
+    LocationModule,
   ],
 })
 export class AppModule implements NestModule {

@@ -19,7 +19,6 @@ import {
   User,
   Building2,
   MapPin,
-  Phone,
   Package,
   ShoppingCart,
   Truck,

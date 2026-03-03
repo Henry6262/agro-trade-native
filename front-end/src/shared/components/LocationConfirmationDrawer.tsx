@@ -8,7 +8,6 @@ import {
   Modal,
   ActivityIndicator,
   Alert,
-  Platform,
 } from 'react-native';
 import { X, MapPin, Search, Check } from 'lucide-react-native';
 import * as Location from 'expo-location';

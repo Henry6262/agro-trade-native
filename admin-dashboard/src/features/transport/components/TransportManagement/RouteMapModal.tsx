@@ -64,7 +64,7 @@ export const RouteMapModal: React.FC<RouteMapModalProps> = ({ request, onClose }
   }, [pickupPoints, deliveryPoint]);
 
   const routeCoordinates: [number, number][] = [
-    ...pickupPoints.map((p) => [p.lat!, p.lng!]),
+    ...pickupPoints.map((p) => [p.lat!, p.lng!] as [number, number]),
     ...(deliveryPoint?.lat && deliveryPoint?.lng ? [[deliveryPoint.lat, deliveryPoint.lng] as [number, number]] : []),
   ];
 

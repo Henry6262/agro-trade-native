@@ -6,7 +6,7 @@ import {
   ProductUnit,
   UserRole
 } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -683,6 +683,58 @@ async function main() {
   });
   console.log('   ✅ System admin user ready (system@agrotrade.internal)');
 
+  // ==================== INSPECTOR USERS ====================
+  // FIXED: Add inspector users for testing and simulation
+  console.log('🔍 Creating inspector users...');
+  const inspectorPassword = await bcrypt.hash('inspector123', 10);
+  
+  await prisma.user.upsert({
+    where: { email: 'inspector1@agrotrade.com' },
+    update: {},
+    create: {
+      email: 'inspector1@agrotrade.com',
+      name: 'Inspector One',
+      password: inspectorPassword,
+      phoneNumber: '+359888111001',
+      role: UserRole.INSPECTOR,
+      isActive: true,
+      isEmailVerified: true,
+      onboardingCompleted: true,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'inspector2@agrotrade.com' },
+    update: {},
+    create: {
+      email: 'inspector2@agrotrade.com',
+      name: 'Inspector Two',
+      password: inspectorPassword,
+      phoneNumber: '+359888111002',
+      role: UserRole.INSPECTOR,
+      isActive: true,
+      isEmailVerified: true,
+      onboardingCompleted: true,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'inspector3@agrotrade.com' },
+    update: {},
+    create: {
+      email: 'inspector3@agrotrade.com',
+      name: 'Inspector Three',
+      password: inspectorPassword,
+      phoneNumber: '+359888111003',
+      role: UserRole.INSPECTOR,
+      isActive: true,
+      isEmailVerified: true,
+      onboardingCompleted: true,
+    },
+  });
+
+  console.log('   ✅ 3 inspector users created (inspector1-3@agrotrade.com, password: inspector123)');
+
   // ==================== SUMMARY ====================
   const regionCount = await prisma.region.count();
   const cityCount = await prisma.city.count();
@@ -697,6 +749,8 @@ async function main() {
   console.log(`   - ${productCount} products (all with Cloudinary images)`);
   console.log(`   - ${specTypeCount} specification types`);
   console.log(`   - ${specTemplateCount} product-specification links`);
+  console.log('   - 1 system admin user');
+  console.log('   - 3 inspector users');
   
   console.log('\n🌾 Products with specifications:');
   console.log('   1. Soft Wheat → Protein, HLW, Falling Number');

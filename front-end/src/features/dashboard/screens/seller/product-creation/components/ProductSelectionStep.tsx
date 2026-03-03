@@ -6,7 +6,6 @@ export const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
   visible,
   onClose,
   onNext,
-  productMetadata,
 }) => {
   const handleProductSelect = (productId: string, productData: any) => {
     // Transform the selected product data to match our ProductData interface

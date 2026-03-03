@@ -85,6 +85,14 @@ export class ProductsController {
     return this.productsService.getSpecificationTypes();
   }
 
+
+  @Get("wishlist")
+  @ApiOperation({ summary: "Get user wishlist (stub)" })
+  @ApiResponse({ status: 200, description: "Returns user wishlist items" })
+  async getWishlist(): Promise<{ items: any[]; total: number }> {
+    return { items: [], total: 0 };
+  }
+
   @Get(":id")
   @ApiOperation({ summary: "Get product by ID" })
   @ApiResponse({ status: 200, description: "Returns a specific product" })

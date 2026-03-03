@@ -6,14 +6,13 @@ import {
   Image,
   ActivityIndicator,
   Alert,
-  Dimensions,
   ScrollView,
 } from 'react-native';
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
 import { productSelectionService } from './service';
-import type { ProductSelectionRole } from './types';
+import type {} from './types';
 
 export const ProductSelectionUnified: React.FC = () => {
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);

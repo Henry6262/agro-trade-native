@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, SafeAreaView } from 'react-native';
 import type { OnboardingStep, ProductSpecification } from '@shared/types/onboarding';
 import { simplifiedRoleSteps } from '@shared/constants/simplifiedOnboarding';
 import { products as onboardingProducts } from '@shared/constants/onboarding';
 import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import { ProductSelectionUnified } from '@pages/Onboarding/features/shared/ProductSelection';
 import { QuantityPricingStep } from '@pages/Onboarding/sections/Seller/features/QuantityPricing/components/QuantityPricingStep';
-import { CustomOfferStep } from '@pages/Onboarding/sections/Seller/features/CustomOffer/components/CustomOfferStep';
 import { SimplifiedMarketOverview } from '@pages/Onboarding/sections/Seller/features/SimplifiedMarketOverview/components/SimplifiedMarketOverview';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
@@ -27,7 +25,7 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
     saveOnboardingData,
   } = useOnboardingStore();
 
-  const { fetchAllData, products, isLoadingProducts } = useProductStore();
+  const { fetchAllData } = useProductStore();
 
   // Initialize with saved step or default to 0 (products step is now first)
   const [currentStepIndex, setCurrentStepIndex] = useState(currentStep >= 0 ? currentStep : 0);

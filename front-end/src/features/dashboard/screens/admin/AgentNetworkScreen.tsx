@@ -15,7 +15,7 @@ const DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVe
 export default function AgentNetworkScreen() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [userTypeFilter, setUserTypeFilter] = useState('all');
+  const [userTypeFilter] = useState('all');
 
   const users = [
     {
@@ -119,19 +119,6 @@ export default function AgentNetworkScreen() {
         return <Truck width={size} height={size} color="#f97316" />;
       default:
         return <Users width={size} height={size} color={COLORS.textMuted} />;
-    }
-  };
-
-  const getTypeVariant = (type: string): 'success' | 'info' | 'warning' | 'muted' => {
-    switch (type) {
-      case 'farmer':
-        return 'success';
-      case 'buyer':
-        return 'info';
-      case 'transporter':
-        return 'warning';
-      default:
-        return 'muted';
     }
   };
 

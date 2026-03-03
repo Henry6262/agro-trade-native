@@ -1,14 +1,6 @@
 import React from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import {
-  Check,
-  X,
-  AlertTriangle,
-  Info,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-} from 'lucide-react-native';
+import { Check, X, AlertTriangle, Info, TrendingUp, Minus } from 'lucide-react-native';
 
 import { SpecificationMatch, MatchType, BuyerSpecification, OfferSpecification } from '../types';
 

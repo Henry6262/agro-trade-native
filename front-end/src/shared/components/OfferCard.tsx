@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, Animated, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Animated } from 'react-native';
 import {
   MapPin,
   Star,

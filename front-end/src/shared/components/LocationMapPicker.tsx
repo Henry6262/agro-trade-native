@@ -1,20 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import {
-  View,
-  Text,
-  Platform,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, ActivityIndicator } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE, Region, LatLng, Circle } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { MapPin, Search, Navigation, Check, X } from 'lucide-react-native';
-import { Button } from './Button';
 import { Input } from './Input';
-import { locationService, LocationData } from '@services/locationService';
-
 // Configuration Constants
 const DEFAULT_LATITUDE_DELTA = 0.01;
 const DEFAULT_LONGITUDE_DELTA = 0.01;
@@ -56,7 +45,7 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   initialLocation,
   showUserLocation = true,
   showSearchBar = true,
-  height = 400,
+  _height = 400,
   title = 'Select Location',
   confirmButtonText = 'Confirm Location',
   style,

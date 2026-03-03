@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm install:*)",
       "SlashCommand(/daily)",
-      "SlashCommand(/verify)"
+      "SlashCommand(/verify)",
+      "mcp__Claude_Preview__preview_start"
     ],
     "deny": [],
     "ask": []

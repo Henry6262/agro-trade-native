@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { InspectionCompletionMode, InspectionCompletionContext } from '../types';
+import type { InspectionCompletionMode, InspectionCompletionContext } from '../types';
 
 const formSchema = z.object({
   qualityScore: z
@@ -95,7 +95,7 @@ export const CompleteInspectionModal: React.FC<CompleteInspectionModalProps> = (
           </DialogTitle>
           <DialogDescription>
             {inspection
-              ? `Provide the quality findings for ${inspection.saleListing?.seller?.name || 'seller'}.`
+              ? `Provide the quality findings for ${inspection.sellerName || 'seller'}.`
               : 'No inspection selected.'}
           </DialogDescription>
         </DialogHeader>

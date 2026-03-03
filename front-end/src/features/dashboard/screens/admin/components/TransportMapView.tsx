@@ -9,16 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Region, LatLng } from 'react-native-maps';
-import {
-  Truck,
-  MapPin,
-  Package,
-  Navigation,
-  Info,
-  Clock,
-  DollarSign,
-  Route,
-} from 'lucide-react-native';
+import { Truck, MapPin, Package, Navigation, Clock, DollarSign, Route } from 'lucide-react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
 

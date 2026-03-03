@@ -14,7 +14,7 @@ import { deliverySchema, type DeliveryFormData } from '../../../schemas';
 export default function OrderCreateScreen() {
   const route = useRoute();
   const navigation = useNavigation();
-  const { productId } = (route.params as { productId?: string }) || {};
+  const {} = (route.params as { productId?: string }) || {};
 
   const {
     currentOrder,
@@ -24,7 +24,6 @@ export default function OrderCreateScreen() {
     setPaymentMethod,
     setOrderNotes,
     createOrder,
-    clearCurrentOrder,
   } = useOrders();
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod | null>(null);

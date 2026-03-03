@@ -13,8 +13,6 @@ import {
 } from 'react-native';
 import {
   X,
-  DollarSign,
-  Package,
   Send,
   TrendingUp,
   TrendingDown,

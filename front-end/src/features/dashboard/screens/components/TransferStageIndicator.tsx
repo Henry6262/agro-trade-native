@@ -48,7 +48,6 @@ export const TransferStageIndicator: React.FC<TransferStageIndicatorProps> = ({
           const Icon = stage.icon;
           const isCompleted = index < currentStage;
           const isCurrent = index === currentStage;
-          const isUpcoming = index > currentStage;
 
           const getStageStyles = () => {
             if (isCompleted) {

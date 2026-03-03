@@ -1,62 +1,128 @@
+import { IsOptional, IsString, IsNumber, IsBoolean, IsIn } from "class-validator";
+import { Type } from "class-transformer";
+
 export class AcceptJobDto {
-  inspectorId: string;
-  estimatedArrival: string;
+  @IsOptional()
+  @IsString()
+  inspectorId?: string;
+
+  @IsOptional()
+  @IsString()
+  estimatedArrival?: string;
 }
 
 export class LocationUpdateDto {
-  inspectorId: string;
+  @IsOptional()
+  @IsString()
+  inspectorId?: string;
+
+  @IsOptional()
+  @IsString()
   jobId?: string;
-  coordinates: {
+
+  @IsOptional()
+  coordinates?: {
     latitude: number;
     longitude: number;
     accuracy: number;
     heading?: number;
     speed?: number;
   };
-  timestamp: string;
+
+  @IsOptional()
+  @IsString()
+  timestamp?: string;
+
+  @IsOptional()
+  @IsNumber()
   batteryLevel?: number;
+
+  @IsOptional()
+  @IsString()
   networkType?: "wifi" | "cellular" | "none";
-  isMoving: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isMoving?: boolean;
 }
 
 export class VerificationResultDto {
-  jobId: string;
-  inspectorId: string;
+  @IsOptional()
+  @IsString()
+  jobId?: string;
+
+  @IsOptional()
+  @IsString()
+  inspectorId?: string;
+
+  @IsOptional()
+  @IsString()
   sellerListingId?: string;
-  originalSpecs: Record<string, any>;
-  verifiedSpecs: Record<string, any>;
-  testMethods: Array<{
+
+  @IsOptional()
+  originalSpecs?: Record<string, any>;
+
+  @IsOptional()
+  verifiedSpecs?: Record<string, any>;
+
+  @IsOptional()
+  testMethods?: Array<{
     parameter: string;
     method: string;
     equipment: string;
     standardUsed?: string;
   }>;
-  evidence: Array<{
+
+  @IsOptional()
+  evidence?: Array<{
     type: "photo" | "document" | "video";
     url: string;
     caption?: string;
     timestamp: string;
   }>;
-  notes: string;
-  verificationStatus:
-    | "VERIFIED"
-    | "PARTIALLY_VERIFIED"
-    | "FAILED"
-    | "PENDING_REVIEW";
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+
+  @IsOptional()
+  @IsString()
+  verificationStatus?: "VERIFIED" | "PARTIALLY_VERIFIED" | "FAILED" | "PENDING_REVIEW";
+
+  @IsOptional()
+  @IsString()
   signature?: string;
-  verifiedAt: string;
+
+  @IsOptional()
+  @IsString()
+  verifiedAt?: string;
 }
 
 export class JobFilterDto {
+  @IsOptional()
+  @IsIn(["LOW", "MEDIUM", "HIGH"])
   priority?: "LOW" | "MEDIUM" | "HIGH";
-  status?:
-    | "PENDING"
-    | "ASSIGNED"
-    | "IN_PROGRESS"
-    | "COMPLETED"
-    | "FAILED"
-    | "CANCELLED";
+
+  @IsOptional()
+  @IsIn(["PENDING", "SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"])
+  status?: "PENDING" | "SCHEDULED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   lat?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   lng?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   radius?: number;
+
+  @IsOptional()
+  @IsString()
+  inspectorId?: string;
 }

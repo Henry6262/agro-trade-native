@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, SafeAreaView } from 'react-native';
-import { useNavigation, CommonActions } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../../navigation/types';
 import { CheckCircle } from 'lucide-react-native';

@@ -6,7 +6,7 @@ import api from '../../../../services/api';
 import { API_ENDPOINTS } from '../../../../config/api';
 import { transportAdminService } from '../../../../services/api';
 import { useToast } from '@/hooks/use-toast';
-import type { TransportData, TransportBid } from '../../../../types/listings';
+import type { TransportData, TransportBidSummary } from '../../../../types';
 import { formatLocationString } from '../../../../utils/locationHelpers';
 import { SkeletonCard, CountdownTimer, EnhancedTooltip } from '../../../../components/common';
 
@@ -390,7 +390,7 @@ export const TransportManagementPanel: React.FC<TransportManagementPanelProps> =
 
 // Bid Card Component
 interface BidCardProps {
-  bid: TransportBid;
+  bid: TransportBidSummary;
   onApprove?: (bidId: string) => void;
   onReject?: (bidId: string) => void;
   processing?: boolean;

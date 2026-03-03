@@ -2,10 +2,7 @@ import type {
   ProductCategory,
   OnboardingCard,
   MarketInsights,
-  DemandData,
-  PriceData,
   TransportOpportunities,
-  RouteInfo,
   Location,
   VehicleType,
 } from '../types';

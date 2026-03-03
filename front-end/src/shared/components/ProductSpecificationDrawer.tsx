@@ -9,7 +9,7 @@ import {
   Switch,
   ActivityIndicator,
 } from 'react-native';
-import { X, ChevronRight, Info } from 'lucide-react-native';
+import { X, Info } from 'lucide-react-native';
 
 interface ProductSpecification {
   id: string;
@@ -40,7 +40,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
 }) => {
   const [quantity, setQuantity] = useState('');
   const [specifications, setSpecifications] = useState<Record<string, any>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {

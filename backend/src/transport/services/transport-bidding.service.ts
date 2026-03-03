@@ -887,7 +887,9 @@ export class TransportBiddingService {
           proofOfDelivery: dto.proofOfDelivery,
           customerRating: dto.customerRating,
           completedAt: new Date(dto.completedAt),
-          onTimeDelivery: true, // TODO: Calculate based on deadline
+          onTimeDelivery: job.estimatedArrival
+            ? new Date(dto.completedAt) <= job.estimatedArrival
+            : true,
         },
       });
 

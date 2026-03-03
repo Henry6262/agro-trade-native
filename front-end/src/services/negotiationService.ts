@@ -190,7 +190,7 @@ export const negotiationService = {
   },
 
   // Bulk negotiate with all parties simultaneously
-  async bulkNegotiate(params: {
+  async bulkNegotiate(_params: {
     tradeOperationId: string;
     buyerOffer: {
       price: number;
@@ -333,15 +333,14 @@ export const negotiationService = {
   // Get AI-powered price suggestions
   async getPriceSuggestions(
     tradeOperationId: string,
-    options?: {
+    _options?: {
       style?: 'AGGRESSIVE' | 'CONSERVATIVE' | 'BALANCED';
     }
   ): Promise<PriceSuggestion> {
     try {
-      const params = options || {};
       const response = await apiClient.get(
         `/negotiations/trade/${tradeOperationId}/suggest-prices`,
-        { params }
+        {}
       );
       return response.data;
     } catch (error) {
@@ -514,9 +513,10 @@ export const negotiationService = {
       if (limit) params.limit = limit;
       if (offset) params.offset = offset;
 
-      const response = await apiClient.get(`/trade-operations/${tradeOperationId}/negotiations`, {
-        params,
-      });
+      const response = await apiClient.get(
+        `/trade-operations/${tradeOperationId}/negotiations`,
+        {}
+      );
       return response.data.data || response.data;
     } catch (error) {
       console.error('Error getting negotiations:', error);

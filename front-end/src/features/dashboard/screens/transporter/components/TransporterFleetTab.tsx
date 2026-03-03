@@ -132,7 +132,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
     active: boolean;
     onPress: () => void;
     activeVariant?: BadgeVariant;
-  }> = ({ label, count, active, onPress, activeVariant = 'success' }) => (
+  }> = ({ label, count, active, onPress, _activeVariant = 'success' }) => (
     <TouchableOpacity onPress={onPress} style={[styles.tabPill, active && styles.tabPillActive]}>
       <Text style={[styles.tabPillText, active && styles.tabPillTextActive]}>
         {label} ({count})

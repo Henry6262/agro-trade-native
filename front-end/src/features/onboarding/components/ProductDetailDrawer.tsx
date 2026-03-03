@@ -55,8 +55,8 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
   productId,
   onConfirm,
 }) => {
-  const { products, specificationTypes } = useProductStore();
-  const { location, setLocation, selectedRole } = useOnboardingStore();
+  const { products } = useProductStore();
+  const { location } = useOnboardingStore();
   const { isAuthenticated } = useAuthStore();
 
   const product = productId ? products.find((p) => p.id === productId) : null;
@@ -69,7 +69,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
     'quantity'
   );
   const [specifications, setSpecifications] = useState<Record<string, string>>({});
-  const [showAuthDrawer, setShowAuthDrawer] = useState(false);
+  const [_showAuthDrawer, setShowAuthDrawer] = useState(false);
 
   // Price offer from backend (mock for now - will come from API)
   const [priceOffer, setPriceOffer] = useState<{
@@ -236,29 +236,6 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
     }
 
     // User is authenticated, proceed with submission
-    onConfirm({
-      productId: product.id,
-      quantity: quantity,
-      unit: product.defaultUnit || 'TON',
-      action: 'custom-offer',
-      specifications: specifications,
-    });
-
-    // Reset form
-    setSelectedQuantity(null);
-    setCustomQuantity('');
-    setSpecifications({});
-    setCurrentStep('quantity');
-    onClose();
-  };
-
-  const handleAuthComplete = () => {
-    // After successful authentication, submit the custom offer
-    const quantity = selectedQuantity || parseFloat(customQuantity);
-    if (!product || !quantity) {
-      return;
-    }
-
     onConfirm({
       productId: product.id,
       quantity: quantity,

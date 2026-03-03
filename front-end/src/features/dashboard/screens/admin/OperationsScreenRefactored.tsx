@@ -1,19 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import {
-  Package,
-  Plus,
-  TrendingUp,
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  Users,
-  DollarSign,
-  Truck,
-  Calendar,
-  Eye,
-  Send,
-} from 'lucide-react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Package, Plus, AlertTriangle, DollarSign, Truck, Calendar } from 'lucide-react-native';
 
 import { useTradeOperations } from './hooks/useTradeOperations';
 import { TradeCreationDrawer } from './components/TradeCreationDrawer';
@@ -23,7 +10,7 @@ import { ActiveOperationsTab } from './components/ActiveOperationsTab';
 import { OfferModal } from './components/OfferModal';
 import { NegotiationManagementScreen } from './components/NegotiationManagementScreen';
 import { CounterOfferModal } from './components/CounterOfferModal';
-import type { BuyListing, SaleListing, TradeOperation } from '@services/tradeOperationService';
+import type { BuyListing, TradeOperation } from '@services/tradeOperationService';
 
 export default function OperationsScreenRefactored() {
   const {
@@ -58,7 +45,6 @@ export default function OperationsScreenRefactored() {
 
     // Error handling
     error,
-    clearError,
   } = useTradeOperations();
 
   // UI State
@@ -66,7 +52,7 @@ export default function OperationsScreenRefactored() {
   const [selectedBuyListing, setSelectedBuyListing] = useState<BuyListing | null>(null);
   const [showCreationDrawer, setShowCreationDrawer] = useState(false);
   const [showTransportMap, setShowTransportMap] = useState(false);
-  const [selectedOperation, setSelectedOperation] = useState<TradeOperation | null>(null);
+  const [selectedOperation] = useState<TradeOperation | null>(null);
   const [showDetailDrawer, setShowDetailDrawer] = useState(false);
   const [selectedOperationId, setSelectedOperationId] = useState<string | null>(null);
   const [showOfferModal, setShowOfferModal] = useState(false);
@@ -455,7 +441,7 @@ export default function OperationsScreenRefactored() {
           setSelectedBuyListing(null);
         }}
         buyListing={selectedBuyListing}
-        onTradeCreated={(trade) => {
+        onTradeCreated={(_trade) => {
           loadTradeOperations();
           setActiveTab('active');
         }}

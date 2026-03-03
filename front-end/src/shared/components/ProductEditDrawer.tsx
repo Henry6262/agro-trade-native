@@ -91,7 +91,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
     try {
       await onSave(editedProduct);
       onClose();
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to update product');
     } finally {
       setIsLoading(false);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, Animated, Alert, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, Animated, ScrollView } from 'react-native';
 import {
   Check,
   X,
@@ -8,9 +8,7 @@ import {
   Package,
   Truck,
   MapPin,
-  Calendar,
   Star,
-  Award,
   Shield,
   Info,
 } from 'lucide-react-native';

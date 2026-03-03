@@ -13,10 +13,8 @@ export const FleetCreationFlow: React.FC<FleetCreationFlowProps> = ({
 }) => {
   const {
     currentStep,
-    creationType,
     truckData,
     driverData,
-    isLoading,
     error,
     selectCreationType,
     goBack,

@@ -22,13 +22,13 @@ import BuyerOrdersPanel from './BuyerOrdersPanel';
 import SellerCardsPanel from './SellerCardsPanel';
 import PricingModal from './PricingModal';
 import SingleOfferModal from './SingleOfferModal';
-import InspectionQueuePanel, { InspectionQueueItem } from './InspectionQueuePanel';
+import InspectionQueuePanel, { type InspectionQueueItem } from './InspectionQueuePanel';
 import AssignInspectorModal from './AssignInspectorModal';
-import CompleteInspectionModal from '../../inspections/components/CompleteInspectionModal';
-import {
+import CompleteInspectionModal from '../../../inspections/components/CompleteInspectionModal';
+import type {
   InspectionCompletionContext,
   InspectionCompletionMode,
-} from '../../inspections/types';
+} from '../../../inspections/types';
 import TransportStatusCard from './TransportStatusCard';
 
 interface SellerAllocation {
@@ -385,7 +385,7 @@ export const MatchingDashboard: React.FC = () => {
         expiresAt: n.expiresAt,
       }));
 
-      setNegotiations(mappedNegotiations);
+      setNegotiations(mappedNegotiations as unknown as Negotiation[]);
 
       console.debug('Negotiations created and mapped:', {
         count: mappedNegotiations.length,
@@ -508,7 +508,7 @@ export const MatchingDashboard: React.FC = () => {
         page: 1,
         limit: 200,
       });
-      setTradeOperations(ops);
+      setTradeOperations(ops as unknown as TradeOperation[]);
       console.debug('[MatchingDashboard] Trade operations snapshot loaded', {
         count: ops.length,
       });
@@ -575,7 +575,7 @@ export const MatchingDashboard: React.FC = () => {
   const loadTradeOperationDetails = useCallback(async (tradeOpId: string) => {
     try {
       const details = await tradeOperationService.getById(tradeOpId);
-      setTradeOperationDetails(details);
+      setTradeOperationDetails(details as unknown as TradeOperation);
       console.debug('[MatchingDashboard] Trade operation details loaded', {
         tradeOperationId: tradeOpId,
         sellers: details?.sellers?.length ?? 0,

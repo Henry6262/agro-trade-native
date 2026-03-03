@@ -26,9 +26,9 @@ import { TransportController as TransportMainController } from "./controllers/tr
     TransportService,
   ],
   controllers: [
+    TransportMainController, // must be first — its specific routes (requests/available) beat TransportBiddingController's wildcard (requests/:id)
     TransportController,
     TransportBiddingController,
-    TransportMainController,
   ],
   exports: [
     TransportCostService,

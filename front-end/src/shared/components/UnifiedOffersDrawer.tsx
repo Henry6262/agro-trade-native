@@ -10,31 +10,23 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
 } from 'react-native';
 import {
   X,
   ArrowLeft,
-  Filter,
-  Search,
-  DollarSign,
   Package,
   Send,
   TrendingUp,
   TrendingDown,
   Info,
-  Target,
   Building2,
   Calculator,
-  ArrowUpDown,
   Check,
-  MessageSquare,
 } from 'lucide-react-native';
 
-import { Offer, NegotiationOffer } from '../types';
+import { Offer } from '../types';
 import { OfferCard } from './OfferCard';
 import { BuyerRequestCard } from './BuyerRequestCard';
-import { Badge } from './Badge';
 import buyerService from '@services/buyerService';
 
 interface UnifiedOffersDrawerProps {
@@ -214,7 +206,7 @@ export const UnifiedOffersDrawer: React.FC<UnifiedOffersDrawerProps> = ({
       );
       Alert.alert('Success', 'Your counter-offer has been sent to the seller!');
       handleBack();
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to send counter-offer. Please try again.');
     } finally {
       setIsLoading(false);
@@ -229,7 +221,7 @@ export const UnifiedOffersDrawer: React.FC<UnifiedOffersDrawerProps> = ({
       await buyerService.acceptOffer(selectedOffer.id);
       Alert.alert('Success', 'Offer accepted successfully!');
       onClose();
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to accept offer. Please try again.');
     } finally {
       setIsLoading(false);
@@ -249,7 +241,7 @@ export const UnifiedOffersDrawer: React.FC<UnifiedOffersDrawerProps> = ({
       await buyerService.rejectOffer(selectedOffer.id, rejectReason);
       Alert.alert('Offer Rejected', 'The seller has been notified of your decision.');
       onClose();
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to reject offer. Please try again.');
     } finally {
       setIsLoading(false);
@@ -323,9 +315,9 @@ export const UnifiedOffersDrawer: React.FC<UnifiedOffersDrawerProps> = ({
               key={offer.id}
               offer={offer}
               buyerRequest={buyerRequest}
-              onAccept={(id) => handleOfferAction('accept', offer)}
-              onReject={(id) => handleOfferAction('reject', offer)}
-              onNegotiate={(id) => handleOfferAction('negotiate', offer)}
+              onAccept={(_id) => handleOfferAction('accept', offer)}
+              onReject={(_id) => handleOfferAction('reject', offer)}
+              onNegotiate={(_id) => handleOfferAction('negotiate', offer)}
               isLoading={isLoading}
             />
           ))

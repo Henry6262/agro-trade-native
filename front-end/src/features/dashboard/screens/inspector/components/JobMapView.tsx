@@ -13,21 +13,8 @@ export const JobMapView: React.FC<JobMapViewProps> = ({
   onRegionChange,
 }) => {
   const mapRef = useRef<MapView>(null);
-  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [_selectedJob, setSelectedJob] = useState<any>(null);
   const [mapRegion, setMapRegion] = useState<any>(null);
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'HIGH':
-        return '#ef4444'; // red
-      case 'MEDIUM':
-        return '#eab308'; // yellow
-      case 'LOW':
-        return '#ffffff'; // white
-      default:
-        return '#9ca3af'; // gray
-    }
-  };
 
   const handleMarkerPress = (job: any) => {
     setSelectedJob(job);

@@ -10,7 +10,7 @@ import type { InspectorAssignee, InspectionRequest } from '@/types';
 import { inspectionService } from '@/services/api';
 import { toast } from 'sonner';
 import CompleteInspectionModal from '../CompleteInspectionModal';
-import { InspectionCompletionContext, InspectionCompletionMode } from '../../types';
+import type { InspectionCompletionContext, InspectionCompletionMode } from '../../types';
 
 const inspectorIcon = new L.Icon({
   iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',

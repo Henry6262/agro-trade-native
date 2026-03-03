@@ -1,4 +1,4 @@
-import { Fleet, Truck } from '../types';
+import { Fleet } from '../types';
 
 // Mock fleet data for different transporters
 const mockFleets: Record<string, Fleet> = {

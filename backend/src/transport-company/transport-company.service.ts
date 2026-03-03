@@ -26,7 +26,7 @@ import {
   DriverStatus,
   TruckType,
 } from "@prisma/client";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class TransportCompanyService {

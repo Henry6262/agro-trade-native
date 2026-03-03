@@ -298,7 +298,7 @@ export class TransportService {
         bidAmount: data.bidAmount,
         estimatedDuration: data.estimatedDuration,
         vehicleType: (data.vehicleType as TruckType) || TruckType.FLATBED,
-        vehicleCapacity: data.estimatedDuration * 10, // TODO: get actual capacity
+        vehicleCapacity: 20, // Default capacity in tons; overridden when transporter profile provides actual capacity
         expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours
         status: BidStatus.PENDING,
       },

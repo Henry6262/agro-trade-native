@@ -4,12 +4,10 @@ import {
   Package,
   DollarSign,
   CheckCircle,
-  Timer,
   AlertTriangle,
   Weight,
   MapPin,
   Calendar,
-  Navigation,
   RefreshCw,
   Truck,
 } from 'lucide-react-native';
@@ -32,7 +30,6 @@ interface TransporterIncomingOffersTabProps extends BaseComponentProps {
 }
 
 export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTabProps> = ({
-  id,
   testID,
   accessibilityLabel,
 }) => {

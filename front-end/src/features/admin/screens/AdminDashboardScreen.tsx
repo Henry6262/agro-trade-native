@@ -6,7 +6,6 @@ import type { AdminStackParamList } from '../../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 import { GradientBackground } from '../../../design-system/GradientBackground';
 import { GlassCard } from '../../../design-system/GlassCard';
-import { GlassButton } from '../../../design-system/GlassButton';
 import { StatCard } from '../../../design-system/StatCard';
 import { COLORS } from '../../../design-system/tokens';
 

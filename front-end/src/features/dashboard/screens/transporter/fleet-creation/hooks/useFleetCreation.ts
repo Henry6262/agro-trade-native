@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { Alert } from 'react-native';
 import {
   FleetCreationState,
   FleetCreationStep,
@@ -96,7 +95,7 @@ export const useFleetCreation = () => {
       await createTruckMutation.mutateAsync(backendData);
       setState((prev) => ({ ...prev, isLoading: false }));
       return true;
-    } catch (error) {
+    } catch (_error) {
       setState((prev) => ({
         ...prev,
         isLoading: false,
@@ -131,7 +130,7 @@ export const useFleetCreation = () => {
       await createDriverMutation.mutateAsync(backendData);
       setState((prev) => ({ ...prev, isLoading: false }));
       return true;
-    } catch (error) {
+    } catch (_error) {
       setState((prev) => ({
         ...prev,
         isLoading: false,

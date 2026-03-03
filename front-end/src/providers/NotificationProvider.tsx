@@ -22,14 +22,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     });
 
     // Listen for incoming notifications while app is foregrounded
-    notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
-      // Notification received while foregrounded
-    });
+    notificationListener.current = Notifications.addNotificationReceivedListener(
+      (_notification) => {
+        // Notification received while foregrounded
+      }
+    );
 
     // Listen for notification taps
-    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
-      // Navigation could be handled here via a navigation ref
-    });
+    responseListener.current = Notifications.addNotificationResponseReceivedListener(
+      (_response) => {
+        // Navigation could be handled here via a navigation ref
+      }
+    );
 
     return () => {
       if (notificationListener.current) {

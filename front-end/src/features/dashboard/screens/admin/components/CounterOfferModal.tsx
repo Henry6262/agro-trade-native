@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  ActivityIndicator,
   StyleSheet,
 } from 'react-native';
 import {
@@ -25,10 +24,10 @@ import {
   XCircle,
 } from 'lucide-react-native';
 import { negotiationService } from '@services/negotiationService';
-import { GlassCard, GlassBadge, GlassButton, GlassInput } from '../../../../../design-system';
+import { GlassCard, GlassButton, GlassInput } from '../../../../../design-system';
 import { COLORS } from '../../../../../design-system';
 
-const DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 10 };
+const _DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 10 };
 
 interface CounterOfferModalProps {
   visible: boolean;

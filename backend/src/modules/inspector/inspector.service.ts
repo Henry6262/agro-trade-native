@@ -137,8 +137,8 @@ export class InspectorService {
     }
 
     // Validate estimated arrival
-    const arrivalTime = new Date(acceptDto.estimatedArrival);
-    if (arrivalTime <= new Date()) {
+    const arrivalTime = acceptDto.estimatedArrival ? new Date(acceptDto.estimatedArrival) : null;
+    if (arrivalTime && arrivalTime <= new Date()) {
       throw new BadRequestException("Estimated arrival must be in the future");
     }
 

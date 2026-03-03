@@ -40,20 +40,19 @@ export function BuyerSubmitDrawer({
   onClose,
   productId,
   specifications,
-  onComplete,
   onBack,
 }: BuyerSubmitDrawerProps) {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [requestCreated, setRequestCreated] = useState(false);
+  const [_requestCreated, setRequestCreated] = useState(false);
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').height)).current;
   const successAnimScale = useRef(new Animated.Value(0)).current;
   const successAnimOpacity = useRef(new Animated.Value(0)).current;
 
-  const { buyerSpecifications, selectedRole } = useOnboardingStore();
-  const { isAuthenticated, user } = useAuthStore();
+  const { buyerSpecifications } = useOnboardingStore();
+  const { isAuthenticated } = useAuthStore();
 
   useEffect(() => {
     if (visible) {
@@ -165,7 +164,7 @@ export function BuyerSubmitDrawer({
 
       // Create the buy listing regardless of role
 
-      const response = await apiClient.post('/buyer/listings', buyListingData);
+      await apiClient.post('/buyer/listings', buyListingData);
 
       setRequestCreated(true);
 

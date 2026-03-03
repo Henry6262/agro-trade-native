@@ -1,107 +1,106 @@
-# Agro-Trade
+# AgroTrade
 
-B2B agricultural commodity trading platform. Digitizes the supply chain from farmer to buyer — matching, negotiations, inspections, transport, and settlement.
-
-## Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Backend | NestJS + TypeScript + Prisma + PostgreSQL |
-| Cache | Redis |
-| Auth | JWT + OAuth (Google, Privy) |
-| Admin Dashboard | React + Vite (port 5173) |
-| Mobile App | React Native + Expo |
-| Deployment | Railway (backend), TestFlight (mobile) |
-
-## Structure
-
-```
-agro-trade-native/
-├── backend/               # NestJS API (port 4000)
-│   ├── prisma/            # Schema (33 models) + migrations
-│   └── src/
-│       └── modules/       # buyer, seller, trade-operations, negotiations,
-│                          # inspections, transport, auth, users
-├── admin-dashboard/       # React/Vite operations console
-│   └── src/
-│       ├── features/      # Domain features (trade-ops, transport, matching)
-│       ├── pages/         # Route-level components
-│       └── services/      # API integration
-├── front-end/             # React Native (Expo) customer app
-│   └── app/               # File-based routing
-├── rules/                 # Enforced coding standards
-│   ├── backend/           # NestJS patterns, DTOs, testing
-│   └── frontend/          # Components, state, design system
-└── docs/
-    ├── ARCHITECTURE.md    # User roles, trade flow, data model, API endpoints
-    └── reference/
-        └── db-schema.md   # 33 Prisma models summary
-```
-
-## User Roles
-
-| Role | Description |
-|------|-------------|
-| **Seller (Farmer)** | Lists products, receives/negotiates offers, schedules inspections |
-| **Buyer** | Creates buy requests, reviews matched sellers, tracks operations |
-| **Transporter** | Views available jobs, submits bids, executes deliveries |
-| **Inspector** | Accepts assignments, performs quality checks, submits pass/fail |
-| **Admin** | Creates trade operations, matches sellers, manages full lifecycle |
-
-## Trade Flow
-
-```
-Buyer creates request → Admin creates TradeOperation → Admin matches sellers
-→ Sellers negotiate (accept/reject/counter) → Inspection → Transport bidding
-→ Transport execution → Delivery confirmation → Complete
-```
-
-9 phases: INITIATION → SELLER_MATCHING → SELLER_NEGOTIATION → INSPECTION_PENDING → TRANSPORT_MATCHING → TRANSPORT_BIDDING → IN_TRANSIT → DELIVERED → COMPLETED
-
-See `docs/ARCHITECTURE.md` for complete flow diagrams, API endpoints, and data model.
+B2B agricultural commodity trading platform for the Bulgarian market. Connects farmers, buyers, transporters, and quality inspectors in one system.
 
 ## Quick Start
 
 ```bash
-# Backend
-cd backend
-npm install
-npm run start:dev          # → http://localhost:4000
+# Backend (port 4000)
+cd backend && npm install && npm run build && node dist/main.js
 
-# Admin Dashboard
-cd admin-dashboard
-npm install
-npm run dev                # → http://localhost:5173
+# Admin Dashboard (port 5173)
+cd admin-dashboard && npm install && npm run dev
 
-# Mobile
-cd front-end
-npm install
-npx expo start
+# Mobile App
+cd front-end && npm install && npx expo start
 ```
 
-**Prerequisites:** Node.js 20+, PostgreSQL, Redis
+**Prerequisites:** Node.js 20+, PostgreSQL (Railway DB configured in backend/.env)
 
-## Key API Endpoints
+## Demo Credentials
 
-| Role | Endpoint | Purpose |
-|------|----------|---------|
-| Seller | `POST /api/seller/listings` | Create sale listing |
-| Seller | `POST /api/negotiations/:id/accept` | Accept offer |
-| Buyer | `POST /api/buyer/listings` | Create buy request |
-| Transport | `POST /api/transport/bids` | Submit bid |
-| Inspector | `POST /api/inspections/:id/results` | Submit results |
-| Auth | `POST /api/auth/privy/login` | Login (all roles) |
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@agrotrade.com | admin123 |
+| Farmer | seller1@agrotrade.com | password123 |
+| Farmer | seller2@agrotrade.com | password123 |
+| Buyer | buyer@agrotrade.com | password123 |
 
-## Database
+## Stack
 
-33 Prisma models. Core entities: User, Product, SaleListing, BuyListing, TradeOperation, TradeSeller, OfferNegotiation, InspectionRequest, TransportRequest, TransportBid, TransportJob.
+| Layer | Tech |
+|-------|------|
+| Backend | NestJS + TypeScript + Prisma + PostgreSQL |
+| Admin | React 19 + Vite 7 + shadcn/ui |
+| Mobile | React Native + Expo 52 + NativeWind |
+| Auth | JWT + Google OAuth + Privy |
 
-See `docs/reference/db-schema.md` for full model list.
+## Trade Lifecycle (9 Phases)
 
-## Rules
+```
+INITIATION → SELLER_MATCHING → SELLER_NEGOTIATION → INSPECTION_PENDING
+→ TRANSPORT_MATCHING → TRANSPORT_BIDDING → IN_TRANSIT → DELIVERED → COMPLETED
+```
 
-Enforced coding standards in `rules/`:
-- `rules/backend/` — NestJS modules, DTOs, services, testing patterns
-- `rules/frontend/` — Components, state management, design system
+Any phase can → CANCELLED (except COMPLETED).
 
-Read these before any code changes.
+## User Roles
+
+| Role | What They Do |
+|------|-------------|
+| **Farmer** | Create sale listings, accept/reject/counter offers, pass inspections |
+| **Buyer** | Post buy orders with specs + budget, track fulfillment |
+| **Transporter** | Bid on transport jobs, manage fleet, GPS tracking, delivery proof |
+| **Inspector** | Accept jobs, on-site quality checks with photos, score 0-100 |
+| **Admin** | Create trades, match sellers, send offers, assign inspectors, optimize routes, calculate profit |
+
+## Documentation
+
+| Doc | What It Covers |
+|-----|---------------|
+| [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) | Every endpoint — method, path, auth, body, response, errors |
+| [`docs/STATE_MACHINES.md`](docs/STATE_MACHINES.md) | All state transitions — trade phases, negotiations, transport, inspections |
+| [`docs/TEST_SCENARIOS.md`](docs/TEST_SCENARIOS.md) | 10 simulation scenarios with exact API call sequences |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Product overview — user journeys, features, data model |
+
+## Project Structure
+
+```
+agro-trade-native/
+├── backend/                # NestJS API (port 4000)
+│   ├── prisma/             # Schema (33 models) + migrations + seed scripts
+│   └── src/                # auth, buyer, seller, trade-operations, negotiations,
+│                           # inspections, transport, simulation, scenarios
+├── admin-dashboard/        # React/Vite operations console (port 5173)
+├── front-end/              # React Native/Expo mobile app
+├── docs/                   # API reference, state machines, test scenarios
+└── rules/                  # Enforced coding standards (backend + frontend)
+```
+
+## Simulation Endpoints
+
+The backend has a `/simulation` module (ADMIN only) for automated testing:
+
+```
+POST /simulation/admin/create-trade-operation
+POST /simulation/admin/send-offers
+POST /simulation/admin/farmer/:id/create-sale-listing
+POST /simulation/seller/:id/accept-offer
+POST /simulation/seller/:id/counter-offer
+POST /simulation/seller/:id/reject-offer
+POST /simulation/admin/assign-inspector
+POST /simulation/inspector/:id/accept-job
+POST /simulation/inspector/:id/submit-results
+POST /simulation/admin/create-transport
+POST /simulation/transporter/:id/submit-bid
+POST /simulation/transporter/:id/start-job
+POST /simulation/transporter/:id/complete-delivery
+POST /simulation/admin/complete-trade
+DELETE /simulation/admin/cleanup-test-data
+```
+
+See `docs/TEST_SCENARIOS.md` for complete step-by-step scenarios.
+
+## Swagger
+
+API docs available at `http://localhost:4000/api/docs/` when backend is running.

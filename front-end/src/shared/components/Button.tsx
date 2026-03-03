@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  ActivityIndicator,
-  TouchableOpacityProps,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
+import { TouchableOpacity, Text, ActivityIndicator, TouchableOpacityProps } from 'react-native';
 import { BaseComponentProps } from '../../shared/types';
 
 interface ButtonProps extends Omit<TouchableOpacityProps, 'className'>, BaseComponentProps {

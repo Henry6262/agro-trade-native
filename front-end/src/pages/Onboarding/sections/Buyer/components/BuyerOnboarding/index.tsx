@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, ScrollView, Text } from 'react-native';
 import type { OnboardingStep, ProductSpecification } from '@shared/types/onboarding';
 import { simplifiedRoleSteps } from '@shared/constants/simplifiedOnboarding';
 import { products as onboardingProducts } from '@shared/constants/onboarding';
@@ -19,19 +18,16 @@ interface BuyerOnboardingProps {
 export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
   const {
     selectedProducts,
-    setSelectedProducts,
-    selectedProductsMetadata,
     buyerSpecifications,
     updateBuyerSpecification,
     setBuyerRequirements,
-    buyerData,
     currentStep,
     setStep,
     saveOnboardingData,
     location,
   } = useOnboardingStore();
 
-  const { fetchAllData, products, isLoadingProducts } = useProductStore();
+  const { fetchAllData } = useProductStore();
 
   // Initialize with saved step or default to 0 (products step is now first)
   const [currentStepIndex, setCurrentStepIndex] = useState(currentStep >= 0 ? currentStep : 0);

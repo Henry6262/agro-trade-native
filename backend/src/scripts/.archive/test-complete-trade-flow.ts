@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { PrismaClient, UserRole } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 const API_URL = 'http://localhost:4000/api';

@@ -11,7 +11,7 @@ const currencyFormatter = new Intl.NumberFormat('en-US', {
 });
 
 export const useTransporterTransfers = (): TransporterTransfersHookResult => {
-  const transporterIdFromStore = useAuthStore((state) => state.user?.id);
+  useAuthStore((state) => state.user?.id);
 
   const [jobs, setJobs] = useState<TransfersJobView[]>([]);
   const [summary, setSummary] = useState<TransfersSummary>({

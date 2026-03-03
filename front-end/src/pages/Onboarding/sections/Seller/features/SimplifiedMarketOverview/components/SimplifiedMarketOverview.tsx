@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import {
-  Package,
   MapPin,
   DollarSign,
   Info,
@@ -50,14 +49,11 @@ interface SimplifiedMarketOverviewProps {
 
 export function SimplifiedMarketOverview({
   selectedProducts = [],
-  specifications,
   onComplete,
 }: SimplifiedMarketOverviewProps) {
   const {
-    selectedProductsMetadata,
     location,
     sellerSpecifications,
-    selectedRole,
     selectedProducts: storeSelectedProducts,
   } = useOnboardingStore();
 
@@ -156,11 +152,6 @@ export function SimplifiedMarketOverview({
       return `$${(value / 1000).toFixed(1)}K`;
     }
     return `$${value.toFixed(0)}`;
-  };
-
-  // Check if specification has value
-  const hasSpecValue = (specKey: string) => {
-    return productSpecs.specifications?.[specKey]?.trim() !== '';
   };
 
   // Remove the auth check here - it's now handled in the drawer

@@ -20,13 +20,10 @@ const PRESET_QUANTITIES = [100, 500, 1000];
 export function QuantityPricingStep() {
   const {
     selectedProducts,
-    selectedProductsMetadata,
     sellerSpecifications,
     updateSellerSpecification,
     location,
     setLocation,
-    nextStep,
-    setStep,
   } = useOnboardingStore();
 
   const { products } = useProductStore();
@@ -139,21 +136,8 @@ export function QuantityPricingStep() {
     }
   };
 
-  const handleContinue = () => {
-    if (!isFormValid()) return;
-
-    // Save the quantity and location data
-    updateSellerSpecification(productId, {
-      quantity: getQuantity().toString(),
-      unit: product?.defaultUnit || 'TON',
-    });
-
-    // Go directly to the overview step
-    nextStep();
-  };
-
   const getQuantity = () => selectedQuantity || parseFloat(customQuantity) || 0;
-  const isFormValid = () => getQuantity() > 0 && location;
+  const _isFormValid = () => getQuantity() > 0 && location;
 
   // Mock price data - will be replaced with API call
   const priceOffer = product

@@ -19,7 +19,6 @@ import {
   Calendar,
   Navigation,
 } from 'lucide-react-native';
-import { Button } from '@shared/components/Button';
 import { Badge } from '@shared/components/Badge';
 import { MetricCard } from '../../components/MetricCard';
 import { TransferStageIndicator } from '@features/dashboard/screens/components/TransferStageIndicator';

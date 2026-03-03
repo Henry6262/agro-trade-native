@@ -2,8 +2,6 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiClient } from './api';
 import { useAuthStore } from '@stores/auth.store';
-import { useOnboardingStore } from '@stores/onboarding.store';
-
 const PENDING_LISTING_KEY = 'pendingBuyerListing';
 const EXPIRY_TIME = 30 * 60 * 1000; // 30 minutes
 
@@ -134,7 +132,7 @@ export class PendingListingService {
       }
 
       // Create the listing
-      const response = await apiClient.post('/buyer/listings', buyListingData);
+      await apiClient.post('/buyer/listings', buyListingData);
 
       // Clear the pending listing
       await this.clearPendingListing();

@@ -1250,6 +1250,14 @@ export class TradeOperationService {
       }
     }
 
+    // 5. If phase is being set to CANCELLED, also set status to CANCELLED
+    if (
+      updateDto.phase === TradePhase.CANCELLED ||
+      updateDto.phase === ('CANCELLED' as TradePhase)
+    ) {
+      updateDto.status = TradeStatus.CANCELLED;
+    }
+
     // Perform the update
     const updatedTrade = await this.prisma.tradeOperation.update({
       where: { id: tradeOperationId },
@@ -1283,6 +1291,84 @@ export class TradeOperationService {
     );
 
     return updatedTrade;
+  }
+
+  /**
+   * Buyer confirms delivery – transitions phase DELIVERED → COMPLETED
+   */
+  async buyerConfirmDelivery(
+    tradeOperationId: string,
+    buyerId: string,
+    notes?: string,
+  ): Promise<TradeOperation> {
+    const tradeOperation = await this.prisma.tradeOperation.findUnique({
+      where: { id: tradeOperationId },
+      include: {
+        buyListing: {
+          select: { buyerId: true },
+        },
+      },
+    });
+
+    if (!tradeOperation) {
+      throw new NotFoundException('Trade operation not found');
+    }
+
+    // Verify the requesting user is the buyer on this trade
+    if (tradeOperation.buyListing.buyerId !== buyerId) {
+      throw new BadRequestException(
+        'You are not the buyer for this trade operation',
+      );
+    }
+
+    // Only allowed when phase is DELIVERED
+    if (tradeOperation.phase !== TradePhase.DELIVERED) {
+      throw new BadRequestException(
+        `Delivery can only be confirmed when the trade is in DELIVERED phase. Current phase: ${tradeOperation.phase}`,
+      );
+    }
+
+    const now = new Date();
+
+    const updated = await this.prisma.tradeOperation.update({
+      where: { id: tradeOperationId },
+      data: {
+        phase: TradePhase.COMPLETED,
+        status: TradeStatus.COMPLETED,
+        completedAt: now,
+        updatedAt: now,
+        ...(notes && {
+          metadata: {
+            ...(tradeOperation.metadata as Record<string, unknown> ?? {}),
+            buyerConfirmationNotes: notes,
+            buyerConfirmedAt: now.toISOString(),
+          },
+        }),
+      },
+    });
+
+    // Log state change for audit trail
+    await this.prisma.tradeStateHistory.create({
+      data: {
+        tradeOperationId,
+        fromPhase: TradePhase.DELIVERED,
+        toPhase: TradePhase.COMPLETED,
+        fromStatus: tradeOperation.status,
+        toStatus: TradeStatus.COMPLETED,
+        changedBy: buyerId,
+        reason: notes || 'Buyer confirmed delivery',
+        metadata: {
+          confirmedBy: 'BUYER',
+          confirmedAt: now.toISOString(),
+        },
+      },
+    });
+
+    this.logger.log(
+      `Trade operation ${tradeOperationId} confirmed as delivered by buyer ${buyerId}`,
+    );
+
+    return updated;
   }
 
   /**

@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { X, MapPin, Search, Check, Map, Navigation2 } from 'lucide-react-native';
+import { X, MapPin, Search, Check, Map } from 'lucide-react-native';
 import * as Location from 'expo-location';
 import { LocationMapPicker, SelectedLocation } from './LocationMapPicker';
 

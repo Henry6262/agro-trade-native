@@ -944,16 +944,17 @@ The following functionality is correctly wired and working:
 
 ---
 
-### Remaining Known Issues (P2 — Deferred)
+### Remaining Known Issues (P2 — ALL RESOLVED 2026-03-02)
 
-| ID | Issue | Location | Notes |
-|----|-------|----------|-------|
-| MG-10 | GPS tracking not implemented | Mobile / Transporter | `PUT /transport/jobs/:id/location` never called |
-| MG-11 | Buyer cannot see matched sellers | Mobile / Buyer | UI-only, no API gap |
-| MG-12 | Inspector job map deep link | Mobile / Inspector | UX improvement |
-| AD-9 | Negotiation round history not shown | Dashboard / Negotiations tab | UX improvement |
-| Backend | Only 1 transporter in seed data | Seed data | Run `add-more-sellers.ts` analog for transporters |
-| Backend | Buyer delivery confirmation needs own endpoint | Backend | `POST /trade-operations/:id/finalize` is ADMIN-only |
+| ID | Issue | Location | Resolution |
+|----|-------|----------|------------|
+| MG-10 | GPS tracking not implemented | Mobile / Transporter | ✅ Fixed — `expo-location` polling every 30s calls `PUT /transport/jobs/:id/location` when job is IN_TRANSIT |
+| MG-11 | Buyer cannot see matched sellers | Mobile / Buyer | ✅ Fixed — `MatchedSellersSection` added to buyer order detail with seller name, status, quantity, agreed price |
+| MG-12 | Inspector job map deep link | Mobile / Inspector | ✅ Fixed — `JobCard` uses `Linking.openURL` with platform-aware Maps deep link on location tap |
+| AD-10 | Negotiation round history not shown | Dashboard / Negotiations tab | ✅ Fixed — `PriceHistoryTimeline` component added showing round-by-round offer progression |
+| Backend Gap-6 | Phase-only cancel doesn't set status=CANCELLED | Backend / trade-operation.service | ✅ Fixed — `updateTradeOperation()` now forces `status=CANCELLED` when `phase=CANCELLED` is set |
+| Backend Gap-7 | Only 1 transporter in seed data | Seed data | ✅ Fixed — `ivan.kolev@transbg.com` added as second transporter in `seed-demo.ts` |
+| Backend | Buyer delivery confirmation needs own endpoint | Backend | ✅ Fixed — `POST /trade-operations/:id/buyer-confirm` added with BUYER role guard |
 
 ---
 

@@ -685,12 +685,57 @@ export class SellerService {
     return (acceptedOffers / offers.length) * 100;
   }
 
-  // Get active trades for seller (placeholder - implement when trade system is ready)
+  // Get active trades for seller
   async getSellerTrades(userId: string) {
-    void userId;
-    // TODO: Implement proper trade fetching from database
-    // For now, return empty array to prevent frontend errors
-    return [];
+    const tradeSellers = await this.prisma.tradeSeller.findMany({
+      where: { sellerId: userId },
+      include: {
+        tradeOperation: {
+          include: {
+            buyListing: {
+              include: {
+                product: true,
+                buyer: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        saleListing: {
+          include: {
+            product: true,
+          },
+        },
+        negotiation: true,
+      },
+      orderBy: { joinedAt: "desc" },
+    });
+
+    return tradeSellers.map((ts) => ({
+      id: ts.id,
+      tradeOperationId: ts.tradeOperationId,
+      status: ts.status,
+      requestedQuantity: ts.requestedQuantity
+        ? Number(ts.requestedQuantity)
+        : null,
+      agreedQuantity: ts.agreedQuantity ? Number(ts.agreedQuantity) : null,
+      agreedPrice: ts.agreedPrice ? Number(ts.agreedPrice) : null,
+      unit: ts.unit,
+      isVerified: ts.isVerified,
+      matchScore: ts.matchScore,
+      product:
+        ts.tradeOperation?.buyListing?.product || ts.saleListing?.product,
+      buyer: ts.tradeOperation?.buyListing?.buyer || null,
+      tradePhase: ts.tradeOperation?.phase,
+      tradeStatus: ts.tradeOperation?.status,
+      negotiationStatus: ts.negotiation?.status || null,
+      joinedAt: ts.joinedAt,
+    }));
   }
 
   // Get seller statistics

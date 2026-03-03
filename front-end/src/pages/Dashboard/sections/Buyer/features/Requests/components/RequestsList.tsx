@@ -25,7 +25,7 @@ function getStatusVariant(status: string): 'success' | 'warning' | 'danger' | 'i
   }
 }
 
-export const RequestsList: React.FC<RequestsListProps> = ({ requests, onOpenOffers }) => (
+export const RequestsList: React.FC<RequestsListProps> = ({ requests }) => (
   <View style={styles.list}>
     {requests.map((request) => (
       <GlassCard key={request.id} tier="subtle" style={styles.card}>

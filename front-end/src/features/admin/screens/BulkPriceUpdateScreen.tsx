@@ -123,7 +123,7 @@ export default function BulkPriceUpdateScreen() {
 
     try {
       setSaving(true);
-      const response = await axios.put(
+      await axios.put(
         `${API_URL}/admin/pricing-zones/${selectedZone}/bulk-update-prices`,
         {
           prices: pricesToSubmit.map((p) => ({

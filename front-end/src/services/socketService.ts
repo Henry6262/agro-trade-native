@@ -23,7 +23,7 @@ class SocketService {
 
     this.socket.on('connect', () => {});
 
-    this.socket.on('disconnect', (reason) => {});
+    this.socket.on('disconnect', (_reason) => {});
 
     this.socket.on('connect_error', (err) => {
       console.warn('[Socket] Connection error:', err.message);

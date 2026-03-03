@@ -21,7 +21,7 @@ import {
 } from "./dto";
 
 @UseGuards(JwtAuthGuard)
-@Controller("api/inspector")
+@Controller("inspector")
 export class InspectorController {
   constructor(private readonly inspectorService: InspectorService) {}
 

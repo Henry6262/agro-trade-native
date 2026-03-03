@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -9,8 +9,6 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Check } from 'lucide-react-native';
-
 interface BuyerSpecificationsDrawerProps {
   visible: boolean;
   onClose: () => void;

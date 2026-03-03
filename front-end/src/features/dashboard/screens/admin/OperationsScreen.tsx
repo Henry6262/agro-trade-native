@@ -13,21 +13,18 @@ import {
   Package,
   Users,
   DollarSign,
-  TrendingUp,
   MapPin,
   Calendar,
-  CheckCircle,
   X,
   Send,
   Plus,
-  Loader2,
   Truck,
   Map,
 } from 'lucide-react-native';
 
 import { useTradeOperations } from './hooks/useTradeOperations';
 import { TransportMapModal } from './components/TransportMapModal';
-import type { BuyListing, TradeOperation, MatchingSeller } from '@services/tradeOperationService';
+import type { BuyListing, MatchingSeller } from '@services/tradeOperationService';
 import { GlassCard, GlassBadge, GlassButton, GlassInput } from '../../../../design-system';
 import { COLORS } from '../../../../design-system';
 

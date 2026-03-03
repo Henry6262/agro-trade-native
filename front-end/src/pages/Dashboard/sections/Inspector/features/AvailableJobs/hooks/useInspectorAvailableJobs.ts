@@ -2,11 +2,7 @@ import { useAuthStore } from '@stores/auth.store';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { inspectorAvailableJobsService } from '../service';
-import type {
-  InspectorAvailableJobsHookResult,
-  InspectorJobPriority,
-  InspectorAvailableJob,
-} from '../types';
+import type { InspectorAvailableJobsHookResult, InspectorJobPriority } from '../types';
 
 export const useInspectorAvailableJobs = (): InspectorAvailableJobsHookResult => {
   const { user } = useAuthStore();

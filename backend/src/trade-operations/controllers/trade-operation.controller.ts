@@ -12,6 +12,7 @@ import {
   BadRequestException,
   NotFoundException,
   UseGuards,
+  ForbiddenException,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -22,6 +23,7 @@ import {
   ApiParam,
 } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../../auth/guards/roles.guard";
 import { Roles } from "../../auth/decorators/roles.decorator";
 import {
   UserRole,
@@ -758,6 +760,83 @@ export class TradeOperationController {
     }
 
     return result;
+  }
+
+  @Post(":id/buyer-confirm")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.BUYER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Buyer confirms delivery of goods",
+    description:
+      "Allows the buyer to confirm receipt of goods, transitioning the trade from DELIVERED to COMPLETED",
+  })
+  @ApiParam({ name: "id", description: "Trade operation ID" })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: "Delivery confirmed successfully",
+    schema: {
+      example: {
+        success: true,
+        message: "Delivery confirmed. Trade operation completed.",
+        data: {
+          id: "trade123",
+          operationNumber: "OP-1234567890",
+          phase: "COMPLETED",
+          status: "COMPLETED",
+          completedAt: "2025-02-20T00:00:00Z",
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: "Trade is not in DELIVERED phase or user is not the buyer",
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: "Trade operation not found",
+  })
+  async buyerConfirmDelivery(
+    @Param("id") id: string,
+    @Body() body: { notes?: string },
+    @Request() req: any,
+  ): Promise<any> {
+    try {
+      const buyerId = req.user?.id;
+      if (!buyerId) {
+        throw new BadRequestException("User ID is required");
+      }
+
+      const confirmed = await this.tradeOperationService.buyerConfirmDelivery(
+        id,
+        buyerId,
+        body.notes,
+      );
+
+      return {
+        success: true,
+        message: "Delivery confirmed. Trade operation completed.",
+        data: {
+          id: confirmed.id,
+          operationNumber: confirmed.operationNumber,
+          phase: confirmed.phase,
+          status: confirmed.status,
+          completedAt: confirmed.completedAt,
+        },
+      };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException(
+        `Failed to confirm delivery: ${error.message}`,
+      );
+    }
   }
 
   @Post(":id/cancel")

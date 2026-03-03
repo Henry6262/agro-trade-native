@@ -29,7 +29,7 @@ type RoleSelectionScreenNavigationProp = NativeStackNavigationProp<
 export const RoleSelectionScreen: React.FC = () => {
   const navigation = useNavigation<RoleSelectionScreenNavigationProp>();
   const { setRole } = useOnboardingStore();
-  const { setTokens, setUser, isAuthenticated, user, login } = useAuthStore();
+  const { isAuthenticated, user, login } = useAuthStore();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'buyer' | 'seller' | 'transport' | null>(null);
 

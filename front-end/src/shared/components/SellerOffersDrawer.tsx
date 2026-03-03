@@ -8,7 +8,6 @@ import {
   Alert,
   ActivityIndicator,
   Animated,
-  Image,
   TextInput,
   KeyboardAvoidingView,
   Platform,
@@ -16,15 +15,11 @@ import {
 import {
   X,
   Package,
-  TrendingUp,
-  Star,
-  Eye,
   DollarSign,
   Users,
   ArrowLeft,
   Check,
   Send,
-  AlertTriangle,
   Info,
   Calculator,
   Building2,
@@ -33,8 +28,6 @@ import {
   TrendingUp as TrendingUpIcon,
   Truck,
   ArrowUpDown,
-  MessageSquare,
-  CheckCircle,
 } from 'lucide-react-native';
 
 import { SellerOfferCard } from './SellerOfferCard';
@@ -97,7 +90,6 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
   offers,
   sellerProduct,
   productName,
-  productId,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [slideAnim] = useState(new Animated.Value(0));
@@ -221,7 +213,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
       await sellerOfferService.acceptOffer(offerId, { acceptanceNote: acceptNotes || undefined });
       Alert.alert('Success', 'Offer accepted successfully!');
       onClose();
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to accept offer. Please try again.');
     } finally {
       setActionLoading(false);
@@ -242,7 +234,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
       await sellerOfferService.rejectOffer(offerId, { reason: rejectReason });
       Alert.alert('Offer Rejected', 'The buyer has been notified of your decision.');
       onClose();
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to reject offer. Please try again.');
     } finally {
       setActionLoading(false);
@@ -288,7 +280,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
       });
       Alert.alert('Counter-Offer Sent', 'Your counter-offer has been sent to the buyer.');
       handleBack();
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to send counter-offer. Please try again.');
     } finally {
       setActionLoading(false);

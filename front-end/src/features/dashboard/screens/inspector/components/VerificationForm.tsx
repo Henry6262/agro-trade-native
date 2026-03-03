@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, StyleSheet } from 'react-native';
 import { Camera, FileText, CheckCircle, XCircle } from 'lucide-react-native';
 import { GlassCard, GlassInput, GlassButton } from '../../../../../design-system';
 import { VerificationFormProps, VerificationStatus } from '../types';

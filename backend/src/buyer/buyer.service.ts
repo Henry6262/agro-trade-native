@@ -565,30 +565,82 @@ export class BuyerService {
     }
 
     // Update specifications if provided
-    // TODO: Fix specifications - need specTypeId
-    /*
-    if (dto.specifications) {
+    if (dto.specifications && Object.keys(dto.specifications).length > 0) {
       // Delete existing specifications
       await this.prisma.listingSpec.deleteMany({
         where: { buyListingId: id },
       });
 
-      // Create new specifications
-      if (Object.keys(dto.specifications).length > 0) {
-        const specEntries = Object.entries(dto.specifications).map(([key, value]) => ({
-          listingType: 'BUY' as const,
-          buyListingId: id,
-          specCode: key,
-          value: String(value),
-          specTypeId: 'TODO',
-        }));
+      // Fields that are NOT specifications (they're core BuyListing fields)
+      const coreFields = [
+        "productId",
+        "quantity",
+        "unit",
+        "pricePerKilo",
+        "maxPrice",
+        "deliveryDeadline",
+        "notes",
+        "neededBy",
+      ];
 
+      const specEntries = [];
+
+      for (const [key, value] of Object.entries(dto.specifications)) {
+        if (
+          coreFields.includes(key) ||
+          value === null ||
+          value === undefined ||
+          value === ""
+        )
+          continue;
+
+        // Skip if the value looks like an ID (cuid pattern)
+        if (typeof value === "string" && value.match(/^c[a-z0-9]{24,}$/))
+          continue;
+
+        // Find or create specification type
+        let specType = await this.prisma.specificationType.findFirst({
+          where: {
+            OR: [{ name: key }, { code: key.toUpperCase() }],
+          },
+        });
+
+        if (!specType) {
+          specType = await this.prisma.specificationType.create({
+            data: {
+              name:
+                key.charAt(0).toUpperCase() +
+                key
+                  .slice(1)
+                  .replace(/([A-Z])/g, " $1")
+                  .trim(),
+              code: key.toUpperCase().replace(/\s+/g, "_"),
+              dataType: typeof value === "number" ? "NUMBER" : "TEXT",
+              unit: typeof value === "number" ? "UNIT" : null,
+            },
+          });
+        }
+
+        const specEntry: any = {
+          buyListingId: id,
+          specTypeId: specType.id,
+        };
+
+        if (typeof value === "number") {
+          specEntry.valueNumber = value;
+        } else {
+          specEntry.valueText = String(value);
+        }
+
+        specEntries.push(specEntry);
+      }
+
+      if (specEntries.length > 0) {
         await this.prisma.listingSpec.createMany({
           data: specEntries,
         });
       }
     }
-    */
 
     return this.prisma.buyListing.update({
       where: { id },

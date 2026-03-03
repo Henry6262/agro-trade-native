@@ -6,7 +6,6 @@ import {
   Image,
   ActivityIndicator,
   ScrollView,
-  Dimensions,
   Platform,
 } from 'react-native';
 import { Check } from 'lucide-react-native';
@@ -19,8 +18,6 @@ interface ProductSelectionDrawerSimpleProps {
   mode?: 'single' | 'multiple';
   selectedProducts?: string[];
 }
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimpleProps> = ({
   visible,

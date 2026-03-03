@@ -1,33 +1,25 @@
 # Use Node 20 with Debian (has OpenSSL 3)
 FROM node:20-bookworm-slim
 
-# Install OpenSSL 3 and other dependencies
+# Install OpenSSL (required by Prisma)
 RUN apt-get update -y && \
     apt-get install -y openssl libssl3 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files and install
 COPY package*.json ./
 COPY prisma ./prisma/
-
-# Install dependencies
 RUN npm ci
-
-# Generate Prisma Client
 RUN npx prisma generate
 
-# Copy source code
+# Copy source and build with tsc (not webpack)
 COPY . .
-
-# Build application
 RUN npm run build
 
-# Expose port
 EXPOSE 3000
 
-# Start command (migrations + start)
-CMD npx prisma migrate deploy && npm run start:prod
+# Start: migrations then app with proper error visibility
+CMD ["sh", "-c", "echo 'Running migrations...' && npx prisma migrate deploy && echo 'Starting app on port ${PORT:-4000}...' && node dist/main.js"]

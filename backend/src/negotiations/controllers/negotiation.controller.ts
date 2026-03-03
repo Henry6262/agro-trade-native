@@ -294,6 +294,59 @@ export class NegotiationController {
     }
   }
 
+
+  /**
+   * Get analytics/overview for negotiations (stub - must come before :negotiationId route)
+   */
+  @Get("analytics")
+  @ApiOperation({ summary: "Get negotiation analytics summary" })
+  @ApiQuery({ name: "tradeOperationId", required: false })
+  @ApiResponse({ status: HttpStatus.OK })
+  async getAnalytics(
+    @Query("tradeOperationId") tradeOperationId?: string,
+  ) {
+    try {
+      if (tradeOperationId) {
+        const negotiations = await this.negotiationService.getNegotiations(
+          tradeOperationId,
+          undefined,
+          100,
+          0,
+        );
+        const total = negotiations.negotiations.length;
+        const accepted = negotiations.negotiations.filter(
+          (n) => n.status === "ACCEPTED",
+        ).length;
+        const pending = negotiations.negotiations.filter(
+          (n) => n.status === "PENDING",
+        ).length;
+
+        return {
+          totalNegotiations: total,
+          successRate: total > 0 ? (accepted / total) * 100 : 0,
+          averageDuration: 0,
+          pendingCount: pending,
+          acceptedCount: accepted,
+        };
+      }
+      return {
+        totalNegotiations: 0,
+        successRate: 0,
+        averageDuration: 0,
+        pendingCount: 0,
+        acceptedCount: 0,
+      };
+    } catch {
+      return {
+        totalNegotiations: 0,
+        successRate: 0,
+        averageDuration: 0,
+        pendingCount: 0,
+        acceptedCount: 0,
+      };
+    }
+  }
+
   /**
    * Get single negotiation details
    */

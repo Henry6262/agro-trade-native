@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Alert, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { MapPin, Shield, AlertCircle } from 'lucide-react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';

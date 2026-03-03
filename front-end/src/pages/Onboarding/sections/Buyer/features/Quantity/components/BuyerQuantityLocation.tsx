@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { MapPin, Package, Edit2, Weight, DollarSign } from 'lucide-react-native';
+import { MapPin, Edit2, Weight, DollarSign } from 'lucide-react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useProductStore } from '@stores/product.store';
 import { getApiUrl } from '@shared/utils/environment';

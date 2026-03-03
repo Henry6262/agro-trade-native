@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { orderService, OrdersListParams } from '@services/orderService';
-import { OrderCreateForm } from '@shared/types';
 import { useOrderStore } from '@stores/order.store';
 
 export const useOrders = () => {

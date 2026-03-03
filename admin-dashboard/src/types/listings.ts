@@ -94,7 +94,7 @@ export interface BuyListing {
   createdAt: string;
   updatedAt?: string;
   notes?: string;
-  specifications: Specification[];
+  specifications?: Specification[];
   buyer?: User;
   product?: Product;
   deliveryAddress?: Address;
@@ -129,6 +129,69 @@ export interface TradeOperation {
   buyListing?: BuyListing;
   sellers?: TradeSellerSummary[];
   offers?: Offer[];
+  transport?: {
+    estimatedCost: number;
+    distance: number;
+    optimized: boolean;
+    request?: {
+      id: string;
+      requestNumber: string;
+      status: string;
+      totalWeight: number;
+      biddingDeadline?: string | null;
+      deliveryDeadline?: string | null;
+      urgencyLevel?: string;
+      tradeOperationId?: string;
+      createdAt?: string;
+      updatedAt?: string;
+      tradeOperation?: {
+        id?: string;
+        operationNumber?: string;
+        buyListing?: {
+          buyer?: { id: string; email: string; name: string; role?: string };
+          product?: { id: string; name: string };
+        };
+      };
+      pickupPoints: Array<{
+        sellerId?: string;
+        saleListingId?: string;
+        sellerName?: string;
+        quantity?: number;
+        unit?: string;
+        address?: string;
+        lat?: number;
+        lng?: number;
+      }>;
+      deliveryPoint?: {
+        buyerId?: string;
+        buyerName?: string;
+        address?: string;
+        lat?: number;
+        lng?: number;
+      } | null;
+      bids: Array<{
+        id: string;
+        status: string;
+        bidAmount?: number;
+        transporterId?: string;
+        transporterName?: string;
+        transportCompanyName?: string;
+        vehicleType?: string;
+        vehicleCapacity?: number;
+        estimatedDuration?: number;
+        submittedAt?: string;
+      }>;
+      job?: {
+        id: string;
+        jobNumber: string;
+        status: string;
+        startedAt?: string;
+        estimatedArrival?: string;
+        actualDelivery?: string;
+        progress?: number;
+      } | null;
+    } | null;
+  };
 }
 
 export interface MatchedSeller {

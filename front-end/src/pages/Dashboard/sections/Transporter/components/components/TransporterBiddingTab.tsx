@@ -22,7 +22,6 @@ import {
   Navigation,
 } from 'lucide-react-native';
 import { Button } from '@shared/components/Button';
-import { Badge } from '@shared/components/Badge';
 import { Input } from '@shared/components/Input';
 import { MetricCard } from '../../components/MetricCard';
 import { BaseComponentProps } from '@shared/types';

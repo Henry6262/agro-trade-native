@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
-  ActivityIndicator,
   StyleSheet,
 } from 'react-native';
 import { X, Send, AlertCircle, DollarSign, Package } from 'lucide-react-native';
@@ -111,7 +110,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               sellerId: seller?.sellerId || '',
             } as TradeSeller;
           }
-        } catch (error) {
+        } catch (_error) {
           Alert.alert('Error', 'Failed to add seller to trade operation. Please try again.');
           setIsSubmitting(false);
           return;
@@ -210,7 +209,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
                   {validationErrors.map((error, index) => (
                     <View key={index} style={styles.errorRow}>
                       <AlertCircle size={13} color={COLORS.danger} />
-                      <Text style={styles.errorText}>{error}</Text>
+                      <Text style={styles.errorText}>{}</Text>
                     </View>
                   ))}
                 </GlassCard>

@@ -43,7 +43,7 @@ import { CurrentUser } from "./decorators/current-user.decorator";
 import { Public } from "./decorators/public.decorator";
 import { User, UserRole, AddressType } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import {
   ApiTags,
   ApiBody,

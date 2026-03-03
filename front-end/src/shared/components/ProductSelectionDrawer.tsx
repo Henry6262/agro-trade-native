@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   ScrollView,
   Modal,
-  Dimensions,
   Platform,
 } from 'react-native';
 import { Check } from 'lucide-react-native';
@@ -20,8 +19,6 @@ interface ProductSelectionDrawerProps {
   mode?: 'single' | 'multiple';
   selectedProducts?: string[];
 }
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
   visible,
@@ -135,7 +132,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
   };
 
   // Fallback image for products without images
-  const getFallbackImage = (category: string) => {
+  const getFallbackImage = (_category: string) => {
     // Return a default image URL based on category
     return 'https://via.placeholder.com/200x200/10B981/FFFFFF?text=Product';
   };
@@ -194,7 +191,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
               contentContainerStyle={{ paddingBottom: 100 }}
             >
               {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
-                <View key={category} className="mb-6">
+                <View key={} className="mb-6">
                   <Text className="text-lg font-semibold text-green-400 px-6 py-2">
                     {getCategoryDisplayName(category)}
                   </Text>

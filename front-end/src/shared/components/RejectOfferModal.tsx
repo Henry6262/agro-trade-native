@@ -1,16 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Modal, Animated, ScrollView } from 'react-native';
-import {
-  X,
-  AlertTriangle,
-  DollarSign,
-  Package,
-  Truck,
-  Clock,
-  Star,
-  MessageSquare,
-  CheckCircle,
-} from 'lucide-react-native';
+import { X, AlertTriangle, MessageSquare, CheckCircle } from 'lucide-react-native';
 
 import { Offer, RejectReason } from '../types';
 

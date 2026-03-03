@@ -1,15 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import {
-  Package,
-  Weight,
-  MapPin,
-  Calendar,
-  Navigation,
-  DollarSign,
-  Target,
-  Zap,
-} from 'lucide-react-native';
+import { Weight, MapPin, Calendar, Navigation, DollarSign, Target, Zap } from 'lucide-react-native';
 import { Button } from '@shared/components/Button';
 import { Input } from '@shared/components/Input';
 import type { TransporterBiddingRequestView, TransportRequest } from '../types';

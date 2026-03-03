@@ -227,6 +227,25 @@ export class TransportCompanyController {
 
   // TRUCK ENDPOINTS
 
+
+  @Get("me/trucks")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Get trucks for the current user's company" })
+  async getMyTrucks(@Request() req: any) {
+    const fleet = await this.transportCompanyService.getFleetForUser(req.user.id);
+    const trucks = (fleet as any)?.trucks ?? [];
+    return { trucks, total: trucks.length };
+  }
+
+  @Get("me/drivers")
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: "Get drivers for the current user's company" })
+  async getMyDrivers(@Request() req: any) {
+    const fleet = await this.transportCompanyService.getFleetForUser(req.user.id);
+    const drivers = (fleet as any)?.drivers ?? [];
+    return { drivers, total: drivers.length };
+  }
+
   @Post("me/trucks")
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.CREATED)

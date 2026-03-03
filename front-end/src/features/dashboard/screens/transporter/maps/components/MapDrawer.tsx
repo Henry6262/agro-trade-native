@@ -256,7 +256,7 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
                 )}
 
                 {/* Detailed Truck Routes */}
-                {routes.map((route, index) => (
+                {routes.map((route, _index) => (
                   <View
                     key={route.truckId}
                     className="bg-white dark:bg-white border-2 rounded-xl p-4 mb-3 shadow-sm"
@@ -371,7 +371,7 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
                       </Marker>
 
                       {/* Truck Markers */}
-                      {routes.map((route, index) => {
+                      {routes.map((route, _index) => {
                         const truck = fleet?.trucks.find((t) => t.id === route.truckId);
                         if (!truck) return null;
 

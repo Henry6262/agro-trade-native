@@ -31,7 +31,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({ offer, onViewRoute }) => {
 
     try {
       await onViewRoute(offer);
-    } catch (error) {
+    } catch (_error) {
       setHasError(true);
     } finally {
       setIsLoading(false);

@@ -1,5 +1,4 @@
 import { Platform } from 'react-native';
-import { apiClient } from './api';
 import { UPLOAD_CONFIG } from '../config/api';
 import api from './api';
 

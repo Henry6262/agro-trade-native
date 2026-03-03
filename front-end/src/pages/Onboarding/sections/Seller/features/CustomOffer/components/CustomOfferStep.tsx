@@ -6,13 +6,8 @@ import { useProductStore } from '@stores/product.store';
 import { getApiUrl } from '@shared/utils/environment';
 
 export function CustomOfferStep() {
-  const {
-    selectedProducts,
-    selectedProductsMetadata,
-    sellerSpecifications,
-    updateSellerSpecification,
-    nextStep,
-  } = useOnboardingStore();
+  const { selectedProducts, sellerSpecifications, updateSellerSpecification, nextStep } =
+    useOnboardingStore();
 
   const { products } = useProductStore();
 

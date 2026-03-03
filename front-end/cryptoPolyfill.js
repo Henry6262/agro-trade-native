@@ -31,7 +31,7 @@ const createHash = (algorithm) => {
 const createCipheriv = (algorithm, key, iv) => {
   const cipher = forge.cipher.createCipher(algorithm, forge.util.createBuffer(key));
   cipher.start({ iv: forge.util.createBuffer(iv) });
-  let output = forge.util.createBuffer();
+  const output = forge.util.createBuffer();
 
   return {
     update: (data) => {
@@ -58,7 +58,7 @@ const createCipheriv = (algorithm, key, iv) => {
 const createDecipheriv = (algorithm, key, iv) => {
   const decipher = forge.cipher.createDecipher(algorithm, forge.util.createBuffer(key));
   decipher.start({ iv: forge.util.createBuffer(iv) });
-  let output = forge.util.createBuffer();
+  const output = forge.util.createBuffer();
 
   return {
     update: (data) => {

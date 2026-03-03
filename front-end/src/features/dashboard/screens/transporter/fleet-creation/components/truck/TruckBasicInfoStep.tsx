@@ -9,7 +9,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import { X, ChevronLeft } from 'lucide-react-native';
-import { GlassCard } from '../../../../../../../design-system/GlassCard';
 import { GlassButton } from '../../../../../../../design-system/GlassButton';
 import { GlassInput } from '../../../../../../../design-system/GlassInput';
 import { ProgressIndicator } from '../shared/ProgressIndicator';

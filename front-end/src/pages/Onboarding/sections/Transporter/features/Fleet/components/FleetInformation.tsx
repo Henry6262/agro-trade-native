@@ -28,7 +28,7 @@ export function FleetInformation() {
     unit: 'tons' as 'tons' | 'kg',
     type: 'Standard',
   });
-  const [batchMode, setBatchMode] = useState(true); // Always active
+  const [batchMode] = useState(true); // Always active
   const [batchCount, setBatchCount] = useState('1');
   const [showTruckTypeModal, setShowTruckTypeModal] = useState(false);
   const [showCustomCapacity, setShowCustomCapacity] = useState(false);
@@ -435,7 +435,7 @@ export function FleetInformation() {
             Your Fleet ({currentFleet.reduce((sum, truck) => sum + (truck.count || 1), 0)} trucks)
           </Text>
           <View>
-            {currentFleet.map((truck, index) => {
+            {currentFleet.map((truck, _index) => {
               const truckCount = truck.count || 1;
               const totalCapacity = truck.capacity * truckCount;
 

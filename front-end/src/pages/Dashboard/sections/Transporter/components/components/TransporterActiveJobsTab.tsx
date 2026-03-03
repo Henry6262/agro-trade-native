@@ -8,7 +8,6 @@ import {
   CheckCircle,
   Navigation,
   Camera,
-  AlertCircle,
 } from 'lucide-react-native';
 import { Button } from '@shared/components/Button';
 import { Badge } from '@shared/components/Badge';
@@ -21,7 +20,6 @@ interface TransporterActiveJobsTabProps extends BaseComponentProps {
 }
 
 export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> = ({
-  id,
   testID,
   accessibilityLabel,
 }) => {

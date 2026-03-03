@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Loader2, Truck } from 'lucide-react';
-import type { TransportRequestListItem, TransportRequestSummary, TransportRequestStatus } from '../../../../types';
+import type { TransportRequestListItem, TransportRequestSummary } from '../../../../types';
+
+type TransportRequestStatus = 'OPEN' | 'ASSIGNED' | 'IN_PROGRESS' | 'IN_TRANSIT' | 'COMPLETED' | 'CANCELLED';
 import type { TradeOperation } from '../../../../types';
 import { transportAdminService } from '../../../../services/api';
 import { BidReviewModal } from './BidReviewModal';

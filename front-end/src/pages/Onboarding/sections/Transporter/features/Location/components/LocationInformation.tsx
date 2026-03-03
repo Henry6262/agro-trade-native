@@ -10,8 +10,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import { MapPin, Plus, X, Truck, Edit2 } from 'lucide-react-native';
-import { Badge } from '@shared/components/Badge';
+import { MapPin, X, Truck, Edit2 } from 'lucide-react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import * as Location from 'expo-location';
 
@@ -62,7 +61,7 @@ export function LocationInformation() {
   const [manualCity, setManualCity] = useState('');
   const [showAddBaseModal, setShowAddBaseModal] = useState(false);
   const [showTruckAssignmentModal, setShowTruckAssignmentModal] = useState(false);
-  const [selectedBaseForAssignment, setSelectedBaseForAssignment] = useState<string | null>(null);
+  const [selectedBaseForAssignment] = useState<string | null>(null);
   const [newBase, setNewBase] = useState<
     Omit<BaseLocation, 'id' | 'assignedTrucks' | 'isMainBase'>
   >({
@@ -182,32 +181,6 @@ export function LocationInformation() {
     setShowManualInput(false);
   };
 
-  const handleLocationChange = (field: string, value: string) => {
-    // Update the main base if it exists
-    if (bases.length > 0 && bases[0].isMainBase) {
-      const updatedBases = bases.map((base) =>
-        base.isMainBase ? { ...base, [field]: value } : base
-      );
-      setBases(updatedBases);
-
-      // Also update the store
-      setFleetInfo({
-        ...transportData?.fleetInfo,
-        baseLocation: {
-          id: updatedBases[0].id,
-          address: updatedBases[0].address,
-          city: updatedBases[0].city,
-          state: updatedBases[0].state,
-          country: updatedBases[0].country,
-          zipCode: updatedBases[0].zipCode,
-        },
-        vehicleCount: transportData?.fleetInfo?.vehicleCount || 0,
-        vehicleTypes: transportData?.fleetInfo?.vehicleTypes || [],
-        capacity: transportData?.fleetInfo?.capacity || { total: 0, unit: 'tons' },
-      });
-    }
-  };
-
   const addBase = () => {
     if (newBase.name && newBase.city && newBase.country) {
       const base: BaseLocation = {
@@ -245,19 +218,6 @@ export function LocationInformation() {
       setNewBase({ name: '', address: '', city: '', state: '', country: '', zipCode: '' });
       setShowAddBaseModal(false);
     }
-  };
-
-  const removeBase = (baseId: string) => {
-    const baseToRemove = bases.find((b) => b.id === baseId);
-    if (baseToRemove?.isMainBase) {
-      Alert.alert('Cannot Remove', 'Cannot remove the main base');
-      return;
-    }
-
-    const updatedBases = bases.filter((b) => b.id !== baseId);
-    setBases(updatedBases);
-
-    // No need to update store with bases field
   };
 
   const assignTrucksToBase = (baseId: string, truckIds: string[]) => {

@@ -5,7 +5,7 @@ import type { InspectionRequest } from '../../../../types';
 import axios from 'axios';
 import { handleApiError } from '../../../../utils/errorHandler';
 
-const API_BASE = 'http://localhost:4001';
+const API_BASE = 'http://localhost:4000';
 
 interface InspectionFormProps {
   inspection: InspectionRequest;

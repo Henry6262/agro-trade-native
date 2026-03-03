@@ -62,7 +62,7 @@ const initialPagination = {
 };
 
 export const useMarketplaceStore = create<MarketplaceState>()(
-  immer((set, get) => ({
+  immer((set, _get) => ({
     // Initial state
     products: [],
     featuredProducts: [],
