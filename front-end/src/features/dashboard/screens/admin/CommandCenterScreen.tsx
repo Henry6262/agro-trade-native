@@ -109,19 +109,10 @@ export default function CommandCenterScreen() {
   ): 'success' | 'warning' | 'danger' | 'info' | 'muted' | 'gold' => {
     switch (type) {
       case 'sale':
-        return 'success';
-      case 'match':
-        return 'gold';
-      case 'alert':
-        return 'danger';
-      case 'listing':
-        return 'info';
       case 'delivery':
-        return 'success';
-      case 'transport':
-        return 'muted';
+        return 'success'; // green — only completed positive actions
       default:
-        return 'muted';
+        return 'muted'; // everything else: quiet white glass
     }
   };
 
@@ -130,9 +121,9 @@ export default function CommandCenterScreen() {
       case 'active':
         return COLORS.accentGreen;
       case 'matched':
-        return COLORS.accentGold;
+        return COLORS.accentGreen;
       case 'transit':
-        return COLORS.info;
+        return COLORS.textSecondary;
       default:
         return COLORS.textMuted;
     }
@@ -143,12 +134,6 @@ export default function CommandCenterScreen() {
       case 'sale':
       case 'delivery':
         return COLORS.accentGreen;
-      case 'match':
-        return COLORS.accentGold;
-      case 'alert':
-        return COLORS.danger;
-      case 'listing':
-        return COLORS.info;
       default:
         return COLORS.textMuted;
     }
@@ -180,7 +165,7 @@ export default function CommandCenterScreen() {
         {/* Order Overview */}
         <GlassCard tier="medium" style={styles.halfCard} delay={80} noPadding>
           <View style={styles.sectionHeader}>
-            <Package color={COLORS.accentGreen} size={14} />
+            <Package color={COLORS.accentGreen} size={16} />
             <Text style={styles.sectionTitle}>ORDER OVERVIEW</Text>
           </View>
           <View style={DIVIDER} />
@@ -203,7 +188,7 @@ export default function CommandCenterScreen() {
         {/* Live Trade Events */}
         <GlassCard tier="medium" style={styles.halfCard} delay={140} noPadding>
           <View style={styles.sectionHeader}>
-            <Bell color="#f97316" size={14} />
+            <Bell color={COLORS.accentGreen} size={16} />
             <Text style={styles.sectionTitle}>LIVE TRADE EVENTS</Text>
             <View style={styles.liveIndicator} />
           </View>
@@ -213,7 +198,7 @@ export default function CommandCenterScreen() {
               const IconComponent = event.icon;
               return (
                 <TouchableOpacity key={index} style={styles.eventRow} activeOpacity={0.7}>
-                  <IconComponent color={getEventIconColor(event.type)} size={14} />
+                  <IconComponent color={getEventIconColor(event.type)} size={16} />
                   <View style={styles.eventBody}>
                     <View style={styles.eventTopRow}>
                       <Text style={styles.eventTime}>{event.time}</Text>
@@ -247,7 +232,7 @@ export default function CommandCenterScreen() {
       {/* Trade Volume Overview */}
       <GlassCard tier="medium" style={styles.chartCard} delay={200} noPadding>
         <View style={styles.sectionHeader}>
-          <TrendingUp color={COLORS.accentGreen} size={14} />
+          <TrendingUp color={COLORS.accentGreen} size={16} />
           <Text style={styles.sectionTitle}>TRADE VOLUME OVERVIEW</Text>
         </View>
         <View style={DIVIDER} />
@@ -283,7 +268,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
   },
   buyerName: {
-    color: COLORS.info,
+    color: COLORS.textMuted,
     fontFamily: 'monospace',
     fontSize: 10,
   },
@@ -405,11 +390,11 @@ const styles = StyleSheet.create({
     paddingTop: 14,
   },
   sectionTitle: {
-    color: COLORS.textSecondary,
+    color: COLORS.textPrimary,
     flex: 1,
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 1.2,
+    letterSpacing: 1.0,
     textTransform: 'uppercase',
   },
   statCell: {
@@ -447,7 +432,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   traderName: {
-    color: COLORS.accentGreen,
+    color: COLORS.textPrimary,
     fontFamily: 'monospace',
     fontSize: 12,
     fontWeight: '700',
