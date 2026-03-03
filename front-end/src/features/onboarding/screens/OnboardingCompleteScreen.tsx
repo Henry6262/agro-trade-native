@@ -19,6 +19,21 @@ interface Props {
   route: any;
 }
 
+/**
+ * Normalizes backend role formats to tour role type.
+ * Handles different casing and aliases:
+ * - 'BUYER', 'buyer' → 'buyer'
+ * - 'SELLER', 'seller', 'FARMER', 'farmer' → 'seller'
+ * - 'TRANSPORT', 'transport', 'TRANSPORTER', 'transporter' → 'transport'
+ */
+const normalizeToTourRole = (role: string): 'buyer' | 'seller' | 'transport' | null => {
+  const lower = role.toLowerCase();
+  if (lower === 'buyer') return 'buyer';
+  if (lower === 'seller' || lower === 'farmer') return 'seller';
+  if (lower === 'transport' || lower === 'transporter') return 'transport';
+  return null;
+};
+
 export const OnboardingCompleteScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuthStore();
   const { selectedRole, resetOnboarding } = useOnboardingStore();
@@ -28,9 +43,12 @@ export const OnboardingCompleteScreen: React.FC<Props> = ({ navigation }) => {
     const userRole = selectedRole || user?.role;
 
     // Trigger character tour on first dashboard entry
-    const roleForTour = selectedRole || user?.role;
-    if (roleForTour && !useTourStore.getState().hasSeenTour) {
-      startTour(roleForTour as 'buyer' | 'seller' | 'transport');
+    const rawRole = selectedRole || user?.role;
+    if (rawRole && !useTourStore.getState().hasSeenTour) {
+      const tourRole = normalizeToTourRole(rawRole);
+      if (tourRole) {
+        startTour(tourRole);
+      }
     }
 
     // Navigate to dashboard with success animation via parent navigator
