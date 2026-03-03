@@ -105,9 +105,14 @@ export const useMarketStore = create<MarketState & MarketActions>()(
         set({ isLoadingPrices: true });
         try {
           const { marketDataService } = await import('../services/marketDataService');
-          const prices = await marketDataService.getPrices();
-          set({ prices, lastPriceFetch: Date.now() });
-          get().checkAlerts();
+          await marketDataService.getPrices((price) => {
+            // Progressive update — add each commodity as it arrives
+            set((state) => ({
+              prices: [...state.prices.filter((p) => p.symbol !== price.symbol), price],
+              lastPriceFetch: Date.now(),
+            }));
+            get().checkAlerts();
+          });
         } catch (error) {
           console.warn('[marketStore] fetchPrices failed:', error);
         } finally {

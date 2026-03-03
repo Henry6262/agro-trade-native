@@ -1,6 +1,13 @@
 const BASE_URL = 'https://www.alphavantage.co/query';
 
-const COMMODITY_SYMBOLS = ['WHEAT', 'CORN', 'COTTON', 'SUGAR', 'COFFEE', 'NATURAL_GAS'] as const;
+const COMMODITY_SYMBOLS = ['WHEAT', 'CORN', 'COTTON', 'SUGAR', 'COFFEE'] as const;
+
+// Delay between requests to stay within Alpha Vantage free tier (5 req/min)
+const RATE_LIMIT_DELAY_MS = 13000; // 13 seconds between each request
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export type CommoditySymbol = (typeof COMMODITY_SYMBOLS)[number];
 
@@ -74,7 +81,7 @@ async function fetchCommodity(
   }
 }
 
-async function getPrices(): Promise<CommodityPrice[]> {
+async function getPrices(onProgress?: (price: CommodityPrice) => void): Promise<CommodityPrice[]> {
   const apiKey = process.env.EXPO_PUBLIC_ALPHA_VANTAGE_KEY ?? '';
 
   if (!apiKey) {
@@ -82,11 +89,23 @@ async function getPrices(): Promise<CommodityPrice[]> {
     return [];
   }
 
-  const results = await Promise.all(
-    COMMODITY_SYMBOLS.map((symbol) => fetchCommodity(symbol, apiKey))
-  );
+  const results: CommodityPrice[] = [];
 
-  return results.filter((r): r is CommodityPrice => r !== null);
+  for (let i = 0; i < COMMODITY_SYMBOLS.length; i++) {
+    const symbol = COMMODITY_SYMBOLS[i];
+
+    if (i > 0) {
+      await sleep(RATE_LIMIT_DELAY_MS);
+    }
+
+    const price = await fetchCommodity(symbol, apiKey);
+    if (price) {
+      results.push(price);
+      onProgress?.(price); // progressively update caller
+    }
+  }
+
+  return results;
 }
 
 export const marketDataService = {

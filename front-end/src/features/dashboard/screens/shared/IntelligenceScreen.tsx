@@ -86,7 +86,10 @@ const PriceTicker: React.FC = () => {
           return (
             <View style={styles.tickerItem}>
               <Text style={styles.tickerSymbol}>{item.symbol}</Text>
-              <Text style={styles.tickerPrice}>${item.price.toFixed(2)}</Text>
+              <Text style={styles.tickerPrice}>{item.price.toFixed(2)}</Text>
+              <Text style={styles.tickerUnit}>
+                {item.unit ? item.unit.split(' ').slice(-1)[0] : ''}
+              </Text>
               <View style={styles.tickerChange}>
                 <ChangeIcon size={10} color={changeColor} />
                 <Text style={[styles.tickerChangePct, { color: changeColor }]}>
@@ -184,7 +187,6 @@ const COMMODITY_NAMES: Record<CommoditySymbol, string> = {
   COTTON: 'Cotton',
   SUGAR: 'Sugar',
   COFFEE: 'Coffee',
-  NATURAL_GAS: 'Gas',
 };
 
 const AlertsSection: React.FC = () => {
@@ -200,9 +202,7 @@ const AlertsSection: React.FC = () => {
 
   const availableSymbols = prices.map((p) => p.symbol);
   const displaySymbols: CommoditySymbol[] =
-    availableSymbols.length > 0
-      ? availableSymbols
-      : ['WHEAT', 'CORN', 'COTTON', 'SUGAR', 'COFFEE', 'NATURAL_GAS'];
+    availableSymbols.length > 0 ? availableSymbols : ['WHEAT', 'CORN', 'COTTON', 'SUGAR', 'COFFEE'];
 
   const handleAdd = useCallback(() => {
     const threshold = parseFloat(newThreshold);
@@ -589,5 +589,11 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '700',
     letterSpacing: 0.8,
+  },
+  tickerUnit: {
+    color: COLORS.textMuted,
+    fontSize: 8,
+    letterSpacing: 0.3,
+    marginTop: 1,
   },
 });

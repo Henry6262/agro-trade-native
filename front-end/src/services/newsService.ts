@@ -1,7 +1,9 @@
-const BASE_URL = 'https://newsapi.org/v2/everything';
+// Using The Guardian Open Platform API (free, works from mobile devices)
+// Get a free key at: https://open-platform.theguardian.com/access/
+// The 'test' key works for development (100 req/day)
+const BASE_URL = 'https://content.guardianapis.com/search';
 
-const QUERY =
-  'agricultural commodities OR wheat prices OR corn market OR coffee futures OR cotton prices OR sugar prices';
+const SEARCH_QUERY = 'wheat OR corn OR cotton OR sugar OR coffee OR agricultural commodities';
 
 export interface NewsArticle {
   title: string;
@@ -11,52 +13,56 @@ export interface NewsArticle {
   publishedAt: string;
 }
 
-interface RawArticle {
-  title: string;
-  source: { name: string };
-  description: string | null; // NewsAPI returns null for missing descriptions
-  url: string;
-  publishedAt: string;
+interface GuardianField {
+  trailText?: string;
 }
 
-function parseArticle(raw: RawArticle): NewsArticle {
+interface GuardianResult {
+  webTitle: string;
+  webUrl: string;
+  webPublicationDate: string;
+  fields?: GuardianField;
+}
+
+interface GuardianResponse {
+  response: {
+    results: GuardianResult[];
+  };
+}
+
+function parseArticle(raw: GuardianResult): NewsArticle {
   return {
-    title: raw.title ?? '',
-    source: raw.source?.name ?? 'Unknown',
-    description: raw.description ?? '',
-    url: raw.url ?? '',
-    publishedAt: raw.publishedAt ?? '',
+    title: raw.webTitle ?? '',
+    source: 'The Guardian',
+    description: raw.fields?.trailText ?? '',
+    url: raw.webUrl ?? '',
+    publishedAt: raw.webPublicationDate ?? '',
   };
 }
 
 async function getAgriNews(): Promise<NewsArticle[]> {
-  const apiKey = process.env.EXPO_PUBLIC_NEWS_API_KEY ?? '';
-
-  if (!apiKey) {
-    console.warn('[newsService] No NewsAPI key set');
-    return [];
-  }
+  const apiKey = process.env.EXPO_PUBLIC_NEWS_API_KEY ?? 'test';
 
   try {
     const params = new URLSearchParams({
-      q: QUERY,
-      sortBy: 'publishedAt',
-      language: 'en',
-      pageSize: '20',
-      apiKey,
+      q: SEARCH_QUERY,
+      'show-fields': 'trailText',
+      'order-by': 'newest',
+      'page-size': '20',
+      'api-key': apiKey,
     });
 
     const response = await fetch(`${BASE_URL}?${params.toString()}`);
 
     if (!response.ok) {
-      console.warn(`[newsService] Fetch failed: ${response.status}`);
+      console.warn(`[newsService] Guardian fetch failed: ${response.status}`);
       return [];
     }
 
-    const json = (await response.json()) as { articles: RawArticle[] };
-    const articles = json.articles ?? [];
+    const json = (await response.json()) as GuardianResponse;
+    const results = json?.response?.results ?? [];
 
-    return articles.filter((a) => a.title !== '[Removed]' && a.url).map(parseArticle);
+    return results.filter((r) => r.webTitle && r.webUrl).map(parseArticle);
   } catch (error) {
     console.warn('[newsService] Error:', error);
     return [];
