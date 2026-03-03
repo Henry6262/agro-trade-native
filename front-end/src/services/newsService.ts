@@ -23,17 +23,16 @@ interface GNewsSource {
 }
 
 interface GNewsArticle {
-  title: string;
-  description: string;
-  content: string;
-  url: string;
+  title: string | null;
+  description: string | null;
+  content?: string;
+  url: string | null;
   image: string | null;
-  publishedAt: string;
-  source: GNewsSource;
+  publishedAt: string | null;
+  source?: GNewsSource | null;
 }
 
 interface GNewsResponse {
-  totalArticles: number;
   articles: GNewsArticle[];
 }
 
@@ -49,7 +48,7 @@ function parseArticle(raw: GNewsArticle): NewsArticle {
 }
 
 async function getAgriNews(): Promise<NewsArticle[]> {
-  const apiKey: string = (process.env[GNEWS_KEY_NAME] as string) ?? '';
+  const apiKey = process.env[GNEWS_KEY_NAME] ?? '';
 
   if (!apiKey) {
     console.warn('[newsService] No GNews API key set');

@@ -3,14 +3,22 @@ import { newsService } from '../newsService';
 global.fetch = jest.fn();
 
 describe('newsService', () => {
+  const ORIGINAL_KEY = process.env.EXPO_PUBLIC_GNEWS_KEY;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    process.env.EXPO_PUBLIC_GNEWS_KEY = 'test-key';
+  });
+
+  afterEach(() => {
+    process.env.EXPO_PUBLIC_GNEWS_KEY = ORIGINAL_KEY;
   });
 
   it('maps GNews article to NewsArticle shape with imageUrl', () => {
     const raw = {
       title: 'Wheat prices surge amid dry weather',
       description: 'Global wheat futures climbed on concerns...',
+      content: '',
       url: 'https://reuters.com/article/123',
       image: 'https://example.com/wheat.jpg',
       publishedAt: '2026-03-03T10:00:00Z',
@@ -31,6 +39,7 @@ describe('newsService', () => {
     const raw = {
       title: 'Corn market update',
       description: 'Corn steady',
+      content: '',
       url: 'https://bloomberg.com/1',
       image: null,
       publishedAt: '2026-03-03T09:00:00Z',
@@ -42,7 +51,7 @@ describe('newsService', () => {
     expect(result.imageUrl).toBe('');
   });
 
-  it('filters articles with missing title or url', () => {
+  it('filters articles with missing title or url', async () => {
     const mockFetch = global.fetch as jest.Mock;
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -68,28 +77,23 @@ describe('newsService', () => {
       }),
     });
 
-    process.env.EXPO_PUBLIC_GNEWS_KEY = 'test-key';
-    return newsService.getAgriNews().then((results) => {
-      expect(results).toHaveLength(1);
-      expect(results[0].title).toBe('Wheat update');
-    });
+    const results = await newsService.getAgriNews();
+    expect(results).toHaveLength(1);
+    expect(results[0].title).toBe('Wheat update');
   });
 
-  it('returns empty array when API key is missing', () => {
-    const original = process.env.EXPO_PUBLIC_GNEWS_KEY;
+  it('returns empty array when API key is missing', async () => {
     process.env.EXPO_PUBLIC_GNEWS_KEY = '';
-    return newsService.getAgriNews().then((results) => {
-      expect(results).toHaveLength(0);
-      process.env.EXPO_PUBLIC_GNEWS_KEY = original;
-    });
+    const results = await newsService.getAgriNews();
+    expect(results).toHaveLength(0);
+    // afterEach restores the key
   });
 
-  it('returns empty array when fetch fails', () => {
+  it('returns empty array when fetch fails', async () => {
     const mockFetch = global.fetch as jest.Mock;
     mockFetch.mockRejectedValueOnce(new Error('Network error'));
-    process.env.EXPO_PUBLIC_GNEWS_KEY = 'test-key';
-    return newsService.getAgriNews().then((results) => {
-      expect(results).toHaveLength(0);
-    });
+
+    const results = await newsService.getAgriNews();
+    expect(results).toHaveLength(0);
   });
 });
