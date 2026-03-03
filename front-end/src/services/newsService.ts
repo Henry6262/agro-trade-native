@@ -14,7 +14,7 @@ export interface NewsArticle {
 interface RawArticle {
   title: string;
   source: { name: string };
-  description: string;
+  description: string | null; // NewsAPI returns null for missing descriptions
   url: string;
   publishedAt: string;
 }

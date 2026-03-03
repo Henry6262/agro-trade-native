@@ -20,6 +20,7 @@ interface AlphaVantageDataPoint {
 }
 
 interface AlphaVantageResponse {
+  Information?: string; // present when rate-limited or error
   name: string;
   unit: string;
   data: AlphaVantageDataPoint[];
@@ -60,6 +61,12 @@ async function fetchCommodity(
     }
 
     const json = (await response.json()) as AlphaVantageResponse;
+
+    if (json.Information) {
+      console.warn(`[marketDataService] ${symbol} rate limited or error:`, json.Information);
+      return null;
+    }
+
     return parseResponse(symbol, json);
   } catch (error) {
     console.warn(`[marketDataService] ${symbol} error:`, error);
