@@ -143,7 +143,6 @@ export default function DashboardMainScreen() {
       { id: 'agents', icon: Users, label: 'NETWORK' },
       { id: 'operations', icon: Package, label: 'TRADE OPS' },
       { id: 'intelligence', icon: TrendingUp, label: 'MARKET INTEL' },
-      { id: 'pricing', icon: BarChart3, label: 'PRICING ZONES' },
     ];
   };
 
@@ -208,11 +207,11 @@ export default function DashboardMainScreen() {
         {/* Glass Header */}
         <GlassHeader showWordmark={true} rightAction={profileButton} />
 
-        {/* Dashboard Content */}
-        <View style={{ flex: 1 }}>{renderContent()}</View>
+        {/* Dashboard Content — bottom padding so content clears the floating pill nav */}
+        <View style={{ flex: 1, paddingBottom: 90 }}>{renderContent()}</View>
       </View>
 
-      {/* Glass Bottom Navigation */}
+      {/* Floating Pill Bottom Navigation */}
       <BottomNavigation
         items={navigationItems}
         activeSection={activeSection}
