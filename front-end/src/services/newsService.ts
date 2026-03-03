@@ -1,9 +1,12 @@
-// Using The Guardian Open Platform API (free, works from mobile devices)
-// Get a free key at: https://open-platform.theguardian.com/access/
-// The 'test' key works for development (100 req/day)
-const BASE_URL = 'https://content.guardianapis.com/search';
+// GNews Open Platform API — https://gnews.io/docs/v4
+// Free tier: 100 req/day, works from any device/origin
+const BASE_URL = 'https://gnews.io/api/v4/search';
 
-const SEARCH_QUERY = 'wheat OR corn OR cotton OR sugar OR coffee OR agricultural commodities';
+const SEARCH_QUERY = 'wheat OR corn OR cotton OR sugar OR coffee OR agriculture';
+
+// Indirection prevents babel-preset-expo from statically inlining the value
+// as `undefined` at transform time, keeping it readable at runtime in tests.
+const GNEWS_KEY_NAME = 'EXPO_PUBLIC_GNEWS_KEY';
 
 export interface NewsArticle {
   title: string;
@@ -11,58 +14,67 @@ export interface NewsArticle {
   description: string;
   url: string;
   publishedAt: string;
+  imageUrl: string;
 }
 
-interface GuardianField {
-  trailText?: string;
+interface GNewsSource {
+  name: string;
+  url: string;
 }
 
-interface GuardianResult {
-  webTitle: string;
-  webUrl: string;
-  webPublicationDate: string;
-  fields?: GuardianField;
+interface GNewsArticle {
+  title: string;
+  description: string;
+  content: string;
+  url: string;
+  image: string | null;
+  publishedAt: string;
+  source: GNewsSource;
 }
 
-interface GuardianResponse {
-  response: {
-    results: GuardianResult[];
-  };
+interface GNewsResponse {
+  totalArticles: number;
+  articles: GNewsArticle[];
 }
 
-function parseArticle(raw: GuardianResult): NewsArticle {
+function parseArticle(raw: GNewsArticle): NewsArticle {
   return {
-    title: raw.webTitle ?? '',
-    source: 'The Guardian',
-    description: raw.fields?.trailText ?? '',
-    url: raw.webUrl ?? '',
-    publishedAt: raw.webPublicationDate ?? '',
+    title: raw.title ?? '',
+    source: raw.source?.name ?? 'GNews',
+    description: raw.description ?? '',
+    url: raw.url ?? '',
+    publishedAt: raw.publishedAt ?? '',
+    imageUrl: raw.image ?? '',
   };
 }
 
 async function getAgriNews(): Promise<NewsArticle[]> {
-  const apiKey = process.env.EXPO_PUBLIC_NEWS_API_KEY ?? 'test';
+  const apiKey: string = (process.env[GNEWS_KEY_NAME] as string) ?? '';
+
+  if (!apiKey) {
+    console.warn('[newsService] No GNews API key set');
+    return [];
+  }
 
   try {
     const params = new URLSearchParams({
       q: SEARCH_QUERY,
-      'show-fields': 'trailText',
-      'order-by': 'newest',
-      'page-size': '20',
-      'api-key': apiKey,
+      lang: 'en',
+      max: '10',
+      apikey: apiKey,
     });
 
     const response = await fetch(`${BASE_URL}?${params.toString()}`);
 
     if (!response.ok) {
-      console.warn(`[newsService] Guardian fetch failed: ${response.status}`);
+      console.warn(`[newsService] GNews fetch failed: ${response.status}`);
       return [];
     }
 
-    const json = (await response.json()) as GuardianResponse;
-    const results = json?.response?.results ?? [];
+    const json = (await response.json()) as GNewsResponse;
+    const articles = json?.articles ?? [];
 
-    return results.filter((r) => r.webTitle && r.webUrl).map(parseArticle);
+    return articles.filter((a) => a.title && a.url).map(parseArticle);
   } catch (error) {
     console.warn('[newsService] Error:', error);
     return [];
@@ -71,5 +83,5 @@ async function getAgriNews(): Promise<NewsArticle[]> {
 
 export const newsService = {
   getAgriNews,
-  parseArticle, // exported for testing
+  parseArticle,
 };
