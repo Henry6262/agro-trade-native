@@ -6,7 +6,9 @@ import {
   Dimensions,
   RefreshControl,
   ActivityIndicator,
+  StyleSheet,
 } from 'react-native';
+import { COLORS } from '../../../../../../design-system';
 import { EarningsSummaryGrid, SellerTradeCard } from './components';
 import { useSellerTrades } from './hooks';
 
@@ -18,46 +20,96 @@ export default function SellerTradesFeature() {
   const isRefreshing = isLoading && trades.length > 0;
 
   return (
-    <View className="flex-1 bg-black">
+    <View style={styles.root}>
       <ScrollView
-        className="flex-1"
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={refresh}
-            tintColor="#FB923C"
-            colors={['#FB923C']}
+            tintColor={COLORS.accentGreen}
+            colors={[COLORS.accentGreen]}
           />
         }
       >
-        <View className="p-6">
-          <View className="mb-6">
-            <Text className="text-2xl font-bold text-white">My Trades</Text>
-            <Text className="text-neutral-400">
+        <View style={styles.content}>
+          <View style={styles.pageHeader}>
+            <Text style={styles.pageTitle}>My Trades</Text>
+            <Text style={styles.pageSubtitle}>
               Track your active trades and earnings performance
             </Text>
           </View>
+
           <EarningsSummaryGrid summary={summary} isMobile={isMobile} />
+
           <View>
-            <Text className="text-xl font-semibold text-white mb-4">Active Trades</Text>
+            <Text style={styles.sectionTitle}>Active Trades</Text>
             {isLoading && trades.length === 0 ? (
-              <View className="items-center py-10">
-                <ActivityIndicator size="large" color="#FB923C" />
-                <Text className="text-neutral-400 mt-3">Loading trades...</Text>
+              <View style={styles.loadingWrap}>
+                <ActivityIndicator size="large" color={COLORS.accentGreen} />
+                <Text style={styles.loadingText}>Loading trades...</Text>
               </View>
             ) : trades.length === 0 ? (
-              <Text className="text-neutral-400">
-                No trades yet. Accepted deals will appear here.
-              </Text>
+              <Text style={styles.emptyText}>No trades yet. Accepted deals will appear here.</Text>
             ) : (
               trades.map((trade) => <SellerTradeCard key={trade.id} trade={trade} />)
             )}
           </View>
         </View>
-        <View className="h-20" />
+        <View style={styles.bottomSpacer} />
       </ScrollView>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  bottomSpacer: {
+    height: 80,
+  },
+  content: {
+    padding: 16,
+  },
+  emptyText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    paddingVertical: 24,
+    textAlign: 'center',
+  },
+  loadingText: {
+    color: COLORS.textSecondary,
+    marginTop: 12,
+  },
+  loadingWrap: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  pageHeader: {
+    marginBottom: 20,
+  },
+  pageSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    marginTop: 2,
+  },
+  pageTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  root: {
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
+  scroll: {
+    flex: 1,
+  },
+  sectionTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 12,
+  },
+});

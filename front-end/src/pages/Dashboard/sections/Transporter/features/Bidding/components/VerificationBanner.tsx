@@ -21,7 +21,7 @@ export const TransporterVerificationBanner: React.FC<TransporterVerificationBann
           <Shield size={32} color="#FCD34D" />
           <View className="ml-3 flex-1">
             <Text className="font-semibold text-yellow-400">Verification Required</Text>
-            <Text className="text-sm text-neutral-300">
+            <Text className="text-sm text-gray-600">
               Complete verification to unlock premium bidding features
             </Text>
           </View>

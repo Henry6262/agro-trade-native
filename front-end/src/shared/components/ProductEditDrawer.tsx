@@ -116,13 +116,13 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
-      <View className="flex-1 bg-black/50">
-        <View className="bg-neutral-900 rounded-t-3xl mt-20" style={{ flex: 1 }}>
+      <View className="flex-1 bg-white/50">
+        <View className="bg-white rounded-t-3xl mt-20" style={{ flex: 1 }}>
           {/* Header */}
-          <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
+          <View className="flex-row justify-between items-center p-6 border-b border-gray-200">
             <View className="flex-1">
-              <Text className="text-xl font-bold text-white">Edit Product</Text>
-              <Text className="text-sm text-neutral-400 mt-1">
+              <Text className="text-xl font-bold text-gray-900">Edit Product</Text>
+              <Text className="text-sm text-gray-500 mt-1">
                 Update your product listing details
               </Text>
             </View>
@@ -140,7 +140,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
             {/* Product Image and Name */}
             <View className="mt-6 mb-4">
               {editedProduct.image && (
-                <View className="w-full h-48 bg-neutral-800 rounded-lg mb-4 overflow-hidden">
+                <View className="w-full h-48 bg-gray-50 rounded-lg mb-4 overflow-hidden">
                   <Image
                     source={{ uri: editedProduct.image }}
                     className="w-full h-full"
@@ -148,13 +148,13 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                   />
                 </View>
               )}
-              <Text className="text-2xl font-bold text-white">{editedProduct.name}</Text>
-              <Text className="text-neutral-400 text-sm mt-1">{editedProduct.category}</Text>
+              <Text className="text-2xl font-bold text-gray-900">{editedProduct.name}</Text>
+              <Text className="text-gray-500 text-sm mt-1">{editedProduct.category}</Text>
             </View>
 
             {/* Quantity */}
             <View className="mb-4">
-              <Text className="text-neutral-300 mb-2">
+              <Text className="text-gray-600 mb-2">
                 Quantity <Text className="text-red-400">*</Text>
               </Text>
               <View className="flex-row gap-2">
@@ -164,12 +164,12 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                   placeholder="Enter quantity"
                   placeholderTextColor="#6B7280"
                   keyboardType="numeric"
-                  className={`flex-1 bg-neutral-800 border ${
-                    errors.quantity ? 'border-red-500' : 'border-neutral-600'
-                  } rounded-lg px-3 py-2 text-white`}
+                  className={`flex-1 bg-gray-50 border ${
+                    errors.quantity ? 'border-red-500' : 'border-gray-200'
+                  } rounded-lg px-3 py-2 text-gray-900`}
                 />
-                <View className="bg-neutral-800 border border-neutral-600 rounded-lg px-4 py-2">
-                  <Text className="text-white">{editedProduct.unit || 'ton'}</Text>
+                <View className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2">
+                  <Text className="text-gray-900">{editedProduct.unit || 'ton'}</Text>
                 </View>
               </View>
               {errors.quantity && (
@@ -185,19 +185,19 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
 
               {/* Address */}
               <View className="mb-3">
-                <Text className="text-neutral-300 mb-2">Address</Text>
+                <Text className="text-gray-600 mb-2">Address</Text>
                 <TextInput
                   value={editedProduct.location?.address || ''}
                   onChangeText={(text) => handleLocationFieldChange('address', text)}
                   placeholder="Street address"
                   placeholderTextColor="#6B7280"
-                  className="bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
+                  className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-900"
                 />
               </View>
 
               {/* City */}
               <View className="mb-3">
-                <Text className="text-neutral-300 mb-2">
+                <Text className="text-gray-600 mb-2">
                   City <Text className="text-red-400">*</Text>
                 </Text>
                 <TextInput
@@ -205,28 +205,28 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                   onChangeText={(text) => handleLocationFieldChange('city', text)}
                   placeholder="City"
                   placeholderTextColor="#6B7280"
-                  className={`bg-neutral-800 border ${
-                    errors.city ? 'border-red-500' : 'border-neutral-600'
-                  } rounded-lg px-3 py-2 text-white`}
+                  className={`bg-gray-50 border ${
+                    errors.city ? 'border-red-500' : 'border-gray-200'
+                  } rounded-lg px-3 py-2 text-gray-900`}
                 />
                 {errors.city && <Text className="text-red-400 text-xs mt-1">{errors.city}</Text>}
               </View>
 
               {/* Region/State */}
               <View className="mb-3">
-                <Text className="text-neutral-300 mb-2">Region/State</Text>
+                <Text className="text-gray-600 mb-2">Region/State</Text>
                 <TextInput
                   value={editedProduct.location?.region || editedProduct.location?.state || ''}
                   onChangeText={(text) => handleLocationFieldChange('region', text)}
                   placeholder="Region or State"
                   placeholderTextColor="#6B7280"
-                  className="bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
+                  className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-900"
                 />
               </View>
 
               {/* Country */}
               <View className="mb-3">
-                <Text className="text-neutral-300 mb-2">
+                <Text className="text-gray-600 mb-2">
                   Country <Text className="text-red-400">*</Text>
                 </Text>
                 <TextInput
@@ -234,9 +234,9 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                   onChangeText={(text) => handleLocationFieldChange('country', text)}
                   placeholder="Country"
                   placeholderTextColor="#6B7280"
-                  className={`bg-neutral-800 border ${
-                    errors.country ? 'border-red-500' : 'border-neutral-600'
-                  } rounded-lg px-3 py-2 text-white`}
+                  className={`bg-gray-50 border ${
+                    errors.country ? 'border-red-500' : 'border-gray-200'
+                  } rounded-lg px-3 py-2 text-gray-900`}
                 />
                 {errors.country && (
                   <Text className="text-red-400 text-xs mt-1">{errors.country}</Text>
@@ -251,7 +251,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                   <Text className="text-lg font-semibold text-green-400 mb-3">Specifications</Text>
                   {Object.entries(editedProduct.specifications).map(([key, value]) => (
                     <View key={key} className="mb-3">
-                      <Text className="text-neutral-300 mb-2 capitalize">
+                      <Text className="text-gray-600 mb-2 capitalize">
                         {key.replace(/_/g, ' ')}
                       </Text>
                       <TextInput
@@ -267,7 +267,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                         }}
                         placeholder={`Enter ${key}`}
                         placeholderTextColor="#6B7280"
-                        className="bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
+                        className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-900"
                       />
                     </View>
                   ))}
@@ -285,7 +285,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
           </ScrollView>
 
           {/* Footer */}
-          <View className="absolute bottom-0 left-0 right-0 bg-neutral-800 border-t border-neutral-700 p-4">
+          <View className="absolute bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 p-4">
             <TouchableOpacity
               onPress={handleSave}
               disabled={isLoading}
@@ -298,7 +298,7 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
               ) : (
                 <>
                   <Save color="#ffffff" size={20} />
-                  <Text className="text-white text-center font-semibold ml-2">Save Changes</Text>
+                  <Text className="text-gray-900 text-center font-semibold ml-2">Save Changes</Text>
                 </>
               )}
             </TouchableOpacity>

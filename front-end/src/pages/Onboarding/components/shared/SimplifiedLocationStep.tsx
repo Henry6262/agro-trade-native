@@ -128,11 +128,11 @@ export function SimplifiedLocationStep({ onLocationSet }: SimplifiedLocationStep
   }, []);
 
   return (
-    <View className="flex-1 p-6 bg-gray-800 rounded-xl m-4">
+    <View className="flex-1 p-6 bg-white rounded-xl m-4">
       <View className="mb-6">
-        <Text className="text-white text-2xl font-bold mb-2">Your Location</Text>
+        <Text className="text-gray-900 text-2xl font-bold mb-2">Your Location</Text>
         <Text className="text-gray-400">
-          We'll show you pricing and opportunities specific to your area
+          We&apos;ll show you pricing and opportunities specific to your area
         </Text>
       </View>
 
@@ -149,7 +149,7 @@ export function SimplifiedLocationStep({ onLocationSet }: SimplifiedLocationStep
                 <Ionicons name="location" size={24} color="#10B981" />
                 <Text className="text-green-400 ml-2 font-medium">Location Detected</Text>
               </View>
-              <Text className="text-white text-lg mb-1">{locationText}</Text>
+              <Text className="text-gray-900 text-lg mb-1">{locationText}</Text>
               <Text className="text-gray-400 text-sm mb-4">
                 Coordinates: {detectedLocation.latitude.toFixed(4)},{' '}
                 {detectedLocation.longitude.toFixed(4)}
@@ -173,7 +173,7 @@ export function SimplifiedLocationStep({ onLocationSet }: SimplifiedLocationStep
               <View className="mb-4">
                 <Text className="text-gray-400 text-sm mb-2">Or enter your city:</Text>
                 <TextInput
-                  className="bg-gray-700 text-white rounded-lg px-4 py-3"
+                  className="bg-gray-700 text-gray-900 rounded-lg px-4 py-3"
                   placeholder="e.g., Sofia, Bulgaria"
                   placeholderTextColor="#6B7280"
                   value={locationText}
@@ -195,7 +195,7 @@ export function SimplifiedLocationStep({ onLocationSet }: SimplifiedLocationStep
                       <View className="flex-row items-center">
                         <Text className="text-lg mr-2">{city.flagEmoji}</Text>
                         <View className="flex-1">
-                          <Text className="text-white">{city.name}</Text>
+                          <Text className="text-gray-900">{city.name}</Text>
                           <Text className="text-gray-400 text-sm">
                             {city.region}, {city.country}
                           </Text>

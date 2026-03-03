@@ -210,16 +210,16 @@ export function AdminZoneDetailsScreen({ route }: Props) {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
+      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
         <LoadingSpinner />
-        <Text className="text-white mt-4">Loading zone details...</Text>
+        <Text className="text-gray-900 mt-4">Loading zone details...</Text>
       </SafeAreaView>
     );
   }
 
   if (!zone) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
+      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
         <Ionicons name="location-outline" size={64} color="#4B5563" />
         <Text className="text-gray-400 text-lg mt-4">Zone not found</Text>
       </SafeAreaView>
@@ -232,13 +232,13 @@ export function AdminZoneDetailsScreen({ route }: Props) {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900">
+    <SafeAreaView className="flex-1 bg-gray-50">
       <View className="flex-1">
         {/* Header */}
-        <View className="flex-row items-center justify-between p-6 border-b border-gray-700">
+        <View className="flex-row items-center justify-between p-6 border-b border-gray-200">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
-            className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center"
+            className="w-10 h-10 rounded-full bg-white items-center justify-center"
           >
             <Ionicons name="chevron-back" size={20} color="#9CA3AF" />
           </TouchableOpacity>
@@ -249,7 +249,7 @@ export function AdminZoneDetailsScreen({ route }: Props) {
                 className="w-4 h-4 rounded-full mr-3"
                 style={{ backgroundColor: zone.color || '#3B82F6' }}
               />
-              <Text className="text-white text-xl font-semibold">{zone.name}</Text>
+              <Text className="text-gray-900 text-xl font-semibold">{zone.name}</Text>
             </View>
             <Text className="text-gray-400 text-sm">Zone Details & Management</Text>
           </View>
@@ -265,9 +265,9 @@ export function AdminZoneDetailsScreen({ route }: Props) {
         <ScrollView className="flex-1">
           {/* Zone Information */}
           <View className="p-6">
-            <View className="bg-gray-800 rounded-xl p-4 border border-gray-700 mb-6">
+            <View className="bg-white rounded-xl p-4 border border-gray-200 mb-6">
               <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-white font-semibold text-lg">Zone Information</Text>
+                <Text className="text-gray-900 font-semibold text-lg">Zone Information</Text>
                 <View
                   className={`px-3 py-1 rounded-full ${
                     zone.isActive ? 'bg-green-900' : 'bg-red-900'
@@ -286,34 +286,34 @@ export function AdminZoneDetailsScreen({ route }: Props) {
               {zone.description && (
                 <View className="mb-4">
                   <Text className="text-gray-400 text-sm mb-1">Description</Text>
-                  <Text className="text-white">{zone.description}</Text>
+                  <Text className="text-gray-900">{zone.description}</Text>
                 </View>
               )}
 
               <View className="flex-row flex-wrap -mx-2">
                 <View className="w-1/2 px-2 mb-3">
                   <Text className="text-gray-400 text-sm mb-1">Market Size</Text>
-                  <Text className="text-white">{zone.marketSize || 'Not set'}</Text>
+                  <Text className="text-gray-900">{zone.marketSize || 'Not set'}</Text>
                 </View>
                 <View className="w-1/2 px-2 mb-3">
                   <Text className="text-gray-400 text-sm mb-1">Transport Access</Text>
-                  <Text className="text-white">{zone.transportAccess || 'Not set'}</Text>
+                  <Text className="text-gray-900">{zone.transportAccess || 'Not set'}</Text>
                 </View>
                 <View className="w-1/2 px-2 mb-3">
                   <Text className="text-gray-400 text-sm mb-1">Storage Capacity</Text>
-                  <Text className="text-white">{zone.storageCapacity || 'Not set'}</Text>
+                  <Text className="text-gray-900">{zone.storageCapacity || 'Not set'}</Text>
                 </View>
                 <View className="w-1/2 px-2 mb-3">
                   <Text className="text-gray-400 text-sm mb-1">Cities Assigned</Text>
-                  <Text className="text-white">{zone.cities.length}</Text>
+                  <Text className="text-gray-900">{zone.cities.length}</Text>
                 </View>
               </View>
             </View>
 
             {/* Cities Section */}
-            <View className="bg-gray-800 rounded-xl p-4 border border-gray-700 mb-6">
+            <View className="bg-white rounded-xl p-4 border border-gray-200 mb-6">
               <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-white font-semibold text-lg">
+                <Text className="text-gray-900 font-semibold text-lg">
                   Assigned Cities ({zone.cities.length})
                 </Text>
                 <TouchableOpacity
@@ -337,7 +337,7 @@ export function AdminZoneDetailsScreen({ route }: Props) {
                         <View className="flex-1">
                           <View className="flex-row items-center mb-1">
                             <Text className="mr-2">{cityZone.city.region.country.flagEmoji}</Text>
-                            <Text className="text-white font-medium">{cityZone.city.name}</Text>
+                            <Text className="text-gray-900 font-medium">{cityZone.city.name}</Text>
                             {cityZone.isDefault && (
                               <View className="bg-blue-600 rounded-full px-2 py-0.5 ml-2">
                                 <Text className="text-white text-xs">Default</Text>
@@ -369,9 +369,9 @@ export function AdminZoneDetailsScreen({ route }: Props) {
             </View>
 
             {/* Product Prices Section */}
-            <View className="bg-gray-800 rounded-xl p-4 border border-gray-700">
+            <View className="bg-white rounded-xl p-4 border border-gray-200">
               <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-white font-semibold text-lg">
+                <Text className="text-gray-900 font-semibold text-lg">
                   Product Prices ({zone.productPrices.length})
                 </Text>
                 <TouchableOpacity
@@ -387,9 +387,11 @@ export function AdminZoneDetailsScreen({ route }: Props) {
                   {zone.productPrices.slice(0, 5).map((price) => (
                     <View key={price.id} className="bg-gray-700 rounded-lg p-3">
                       <View className="flex-row items-center justify-between mb-1">
-                        <Text className="text-white font-medium">{price.product.displayName}</Text>
+                        <Text className="text-gray-900 font-medium">
+                          {price.product.displayName}
+                        </Text>
                         <View className="bg-gray-600 rounded-full px-2 py-0.5">
-                          <Text className="text-gray-300 text-xs">{price.product.category}</Text>
+                          <Text className="text-gray-600 text-xs">{price.product.category}</Text>
                         </View>
                       </View>
                       <View className="flex-row items-center justify-between">
@@ -429,10 +431,10 @@ export function AdminZoneDetailsScreen({ route }: Props) {
         transparent
         onRequestClose={() => setEditingZone(false)}
       >
-        <View className="flex-1 bg-black/50 justify-center p-4">
-          <View className="bg-gray-800 rounded-xl p-6">
+        <View className="flex-1 bg-white/50 justify-center p-4">
+          <View className="bg-white rounded-xl p-6">
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-white font-semibold text-xl">Edit Zone</Text>
+              <Text className="text-gray-900 font-semibold text-xl">Edit Zone</Text>
               <TouchableOpacity onPress={() => setEditingZone(false)}>
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -440,20 +442,20 @@ export function AdminZoneDetailsScreen({ route }: Props) {
 
             <View className="space-y-4">
               <View>
-                <Text className="text-gray-300 text-sm mb-2">Zone Name</Text>
+                <Text className="text-gray-600 text-sm mb-2">Zone Name</Text>
                 <TextInput
                   value={zoneForm.name}
                   onChangeText={(text) => setZoneForm({ ...zoneForm, name: text })}
-                  className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                  className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                 />
               </View>
 
               <View>
-                <Text className="text-gray-300 text-sm mb-2">Description</Text>
+                <Text className="text-gray-600 text-sm mb-2">Description</Text>
                 <TextInput
                   value={zoneForm.description}
                   onChangeText={(text) => setZoneForm({ ...zoneForm, description: text })}
-                  className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                  className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                   multiline
                   numberOfLines={3}
                 />
@@ -461,29 +463,29 @@ export function AdminZoneDetailsScreen({ route }: Props) {
 
               <View className="flex-row space-x-3">
                 <View className="flex-1">
-                  <Text className="text-gray-300 text-sm mb-2">Market Size</Text>
+                  <Text className="text-gray-600 text-sm mb-2">Market Size</Text>
                   <TextInput
                     value={zoneForm.marketSize}
                     onChangeText={(text) => setZoneForm({ ...zoneForm, marketSize: text })}
-                    className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                    className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-gray-300 text-sm mb-2">Transport Access</Text>
+                  <Text className="text-gray-600 text-sm mb-2">Transport Access</Text>
                   <TextInput
                     value={zoneForm.transportAccess}
                     onChangeText={(text) => setZoneForm({ ...zoneForm, transportAccess: text })}
-                    className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                    className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                   />
                 </View>
               </View>
 
               <View>
-                <Text className="text-gray-300 text-sm mb-2">Storage Capacity</Text>
+                <Text className="text-gray-600 text-sm mb-2">Storage Capacity</Text>
                 <TextInput
                   value={zoneForm.storageCapacity}
                   onChangeText={(text) => setZoneForm({ ...zoneForm, storageCapacity: text })}
-                  className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                  className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                 />
               </View>
             </View>
@@ -493,7 +495,7 @@ export function AdminZoneDetailsScreen({ route }: Props) {
                 onPress={() => setEditingZone(false)}
                 className="flex-1 bg-gray-700 rounded-lg py-3 items-center"
               >
-                <Text className="text-gray-300 font-medium">Cancel</Text>
+                <Text className="text-gray-600 font-medium">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={updateZoneInfo}
@@ -513,10 +515,10 @@ export function AdminZoneDetailsScreen({ route }: Props) {
         transparent
         onRequestClose={() => setShowAddCityModal(false)}
       >
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-gray-800 rounded-t-3xl p-6">
+        <View className="flex-1 bg-white/50 justify-end">
+          <View className="bg-white rounded-t-3xl p-6">
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-white font-semibold text-xl">Add City to Zone</Text>
+              <Text className="text-gray-900 font-semibold text-xl">Add City to Zone</Text>
               <TouchableOpacity onPress={() => setShowAddCityModal(false)}>
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -524,7 +526,7 @@ export function AdminZoneDetailsScreen({ route }: Props) {
 
             <View className="space-y-4">
               <View>
-                <Text className="text-gray-300 text-sm mb-2">Select City</Text>
+                <Text className="text-gray-600 text-sm mb-2">Select City</Text>
                 <View className="bg-gray-700 rounded-lg">
                   <Picker
                     selectedValue={selectedCity}
@@ -546,11 +548,11 @@ export function AdminZoneDetailsScreen({ route }: Props) {
 
               <View className="flex-row space-x-3">
                 <View className="flex-1">
-                  <Text className="text-gray-300 text-sm mb-2">Priority</Text>
+                  <Text className="text-gray-600 text-sm mb-2">Priority</Text>
                   <TextInput
                     value={cityPriority}
                     onChangeText={setCityPriority}
-                    className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                    className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                     keyboardType="numeric"
                     placeholder="1"
                   />
@@ -567,7 +569,7 @@ export function AdminZoneDetailsScreen({ route }: Props) {
                       size={20}
                       color={isDefaultCity ? 'white' : '#9CA3AF'}
                     />
-                    <Text className={`ml-2 ${isDefaultCity ? 'text-white' : 'text-gray-300'}`}>
+                    <Text className={`ml-2 ${isDefaultCity ? 'text-gray-900' : 'text-gray-600'}`}>
                       Default City
                     </Text>
                   </TouchableOpacity>
@@ -580,7 +582,7 @@ export function AdminZoneDetailsScreen({ route }: Props) {
                 onPress={() => setShowAddCityModal(false)}
                 className="flex-1 bg-gray-700 rounded-lg py-3 items-center"
               >
-                <Text className="text-gray-300 font-medium">Cancel</Text>
+                <Text className="text-gray-600 font-medium">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={assignCityToZone}

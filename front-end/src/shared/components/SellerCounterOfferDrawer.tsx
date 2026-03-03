@@ -261,16 +261,16 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           >
             {/* Header */}
-            <View className="flex-row justify-between items-center p-6 border-b border-neutral-700/50">
+            <View className="flex-row justify-between items-center p-6 border-b border-gray-200/50">
               <TouchableOpacity
                 onPress={handleClose}
-                className="p-2 -m-2 bg-neutral-800/50 rounded-lg border border-neutral-700/50"
+                className="p-2 -m-2 bg-gray-50/50 rounded-lg border border-gray-200/50"
               >
                 <X color="#9CA3AF" size={20} />
               </TouchableOpacity>
               <View className="items-center">
-                <Text className="text-xl font-bold text-white">Counter Offer</Text>
-                <Text className="text-sm text-neutral-400 mt-1">Negotiate terms with buyer</Text>
+                <Text className="text-xl font-bold text-gray-900">Counter Offer</Text>
+                <Text className="text-sm text-gray-500 mt-1">Negotiate terms with buyer</Text>
               </View>
               <View style={{ width: 36 }} />
             </View>
@@ -283,7 +283,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                     <View className="w-10 h-10 bg-gradient-to-br from-blue-500/30 to-indigo-600/20 rounded-xl items-center justify-center mr-3 border border-blue-400/30">
                       <Target size={20} color="#3B82F6" />
                     </View>
-                    <Text className="text-blue-400 font-bold text-xl">Buyer's Offer</Text>
+                    <Text className="text-blue-400 font-bold text-xl">Buyer&apos;s Offer</Text>
                   </View>
                   <View
                     className="rounded-2xl p-6 border border-blue-500/40"
@@ -314,7 +314,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                         <Text className="text-blue-200 font-medium text-base">
                           Requested Quantity
                         </Text>
-                        <Text className="text-white font-bold text-lg">
+                        <Text className="text-gray-900 font-bold text-lg">
                           {buyerOffer?.requestedQuantity || 0}{' '}
                           {buyerOffer?.unit?.toLowerCase() || 'units'}
                         </Text>
@@ -348,7 +348,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                         <Text className="text-green-200 font-medium text-base">
                           Available Stock
                         </Text>
-                        <Text className="text-white font-bold text-lg">
+                        <Text className="text-gray-900 font-bold text-lg">
                           {sellerProduct?.quantity || 0}{' '}
                           {buyerOffer?.unit?.toLowerCase() || 'units'}
                         </Text>
@@ -371,7 +371,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
 
                 {/* Negotiation Type Selection */}
                 <View className="mb-6">
-                  <Text className="text-white font-semibold mb-3">
+                  <Text className="text-gray-900 font-semibold mb-3">
                     What would you like to negotiate?
                   </Text>
                   <View className="flex-row flex-wrap gap-2">
@@ -387,13 +387,13 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                         className={`flex-row items-center px-4 py-3 rounded-xl border ${
                           negotiationType === key
                             ? 'bg-gradient-to-br from-yellow-500/20 to-orange-600/10 border-yellow-500/50'
-                            : 'bg-gradient-to-br from-neutral-800/50 to-neutral-700/30 border-neutral-600/50'
+                            : 'bg-gradient-to-br from-neutral-800/50 to-neutral-700/30 border-gray-200/50'
                         }`}
                       >
                         <Icon size={16} color={negotiationType === key ? '#F59E0B' : '#9CA3AF'} />
                         <Text
                           className={`ml-2 font-medium ${
-                            negotiationType === key ? 'text-yellow-400' : 'text-neutral-300'
+                            negotiationType === key ? 'text-yellow-400' : 'text-gray-600'
                           }`}
                         >
                           {label}
@@ -429,7 +429,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                       {(negotiationType === 'price' || negotiationType === 'combined') && (
                         <View className="mb-6">
                           <Text className="text-yellow-300 font-semibold mb-3">Counter Price</Text>
-                          <View className="bg-black/20 rounded-xl p-4 border border-yellow-400/20">
+                          <View className="bg-white/20 rounded-xl p-4 border border-yellow-400/20">
                             <View className="flex-row items-center justify-center">
                               <Text className="text-yellow-300 text-2xl font-black">€</Text>
                               <TextInput
@@ -437,7 +437,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                                 onChangeText={setCounterPrice}
                                 placeholder="0.00"
                                 placeholderTextColor="#A16207"
-                                className="text-white text-2xl font-black ml-3 flex-1 text-center"
+                                className="text-gray-900 text-2xl font-black ml-3 flex-1 text-center"
                                 keyboardType="decimal-pad"
                               />
                               <Text className="text-yellow-400/80 text-lg font-medium">
@@ -448,7 +448,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
 
                           {/* Real-time Price Analysis */}
                           {priceDiff.difference !== 0 && (
-                            <View className="mt-4 bg-black/30 rounded-xl p-4 border border-yellow-400/20">
+                            <View className="mt-4 bg-white/30 rounded-xl p-4 border border-yellow-400/20">
                               <View className="flex-row items-center justify-between mb-3">
                                 <View className="flex-row items-center">
                                   {priceDiff.isIncrease ? (
@@ -504,14 +504,14 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                           <Text className="text-yellow-300 font-semibold mb-3">
                             Available Quantity
                           </Text>
-                          <View className="bg-black/20 rounded-xl p-4 border border-yellow-400/20">
+                          <View className="bg-white/20 rounded-xl p-4 border border-yellow-400/20">
                             <View className="flex-row items-center justify-center">
                               <TextInput
                                 value={counterQuantity}
                                 onChangeText={setCounterQuantity}
                                 placeholder="0"
                                 placeholderTextColor="#A16207"
-                                className="text-white text-2xl font-black flex-1 text-center"
+                                className="text-gray-900 text-2xl font-black flex-1 text-center"
                                 keyboardType="numeric"
                               />
                               <Text className="text-yellow-400/80 text-lg font-medium ml-3">
@@ -522,7 +522,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
 
                           {/* Quantity Analysis */}
                           {quantityDiff.difference !== 0 && (
-                            <View className="mt-4 bg-black/30 rounded-xl p-4 border border-yellow-400/20">
+                            <View className="mt-4 bg-white/30 rounded-xl p-4 border border-yellow-400/20">
                               <View className="flex-row items-center justify-between">
                                 <Text className="text-yellow-200 text-sm">Quantity Change:</Text>
                                 <Text
@@ -555,12 +555,12 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                                     className={`flex-1 p-3 rounded-lg border ${
                                       deliveryDays === days
                                         ? 'bg-blue-500/20 border-blue-500/50'
-                                        : 'bg-neutral-800/50 border-neutral-600/50'
+                                        : 'bg-gray-50/50 border-gray-200/50'
                                     }`}
                                   >
                                     <Text
                                       className={`text-center font-medium ${
-                                        deliveryDays === days ? 'text-blue-400' : 'text-neutral-300'
+                                        deliveryDays === days ? 'text-blue-400' : 'text-gray-600'
                                       }`}
                                     >
                                       {days} days
@@ -580,14 +580,12 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                                     className={`flex-1 p-3 rounded-lg border ${
                                       deliveryTerms === term
                                         ? 'bg-green-500/20 border-green-500/50'
-                                        : 'bg-neutral-800/50 border-neutral-600/50'
+                                        : 'bg-gray-50/50 border-gray-200/50'
                                     }`}
                                   >
                                     <Text
                                       className={`text-center text-sm font-medium ${
-                                        deliveryTerms === term
-                                          ? 'text-green-400'
-                                          : 'text-neutral-300'
+                                        deliveryTerms === term ? 'text-green-400' : 'text-gray-600'
                                       }`}
                                     >
                                       {term}
@@ -601,7 +599,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                       )}
 
                       {/* Total Value Display */}
-                      <View className="bg-black/30 rounded-xl p-4 border border-yellow-400/20">
+                      <View className="bg-white/30 rounded-xl p-4 border border-yellow-400/20">
                         <View className="flex-row justify-between items-center">
                           <Text className="text-yellow-200 font-medium">Total Contract Value</Text>
                           <Text className="text-yellow-400 font-bold text-xl">
@@ -615,13 +613,13 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
 
                 {/* Message to Buyer */}
                 <View className="mb-6">
-                  <Text className="text-white font-semibold mb-3">Message to Buyer</Text>
+                  <Text className="text-gray-900 font-semibold mb-3">Message to Buyer</Text>
                   <TextInput
                     value={message}
                     onChangeText={setMessage}
                     placeholder="Explain your counter-offer (e.g., quality standards, delivery logistics, volume pricing, etc.)"
                     placeholderTextColor="#6B7280"
-                    className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 border border-neutral-700/50 rounded-xl p-4 text-white min-h-24"
+                    className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 border border-gray-200/50 rounded-xl p-4 text-gray-900 min-h-24"
                     multiline
                     textAlignVertical="top"
                   />
@@ -629,7 +627,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
 
                 {/* Offer Validity */}
                 <View className="mb-6">
-                  <Text className="text-white font-semibold mb-3">Counter-offer Valid For</Text>
+                  <Text className="text-gray-900 font-semibold mb-3">Counter-offer Valid For</Text>
                   <View className="flex-row gap-3">
                     {['3', '7', '14'].map((days) => (
                       <TouchableOpacity
@@ -638,12 +636,12 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                         className={`flex-1 p-4 rounded-xl border ${
                           validDays === days
                             ? 'bg-gradient-to-br from-blue-500/20 to-indigo-500/10 border-blue-500/50'
-                            : 'bg-gradient-to-br from-neutral-800/50 to-neutral-700/30 border-neutral-600/50'
+                            : 'bg-gradient-to-br from-neutral-800/50 to-neutral-700/30 border-gray-200/50'
                         }`}
                       >
                         <Text
                           className={`text-center font-semibold ${
-                            validDays === days ? 'text-blue-400' : 'text-neutral-300'
+                            validDays === days ? 'text-blue-400' : 'text-gray-600'
                           }`}
                         >
                           {days} days
@@ -699,13 +697,13 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
             </ScrollView>
 
             {/* Footer Actions */}
-            <View className="p-6 border-t border-neutral-700/50 bg-gradient-to-b from-neutral-900/80 to-black">
+            <View className="p-6 border-t border-gray-200/50 bg-gradient-to-b from-neutral-900/80 to-black">
               <View className="flex-row gap-4">
                 <TouchableOpacity
                   onPress={handleClose}
-                  className="flex-1 bg-gradient-to-br from-neutral-700/80 to-neutral-800/60 rounded-xl py-4 items-center justify-center border border-neutral-600/50"
+                  className="flex-1 bg-gradient-to-br from-neutral-700/80 to-neutral-800/60 rounded-xl py-4 items-center justify-center border border-gray-200/50"
                 >
-                  <Text className="text-white font-semibold">Cancel</Text>
+                  <Text className="text-gray-900 font-semibold">Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -721,7 +719,7 @@ export const SellerCounterOfferDrawer: React.FC<SellerCounterOfferDrawerProps> =
                   }}
                 >
                   <Send size={18} color="#FFFFFF" />
-                  <Text className="text-white font-bold ml-2">
+                  <Text className="text-gray-900 font-bold ml-2">
                     {isLoading ? 'Sending...' : 'Send Counter-Offer'}
                   </Text>
                 </TouchableOpacity>

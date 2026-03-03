@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text } from 'react-native';
-import { Card, CardContent } from '@shared/components/Card';
+import { View, Text, StyleSheet } from 'react-native';
+import { GlassCard, COLORS } from '../../../../../../../design-system';
 import type { OfferStatCard } from '../types';
 
 interface OfferStatsGridProps {
@@ -8,20 +8,48 @@ interface OfferStatsGridProps {
 }
 
 export const OfferStatsGrid: React.FC<OfferStatsGridProps> = ({ cards }) => (
-  <View className="flex-row justify-between gap-2 mb-6">
-    {cards.map((card) => (
-      <Card key={card.id} className="bg-neutral-900 border-neutral-700 flex-1">
-        <CardContent className="p-4">
-          <View className="flex-row items-center justify-between mb-2">
-            <card.Icon color={card.iconColor} size={24} />
-            <Text className="text-2xl font-bold text-white">{card.value}</Text>
-          </View>
-          <Text className="text-xs text-neutral-400">{card.label}</Text>
-          {card.subLabel ? (
-            <Text className="text-[10px] text-neutral-500 mt-1">{card.subLabel}</Text>
-          ) : null}
-        </CardContent>
-      </Card>
+  <View style={styles.grid}>
+    {cards.map((card, idx) => (
+      <GlassCard key={card.id} tier="medium" style={styles.card} delay={idx * 60}>
+        <View style={styles.cardTop}>
+          <card.Icon color={card.iconColor} size={22} />
+          <Text style={styles.value}>{card.value}</Text>
+        </View>
+        <Text style={styles.label}>{card.label}</Text>
+        {card.subLabel ? <Text style={styles.subLabel}>{card.subLabel}</Text> : null}
+      </GlassCard>
     ))}
   </View>
 );
+
+const styles = StyleSheet.create({
+  card: {
+    flex: 1,
+  },
+  cardTop: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  grid: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  label: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  subLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    marginTop: 2,
+  },
+  value: {
+    color: COLORS.accentGold,
+    fontSize: 22,
+    fontWeight: '800',
+  },
+});

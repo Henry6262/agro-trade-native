@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, Pressable, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  Modal,
+  Pressable,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 import { X, ChevronLeft } from 'lucide-react-native';
-import { Input } from '@shared/components/Input';
-import { Button } from '@shared/components/Button';
+import { GlassButton } from '../../../../../../../design-system/GlassButton';
+import { GlassInput } from '../../../../../../../design-system/GlassInput';
+import { COLORS } from '../../../../../../../design-system/tokens';
 import { TruckInfo } from '../../types';
 
 interface TruckInfoStepProps {
@@ -38,7 +47,6 @@ export const TruckInfoStep: React.FC<TruckInfoStepProps> = ({
 
   const handleSubmit = () => {
     if (!formData.licensePlate || !formData.trailerRegistrationNumber) {
-      // Add validation feedback
       return;
     }
     onSubmit(formData);
@@ -46,94 +54,165 @@ export const TruckInfoStep: React.FC<TruckInfoStepProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/50">
-        <Pressable className="flex-1" onPress={onClose} />
+      <View style={styles.overlay}>
+        <Pressable style={styles.backdrop} onPress={onClose} />
 
-        <View className="bg-neutral-900 rounded-t-3xl max-h-[90%]">
+        <View style={styles.sheet}>
           {/* Header */}
-          <View className="flex-row items-center justify-between p-6 border-b border-neutral-800">
-            <View className="flex-row items-center flex-1">
-              <TouchableOpacity onPress={onBack} className="mr-4">
-                <ChevronLeft size={24} color="#9CA3AF" />
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+                <ChevronLeft size={22} color={COLORS.textSecondary} />
               </TouchableOpacity>
-              <Text className="text-xl font-bold text-white">Add New Truck</Text>
+              <Text style={styles.headerTitle}>Add New Truck</Text>
             </View>
-            <TouchableOpacity onPress={onClose}>
-              <X size={24} color="#9CA3AF" />
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <X size={22} color={COLORS.textSecondary} />
             </TouchableOpacity>
           </View>
 
-          {/* Content - No progress indicator needed for single step */}
           <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 400 }}>
-            <View className="p-6">
-              <Text className="text-lg font-semibold text-white mb-4">Truck Information</Text>
+            <View style={styles.content}>
+              <Text style={styles.sectionTitle}>Truck Information</Text>
 
-              {/* License Plate */}
-              <View className="mb-4">
-                <Text className="text-sm text-neutral-400 mb-2">License Plate *</Text>
-                <Input
-                  placeholder="ABC-1234"
-                  value={formData.licensePlate}
-                  onChangeText={(text) => setFormData({ ...formData, licensePlate: text })}
-                  className="bg-neutral-800 border-neutral-700"
-                />
-              </View>
+              <GlassInput
+                label="License Plate *"
+                placeholder="ABC-1234"
+                value={formData.licensePlate}
+                onChangeText={(text) => setFormData({ ...formData, licensePlate: text })}
+              />
 
-              {/* Trailer Registration Number */}
-              <View className="mb-4">
-                <Text className="text-sm text-neutral-400 mb-2">Trailer Registration Number *</Text>
-                <Input
-                  placeholder="TR-12345"
-                  value={formData.trailerRegistrationNumber}
-                  onChangeText={(text) =>
-                    setFormData({ ...formData, trailerRegistrationNumber: text })
-                  }
-                  className="bg-neutral-800 border-neutral-700"
-                />
-              </View>
+              <GlassInput
+                label="Trailer Registration Number *"
+                placeholder="TR-12345"
+                value={formData.trailerRegistrationNumber}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, trailerRegistrationNumber: text })
+                }
+              />
 
               {/* Vehicle Type */}
-              <View className="mb-6">
-                <Text className="text-sm text-neutral-400 mb-2">Vehicle Type</Text>
-                <View className="flex-row flex-wrap">
-                  {vehicleTypes.map((type) => (
-                    <TouchableOpacity
-                      key={type.value}
-                      onPress={() => setFormData({ ...formData, vehicleType: type.value as any })}
-                      className={`px-4 py-2 rounded-lg mr-2 mb-2 border ${
-                        formData.vehicleType === type.value
-                          ? 'bg-green-500/20 border-green-500'
-                          : 'bg-neutral-800 border-neutral-700'
-                      }`}
-                    >
-                      <Text
-                        className={
-                          formData.vehicleType === type.value
-                            ? 'text-green-400'
-                            : 'text-neutral-400'
-                        }
+              <View style={{ marginBottom: 8 }}>
+                <Text style={styles.label}>VEHICLE TYPE</Text>
+                <View style={styles.typeRow}>
+                  {vehicleTypes.map((type) => {
+                    const isSelected = formData.vehicleType === type.value;
+                    return (
+                      <TouchableOpacity
+                        key={type.value}
+                        onPress={() => setFormData({ ...formData, vehicleType: type.value as any })}
+                        style={[styles.typeChip, isSelected && styles.typeChipSelected]}
                       >
-                        {type.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                        <Text
+                          style={[styles.typeChipText, isSelected && styles.typeChipTextSelected]}
+                        >
+                          {type.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
                 </View>
               </View>
             </View>
           </ScrollView>
 
-          {/* Footer Actions */}
-          <View className="p-6 border-t border-neutral-800">
-            <Button
-              variant="gradient"
-              className="bg-gradient-to-r from-green-600 to-green-700"
-              onPress={handleSubmit}
-            >
-              <Text className="text-white font-semibold">Add Truck</Text>
-            </Button>
+          <View style={styles.footer}>
+            <GlassButton label="Add Truck" onPress={handleSubmit} variant="primary" fullWidth />
           </View>
         </View>
       </View>
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  backBtn: {
+    marginRight: 12,
+    padding: 4,
+  },
+  backdrop: {
+    flex: 1,
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  content: {
+    padding: 20,
+  },
+  footer: {
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    borderTopWidth: 1,
+    padding: 20,
+  },
+  header: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+  },
+  headerLeft: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
+  },
+  headerTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 19,
+    fontWeight: '700',
+  },
+  label: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 10,
+  },
+  overlay: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  sectionTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  sheet: {
+    backgroundColor: 'rgba(5,46,22,0.97)',
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 1,
+    maxHeight: '90%',
+  },
+  typeChip: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  typeChipSelected: {
+    backgroundColor: 'rgba(74,222,128,0.15)',
+    borderColor: '#4ADE80',
+  },
+  typeChipText: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  typeChipTextSelected: {
+    color: '#4ADE80',
+  },
+  typeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+});

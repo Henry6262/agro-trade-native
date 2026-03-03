@@ -18,8 +18,8 @@ export const TransporterJobCard: React.FC<TransporterJobCardProps> = ({
     <View className="bg-gradient-to-r from-blue-500/10 to-purple-500/5 border border-blue-500/30 rounded-lg p-6 mb-3 mx-2">
       <View className="mb-3">
         <View className="flex-row items-center justify-between mb-2">
-          <Text className="text-white font-bold">Job #{job.jobNumber}</Text>
-          <Badge className={`${job.statusColorClass} bg-gray-800/50`}>{job.status}</Badge>
+          <Text className="text-gray-900 font-bold">Job #{job.jobNumber}</Text>
+          <Badge className={`${job.statusColorClass} bg-white/50`}>{job.status}</Badge>
         </View>
         <View className="flex-row items-center justify-between mb-2">
           <View className="flex-row items-center">
@@ -35,10 +35,10 @@ export const TransporterJobCard: React.FC<TransporterJobCardProps> = ({
         </View>
       </View>
 
-      <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-3 mb-3">
+      <View className="bg-white/50 border border-gray-200 rounded-lg p-3 mb-3">
         <View className="flex-row items-center justify-between mb-2">
           <Text className="text-gray-400 text-sm">Pickups Completed</Text>
-          <Text className="text-white font-semibold">
+          <Text className="text-gray-900 font-semibold">
             {job.pickupsCompleted} / {job.pickupPointsTotal}
           </Text>
         </View>
@@ -64,7 +64,7 @@ export const TransporterJobCard: React.FC<TransporterJobCardProps> = ({
             ) : (
               <>
                 <Truck size={14} color="#FFFFFF" />
-                <Text className="ml-1 text-white">START JOB</Text>
+                <Text className="ml-1 text-gray-900">START JOB</Text>
               </>
             )}
           </Button>
@@ -102,7 +102,7 @@ export const TransporterJobCard: React.FC<TransporterJobCardProps> = ({
             ) : (
               <>
                 <CheckCircle size={14} color="#FFFFFF" />
-                <Text className="ml-1 text-white">COMPLETE DELIVERY</Text>
+                <Text className="ml-1 text-gray-900">COMPLETE DELIVERY</Text>
               </>
             )}
           </Button>

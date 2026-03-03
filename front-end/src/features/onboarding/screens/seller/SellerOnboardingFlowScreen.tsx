@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { View, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../../../navigation/types';
 import { SellerOnboarding } from '@pages/Onboarding/sections/Seller/components/SellerOnboarding';
 import { useOnboardingStore } from '@stores/onboarding.store';
+import { GradientBackground } from '../../../../design-system';
 
 type NavigationProp = NativeStackNavigationProp<OnboardingStackParamList, 'SellerOnboardingFlow'>;
 
@@ -30,9 +31,10 @@ export const SellerOnboardingFlowScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#111827' }}>
-      <StatusBar barStyle="light-content" backgroundColor="#111827" />
-      <SellerOnboarding onComplete={handleComplete} />
-    </View>
+    <GradientBackground>
+      <SafeAreaView style={{ flex: 1 }}>
+        <SellerOnboarding onComplete={handleComplete} />
+      </SafeAreaView>
+    </GradientBackground>
   );
 };

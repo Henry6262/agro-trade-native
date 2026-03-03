@@ -15,7 +15,7 @@ interface OrderStageIndicatorProps {
 
 export const OrderStageIndicator: React.FC<OrderStageIndicatorProps> = ({ currentStage }) => (
   <View className="relative mb-6">
-    <View className="absolute top-4 left-8 right-8 h-0.5 bg-neutral-700 z-0" />
+    <View className="absolute top-4 left-8 right-8 h-0.5 bg-gray-100 z-0" />
     <View
       className="absolute top-4 left-8 h-0.5 bg-blue-500 z-0 transition-all duration-500"
       style={{ width: `${(currentStage / (ORDER_STAGES.length - 1)) * 100}%`, maxWidth: '75%' }}
@@ -31,7 +31,7 @@ export const OrderStageIndicator: React.FC<OrderStageIndicatorProps> = ({ curren
           <View key={stage.name} className="flex flex-col items-center">
             <View
               className={`w-8 h-8 rounded-full flex items-center justify-center relative ${
-                isCompleted ? 'bg-blue-500' : isCurrent ? 'bg-yellow-500' : 'bg-neutral-700'
+                isCompleted ? 'bg-blue-500' : isCurrent ? 'bg-yellow-500' : 'bg-gray-100'
               }`}
             >
               <IconComponent color={isCompleted || isCurrent ? '#ffffff' : '#9CA3AF'} size={16} />
@@ -41,7 +41,7 @@ export const OrderStageIndicator: React.FC<OrderStageIndicatorProps> = ({ curren
             </View>
             <Text
               className={`text-xs text-center mt-2 max-w-16 ${
-                isCompleted ? 'text-blue-400' : isCurrent ? 'text-yellow-400' : 'text-neutral-500'
+                isCompleted ? 'text-blue-400' : isCurrent ? 'text-yellow-400' : 'text-gray-400'
               }`}
             >
               {stage.name}

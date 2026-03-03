@@ -97,7 +97,11 @@ export const ProductSelectionUnified: React.FC = () => {
       </View>
 
       {/* Product Grid - Fixed 2 columns */}
-      <ScrollView showsVerticalScrollIndicator={false} className="flex-1" contentContainerStyle={{ paddingBottom: 140 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 140 }}
+      >
         {products && products.length > 0 ? (
           <View>
             {/* Create rows of 2 items each */}
@@ -117,7 +121,7 @@ export const ProductSelectionUnified: React.FC = () => {
                       } ${
                         isSelected
                           ? 'bg-emerald-500/10 border-emerald-500'
-                          : 'bg-gray-800/50 border-gray-700'
+                          : 'bg-white/50 border-gray-200'
                       }`}
                       style={{
                         backgroundColor: isSelected
@@ -148,7 +152,7 @@ export const ProductSelectionUnified: React.FC = () => {
                       {/* Product Info */}
                       <View className="p-3">
                         <Text
-                          className={`text-sm font-medium text-center ${isSelected ? 'text-white' : 'text-gray-300'}`}
+                          className={`text-sm font-medium text-center ${isSelected ? 'text-gray-900' : 'text-gray-600'}`}
                           numberOfLines={2}
                         >
                           {product.displayName || product.name}

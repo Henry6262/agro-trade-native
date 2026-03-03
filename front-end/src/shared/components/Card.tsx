@@ -49,16 +49,16 @@ export const Card: React.FC<CardProps> = ({
   const getVariantStyles = () => {
     switch (variant) {
       case 'outlined':
-        return 'bg-neutral-900 border border-neutral-700';
+        return 'bg-white border border-gray-200';
       case 'elevated':
-        return 'bg-neutral-900 border border-neutral-700 shadow-lg';
+        return 'bg-white border border-gray-200 shadow-lg';
       case 'dark':
-        return 'bg-neutral-900 border border-neutral-700';
+        return 'bg-white border border-gray-200';
       case 'gradient':
         return 'bg-gradient-to-r from-blue-900/20 to-cyan-900/20 border border-blue-500/30';
       default:
         // Default to dark theme for consistency
-        return 'bg-neutral-900 border border-neutral-700';
+        return 'bg-white border border-gray-200';
     }
   };
 
@@ -128,7 +128,7 @@ export const CardTitle: React.FC<CardTitleProps> = ({
   accessibilityLabel,
 }) => (
   <Text
-    className={`text-xl font-semibold text-white ${className || ''}`}
+    className={`text-xl font-semibold text-gray-900 ${className || ''}`}
     testID={testID}
     accessibilityLabel={accessibilityLabel}
   >
@@ -154,7 +154,7 @@ export const CardDescription: React.FC<CardDescriptionProps> = ({
   accessibilityLabel,
 }) => (
   <Text
-    className={`text-sm text-neutral-400 ${className || ''}`}
+    className={`text-sm text-gray-500 ${className || ''}`}
     testID={testID}
     accessibilityLabel={accessibilityLabel}
   >

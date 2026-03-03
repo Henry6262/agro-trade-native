@@ -52,7 +52,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
         {showAddToCart && onAddToCart && (
           <TouchableOpacity onPress={onAddToCart} className="bg-primary-600 px-4 py-2 rounded-lg">
-            <Text className="text-white font-medium">Add to Cart</Text>
+            <Text className="text-gray-900 font-medium">Add to Cart</Text>
           </TouchableOpacity>
         )}
       </View>

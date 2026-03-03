@@ -46,7 +46,7 @@ export const NotificationBanner: React.FC = () => {
   return (
     <Animated.View
       style={{ transform: [{ translateY: slideAnim }] }}
-      className="absolute top-12 left-4 right-4 z-50 bg-neutral-800 rounded-xl p-4 border border-green-500/30 shadow-lg"
+      className="absolute top-12 left-4 right-4 z-50 bg-gray-50 rounded-xl p-4 border border-green-500/30 shadow-lg"
     >
       <View className="flex-row items-start">
         <View className="w-8 h-8 bg-green-500/20 rounded-full items-center justify-center mr-3">
@@ -54,7 +54,7 @@ export const NotificationBanner: React.FC = () => {
         </View>
         <View className="flex-1">
           <Text className="text-white font-semibold text-sm">{visible.title}</Text>
-          <Text className="text-neutral-400 text-xs mt-1" numberOfLines={2}>
+          <Text className="text-gray-500 text-xs mt-1" numberOfLines={2}>
             {visible.body}
           </Text>
         </View>

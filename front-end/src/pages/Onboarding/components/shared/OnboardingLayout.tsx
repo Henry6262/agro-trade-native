@@ -45,7 +45,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
 
   const containerStyle: ViewStyle = {
     flex: 1,
-    backgroundColor: '#111827', // bg-gray-900
+    backgroundColor: '#111827', // bg-gray-50
     ...style,
   };
 
@@ -91,7 +91,16 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
               {children}
             </ScrollView>
           ) : (
-            <View style={{ flex: 1, paddingHorizontal: horizontalMargin, paddingTop: insets.top, overflow: 'hidden' }}>{children}</View>
+            <View
+              style={{
+                flex: 1,
+                paddingHorizontal: horizontalMargin,
+                paddingTop: insets.top,
+                overflow: 'hidden',
+              }}
+            >
+              {children}
+            </View>
           )}
 
           {/* Navigation */}

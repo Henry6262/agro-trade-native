@@ -7,6 +7,7 @@ import {
   RefreshControl,
   ActivityIndicator,
   Alert,
+  StyleSheet,
 } from 'react-native';
 import {
   Package,
@@ -21,10 +22,7 @@ import {
   Calendar,
   Navigation,
 } from 'lucide-react-native';
-import { Button } from '@shared/components/Button';
-import { Badge } from '@shared/components/Badge';
-import { Input } from '@shared/components/Input';
-import { MetricCard } from '../../components/MetricCard';
+import { GlassCard, GlassBadge, GlassButton, GlassInput } from '../../../../../design-system';
 import { BaseComponentProps } from '@shared/types';
 import { MapDrawer } from '../maps/components/MapDrawer';
 import { MapOffer } from '../maps/types';
@@ -56,7 +54,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
 
   const [selectedBid, setSelectedBid] = useState<string | null>(null);
   const [bidAmount, setBidAmount] = useState('');
-  const [isVerified] = useState(true); // Placeholder until verification flow is wired
+  const [isVerified] = useState(true);
   const [selectedOffer, setSelectedOffer] = useState<MapOffer | null>(null);
   const [isMapDrawerOpen, setIsMapDrawerOpen] = useState(false);
   const [transportRequests, setTransportRequests] = useState<TransportRequest[]>([]);
@@ -211,7 +209,6 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
   };
 
   const pendingBids = useMemo(() => myBids.filter((bid) => bid.status === 'PENDING'), [myBids]);
-
   const acceptedBids = useMemo(() => myBids.filter((bid) => bid.status === 'ACCEPTED'), [myBids]);
 
   const winRate = useMemo(() => {
@@ -238,9 +235,9 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
 
   if (loading && !refreshing) {
     return (
-      <View className="flex-1 bg-black justify-center items-center">
-        <ActivityIndicator size="large" color="#34D399" />
-        <Text className="text-gray-400 mt-4">Loading transport requests...</Text>
+      <View style={styles.loadingFull}>
+        <ActivityIndicator size="large" color="#4ADE80" />
+        <Text style={styles.loadingText}>Loading transport requests...</Text>
       </View>
     );
   }
@@ -248,292 +245,235 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
   return (
     <>
       <ScrollView
-        className="flex-1 bg-black"
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
         testID={testID}
         accessibilityLabel={accessibilityLabel}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4ADE80" />
+        }
       >
-        <View className="p-4 space-y-4">
+        <View style={styles.content}>
           {/* Stats Grid */}
-          <View className="flex-row flex-wrap -mx-1">
-            <View className="w-1/2 px-1 mb-2">
-              <MetricCard
-                title="ACTIVE BIDS"
-                value={pendingBids.length.toString()}
-                icon={Target}
-                gradient="from-blue-500/10 to-blue-600/5"
-                borderColor="border-blue-500/20"
-                iconColor="#60A5FA"
-                valueColor="text-blue-400"
-              />
-            </View>
-            <View className="w-1/2 px-1 mb-2">
-              <MetricCard
-                title="WIN RATE"
-                value={winRate}
-                icon={Trophy}
-                gradient="from-green-500/10 to-green-600/5"
-                borderColor="border-green-500/20"
-                iconColor="#34D399"
-                valueColor="text-green-400"
-              />
-            </View>
-            <View className="w-1/2 px-1 mb-2">
-              <MetricCard
-                title="AVG BID"
-                value={averageBid}
-                icon={DollarSign}
-                gradient="from-yellow-500/10 to-yellow-600/5"
-                borderColor="border-yellow-500/20"
-                iconColor="#FCD34D"
-                valueColor="text-yellow-400"
-              />
-            </View>
-            <View className="w-1/2 px-1 mb-2">
-              <MetricCard
-                title="COMPLETED JOBS"
-                value={completedJobs.toString()}
-                icon={TrendingUp}
-                gradient="from-purple-500/10 to-purple-600/5"
-                borderColor="border-purple-500/20"
-                iconColor="#A78BFA"
-                valueColor="text-purple-400"
-              />
-            </View>
+          <View style={styles.statsGrid}>
+            <GlassCard tier="subtle" style={styles.statCard}>
+              <Target size={16} color="#60A5FA" />
+              <Text style={[styles.statValue, { color: '#60A5FA' }]}>{pendingBids.length}</Text>
+              <Text style={styles.statLabel}>ACTIVE BIDS</Text>
+            </GlassCard>
+            <GlassCard tier="subtle" style={styles.statCard}>
+              <Trophy size={16} color="#4ADE80" />
+              <Text style={[styles.statValue, { color: '#4ADE80' }]}>{winRate}</Text>
+              <Text style={styles.statLabel}>WIN RATE</Text>
+            </GlassCard>
+            <GlassCard tier="subtle" style={styles.statCard}>
+              <DollarSign size={16} color="#FCD34D" />
+              <Text style={[styles.statValue, { color: '#FCD34D', fontSize: 14 }]}>
+                {averageBid}
+              </Text>
+              <Text style={styles.statLabel}>AVG BID</Text>
+            </GlassCard>
+            <GlassCard tier="subtle" style={styles.statCard}>
+              <TrendingUp size={16} color="#A78BFA" />
+              <Text style={[styles.statValue, { color: '#A78BFA' }]}>{completedJobs}</Text>
+              <Text style={styles.statLabel}>COMPLETED</Text>
+            </GlassCard>
           </View>
 
           {/* Verification Banner */}
           {!isVerified && (
-            <View className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-4">
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center flex-1 mr-3">
-                  <Shield size={32} color="#FCD34D" />
-                  <View className="ml-3 flex-1">
-                    <Text className="font-semibold text-yellow-400">Verification Required</Text>
-                    <Text className="text-sm text-neutral-300">
-                      Complete verification to unlock premium bidding features
-                    </Text>
-                  </View>
+            <GlassCard tier="medium" style={styles.verifyBanner}>
+              <View style={styles.verifyRow}>
+                <Shield size={28} color="#FCD34D" />
+                <View style={styles.verifyText}>
+                  <Text style={styles.verifyTitle}>Verification Required</Text>
+                  <Text style={styles.verifySubtitle}>
+                    Complete verification to unlock premium bidding features
+                  </Text>
                 </View>
-                <Button
-                  onPress={() => Alert.alert('Verification', 'Verification flow coming soon.')}
-                  variant="gradient"
-                  className="bg-gradient-to-r from-yellow-600 to-yellow-700"
-                >
-                  <View className="flex-row items-center">
-                    <Zap size={16} color="#000000" />
-                    <Text className="ml-2 text-black font-semibold">VERIFY NOW</Text>
-                  </View>
-                </Button>
               </View>
-            </View>
+              <GlassButton
+                label="VERIFY NOW"
+                onPress={() => Alert.alert('Verification', 'Verification flow coming soon.')}
+                variant="primary"
+                size="sm"
+                fullWidth
+                leftIcon={<Zap size={15} color="#FFFFFF" />}
+              />
+            </GlassCard>
           )}
 
           {/* Live Transport Auctions */}
-          <View className="mt-4">
-            <View className="flex-row items-center mb-3">
-              <Package size={20} color="#34D399" />
-              <Text className="text-lg font-semibold text-green-400 ml-2">
-                LIVE TRANSPORT AUCTIONS
+          <View style={styles.sectionHeader}>
+            <Package size={18} color="#4ADE80" />
+            <Text style={styles.sectionTitle}>LIVE TRANSPORT AUCTIONS</Text>
+          </View>
+
+          {transportRequests.length === 0 ? (
+            <GlassCard tier="subtle" style={styles.emptyCard}>
+              <Package size={44} color="rgba(255,255,255,0.25)" style={styles.emptyIcon} />
+              <Text style={styles.emptyTitle}>No open requests right now</Text>
+              <Text style={styles.emptySubtitle}>
+                Pull to refresh or check back later for new opportunities
               </Text>
-            </View>
+            </GlassCard>
+          ) : (
+            transportRequests.map((request) => {
+              const productName =
+                request.tradeOperation?.buyListing?.product?.name || 'Agricultural Goods';
+              const pickupPoint: TransportPickupPoint | undefined = request.pickupPoints?.[0];
+              const deliveryPoint: TransportDeliveryPoint | undefined = request.deliveryPoint;
+              const pickupLabel = toLocationLabel(pickupPoint);
+              const deliveryLabel = toLocationLabel(deliveryPoint);
+              const lowestBidDisplay = request.lowestBid
+                ? currencyFormatter.format(request.lowestBid)
+                : 'No bids yet';
+              const pricePerKmDisplay =
+                request.lowestBid && request.estimatedDistance
+                  ? `${currencyFormatter.format(
+                      request.lowestBid / Math.max(request.estimatedDistance, 1)
+                    )}/km`
+                  : '--';
+              const totalBids = request.bidsCount ?? 0;
+              const hasBid = hasBidOnRequest(request.id);
 
-            {transportRequests.length === 0 ? (
-              <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
-                <Package
-                  size={48}
-                  color="#6B7280"
-                  style={{ alignSelf: 'center', marginBottom: 12 }}
-                />
-                <Text className="text-gray-400 text-center">No open requests right now</Text>
-                <Text className="text-gray-500 text-center text-sm mt-2">
-                  Pull to refresh or check back later for new opportunities
-                </Text>
-              </View>
-            ) : (
-              transportRequests.map((request) => {
-                const productName =
-                  request.tradeOperation?.buyListing?.product?.name || 'Agricultural Goods';
-                const pickupPoint: TransportPickupPoint | undefined = request.pickupPoints?.[0];
-                const deliveryPoint: TransportDeliveryPoint | undefined = request.deliveryPoint;
-                const pickupLabel = toLocationLabel(pickupPoint);
-                const deliveryLabel = toLocationLabel(deliveryPoint);
-                const lowestBidDisplay = request.lowestBid
-                  ? currencyFormatter.format(request.lowestBid)
-                  : 'No bids yet';
-                const pricePerKmDisplay =
-                  request.lowestBid && request.estimatedDistance
-                    ? `${currencyFormatter.format(
-                        request.lowestBid / Math.max(request.estimatedDistance, 1)
-                      )}/km`
-                    : '--';
-                const totalBids = request.bidsCount ?? 0;
-                const hasBid = hasBidOnRequest(request.id);
-
-                return (
-                  <View
-                    key={request.id}
-                    className="border border-neutral-700 rounded-lg p-6 mb-3 mx-2"
-                  >
-                    {/* Header */}
-                    <View className="mb-3">
-                      <View className="flex-row items-start mb-3">
-                        <View className="w-12 h-12 bg-gradient-to-br from-green-500/30 to-green-600/10 rounded-lg items-center justify-center border border-green-500/30">
-                          <Text className="text-xl">{productName.charAt(0).toUpperCase()}</Text>
-                        </View>
-                        <View className="ml-3 flex-1">
-                          <Text className="font-bold text-white mb-2">
-                            {request.requestNumber || productName}
-                          </Text>
-                          <View className="flex-row items-center space-x-4">
-                            <View className="flex-row items-center">
-                              <Weight size={14} color="#9CA3AF" />
-                              <Text className="text-gray-400 text-sm ml-1">
-                                {request.totalWeight ? `${request.totalWeight} tons` : 'N/A'}
-                              </Text>
-                            </View>
-                            <View className="flex-row items-center">
-                              <MapPin size={14} color="#9CA3AF" />
-                              <Text className="text-gray-400 text-sm ml-1">
-                                {request.estimatedDistance
-                                  ? `${Math.round(request.estimatedDistance)} km`
-                                  : '—'}
-                              </Text>
-                            </View>
-                            <View className="flex-row items-center">
-                              <Calendar size={14} color="#9CA3AF" />
-                              <Text className="text-gray-400 text-sm ml-1">
-                                {getTimeRemaining(request.biddingDeadline)}
-                              </Text>
-                            </View>
-                          </View>
-                        </View>
-                      </View>
-
-                      <View className="flex-row items-center mb-3" style={{ minHeight: 24 }}>
-                        <Text className="text-base">🚚</Text>
-                        <Text
-                          className="text-white font-bold mx-1"
-                          numberOfLines={1}
-                          style={{ maxWidth: '35%' }}
-                        >
-                          {pickupLabel}
-                        </Text>
-                        <Text className="text-neutral-500 mx-1">→</Text>
-                        <Text className="text-base">📦</Text>
-                        <Text className="text-white font-bold mx-1 flex-1" numberOfLines={1}>
-                          {deliveryLabel}
-                        </Text>
-                      </View>
+              return (
+                <GlassCard key={request.id} tier="medium" style={styles.auctionCard}>
+                  {/* Header */}
+                  <View style={styles.auctionHeader}>
+                    <View style={styles.auctionIcon}>
+                      <Text style={styles.auctionIconText}>
+                        {productName.charAt(0).toUpperCase()}
+                      </Text>
                     </View>
-
-                    {/* Pricing */}
-                    <View className="flex-row justify-between mb-3">
-                      <View className="flex-1 mr-4">
-                        <View className="flex-row items-center mb-2">
-                          <Navigation size={16} color="#9CA3AF" />
-                          <Text className="text-neutral-400 ml-2">
-                            Max budget:{' '}
-                            <Text className="text-gray-400 font-medium">
-                              {request.maxBudget
-                                ? currencyFormatter.format(request.maxBudget)
-                                : '—'}
-                            </Text>
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View className="bg-gradient-to-br from-green-500/10 to-transparent rounded-lg p-3 border border-green-500/20">
-                        <Text className="text-xs text-green-400 font-medium">CURRENT BID</Text>
-                        <Text className="text-2xl font-bold text-green-400">
-                          {lowestBidDisplay}
+                    <View style={styles.auctionTitleWrap}>
+                      <Text style={styles.auctionTitle}>
+                        {request.requestNumber || productName}
+                      </Text>
+                      <View style={styles.auctionMeta}>
+                        <Weight size={13} color="rgba(255,255,255,0.4)" />
+                        <Text style={styles.auctionMetaText}>
+                          {request.totalWeight ? `${request.totalWeight} tons` : 'N/A'}
                         </Text>
-                        <View className="flex-row justify-between">
-                          <Text className="text-xs text-neutral-400">{totalBids} bids</Text>
-                          <Text className="text-xs text-green-300 font-medium">
-                            {pricePerKmDisplay}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-
-                    {/* Actions */}
-                    <View className="space-y-2">
-                      <View className="flex-row items-center justify-center">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-blue-500/50 flex-1"
-                          onPress={() => handleViewRoute(request)}
-                        >
-                          <MapPin size={14} color="#60A5FA" />
-                          <Text className="text-blue-400 ml-1">View Route</Text>
-                        </Button>
-                      </View>
-
-                      <View className="flex-row justify-center items-center">
-                        {selectedBid === request.id ? (
-                          <View className="flex-row items-center w-full">
-                            <View className="relative mr-2 flex-1">
-                              <DollarSign
-                                size={14}
-                                color="#9CA3AF"
-                                style={{ position: 'absolute', left: 8, top: 10, zIndex: 10 }}
-                              />
-                              <Input
-                                placeholder="2800"
-                                value={bidAmount}
-                                onChangeText={setBidAmount}
-                                keyboardType="numeric"
-                                className="w-full h-8 pl-6 bg-neutral-700 border-neutral-600 text-white text-sm"
-                              />
-                            </View>
-                            <Button
-                              size="sm"
-                              variant="gradient"
-                              className="bg-gradient-to-r from-green-600 to-green-700 mr-2"
-                              disabled={!isVerified}
-                              onPress={() => handleSubmitBid(request.id)}
-                            >
-                              <Zap size={14} color="#FFFFFF" />
-                              <Text className="ml-1 text-white font-semibold">BID</Text>
-                            </Button>
-                            <TouchableOpacity
-                              onPress={() => {
-                                setSelectedBid(null);
-                                setBidAmount('');
-                              }}
-                              className="px-2 py-1"
-                            >
-                              <Text className="text-neutral-400">✕</Text>
-                            </TouchableOpacity>
-                          </View>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="gradient"
-                            className="bg-gradient-to-r from-blue-600 to-blue-700 flex-1"
-                            onPress={() => handleSelectBid(request)}
-                            disabled={!isVerified || hasBid}
-                          >
-                            <Target size={14} color="#FFFFFF" />
-                            <Text className="ml-1 text-white font-semibold">PLACE BID</Text>
-                          </Button>
-                        )}
-                      </View>
-
-                      {hasBid && (
-                        <Text className="text-xs text-blue-400 text-center">
-                          You already have a pending bid for this request
+                        <MapPin size={13} color="rgba(255,255,255,0.4)" />
+                        <Text style={styles.auctionMetaText}>
+                          {request.estimatedDistance
+                            ? `${Math.round(request.estimatedDistance)} km`
+                            : '—'}
                         </Text>
-                      )}
+                        <Calendar size={13} color="rgba(255,255,255,0.4)" />
+                        <Text style={styles.auctionMetaText}>
+                          {getTimeRemaining(request.biddingDeadline)}
+                        </Text>
+                      </View>
                     </View>
                   </View>
-                );
-              })
-            )}
-          </View>
+
+                  {/* Route Row */}
+                  <View style={styles.routeRow}>
+                    <Text style={styles.routeIcon}>🚚</Text>
+                    <Text style={styles.routeLabel} numberOfLines={1}>
+                      {pickupLabel}
+                    </Text>
+                    <Text style={styles.routeArrow}>→</Text>
+                    <Text style={styles.routeIcon}>📦</Text>
+                    <Text style={[styles.routeLabel, { flex: 1 }]} numberOfLines={1}>
+                      {deliveryLabel}
+                    </Text>
+                  </View>
+
+                  {/* Separator */}
+                  <View style={styles.separator} />
+
+                  {/* Current Bid Box */}
+                  <View style={styles.bidInfoRow}>
+                    <View style={styles.maxBudgetWrap}>
+                      <Navigation size={14} color="rgba(255,255,255,0.4)" />
+                      <Text style={styles.maxBudgetText}>
+                        Max:{' '}
+                        <Text style={styles.maxBudgetValue}>
+                          {request.maxBudget ? currencyFormatter.format(request.maxBudget) : '—'}
+                        </Text>
+                      </Text>
+                    </View>
+                    <GlassCard tier="subtle" style={styles.currentBidCard} animate={false}>
+                      <Text style={styles.currentBidLabel}>CURRENT BID</Text>
+                      <Text style={styles.currentBidValue}>{lowestBidDisplay}</Text>
+                      <View style={styles.currentBidBottom}>
+                        <Text style={styles.currentBidCount}>{totalBids} bids</Text>
+                        <Text style={styles.currentBidPerKm}>{pricePerKmDisplay}</Text>
+                      </View>
+                    </GlassCard>
+                  </View>
+
+                  {/* Actions */}
+                  <View style={styles.actionsCol}>
+                    <GlassButton
+                      label="View Route"
+                      onPress={() => handleViewRoute(request)}
+                      variant="secondary"
+                      size="sm"
+                      fullWidth
+                      leftIcon={<MapPin size={14} color="#60A5FA" />}
+                    />
+
+                    {selectedBid === request.id ? (
+                      <View style={styles.bidInputRow}>
+                        <View style={styles.bidInputWrap}>
+                          <DollarSign
+                            size={14}
+                            color="rgba(255,255,255,0.5)"
+                            style={styles.bidInputIcon}
+                          />
+                          <GlassInput
+                            placeholder="Bid amount"
+                            value={bidAmount}
+                            onChangeText={setBidAmount}
+                            keyboardType="numeric"
+                            containerStyle={styles.bidInputField}
+                          />
+                        </View>
+                        <GlassButton
+                          label="BID"
+                          onPress={() => handleSubmitBid(request.id)}
+                          variant="primary"
+                          size="sm"
+                          disabled={!isVerified}
+                          leftIcon={<Zap size={14} color="#FFFFFF" />}
+                          style={styles.bidSubmitBtn}
+                        />
+                        <TouchableOpacity
+                          onPress={() => {
+                            setSelectedBid(null);
+                            setBidAmount('');
+                          }}
+                          style={styles.cancelBidBtn}
+                        >
+                          <Text style={styles.cancelBidText}>✕</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <GlassButton
+                        label="PLACE BID"
+                        onPress={() => handleSelectBid(request)}
+                        variant="primary"
+                        size="sm"
+                        fullWidth
+                        disabled={!isVerified || hasBid}
+                        leftIcon={<Target size={14} color="#FFFFFF" />}
+                      />
+                    )}
+
+                    {hasBid && (
+                      <Text style={styles.hasBidText}>
+                        You already have a pending bid for this request
+                      </Text>
+                    )}
+                  </View>
+                </GlassCard>
+              );
+            })
+          )}
         </View>
       </ScrollView>
 
@@ -548,3 +488,246 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  actionsCol: {
+    gap: 10,
+  },
+  auctionCard: {
+    gap: 12,
+  },
+  auctionHeader: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  auctionIcon: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.15)',
+    borderColor: 'rgba(74,222,128,0.25)',
+    borderRadius: 10,
+    borderWidth: 1,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  auctionIconText: {
+    color: '#4ADE80',
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  auctionMeta: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  auctionMetaText: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 12,
+  },
+  auctionTitle: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  auctionTitleWrap: {
+    flex: 1,
+    gap: 5,
+  },
+  bidInfoRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  bidInputField: {
+    marginBottom: 0,
+  },
+  bidInputIcon: {
+    left: 12,
+    position: 'absolute',
+    top: 16,
+    zIndex: 10,
+  },
+  bidInputRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  bidInputWrap: {
+    flex: 1,
+    position: 'relative',
+  },
+  bidSubmitBtn: {
+    minWidth: 70,
+  },
+  cancelBidBtn: {
+    padding: 8,
+  },
+  cancelBidText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 16,
+  },
+  content: {
+    gap: 14,
+    padding: 16,
+  },
+  currentBidBottom: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  currentBidCard: {
+    gap: 2,
+    minWidth: 120,
+  },
+  currentBidCount: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 10,
+  },
+  currentBidLabel: {
+    color: 'rgba(74,222,128,0.7)',
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  currentBidPerKm: {
+    color: 'rgba(74,222,128,0.6)',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  currentBidValue: {
+    color: '#4ADE80',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  emptyCard: {
+    alignItems: 'center',
+    paddingVertical: 32,
+  },
+  emptyIcon: {
+    marginBottom: 12,
+  },
+  emptySubtitle: {
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: 13,
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  emptyTitle: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  hasBidText: {
+    color: '#60A5FA',
+    fontSize: 11,
+    textAlign: 'center',
+  },
+  loadingFull: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    flex: 1,
+    gap: 12,
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+  },
+  maxBudgetText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+  },
+  maxBudgetValue: {
+    color: 'rgba(255,255,255,0.8)',
+    fontWeight: '600',
+  },
+  maxBudgetWrap: {
+    alignItems: 'center',
+    flex: 1,
+    flexDirection: 'row',
+    gap: 6,
+  },
+  routeArrow: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 14,
+    marginHorizontal: 2,
+  },
+  routeIcon: {
+    fontSize: 14,
+  },
+  routeLabel: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
+    maxWidth: '35%',
+  },
+  routeRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 4,
+  },
+  scroll: {
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+  },
+  sectionTitle: {
+    color: '#4ADE80',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  separator: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    height: 1,
+  },
+  statCard: {
+    alignItems: 'center',
+    flex: 1,
+    gap: 4,
+  },
+  statLabel: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  statValue: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  verifyBanner: {
+    gap: 12,
+  },
+  verifyRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  verifySubtitle: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  verifyText: {
+    flex: 1,
+  },
+  verifyTitle: {
+    color: '#FCD34D',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+});

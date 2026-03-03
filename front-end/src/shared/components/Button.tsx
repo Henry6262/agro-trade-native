@@ -53,12 +53,12 @@ export const Button: React.FC<ButtonProps> = ({
       case 'primary':
         return {
           container: 'bg-primary-600 border-primary-600',
-          text: 'text-white',
+          text: 'text-gray-900',
         };
       case 'secondary':
         return {
           container: 'bg-secondary-600 border-secondary-600',
-          text: 'text-white',
+          text: 'text-gray-900',
         };
       case 'outline':
         return {
@@ -73,17 +73,17 @@ export const Button: React.FC<ButtonProps> = ({
       case 'danger':
         return {
           container: 'bg-red-600 border-red-600',
-          text: 'text-white',
+          text: 'text-gray-900',
         };
       case 'gradient-green':
         return {
           container: 'bg-gradient-to-r from-green-600 to-green-700 border-green-600',
-          text: 'text-white',
+          text: 'text-gray-900',
         };
       case 'gradient-blue':
         return {
           container: 'bg-gradient-to-r from-blue-600 to-blue-700 border-blue-600',
-          text: 'text-white',
+          text: 'text-gray-900',
         };
       case 'gradient-yellow':
         return {
@@ -93,12 +93,12 @@ export const Button: React.FC<ButtonProps> = ({
       case 'gradient':
         return {
           container: '',
-          text: 'text-white',
+          text: 'text-gray-900',
         };
       default:
         return {
           container: 'bg-primary-600 border-primary-600',
-          text: 'text-white',
+          text: 'text-gray-900',
         };
     }
   };

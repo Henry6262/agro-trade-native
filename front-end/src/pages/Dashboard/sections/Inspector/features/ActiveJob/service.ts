@@ -25,7 +25,10 @@ const toInspectorLocation = (request: InspectionRequest): InspectorLocationCoord
   longitude: request.longitude,
   address: request.address,
   city: request.tradeOperation?.buyListing?.buyer?.name ?? undefined,
-  region: (request.saleListing?.product as any)?.category ?? (request.saleListing?.product as any)?.type ?? undefined,
+  region:
+    (request.saleListing?.product as any)?.category ??
+    (request.saleListing?.product as any)?.type ??
+    undefined,
 });
 
 const toInspectorJob = (request: InspectionRequest): InspectorVerificationJob => {
@@ -45,7 +48,8 @@ const toInspectorJob = (request: InspectionRequest): InspectorVerificationJob =>
       claimedSpecs: buildClaimedSpecs(request),
     },
     estimatedDuration: 45,
-    distance: request.latitude && request.longitude ? Math.round(Math.random() * 50) + 10 : undefined,
+    distance:
+      request.latitude && request.longitude ? Math.round(Math.random() * 50) + 10 : undefined,
   };
 };
 

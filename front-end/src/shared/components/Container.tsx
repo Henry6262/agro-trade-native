@@ -50,7 +50,7 @@ export const Container: React.FC<ContainerProps> = ({
   maxWidth,
   centered = false,
   noPadding = false,
-  backgroundColor = '#000000',
+  backgroundColor = '#FFFFFF',
 }) => {
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = Dimensions.get('window');
@@ -73,11 +73,13 @@ export const Container: React.FC<ContainerProps> = ({
     centered && {
       alignItems: 'center',
     },
-    maxWidth ? {
-      maxWidth,
-      width: '100%' as const,
-      alignSelf: 'center' as const,
-    } : undefined,
+    maxWidth
+      ? {
+          maxWidth,
+          width: '100%' as const,
+          alignSelf: 'center' as const,
+        }
+      : undefined,
     contentContainerStyle,
   ];
 

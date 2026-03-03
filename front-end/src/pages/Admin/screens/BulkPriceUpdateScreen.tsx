@@ -166,22 +166,22 @@ export default function BulkPriceUpdateScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
+      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="text-white mt-4">Loading products...</Text>
+        <Text className="text-gray-900 mt-4">Loading products...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900">
+    <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
-      <View className="px-6 pt-4 pb-2 border-b border-gray-800">
+      <View className="px-6 pt-4 pb-2 border-b border-gray-200">
         <View className="flex-row items-center mb-4">
           <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
             <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
-          <Text className="text-2xl font-bold text-white flex-1">Bulk Price Update</Text>
+          <Text className="text-2xl font-bold text-gray-900 flex-1">Bulk Price Update</Text>
         </View>
 
         {/* Zone Selection */}
@@ -193,7 +193,7 @@ export default function BulkPriceUpdateScreen() {
                 key={zone.id}
                 onPress={() => setSelectedZone(zone.id)}
                 className={`px-4 py-2 rounded-lg mr-2 ${
-                  selectedZone === zone.id ? 'bg-blue-600' : 'bg-gray-800 border border-gray-700'
+                  selectedZone === zone.id ? 'bg-blue-600' : 'bg-white border border-gray-200'
                 }`}
               >
                 <Text className={selectedZone === zone.id ? 'text-white' : 'text-gray-400'}>
@@ -206,10 +206,10 @@ export default function BulkPriceUpdateScreen() {
 
         {/* Bulk Actions */}
         <View className="flex-row items-center space-x-4">
-          <View className="flex-1 flex-row items-center bg-gray-800 rounded-lg px-3 py-2">
+          <View className="flex-1 flex-row items-center bg-white rounded-lg px-3 py-2">
             <Text className="text-gray-400 mr-2">Multiplier:</Text>
             <TextInput
-              className="flex-1 text-white"
+              className="flex-1 text-gray-900"
               placeholder="1.1 (10% increase)"
               placeholderTextColor="#6B7280"
               value={priceMultiplier}
@@ -233,13 +233,13 @@ export default function BulkPriceUpdateScreen() {
         </Text>
 
         {products.map((product) => (
-          <View key={product.id} className="bg-gray-800 rounded-xl p-4 mb-3 border border-gray-700">
-            <Text className="text-white font-medium mb-3">{product.displayName}</Text>
+          <View key={product.id} className="bg-white rounded-xl p-4 mb-3 border border-gray-200">
+            <Text className="text-gray-900 font-medium mb-3">{product.displayName}</Text>
             <View className="flex-row space-x-3">
               <View className="flex-1">
                 <Text className="text-gray-400 text-xs mb-1">Min Price (€)</Text>
                 <TextInput
-                  className="bg-gray-700 text-white rounded-lg px-3 py-2"
+                  className="bg-gray-700 text-gray-900 rounded-lg px-3 py-2"
                   placeholder="0.00"
                   placeholderTextColor="#6B7280"
                   value={priceUpdates[product.id]?.minPrice || ''}
@@ -250,7 +250,7 @@ export default function BulkPriceUpdateScreen() {
               <View className="flex-1">
                 <Text className="text-gray-400 text-xs mb-1">Max Price (€)</Text>
                 <TextInput
-                  className="bg-gray-700 text-white rounded-lg px-3 py-2"
+                  className="bg-gray-700 text-gray-900 rounded-lg px-3 py-2"
                   placeholder="0.00"
                   placeholderTextColor="#6B7280"
                   value={priceUpdates[product.id]?.maxPrice || ''}
@@ -270,7 +270,7 @@ export default function BulkPriceUpdateScreen() {
       </ScrollView>
 
       {/* Save Button */}
-      <View className="px-6 py-4 border-t border-gray-800">
+      <View className="px-6 py-4 border-t border-gray-200">
         <TouchableOpacity
           onPress={handleSavePrices}
           disabled={saving || !selectedZone}

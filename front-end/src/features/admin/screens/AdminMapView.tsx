@@ -78,22 +78,22 @@ export function AdminMapView() {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
+      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
         <ActivityIndicator size="large" color="#3B82F6" />
-        <Text className="text-white mt-4">Loading map data...</Text>
+        <Text className="text-gray-900 mt-4">Loading map data...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900">
+    <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
-      <View className="px-6 pt-4 pb-2 border-b border-gray-800">
+      <View className="px-6 pt-4 pb-2 border-b border-gray-200">
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => navigation.goBack()} className="mr-4">
             <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
-          <Text className="text-2xl font-bold text-white flex-1">Pricing Zones Map</Text>
+          <Text className="text-2xl font-bold text-gray-900 flex-1">Pricing Zones Map</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate('AdminPricingZones' as any)}
             className="bg-blue-600 px-4 py-2 rounded-lg"
@@ -131,7 +131,7 @@ export function AdminMapView() {
                           borderColor: 'white',
                         }}
                       >
-                        <Text className="text-white text-xs font-bold">
+                        <Text className="text-gray-900 text-xs font-bold">
                           {city.flagEmoji} {city.name}
                         </Text>
                       </View>
@@ -163,10 +163,10 @@ export function AdminMapView() {
 
         {/* Zone Info Overlay */}
         {selectedZone && (
-          <View className="absolute bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-700 p-4">
+          <View className="absolute bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 p-4">
             <View className="flex-row justify-between items-start mb-2">
               <View className="flex-1">
-                <Text className="text-white text-lg font-bold">{selectedZone.name}</Text>
+                <Text className="text-gray-900 text-lg font-bold">{selectedZone.name}</Text>
                 <Text className="text-gray-400 text-sm">
                   {selectedZone.cities.length} cities in zone
                 </Text>
@@ -179,8 +179,8 @@ export function AdminMapView() {
             {/* Cities List */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mb-3">
               {selectedZone.cities.map((city) => (
-                <View key={city.id} className="bg-gray-800 rounded-lg px-3 py-2 mr-2">
-                  <Text className="text-white text-sm">
+                <View key={city.id} className="bg-white rounded-lg px-3 py-2 mr-2">
+                  <Text className="text-gray-900 text-sm">
                     {city.flagEmoji} {city.name}
                   </Text>
                 </View>
@@ -193,8 +193,8 @@ export function AdminMapView() {
                 <Text className="text-gray-400 text-sm mb-2">Sample Prices:</Text>
                 <View className="flex-row flex-wrap">
                   {selectedZone.samplePrices.map((price, index) => (
-                    <View key={index} className="bg-gray-800 rounded-lg px-3 py-2 mr-2 mb-2">
-                      <Text className="text-white text-sm font-medium">{price.productName}</Text>
+                    <View key={index} className="bg-white rounded-lg px-3 py-2 mr-2 mb-2">
+                      <Text className="text-gray-900 text-sm font-medium">{price.productName}</Text>
                       <Text className="text-green-400 text-xs">
                         {price.range}/{price.unit}
                       </Text>
@@ -217,15 +217,15 @@ export function AdminMapView() {
       </View>
 
       {/* Legend */}
-      <View className="absolute top-20 right-4 bg-gray-900 rounded-lg p-3 border border-gray-700">
-        <Text className="text-white text-xs font-bold mb-2">Pricing Zones</Text>
+      <View className="absolute top-20 right-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
+        <Text className="text-gray-900 text-xs font-bold mb-2">Pricing Zones</Text>
         {zones.slice(0, 5).map((zone) => (
           <View key={zone.id} className="flex-row items-center mb-1">
             <View
               className="w-3 h-3 rounded-full mr-2"
               style={{ backgroundColor: zone.color || '#3B82F6' }}
             />
-            <Text className="text-gray-300 text-xs">{zone.name}</Text>
+            <Text className="text-gray-600 text-xs">{zone.name}</Text>
           </View>
         ))}
       </View>

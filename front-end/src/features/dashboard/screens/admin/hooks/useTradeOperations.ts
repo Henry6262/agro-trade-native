@@ -199,7 +199,7 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
           tradeOperationId,
           maxDistance
         );
-        setMatchingSellers(result.sellers);
+        setMatchingSellers(result?.sellers || []);
       } catch (err) {
         handleError(err, 'find matching sellers');
       } finally {
@@ -349,23 +349,41 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
       try {
         setIsSendingOffers(true);
         clearError();
-        const result = await negotiationService.bulkNegotiate(params);
 
-        // Update active negotiations
-        setActiveNegotiations((prev) => [
-          ...prev,
-          result.negotiations.buyer,
-          ...result.negotiations.sellers,
-        ]);
-
-        // Show recommendation
-        Alert.alert(
-          'Bulk Offers Sent',
-          `${result.recommendation.action}: ${result.recommendation.reasoning}`,
-          [{ text: 'OK' }]
+        // Send individual offers to each seller since bulk endpoint is not available
+        const sellerResults = await Promise.allSettled(
+          params.sellerOffers.map((offer) =>
+            negotiationService.createOfferForSeller({
+              tradeOperationId: params.tradeOperationId,
+              sellerId: offer.sellerId,
+              price: offer.price,
+              quantity: offer.quantity,
+            })
+          )
         );
 
-        return true;
+        const successfulOffers = sellerResults
+          .filter((r): r is PromiseFulfilledResult<Negotiation> => r.status === 'fulfilled')
+          .map((r) => r.value);
+
+        const failedCount = sellerResults.filter((r) => r.status === 'rejected').length;
+
+        // Update active negotiations
+        setActiveNegotiations((prev) => [...prev, ...successfulOffers]);
+
+        if (failedCount > 0) {
+          Alert.alert(
+            'Offers Partially Sent',
+            `${successfulOffers.length} offers sent successfully, ${failedCount} failed.`,
+            [{ text: 'OK' }]
+          );
+        } else {
+          Alert.alert('Offers Sent', `All ${successfulOffers.length} offers sent successfully.`, [
+            { text: 'OK' },
+          ]);
+        }
+
+        return successfulOffers.length > 0;
       } catch (err) {
         handleError(err, 'send bulk offers');
         return false;

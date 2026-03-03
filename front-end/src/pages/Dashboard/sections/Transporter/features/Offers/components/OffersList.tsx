@@ -21,9 +21,9 @@ export const OffersList: React.FC<OffersListProps> = ({
 }) => {
   if (!requests.length) {
     return (
-      <View className="bg-neutral-800 rounded-lg p-8 items-center">
-        <Text className="text-white font-semibold text-lg mt-4">No transport requests</Text>
-        <Text className="text-neutral-400 text-center mt-2">
+      <View className="bg-gray-50 rounded-lg p-8 items-center">
+        <Text className="text-gray-900 font-semibold text-lg mt-4">No transport requests</Text>
+        <Text className="text-gray-500 text-center mt-2">
           When new requests appear, you can bid on them to secure transport jobs.
         </Text>
       </View>
@@ -33,27 +33,24 @@ export const OffersList: React.FC<OffersListProps> = ({
   return (
     <View className="space-y-4">
       {requests.map((request) => (
-        <View
-          key={request.id}
-          className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 space-y-3"
-        >
+        <View key={request.id} className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
           <View className="flex-row items-center justify-between">
             <View>
-              <Text className="text-lg font-semibold text-white">
+              <Text className="text-lg font-semibold text-gray-900">
                 {request.tradeOperation?.buyListing?.product?.name}
               </Text>
-              <Text className="text-neutral-400 text-sm">
+              <Text className="text-gray-500 text-sm">
                 {request.tradeOperation?.buyListing?.buyer?.name}
               </Text>
             </View>
-            <Badge className="bg-orange-500 text-white px-2 py-1 rounded">
+            <Badge className="bg-orange-500 text-gray-900 px-2 py-1 rounded">
               {request.urgencyLevel || 'STANDARD'}
             </Badge>
           </View>
 
           <View className="flex-row gap-4">
-            <Text className="text-white font-medium">{request.totalWeight} tons</Text>
-            <Text className="text-neutral-400 text-sm">
+            <Text className="text-gray-900 font-medium">{request.totalWeight} tons</Text>
+            <Text className="text-gray-500 text-sm">
               Budget: €{request.maxBudget?.toLocaleString()}
             </Text>
           </View>

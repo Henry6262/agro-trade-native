@@ -1,18 +1,10 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  Dimensions,
-  ScrollView,
-} from 'react-native';
-import { ChevronRight, Menu, User, LayoutGrid } from 'lucide-react-native';
+import { View, Text, TouchableOpacity, StatusBar, Dimensions, ScrollView } from 'react-native';
+import { ChevronRight, Menu, User } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ProfileDrawer } from './ProfileDrawer';
 import { useAuthStore } from '@stores/auth.store';
-import { Container } from '../../../shared/components';
+import { GradientBackground } from '../../../design-system';
 
 export interface NavigationItem {
   id: string;
@@ -48,7 +40,6 @@ export default function DashboardWrapper({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(screenWidth < 768);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
-  const [showDashboardSwitcher, setShowDashboardSwitcher] = useState(false);
 
   // Ensure authenticated users stay on dashboard
   React.useEffect(() => {
@@ -57,59 +48,49 @@ export default function DashboardWrapper({
     }
   }, [isAuthenticated]);
 
-  const getRoleBrandColor = () => {
-    switch (userRole) {
-      case 'seller':
-        return 'text-blue-500 border-blue-500';
-      case 'buyer':
-        return 'text-yellow-500 border-yellow-500';
-      case 'transporter':
-        return 'text-green-500 border-green-500';
-      case 'admin':
-      default:
-        return 'text-green-500 border-green-500';
-    }
-  };
-
-  const brandColor = getRoleBrandColor();
-
-  const handleDashboardSwitch = (newRole: 'seller' | 'buyer' | 'transporter' | 'admin') => {
-    setShowDashboardSwitcher(false);
-
-    // Navigate to the appropriate dashboard based on role
-    switch (newRole) {
-      case 'seller':
-        navigation.navigate('SellerDashboard' as never);
-        break;
-      case 'buyer':
-        navigation.navigate('BuyerDashboard' as never);
-        break;
-      case 'transporter':
-        navigation.navigate('TransporterDashboard' as never);
-        break;
-      case 'admin':
-        navigation.navigate('AdminDashboard' as never);
-        break;
-    }
-  };
-
   const renderSidebar = () => (
     <View
-      className={`${
-        sidebarCollapsed ? 'w-16' : 'w-70'
-      } bg-neutral-900 border-r border-neutral-700 h-full`}
+      style={{
+        width: sidebarCollapsed ? 64 : 280,
+        backgroundColor: 'rgba(5,46,22,0.7)',
+        borderRightWidth: 1,
+        borderRightColor: 'rgba(255,255,255,0.1)',
+        height: '100%',
+      }}
     >
-      <View className="p-4">
-        <View className="flex-row items-center justify-between mb-8">
-          <View className={`${sidebarCollapsed ? 'hidden' : 'flex'}`}>
-            <Text className={`font-bold text-lg tracking-wider ${brandColor.split(' ')[0]}`}>
-              AGRI TRADE
-            </Text>
-            <Text className="text-neutral-500 text-xs">{userRole.toUpperCase()} PORTAL</Text>
-          </View>
-          <TouchableOpacity onPress={() => setSidebarCollapsed(!sidebarCollapsed)} className="p-2">
+      <View style={{ padding: 16, flex: 1 }}>
+        {/* Sidebar header */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 32,
+          }}
+        >
+          {!sidebarCollapsed && (
+            <View>
+              <Text
+                style={{
+                  color: '#4ADE80',
+                  fontWeight: '700',
+                  fontSize: 16,
+                  letterSpacing: 3,
+                }}
+              >
+                AGRO TRADE
+              </Text>
+              <Text style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, marginTop: 2 }}>
+                {userRole.toUpperCase()} PORTAL
+              </Text>
+            </View>
+          )}
+          <TouchableOpacity
+            onPress={() => setSidebarCollapsed(!sidebarCollapsed)}
+            style={{ padding: 8 }}
+          >
             <ChevronRight
-              color="#9CA3AF"
+              color="rgba(255,255,255,0.5)"
               size={20}
               style={{
                 transform: [{ rotate: sidebarCollapsed ? '0deg' : '180deg' }],
@@ -118,8 +99,8 @@ export default function DashboardWrapper({
           </TouchableOpacity>
         </View>
 
-        <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-          <View className="space-y-1">
+        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+          <View style={{ gap: 4 }}>
             {navigationItems.map((item) => {
               const IconComponent = item.icon;
               const isActive = activeSection === item.id;
@@ -133,16 +114,26 @@ export default function DashboardWrapper({
                       setShowMobileSidebar(false);
                     }
                   }}
-                  className={`flex-row items-center p-3 rounded-lg transition-all ${
-                    isActive ? 'bg-neutral-800 border-l-2 ' + brandColor : 'hover:bg-neutral-800/50'
-                  }`}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    padding: 12,
+                    borderRadius: 8,
+                    backgroundColor: isActive ? 'rgba(74,222,128,0.15)' : 'transparent',
+                    borderLeftWidth: isActive ? 2 : 0,
+                    borderLeftColor: isActive ? '#4ADE80' : 'transparent',
+                  }}
+                  activeOpacity={0.7}
                 >
-                  <IconComponent color={isActive ? '#10b981' : '#9CA3AF'} size={20} />
+                  <IconComponent color={isActive ? '#4ADE80' : 'rgba(255,255,255,0.5)'} size={20} />
                   {!sidebarCollapsed && (
                     <Text
-                      className={`ml-3 text-sm font-medium ${
-                        isActive ? 'text-white' : 'text-neutral-400'
-                      }`}
+                      style={{
+                        marginLeft: 12,
+                        fontSize: 14,
+                        fontWeight: '500',
+                        color: isActive ? '#FFFFFF' : 'rgba(255,255,255,0.5)',
+                      }}
                     >
                       {item.label}
                     </Text>
@@ -154,20 +145,46 @@ export default function DashboardWrapper({
         </ScrollView>
 
         {/* User Profile Section */}
-        <View className="pt-4 mt-4 border-t border-neutral-700">
+        <View
+          style={{
+            paddingTop: 16,
+            marginTop: 16,
+            borderTopWidth: 1,
+            borderTopColor: 'rgba(255,255,255,0.1)',
+          }}
+        >
           <TouchableOpacity
             onPress={() => setShowProfileDrawer(true)}
-            className="flex-row items-center p-2 rounded hover:bg-neutral-800/50"
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: 8,
+              borderRadius: 8,
+            }}
+            activeOpacity={0.7}
           >
-            <View className="w-8 h-8 bg-neutral-700 rounded-full flex items-center justify-center">
-              <User color="#9CA3AF" size={16} />
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                backgroundColor: 'rgba(74,222,128,0.2)',
+                borderRadius: 16,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 1,
+                borderColor: 'rgba(74,222,128,0.3)',
+              }}
+            >
+              <User color="#4ADE80" size={16} />
             </View>
             {!sidebarCollapsed && (
-              <View className="ml-3">
-                <Text className="text-white text-sm font-medium">
+              <View style={{ marginLeft: 12 }}>
+                <Text style={{ color: '#FFFFFF', fontSize: 14, fontWeight: '500' }}>
                   {user?.name || userRole.charAt(0).toUpperCase() + userRole.slice(1)}
                 </Text>
-                <Text className="text-neutral-500 text-xs">{user?.email || 'View Profile'}</Text>
+                <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 1 }}>
+                  {user?.email || 'View Profile'}
+                </Text>
               </View>
             )}
           </TouchableOpacity>
@@ -177,10 +194,10 @@ export default function DashboardWrapper({
   );
 
   return (
-    <Container safeArea={true} noPadding={true} backgroundColor="#000000">
-      <StatusBar backgroundColor="#000000" barStyle="light-content" />
+    <GradientBackground>
+      <StatusBar barStyle="light-content" />
 
-      <View className="flex-1 flex-row">
+      <View style={{ flex: 1, flexDirection: 'row' }}>
         {/* Desktop Sidebar - Always shown on desktop/tablet */}
         {screenWidth >= 768 && <View style={{ position: 'relative' }}>{renderSidebar()}</View>}
 
@@ -188,93 +205,63 @@ export default function DashboardWrapper({
         {screenWidth < 768 && showMobileSidebar && (
           <>
             <TouchableOpacity
-              className="absolute inset-0 bg-black/50 z-40"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                zIndex: 40,
+              }}
               onPress={() => setShowMobileSidebar(false)}
             />
-            <View className="absolute left-0 top-0 bottom-0 z-50">{renderSidebar()}</View>
+            <View style={{ position: 'absolute', left: 0, top: 0, bottom: 0, zIndex: 50 }}>
+              {renderSidebar()}
+            </View>
           </>
         )}
 
         {/* Main Content Area */}
-        <View className="flex-1">
-          {/* Header with Dashboard Switcher */}
-          <View className="px-4 py-3 border-b border-neutral-800 flex-row items-center justify-between">
+        <View style={{ flex: 1 }}>
+          {/* Header */}
+          <View
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              borderBottomWidth: 1,
+              borderBottomColor: 'rgba(255,255,255,0.1)',
+              backgroundColor: 'rgba(5,46,22,0.5)',
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
             {screenWidth < 768 && (
-              <TouchableOpacity onPress={() => setShowMobileSidebar(true)} className="p-2">
-                <Menu color="#9CA3AF" size={24} />
+              <TouchableOpacity onPress={() => setShowMobileSidebar(true)} style={{ padding: 8 }}>
+                <Menu color="#FFFFFF" size={24} />
               </TouchableOpacity>
             )}
 
-            <View className="flex-1 mx-4">
-              <Text className="text-white font-bold text-lg">{title}</Text>
-              <Text className="text-neutral-400 text-xs">{subtitle}</Text>
+            <View style={{ flex: 1, marginHorizontal: 16 }}>
+              <Text style={{ color: '#FFFFFF', fontWeight: '700', fontSize: 18 }}>{title}</Text>
+              <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12, marginTop: 1 }}>
+                {subtitle}
+              </Text>
             </View>
 
-            {/* Dashboard Switcher Button */}
-            <TouchableOpacity
-              onPress={() => setShowDashboardSwitcher(!showDashboardSwitcher)}
-              className="p-2 bg-neutral-800 rounded-lg mr-2 flex-row items-center"
-            >
-              <LayoutGrid color="#9CA3AF" size={20} />
-              <Text className="text-neutral-400 text-sm ml-2">Switch Dashboard</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => setShowProfileDrawer(true)} className="p-2">
-              <User color="#9CA3AF" size={24} />
+            <TouchableOpacity onPress={() => setShowProfileDrawer(true)} style={{ padding: 8 }}>
+              <User color="#FFFFFF" size={24} />
             </TouchableOpacity>
           </View>
 
-          {/* Dashboard Switcher Dropdown */}
-          {showDashboardSwitcher && (
-            <View className="absolute top-16 right-4 bg-neutral-900 border border-neutral-700 rounded-lg p-2 z-50 shadow-lg">
-              <Text className="text-neutral-400 text-xs px-3 py-1 mb-1">TEST DASHBOARDS</Text>
-
-              <TouchableOpacity
-                onPress={() => handleDashboardSwitch('seller')}
-                className={`flex-row items-center px-3 py-2 rounded hover:bg-neutral-800 ${
-                  userRole === 'seller' ? 'bg-neutral-800' : ''
-                }`}
-              >
-                <View className="w-2 h-2 bg-blue-500 rounded-full mr-2" />
-                <Text className="text-white">Seller Dashboard</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => handleDashboardSwitch('buyer')}
-                className={`flex-row items-center px-3 py-2 rounded hover:bg-neutral-800 ${
-                  userRole === 'buyer' ? 'bg-neutral-800' : ''
-                }`}
-              >
-                <View className="w-2 h-2 bg-yellow-500 rounded-full mr-2" />
-                <Text className="text-white">Buyer Dashboard</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => handleDashboardSwitch('transporter')}
-                className={`flex-row items-center px-3 py-2 rounded hover:bg-neutral-800 ${
-                  userRole === 'transporter' ? 'bg-neutral-800' : ''
-                }`}
-              >
-                <View className="w-2 h-2 bg-green-500 rounded-full mr-2" />
-                <Text className="text-white">Transporter Dashboard</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => handleDashboardSwitch('admin')}
-                className={`flex-row items-center px-3 py-2 rounded hover:bg-neutral-800 ${
-                  userRole === 'admin' ? 'bg-neutral-800' : ''
-                }`}
-              >
-                <View className="w-2 h-2 bg-purple-500 rounded-full mr-2" />
-                <Text className="text-white">Admin Dashboard</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
           {/* Dynamic Content Based on Active Section */}
-          <View className="flex-1">
+          <View style={{ flex: 1 }}>
             {React.Children.map(children, (child) => {
-              if (React.isValidElement(child) && (child as React.ReactElement<any>).props.id === activeSection) {
+              if (
+                React.isValidElement(child) &&
+                (child as React.ReactElement<any>).props.id === activeSection
+              ) {
                 return child;
               }
               return null;
@@ -285,6 +272,6 @@ export default function DashboardWrapper({
 
       {/* Profile Drawer */}
       <ProfileDrawer visible={showProfileDrawer} onClose={() => setShowProfileDrawer(false)} />
-    </Container>
+    </GradientBackground>
   );
 }

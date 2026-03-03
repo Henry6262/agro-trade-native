@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { BaseComponentProps } from '@shared/types';
+import { GlassCard } from '../../../../design-system';
+import { COLORS } from '../../../../design-system';
 
 interface MetricCardProps extends BaseComponentProps {
   title: string;
@@ -16,28 +18,70 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   title,
   value,
   icon: Icon,
-  gradient = 'from-blue-500/10 to-blue-600/5',
-  borderColor = 'border-blue-500/20',
-  iconColor = '#60A5FA',
-  valueColor = 'text-blue-400',
+  iconColor = COLORS.info,
+  valueColor,
   testID,
   accessibilityLabel,
 }) => {
+  const resolvedValueColor = valueColor ? resolveValueColor(valueColor) : COLORS.accentGold;
+
   return (
-    <View
-      className={`bg-gradient-to-br ${gradient} border ${borderColor} rounded-lg p-3`}
+    <GlassCard
+      tier="subtle"
+      animate={false}
+      style={styles.card}
       testID={testID}
       accessibilityLabel={accessibilityLabel || `${title}: ${value}`}
     >
-      <View className="flex-row items-center justify-between">
-        <View className="flex-1">
-          <Text className="text-xs text-neutral-400 mb-1">{title}</Text>
-          <Text className={`text-lg font-bold ${valueColor}`}>{value}</Text>
+      <View style={styles.row}>
+        <View style={styles.textBlock}>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={[styles.value, { color: resolvedValueColor }]}>{value}</Text>
         </View>
-        <View className="w-8 h-8 items-center justify-center">
+        <View style={styles.iconWrap}>
           <Icon size={20} color={iconColor} />
         </View>
       </View>
-    </View>
+    </GlassCard>
   );
 };
+
+/**
+ * Maps legacy Tailwind color class strings (e.g. "text-blue-400") to
+ * design-system token colors so callers that pass className-style
+ * strings still get a valid color.
+ */
+function resolveValueColor(valueColor: string): string {
+  if (!valueColor.startsWith('text-')) return valueColor;
+  const map: Record<string, string> = {
+    'text-blue-400': COLORS.info,
+    'text-green-400': COLORS.accentGreen,
+    'text-yellow-400': COLORS.accentGold,
+    'text-red-400': COLORS.danger,
+    'text-white': COLORS.textPrimary,
+    'text-gray-400': COLORS.textMuted,
+  };
+  return map[valueColor] ?? COLORS.accentGold;
+}
+
+const styles = StyleSheet.create({
+  card: {},
+  iconWrap: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 10,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  row: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
+  textBlock: { flex: 1 },
+  title: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    letterSpacing: 0.5,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  value: { fontFamily: 'monospace', fontSize: 18, fontWeight: '800' },
+});

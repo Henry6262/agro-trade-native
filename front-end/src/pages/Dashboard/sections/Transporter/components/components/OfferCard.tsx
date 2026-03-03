@@ -45,11 +45,11 @@ export const OfferCard: React.FC<OfferCardProps> = ({ offer, onViewRoute }) => {
   };
 
   return (
-    <View className="bg-white dark:bg-gray-800 rounded-lg p-4 mb-3 shadow-sm">
+    <View className="bg-white dark:bg-white rounded-lg p-4 mb-3 shadow-sm">
       {/* Offer Header */}
       <View className="flex-row justify-between items-start mb-3">
         <View className="flex-1">
-          <Text className="text-lg font-semibold text-gray-900 dark:text-white">
+          <Text className="text-lg font-semibold text-gray-900 dark:text-gray-900">
             {offer.productType.charAt(0).toUpperCase() + offer.productType.slice(1)}
           </Text>
           <Text className="text-sm text-gray-600 dark:text-gray-400">{offer.quantity} tons</Text>
@@ -64,13 +64,13 @@ export const OfferCard: React.FC<OfferCardProps> = ({ offer, onViewRoute }) => {
       {/* Location Info */}
       <View className="mb-3">
         <View className="flex-row items-center mb-1">
-          <Text className="text-sm text-gray-700 dark:text-gray-300 font-medium">From:</Text>
+          <Text className="text-sm text-gray-700 dark:text-gray-600 font-medium">From:</Text>
           <Text className="text-sm text-gray-600 dark:text-gray-400 ml-1">
             {offer.pickup.name || offer.pickup.address.city}
           </Text>
         </View>
         <View className="flex-row items-center">
-          <Text className="text-sm text-gray-700 dark:text-gray-300 font-medium">To:</Text>
+          <Text className="text-sm text-gray-700 dark:text-gray-600 font-medium">To:</Text>
           <Text className="text-sm text-gray-600 dark:text-gray-400 ml-1">
             {offer.delivery.name || offer.delivery.address.city}
           </Text>
@@ -126,7 +126,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({ offer, onViewRoute }) => {
             <Text
               className={`
                 ml-2 font-medium
-                ${isDelivered ? 'text-gray-400 dark:text-gray-500' : 'text-white'}
+                ${isDelivered ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900'}
               `}
               disabled={isDelivered}
             >

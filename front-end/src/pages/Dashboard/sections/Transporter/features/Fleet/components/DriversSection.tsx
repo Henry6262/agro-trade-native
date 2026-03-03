@@ -20,22 +20,22 @@ export const FleetDriversSection: React.FC<FleetDriversSectionProps> = ({
       <Users size={20} color="#34D399" />
       <Text className="text-lg font-semibold text-green-300 ml-2">Drivers</Text>
     </View>
-    <View className="flex-row mb-4 rounded-lg overflow-hidden border border-gray-700">
+    <View className="flex-row mb-4 rounded-lg overflow-hidden border border-gray-200">
       <TouchableOpacity
-        className={`flex-1 py-2 ${activeTab === 'available' ? 'bg-green-600' : 'bg-gray-900'}`}
+        className={`flex-1 py-2 ${activeTab === 'available' ? 'bg-green-600' : 'bg-gray-50'}`}
         onPress={() => onTabChange('available')}
       >
         <Text className="text-center text-sm font-semibold text-white">Available</Text>
       </TouchableOpacity>
       <TouchableOpacity
-        className={`flex-1 py-2 ${activeTab === 'assigned' ? 'bg-green-600' : 'bg-gray-900'}`}
+        className={`flex-1 py-2 ${activeTab === 'assigned' ? 'bg-green-600' : 'bg-gray-50'}`}
         onPress={() => onTabChange('assigned')}
       >
         <Text className="text-center text-sm font-semibold text-white">Assigned</Text>
       </TouchableOpacity>
     </View>
     {drivers.length === 0 ? (
-      <View className="bg-gray-900/40 border border-gray-800 rounded-lg p-6">
+      <View className="bg-gray-50/40 border border-gray-200 rounded-lg p-6">
         <Text className="text-gray-400 text-center">No drivers in this tab</Text>
       </View>
     ) : (

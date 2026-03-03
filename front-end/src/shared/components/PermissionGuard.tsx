@@ -97,17 +97,17 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
 
   if (isChecking) {
     return (
-      <View className="flex-1 bg-gray-900 justify-center items-center">
+      <View className="flex-1 bg-gray-50 justify-center items-center">
         <Shield size={48} color="#10B981" />
-        <Text className="text-white mt-4">Checking permissions...</Text>
+        <Text className="text-gray-900 mt-4">Checking permissions...</Text>
       </View>
     );
   }
 
   if (requireLocation && locationPermission === false) {
     return (
-      <View className="flex-1 bg-gray-900 justify-center items-center px-8">
-        <View className="bg-gray-800 rounded-2xl p-6 w-full max-w-sm">
+      <View className="flex-1 bg-gray-50 justify-center items-center px-8">
+        <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
           <View className="items-center mb-4">
             <View className="bg-emerald-500/20 p-4 rounded-full mb-4">
               <MapPin size={48} color="#10B981" />

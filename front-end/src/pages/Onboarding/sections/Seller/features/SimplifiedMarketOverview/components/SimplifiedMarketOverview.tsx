@@ -178,16 +178,20 @@ export function SimplifiedMarketOverview({
 
   return (
     <>
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 140 }}
+      >
         {/* Header */}
         <View className="mb-6">
-          <Text className="text-3xl font-bold text-white mb-2">Listing Overview</Text>
+          <Text className="text-3xl font-bold text-gray-900 mb-2">Listing Overview</Text>
           <Text className="text-gray-400">Review your listing details before submitting</Text>
         </View>
 
         {/* Product Card - Enhanced Display */}
         {product && (
-          <View className="bg-gray-800/50 rounded-2xl overflow-hidden border border-gray-700 mb-6">
+          <View className="bg-white/50 rounded-2xl overflow-hidden border border-gray-200 mb-6">
             {/* Product Image Header */}
             {product.image && (
               <View className="relative">
@@ -218,7 +222,7 @@ export function SimplifiedMarketOverview({
 
             {/* Product Details */}
             <View className="p-4">
-              <Text className="text-white text-xl font-bold mb-1">
+              <Text className="text-gray-900 text-xl font-bold mb-1">
                 {product.displayName || product.name}
               </Text>
               <Text className="text-gray-400 text-sm mb-4">
@@ -229,12 +233,12 @@ export function SimplifiedMarketOverview({
               <View className="flex-row flex-wrap -mx-2 mb-4">
                 {/* Quantity */}
                 <View className="w-1/2 px-2 mb-3">
-                  <View className="bg-gray-900/50 rounded-xl p-3">
+                  <View className="bg-gray-50/50 rounded-xl p-3">
                     <View className="flex-row items-center mb-1">
                       <Weight size={14} color="#10B981" />
                       <Text className="text-gray-400 text-xs ml-1">Quantity</Text>
                     </View>
-                    <Text className="text-white text-lg font-semibold">
+                    <Text className="text-gray-900 text-lg font-semibold">
                       {productSpecs.quantity || '0'}{' '}
                       {productSpecs.unit || product.defaultUnit || 'TON'}
                     </Text>
@@ -243,12 +247,12 @@ export function SimplifiedMarketOverview({
 
                 {/* Location */}
                 <View className="w-1/2 px-2 mb-3">
-                  <View className="bg-gray-900/50 rounded-xl p-3">
+                  <View className="bg-gray-50/50 rounded-xl p-3">
                     <View className="flex-row items-center mb-1">
                       <MapPin size={14} color="#10B981" />
                       <Text className="text-gray-400 text-xs ml-1">Location</Text>
                     </View>
-                    <Text className="text-white text-sm font-semibold" numberOfLines={1}>
+                    <Text className="text-gray-900 text-sm font-semibold" numberOfLines={1}>
                       {location?.city || location?.address || 'Not set'}
                     </Text>
                   </View>
@@ -276,10 +280,12 @@ export function SimplifiedMarketOverview({
           <View className="mb-6">
             <View className="flex-row items-center mb-3">
               <FileText size={20} color="white" />
-              <Text className="text-white text-lg font-semibold ml-2">Product Specifications</Text>
+              <Text className="text-gray-900 text-lg font-semibold ml-2">
+                Product Specifications
+              </Text>
             </View>
 
-            <View className="bg-gray-800/50 rounded-xl p-4 border border-gray-700">
+            <View className="bg-white/50 rounded-xl p-4 border border-gray-200">
               {(product?.specifications?.length ?? 0) > 0 ? (
                 <View className="space-y-3">
                   {product?.specifications?.map((spec) => {
@@ -290,7 +296,7 @@ export function SimplifiedMarketOverview({
                     return (
                       <View
                         key={specKey}
-                        className="flex-row items-center justify-between py-2 border-b border-gray-700/50"
+                        className="flex-row items-center justify-between py-2 border-b border-gray-200/50"
                       >
                         <View className="flex-row items-center flex-1">
                           {hasValue ? (
@@ -299,7 +305,7 @@ export function SimplifiedMarketOverview({
                             <X size={16} color="#EF4444" />
                           )}
                           <Text
-                            className={`ml-2 text-sm ${hasValue ? 'text-gray-300' : 'text-gray-500'}`}
+                            className={`ml-2 text-sm ${hasValue ? 'text-gray-600' : 'text-gray-500'}`}
                           >
                             {spec.name || spec.code}
                           </Text>
@@ -307,7 +313,7 @@ export function SimplifiedMarketOverview({
                         <View className="flex-row items-center">
                           {hasValue ? (
                             <>
-                              <Text className="text-white font-medium mr-2">{value}</Text>
+                              <Text className="text-gray-900 font-medium mr-2">{value}</Text>
                               {spec.unit && (
                                 <Text className="text-gray-400 text-xs">{spec.unit}</Text>
                               )}
@@ -356,7 +362,7 @@ export function SimplifiedMarketOverview({
 
         {/* Data Preview (Debug - Remove in production) */}
         {__DEV__ && (
-          <View className="bg-gray-900 rounded-xl p-4 mb-4">
+          <View className="bg-gray-50 rounded-xl p-4 mb-4">
             <Text className="text-gray-400 text-xs font-mono mb-2">DTO Preview:</Text>
             <Text className="text-gray-500 text-xs font-mono">
               {JSON.stringify(buildListingDTO() || {}, null, 2)}

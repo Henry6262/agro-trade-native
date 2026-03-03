@@ -88,11 +88,11 @@ export function ProductSpecifications({
       <View key={productId} className={`${isLargeScreen ? 'w-1/2' : 'w-full'} p-2`}>
         <View
           className={`border rounded-lg overflow-hidden ${
-            isCompleted ? 'bg-emerald-500/10 border-emerald-500' : 'bg-gray-800 border-gray-700'
+            isCompleted ? 'bg-emerald-500/10 border-emerald-500' : 'bg-white border-gray-200'
           }`}
         >
           {/* Card Header */}
-          <View className="p-4 border-b border-gray-700 relative">
+          <View className="p-4 border-b border-gray-200 relative">
             <View className="flex-row items-center">
               {product.image ? (
                 <Image
@@ -106,7 +106,7 @@ export function ProductSpecifications({
                 </View>
               )}
               <View className="flex-1">
-                <Text className="font-bold text-lg text-white">
+                <Text className="font-bold text-lg text-gray-900">
                   {product.name || product.category}
                 </Text>
               </View>
@@ -133,7 +133,7 @@ export function ProductSpecifications({
                   placeholder="100"
                   keyboardType="numeric"
                   maxLength={6}
-                  className={`border-2 rounded-lg px-2 py-2 bg-gray-900 text-white text-center ${
+                  className={`border-2 rounded-lg px-2 py-2 bg-gray-50 text-gray-900 text-center ${
                     !spec.quantity ? 'border-red-500' : 'border-gray-600'
                   }`}
                   placeholderTextColor="#6B7280"
@@ -152,7 +152,7 @@ export function ProductSpecifications({
                     onChangeText={(text) => updateSpecification(productId, 'pricePerKilo', text)}
                     placeholder="25.50"
                     keyboardType="decimal-pad"
-                    className={`border-2 rounded-lg pl-8 pr-3 py-3 bg-gray-900 text-white ${
+                    className={`border-2 rounded-lg pl-8 pr-3 py-3 bg-gray-50 text-gray-900 ${
                       !spec.pricePerKilo ? 'border-red-500' : 'border-gray-600'
                     }`}
                     placeholderTextColor="#6B7280"
@@ -164,7 +164,7 @@ export function ProductSpecifications({
             {/* Optional Fields Button */}
             <TouchableOpacity
               onPress={() => toggleCardExpansion(productId)}
-              className="border-2 border-dashed border-gray-700 rounded-lg py-3 flex-row items-center justify-center bg-gray-900/50"
+              className="border-2 border-dashed border-gray-200 rounded-lg py-3 flex-row items-center justify-center bg-gray-50/50"
             >
               {isExpanded ? (
                 <ChevronUp size={16} color="#9CA3AF" />
@@ -185,7 +185,7 @@ export function ProductSpecifications({
                     value={spec.harvestDate || ''}
                     onChangeText={(text) => updateSpecification(productId, 'harvestDate', text)}
                     placeholder="DD/MM/YYYY"
-                    className="border-2 border-gray-600 rounded-lg px-3 py-3 bg-gray-900 text-white"
+                    className="border-2 border-gray-600 rounded-lg px-3 py-3 bg-gray-50 text-gray-900"
                     placeholderTextColor="#6B7280"
                   />
                 </View>
@@ -196,7 +196,7 @@ export function ProductSpecifications({
                     value={spec.storageLocation || ''}
                     onChangeText={(text) => updateSpecification(productId, 'storageLocation', text)}
                     placeholder="e.g., Warehouse A, City"
-                    className="border-2 border-gray-600 rounded-lg px-3 py-3 bg-gray-900 text-white"
+                    className="border-2 border-gray-600 rounded-lg px-3 py-3 bg-gray-50 text-gray-900"
                     placeholderTextColor="#6B7280"
                   />
                 </View>
@@ -209,7 +209,7 @@ export function ProductSpecifications({
                     placeholder="e.g., Organic certified, Premium grade"
                     multiline
                     numberOfLines={3}
-                    className="border-2 border-gray-600 rounded-lg px-3 py-3 bg-gray-900 text-white"
+                    className="border-2 border-gray-600 rounded-lg px-3 py-3 bg-gray-50 text-gray-900"
                     placeholderTextColor="#6B7280"
                   />
                 </View>
@@ -223,7 +223,7 @@ export function ProductSpecifications({
 
   if (loading) {
     return (
-      <View className="flex-1 bg-gray-900 items-center justify-center">
+      <View className="flex-1 bg-gray-50 items-center justify-center">
         <Package size={48} color="#9CA3AF" />
         <Text className="text-gray-400 mt-4">Loading product details...</Text>
       </View>
@@ -231,7 +231,7 @@ export function ProductSpecifications({
   }
 
   return (
-    <View className="flex-1 bg-gray-900">
+    <View className="flex-1 bg-gray-50">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 100 }}
@@ -254,11 +254,11 @@ export function ProductSpecifications({
               {specifications.map((spec, index) => renderSpecificationCard(spec.productId, index))}
             </View>
           ) : (
-            <View className="bg-gray-800 border border-gray-700 rounded-lg p-8 items-center">
+            <View className="bg-white border border-gray-200 rounded-lg p-8 items-center">
               <View className="w-16 h-16 bg-gray-700 rounded-full items-center justify-center mb-4">
                 <Package size={32} color="#6B7280" />
               </View>
-              <Text className="text-lg font-semibold text-white mb-2">No Products Selected</Text>
+              <Text className="text-lg font-semibold text-gray-900 mb-2">No Products Selected</Text>
               <Text className="text-sm text-gray-400 text-center">
                 Go back to select products first
               </Text>

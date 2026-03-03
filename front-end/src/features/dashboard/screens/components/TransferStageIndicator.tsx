@@ -32,7 +32,7 @@ export const TransferStageIndicator: React.FC<TransferStageIndicatorProps> = ({
   return (
     <View className="relative mb-6" testID={testID} accessibilityLabel={accessibilityLabel}>
       {/* Progress Bar Background */}
-      <View className="absolute top-4 left-8 right-8 h-0.5 bg-neutral-700 z-0" />
+      <View className="absolute top-4 left-8 right-8 h-0.5 bg-gray-100 z-0" />
 
       {/* Active Progress Bar */}
       <View
@@ -65,9 +65,9 @@ export const TransferStageIndicator: React.FC<TransferStageIndicatorProps> = ({
               };
             } else {
               return {
-                container: 'bg-neutral-700',
+                container: 'bg-gray-100',
                 iconColor: '#9CA3AF',
-                textColor: 'text-neutral-500',
+                textColor: 'text-gray-400',
               };
             }
           };

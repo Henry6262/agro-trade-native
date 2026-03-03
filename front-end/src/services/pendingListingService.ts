@@ -81,7 +81,6 @@ export class PendingListingService {
         return false;
       }
 
-
       // Create the buyer listing
       const buyerSpec = pending.specifications;
       const location = pending.location;
@@ -114,7 +113,6 @@ export class PendingListingService {
         notes: buyerSpec.notes,
         status: 'ACTIVE',
       };
-
 
       // Skip onboarding for authenticated users
       const currentUser = authState.user;

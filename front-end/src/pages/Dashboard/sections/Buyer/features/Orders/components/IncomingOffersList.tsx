@@ -13,12 +13,12 @@ interface IncomingOffersListProps {
 export const IncomingOffersList: React.FC<IncomingOffersListProps> = ({ offers }) => (
   <View className="space-y-4">
     {offers.map((offer) => (
-      <Card key={offer.id} className="bg-neutral-900 border-neutral-800 rounded-2xl">
+      <Card key={offer.id} className="bg-white border-gray-100 rounded-2xl">
         <CardContent className="p-5 space-y-3">
           <View className="flex-row items-center justify-between">
             <View>
-              <Text className="text-white font-semibold text-lg">{offer.product}</Text>
-              <Text className="text-neutral-400 text-sm">
+              <Text className="text-gray-900 font-semibold text-lg">{offer.product}</Text>
+              <Text className="text-gray-500 text-sm">
                 {offer.sellerFlag} {offer.seller} • {offer.sellerLocation}
               </Text>
             </View>
@@ -26,16 +26,18 @@ export const IncomingOffersList: React.FC<IncomingOffersListProps> = ({ offers }
           </View>
           <View className="flex-row justify-between">
             <View>
-              <Text className="text-xs text-neutral-400">Quantity</Text>
+              <Text className="text-xs text-gray-500">Quantity</Text>
               <Text className="text-white font-semibold">{offer.quantity} tons</Text>
             </View>
             <View>
-              <Text className="text-xs text-neutral-400">Price/ton</Text>
-              <Text className="text-white font-semibold">${offer.offeredPricePerTon}</Text>
+              <Text className="text-xs text-gray-500">Price/ton</Text>
+              <Text className="text-gray-900 font-semibold">${offer.offeredPricePerTon}</Text>
             </View>
             <View>
-              <Text className="text-xs text-neutral-400">Total</Text>
-              <Text className="text-white font-semibold">${offer.totalValue.toLocaleString()}</Text>
+              <Text className="text-xs text-gray-500">Total</Text>
+              <Text className="text-gray-900 font-semibold">
+                ${offer.totalValue.toLocaleString()}
+              </Text>
             </View>
           </View>
           <View className="flex-row flex-wrap gap-2">
@@ -46,16 +48,16 @@ export const IncomingOffersList: React.FC<IncomingOffersListProps> = ({ offers }
             ))}
           </View>
           <View className="flex-row justify-between items-center text-sm">
-            <View className="flex-row items-center text-neutral-300">
+            <View className="flex-row items-center text-gray-600">
               <Calendar size={14} color="#93c5fd" />
-              <Text className="text-neutral-300 ml-2">Delivery {offer.deliveryDate}</Text>
+              <Text className="text-gray-600 ml-2">Delivery {offer.deliveryDate}</Text>
             </View>
-            <View className="flex-row items-center text-neutral-300">
+            <View className="flex-row items-center text-gray-600">
               <DollarSign size={14} color="#fbbf24" />
-              <Text className="text-neutral-300 ml-2">{offer.responseTime} response</Text>
+              <Text className="text-gray-600 ml-2">{offer.responseTime} response</Text>
             </View>
           </View>
-          <Text className="text-neutral-400 text-sm">{offer.adminNote}</Text>
+          <Text className="text-gray-500 text-sm">{offer.adminNote}</Text>
           <View className="flex-row gap-3">
             <Button variant="secondary" className="flex-1">
               View Details

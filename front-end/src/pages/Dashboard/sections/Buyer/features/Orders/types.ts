@@ -1,5 +1,3 @@
-import type { VerificationJob } from '@features/dashboard/screens/inspector/types';
-
 export interface BuyerStatistics {
   totalSpent: number;
   monthlySpent: number;
@@ -7,6 +5,14 @@ export interface BuyerStatistics {
   averagePerOrder: number;
   topProduct: string;
   savingsRate: number;
+}
+
+export interface MatchedSeller {
+  id: string;
+  sellerName: string;
+  agreedPricePerUnit: number | null;
+  quantity: number | null;
+  status: string;
 }
 
 export interface BuyerOrder {
@@ -22,6 +28,7 @@ export interface BuyerOrder {
   qualityRequirements: string[];
   securedQuantity: number;
   estimatedProfit?: number;
+  sellers: MatchedSeller[];
   createdAt: string;
   updatedAt: string;
 }

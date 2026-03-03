@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { COLORS } from '../../../../../../../design-system/tokens';
 
 interface ProgressIndicatorProps {
   currentStep: number;
@@ -13,42 +14,114 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({
   stepLabels = [],
 }) => {
   return (
-    <View className="px-6 py-4">
-      {/* Progress Bar */}
-      <View className="flex-row items-center mb-2">
-        {Array.from({ length: totalSteps }, (_, index) => (
-          <React.Fragment key={index}>
-            {/* Step Circle */}
-            <View
-              className={`w-8 h-8 rounded-full items-center justify-center ${
-                index < currentStep
-                  ? 'bg-green-500'
-                  : index === currentStep
-                    ? 'bg-blue-500'
-                    : 'bg-neutral-700'
-              }`}
-            >
-              <Text className="text-white text-xs font-bold">{index + 1}</Text>
-            </View>
-
-            {/* Connector Line */}
-            {index < totalSteps - 1 && (
+    <View style={styles.container}>
+      {/* Step circles and connectors */}
+      <View style={styles.row}>
+        {Array.from({ length: totalSteps }, (_, index) => {
+          const isCompleted = index < currentStep;
+          const isCurrent = index === currentStep;
+          return (
+            <React.Fragment key={index}>
+              {/* Circle */}
               <View
-                className={`flex-1 h-1 mx-2 ${
-                  index < currentStep ? 'bg-green-500' : 'bg-neutral-700'
-                }`}
-              />
-            )}
-          </React.Fragment>
-        ))}
+                style={[
+                  styles.circle,
+                  isCompleted && styles.circleCompleted,
+                  isCurrent && styles.circleCurrent,
+                  !isCompleted && !isCurrent && styles.circleUpcoming,
+                ]}
+              >
+                {isCompleted ? (
+                  <Text style={styles.circleCheckmark}>✓</Text>
+                ) : (
+                  <Text
+                    style={[
+                      styles.circleText,
+                      isCurrent && styles.circleTextCurrent,
+                      !isCompleted && !isCurrent && styles.circleTextUpcoming,
+                    ]}
+                  >
+                    {index + 1}
+                  </Text>
+                )}
+              </View>
+
+              {/* Connector */}
+              {index < totalSteps - 1 && (
+                <View style={[styles.connector, isCompleted && styles.connectorCompleted]} />
+              )}
+            </React.Fragment>
+          );
+        })}
       </View>
 
-      {/* Step Label */}
+      {/* Step label */}
       {stepLabels[currentStep] && (
-        <Text className="text-center text-sm text-neutral-400">
+        <Text style={styles.label}>
           Step {currentStep + 1}: {stepLabels[currentStep]}
         </Text>
       )}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  circle: {
+    alignItems: 'center',
+    borderRadius: 16,
+    height: 32,
+    justifyContent: 'center',
+    width: 32,
+  },
+  circleCheckmark: {
+    color: '#052e16',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  circleCompleted: {
+    backgroundColor: '#4ADE80',
+  },
+  circleCurrent: {
+    backgroundColor: 'transparent',
+    borderColor: '#FFFFFF',
+    borderWidth: 2,
+  },
+  circleText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  circleTextCurrent: {
+    color: '#FFFFFF',
+  },
+  circleTextUpcoming: {
+    color: 'rgba(255,255,255,0.35)',
+  },
+  circleUpcoming: {
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.2)',
+    borderWidth: 1,
+  },
+  connector: {
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    flex: 1,
+    height: 2,
+    marginHorizontal: 4,
+  },
+  connectorCompleted: {
+    backgroundColor: '#4ADE80',
+  },
+  container: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+  },
+  label: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  row: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+});

@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StatusBar } from 'react-native';
+import { View, Text, SafeAreaView } from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../../navigation/types';
 import { CheckCircle } from 'lucide-react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useAuthStore } from '@stores/auth.store';
 import { useOnboardingStore } from '@stores/onboarding.store';
+import { GradientBackground, GlassCard, GlassButton, GlassBadge } from '../../../design-system';
 
 type OnboardingCompleteScreenNavigationProp = NativeStackNavigationProp<
   OnboardingStackParamList,
@@ -64,78 +64,100 @@ export const OnboardingCompleteScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  const getRoleLabel = () => {
+    switch (selectedRole) {
+      case 'buyer':
+        return 'Buyer';
+      case 'seller':
+        return 'Seller';
+      case 'transport':
+        return 'Transporter';
+      default:
+        return 'Member';
+    }
+  };
+
   return (
-    <LinearGradient colors={['#1F2937', '#111827']} style={{ flex: 1 }}>
-      <StatusBar barStyle="light-content" backgroundColor="#1F2937" />
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 24,
-        }}
-      >
+    <GradientBackground>
+      <SafeAreaView style={{ flex: 1 }}>
         <View
           style={{
-            backgroundColor: '#10B981',
-            borderRadius: 60,
-            padding: 20,
-            marginBottom: 32,
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 24,
           }}
         >
-          <CheckCircle size={80} color="white" />
-        </View>
+          {/* Glowing checkmark circle */}
+          <GlassCard
+            tier="strong"
+            borderRadius={60}
+            style={{
+              width: 120,
+              height: 120,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: 32,
+              alignSelf: 'center',
+              shadowColor: '#4ADE80',
+              shadowOffset: { width: 0, height: 0 },
+              shadowOpacity: 0.5,
+              shadowRadius: 24,
+              elevation: 12,
+            }}
+            animate
+            delay={0}
+          >
+            <CheckCircle size={64} color="#4ADE80" />
+          </GlassCard>
 
-        <Text
-          style={{
-            fontSize: 32,
-            fontWeight: 'bold',
-            color: 'white',
-            textAlign: 'center',
-            marginBottom: 16,
-          }}
-        >
-          Welcome to Agro Trade!
-        </Text>
-
-        <Text
-          style={{
-            fontSize: 18,
-            color: '#9CA3AF',
-            textAlign: 'center',
-            marginBottom: 40,
-            lineHeight: 28,
-            maxWidth: 400,
-          }}
-        >
-          {getRoleSpecificMessage()}
-        </Text>
-
-        <TouchableOpacity
-          onPress={handleContinue}
-          style={{
-            backgroundColor: '#3B82F6',
-            paddingHorizontal: 48,
-            paddingVertical: 16,
-            borderRadius: 12,
-            shadowColor: '#3B82F6',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 8,
-          }}
-        >
+          {/* Title */}
           <Text
             style={{
-              color: 'white',
-              fontSize: 18,
-              fontWeight: '600',
+              fontSize: 32,
+              fontWeight: 'bold',
+              color: '#FFFFFF',
+              textAlign: 'center',
+              marginBottom: 12,
             }}
           >
-            Go to Dashboard
+            {"You're all set!"}
           </Text>
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
+
+          {/* Subtitle */}
+          <Text
+            style={{
+              fontSize: 16,
+              color: 'rgba(255,255,255,0.65)',
+              textAlign: 'center',
+              marginBottom: 24,
+              lineHeight: 24,
+              maxWidth: 320,
+            }}
+          >
+            {getRoleSpecificMessage()}
+          </Text>
+
+          {/* Role badge */}
+          <GlassBadge
+            label={getRoleLabel()}
+            variant="success"
+            size="md"
+            style={{ marginBottom: 40 }}
+          />
+
+          {/* Enter Dashboard button */}
+          <View style={{ width: '100%', maxWidth: 400 }}>
+            <GlassButton
+              label="Enter Dashboard"
+              onPress={handleContinue}
+              variant="primary"
+              size="lg"
+              fullWidth
+            />
+          </View>
+        </View>
+      </SafeAreaView>
+    </GradientBackground>
   );
 };

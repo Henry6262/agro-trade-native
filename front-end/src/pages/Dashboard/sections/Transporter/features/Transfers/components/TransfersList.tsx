@@ -11,7 +11,7 @@ interface TransfersListProps {
 export const TransfersList: React.FC<TransfersListProps> = ({ jobs, onViewRoute }) => {
   if (!jobs.length) {
     return (
-      <View className="bg-gray-900/50 border border-gray-800 rounded-lg p-6 items-center">
+      <View className="bg-gray-50/50 border border-gray-200 rounded-lg p-6 items-center">
         <Text className="text-gray-400 text-center">No transfers found</Text>
         <Text className="text-gray-500 text-center text-sm mt-2">
           New jobs will appear here as they are assigned.

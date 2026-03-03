@@ -4,10 +4,11 @@ import {
   RefreshControl,
   ScrollView,
   Text,
-  TouchableOpacity,
   View,
+  StyleSheet,
 } from 'react-native';
 import { Plus } from 'lucide-react-native';
+import { GlassButton, COLORS } from '../../../../../../design-system';
 import { useProductStore } from '@stores/product.store';
 import { BuyerRequestCreationFlow } from '@pages/Dashboard/sections/Buyer/features/RequestCreation/BuyerRequestCreationFlow';
 import { UnifiedOffersDrawer } from '@shared/components/UnifiedOffersDrawer';
@@ -38,9 +39,9 @@ export default function BuyerRequestsTab() {
 
   if (isLoading && !isRefreshing) {
     return (
-      <View className="flex-1 bg-black items-center justify-center">
-        <ActivityIndicator size="large" color="#60A5FA" />
-        <Text className="text-gray-400 mt-4">Loading buyer requests...</Text>
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={COLORS.info} />
+        <Text style={styles.loadingText}>Loading buyer requests...</Text>
       </View>
     );
   }
@@ -48,31 +49,31 @@ export default function BuyerRequestsTab() {
   return (
     <>
       <ScrollView
-        className="flex-1 bg-black"
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
         refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={refresh} tintColor="#60A5FA" />
+          <RefreshControl refreshing={isRefreshing} onRefresh={refresh} tintColor={COLORS.info} />
         }
       >
-        <View className="p-6 space-y-6">
-          <View className="flex-row items-center justify-between">
-            <View>
-              <Text className="text-2xl font-bold text-white">Buyer Requests</Text>
-              <Text className="text-neutral-400">
+        <View style={styles.content}>
+          <View style={styles.headerRow}>
+            <View style={styles.headerText}>
+              <Text style={styles.pageTitle}>Buyer Requests</Text>
+              <Text style={styles.pageSubtitle}>
                 Submit purchase needs and review incoming offers
               </Text>
             </View>
-            <TouchableOpacity
+            <GlassButton
+              label="New Request"
               onPress={openRequestCreation}
-              className="bg-blue-600 px-4 py-2 rounded-lg flex-row items-center"
-            >
-              <Plus size={16} color="#ffffff" />
-              <Text className="text-white font-semibold ml-2">New Request</Text>
-            </TouchableOpacity>
+              variant="primary"
+              size="sm"
+              leftIcon={<Plus size={14} color="#ffffff" />}
+            />
           </View>
 
-          {error && <Text className="text-red-400 text-sm">{error}</Text>}
+          {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
           <RequestsList requests={requests} onOpenOffers={openOffersDrawer} />
         </View>
@@ -97,3 +98,49 @@ export default function BuyerRequestsTab() {
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  centered: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  content: {
+    gap: 16,
+    padding: 16,
+  },
+  errorText: {
+    color: COLORS.danger,
+    fontSize: 13,
+  },
+  headerRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  headerText: {
+    flex: 1,
+    marginRight: 12,
+  },
+  loadingText: {
+    color: COLORS.textSecondary,
+    fontSize: 15,
+    marginTop: 12,
+  },
+  pageSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    marginTop: 2,
+  },
+  pageTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  scroll: {
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
+});

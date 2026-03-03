@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  StyleSheet,
 } from 'react-native';
 import {
   Truck,
@@ -19,9 +20,7 @@ import {
   Calendar,
   Navigation,
 } from 'lucide-react-native';
-import { Button } from '@shared/components/Button';
-import { Badge } from '@shared/components/Badge';
-import { MetricCard } from '../../components/MetricCard';
+import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
 import { TransferStageIndicator } from '../../components/TransferStageIndicator';
 import { MapDrawer } from '../maps/components/MapDrawer';
 import { MapOffer } from '../maps/types';
@@ -62,6 +61,15 @@ const stageDefinitions = [
   { name: 'In Transit', description: 'Cargo picked up, en route to delivery', icon: Route },
   { name: 'Completed', description: 'Delivery confirmed', icon: CheckCircle },
 ];
+
+type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'muted' | 'gold';
+
+const STATUS_VARIANT: Record<string, BadgeVariant> = {
+  ASSIGNED: 'info',
+  STARTED: 'warning',
+  IN_TRANSIT: 'gold',
+  COMPLETED: 'success',
+};
 
 export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = ({
   id,
@@ -121,7 +129,6 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
   };
 
   const activeJobs = useMemo(() => jobs.filter((job) => job.status !== 'COMPLETED'), [jobs]);
-
   const completedJobs = useMemo(() => jobs.filter((job) => job.status === 'COMPLETED'), [jobs]);
 
   const totalEarnings = useMemo(() => {
@@ -183,9 +190,9 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
 
   if (loading && !refreshing) {
     return (
-      <View className="flex-1 bg-black justify-center items-center">
-        <ActivityIndicator size="large" color="#34D399" />
-        <Text className="text-gray-400 mt-4">Loading transfers...</Text>
+      <View style={styles.loadingFull}>
+        <ActivityIndicator size="large" color="#4ADE80" />
+        <Text style={styles.loadingText}>Loading transfers...</Text>
       </View>
     );
   }
@@ -193,162 +200,135 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
   return (
     <>
       <ScrollView
-        className="flex-1 bg-black"
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
         testID={testID}
         accessibilityLabel={accessibilityLabel}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4ADE80" />
+        }
       >
-        <View className="p-4 space-y-4">
-          {/* Stats */}
-          <View className="flex-row flex-wrap -mx-1">
-            <View className="w-1/2 px-1 mb-2">
-              <MetricCard
-                title="TOTAL EARNED"
-                value={totalEarnings}
-                icon={DollarSign}
-                gradient="from-green-500/10 to-green-600/5"
-                borderColor="border-green-500/20"
-                iconColor="#34D399"
-                valueColor="text-green-400"
-              />
-            </View>
-            <View className="w-1/2 px-1 mb-2">
-              <MetricCard
-                title="ACTIVE"
-                value={activeJobs.length.toString()}
-                icon={Truck}
-                gradient="from-blue-500/10 to-blue-600/5"
-                borderColor="border-blue-500/20"
-                iconColor="#60A5FA"
-                valueColor="text-blue-400"
-              />
-            </View>
-            <View className="w-1/2 px-1 mb-2">
-              <MetricCard
-                title="COMPLETED"
-                value={completedJobs.length.toString()}
-                icon={CheckCircle}
-                gradient="from-purple-500/10 to-purple-600/5"
-                borderColor="border-purple-500/20"
-                iconColor="#A78BFA"
-                valueColor="text-purple-400"
-              />
-            </View>
-            <View className="w-1/2 px-1 mb-2">
-              <MetricCard
-                title="ON-TIME RATE"
-                value={performance ? `${Math.round(performance.onTimeDeliveryRate ?? 0)}%` : '--'}
-                icon={Clock}
-                gradient="from-yellow-500/10 to-yellow-600/5"
-                borderColor="border-yellow-500/20"
-                iconColor="#FCD34D"
-                valueColor="text-yellow-400"
-              />
-            </View>
+        <View style={styles.content}>
+          {/* Stats Grid */}
+          <View style={styles.statsGrid}>
+            <GlassCard tier="subtle" style={styles.statCard}>
+              <DollarSign size={16} color="#4ADE80" />
+              <Text style={[styles.statValue, { color: '#4ADE80', fontSize: 14 }]}>
+                {totalEarnings}
+              </Text>
+              <Text style={styles.statLabel}>EARNED</Text>
+            </GlassCard>
+            <GlassCard tier="subtle" style={styles.statCard}>
+              <Truck size={16} color="#60A5FA" />
+              <Text style={[styles.statValue, { color: '#60A5FA' }]}>{activeJobs.length}</Text>
+              <Text style={styles.statLabel}>ACTIVE</Text>
+            </GlassCard>
+            <GlassCard tier="subtle" style={styles.statCard}>
+              <CheckCircle size={16} color="#A78BFA" />
+              <Text style={[styles.statValue, { color: '#A78BFA' }]}>{completedJobs.length}</Text>
+              <Text style={styles.statLabel}>DONE</Text>
+            </GlassCard>
+            <GlassCard tier="subtle" style={styles.statCard}>
+              <Clock size={16} color="#FCD34D" />
+              <Text style={[styles.statValue, { color: '#FCD34D' }]}>
+                {performance ? `${Math.round(performance.onTimeDeliveryRate ?? 0)}%` : '--'}
+              </Text>
+              <Text style={styles.statLabel}>ON-TIME</Text>
+            </GlassCard>
           </View>
 
-          {/* Transfers */}
-          <View className="mt-4">
-            <View className="flex-row items-center mb-3">
-              <Truck size={20} color="#34D399" />
-              <Text className="text-lg font-semibold text-green-400 ml-2">MY ACTIVE TRANSFERS</Text>
-            </View>
+          {/* Transfers Section */}
+          <View style={styles.sectionHeader}>
+            <Truck size={18} color="#4ADE80" />
+            <Text style={styles.sectionTitle}>MY ACTIVE TRANSFERS</Text>
+          </View>
 
-            {jobs.length === 0 ? (
-              <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
-                <Truck
-                  size={48}
-                  color="#6B7280"
-                  style={{ alignSelf: 'center', marginBottom: 12 }}
-                />
-                <Text className="text-gray-400 text-center">No transport jobs yet</Text>
-                <Text className="text-gray-500 text-center text-sm mt-2">
-                  Submit bids to secure your first transport assignment.
-                </Text>
-              </View>
-            ) : (
-              jobs.map((job) => {
-                const pickupPoint = job.transportRequest?.pickupPoints?.[0];
-                const deliveryPoint = job.transportRequest?.deliveryPoint;
-                const pickupLabel = toLocationLabel(pickupPoint);
-                const deliveryLabel = toLocationLabel(deliveryPoint);
-                const product =
-                  job.transportRequest?.tradeOperation?.buyListing?.product?.name ||
-                  'Transport Job';
-                const quantity = job.transportRequest?.totalWeight
-                  ? `${job.transportRequest.totalWeight} tons`
-                  : '—';
-                const stageIndex = stageIndexFromStatus(job.status);
+          {jobs.length === 0 ? (
+            <GlassCard tier="subtle" style={styles.emptyCard}>
+              <Truck size={44} color="rgba(255,255,255,0.25)" style={styles.emptyIcon} />
+              <Text style={styles.emptyTitle}>No transport jobs yet</Text>
+              <Text style={styles.emptySubtitle}>
+                Submit bids to secure your first transport assignment.
+              </Text>
+            </GlassCard>
+          ) : (
+            jobs.map((job) => {
+              const pickupPoint = job.transportRequest?.pickupPoints?.[0];
+              const deliveryPoint = job.transportRequest?.deliveryPoint;
+              const pickupLabel = toLocationLabel(pickupPoint);
+              const deliveryLabel = toLocationLabel(deliveryPoint);
+              const product =
+                job.transportRequest?.tradeOperation?.buyListing?.product?.name || 'Transport Job';
+              const quantity = job.transportRequest?.totalWeight
+                ? `${job.transportRequest.totalWeight} tons`
+                : '—';
+              const stageIndex = stageIndexFromStatus(job.status);
+              const statusVariant: BadgeVariant =
+                STATUS_VARIANT[(job.status || '').toUpperCase()] ?? 'muted';
 
-                return (
-                  <View key={job.id} className="border border-neutral-700 rounded-lg p-4 mb-3">
-                    <View className="flex-row justify-between items-start mb-4">
-                      <View>
-                        <Text className="text-lg font-semibold text-white">{product}</Text>
-                        <View className="flex-row items-center mt-2">
-                          <View className="flex-row items-center mr-4">
-                            <Weight size={16} color="#9CA3AF" />
-                            <Text className="text-neutral-400 ml-1">{quantity}</Text>
-                          </View>
-                          <View className="flex-row items-center mr-4">
-                            <Route size={16} color="#9CA3AF" />
-                            <Text className="text-neutral-400 ml-1">
-                              {job.transportRequest?.estimatedDistance
-                                ? `${Math.round(job.transportRequest.estimatedDistance)} km`
-                                : '—'}
-                            </Text>
-                          </View>
-                          <View className="flex-row items-center">
-                            <Text className="text-neutral-500">ETA:</Text>
-                            <Text className="text-green-400 font-medium ml-1">
-                              {job.estimatedArrival
-                                ? format(new Date(job.estimatedArrival), 'MMM dd, HH:mm')
-                                : 'TBD'}
-                            </Text>
-                          </View>
-                        </View>
-                      </View>
-                      <Badge className="bg-blue-500/20 border border-blue-500/40">
-                        <Text className="text-xs text-blue-300">
-                          {job.status?.replace('_', ' ') || 'ASSIGNED'}
+              return (
+                <GlassCard key={job.id} tier="subtle" style={styles.transferCard}>
+                  {/* Header */}
+                  <View style={styles.transferHeader}>
+                    <View style={styles.transferTitleWrap}>
+                      <Text style={styles.transferTitle}>{product}</Text>
+                      <View style={styles.transferMeta}>
+                        <Weight size={13} color="rgba(255,255,255,0.4)" />
+                        <Text style={styles.transferMetaText}>{quantity}</Text>
+                        <Route size={13} color="rgba(255,255,255,0.4)" />
+                        <Text style={styles.transferMetaText}>
+                          {job.transportRequest?.estimatedDistance
+                            ? `${Math.round(job.transportRequest.estimatedDistance)} km`
+                            : '—'}
                         </Text>
-                      </Badge>
+                        <Text style={styles.transferMetaText}>ETA:</Text>
+                        <Text style={styles.etaText}>
+                          {job.estimatedArrival
+                            ? format(new Date(job.estimatedArrival), 'MMM dd, HH:mm')
+                            : 'TBD'}
+                        </Text>
+                      </View>
                     </View>
-
-                    <View className="flex-row items-center mb-3">
-                      <MapPin size={16} color="#60A5FA" />
-                      <Text className="text-white font-semibold ml-2 flex-1" numberOfLines={1}>
-                        {pickupLabel}
-                      </Text>
-                      <Text className="text-neutral-500 mx-2">→</Text>
-                      <MapPin size={16} color="#FCD34D" />
-                      <Text className="text-white font-semibold ml-2 flex-1" numberOfLines={1}>
-                        {deliveryLabel}
-                      </Text>
-                    </View>
-
-                    <TransferStageIndicator currentStage={stageIndex} stages={stageDefinitions} />
-
-                    <View className="flex-row mt-4 space-x-2">
-                      <TouchableOpacity className="flex-1" onPress={() => handleViewRoute(job)}>
-                        <View className="border border-blue-500/40 rounded-lg py-2 items-center justify-center">
-                          <Navigation size={16} color="#60A5FA" />
-                          <Text className="text-blue-400 text-sm mt-1">VIEW ROUTE</Text>
-                        </View>
-                      </TouchableOpacity>
-                      <TouchableOpacity className="flex-1" disabled>
-                        <View className="border border-neutral-700 rounded-lg py-2 items-center justify-center">
-                          <Calendar size={16} color="#9CA3AF" />
-                          <Text className="text-neutral-400 text-sm mt-1">SCHEDULE</Text>
-                        </View>
-                      </TouchableOpacity>
-                    </View>
+                    <GlassBadge
+                      label={job.status?.replace('_', ' ') || 'ASSIGNED'}
+                      variant={statusVariant}
+                    />
                   </View>
-                );
-              })
-            )}
-          </View>
+
+                  {/* Separator */}
+                  <View style={styles.separator} />
+
+                  {/* Route Row */}
+                  <View style={styles.routeRow}>
+                    <MapPin size={14} color="#60A5FA" />
+                    <Text style={styles.routeLabel} numberOfLines={1}>
+                      {pickupLabel}
+                    </Text>
+                    <Text style={styles.routeArrow}>→</Text>
+                    <MapPin size={14} color="#FCD34D" />
+                    <Text style={[styles.routeLabel, { flex: 1 }]} numberOfLines={1}>
+                      {deliveryLabel}
+                    </Text>
+                  </View>
+
+                  {/* Stage Indicator */}
+                  <TransferStageIndicator currentStage={stageIndex} stages={stageDefinitions} />
+
+                  {/* Actions */}
+                  <View style={styles.actionsRow}>
+                    <TouchableOpacity style={styles.actionBtn} onPress={() => handleViewRoute(job)}>
+                      <Navigation size={15} color="#60A5FA" />
+                      <Text style={styles.actionBtnText}>VIEW ROUTE</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.actionBtn, styles.actionBtnDisabled]} disabled>
+                      <Calendar size={15} color="rgba(255,255,255,0.3)" />
+                      <Text style={styles.actionBtnTextMuted}>SCHEDULE</Text>
+                    </TouchableOpacity>
+                  </View>
+                </GlassCard>
+              );
+            })
+          )}
         </View>
       </ScrollView>
 
@@ -363,3 +343,158 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  actionBtn: {
+    alignItems: 'center',
+    borderColor: 'rgba(96,165,250,0.3)',
+    borderRadius: 10,
+    borderWidth: 1,
+    flex: 1,
+    gap: 4,
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
+  actionBtnDisabled: {
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  actionBtnText: {
+    color: '#60A5FA',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  actionBtnTextMuted: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 4,
+  },
+  content: {
+    gap: 14,
+    padding: 16,
+  },
+  emptyCard: {
+    alignItems: 'center',
+    paddingVertical: 32,
+  },
+  emptyIcon: {
+    marginBottom: 12,
+  },
+  emptySubtitle: {
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: 13,
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  emptyTitle: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  etaText: {
+    color: '#4ADE80',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  loadingFull: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    flex: 1,
+    gap: 12,
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+  },
+  routeArrow: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 13,
+    marginHorizontal: 2,
+  },
+  routeLabel: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  routeRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 6,
+  },
+  scroll: {
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+  },
+  sectionTitle: {
+    color: '#4ADE80',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  separator: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    height: 1,
+  },
+  statCard: {
+    alignItems: 'center',
+    flex: 1,
+    gap: 4,
+  },
+  statLabel: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  statValue: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  transferCard: {
+    gap: 12,
+  },
+  transferHeader: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'space-between',
+  },
+  transferMeta: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 5,
+  },
+  transferMetaText: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 11,
+  },
+  transferTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  transferTitleWrap: {
+    flex: 1,
+    gap: 5,
+  },
+});

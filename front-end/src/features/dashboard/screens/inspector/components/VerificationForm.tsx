@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Alert, StyleSheet } from 'react-native';
 import { Camera, FileText, CheckCircle, XCircle } from 'lucide-react-native';
+import { GlassCard, GlassInput, GlassButton } from '../../../../../design-system';
 import { VerificationFormProps, VerificationStatus } from '../types';
 
 export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmit, onCancel }) => {
@@ -28,7 +29,6 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
   };
 
   const handleAddPhoto = () => {
-    // Mock photo picker
     Alert.alert('Add Photo Evidence', 'Choose photo source', [
       { text: 'Camera', onPress: () => addMockPhoto('camera') },
       { text: 'Gallery', onPress: () => addMockPhoto('gallery') },
@@ -49,7 +49,6 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    // Check all specs have values
     specKeys.forEach((key) => {
       if (!verifiedSpecs[key]) {
         newErrors[key] = 'Required';
@@ -59,7 +58,6 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
       }
     });
 
-    // Check notes for failed verification
     if (verificationStatus === VerificationStatus.FAILED && !notes.trim()) {
       newErrors.notes = 'Notes are required for failed verification';
     }
@@ -76,11 +74,11 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
 
     const result = {
       jobId: job.id,
-      inspectorId: 'inspector-001', // Would come from auth
+      inspectorId: 'inspector-001',
       originalSpecs: job.productDetails.claimedSpecs,
       verifiedSpecs: Object.keys(verifiedSpecs).reduce(
         (acc, key) => {
-          acc[key] = `${verifiedSpecs[key]}%`; // Add unit
+          acc[key] = `${verifiedSpecs[key]}%`;
           return acc;
         },
         {} as Record<string, string>
@@ -95,7 +93,6 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
       notes: notes + (correctedSpecs.notes ? `\n\nCorrections: ${correctedSpecs.notes}` : ''),
       verificationStatus,
       verifiedAt: new Date(),
-      // Include product specification corrections if provided
       productSpecifications:
         Object.keys(correctedSpecs).length > 0
           ? {
@@ -109,233 +106,356 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
     onSubmit(result);
   };
 
+  const statusVerifiedActive = verificationStatus === VerificationStatus.VERIFIED;
+  const statusPartialActive = verificationStatus === VerificationStatus.PARTIALLY_VERIFIED;
+  const statusFailedActive = verificationStatus === VerificationStatus.FAILED;
+
   return (
-    <ScrollView className="bg-white rounded-lg">
-      <View className="p-4">
-        <Text className="text-lg font-semibold mb-4">Verification Form</Text>
+    <GlassCard tier="strong">
+      <Text style={styles.formTitle}>Verification Form</Text>
 
-        {/* Specifications */}
-        <View className="mb-4">
-          <Text className="text-sm font-semibold text-gray-700 mb-2">Verify Specifications</Text>
+      {/* Specifications */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Verify Specifications</Text>
 
-          {specKeys.map((key) => (
-            <View key={key} className="mb-4 bg-gray-50 p-3 rounded-lg">
-              <Text className="text-sm font-medium text-gray-700 mb-1">
-                {key.charAt(0).toUpperCase() + key.slice(1)}
-              </Text>
-              <Text className="text-xs text-gray-500 mb-2">
-                Claimed: {job.productDetails.claimedSpecs[key]}
-              </Text>
-
-              <TextInput
-                testID={`input-${key}`}
-                placeholder="Verified value"
-                value={verifiedSpecs[key] || ''}
-                onChangeText={(value) => handleSpecChange(key, value)}
-                className={`bg-white border ${errors[key] ? 'border-red-500' : 'border-gray-300'} rounded px-3 py-2 mb-2`}
-                keyboardType="numeric"
-              />
-              {errors[key] && <Text className="text-red-500 text-xs">{errors[key]}</Text>}
-
-              <TextInput
-                testID={`method-${key}`}
-                placeholder="Test method used"
-                value={testMethods[key] || ''}
-                onChangeText={(value) => handleMethodChange(key, value)}
-                className={`bg-white border ${errors[`method-${key}`] ? 'border-red-500' : 'border-gray-300'} rounded px-3 py-2`}
-              />
-              {errors[`method-${key}`] && (
-                <Text className="text-red-500 text-xs">{errors[`method-${key}`]}</Text>
-              )}
-            </View>
-          ))}
-        </View>
-
-        {/* Product Specification Corrections */}
-        <View className="mb-4">
-          <TouchableOpacity
-            onPress={() => setShowCorrections(!showCorrections)}
-            className="flex-row items-center justify-between bg-amber-50 p-3 rounded-lg"
-          >
-            <Text className="text-sm font-semibold text-amber-800">
-              Product Specification Corrections
+        {specKeys.map((key) => (
+          <GlassCard key={key} tier="subtle" style={styles.specCard}>
+            <Text style={styles.specKeyLabel}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
+            <Text style={styles.specClaimedText}>
+              Claimed: {job.productDetails.claimedSpecs[key]}
             </Text>
-            <Text className="text-amber-600">{showCorrections ? '▼' : '▶'}</Text>
-          </TouchableOpacity>
 
-          {showCorrections && (
-            <View className="mt-2 bg-amber-50 p-3 rounded-lg">
-              <Text className="text-xs text-amber-700 mb-2">
-                If seller-provided specifications are incorrect, enter corrected values:
-              </Text>
+            <GlassInput
+              testID={`input-${key}`}
+              placeholder="Verified value"
+              value={verifiedSpecs[key] || ''}
+              onChangeText={(value) => handleSpecChange(key, value)}
+              keyboardType="numeric"
+              error={errors[key]}
+              containerStyle={styles.inputContainer}
+            />
 
-              <TextInput
-                placeholder="Product variety (if different)"
-                value={correctedSpecs.variety || ''}
-                onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, variety: value }))}
-                className="bg-white border border-amber-300 rounded px-3 py-2 mb-2"
-              />
+            <GlassInput
+              testID={`method-${key}`}
+              placeholder="Test method used"
+              value={testMethods[key] || ''}
+              onChangeText={(value) => handleMethodChange(key, value)}
+              error={errors[`method-${key}`]}
+              containerStyle={styles.inputContainer}
+            />
+          </GlassCard>
+        ))}
+      </View>
 
-              <TextInput
-                placeholder="Grade (if different)"
-                value={correctedSpecs.grade || ''}
-                onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, grade: value }))}
-                className="bg-white border border-amber-300 rounded px-3 py-2 mb-2"
-              />
+      {/* Product Specification Corrections */}
+      <View style={styles.section}>
+        <TouchableOpacity
+          onPress={() => setShowCorrections(!showCorrections)}
+          style={styles.correctionsToggle}
+        >
+          <Text style={styles.correctionsLabel}>Product Specification Corrections</Text>
+          <Text style={styles.correctionsArrow}>{showCorrections ? '▼' : '▶'}</Text>
+        </TouchableOpacity>
 
-              <TextInput
-                placeholder="Origin (if different)"
-                value={correctedSpecs.origin || ''}
-                onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, origin: value }))}
-                className="bg-white border border-amber-300 rounded px-3 py-2 mb-2"
-              />
+        {showCorrections && (
+          <GlassCard tier="subtle" style={styles.correctionsCard}>
+            <Text style={styles.correctionsHint}>
+              If seller-provided specifications are incorrect, enter corrected values:
+            </Text>
 
-              <TextInput
-                placeholder="Additional corrections notes"
-                value={correctedSpecs.notes || ''}
-                onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, notes: value }))}
-                className="bg-white border border-amber-300 rounded px-3 py-2"
-                multiline
-                numberOfLines={2}
-              />
-            </View>
-          )}
-        </View>
+            <GlassInput
+              placeholder="Product variety (if different)"
+              value={correctedSpecs.variety || ''}
+              onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, variety: value }))}
+              containerStyle={styles.inputContainer}
+            />
+            <GlassInput
+              placeholder="Grade (if different)"
+              value={correctedSpecs.grade || ''}
+              onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, grade: value }))}
+              containerStyle={styles.inputContainer}
+            />
+            <GlassInput
+              placeholder="Origin (if different)"
+              value={correctedSpecs.origin || ''}
+              onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, origin: value }))}
+              containerStyle={styles.inputContainer}
+            />
+            <GlassInput
+              placeholder="Additional corrections notes"
+              value={correctedSpecs.notes || ''}
+              onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, notes: value }))}
+              multiline
+              numberOfLines={2}
+            />
+          </GlassCard>
+        )}
+      </View>
 
-        {/* Verification Status */}
-        <View className="mb-4">
-          <Text className="text-sm font-semibold text-gray-700 mb-2">Verification Status</Text>
-          <View className="flex-row">
-            <TouchableOpacity
-              testID="status-verified"
-              onPress={() => setVerificationStatus(VerificationStatus.VERIFIED)}
-              className={`flex-1 flex-row items-center justify-center py-2 rounded-l-lg border ${
-                verificationStatus === VerificationStatus.VERIFIED
-                  ? 'bg-green-100 border-green-600'
-                  : 'bg-white border-gray-300'
-              }`}
-            >
-              <CheckCircle
-                size={16}
-                color={verificationStatus === VerificationStatus.VERIFIED ? '#16a34a' : '#9ca3af'}
-              />
-              <Text
-                className={`ml-1 text-sm ${
-                  verificationStatus === VerificationStatus.VERIFIED
-                    ? 'text-green-700'
-                    : 'text-gray-600'
-                }`}
-              >
-                Verified
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              testID="status-partially-verified"
-              onPress={() => setVerificationStatus(VerificationStatus.PARTIALLY_VERIFIED)}
-              className={`flex-1 flex-row items-center justify-center py-2 border-t border-b ${
-                verificationStatus === VerificationStatus.PARTIALLY_VERIFIED
-                  ? 'bg-yellow-100 border-yellow-600'
-                  : 'bg-white border-gray-300'
-              }`}
-            >
-              <Text
-                className={`text-sm ${
-                  verificationStatus === VerificationStatus.PARTIALLY_VERIFIED
-                    ? 'text-yellow-700'
-                    : 'text-gray-600'
-                }`}
-              >
-                Partial
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              testID="status-failed"
-              onPress={() => setVerificationStatus(VerificationStatus.FAILED)}
-              className={`flex-1 flex-row items-center justify-center py-2 rounded-r-lg border ${
-                verificationStatus === VerificationStatus.FAILED
-                  ? 'bg-red-100 border-red-600'
-                  : 'bg-white border-gray-300'
-              }`}
-            >
-              <XCircle
-                size={16}
-                color={verificationStatus === VerificationStatus.FAILED ? '#dc2626' : '#9ca3af'}
-              />
-              <Text
-                className={`ml-1 text-sm ${
-                  verificationStatus === VerificationStatus.FAILED
-                    ? 'text-red-700'
-                    : 'text-gray-600'
-                }`}
-              >
-                Failed
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Evidence */}
-        <View className="mb-4">
-          <Text className="text-sm font-semibold text-gray-700 mb-2">Evidence</Text>
-
+      {/* Verification Status */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Verification Status</Text>
+        <View style={styles.statusRow}>
           <TouchableOpacity
-            testID="photo-picker"
-            onPress={handleAddPhoto}
-            className="bg-gray-100 border border-gray-300 border-dashed rounded-lg py-4 flex-row items-center justify-center"
+            testID="status-verified"
+            onPress={() => setVerificationStatus(VerificationStatus.VERIFIED)}
+            style={[
+              styles.statusBtn,
+              styles.statusBtnLeft,
+              statusVerifiedActive && styles.statusBtnActiveGreen,
+            ]}
           >
-            <Camera size={20} color="#6b7280" />
-            <Text className="ml-2 text-gray-600">Add Photo Evidence</Text>
-          </TouchableOpacity>
-
-          {evidence.length > 0 && (
-            <View className="mt-2">
-              {evidence.map((item, index) => (
-                <View key={index} className="flex-row items-center bg-gray-50 p-2 rounded mb-1">
-                  <FileText size={16} color="#6b7280" />
-                  <Text className="ml-2 text-sm text-gray-600 flex-1">{item.caption}</Text>
-                </View>
-              ))}
-            </View>
-          )}
-        </View>
-
-        {/* Notes */}
-        <View className="mb-4">
-          <Text className="text-sm font-semibold text-gray-700 mb-2">
-            Notes{' '}
-            {verificationStatus === VerificationStatus.FAILED && (
-              <Text className="text-red-500">*</Text>
-            )}
-          </Text>
-          <TextInput
-            testID="verification-notes"
-            placeholder="Add verification notes..."
-            value={notes}
-            onChangeText={setNotes}
-            multiline
-            numberOfLines={4}
-            className={`bg-white border ${errors.notes ? 'border-red-500' : 'border-gray-300'} rounded px-3 py-2`}
-            textAlignVertical="top"
-          />
-          {errors.notes && <Text className="text-red-500 text-xs mt-1">{errors.notes}</Text>}
-        </View>
-
-        {/* Actions */}
-        <View className="flex-row">
-          <TouchableOpacity onPress={onCancel} className="flex-1 bg-gray-200 py-3 rounded-lg mr-2">
-            <Text className="text-center text-gray-700 font-medium">Cancel</Text>
+            <CheckCircle
+              size={15}
+              color={statusVerifiedActive ? '#4ADE80' : 'rgba(255,255,255,0.35)'}
+            />
+            <Text style={[styles.statusBtnText, statusVerifiedActive && { color: '#4ADE80' }]}>
+              Verified
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={handleSubmit}
-            className="flex-1 bg-green-600 py-3 rounded-lg ml-2"
+            testID="status-partially-verified"
+            onPress={() => setVerificationStatus(VerificationStatus.PARTIALLY_VERIFIED)}
+            style={[
+              styles.statusBtn,
+              styles.statusBtnCenter,
+              statusPartialActive && styles.statusBtnActiveYellow,
+            ]}
           >
-            <Text className="text-center text-white font-medium">Submit Verification</Text>
+            <Text style={[styles.statusBtnText, statusPartialActive && { color: '#FCD34D' }]}>
+              Partial
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            testID="status-failed"
+            onPress={() => setVerificationStatus(VerificationStatus.FAILED)}
+            style={[
+              styles.statusBtn,
+              styles.statusBtnRight,
+              statusFailedActive && styles.statusBtnActiveRed,
+            ]}
+          >
+            <XCircle size={15} color={statusFailedActive ? '#F87171' : 'rgba(255,255,255,0.35)'} />
+            <Text style={[styles.statusBtnText, statusFailedActive && { color: '#F87171' }]}>
+              Failed
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
-    </ScrollView>
+
+      {/* Evidence */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Evidence</Text>
+
+        <TouchableOpacity
+          testID="photo-picker"
+          onPress={handleAddPhoto}
+          style={styles.photoPickerBtn}
+        >
+          <Camera size={20} color="rgba(255,255,255,0.5)" />
+          <Text style={styles.photoPickerText}>Add Photo Evidence</Text>
+        </TouchableOpacity>
+
+        {evidence.length > 0 && (
+          <View style={styles.evidenceList}>
+            {evidence.map((item, index) => (
+              <View key={index} style={styles.evidenceItem}>
+                <FileText size={15} color="rgba(255,255,255,0.45)" />
+                <Text style={styles.evidenceCaption}>{item.caption}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+      </View>
+
+      {/* Notes */}
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>
+          Notes{' '}
+          {verificationStatus === VerificationStatus.FAILED && (
+            <Text style={{ color: '#F87171' }}>*</Text>
+          )}
+        </Text>
+        <GlassInput
+          testID="verification-notes"
+          placeholder="Add verification notes..."
+          value={notes}
+          onChangeText={setNotes}
+          multiline
+          numberOfLines={4}
+          error={errors.notes}
+        />
+      </View>
+
+      {/* Actions */}
+      <View style={styles.actionsRow}>
+        <GlassButton
+          label="Cancel"
+          onPress={onCancel}
+          variant="secondary"
+          size="md"
+          style={styles.actionBtnHalf}
+        />
+        <GlassButton
+          label="Submit Verification"
+          onPress={handleSubmit}
+          variant="primary"
+          size="md"
+          style={styles.actionBtnHalf}
+        />
+      </View>
+    </GlassCard>
   );
 };
+
+const styles = StyleSheet.create({
+  actionBtnHalf: {
+    flex: 1,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  correctionsArrow: {
+    color: '#FCD34D',
+    fontSize: 12,
+  },
+  correctionsCard: {
+    gap: 8,
+  },
+  correctionsHint: {
+    color: 'rgba(252,211,77,0.7)',
+    fontSize: 11,
+    marginBottom: 8,
+  },
+  correctionsLabel: {
+    color: '#FCD34D',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  correctionsToggle: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(252,211,77,0.1)',
+    borderColor: 'rgba(252,211,77,0.2)',
+    borderRadius: 10,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  evidenceCaption: {
+    color: 'rgba(255,255,255,0.55)',
+    flex: 1,
+    fontSize: 13,
+  },
+  evidenceItem: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 8,
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  evidenceList: {
+    gap: 6,
+    marginTop: 8,
+  },
+  formTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  inputContainer: {
+    marginBottom: 8,
+  },
+  photoPickerBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 12,
+    borderStyle: 'dashed',
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    paddingVertical: 16,
+  },
+  photoPickerText: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 14,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionLabel: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 10,
+    textTransform: 'uppercase',
+  },
+  specCard: {
+    marginBottom: 12,
+  },
+  specClaimedText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 11,
+    marginBottom: 10,
+  },
+  specKeyLabel: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  statusBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderWidth: 1,
+    flex: 1,
+    flexDirection: 'row',
+    gap: 5,
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
+  statusBtnActiveGreen: {
+    backgroundColor: 'rgba(74,222,128,0.12)',
+    borderColor: 'rgba(74,222,128,0.35)',
+  },
+  statusBtnActiveRed: {
+    backgroundColor: 'rgba(248,113,113,0.12)',
+    borderColor: 'rgba(248,113,113,0.35)',
+  },
+  statusBtnActiveYellow: {
+    backgroundColor: 'rgba(252,211,77,0.12)',
+    borderColor: 'rgba(252,211,77,0.35)',
+  },
+  statusBtnCenter: {
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+  },
+  statusBtnLeft: {
+    borderBottomLeftRadius: 10,
+    borderTopLeftRadius: 10,
+  },
+  statusBtnRight: {
+    borderBottomRightRadius: 10,
+    borderTopRightRadius: 10,
+  },
+  statusBtnText: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  statusRow: {
+    flexDirection: 'row',
+  },
+});

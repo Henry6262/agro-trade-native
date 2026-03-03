@@ -55,14 +55,14 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
-        <View className="flex-1 bg-black/50">
-          <View className="bg-neutral-900 rounded-t-3xl mt-20" style={{ flex: 1 }}>
+        <View className="flex-1 bg-white/50">
+          <View className="bg-white rounded-t-3xl mt-20" style={{ flex: 1 }}>
             {/* Header */}
-            <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
+            <View className="flex-row justify-between items-center p-6 border-b border-gray-200">
               <TouchableOpacity onPress={onBack || onClose}>
                 <Text className="text-blue-400 font-semibold">Back</Text>
               </TouchableOpacity>
-              <Text className="text-xl font-bold text-white">Product Requirements</Text>
+              <Text className="text-xl font-bold text-gray-900">Product Requirements</Text>
               <TouchableOpacity onPress={handleSave} disabled={!isValid}>
                 <Text className={isValid ? 'text-blue-400 font-semibold' : 'text-gray-500'}>
                   Next
@@ -72,13 +72,13 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
 
             {/* Content */}
             <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
-              <Text className="text-lg text-white mb-1">{productName}</Text>
+              <Text className="text-lg text-gray-900 mb-1">{productName}</Text>
               <Text className="text-gray-400 mb-6">Specify your requirements</Text>
 
               {/* Quantity Input */}
               <View className="mb-6">
-                <Text className="text-white font-semibold mb-2">Quantity Required</Text>
-                <View className="bg-neutral-800 rounded-xl p-4 border border-neutral-700">
+                <Text className="text-gray-900 font-semibold mb-2">Quantity Required</Text>
+                <View className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <View className="flex-row items-center">
                     <TextInput
                       value={quantity}
@@ -86,7 +86,7 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
                       placeholder="0"
                       placeholderTextColor="#6B7280"
                       keyboardType="numeric"
-                      className="flex-1 text-white text-lg"
+                      className="flex-1 text-gray-900 text-lg"
                     />
                     <Text className="text-gray-400 ml-2">tons</Text>
                   </View>
@@ -95,8 +95,8 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
 
               {/* Price Input */}
               <View className="mb-6">
-                <Text className="text-white font-semibold mb-2">Maximum Price</Text>
-                <View className="bg-neutral-800 rounded-xl p-4 border border-neutral-700">
+                <Text className="text-gray-900 font-semibold mb-2">Maximum Price</Text>
+                <View className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <View className="flex-row items-center">
                     <Text className="text-gray-400 mr-2">€</Text>
                     <TextInput
@@ -105,7 +105,7 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
                       placeholder="0.00"
                       placeholderTextColor="#6B7280"
                       keyboardType="numeric"
-                      className="flex-1 text-white text-lg"
+                      className="flex-1 text-gray-900 text-lg"
                     />
                     <Text className="text-gray-400 ml-2">per kg</Text>
                   </View>
@@ -124,24 +124,26 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
 
               {/* Delivery Deadline */}
               <View className="mb-6">
-                <Text className="text-white font-semibold mb-2">Delivery Deadline (Optional)</Text>
-                <View className="bg-neutral-800 rounded-xl p-4 border border-neutral-700">
+                <Text className="text-gray-900 font-semibold mb-2">
+                  Delivery Deadline (Optional)
+                </Text>
+                <View className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <TextInput
                     value={deliveryDeadline}
                     onChangeText={setDeliveryDeadline}
                     placeholder="DD/MM/YYYY"
                     placeholderTextColor="#6B7280"
-                    className="text-white text-lg"
+                    className="text-gray-900 text-lg"
                   />
                 </View>
               </View>
 
               {/* Additional Notes */}
               <View className="mb-6">
-                <Text className="text-white font-semibold mb-2">
+                <Text className="text-gray-900 font-semibold mb-2">
                   Additional Requirements (Optional)
                 </Text>
-                <View className="bg-neutral-800 rounded-xl p-4 border border-neutral-700">
+                <View className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <TextInput
                     value={notes}
                     onChangeText={setNotes}
@@ -149,7 +151,7 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
                     placeholderTextColor="#6B7280"
                     multiline
                     numberOfLines={4}
-                    className="text-white"
+                    className="text-gray-900"
                     textAlignVertical="top"
                   />
                 </View>
@@ -157,7 +159,7 @@ export const BuyerSpecificationsDrawer: React.FC<BuyerSpecificationsDrawerProps>
             </ScrollView>
 
             {/* Footer Button */}
-            <View className="p-6 border-t border-neutral-700">
+            <View className="p-6 border-t border-gray-200">
               <TouchableOpacity
                 onPress={handleSave}
                 disabled={!isValid}

@@ -29,11 +29,11 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
   } = useTransporterOffers();
 
   return (
-    <View className="flex-1 bg-black">
+    <View className="flex-1 bg-white">
       {isLoading ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#60A5FA" />
-          <Text className="text-white mt-4">Loading transport requests...</Text>
+          <Text className="text-gray-900 mt-4">Loading transport requests...</Text>
         </View>
       ) : (
         <ScrollView
@@ -46,7 +46,7 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
             <TouchableOpacity
               onPress={refresh}
               disabled={isRefreshing}
-              className="flex-row items-center justify-center bg-gray-800/50 border border-gray-700 rounded-lg p-3"
+              className="flex-row items-center justify-center bg-white/50 border border-gray-200 rounded-lg p-3"
             >
               <RefreshCw size={18} color={isRefreshing ? '#6B7280' : '#60A5FA'} />
               <Text className={`ml-2 ${isRefreshing ? 'text-gray-500' : 'text-blue-400'}`}>

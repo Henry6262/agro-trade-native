@@ -50,24 +50,53 @@ export const getPhaseStage = (phase: string): number => {
   }
 };
 
-export const mapOperationToOrder = (operation: any): BuyerOrder => ({
-  id: operation.id,
-  operationNumber: operation.operationNumber,
-  product: operation.buyListing?.product?.name || 'Unknown Product',
-  quantity: operation.targetQuantity,
-  maxPricePerTon: operation.buyListing?.maxPricePerUnit || 0,
-  phase: operation.phase,
-  status: getPhaseStatus(operation.phase),
-  totalCost: operation.targetQuantity * (operation.buyListing?.maxPricePerUnit || 0),
-  currentStage: getPhaseStage(operation.phase),
-  qualityRequirements: operation.buyListing?.qualityRequirements || [],
-  securedQuantity: operation.securedQuantity ?? 0,
-  estimatedProfit: operation.estimatedProfit,
-  createdAt: operation.createdAt,
-  updatedAt: operation.updatedAt,
-});
+const PHASES_WITH_SELLERS = new Set([
+  'SELLER_MATCHING',
+  'SELLER_NEGOTIATION',
+  'INSPECTION_PENDING',
+  'TRANSPORT_MATCHING',
+  'TRANSPORT_BIDDING',
+  'IN_TRANSIT',
+  'DELIVERED',
+  'COMPLETED',
+]);
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const mapOperationToOrder = (operation: any): BuyerOrder => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawSellers: any[] = Array.isArray(operation.sellers) ? operation.sellers : [];
+  const sellers: BuyerOrder['sellers'] = PHASES_WITH_SELLERS.has(operation.phase)
+    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      rawSellers.map((s: any) => ({
+        id: s.id ?? s.sellerId ?? '',
+        sellerName: s.sellerName ?? s.seller?.name ?? s.seller?.email ?? 'Unknown Seller',
+        agreedPricePerUnit: s.agreedPricePerUnit ?? s.finalPrice ?? null,
+        quantity: s.quantity ?? null,
+        status: s.status ?? 'UNKNOWN',
+      }))
+    : [];
+
+  return {
+    id: operation.id,
+    operationNumber: operation.operationNumber,
+    product: operation.buyListing?.product?.name || 'Unknown Product',
+    quantity: operation.targetQuantity,
+    maxPricePerTon: operation.buyListing?.maxPricePerUnit || 0,
+    phase: operation.phase,
+    status: getPhaseStatus(operation.phase),
+    totalCost: operation.targetQuantity * (operation.buyListing?.maxPricePerUnit || 0),
+    currentStage: getPhaseStage(operation.phase),
+    qualityRequirements: operation.buyListing?.qualityRequirements || [],
+    securedQuantity: operation.securedQuantity ?? 0,
+    estimatedProfit: operation.estimatedProfit,
+    sellers,
+    createdAt: operation.createdAt,
+    updatedAt: operation.updatedAt,
+  };
+};
 
 export const deriveBuyerStatistics = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   operations: any[],
   backendStats?: BuyerStats
 ): BuyerStatistics => {

@@ -81,7 +81,7 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
     if (spec.type === 'select' && spec.options) {
       return (
         <View key={specKey} className="mb-6">
-          <Text className="text-white font-semibold mb-2">{spec.name || specKey}</Text>
+          <Text className="text-gray-900 font-semibold mb-2">{spec.name || specKey}</Text>
           {spec.description && (
             <Text className="text-gray-400 text-sm mb-2">{spec.description}</Text>
           )}
@@ -94,10 +94,10 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
                   className={`px-4 py-2 rounded-lg border ${
                     value === option
                       ? 'bg-blue-500/20 border-blue-500'
-                      : 'bg-neutral-800 border-neutral-700'
+                      : 'bg-gray-50 border-gray-200'
                   }`}
                 >
-                  <Text className={value === option ? 'text-blue-400' : 'text-gray-300'}>
+                  <Text className={value === option ? 'text-blue-400' : 'text-gray-600'}>
                     {option}
                   </Text>
                 </TouchableOpacity>
@@ -111,9 +111,9 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
     // Default text input
     return (
       <View key={specKey} className="mb-6">
-        <Text className="text-white font-semibold mb-2">{spec.name || specKey}</Text>
+        <Text className="text-gray-900 font-semibold mb-2">{spec.name || specKey}</Text>
         {spec.description && <Text className="text-gray-400 text-sm mb-2">{spec.description}</Text>}
-        <View className="bg-neutral-800 rounded-xl p-4 border border-neutral-700">
+        <View className="bg-gray-50 rounded-xl p-4 border border-gray-200">
           <View className="flex-row items-center">
             <TextInput
               value={value}
@@ -121,7 +121,7 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
               placeholder={spec.placeholder || `Enter ${spec.name || specKey}`}
               placeholderTextColor="#6B7280"
               keyboardType={spec.type === 'number' ? 'numeric' : 'default'}
-              className="flex-1 text-white text-lg"
+              className="flex-1 text-gray-900 text-lg"
             />
             {spec.unit && <Text className="text-gray-400 ml-2">{spec.unit}</Text>}
           </View>
@@ -136,15 +136,15 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
-        <View className="flex-1 bg-black/50">
-          <View className="bg-neutral-900 rounded-t-3xl mt-20" style={{ flex: 1 }}>
+        <View className="flex-1 bg-white/50">
+          <View className="bg-white rounded-t-3xl mt-20" style={{ flex: 1 }}>
             {/* Header */}
-            <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
+            <View className="flex-row justify-between items-center p-6 border-b border-gray-200">
               <TouchableOpacity onPress={onBack} className="flex-row items-center">
                 <ChevronLeft color="#60a5fa" size={20} />
                 <Text className="text-blue-400 font-semibold ml-1">Back</Text>
               </TouchableOpacity>
-              <Text className="text-xl font-bold text-white">Specifications</Text>
+              <Text className="text-xl font-bold text-gray-900">Specifications</Text>
               <TouchableOpacity onPress={handleNext}>
                 <Text className="text-blue-400 font-semibold">Next</Text>
               </TouchableOpacity>
@@ -158,7 +158,7 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
               </View>
             ) : (
               <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
-                <Text className="text-lg text-white mb-1">{productName}</Text>
+                <Text className="text-lg text-gray-900 mb-1">{productName}</Text>
                 <Text className="text-gray-400 mb-6">
                   Specify your quality requirements (optional)
                 </Text>
@@ -171,7 +171,7 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
                       <Text className="text-blue-400 font-semibold mb-1">Optional Step</Text>
                       <Text className="text-blue-300 text-sm">
                         These specifications help sellers match your exact requirements. You can
-                        skip this step if you don't have specific quality needs.
+                        skip this step if you don&apos;t have specific quality needs.
                       </Text>
                     </View>
                   </View>
@@ -181,7 +181,7 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
                 {productSpecs && productSpecs.length > 0 ? (
                   <View>{productSpecs.map((spec) => renderSpecInput(spec))}</View>
                 ) : (
-                  <View className="bg-neutral-800/50 rounded-xl p-6 items-center">
+                  <View className="bg-gray-50/50 rounded-xl p-6 items-center">
                     <Text className="text-gray-400 text-center">
                       No specific quality parameters available for this product.
                     </Text>
@@ -198,13 +198,13 @@ export const ProductSpecificationsDrawer: React.FC<ProductSpecificationsDrawerPr
 
             {/* Footer Buttons */}
             {!loading && productSpecs && productSpecs.length > 0 && (
-              <View className="p-6 border-t border-neutral-700">
+              <View className="p-6 border-t border-gray-200">
                 <View className="flex-row gap-3">
                   <TouchableOpacity
                     onPress={handleNext}
-                    className="flex-1 bg-neutral-700 rounded-xl py-4"
+                    className="flex-1 bg-gray-100 rounded-xl py-4"
                   >
-                    <Text className="text-white text-center font-semibold text-lg">Skip</Text>
+                    <Text className="text-gray-900 text-center font-semibold text-lg">Skip</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={handleNext}

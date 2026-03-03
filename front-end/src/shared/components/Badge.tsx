@@ -20,11 +20,11 @@ export const Badge: React.FC<BadgeProps> = ({
   const getVariantStyles = () => {
     switch (variant) {
       case 'secondary':
-        return 'bg-neutral-800';
+        return 'bg-gray-50';
       case 'destructive':
         return 'bg-red-600';
       case 'outline':
-        return 'border border-neutral-600';
+        return 'border border-gray-200';
       default:
         return 'bg-green-600';
     }
@@ -45,7 +45,7 @@ export const Badge: React.FC<BadgeProps> = ({
       return null;
     }
 
-    return <Text className="text-center font-semibold text-xs text-white">{textContent}</Text>;
+    return <Text className="text-center font-semibold text-xs text-gray-900">{textContent}</Text>;
   };
 
   return (

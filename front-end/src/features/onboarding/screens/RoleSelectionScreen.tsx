@@ -1,18 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StatusBar,
-  Alert,
-  Platform,
-  ToastAndroid,
-} from 'react-native';
+import { View, Text, ScrollView, Alert, Platform, ToastAndroid, SafeAreaView } from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../../navigation/types';
-import { LinearGradient } from 'expo-linear-gradient';
 import { LogIn } from 'lucide-react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useAuthStore } from '@stores/auth.store';
@@ -20,6 +10,7 @@ import { AnimatedRoleCard } from '../components/AnimatedRoleCard';
 import { AuthGuard } from '@shared/components/AuthGuard';
 import { useLoginWithOAuth, usePrivy, OAuthProviderType } from '@privy-io/expo';
 import { apiClient } from '@services/api';
+import { GradientBackground, GlassButton, GlassBadge } from '../../../design-system';
 
 type RoleSelectionScreenNavigationProp = NativeStackNavigationProp<
   OnboardingStackParamList,
@@ -29,11 +20,11 @@ type RoleSelectionScreenNavigationProp = NativeStackNavigationProp<
 export const RoleSelectionScreen: React.FC = () => {
   const navigation = useNavigation<RoleSelectionScreenNavigationProp>();
   const { setRole } = useOnboardingStore();
-  const { setTokens, setUser, isAuthenticated, user, login } = useAuthStore();
+  const { isAuthenticated, user, login } = useAuthStore();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'buyer' | 'seller' | 'transport' | null>(null);
 
-  // Privy hooks - Re-enabled with bundle ID configured
+  // Privy hooks
   const { getAccessToken } = usePrivy();
   const { login: loginWithOAuth, state: oauthState } = useLoginWithOAuth({});
 
@@ -61,19 +52,19 @@ export const RoleSelectionScreen: React.FC = () => {
     {
       id: 'buyer' as const,
       title: 'Buyer',
-      color: '#3B82F6',
+      color: '#60A5FA',
       gradient: ['#3B82F6', '#1E40AF'],
     },
     {
       id: 'seller' as const,
       title: 'Seller',
-      color: '#10B981',
+      color: '#4ADE80',
       gradient: ['#10B981', '#065F46'],
     },
     {
       id: 'transport' as const,
       title: 'Transporter',
-      color: '#8B5CF6',
+      color: '#A78BFA',
       gradient: ['#8B5CF6', '#5B21B6'],
     },
   ];
@@ -104,7 +95,8 @@ export const RoleSelectionScreen: React.FC = () => {
     try {
       if (Platform.OS === 'web') {
         // Web platform - use redirect OAuth
-        const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000/api';
+        const { getApiUrl } = await import('@shared/utils/environment');
+        const apiUrl = getApiUrl();
         window.location.href = `${apiUrl.replace('/api', '')}/api/auth/google`;
       } else {
         // Mobile platform - use Privy OAuth
@@ -156,147 +148,139 @@ export const RoleSelectionScreen: React.FC = () => {
 
   return (
     <AuthGuard requireAuth={false} redirectTo="Main">
-      <View style={{ flex: 1, backgroundColor: '#0F172A' }}>
-        <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
-        <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingTop: 60,
-            paddingHorizontal: 24,
-            paddingBottom: 24,
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={{ maxWidth: 600, width: '100%', alignSelf: 'center' }}>
-            {/* Header - Simplified with just logo */}
-            <View style={{ marginBottom: 48, alignItems: 'center' }}>
-              <LinearGradient
-                colors={['#3B82F6', '#10B981']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  paddingHorizontal: 32,
-                  paddingVertical: 16,
-                  borderRadius: 20,
-                }}
-              >
+      <GradientBackground>
+        <SafeAreaView style={{ flex: 1 }}>
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingTop: 48,
+              paddingHorizontal: 24,
+              paddingBottom: 32,
+            }}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={{ maxWidth: 600, width: '100%', alignSelf: 'center' }}>
+              {/* Header */}
+              <View style={{ marginBottom: 40, alignItems: 'center' }}>
+                <GlassBadge
+                  label="AgroTrade"
+                  variant="success"
+                  size="md"
+                  style={{ marginBottom: 20 }}
+                />
                 <Text
                   style={{
-                    fontSize: 42,
+                    fontSize: 28,
                     fontWeight: 'bold',
-                    color: 'white',
+                    color: '#FFFFFF',
+                    textAlign: 'center',
+                    marginBottom: 8,
+                  }}
+                >
+                  I am a...
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    color: 'rgba(255,255,255,0.65)',
                     textAlign: 'center',
                   }}
                 >
-                  AgroTrade
+                  Choose your role to get started
                 </Text>
-              </LinearGradient>
-            </View>
+              </View>
 
-            {/* Sign In Button for Existing Users - More prominent */}
-            <TouchableOpacity
-              onPress={handleExistingUserSignIn}
-              disabled={isPending}
-              style={{
-                marginBottom: 32,
-                opacity: isPending ? 0.7 : 1,
-              }}
-            >
-              <LinearGradient
-                colors={['#3B82F6', '#2563EB']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+              {/* Sign In Button for Existing Users */}
+              <GlassButton
+                label={isPending ? 'Signing in...' : 'Sign In'}
+                onPress={handleExistingUserSignIn}
+                variant="secondary"
+                fullWidth
+                loading={isPending}
+                disabled={isPending}
+                leftIcon={<LogIn size={20} color="rgba(255,255,255,0.65)" />}
+                style={{ marginBottom: 28 }}
+              />
+
+              {/* Divider */}
+              <View
                 style={{
-                  borderRadius: 16,
-                  padding: 18,
                   flexDirection: 'row',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  shadowColor: '#3B82F6',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: 5,
+                  marginBottom: 24,
                 }}
               >
-                <LogIn size={24} color="white" style={{ marginRight: 12 }} />
+                <View
+                  style={{
+                    flex: 1,
+                    height: 1,
+                    backgroundColor: 'rgba(255,255,255,0.12)',
+                  }}
+                />
                 <Text
                   style={{
-                    color: 'white',
-                    fontSize: 18,
-                    fontWeight: 'bold',
+                    color: 'rgba(255,255,255,0.35)',
+                    marginHorizontal: 16,
+                    fontSize: 12,
+                    fontWeight: '600',
+                    letterSpacing: 0.8,
                   }}
                 >
-                  {isPending ? 'Signing in...' : 'Sign In'}
+                  OR CREATE NEW ACCOUNT
                 </Text>
-              </LinearGradient>
-            </TouchableOpacity>
+                <View
+                  style={{
+                    flex: 1,
+                    height: 1,
+                    backgroundColor: 'rgba(255,255,255,0.12)',
+                  }}
+                />
+              </View>
 
-            {/* Divider */}
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 32,
-              }}
-            >
-              <View
-                style={{
-                  flex: 1,
-                  height: 1,
-                  backgroundColor: 'rgba(148, 163, 184, 0.2)',
-                }}
-              />
+              {/* Role Cards */}
+              <View style={{ gap: 0 }}>
+                {roleCards.map((card, index) => (
+                  <AnimatedRoleCard
+                    key={card.id}
+                    id={card.id}
+                    title={card.title}
+                    color={card.color}
+                    gradient={card.gradient}
+                    isSelected={selectedRole === card.id}
+                    onPress={() => handleRoleSelect(card.id)}
+                    delay={index * 100}
+                  />
+                ))}
+              </View>
+
+              {/* Continue Button */}
+              <View style={{ marginTop: 20 }}>
+                <GlassButton
+                  label="Continue"
+                  onPress={() => selectedRole && handleRoleSelect(selectedRole)}
+                  variant="primary"
+                  fullWidth
+                  disabled={!selectedRole}
+                  size="lg"
+                />
+              </View>
+
+              {/* Footer */}
               <Text
                 style={{
-                  color: '#94A3B8',
-                  marginHorizontal: 16,
-                  fontSize: 14,
-                  fontWeight: '500',
+                  color: 'rgba(255,255,255,0.35)',
+                  fontSize: 12,
+                  textAlign: 'center',
+                  marginTop: 24,
+                  lineHeight: 18,
                 }}
               >
-                OR CREATE NEW ACCOUNT
+                By continuing, you agree to our Terms of Service and Privacy Policy
               </Text>
-              <View
-                style={{
-                  flex: 1,
-                  height: 1,
-                  backgroundColor: 'rgba(148, 163, 184, 0.2)',
-                }}
-              />
             </View>
-
-            {/* Role Cards - Compact with Animated Icons */}
-            <View>
-              {roleCards.map((card, index) => (
-                <AnimatedRoleCard
-                  key={card.id}
-                  id={card.id}
-                  title={card.title}
-                  color={card.color}
-                  gradient={card.gradient}
-                  isSelected={selectedRole === card.id}
-                  onPress={() => handleRoleSelect(card.id)}
-                  delay={index * 100}
-                />
-              ))}
-            </View>
-
-            {/* Footer */}
-            <Text
-              style={{
-                color: '#64748B',
-                fontSize: 12,
-                textAlign: 'center',
-                marginTop: 32,
-                lineHeight: 18,
-              }}
-            >
-              By continuing, you agree to our Terms of Service and Privacy Policy
-            </Text>
-          </View>
-        </ScrollView>
-      </View>
+          </ScrollView>
+        </SafeAreaView>
+      </GradientBackground>
     </AuthGuard>
   );
 };

@@ -83,33 +83,33 @@ export const SellerAcceptOfferModal: React.FC<SellerAcceptOfferModalProps> = ({
           style={{
             transform: [{ scale: scaleAnim }],
           }}
-          className="bg-neutral-900 rounded-2xl w-full max-w-md border border-neutral-700"
+          className="bg-white rounded-2xl w-full max-w-md border border-gray-200"
         >
           {/* Header */}
-          <View className="p-6 border-b border-neutral-700">
+          <View className="p-6 border-b border-gray-200">
             <View className="flex-row justify-between items-center">
-              <Text className="text-xl font-bold text-white">Accept Offer</Text>
+              <Text className="text-xl font-bold text-gray-900">Accept Offer</Text>
               <TouchableOpacity onPress={handleClose}>
                 <X color="#9CA3AF" size={24} />
               </TouchableOpacity>
             </View>
-            <Text className="text-neutral-400 mt-1">Confirm this offer acceptance</Text>
+            <Text className="text-gray-500 mt-1">Confirm this offer acceptance</Text>
           </View>
 
           <ScrollView className="max-h-96" showsVerticalScrollIndicator={false}>
             <View className="p-6">
               {/* Buyer Info */}
-              <View className="bg-neutral-800 rounded-lg p-4 mb-4 border border-neutral-700">
+              <View className="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
                 <View className="flex-row items-center mb-3">
                   <User color="#60a5fa" size={20} />
-                  <Text className="text-white font-semibold text-lg ml-2 flex-1">
+                  <Text className="text-gray-900 font-semibold text-lg ml-2 flex-1">
                     {offer.buyer}
                   </Text>
                 </View>
 
                 <View className="flex-row items-center">
                   <MapPin size={14} color="#60a5fa" />
-                  <Text className="text-neutral-300 text-sm ml-2">
+                  <Text className="text-gray-600 text-sm ml-2">
                     {offer.buyerFlag} {offer.buyerLocation}
                   </Text>
                 </View>
@@ -122,24 +122,26 @@ export const SellerAcceptOfferModal: React.FC<SellerAcceptOfferModalProps> = ({
 
                   <View className="space-y-3">
                     <View className="flex-row justify-between items-center">
-                      <Text className="text-neutral-300">Product</Text>
-                      <Text className="text-white font-semibold">{offer.product}</Text>
+                      <Text className="text-gray-600">Product</Text>
+                      <Text className="text-gray-900 font-semibold">{offer.product}</Text>
                     </View>
 
                     <View className="flex-row justify-between items-center">
                       <View className="flex-row items-center">
                         <Package color="#10B981" size={16} />
-                        <Text className="text-neutral-300 ml-2">Quantity</Text>
+                        <Text className="text-gray-600 ml-2">Quantity</Text>
                       </View>
-                      <Text className="text-white font-semibold">{offer.quantity} tons</Text>
+                      <Text className="text-gray-900 font-semibold">{offer.quantity} tons</Text>
                     </View>
 
                     <View className="flex-row justify-between items-center">
                       <View className="flex-row items-center">
                         <DollarSign color="#10B981" size={16} />
-                        <Text className="text-neutral-300 ml-2">Price per ton</Text>
+                        <Text className="text-gray-600 ml-2">Price per ton</Text>
                       </View>
-                      <Text className="text-white font-semibold">${offer.offeredPricePerTon}</Text>
+                      <Text className="text-gray-900 font-semibold">
+                        ${offer.offeredPricePerTon}
+                      </Text>
                     </View>
 
                     <View className="border-t border-green-500/20 pt-3">
@@ -166,12 +168,12 @@ export const SellerAcceptOfferModal: React.FC<SellerAcceptOfferModalProps> = ({
 
               {/* Quality Requirements */}
               <View className="mb-4">
-                <Text className="text-neutral-400 text-sm mb-2">Quality Requirements:</Text>
+                <Text className="text-gray-500 text-sm mb-2">Quality Requirements:</Text>
                 <View className="flex-row flex-wrap gap-1">
                   {offer.qualityRequirements.map((req, index) => (
                     <View
                       key={index}
-                      className="bg-neutral-800 border border-orange-400/30 px-2 py-1 rounded"
+                      className="bg-gray-50 border border-orange-400/30 px-2 py-1 rounded"
                     >
                       <Text className="text-orange-300 text-xs">{req}</Text>
                     </View>
@@ -181,18 +183,18 @@ export const SellerAcceptOfferModal: React.FC<SellerAcceptOfferModalProps> = ({
 
               {/* Admin Note */}
               {offer.adminNote && (
-                <View className="bg-neutral-800/50 rounded-lg p-3 mb-4">
+                <View className="bg-gray-50/50 rounded-lg p-3 mb-4">
                   <View className="flex-row items-center mb-2">
                     <FileText color="#9CA3AF" size={16} />
-                    <Text className="text-neutral-400 text-sm ml-2">Note from buyer:</Text>
+                    <Text className="text-gray-500 text-sm ml-2">Note from buyer:</Text>
                   </View>
-                  <Text className="text-neutral-300 text-sm">{offer.adminNote}</Text>
+                  <Text className="text-gray-600 text-sm">{offer.adminNote}</Text>
                 </View>
               )}
 
               {/* Acceptance Note */}
               <View className="mb-4">
-                <Text className="text-neutral-400 text-sm mb-2">Optional note to buyer:</Text>
+                <Text className="text-gray-500 text-sm mb-2">Optional note to buyer:</Text>
                 <TextInput
                   value={acceptanceNote}
                   onChangeText={setAcceptanceNote}
@@ -200,7 +202,7 @@ export const SellerAcceptOfferModal: React.FC<SellerAcceptOfferModalProps> = ({
                   placeholderTextColor="#6B7280"
                   multiline
                   numberOfLines={3}
-                  className="bg-neutral-800 border border-neutral-700 rounded-lg p-3 text-white"
+                  className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-900"
                   textAlignVertical="top"
                 />
               </View>
@@ -220,14 +222,14 @@ export const SellerAcceptOfferModal: React.FC<SellerAcceptOfferModalProps> = ({
           </ScrollView>
 
           {/* Action Buttons */}
-          <View className="p-6 border-t border-neutral-700">
+          <View className="p-6 border-t border-gray-200">
             <View className="flex-row gap-3">
               <TouchableOpacity
                 onPress={handleClose}
-                className="flex-1 bg-neutral-700 rounded-lg py-3 items-center justify-center"
+                className="flex-1 bg-gray-100 rounded-lg py-3 items-center justify-center"
                 disabled={isLoading}
               >
-                <Text className="text-white font-semibold">Cancel</Text>
+                <Text className="text-gray-900 font-semibold">Cancel</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -248,7 +250,7 @@ export const SellerAcceptOfferModal: React.FC<SellerAcceptOfferModalProps> = ({
                   ) : (
                     <Check color="#FFFFFF" size={18} />
                   )}
-                  <Text className="text-white font-bold ml-2">
+                  <Text className="text-gray-900 font-bold ml-2">
                     {isLoading ? 'Accepting...' : 'Accept Offer'}
                   </Text>
                 </View>

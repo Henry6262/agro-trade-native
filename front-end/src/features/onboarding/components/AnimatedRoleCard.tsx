@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { ShoppingCart, Wheat, Truck } from 'lucide-react-native';
 import Animated, {
   useSharedValue,
@@ -28,7 +27,6 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   id,
   title,
   color,
-  gradient,
   isSelected = false,
   onPress,
   delay = 0,
@@ -81,31 +79,16 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   const animatedStyle = useAnimatedStyle(() => {
     const pressScale = interpolate(pressed.value, [0, 1], [1, 0.97]);
     const selectedScale = interpolate(selected.value, [0, 1], [1, 1.02]);
-    const selectedElevation = interpolate(selected.value, [0, 1], [3, 6]);
 
     return {
       transform: [{ scale: scale.value * pressScale * selectedScale }],
       opacity: opacity.value,
-      elevation: selectedElevation,
-      // Remove shadow properties for Android compatibility
-      // shadowOpacity, shadowRadius, and shadowOffset cause issues on Android
     };
   });
 
   const iconAnimatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ rotate: `${iconRotation.value}deg` }, { scale: iconScale.value }],
-    };
-  });
-
-  const borderStyle = useAnimatedStyle(() => {
-    const borderWidth = interpolate(selected.value, [0, 1], [0, 2]);
-    const borderOpacity = interpolate(selected.value, [0, 1], [0, 1]);
-
-    return {
-      borderWidth,
-      borderColor: color,
-      opacity: borderOpacity,
     };
   });
 
@@ -118,10 +101,8 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   };
 
   const getIcon = () => {
-    const iconProps = {
-      size: 32,
-      color: isSelected ? color : '#94A3B8',
-    };
+    const iconColor = isSelected ? color : 'rgba(255,255,255,0.5)';
+    const iconProps = { size: 32, color: iconColor };
 
     switch (id) {
       case 'buyer':
@@ -133,108 +114,113 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
     }
   };
 
+  const getRoleDescription = () => {
+    switch (id) {
+      case 'buyer':
+        return 'Browse and purchase quality agricultural products';
+      case 'seller':
+        return 'List your produce and connect with buyers';
+      case 'transport':
+        return 'Deliver goods and grow your logistics business';
+    }
+  };
+
+  // Glass card styles based on selection state
+  const cardBg = isSelected ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.08)';
+  const cardBorder = isSelected ? '#4ADE80' : 'rgba(255,255,255,0.15)';
+  const cardBorderWidth = isSelected ? 2 : 1;
+
+  // Icon circle
+  const iconBg = isSelected
+    ? `${color}26` // ~15% opacity hex
+    : 'rgba(255,255,255,0.06)';
+  const iconBorderColor = isSelected ? color : 'rgba(255,255,255,0.12)';
+
   return (
     <AnimatedPressable
-      style={[animatedStyle, { marginBottom: 16 }]}
+      style={[animatedStyle, { marginBottom: 12 }]}
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
-      <LinearGradient
-        colors={isSelected ? gradient as any : ['#1F2937', '#111827']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
+      <View
         style={{
+          backgroundColor: cardBg,
           borderRadius: 16,
-          padding: 2,
+          borderWidth: cardBorderWidth,
+          borderColor: cardBorder,
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: 16,
+          paddingHorizontal: 20,
+          minHeight: 90,
+          // Green glow when selected
+          ...(isSelected && {
+            shadowColor: '#4ADE80',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0.4,
+            shadowRadius: 12,
+            elevation: 6,
+          }),
         }}
       >
+        {/* Animated Icon */}
         <View
           style={{
-            backgroundColor: '#0F172A',
-            borderRadius: 14,
-            flexDirection: 'row',
+            width: 64,
+            height: 64,
+            marginRight: 20,
+            backgroundColor: iconBg,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: iconBorderColor,
             alignItems: 'center',
-            paddingVertical: 16,
-            paddingHorizontal: 20,
-            minHeight: 90,
+            justifyContent: 'center',
           }}
         >
-          {/* Animated Icon on the left */}
-          <View
+          <Animated.View style={iconAnimatedStyle}>{getIcon()}</Animated.View>
+        </View>
+
+        {/* Text content */}
+        <View style={{ flex: 1 }}>
+          <Text
             style={{
-              width: 64,
-              height: 64,
-              marginRight: 20,
-              backgroundColor: isSelected ? `${color}15` : 'rgba(255, 255, 255, 0.05)',
-              borderRadius: 12,
-              alignItems: 'center',
-              justifyContent: 'center',
+              color: '#FFFFFF',
+              fontSize: 20,
+              fontWeight: 'bold',
+              marginBottom: 4,
             }}
           >
-            <Animated.View style={iconAnimatedStyle}>{getIcon()}</Animated.View>
-          </View>
-
-          {/* Text content on the right */}
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{
-                color: isSelected ? color : '#94A3B8',
-                fontSize: 20,
-                fontWeight: 'bold',
-                marginBottom: 4,
-              }}
-            >
-              {title}
-            </Text>
-            <Text
-              style={{
-                color: '#64748B',
-                fontSize: 14,
-              }}
-            >
-              {id === 'buyer'
-                ? 'Purchase products'
-                : id === 'seller'
-                  ? 'List your products'
-                  : 'Transport goods'}
-            </Text>
-          </View>
-
-          {/* Selection indicator */}
-          {isSelected && (
-            <View
-              style={{
-                width: 24,
-                height: 24,
-                borderRadius: 12,
-                backgroundColor: color,
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginLeft: 12,
-              }}
-            >
-              <Text style={{ color: 'white', fontSize: 14, fontWeight: 'bold' }}>✓</Text>
-            </View>
-          )}
+            {title}
+          </Text>
+          <Text
+            style={{
+              color: 'rgba(255,255,255,0.65)',
+              fontSize: 13,
+              lineHeight: 18,
+            }}
+          >
+            {getRoleDescription()}
+          </Text>
         </View>
-      </LinearGradient>
 
-      {/* Selection border overlay */}
-      <Animated.View
-        style={[
-          borderStyle,
-          {
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            borderRadius: 16,
-            pointerEvents: 'none',
-          },
-        ]}
-      />
+        {/* Selection checkmark */}
+        {isSelected && (
+          <View
+            style={{
+              width: 24,
+              height: 24,
+              borderRadius: 12,
+              backgroundColor: '#4ADE80',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginLeft: 12,
+            }}
+          >
+            <Text style={{ color: '#052e16', fontSize: 14, fontWeight: 'bold' }}>✓</Text>
+          </View>
+        )}
+      </View>
     </AnimatedPressable>
   );
 };

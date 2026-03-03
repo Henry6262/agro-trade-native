@@ -5,7 +5,6 @@ import {
   Modal,
   TouchableOpacity,
   ScrollView,
-  TextInput,
   SafeAreaView,
   Platform,
   Animated,
@@ -21,22 +20,22 @@ import {
   Building2,
   MapPin,
   Phone,
-  Mail,
-  Globe,
-  Calendar,
+  Package,
+  ShoppingCart,
+  Truck,
   Edit2,
   Save,
   LogOut,
   Plus,
   Trash2,
-  ChevronRight,
-  Package,
-  ShoppingCart,
-  Truck,
 } from 'lucide-react-native';
 import { useAuthStore } from '@stores/auth.store';
 import { useNavigation } from '@react-navigation/native';
 import { authService } from '@services/authService';
+import { GlassCard } from '../../../design-system/GlassCard';
+import { GlassButton } from '../../../design-system/GlassButton';
+import { GlassInput } from '../../../design-system/GlassInput';
+import { COLORS } from '../../../design-system/tokens';
 
 interface ProfileDrawerProps {
   visible: boolean;
@@ -52,7 +51,7 @@ interface Base {
   capacity: string;
   addressType?: string;
   isDefault?: boolean;
-  isNew?: boolean; // Flag for locally-added bases not yet saved
+  isNew?: boolean;
 }
 
 export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
@@ -67,7 +66,6 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   const [showSuccess, setShowSuccess] = useState(showSuccessAnimation);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Animation values
   const slideAnim = new Animated.Value(Dimensions.get('window').width);
   const successOpacity = new Animated.Value(0);
   const successScale = new Animated.Value(0.3);
@@ -82,7 +80,6 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
         useNativeDriver: true,
       }).start();
 
-      // Show success animation if needed
       if (showSuccessAnimation && showSuccess) {
         setTimeout(() => {
           Animated.parallel([
@@ -104,10 +101,8 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
               useNativeDriver: true,
             }),
           ]).start(() => {
-            // Hide success animation after 2 seconds and redirect
             setTimeout(() => {
               setShowSuccess(false);
-              // Redirect based on user role
               if (user?.role) {
                 redirectToDashboard(user.role);
               }
@@ -141,7 +136,6 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     }
   };
 
-  // Form states
   const [personalInfo, setPersonalInfo] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -161,7 +155,6 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   const [bases, setBases] = useState<Base[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch company and bases data when drawer opens
   useEffect(() => {
     if (visible) {
       setIsLoading(true);
@@ -189,11 +182,8 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   }, [visible]);
 
   const handleLogout = async () => {
-    // Clear the auth session (now async)
     await logout();
     onClose();
-
-    // Navigate to the Onboarding stack and then to RoleSelection
     navigation.reset({
       index: 0,
       routes: [
@@ -227,18 +217,13 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   const handleSave = async () => {
     try {
       setIsSaving(true);
-
-      // Save personal info
       const updatedUser = await authService.updateProfile({
         name: personalInfo.name,
         email: personalInfo.email,
         phone: personalInfo.phone,
       });
-
-      // Update Zustand store with new user data
       setUser(updatedUser);
 
-      // Save company info
       if (companyInfo.companyName) {
         await authService.updateCompany({
           companyName: companyInfo.companyName,
@@ -247,7 +232,6 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
         });
       }
 
-      // Save new bases (ones added locally that don't exist on backend yet)
       for (const base of bases) {
         if (base.isNew) {
           await authService.createBase({
@@ -259,7 +243,6 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
         }
       }
 
-      // Refresh bases from server to get real IDs
       const basesRes = await authService.getBases().catch(() => ({ bases: [] }));
       setBases(basesRes.bases || []);
 
@@ -267,7 +250,8 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
       showToast('Profile updated successfully!');
     } catch (error: any) {
       console.error('Profile save error:', error);
-      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to save profile';
+      const errorMessage =
+        error?.response?.data?.message || error?.message || 'Failed to save profile';
       showError(errorMessage);
     } finally {
       setIsSaving(false);
@@ -293,7 +277,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
       try {
         await authService.deleteBase(id);
         showToast('Base removed');
-      } catch (error: any) {
+      } catch {
         showError('Failed to remove base');
         return;
       }
@@ -302,291 +286,265 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   };
 
   const renderPersonalTab = () => (
-    <View className="p-4">
-      <View className="mb-6">
-        <View className="w-24 h-24 bg-emerald-500 rounded-full items-center justify-center self-center mb-4">
-          <User size={48} color="white" />
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+      {/* Avatar */}
+      <View style={{ alignItems: 'center', marginBottom: 24 }}>
+        <View
+          style={{
+            width: 88,
+            height: 88,
+            borderRadius: 44,
+            backgroundColor: 'rgba(74,222,128,0.2)',
+            borderWidth: 2,
+            borderColor: '#4ADE80',
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: '#4ADE80',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0.5,
+            shadowRadius: 12,
+          }}
+        >
+          <User size={44} color="#4ADE80" />
         </View>
-
-        <View className="space-y-4">
-          <View>
-            <Text className="text-gray-500 text-sm mb-1">Full Name</Text>
-            {editMode ? (
-              <TextInput
-                value={personalInfo.name}
-                onChangeText={(text) => setPersonalInfo({ ...personalInfo, name: text })}
-                className="bg-gray-100 p-3 rounded-lg text-gray-900"
-              />
-            ) : (
-              <Text className="text-gray-900 text-lg">{personalInfo.name}</Text>
-            )}
-          </View>
-
-          <View>
-            <Text className="text-gray-500 text-sm mb-1">Email</Text>
-            {editMode ? (
-              <TextInput
-                value={personalInfo.email}
-                onChangeText={(text) => setPersonalInfo({ ...personalInfo, email: text })}
-                className="bg-gray-100 p-3 rounded-lg text-gray-900"
-                keyboardType="email-address"
-              />
-            ) : (
-              <Text className="text-gray-900 text-lg">{personalInfo.email}</Text>
-            )}
-          </View>
-
-          <View>
-            <Text className="text-gray-500 text-sm mb-1">Phone</Text>
-            {editMode ? (
-              <TextInput
-                value={personalInfo.phone}
-                onChangeText={(text) => setPersonalInfo({ ...personalInfo, phone: text })}
-                className="bg-gray-100 p-3 rounded-lg text-gray-900"
-                keyboardType="phone-pad"
-              />
-            ) : (
-              <Text className="text-gray-900 text-lg">{personalInfo.phone || 'Not provided'}</Text>
-            )}
-          </View>
-
-          <View>
-            <Text className="text-gray-500 text-sm mb-1">Account Type</Text>
-            <View className="flex-row items-center gap-2">
-              {(() => {
-                const roleIcons: Record<string, { icon: any; color: string; bg: string }> = {
-                  seller: { icon: Package, color: '#10b981', bg: '#dcfce7' },
-                  buyer: { icon: ShoppingCart, color: '#3b82f6', bg: '#dbeafe' },
-                  transporter: { icon: Truck, color: '#8b5cf6', bg: '#ede9fe' },
-                  admin: { icon: User, color: '#f59e0b', bg: '#fef3c7' },
-                  farmer: { icon: Package, color: '#10b981', bg: '#dcfce7' },
-                };
-                const roleConfig = roleIcons[personalInfo.role?.toLowerCase()] || roleIcons.buyer;
-                const RoleIcon = roleConfig.icon;
-
-                return (
-                  <View
-                    className="flex-row items-center gap-2 px-4 py-2 rounded-full"
-                    style={{ backgroundColor: roleConfig.bg }}
-                  >
-                    <RoleIcon size={18} color={roleConfig.color} />
-                    <Text className="font-semibold capitalize" style={{ color: roleConfig.color }}>
-                      {personalInfo.role || 'Unknown'}
-                    </Text>
-                  </View>
-                );
-              })()}
-            </View>
-          </View>
-        </View>
+        <Text style={{ color: COLORS.textPrimary, fontSize: 20, fontWeight: '700', marginTop: 12 }}>
+          {personalInfo.name || 'Your Name'}
+        </Text>
+        <Text style={{ color: COLORS.textSecondary, fontSize: 14, marginTop: 4 }}>
+          {personalInfo.email}
+        </Text>
       </View>
-    </View>
+
+      <GlassCard tier="medium" style={{ marginBottom: 12 }}>
+        <GlassInput
+          label="Full Name"
+          value={personalInfo.name}
+          onChangeText={(text) => setPersonalInfo({ ...personalInfo, name: text })}
+          placeholder="Enter full name"
+          editable={editMode}
+        />
+        <GlassInput
+          label="Email"
+          value={personalInfo.email}
+          onChangeText={(text) => setPersonalInfo({ ...personalInfo, email: text })}
+          placeholder="Enter email"
+          keyboardType="email-address"
+          editable={editMode}
+          containerStyle={{ marginBottom: 0 }}
+        />
+      </GlassCard>
+
+      <GlassCard tier="medium" style={{ marginBottom: 12 }}>
+        <GlassInput
+          label="Phone"
+          value={personalInfo.phone}
+          onChangeText={(text) => setPersonalInfo({ ...personalInfo, phone: text })}
+          placeholder="Enter phone number"
+          keyboardType="phone-pad"
+          editable={editMode}
+          containerStyle={{ marginBottom: 0 }}
+        />
+      </GlassCard>
+
+      {/* Role Badge */}
+      <GlassCard tier="subtle">
+        <Text
+          style={{
+            color: COLORS.textMuted,
+            fontSize: 11,
+            fontWeight: '700',
+            letterSpacing: 0.8,
+            marginBottom: 8,
+          }}
+        >
+          ACCOUNT TYPE
+        </Text>
+        {(() => {
+          const roleIcons: Record<string, { icon: any; color: string }> = {
+            seller: { icon: Package, color: '#4ADE80' },
+            buyer: { icon: ShoppingCart, color: '#60A5FA' },
+            transporter: { icon: Truck, color: '#A78BFA' },
+            admin: { icon: User, color: '#FCD34D' },
+            farmer: { icon: Package, color: '#4ADE80' },
+          };
+          const roleConfig = roleIcons[personalInfo.role?.toLowerCase()] || roleIcons.buyer;
+          const RoleIcon = roleConfig.icon;
+          return (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <RoleIcon size={18} color={roleConfig.color} />
+              <Text
+                style={{ color: roleConfig.color, fontWeight: '600', textTransform: 'capitalize' }}
+              >
+                {personalInfo.role || 'Unknown'}
+              </Text>
+            </View>
+          );
+        })()}
+      </GlassCard>
+    </ScrollView>
   );
 
   const renderCompanyTab = () => (
-    <ScrollView className="p-4">
-      <View className="space-y-4">
-        <View>
-          <Text className="text-gray-500 text-sm mb-1">Company Name</Text>
-          {editMode ? (
-            <TextInput
-              value={companyInfo.companyName}
-              onChangeText={(text) => setCompanyInfo({ ...companyInfo, companyName: text })}
-              className="bg-gray-100 p-3 rounded-lg text-gray-900"
-              placeholder="Enter company name"
-            />
-          ) : (
-            <Text className="text-gray-900 text-lg">
-              {companyInfo.companyName || 'Not provided'}
-            </Text>
-          )}
-        </View>
-
-        <View>
-          <Text className="text-gray-500 text-sm mb-1">VAT Number</Text>
-          {editMode ? (
-            <TextInput
-              value={companyInfo.vatNumber}
-              onChangeText={(text) => setCompanyInfo({ ...companyInfo, vatNumber: text })}
-              className="bg-gray-100 p-3 rounded-lg text-gray-900"
-              placeholder="Enter VAT number"
-            />
-          ) : (
-            <Text className="text-gray-900 text-lg">{companyInfo.vatNumber || 'Not provided'}</Text>
-          )}
-        </View>
-
-        <View>
-          <Text className="text-gray-500 text-sm mb-1">Business Type</Text>
-          {editMode ? (
-            <TextInput
-              value={companyInfo.businessType}
-              onChangeText={(text) => setCompanyInfo({ ...companyInfo, businessType: text })}
-              className="bg-gray-100 p-3 rounded-lg text-gray-900"
-              placeholder="e.g., Agriculture, Manufacturing"
-            />
-          ) : (
-            <Text className="text-gray-900 text-lg">
-              {companyInfo.businessType || 'Not provided'}
-            </Text>
-          )}
-        </View>
-
-        <View>
-          <Text className="text-gray-500 text-sm mb-1">Company Address</Text>
-          {editMode ? (
-            <TextInput
-              value={companyInfo.companyAddress}
-              onChangeText={(text) => setCompanyInfo({ ...companyInfo, companyAddress: text })}
-              className="bg-gray-100 p-3 rounded-lg text-gray-900"
-              placeholder="Enter company address"
-              multiline
-            />
-          ) : (
-            <Text className="text-gray-900 text-lg">
-              {companyInfo.companyAddress || 'Not provided'}
-            </Text>
-          )}
-        </View>
-
-        <View>
-          <Text className="text-gray-500 text-sm mb-1">Website</Text>
-          {editMode ? (
-            <TextInput
-              value={companyInfo.website}
-              onChangeText={(text) => setCompanyInfo({ ...companyInfo, website: text })}
-              className="bg-gray-100 p-3 rounded-lg text-gray-900"
-              placeholder="https://www.example.com"
-              keyboardType="url"
-            />
-          ) : (
-            <Text className="text-gray-900 text-lg">{companyInfo.website || 'Not provided'}</Text>
-          )}
-        </View>
-
-        <View>
-          <Text className="text-gray-500 text-sm mb-1">Established Year</Text>
-          {editMode ? (
-            <TextInput
-              value={companyInfo.establishedYear}
-              onChangeText={(text) => setCompanyInfo({ ...companyInfo, establishedYear: text })}
-              className="bg-gray-100 p-3 rounded-lg text-gray-900"
-              placeholder="e.g., 2020"
-              keyboardType="numeric"
-            />
-          ) : (
-            <Text className="text-gray-900 text-lg">
-              {companyInfo.establishedYear || 'Not provided'}
-            </Text>
-          )}
-        </View>
-      </View>
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+      <GlassCard tier="medium" style={{ marginBottom: 12 }}>
+        <GlassInput
+          label="Company Name"
+          value={companyInfo.companyName}
+          onChangeText={(text) => setCompanyInfo({ ...companyInfo, companyName: text })}
+          placeholder="Enter company name"
+          editable={editMode}
+        />
+        <GlassInput
+          label="VAT Number"
+          value={companyInfo.vatNumber}
+          onChangeText={(text) => setCompanyInfo({ ...companyInfo, vatNumber: text })}
+          placeholder="Enter VAT number"
+          editable={editMode}
+        />
+        <GlassInput
+          label="Business Type"
+          value={companyInfo.businessType}
+          onChangeText={(text) => setCompanyInfo({ ...companyInfo, businessType: text })}
+          placeholder="e.g., Agriculture, Manufacturing"
+          editable={editMode}
+        />
+        <GlassInput
+          label="Company Address"
+          value={companyInfo.companyAddress}
+          onChangeText={(text) => setCompanyInfo({ ...companyInfo, companyAddress: text })}
+          placeholder="Enter company address"
+          editable={editMode}
+          multiline
+        />
+        <GlassInput
+          label="Website"
+          value={companyInfo.website}
+          onChangeText={(text) => setCompanyInfo({ ...companyInfo, website: text })}
+          placeholder="https://www.example.com"
+          keyboardType="url"
+          editable={editMode}
+        />
+        <GlassInput
+          label="Established Year"
+          value={companyInfo.establishedYear}
+          onChangeText={(text) => setCompanyInfo({ ...companyInfo, establishedYear: text })}
+          placeholder="e.g., 2020"
+          keyboardType="numeric"
+          editable={editMode}
+          containerStyle={{ marginBottom: 0 }}
+        />
+      </GlassCard>
     </ScrollView>
   );
 
   const renderBasesTab = () => (
-    <ScrollView className="p-4">
-      <View className="space-y-4">
-        {bases.map((base, index) => (
-          <View key={base.id} className="bg-gray-50 p-4 rounded-xl border border-gray-200">
-            <View className="flex-row justify-between items-start mb-3">
-              <View className="flex-1">
-                {editMode ? (
-                  <TextInput
-                    value={base.name}
-                    onChangeText={(text) => {
-                      const updated = [...bases];
-                      updated[index] = { ...base, name: text };
-                      setBases(updated);
-                    }}
-                    className="bg-white p-2 rounded text-gray-900 font-semibold"
-                    placeholder="Base name"
-                  />
-                ) : (
-                  <Text className="text-gray-900 font-semibold text-lg">{base.name}</Text>
-                )}
-              </View>
-              {editMode && (
-                <TouchableOpacity onPress={() => removeBase(base.id)} className="ml-2 p-2">
-                  <Trash2 size={20} color="#ef4444" />
-                </TouchableOpacity>
-              )}
-            </View>
-
-            <View className="space-y-2">
-              <View className="flex-row items-center">
-                <MapPin size={16} color="#6b7280" />
-                {editMode ? (
-                  <TextInput
-                    value={base.location}
-                    onChangeText={(text) => {
-                      const updated = [...bases];
-                      updated[index] = { ...base, location: text };
-                      setBases(updated);
-                    }}
-                    className="flex-1 ml-2 bg-white p-2 rounded text-gray-700"
-                    placeholder="Location"
-                  />
-                ) : (
-                  <Text className="ml-2 text-gray-700">{base.location}</Text>
-                )}
-              </View>
-
-              <View className="flex-row items-center">
-                <Building2 size={16} color="#6b7280" />
-                {editMode ? (
-                  <TextInput
-                    value={base.type}
-                    onChangeText={(text) => {
-                      const updated = [...bases];
-                      updated[index] = { ...base, type: text as any };
-                      setBases(updated);
-                    }}
-                    className="flex-1 ml-2 bg-white p-2 rounded text-gray-700"
-                    placeholder="Type (warehouse/distribution/collection)"
-                  />
-                ) : (
-                  <Text className="ml-2 text-gray-700 capitalize">{base.type}</Text>
-                )}
-              </View>
-
-              <View className="flex-row items-center">
-                <Package size={16} color="#6b7280" />
-                {editMode ? (
-                  <TextInput
-                    value={base.capacity}
-                    onChangeText={(text) => {
-                      const updated = [...bases];
-                      updated[index] = { ...base, capacity: text };
-                      setBases(updated);
-                    }}
-                    className="flex-1 ml-2 bg-white p-2 rounded text-gray-700"
-                    placeholder="Capacity"
-                  />
-                ) : (
-                  <Text className="ml-2 text-gray-700">{base.capacity}</Text>
-                )}
-              </View>
-            </View>
-          </View>
-        ))}
-
-        {editMode && (
-          <TouchableOpacity
-            onPress={addBase}
-            className="bg-emerald-500 p-4 rounded-xl flex-row items-center justify-center"
+    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16 }}>
+      {bases.map((base, index) => (
+        <GlassCard key={base.id} tier="medium" style={{ marginBottom: 12 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 12,
+            }}
           >
-            <Plus size={20} color="white" />
-            <Text className="ml-2 text-white font-semibold">Add New Base</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+            <Text style={{ color: COLORS.textPrimary, fontWeight: '700', fontSize: 16 }}>
+              {base.name}
+            </Text>
+            {editMode && (
+              <TouchableOpacity onPress={() => removeBase(base.id)} style={{ padding: 4 }}>
+                <Trash2 size={18} color="#F87171" />
+              </TouchableOpacity>
+            )}
+          </View>
+          {editMode ? (
+            <>
+              <GlassInput
+                label="Base Name"
+                value={base.name}
+                onChangeText={(text) => {
+                  const updated = [...bases];
+                  updated[index] = { ...base, name: text };
+                  setBases(updated);
+                }}
+                placeholder="Base name"
+              />
+              <GlassInput
+                label="Location"
+                value={base.location}
+                onChangeText={(text) => {
+                  const updated = [...bases];
+                  updated[index] = { ...base, location: text };
+                  setBases(updated);
+                }}
+                placeholder="Location"
+                leftIcon={<MapPin size={16} color={COLORS.textMuted} />}
+              />
+              <GlassInput
+                label="Type"
+                value={base.type}
+                onChangeText={(text) => {
+                  const updated = [...bases];
+                  updated[index] = { ...base, type: text as any };
+                  setBases(updated);
+                }}
+                placeholder="warehouse/distribution/collection"
+                leftIcon={<Building2 size={16} color={COLORS.textMuted} />}
+              />
+              <GlassInput
+                label="Capacity"
+                value={base.capacity}
+                onChangeText={(text) => {
+                  const updated = [...bases];
+                  updated[index] = { ...base, capacity: text };
+                  setBases(updated);
+                }}
+                placeholder="Capacity"
+                containerStyle={{ marginBottom: 0 }}
+              />
+            </>
+          ) : (
+            <View style={{ gap: 8 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <MapPin size={14} color={COLORS.textMuted} />
+                <Text style={{ color: COLORS.textSecondary, marginLeft: 8, fontSize: 14 }}>
+                  {base.location || 'No location'}
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Building2 size={14} color={COLORS.textMuted} />
+                <Text
+                  style={{
+                    color: COLORS.textSecondary,
+                    marginLeft: 8,
+                    fontSize: 14,
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {base.type}
+                </Text>
+              </View>
+            </View>
+          )}
+        </GlassCard>
+      ))}
+
+      {editMode && (
+        <GlassButton
+          label="Add New Base"
+          onPress={addBase}
+          variant="ghost"
+          fullWidth
+          leftIcon={<Plus size={16} color={COLORS.textSecondary} />}
+        />
+      )}
     </ScrollView>
   );
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
-      <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' }}>
         <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
 
         <Animated.View
@@ -595,14 +553,16 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
             right: 0,
             top: 0,
             bottom: 0,
-            width: Platform.OS === 'web' ? 400 : '85%',
-            backgroundColor: 'white',
+            width: Platform.OS === 'web' ? 400 : '88%',
+            backgroundColor: 'rgba(5,46,22,0.97)',
+            borderLeftWidth: 1,
+            borderLeftColor: 'rgba(74,222,128,0.2)',
             transform: [{ translateX: slideAnim }],
             shadowColor: '#000',
-            shadowOffset: { width: -2, height: 0 },
-            shadowOpacity: 0.25,
-            shadowRadius: 10,
-            elevation: 5,
+            shadowOffset: { width: -4, height: 0 },
+            shadowOpacity: 0.5,
+            shadowRadius: 20,
+            elevation: 10,
           }}
         >
           <SafeAreaView style={{ flex: 1 }}>
@@ -615,7 +575,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                  backgroundColor: 'rgba(5,46,22,0.98)',
                   zIndex: 1000,
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -635,16 +595,27 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                     ],
                   }}
                 >
-                  <View className="w-32 h-32 bg-emerald-500 rounded-full items-center justify-center">
-                    <Text className="text-white text-6xl">✓</Text>
+                  <View
+                    style={{
+                      width: 120,
+                      height: 120,
+                      borderRadius: 60,
+                      backgroundColor: 'rgba(74,222,128,0.2)',
+                      borderWidth: 2,
+                      borderColor: '#4ADE80',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Text style={{ color: '#4ADE80', fontSize: 56 }}>✓</Text>
                   </View>
                 </Animated.View>
                 <Animated.Text
                   style={{
                     marginTop: 24,
-                    fontSize: 24,
-                    fontWeight: 'bold',
-                    color: '#10b981',
+                    fontSize: 22,
+                    fontWeight: '700',
+                    color: '#4ADE80',
                     opacity: successOpacity,
                   }}
                 >
@@ -653,8 +624,8 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
                 <Animated.Text
                   style={{
                     marginTop: 8,
-                    fontSize: 16,
-                    color: '#6b7280',
+                    fontSize: 15,
+                    color: COLORS.textSecondary,
                     opacity: successOpacity,
                   }}
                 >
@@ -664,40 +635,66 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
             )}
 
             {/* Header */}
-            <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-              <Text className="text-xl font-bold text-gray-900">Profile</Text>
-              <View className="flex-row items-center space-x-3">
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: 16,
+                borderBottomWidth: 1,
+                borderBottomColor: 'rgba(255,255,255,0.1)',
+              }}
+            >
+              <Text style={{ color: COLORS.textPrimary, fontSize: 20, fontWeight: '700' }}>
+                Profile
+              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <TouchableOpacity
                   onPress={() => (editMode ? handleSave() : setEditMode(true))}
-                  className="p-2"
+                  style={{ padding: 8 }}
                   disabled={isSaving}
                 >
                   {isSaving ? (
-                    <ActivityIndicator size="small" color="#10b981" />
+                    <ActivityIndicator size="small" color="#4ADE80" />
                   ) : editMode ? (
-                    <Save size={24} color="#10b981" />
+                    <Save size={22} color="#4ADE80" />
                   ) : (
-                    <Edit2 size={24} color="#6b7280" />
+                    <Edit2 size={22} color={COLORS.textSecondary} />
                   )}
                 </TouchableOpacity>
-                <TouchableOpacity onPress={onClose} className="p-2" disabled={isSaving}>
-                  <X size={24} color="#6b7280" />
+                <TouchableOpacity onPress={onClose} style={{ padding: 8 }} disabled={isSaving}>
+                  <X size={22} color={COLORS.textSecondary} />
                 </TouchableOpacity>
               </View>
             </View>
 
             {/* Tabs */}
-            <View className="flex-row border-b border-gray-200">
+            <View
+              style={{
+                flexDirection: 'row',
+                borderBottomWidth: 1,
+                borderBottomColor: 'rgba(255,255,255,0.08)',
+              }}
+            >
               {(['personal', 'company', 'bases'] as const).map((tab) => (
                 <TouchableOpacity
                   key={tab}
                   onPress={() => setActiveTab(tab)}
-                  className={`flex-1 py-3 ${activeTab === tab ? 'border-b-2 border-emerald-500' : ''}`}
+                  style={{
+                    flex: 1,
+                    paddingVertical: 12,
+                    borderBottomWidth: 2,
+                    borderBottomColor: activeTab === tab ? '#4ADE80' : 'transparent',
+                  }}
                 >
                   <Text
-                    className={`text-center font-medium capitalize ${
-                      activeTab === tab ? 'text-emerald-600' : 'text-gray-500'
-                    }`}
+                    style={{
+                      textAlign: 'center',
+                      fontWeight: '600',
+                      textTransform: 'capitalize',
+                      fontSize: 13,
+                      color: activeTab === tab ? '#4ADE80' : COLORS.textMuted,
+                    }}
                   >
                     {tab}
                   </Text>
@@ -705,22 +702,34 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
               ))}
             </View>
 
-            {/* Tab Content */}
-            <View className="flex-1">
-              {activeTab === 'personal' && renderPersonalTab()}
-              {activeTab === 'company' && renderCompanyTab()}
-              {activeTab === 'bases' && renderBasesTab()}
-            </View>
+            {/* Loading */}
+            {isLoading ? (
+              <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                <ActivityIndicator color="#4ADE80" />
+              </View>
+            ) : (
+              <View style={{ flex: 1 }}>
+                {activeTab === 'personal' && renderPersonalTab()}
+                {activeTab === 'company' && renderCompanyTab()}
+                {activeTab === 'bases' && renderBasesTab()}
+              </View>
+            )}
 
-            {/* Logout Button */}
-            <View className="p-4 border-t border-gray-200">
-              <TouchableOpacity
+            {/* Logout */}
+            <View
+              style={{
+                padding: 16,
+                borderTopWidth: 1,
+                borderTopColor: 'rgba(255,255,255,0.08)',
+              }}
+            >
+              <GlassButton
+                label="Logout"
                 onPress={handleLogout}
-                className="bg-red-500 p-4 rounded-xl flex-row items-center justify-center"
-              >
-                <LogOut size={20} color="white" />
-                <Text className="ml-2 text-white font-semibold">Logout</Text>
-              </TouchableOpacity>
+                variant="danger"
+                fullWidth
+                leftIcon={<LogOut size={18} color="#FFFFFF" />}
+              />
             </View>
           </SafeAreaView>
         </Animated.View>

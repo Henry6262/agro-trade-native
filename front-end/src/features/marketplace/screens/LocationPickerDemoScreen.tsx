@@ -26,9 +26,9 @@ export const LocationPickerDemoScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView className="flex-1 bg-gray-900">
+    <ScrollView className="flex-1 bg-gray-50">
       <View className="p-4">
-        <Text className="text-white text-2xl font-bold mb-2">Location Map Picker Demo</Text>
+        <Text className="text-gray-900 text-2xl font-bold mb-2">Location Map Picker Demo</Text>
         <Text className="text-gray-400 mb-6">
           Tap on the map to select a location. The component will automatically reverse geocode the
           coordinates to get the address.
@@ -47,30 +47,30 @@ export const LocationPickerDemoScreen: React.FC = () => {
 
         {/* Selected Location Info */}
         {selectedLocation && (
-          <View className="mt-6 bg-gray-800 rounded-lg p-4">
-            <Text className="text-white text-lg font-semibold mb-2">Selected Location</Text>
+          <View className="mt-6 bg-white rounded-lg p-4">
+            <Text className="text-gray-900 text-lg font-semibold mb-2">Selected Location</Text>
             <View className="space-y-2">
-              <Text className="text-gray-300">
+              <Text className="text-gray-600">
                 <Text className="font-medium">Coordinates:</Text>{' '}
                 {selectedLocation.latitude.toFixed(6)}, {selectedLocation.longitude.toFixed(6)}
               </Text>
               {selectedLocation.formattedAddress && (
-                <Text className="text-gray-300">
+                <Text className="text-gray-600">
                   <Text className="font-medium">Address:</Text> {selectedLocation.formattedAddress}
                 </Text>
               )}
               {selectedLocation.city && (
-                <Text className="text-gray-300">
+                <Text className="text-gray-600">
                   <Text className="font-medium">City:</Text> {selectedLocation.city}
                 </Text>
               )}
               {selectedLocation.region && (
-                <Text className="text-gray-300">
+                <Text className="text-gray-600">
                   <Text className="font-medium">Region:</Text> {selectedLocation.region}
                 </Text>
               )}
               {selectedLocation.country && (
-                <Text className="text-gray-300">
+                <Text className="text-gray-600">
                   <Text className="font-medium">Country:</Text> {selectedLocation.country}
                 </Text>
               )}
@@ -106,7 +106,7 @@ export const LocationPickerDemoScreen: React.FC = () => {
               • The address will be automatically resolved
             </Text>
             <Text className="text-blue-300 text-sm">
-              • Use the "Confirm Location" button to finalize your selection
+              • Use the &quot;Confirm Location&quot; button to finalize your selection
             </Text>
             <Text className="text-blue-300 text-sm">
               • The search bar is for UI demonstration (functionality coming soon)
@@ -115,27 +115,27 @@ export const LocationPickerDemoScreen: React.FC = () => {
         </View>
 
         {/* Component Features */}
-        <View className="mt-4 bg-gray-800 rounded-lg p-4">
-          <Text className="text-white text-lg font-semibold mb-2">Component Features</Text>
+        <View className="mt-4 bg-white rounded-lg p-4">
+          <Text className="text-gray-900 text-lg font-semibold mb-2">Component Features</Text>
           <View className="space-y-1">
-            <Text className="text-gray-300 text-sm">
+            <Text className="text-gray-600 text-sm">
               ✓ Google Maps integration with react-native-maps
             </Text>
-            <Text className="text-gray-300 text-sm">
+            <Text className="text-gray-600 text-sm">
               ✓ User location detection and permission handling
             </Text>
-            <Text className="text-gray-300 text-sm">
+            <Text className="text-gray-600 text-sm">
               ✓ Tap-to-select location with custom marker
             </Text>
-            <Text className="text-gray-300 text-sm">
+            <Text className="text-gray-600 text-sm">
               ✓ Automatic reverse geocoding for addresses
             </Text>
-            <Text className="text-gray-300 text-sm">✓ Customizable UI with confirmation flow</Text>
-            <Text className="text-gray-300 text-sm">
+            <Text className="text-gray-600 text-sm">✓ Customizable UI with confirmation flow</Text>
+            <Text className="text-gray-600 text-sm">
               ✓ Search bar UI (implementation ready for backend)
             </Text>
-            <Text className="text-gray-300 text-sm">✓ Error handling and loading states</Text>
-            <Text className="text-gray-300 text-sm">✓ Platform-specific optimizations</Text>
+            <Text className="text-gray-600 text-sm">✓ Error handling and loading states</Text>
+            <Text className="text-gray-600 text-sm">✓ Platform-specific optimizations</Text>
           </View>
         </View>
       </View>

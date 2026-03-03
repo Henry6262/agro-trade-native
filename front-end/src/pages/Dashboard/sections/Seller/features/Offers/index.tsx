@@ -6,10 +6,11 @@ import {
   RefreshControl,
   ActivityIndicator,
   Alert,
-  TouchableOpacity,
+  StyleSheet,
 } from 'react-native';
-import { Badge } from '@shared/components/Badge';
-import { AlertCircle, RefreshCw } from 'lucide-react-native';
+import { AlertCircle } from 'lucide-react-native';
+
+import { GlassButton, GlassBadge, COLORS } from '../../../../../../design-system';
 
 import {
   OfferStatsGrid,
@@ -92,69 +93,60 @@ export default function SellerOffersFeature() {
 
   if (isLoading && offers.length === 0) {
     return (
-      <View className="flex-1 bg-black justify-center items-center">
-        <ActivityIndicator size="large" color="#FB923C" />
-        <Text className="text-white mt-4">Loading your offers...</Text>
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={COLORS.accentGreen} />
+        <Text style={styles.loadingText}>Loading your offers...</Text>
       </View>
     );
   }
 
   if (isError) {
     return (
-      <View className="flex-1 bg-black justify-center items-center p-6">
-        <AlertCircle color="#EF4444" size={48} />
-        <Text className="text-white text-lg font-semibold mt-4 text-center">
-          Failed to load offers
-        </Text>
-        <Text className="text-neutral-400 text-center mt-2">
-          {error?.message || 'Please try again later'}
-        </Text>
-        <Badge className="bg-orange-500 text-white px-6 py-3 rounded-lg mt-4 flex-row items-center">
-          <RefreshCw color="#FFFFFF" size={16} />
-          <Text className="text-white font-semibold ml-2" onPress={refreshOffers}>
-            Retry
-          </Text>
-        </Badge>
+      <View style={styles.centered}>
+        <AlertCircle color={COLORS.danger} size={48} />
+        <Text style={styles.errorTitle}>Failed to load offers</Text>
+        <Text style={styles.errorSubtitle}>{error?.message || 'Please try again later'}</Text>
+        <GlassButton
+          label="Retry"
+          onPress={refreshOffers}
+          variant="ghost"
+          style={styles.retryBtn}
+        />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-black">
+    <View style={styles.root}>
       <ScrollView
-        className="flex-1"
+        style={styles.scroll}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
         refreshControl={
           <RefreshControl
             refreshing={isLoading}
             onRefresh={refreshOffers}
-            tintColor="#FB923C"
-            colors={['#FB923C']}
+            tintColor={COLORS.accentGreen}
+            colors={[COLORS.accentGreen]}
           />
         }
       >
-        <View className="p-6">
-          <View className="mb-6">
-            <Text className="text-2xl font-bold text-white">Incoming Offers</Text>
-            <Text className="text-neutral-400">Review and respond to buyer requests</Text>
+        <View style={styles.content}>
+          <View style={styles.pageHeader}>
+            <Text style={styles.pageTitle}>Incoming Offers</Text>
+            <Text style={styles.pageSubtitle}>Review and respond to buyer requests</Text>
           </View>
 
           <OfferStatsGrid cards={statsCards} />
 
-          <View className="mt-6">
+          <View style={styles.timelineSection}>
             <SellerTimelineFeature />
           </View>
 
           <View>
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-xl font-semibold text-white">Active Offers</Text>
-              <TouchableOpacity onPress={refreshOffers} className="flex-row items-center">
-                <Badge className="bg-orange-500 text-white px-3 py-1 rounded flex-row items-center">
-                  <RefreshCw color="#FFFFFF" size={12} />
-                  <Text className="text-white text-sm ml-1">{stats.pendingOffers} Pending</Text>
-                </Badge>
-              </TouchableOpacity>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Active Offers</Text>
+              <GlassBadge label={`${stats.pendingOffers} Pending`} variant="warning" size="sm" />
             </View>
 
             {offers.length === 0 ? (
@@ -173,7 +165,7 @@ export default function SellerOffersFeature() {
             )}
           </View>
         </View>
-        <View className="h-20" />
+        <View style={styles.bottomSpacer} />
       </ScrollView>
 
       <SellerAcceptOfferModal
@@ -202,3 +194,75 @@ export default function SellerOffersFeature() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  bottomSpacer: {
+    height: 80,
+  },
+  centered: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+  },
+  content: {
+    padding: 16,
+  },
+  errorSubtitle: {
+    color: COLORS.textSecondary,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  errorTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  loadingText: {
+    color: COLORS.textSecondary,
+    fontSize: 15,
+    marginTop: 12,
+  },
+  pageHeader: {
+    marginBottom: 20,
+  },
+  pageSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    marginTop: 2,
+  },
+  pageTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  retryBtn: {
+    marginTop: 16,
+  },
+  root: {
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
+  scroll: {
+    flex: 1,
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  timelineSection: {
+    marginBottom: 8,
+    marginTop: 4,
+  },
+});

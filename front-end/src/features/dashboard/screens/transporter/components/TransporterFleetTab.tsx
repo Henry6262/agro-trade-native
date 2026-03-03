@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { Truck, CheckCircle, Shield, Route, Plus, User, MapPin, Users } from 'lucide-react-native';
-import { Button } from '@shared/components/Button';
-import { Badge } from '@shared/components/Badge';
-import { MetricCard } from '../../components/MetricCard';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { Truck, CheckCircle, Shield, Route, User, MapPin, Users } from 'lucide-react-native';
+import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
 import { BaseComponentProps } from '@shared/types';
 import { FleetCreationFlow } from '../fleet-creation';
 
@@ -33,8 +31,9 @@ interface FleetDriver {
   assignment?: string;
 }
 
+type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'muted' | 'gold';
+
 export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
-  id,
   testID,
   accessibilityLabel,
 }) => {
@@ -114,299 +113,225 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
     },
   ];
 
-  // Filter trucks based on selected tab
-  const filteredTrucks = mockTrucks.filter((truck) => {
-    if (truckTab === 'available') {
-      return truck.status === 'available';
-    } else {
-      return truck.status === 'assigned';
-    }
-  });
+  const filteredTrucks = mockTrucks.filter((truck) =>
+    truckTab === 'available' ? truck.status === 'available' : truck.status === 'assigned'
+  );
 
-  // Filter drivers based on selected tab
-  const filteredDrivers = mockDrivers.filter((driver) => {
-    if (driverTab === 'available') {
-      return driver.status === 'available';
-    } else {
-      return driver.status === 'assigned';
-    }
-  });
+  const filteredDrivers = mockDrivers.filter((driver) =>
+    driverTab === 'available' ? driver.status === 'available' : driver.status === 'assigned'
+  );
 
-  // Count calculations
   const availableTrucksCount = mockTrucks.filter((t) => t.status === 'available').length;
   const inTransitTrucksCount = mockTrucks.filter((t) => t.status === 'assigned').length;
   const availableDriversCount = mockDrivers.filter((d) => d.status === 'available').length;
   const assignedDriversCount = mockDrivers.filter((d) => d.status === 'assigned').length;
 
+  const TabPill: React.FC<{
+    label: string;
+    count: number;
+    active: boolean;
+    onPress: () => void;
+    activeVariant?: BadgeVariant;
+  }> = ({ label, count, active, onPress, activeVariant = 'success' }) => (
+    <TouchableOpacity onPress={onPress} style={[styles.tabPill, active && styles.tabPillActive]}>
+      <Text style={[styles.tabPillText, active && styles.tabPillTextActive]}>
+        {label} ({count})
+      </Text>
+    </TouchableOpacity>
+  );
+
   return (
     <ScrollView
-      className="flex-1 bg-black"
+      style={styles.scroll}
       showsVerticalScrollIndicator={false}
       testID={testID}
       accessibilityLabel={accessibilityLabel}
     >
-      <View className="p-4 space-y-4">
+      <View style={styles.content}>
         {/* Stats Grid */}
-        <View className="flex-row flex-wrap -mx-1">
-          <View className="w-1/2 px-1 mb-2">
-            <MetricCard
-              title="TOTAL TRUCKS"
-              value="12"
-              icon={Truck}
-              gradient="from-blue-500/10 to-blue-600/5"
-              borderColor="border-blue-500/20"
-              iconColor="#60A5FA"
-              valueColor="text-blue-400"
-            />
-          </View>
-          <View className="w-1/2 px-1 mb-2">
-            <MetricCard
-              title="AVAILABLE"
-              value="8"
-              icon={CheckCircle}
-              gradient="from-green-500/10 to-green-600/5"
-              borderColor="border-green-500/20"
-              iconColor="#34D399"
-              valueColor="text-green-400"
-            />
-          </View>
-          <View className="w-1/2 px-1 mb-2">
-            <MetricCard
-              title="IN TRANSIT"
-              value="4"
-              icon={Route}
-              gradient="from-yellow-500/10 to-yellow-600/5"
-              borderColor="border-yellow-500/20"
-              iconColor="#FCD34D"
-              valueColor="text-yellow-400"
-            />
-          </View>
-          <View className="w-1/2 px-1 mb-2">
-            <MetricCard
-              title="VERIFIED"
-              value="10"
-              icon={Shield}
-              gradient="from-purple-500/10 to-purple-600/5"
-              borderColor="border-purple-500/20"
-              iconColor="#A78BFA"
-              valueColor="text-purple-400"
-            />
-          </View>
+        <View style={styles.statsGrid}>
+          <GlassCard tier="subtle" style={styles.statCard}>
+            <Truck size={16} color="#60A5FA" />
+            <Text style={[styles.statValue, { color: '#60A5FA' }]}>12</Text>
+            <Text style={styles.statLabel}>TOTAL</Text>
+          </GlassCard>
+          <GlassCard tier="subtle" style={styles.statCard}>
+            <CheckCircle size={16} color="#4ADE80" />
+            <Text style={[styles.statValue, { color: '#4ADE80' }]}>8</Text>
+            <Text style={styles.statLabel}>AVAILABLE</Text>
+          </GlassCard>
+          <GlassCard tier="subtle" style={styles.statCard}>
+            <Route size={16} color="#FCD34D" />
+            <Text style={[styles.statValue, { color: '#FCD34D' }]}>4</Text>
+            <Text style={styles.statLabel}>IN TRANSIT</Text>
+          </GlassCard>
+          <GlassCard tier="subtle" style={styles.statCard}>
+            <Shield size={16} color="#A78BFA" />
+            <Text style={[styles.statValue, { color: '#A78BFA' }]}>10</Text>
+            <Text style={styles.statLabel}>VERIFIED</Text>
+          </GlassCard>
         </View>
 
-        {/* Action Button - Single Entry Point */}
-        <View className="mb-4">
-          <Button
-            variant="gradient"
-            className="bg-gradient-to-r from-purple-600 to-purple-700 w-full"
-            onPress={() => setShowFleetCreation(true)}
-          >
-            <View className="flex-row items-center justify-center">
-              <Users size={20} color="#FFFFFF" />
-              <Text className="ml-2 text-white font-semibold text-base">ADD TO FLEET</Text>
-            </View>
-          </Button>
+        {/* Add to Fleet */}
+        <GlassButton
+          label="ADD TO FLEET"
+          onPress={() => setShowFleetCreation(true)}
+          variant="primary"
+          size="md"
+          fullWidth
+          leftIcon={<Users size={18} color="#FFFFFF" />}
+        />
+
+        {/* Fleet Section */}
+        <View style={styles.sectionHeader}>
+          <Truck size={18} color="#4ADE80" />
+          <Text style={styles.sectionTitle}>MY FLEET</Text>
         </View>
 
-        {/* Fleet List Section */}
-        <View className="mt-4">
-          <View className="flex-row items-center justify-between mb-3">
-            <View className="flex-row items-center">
-              <Truck size={20} color="#34D399" />
-              <Text className="text-lg font-semibold text-green-400 ml-2">MY FLEET</Text>
-            </View>
-          </View>
+        {/* Truck Tabs */}
+        <View style={styles.tabRow}>
+          <TabPill
+            label="Available"
+            count={availableTrucksCount}
+            active={truckTab === 'available'}
+            onPress={() => setTruckTab('available')}
+            activeVariant="success"
+          />
+          <TabPill
+            label="In Transit"
+            count={inTransitTrucksCount}
+            active={truckTab === 'in_transit'}
+            onPress={() => setTruckTab('in_transit')}
+            activeVariant="warning"
+          />
+        </View>
 
-          {/* Truck Tab Selector */}
-          <View className="flex-row bg-neutral-800 rounded-lg p-1 mb-4">
-            <TouchableOpacity
-              onPress={() => setTruckTab('available')}
-              className={`flex-1 py-2 px-4 rounded-md ${
-                truckTab === 'available' ? 'bg-green-500' : 'bg-transparent'
-              }`}
-            >
-              <Text
-                className={`text-center font-semibold ${
-                  truckTab === 'available' ? 'text-white' : 'text-neutral-400'
-                }`}
-              >
-                Available ({availableTrucksCount})
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setTruckTab('in_transit')}
-              className={`flex-1 py-2 px-4 rounded-md ${
-                truckTab === 'in_transit' ? 'bg-yellow-500' : 'bg-transparent'
-              }`}
-            >
-              <Text
-                className={`text-center font-semibold ${
-                  truckTab === 'in_transit' ? 'text-white' : 'text-neutral-400'
-                }`}
-              >
-                In Transit ({inTransitTrucksCount})
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {filteredTrucks.length > 0 ? (
-            filteredTrucks.map((truck) => (
-              <View key={truck.id} className="border border-neutral-700 rounded-lg p-4 mb-3">
-                {/* Header */}
-                <View className="flex-row items-center justify-between mb-3">
-                  <View className="flex-row items-center flex-1">
-                    <View className="w-10 h-10 bg-gradient-to-br from-green-500/30 to-green-600/10 rounded-lg items-center justify-center border border-green-500/30">
-                      <Truck size={20} color="#34D399" />
-                    </View>
-                    <View className="ml-3 flex-1">
-                      <View className="flex-row items-center">
-                        <Text className="font-bold text-white">{truck.licensePlate}</Text>
-                        {truck.verified && (
-                          <Shield size={16} color="#34D399" style={{ marginLeft: 8 }} />
-                        )}
-                      </View>
-                      <Text className="text-sm text-neutral-400">
-                        {truck.model} • {truck.capacity}
-                      </Text>
-                    </View>
+        {filteredTrucks.length > 0 ? (
+          filteredTrucks.map((truck) => {
+            const statusVariant: BadgeVariant =
+              truck.status === 'available' ? 'success' : 'warning';
+            return (
+              <GlassCard key={truck.id} tier="subtle" style={styles.fleetCard}>
+                <View style={styles.fleetCardHeader}>
+                  <View style={styles.truckIconWrap}>
+                    <Truck size={18} color="#4ADE80" />
                   </View>
-                  <Badge variant={truck.status === 'available' ? 'secondary' : 'default'}>
-                    {truck.status.toUpperCase()}
-                  </Badge>
+                  <View style={styles.fleetCardInfo}>
+                    <View style={styles.fleetCardTitleRow}>
+                      <Text style={styles.fleetCardTitle}>{truck.licensePlate}</Text>
+                      {truck.verified && <Shield size={14} color="#4ADE80" />}
+                    </View>
+                    <Text style={styles.fleetCardSub}>
+                      {truck.model} • {truck.capacity}
+                    </Text>
+                  </View>
+                  <GlassBadge label={truck.status.toUpperCase()} variant={statusVariant} />
                 </View>
 
-                {/* Details */}
-                <View className="space-y-2">
-                  <View className="flex-row items-center">
-                    <MapPin size={16} color="#60A5FA" />
-                    <Text className="text-neutral-300 ml-2">{truck.location}</Text>
+                <View style={styles.separator} />
+
+                <View style={styles.fleetDetails}>
+                  <View style={styles.detailRow}>
+                    <MapPin size={13} color="#60A5FA" />
+                    <Text style={styles.detailText}>{truck.location}</Text>
                   </View>
 
                   {truck.status === 'assigned' && truck.driver && (
                     <>
-                      <View className="flex-row items-center">
-                        <User size={16} color="#FCD34D" />
-                        <Text className="text-neutral-300 ml-2">Driver: {truck.driver}</Text>
+                      <View style={styles.detailRow}>
+                        <User size={13} color="#FCD34D" />
+                        <Text style={styles.detailText}>Driver: {truck.driver}</Text>
                       </View>
                       {truck.assignment && (
-                        <View className="flex-row items-center">
-                          <Route size={16} color="#34D399" />
-                          <Text className="text-neutral-300 ml-2">{truck.assignment}</Text>
+                        <View style={styles.detailRow}>
+                          <Route size={13} color="#4ADE80" />
+                          <Text style={styles.detailText}>{truck.assignment}</Text>
                         </View>
                       )}
                     </>
                   )}
                 </View>
 
-                {/* Actions */}
-                <View className="flex-row justify-end mt-3">
-                  <Button size="sm" variant="ghost" onPress={() => {}}>
-                    <Text className="text-neutral-400">EDIT</Text>
-                  </Button>
+                <View style={styles.fleetActions}>
+                  <GlassButton label="EDIT" onPress={() => {}} variant="ghost" size="sm" />
                 </View>
-              </View>
-            ))
-          ) : (
-            <View className="border border-neutral-700 rounded-lg p-8 items-center">
-              <Truck size={48} color="#6B7280" />
-              <Text className="text-neutral-400 mt-4 text-center">
-                No {truckTab === 'available' ? 'available' : 'in transit'} trucks
-              </Text>
-            </View>
-          )}
+              </GlassCard>
+            );
+          })
+        ) : (
+          <GlassCard tier="subtle" style={styles.emptyCard}>
+            <Truck size={44} color="rgba(255,255,255,0.25)" />
+            <Text style={styles.emptyText}>
+              No {truckTab === 'available' ? 'available' : 'in transit'} trucks
+            </Text>
+          </GlassCard>
+        )}
+
+        {/* Drivers Section */}
+        <View style={[styles.sectionHeader, { marginTop: 8 }]}>
+          <User size={18} color="#60A5FA" />
+          <Text style={[styles.sectionTitle, { color: '#60A5FA' }]}>DRIVERS</Text>
         </View>
 
-        {/* Drivers List Section */}
-        <View className="mt-4">
-          <View className="flex-row items-center mb-3">
-            <User size={20} color="#60A5FA" />
-            <Text className="text-lg font-semibold text-blue-400 ml-2">DRIVERS</Text>
-          </View>
+        {/* Driver Tabs */}
+        <View style={styles.tabRow}>
+          <TabPill
+            label="Available"
+            count={availableDriversCount}
+            active={driverTab === 'available'}
+            onPress={() => setDriverTab('available')}
+            activeVariant="info"
+          />
+          <TabPill
+            label="Assigned"
+            count={assignedDriversCount}
+            active={driverTab === 'assigned'}
+            onPress={() => setDriverTab('assigned')}
+            activeVariant="warning"
+          />
+        </View>
 
-          {/* Driver Tab Selector */}
-          <View className="flex-row bg-neutral-800 rounded-lg p-1 mb-4">
-            <TouchableOpacity
-              onPress={() => setDriverTab('available')}
-              className={`flex-1 py-2 px-4 rounded-md ${
-                driverTab === 'available' ? 'bg-blue-500' : 'bg-transparent'
-              }`}
-            >
-              <Text
-                className={`text-center font-semibold ${
-                  driverTab === 'available' ? 'text-white' : 'text-neutral-400'
-                }`}
-              >
-                Available ({availableDriversCount})
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setDriverTab('assigned')}
-              className={`flex-1 py-2 px-4 rounded-md ${
-                driverTab === 'assigned' ? 'bg-orange-500' : 'bg-transparent'
-              }`}
-            >
-              <Text
-                className={`text-center font-semibold ${
-                  driverTab === 'assigned' ? 'text-white' : 'text-neutral-400'
-                }`}
-              >
-                Assigned ({assignedDriversCount})
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {filteredDrivers.length > 0 ? (
-            filteredDrivers.map((driver) => (
-              <View key={driver.id} className="border border-neutral-700 rounded-lg p-4 mb-3">
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center flex-1">
-                    <View className="w-10 h-10 bg-gradient-to-br from-blue-500/30 to-blue-600/10 rounded-lg items-center justify-center border border-blue-500/30">
-                      <User size={20} color="#60A5FA" />
-                    </View>
-                    <View className="ml-3 flex-1">
-                      <Text className="font-bold text-white">{driver.name}</Text>
-                      <Text className="text-sm text-neutral-400">
-                        {driver.experience} experience
-                      </Text>
-                      {driver.assignment && (
-                        <Text className="text-xs text-green-400">
-                          Assigned to: {driver.assignment}
-                        </Text>
-                      )}
-                    </View>
+        {filteredDrivers.length > 0 ? (
+          filteredDrivers.map((driver) => {
+            const statusVariant: BadgeVariant =
+              driver.status === 'available' ? 'success' : 'warning';
+            return (
+              <GlassCard key={driver.id} tier="subtle" style={styles.fleetCard}>
+                <View style={styles.fleetCardHeader}>
+                  <View style={[styles.truckIconWrap, styles.driverIconWrap]}>
+                    <User size={18} color="#60A5FA" />
                   </View>
-                  <View className="items-end">
-                    <Badge
-                      variant={driver.status === 'available' ? 'secondary' : 'default'}
-                      className="mb-2"
-                    >
-                      {driver.status.toUpperCase()}
-                    </Badge>
-                    <Button size="sm" variant="ghost" onPress={() => {}}>
-                      <Text className="text-neutral-400">EDIT</Text>
-                    </Button>
+                  <View style={styles.fleetCardInfo}>
+                    <Text style={styles.fleetCardTitle}>{driver.name}</Text>
+                    <Text style={styles.fleetCardSub}>{driver.experience} experience</Text>
+                    {driver.assignment && (
+                      <Text style={styles.assignmentText}>Assigned to: {driver.assignment}</Text>
+                    )}
+                  </View>
+                  <View style={styles.driverActions}>
+                    <GlassBadge label={driver.status.toUpperCase()} variant={statusVariant} />
+                    <GlassButton label="EDIT" onPress={() => {}} variant="ghost" size="sm" />
                   </View>
                 </View>
-              </View>
-            ))
-          ) : (
-            <View className="border border-neutral-700 rounded-lg p-8 items-center">
-              <User size={48} color="#6B7280" />
-              <Text className="text-neutral-400 mt-4 text-center">
-                No {driverTab === 'available' ? 'available' : 'assigned'} drivers
-              </Text>
-            </View>
-          )}
-        </View>
+              </GlassCard>
+            );
+          })
+        ) : (
+          <GlassCard tier="subtle" style={styles.emptyCard}>
+            <User size={44} color="rgba(255,255,255,0.25)" />
+            <Text style={styles.emptyText}>
+              No {driverTab === 'available' ? 'available' : 'assigned'} drivers
+            </Text>
+          </GlassCard>
+        )}
       </View>
 
       {/* Fleet Creation Flow */}
       <FleetCreationFlow
         visible={showFleetCreation}
         onClose={() => setShowFleetCreation(false)}
-        onSuccess={(data) => {
+        onSuccess={() => {
           // TODO: Refresh fleet data
-          // Don't need to set false here as onClose will be called
         }}
         onError={(error) => {
           console.error('Fleet creation error:', error);
@@ -415,3 +340,151 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  assignmentText: {
+    color: '#4ADE80',
+    fontSize: 11,
+    marginTop: 2,
+  },
+  content: {
+    gap: 14,
+    padding: 16,
+  },
+  detailRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  detailText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 13,
+  },
+  driverActions: {
+    alignItems: 'flex-end',
+    gap: 6,
+  },
+  driverIconWrap: {
+    backgroundColor: 'rgba(96,165,250,0.12)',
+    borderColor: 'rgba(96,165,250,0.2)',
+  },
+  emptyCard: {
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 32,
+  },
+  emptyText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  fleetActions: {
+    alignItems: 'flex-end',
+  },
+  fleetCard: {
+    gap: 10,
+  },
+  fleetCardHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+  },
+  fleetCardInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  fleetCardSub: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+  },
+  fleetCardTitle: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  fleetCardTitleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 6,
+  },
+  fleetDetails: {
+    gap: 6,
+  },
+  scroll: {
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+  },
+  sectionTitle: {
+    color: '#4ADE80',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  separator: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    height: 1,
+  },
+  statCard: {
+    alignItems: 'center',
+    flex: 1,
+    gap: 4,
+  },
+  statLabel: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  statValue: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  tabPill: {
+    alignItems: 'center',
+    borderRadius: 8,
+    flex: 1,
+    paddingVertical: 8,
+  },
+  tabPillActive: {
+    backgroundColor: 'rgba(74,222,128,0.15)',
+    borderColor: 'rgba(74,222,128,0.3)',
+    borderWidth: 1,
+  },
+  tabPillText: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  tabPillTextActive: {
+    color: '#4ADE80',
+  },
+  tabRow: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 12,
+    flexDirection: 'row',
+    gap: 8,
+    padding: 4,
+  },
+  truckIconWrap: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.12)',
+    borderColor: 'rgba(74,222,128,0.2)',
+    borderRadius: 10,
+    borderWidth: 1,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+});

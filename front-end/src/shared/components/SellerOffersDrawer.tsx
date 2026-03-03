@@ -362,10 +362,10 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
     };
 
     return (
-      <View className="flex-row justify-between items-center p-6 border-b border-neutral-700/50">
+      <View className="flex-row justify-between items-center p-6 border-b border-gray-200/50">
         <TouchableOpacity
           onPress={currentView === 'list' ? onClose : handleBack}
-          className="p-2 -m-2 bg-neutral-800/50 rounded-lg border border-neutral-700/50"
+          className="p-2 -m-2 bg-gray-50/50 rounded-lg border border-gray-200/50"
         >
           {currentView === 'list' ? (
             <X color="#9CA3AF" size={20} />
@@ -374,8 +374,8 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
           )}
         </TouchableOpacity>
         <View className="items-center flex-1 mx-4">
-          <Text className="text-xl font-bold text-white">{getTitle()}</Text>
-          <Text className="text-sm text-neutral-400 mt-1">{getSubtitle()}</Text>
+          <Text className="text-xl font-bold text-gray-900">{getTitle()}</Text>
+          <Text className="text-sm text-gray-500 mt-1">{getSubtitle()}</Text>
         </View>
         <View style={{ width: 36 }} />
       </View>
@@ -403,7 +403,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
         {/* Filter Controls */}
         <View className="mb-6">
-          <Text className="text-neutral-400 text-xs mb-2">Filter offers</Text>
+          <Text className="text-gray-500 text-xs mb-2">Filter offers</Text>
           <View className="flex-row gap-2">
             {[
               { key: 'all', label: 'All' },
@@ -415,11 +415,11 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                 className={`px-3 py-2 rounded-lg border ${
                   filterBy === key
                     ? 'bg-green-500/20 border-green-500/50'
-                    : 'bg-neutral-800/50 border-neutral-600/50'
+                    : 'bg-gray-50/50 border-gray-200/50'
                 }`}
               >
                 <Text
-                  className={`text-xs ${filterBy === key ? 'text-green-400' : 'text-neutral-400'}`}
+                  className={`text-xs ${filterBy === key ? 'text-green-400' : 'text-gray-500'}`}
                 >
                   {label}
                 </Text>
@@ -437,7 +437,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
         ) : processedOffers.length === 0 ? (
           <View className="items-center py-12">
             <Users size={48} color="#6B7280" />
-            <Text className="text-lg font-semibold text-white mt-4">
+            <Text className="text-lg font-semibold text-gray-900 mt-4">
               No {filterBy !== 'all' ? filterBy : ''} Offers
             </Text>
             <Text className="text-gray-400 text-center mt-2">
@@ -481,7 +481,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               <View className="w-10 h-10 bg-gradient-to-br from-blue-500/30 to-indigo-600/20 rounded-xl items-center justify-center mr-3 border border-blue-400/30">
                 <Target size={20} color="#3B82F6" />
               </View>
-              <Text className="text-blue-400 font-bold text-xl">Buyer's Offer</Text>
+              <Text className="text-blue-400 font-bold text-xl">Buyer&apos;s Offer</Text>
             </View>
             <View className="rounded-2xl p-6 border border-blue-500/40 bg-gradient-to-br from-blue-500/20 to-indigo-600/10">
               <View className="flex-row justify-between items-center mb-4">
@@ -498,7 +498,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               <View className="h-px bg-gradient-to-r from-transparent via-blue-400/30 to-transparent mb-4" />
               <View className="flex-row justify-between items-center">
                 <Text className="text-blue-200 font-medium text-base">Requested Quantity</Text>
-                <Text className="text-white font-bold text-lg">
+                <Text className="text-gray-900 font-bold text-lg">
                   {selectedOffer.requestedQuantity} {selectedOffer.unit.toLowerCase()}
                 </Text>
               </View>
@@ -516,7 +516,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
             <View className="rounded-2xl p-6 border border-green-500/40 bg-gradient-to-br from-green-500/20 to-emerald-600/10">
               <View className="flex-row justify-between items-center mb-4">
                 <Text className="text-green-200 font-medium text-base">Available Stock</Text>
-                <Text className="text-white font-bold text-lg">
+                <Text className="text-gray-900 font-bold text-lg">
                   {sellerProduct?.quantity || 0} {selectedOffer.unit.toLowerCase()}
                 </Text>
               </View>
@@ -537,7 +537,9 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
           {/* Negotiation Type Selection */}
           <View className="mb-6">
-            <Text className="text-white font-semibold mb-3">What would you like to negotiate?</Text>
+            <Text className="text-gray-900 font-semibold mb-3">
+              What would you like to negotiate?
+            </Text>
             <View className="flex-row flex-wrap gap-2">
               {[
                 { key: 'price', label: 'Price Only', icon: DollarSign },
@@ -551,13 +553,13 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                   className={`flex-row items-center px-4 py-3 rounded-xl border ${
                     negotiationType === key
                       ? 'bg-gradient-to-br from-yellow-500/20 to-orange-600/10 border-yellow-500/50'
-                      : 'bg-gradient-to-br from-neutral-800/50 to-neutral-700/30 border-neutral-600/50'
+                      : 'bg-gradient-to-br from-neutral-800/50 to-neutral-700/30 border-gray-200/50'
                   }`}
                 >
                   <Icon size={16} color={negotiationType === key ? '#F59E0B' : '#9CA3AF'} />
                   <Text
                     className={`ml-2 font-medium ${
-                      negotiationType === key ? 'text-yellow-400' : 'text-neutral-300'
+                      negotiationType === key ? 'text-yellow-400' : 'text-gray-600'
                     }`}
                   >
                     {label}
@@ -581,7 +583,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               {(negotiationType === 'price' || negotiationType === 'combined') && (
                 <View className="mb-6">
                   <Text className="text-yellow-300 font-semibold mb-3">Counter Price</Text>
-                  <View className="bg-black/20 rounded-xl p-4 border border-yellow-400/20">
+                  <View className="bg-white/20 rounded-xl p-4 border border-yellow-400/20">
                     <View className="flex-row items-center justify-center">
                       <Text className="text-yellow-300 text-2xl font-black">€</Text>
                       <TextInput
@@ -589,7 +591,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                         onChangeText={setCounterPrice}
                         placeholder="0.00"
                         placeholderTextColor="#A16207"
-                        className="text-white text-2xl font-black ml-3 flex-1 text-center"
+                        className="text-gray-900 text-2xl font-black ml-3 flex-1 text-center"
                         keyboardType="decimal-pad"
                       />
                       <Text className="text-yellow-400/80 text-lg font-medium">
@@ -600,7 +602,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
                   {/* Real-time Price Analysis */}
                   {priceDiff.difference !== 0 && (
-                    <View className="mt-4 bg-black/30 rounded-xl p-4 border border-yellow-400/20">
+                    <View className="mt-4 bg-white/30 rounded-xl p-4 border border-yellow-400/20">
                       <View className="flex-row items-center justify-between mb-3">
                         <View className="flex-row items-center">
                           {priceDiff.isIncrease ? (
@@ -652,14 +654,14 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               {(negotiationType === 'quantity' || negotiationType === 'combined') && (
                 <View className="mb-6">
                   <Text className="text-yellow-300 font-semibold mb-3">Available Quantity</Text>
-                  <View className="bg-black/20 rounded-xl p-4 border border-yellow-400/20">
+                  <View className="bg-white/20 rounded-xl p-4 border border-yellow-400/20">
                     <View className="flex-row items-center justify-center">
                       <TextInput
                         value={counterQuantity}
                         onChangeText={setCounterQuantity}
                         placeholder="0"
                         placeholderTextColor="#A16207"
-                        className="text-white text-2xl font-black flex-1 text-center"
+                        className="text-gray-900 text-2xl font-black flex-1 text-center"
                         keyboardType="numeric"
                       />
                       <Text className="text-yellow-400/80 text-lg font-medium ml-3">
@@ -670,7 +672,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
                   {/* Quantity Analysis */}
                   {quantityDiff.difference !== 0 && (
-                    <View className="mt-4 bg-black/30 rounded-xl p-4 border border-yellow-400/20">
+                    <View className="mt-4 bg-white/30 rounded-xl p-4 border border-yellow-400/20">
                       <View className="flex-row items-center justify-between">
                         <Text className="text-yellow-200 text-sm">Quantity Change:</Text>
                         <Text
@@ -702,12 +704,12 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                             className={`flex-1 p-3 rounded-lg border ${
                               deliveryDays === days
                                 ? 'bg-blue-500/20 border-blue-500/50'
-                                : 'bg-neutral-800/50 border-neutral-600/50'
+                                : 'bg-gray-50/50 border-gray-200/50'
                             }`}
                           >
                             <Text
                               className={`text-center font-medium ${
-                                deliveryDays === days ? 'text-blue-400' : 'text-neutral-300'
+                                deliveryDays === days ? 'text-blue-400' : 'text-gray-600'
                               }`}
                             >
                               {days} days
@@ -727,12 +729,12 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                             className={`flex-1 p-3 rounded-lg border ${
                               deliveryTerms === term
                                 ? 'bg-green-500/20 border-green-500/50'
-                                : 'bg-neutral-800/50 border-neutral-600/50'
+                                : 'bg-gray-50/50 border-gray-200/50'
                             }`}
                           >
                             <Text
                               className={`text-center text-sm font-medium ${
-                                deliveryTerms === term ? 'text-green-400' : 'text-neutral-300'
+                                deliveryTerms === term ? 'text-green-400' : 'text-gray-600'
                               }`}
                             >
                               {term}
@@ -746,7 +748,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               )}
 
               {/* Total Value Display */}
-              <View className="bg-black/30 rounded-xl p-4 border border-yellow-400/20">
+              <View className="bg-white/30 rounded-xl p-4 border border-yellow-400/20">
                 <View className="flex-row justify-between items-center">
                   <Text className="text-yellow-200 font-medium">Total Contract Value</Text>
                   <Text className="text-yellow-400 font-bold text-xl">
@@ -759,13 +761,13 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
           {/* Message to Buyer */}
           <View className="mb-6">
-            <Text className="text-white font-semibold mb-3">Message to Buyer</Text>
+            <Text className="text-gray-900 font-semibold mb-3">Message to Buyer</Text>
             <TextInput
               value={message}
               onChangeText={setMessage}
               placeholder="Explain your counter-offer (e.g., quality standards, delivery logistics, volume pricing, etc.)"
               placeholderTextColor="#6B7280"
-              className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 border border-neutral-700/50 rounded-xl p-4 text-white min-h-24"
+              className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 border border-gray-200/50 rounded-xl p-4 text-gray-900 min-h-24"
               multiline
               textAlignVertical="top"
             />
@@ -773,7 +775,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
           {/* Offer Validity */}
           <View className="mb-6">
-            <Text className="text-white font-semibold mb-3">Counter-offer Valid For</Text>
+            <Text className="text-gray-900 font-semibold mb-3">Counter-offer Valid For</Text>
             <View className="flex-row gap-3">
               {['3', '7', '14'].map((days) => (
                 <TouchableOpacity
@@ -782,12 +784,12 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                   className={`flex-1 p-4 rounded-xl border ${
                     validDays === days
                       ? 'bg-gradient-to-br from-blue-500/20 to-indigo-500/10 border-blue-500/50'
-                      : 'bg-gradient-to-br from-neutral-800/50 to-neutral-700/30 border-neutral-600/50'
+                      : 'bg-gradient-to-br from-neutral-800/50 to-neutral-700/30 border-gray-200/50'
                   }`}
                 >
                   <Text
                     className={`text-center font-semibold ${
-                      validDays === days ? 'text-blue-400' : 'text-neutral-300'
+                      validDays === days ? 'text-blue-400' : 'text-gray-600'
                     }`}
                   >
                     {days} days
@@ -809,27 +811,29 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
         <View className="p-6">
           {/* Offer Summary */}
           <View className="mb-6">
-            <Text className="text-white font-bold text-lg mb-4">You're accepting this offer:</Text>
+            <Text className="text-gray-900 font-bold text-lg mb-4">
+              You&apos;re accepting this offer:
+            </Text>
             <View className="bg-gradient-to-br from-green-500/20 to-emerald-600/10 rounded-xl p-4 border border-green-500/40">
               <View className="flex-row justify-between mb-3">
-                <Text className="text-neutral-300">Buyer</Text>
-                <Text className="text-white font-semibold">{selectedOffer.buyer.name}</Text>
+                <Text className="text-gray-600">Buyer</Text>
+                <Text className="text-gray-900 font-semibold">{selectedOffer.buyer.name}</Text>
               </View>
               <View className="flex-row justify-between mb-3">
-                <Text className="text-neutral-300">Price</Text>
+                <Text className="text-gray-600">Price</Text>
                 <Text className="text-green-400 font-bold">
                   €{selectedOffer.offeredPrice.toFixed(2)}/{selectedOffer.unit.toLowerCase()}
                 </Text>
               </View>
               <View className="flex-row justify-between mb-3">
-                <Text className="text-neutral-300">Quantity</Text>
-                <Text className="text-white font-semibold">
+                <Text className="text-gray-600">Quantity</Text>
+                <Text className="text-gray-900 font-semibold">
                   {selectedOffer.requestedQuantity} {selectedOffer.unit.toLowerCase()}
                 </Text>
               </View>
               <View className="h-px bg-green-400/30 my-3" />
               <View className="flex-row justify-between">
-                <Text className="text-neutral-300">Total Value</Text>
+                <Text className="text-gray-600">Total Value</Text>
                 <Text className="text-green-400 font-black text-xl">
                   €{(selectedOffer.offeredPrice * selectedOffer.requestedQuantity).toLocaleString()}
                 </Text>
@@ -839,13 +843,13 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
           {/* Additional Notes */}
           <View className="mb-6">
-            <Text className="text-white font-semibold mb-3">Additional Notes (Optional)</Text>
+            <Text className="text-gray-900 font-semibold mb-3">Additional Notes (Optional)</Text>
             <TextInput
               value={acceptNotes}
               onChangeText={setAcceptNotes}
               placeholder="Any special requirements or delivery instructions..."
               placeholderTextColor="#6B7280"
-              className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 border border-neutral-700/50 rounded-xl p-4 text-white min-h-24"
+              className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 border border-gray-200/50 rounded-xl p-4 text-gray-900 min-h-24"
               multiline
               textAlignVertical="top"
             />
@@ -858,7 +862,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
               <View className="ml-3 flex-1">
                 <Text className="text-blue-300 font-semibold mb-1">Important</Text>
                 <Text className="text-blue-200 text-sm">
-                  By accepting this offer, you agree to the buyer's terms and conditions. This
+                  By accepting this offer, you agree to the buyer&apos;s terms and conditions. This
                   action is binding and cannot be undone.
                 </Text>
               </View>
@@ -888,10 +892,10 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
         <View className="p-6">
           {/* Offer Being Rejected */}
           <View className="mb-6">
-            <Text className="text-white font-bold text-lg mb-4">Rejecting offer from:</Text>
+            <Text className="text-gray-900 font-bold text-lg mb-4">Rejecting offer from:</Text>
             <View className="bg-gradient-to-br from-red-500/20 to-orange-600/10 rounded-xl p-4 border border-red-500/40">
-              <Text className="text-white font-semibold mb-2">{selectedOffer.buyer.name}</Text>
-              <Text className="text-neutral-300">
+              <Text className="text-gray-900 font-semibold mb-2">{selectedOffer.buyer.name}</Text>
+              <Text className="text-gray-600">
                 €{selectedOffer.offeredPrice.toFixed(2)}/{selectedOffer.unit.toLowerCase()} •{' '}
                 {selectedOffer.requestedQuantity} {selectedOffer.unit.toLowerCase()}
               </Text>
@@ -900,7 +904,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
           {/* Rejection Reason */}
           <View className="mb-6">
-            <Text className="text-white font-semibold mb-3">Reason for Rejection</Text>
+            <Text className="text-gray-900 font-semibold mb-3">Reason for Rejection</Text>
             <View className="flex-row flex-wrap gap-2">
               {rejectReasons.map((reason) => (
                 <TouchableOpacity
@@ -909,12 +913,10 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                   className={`px-4 py-2 rounded-lg border ${
                     rejectReason === reason
                       ? 'bg-red-500/30 border-red-500/50'
-                      : 'bg-neutral-800/50 border-neutral-700/50'
+                      : 'bg-gray-50/50 border-gray-200/50'
                   }`}
                 >
-                  <Text
-                    className={`${rejectReason === reason ? 'text-red-400' : 'text-neutral-300'}`}
-                  >
+                  <Text className={`${rejectReason === reason ? 'text-red-400' : 'text-gray-600'}`}>
                     {reason}
                   </Text>
                 </TouchableOpacity>
@@ -924,13 +926,13 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
 
           {/* Additional Message */}
           <View className="mb-6">
-            <Text className="text-white font-semibold mb-3">Message to Buyer (Optional)</Text>
+            <Text className="text-gray-900 font-semibold mb-3">Message to Buyer (Optional)</Text>
             <TextInput
               value={rejectMessage}
               onChangeText={setRejectMessage}
               placeholder="Provide additional feedback or suggestions..."
               placeholderTextColor="#6B7280"
-              className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 border border-neutral-700/50 rounded-xl p-4 text-white min-h-24"
+              className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 border border-gray-200/50 rounded-xl p-4 text-gray-900 min-h-24"
               multiline
               textAlignVertical="top"
             />
@@ -950,9 +952,9 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
             <>
               <TouchableOpacity
                 onPress={handleBack}
-                className="flex-1 bg-gradient-to-br from-neutral-700/80 to-neutral-800/60 rounded-xl py-4 items-center justify-center border border-neutral-600/50"
+                className="flex-1 bg-gradient-to-br from-neutral-700/80 to-neutral-800/60 rounded-xl py-4 items-center justify-center border border-gray-200/50"
               >
-                <Text className="text-white font-semibold">Cancel</Text>
+                <Text className="text-gray-900 font-semibold">Cancel</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -961,7 +963,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                 className="flex-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl py-4 items-center justify-center flex-row"
               >
                 <Send size={18} color="#FFFFFF" />
-                <Text className="text-white font-bold ml-2">
+                <Text className="text-gray-900 font-bold ml-2">
                   {actionLoading ? 'Sending...' : 'Send Counter-Offer'}
                 </Text>
               </TouchableOpacity>
@@ -972,9 +974,9 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
             <>
               <TouchableOpacity
                 onPress={handleBack}
-                className="flex-1 bg-gradient-to-br from-neutral-700/80 to-neutral-800/60 rounded-xl py-4 items-center justify-center border border-neutral-600/50"
+                className="flex-1 bg-gradient-to-br from-neutral-700/80 to-neutral-800/60 rounded-xl py-4 items-center justify-center border border-gray-200/50"
               >
-                <Text className="text-white font-semibold">Cancel</Text>
+                <Text className="text-gray-900 font-semibold">Cancel</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -983,7 +985,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                 className="flex-2 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl py-4 items-center justify-center flex-row"
               >
                 <Check size={18} color="#FFFFFF" />
-                <Text className="text-white font-bold ml-2">
+                <Text className="text-gray-900 font-bold ml-2">
                   {actionLoading ? 'Processing...' : 'Confirm Accept'}
                 </Text>
               </TouchableOpacity>
@@ -994,9 +996,9 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
             <>
               <TouchableOpacity
                 onPress={handleBack}
-                className="flex-1 bg-gradient-to-br from-neutral-700/80 to-neutral-800/60 rounded-xl py-4 items-center justify-center border border-neutral-600/50"
+                className="flex-1 bg-gradient-to-br from-neutral-700/80 to-neutral-800/60 rounded-xl py-4 items-center justify-center border border-gray-200/50"
               >
-                <Text className="text-white font-semibold">Cancel</Text>
+                <Text className="text-gray-900 font-semibold">Cancel</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -1005,7 +1007,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
                 className="flex-2 bg-gradient-to-r from-red-500 to-orange-600 rounded-xl py-4 items-center justify-center flex-row"
               >
                 <X size={18} color="#FFFFFF" />
-                <Text className="text-white font-bold ml-2">
+                <Text className="text-gray-900 font-bold ml-2">
                   {actionLoading ? 'Processing...' : 'Confirm Reject'}
                 </Text>
               </TouchableOpacity>
@@ -1017,7 +1019,7 @@ export const SellerOffersDrawer: React.FC<SellerOffersDrawerProps> = ({
     };
 
     return (
-      <View className="p-6 border-t border-neutral-700/50 bg-gradient-to-b from-neutral-900/80 to-black">
+      <View className="p-6 border-t border-gray-200/50 bg-gradient-to-b from-neutral-900/80 to-black">
         <View className="flex-row gap-4">{getButtons()}</View>
       </View>
     );

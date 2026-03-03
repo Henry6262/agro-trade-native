@@ -24,7 +24,7 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby bases and optimize delivery routes.",
         "NSCameraUsageDescription": "This app uses the camera to take photos of your agricultural products.",
         "NSPhotoLibraryUsageDescription": "This app accesses your photo library to upload product images.",
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": ["remote-notification", "location"]
       }
     },
     "android": {
@@ -61,6 +61,15 @@
       ],
       "expo-secure-store",
       "expo-notifications",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow AgroTrade to use your location for delivery tracking.",
+          "locationWhenInUsePermission": "Allow AgroTrade to use your location to track active deliveries.",
+          "isAndroidBackgroundLocationEnabled": false,
+          "isAndroidForegroundServiceEnabled": true
+        }
+      ],
       [
         "expo-image-picker",
         {

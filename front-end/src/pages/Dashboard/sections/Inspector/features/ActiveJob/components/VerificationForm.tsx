@@ -279,7 +279,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
               />
               <Text
                 className={`ml-2 font-medium ${
-                  verificationStatus === 'VERIFIED' ? 'text-white' : 'text-gray-700'
+                  verificationStatus === 'VERIFIED' ? 'text-gray-900' : 'text-gray-700'
                 }`}
               >
                 Verified
@@ -294,7 +294,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
               <XCircle size={16} color={verificationStatus === 'FAILED' ? '#fff' : '#374151'} />
               <Text
                 className={`ml-2 font-medium ${
-                  verificationStatus === 'FAILED' ? 'text-white' : 'text-gray-700'
+                  verificationStatus === 'FAILED' ? 'text-gray-900' : 'text-gray-700'
                 }`}
               >
                 Failed

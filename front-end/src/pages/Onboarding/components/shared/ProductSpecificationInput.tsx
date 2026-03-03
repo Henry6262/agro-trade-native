@@ -38,10 +38,10 @@ export function ProductSpecificationInput({
   };
 
   return (
-    <View className="bg-gray-800/50 rounded-2xl p-4 mb-3 border border-gray-700/50">
+    <View className="bg-white/50 rounded-2xl p-4 mb-3 border border-gray-200/50">
       {/* Label Row */}
       <View className="mb-3">
-        <Text className="text-white text-sm font-semibold">
+        <Text className="text-gray-900 text-sm font-semibold">
           {spec.name || spec.code}
           {isRequired && <Text className="text-red-400"> *</Text>}
         </Text>

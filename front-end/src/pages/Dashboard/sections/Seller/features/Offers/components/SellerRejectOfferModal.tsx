@@ -96,33 +96,33 @@ export const SellerRejectOfferModal: React.FC<SellerRejectOfferModalProps> = ({
           style={{
             transform: [{ scale: scaleAnim }],
           }}
-          className="bg-neutral-900 rounded-2xl w-full max-w-md border border-neutral-700"
+          className="bg-white rounded-2xl w-full max-w-md border border-gray-200"
         >
           {/* Header */}
-          <View className="p-6 border-b border-neutral-700">
+          <View className="p-6 border-b border-gray-200">
             <View className="flex-row justify-between items-center">
-              <Text className="text-xl font-bold text-white">Reject Offer</Text>
+              <Text className="text-xl font-bold text-gray-900">Reject Offer</Text>
               <TouchableOpacity onPress={handleClose}>
                 <X color="#9CA3AF" size={24} />
               </TouchableOpacity>
             </View>
-            <Text className="text-neutral-400 mt-1">Decline this offer with reason</Text>
+            <Text className="text-gray-500 mt-1">Decline this offer with reason</Text>
           </View>
 
           <ScrollView className="max-h-96" showsVerticalScrollIndicator={false}>
             <View className="p-6">
               {/* Buyer Info */}
-              <View className="bg-neutral-800 rounded-lg p-4 mb-4 border border-neutral-700">
+              <View className="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
                 <View className="flex-row items-center mb-3">
                   <User color="#ef4444" size={20} />
-                  <Text className="text-white font-semibold text-lg ml-2 flex-1">
+                  <Text className="text-gray-900 font-semibold text-lg ml-2 flex-1">
                     {offer.buyer}
                   </Text>
                 </View>
 
                 <View className="flex-row items-center">
                   <MapPin size={14} color="#ef4444" />
-                  <Text className="text-neutral-300 text-sm ml-2">
+                  <Text className="text-gray-600 text-sm ml-2">
                     {offer.buyerFlag} {offer.buyerLocation}
                   </Text>
                 </View>
@@ -135,24 +135,24 @@ export const SellerRejectOfferModal: React.FC<SellerRejectOfferModalProps> = ({
 
                   <View className="space-y-3">
                     <View className="flex-row justify-between items-center">
-                      <Text className="text-neutral-300">Product</Text>
-                      <Text className="text-white font-semibold">{offer.product}</Text>
+                      <Text className="text-gray-600">Product</Text>
+                      <Text className="text-gray-900 font-semibold">{offer.product}</Text>
                     </View>
 
                     <View className="flex-row justify-between items-center">
                       <View className="flex-row items-center">
                         <Package color="#ef4444" size={16} />
-                        <Text className="text-neutral-300 ml-2">Quantity</Text>
+                        <Text className="text-gray-600 ml-2">Quantity</Text>
                       </View>
-                      <Text className="text-white font-semibold">{offer.quantity} tons</Text>
+                      <Text className="text-gray-900 font-semibold">{offer.quantity} tons</Text>
                     </View>
 
                     <View className="flex-row justify-between items-center">
                       <View className="flex-row items-center">
                         <DollarSign color="#ef4444" size={16} />
-                        <Text className="text-neutral-300 ml-2">Offered price</Text>
+                        <Text className="text-gray-600 ml-2">Offered price</Text>
                       </View>
-                      <Text className="text-white font-semibold">
+                      <Text className="text-gray-900 font-semibold">
                         ${offer.offeredPricePerTon}/ton
                       </Text>
                     </View>
@@ -182,7 +182,7 @@ export const SellerRejectOfferModal: React.FC<SellerRejectOfferModalProps> = ({
 
               {/* Reason Selection */}
               <View className="mb-4">
-                <Text className="text-white font-semibold mb-3">Reason for rejection:</Text>
+                <Text className="text-gray-900 font-semibold mb-3">Reason for rejection:</Text>
                 <View className="space-y-2">
                   {predefinedReasons.map((reason, index) => (
                     <TouchableOpacity
@@ -191,12 +191,12 @@ export const SellerRejectOfferModal: React.FC<SellerRejectOfferModalProps> = ({
                       className={`p-3 rounded-lg border ${
                         selectedReason === reason
                           ? 'bg-red-500/20 border-red-500'
-                          : 'bg-neutral-800 border-neutral-700'
+                          : 'bg-gray-50 border-gray-200'
                       }`}
                     >
                       <Text
                         className={`text-sm ${
-                          selectedReason === reason ? 'text-red-300' : 'text-neutral-300'
+                          selectedReason === reason ? 'text-red-300' : 'text-gray-600'
                         }`}
                       >
                         {reason}
@@ -209,7 +209,7 @@ export const SellerRejectOfferModal: React.FC<SellerRejectOfferModalProps> = ({
               {/* Custom Reason Input */}
               {selectedReason === 'Other' && (
                 <View className="mb-4">
-                  <Text className="text-neutral-400 text-sm mb-2">Please specify your reason:</Text>
+                  <Text className="text-gray-500 text-sm mb-2">Please specify your reason:</Text>
                   <TextInput
                     value={rejectReason}
                     onChangeText={setRejectReason}
@@ -217,7 +217,7 @@ export const SellerRejectOfferModal: React.FC<SellerRejectOfferModalProps> = ({
                     placeholderTextColor="#6B7280"
                     multiline
                     numberOfLines={3}
-                    className="bg-neutral-800 border border-neutral-700 rounded-lg p-3 text-white"
+                    className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-900"
                     textAlignVertical="top"
                   />
                 </View>
@@ -242,14 +242,14 @@ export const SellerRejectOfferModal: React.FC<SellerRejectOfferModalProps> = ({
           </ScrollView>
 
           {/* Action Buttons */}
-          <View className="p-6 border-t border-neutral-700">
+          <View className="p-6 border-t border-gray-200">
             <View className="flex-row gap-3">
               <TouchableOpacity
                 onPress={handleClose}
-                className="flex-1 bg-neutral-700 rounded-lg py-3 items-center justify-center"
+                className="flex-1 bg-gray-100 rounded-lg py-3 items-center justify-center"
                 disabled={isLoading}
               >
-                <Text className="text-white font-semibold">Cancel</Text>
+                <Text className="text-gray-900 font-semibold">Cancel</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -263,7 +263,7 @@ export const SellerRejectOfferModal: React.FC<SellerRejectOfferModalProps> = ({
                   isLoading ||
                   !selectedReason ||
                   (selectedReason === 'Other' && !rejectReason.trim())
-                    ? 'bg-neutral-600'
+                    ? 'bg-gray-200'
                     : 'bg-gradient-to-r from-red-500 to-red-600'
                 }`}
                 style={{
@@ -280,7 +280,7 @@ export const SellerRejectOfferModal: React.FC<SellerRejectOfferModalProps> = ({
                   ) : (
                     <XCircle color="#FFFFFF" size={18} />
                   )}
-                  <Text className="text-white font-bold ml-2">
+                  <Text className="text-gray-900 font-bold ml-2">
                     {isLoading ? 'Rejecting...' : 'Reject Offer'}
                   </Text>
                 </View>

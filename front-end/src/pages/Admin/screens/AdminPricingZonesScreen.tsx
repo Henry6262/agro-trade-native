@@ -183,27 +183,27 @@ export function AdminPricingZonesScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
+      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
         <LoadingSpinner />
-        <Text className="text-white mt-4">Loading pricing zones...</Text>
+        <Text className="text-gray-900 mt-4">Loading pricing zones...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900">
+    <SafeAreaView className="flex-1 bg-gray-50">
       <View className="flex-1">
         {/* Header */}
-        <View className="flex-row items-center justify-between p-6 border-b border-gray-700">
+        <View className="flex-row items-center justify-between p-6 border-b border-gray-200">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
-            className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center"
+            className="w-10 h-10 rounded-full bg-white items-center justify-center"
           >
             <Ionicons name="chevron-back" size={20} color="#9CA3AF" />
           </TouchableOpacity>
 
           <View className="flex-1 mx-4">
-            <Text className="text-white text-xl font-semibold">Pricing Zones</Text>
+            <Text className="text-gray-900 text-xl font-semibold">Pricing Zones</Text>
             <Text className="text-gray-400 text-sm">Manage regional pricing zones</Text>
           </View>
 
@@ -218,14 +218,14 @@ export function AdminPricingZonesScreen() {
 
         {/* Search Bar */}
         <View className="px-6 py-4">
-          <View className="bg-gray-800 rounded-lg flex-row items-center px-4 py-3">
+          <View className="bg-white rounded-lg flex-row items-center px-4 py-3">
             <Ionicons name="search" size={20} color="#6B7280" />
             <TextInput
               value={searchTerm}
               onChangeText={setSearchTerm}
               placeholder="Search zones..."
               placeholderTextColor="#6B7280"
-              className="flex-1 ml-3 text-white"
+              className="flex-1 ml-3 text-gray-900"
             />
             {searchTerm.length > 0 && (
               <TouchableOpacity onPress={() => setSearchTerm('')}>
@@ -237,9 +237,9 @@ export function AdminPricingZonesScreen() {
 
         {/* Create Form */}
         {showCreateForm && (
-          <View className="mx-6 mb-4 bg-gray-800 rounded-xl p-4 border border-gray-700">
+          <View className="mx-6 mb-4 bg-white rounded-xl p-4 border border-gray-200">
             <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-white font-semibold text-lg">Create New Zone</Text>
+              <Text className="text-gray-900 font-semibold text-lg">Create New Zone</Text>
               <TouchableOpacity onPress={() => setShowCreateForm(false)}>
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -247,24 +247,24 @@ export function AdminPricingZonesScreen() {
 
             <View className="space-y-3">
               <View>
-                <Text className="text-gray-300 text-sm mb-2">Zone Name *</Text>
+                <Text className="text-gray-600 text-sm mb-2">Zone Name *</Text>
                 <TextInput
                   value={newZone.name}
                   onChangeText={(text) => setNewZone({ ...newZone, name: text })}
                   placeholder="e.g., Sofia Metro Area"
                   placeholderTextColor="#6B7280"
-                  className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                  className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                 />
               </View>
 
               <View>
-                <Text className="text-gray-300 text-sm mb-2">Description</Text>
+                <Text className="text-gray-600 text-sm mb-2">Description</Text>
                 <TextInput
                   value={newZone.description}
                   onChangeText={(text) => setNewZone({ ...newZone, description: text })}
                   placeholder="Zone description..."
                   placeholderTextColor="#6B7280"
-                  className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                  className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                   multiline
                   numberOfLines={2}
                 />
@@ -272,29 +272,29 @@ export function AdminPricingZonesScreen() {
 
               <View className="flex-row space-x-3">
                 <View className="flex-1">
-                  <Text className="text-gray-300 text-sm mb-2">Market Size</Text>
+                  <Text className="text-gray-600 text-sm mb-2">Market Size</Text>
                   <TextInput
                     value={newZone.marketSize}
                     onChangeText={(text) => setNewZone({ ...newZone, marketSize: text })}
                     placeholder="Large/Medium/Small"
                     placeholderTextColor="#6B7280"
-                    className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                    className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-gray-300 text-sm mb-2">Transport Access</Text>
+                  <Text className="text-gray-600 text-sm mb-2">Transport Access</Text>
                   <TextInput
                     value={newZone.transportAccess}
                     onChangeText={(text) => setNewZone({ ...newZone, transportAccess: text })}
                     placeholder="Good/Limited/Poor"
                     placeholderTextColor="#6B7280"
-                    className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                    className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                   />
                 </View>
               </View>
 
               <View>
-                <Text className="text-gray-300 text-sm mb-2">Zone Color</Text>
+                <Text className="text-gray-600 text-sm mb-2">Zone Color</Text>
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -319,7 +319,7 @@ export function AdminPricingZonesScreen() {
                   onPress={() => setShowCreateForm(false)}
                   className="flex-1 bg-gray-700 rounded-lg py-3 items-center"
                 >
-                  <Text className="text-gray-300 font-medium">Cancel</Text>
+                  <Text className="text-gray-600 font-medium">Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={createPricingZone}
@@ -338,7 +338,7 @@ export function AdminPricingZonesScreen() {
         {/* Zones List */}
         <ScrollView className="flex-1 px-6">
           {filteredZones.map((zone) => (
-            <View key={zone.id} className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700">
+            <View key={zone.id} className="bg-white rounded-xl p-4 mb-4 border border-gray-200">
               {/* Zone Header */}
               <View className="flex-row items-start justify-between mb-3">
                 <View className="flex-1">
@@ -347,7 +347,7 @@ export function AdminPricingZonesScreen() {
                       className="w-4 h-4 rounded-full mr-3"
                       style={{ backgroundColor: zone.color || '#3B82F6' }}
                     />
-                    <Text className="text-white font-semibold text-lg flex-1">{zone.name}</Text>
+                    <Text className="text-gray-900 font-semibold text-lg flex-1">{zone.name}</Text>
                     <View
                       className={`px-2 py-1 rounded-full ${
                         zone.isActive ? 'bg-green-900' : 'bg-red-900'
@@ -371,16 +371,16 @@ export function AdminPricingZonesScreen() {
               {/* Zone Stats */}
               <View className="flex-row space-x-4 mb-3">
                 <View className="bg-gray-700 rounded-lg px-3 py-2 flex-1">
-                  <Text className="text-gray-300 text-xs">Cities</Text>
-                  <Text className="text-white font-semibold">{zone._count.cities}</Text>
+                  <Text className="text-gray-600 text-xs">Cities</Text>
+                  <Text className="text-gray-900 font-semibold">{zone._count.cities}</Text>
                 </View>
                 <View className="bg-gray-700 rounded-lg px-3 py-2 flex-1">
-                  <Text className="text-gray-300 text-xs">Price Points</Text>
-                  <Text className="text-white font-semibold">{zone._count.productPrices}</Text>
+                  <Text className="text-gray-600 text-xs">Price Points</Text>
+                  <Text className="text-gray-900 font-semibold">{zone._count.productPrices}</Text>
                 </View>
                 <View className="bg-gray-700 rounded-lg px-3 py-2 flex-1">
-                  <Text className="text-gray-300 text-xs">Market Size</Text>
-                  <Text className="text-white font-semibold">{zone.marketSize || 'N/A'}</Text>
+                  <Text className="text-gray-600 text-xs">Market Size</Text>
+                  <Text className="text-gray-900 font-semibold">{zone.marketSize || 'N/A'}</Text>
                 </View>
               </View>
 
@@ -397,7 +397,7 @@ export function AdminPricingZonesScreen() {
                         <Text className="text-xs mr-1">
                           {cityZone.city.region.country.flagEmoji}
                         </Text>
-                        <Text className="text-gray-300 text-xs">{cityZone.city.name}</Text>
+                        <Text className="text-gray-600 text-xs">{cityZone.city.name}</Text>
                         {cityZone.isDefault && (
                           <View className="w-2 h-2 bg-blue-400 rounded-full ml-1" />
                         )}
@@ -411,7 +411,7 @@ export function AdminPricingZonesScreen() {
               )}
 
               {/* Action Buttons */}
-              <View className="flex-row space-x-2 pt-3 border-t border-gray-700">
+              <View className="flex-row space-x-2 pt-3 border-t border-gray-200">
                 <TouchableOpacity
                   onPress={() => navigation.navigate('AdminZoneDetails', { zoneId: zone.id })}
                   className="flex-1 bg-blue-600 rounded-lg py-2 flex-row items-center justify-center"

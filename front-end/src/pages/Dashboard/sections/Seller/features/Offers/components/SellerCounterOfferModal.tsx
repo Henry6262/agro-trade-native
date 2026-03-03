@@ -172,33 +172,33 @@ export const SellerCounterOfferModal: React.FC<SellerCounterOfferModalProps> = (
           style={{
             transform: [{ scale: scaleAnim }],
           }}
-          className="bg-neutral-900 rounded-2xl w-full max-w-md border border-neutral-700"
+          className="bg-white rounded-2xl w-full max-w-md border border-gray-200"
         >
           {/* Header */}
-          <View className="p-6 border-b border-neutral-700">
+          <View className="p-6 border-b border-gray-200">
             <View className="flex-row justify-between items-center">
-              <Text className="text-xl font-bold text-white">Counter Offer</Text>
+              <Text className="text-xl font-bold text-gray-900">Counter Offer</Text>
               <TouchableOpacity onPress={handleClose}>
                 <X color="#9CA3AF" size={24} />
               </TouchableOpacity>
             </View>
-            <Text className="text-neutral-400 mt-1">Propose your terms</Text>
+            <Text className="text-gray-500 mt-1">Propose your terms</Text>
           </View>
 
           <ScrollView className="max-h-96" showsVerticalScrollIndicator={false}>
             <View className="p-6">
               {/* Buyer Info */}
-              <View className="bg-neutral-800 rounded-lg p-4 mb-4 border border-neutral-700">
+              <View className="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
                 <View className="flex-row items-center mb-3">
                   <User color="#fb923c" size={20} />
-                  <Text className="text-white font-semibold text-lg ml-2 flex-1">
+                  <Text className="text-gray-900 font-semibold text-lg ml-2 flex-1">
                     {offer.buyer}
                   </Text>
                 </View>
 
                 <View className="flex-row items-center">
                   <MapPin size={14} color="#fb923c" />
-                  <Text className="text-neutral-300 text-sm ml-2">
+                  <Text className="text-gray-600 text-sm ml-2">
                     {offer.buyerFlag} {offer.buyerLocation}
                   </Text>
                 </View>
@@ -211,26 +211,26 @@ export const SellerCounterOfferModal: React.FC<SellerCounterOfferModalProps> = (
 
                   <View className="flex-row justify-between mb-3">
                     <View className="flex-1">
-                      <Text className="text-neutral-400 text-xs">Their Offer</Text>
-                      <Text className="text-white font-semibold">
+                      <Text className="text-gray-500 text-xs">Their Offer</Text>
+                      <Text className="text-gray-900 font-semibold">
                         ${offer.offeredPricePerTon}/ton
                       </Text>
-                      <Text className="text-neutral-400 text-xs">{offer.quantity} tons</Text>
+                      <Text className="text-gray-500 text-xs">{offer.quantity} tons</Text>
                     </View>
                     <View className="justify-center">
                       <MessageSquare size={20} color="#FB923C" />
                     </View>
                     <View className="flex-1 items-end">
-                      <Text className="text-neutral-400 text-xs">Your Counter</Text>
+                      <Text className="text-gray-500 text-xs">Your Counter</Text>
                       <Text className="text-orange-400 font-semibold">
                         ${counterPrice || '0'}/ton
                       </Text>
-                      <Text className="text-neutral-400 text-xs">{counterQuantity} tons</Text>
+                      <Text className="text-gray-500 text-xs">{counterQuantity} tons</Text>
                     </View>
                   </View>
 
                   {priceDiff.percentage !== 0 && (
-                    <View className="flex-row items-center justify-center bg-neutral-800/50 rounded-lg p-2">
+                    <View className="flex-row items-center justify-center bg-gray-50/50 rounded-lg p-2">
                       {priceDiff.difference > 0 ? (
                         <TrendingUp size={16} color="#10B981" />
                       ) : (
@@ -262,8 +262,8 @@ export const SellerCounterOfferModal: React.FC<SellerCounterOfferModalProps> = (
 
               {/* Counter Price Input */}
               <View className="mb-4">
-                <Text className="text-white font-semibold mb-2">Counter Price (per ton)</Text>
-                <View className="flex-row items-center bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-3">
+                <Text className="text-gray-900 font-semibold mb-2">Counter Price (per ton)</Text>
+                <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-3">
                   <DollarSign size={20} color="#FB923C" />
                   <TextInput
                     value={counterPrice}
@@ -271,19 +271,19 @@ export const SellerCounterOfferModal: React.FC<SellerCounterOfferModalProps> = (
                     placeholder={offer.offeredPricePerTon.toString()}
                     placeholderTextColor="#6B7280"
                     keyboardType="numeric"
-                    className="flex-1 ml-2 text-white"
+                    className="flex-1 ml-2 text-gray-900"
                   />
-                  <Text className="text-neutral-400">USD</Text>
+                  <Text className="text-gray-500">USD</Text>
                 </View>
-                <Text className="text-xs text-neutral-500 mt-1">
+                <Text className="text-xs text-gray-400 mt-1">
                   Original offer: ${offer.offeredPricePerTon}/ton
                 </Text>
               </View>
 
               {/* Quantity Input */}
               <View className="mb-4">
-                <Text className="text-white font-semibold mb-2">Quantity (tons)</Text>
-                <View className="flex-row items-center bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-3">
+                <Text className="text-gray-900 font-semibold mb-2">Quantity (tons)</Text>
+                <View className="flex-row items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-3">
                   <Package size={20} color="#FB923C" />
                   <TextInput
                     value={counterQuantity}
@@ -291,9 +291,9 @@ export const SellerCounterOfferModal: React.FC<SellerCounterOfferModalProps> = (
                     placeholder={offer.quantity.toString()}
                     placeholderTextColor="#6B7280"
                     keyboardType="numeric"
-                    className="flex-1 ml-2 text-white"
+                    className="flex-1 ml-2 text-gray-900"
                   />
-                  <Text className="text-neutral-400">tons</Text>
+                  <Text className="text-gray-500">tons</Text>
                 </View>
               </View>
 
@@ -315,7 +315,7 @@ export const SellerCounterOfferModal: React.FC<SellerCounterOfferModalProps> = (
 
               {/* Message Input */}
               <View className="mb-4">
-                <Text className="text-white font-semibold mb-2">Message to Buyer</Text>
+                <Text className="text-gray-900 font-semibold mb-2">Message to Buyer</Text>
                 <TextInput
                   value={counterMessage}
                   onChangeText={setCounterMessage}
@@ -323,7 +323,7 @@ export const SellerCounterOfferModal: React.FC<SellerCounterOfferModalProps> = (
                   placeholderTextColor="#6B7280"
                   multiline
                   numberOfLines={3}
-                  className="bg-neutral-800 border border-neutral-700 rounded-lg p-3 text-white"
+                  className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-gray-900"
                   textAlignVertical="top"
                 />
               </View>
@@ -348,14 +348,14 @@ export const SellerCounterOfferModal: React.FC<SellerCounterOfferModalProps> = (
           </ScrollView>
 
           {/* Action Buttons */}
-          <View className="p-6 border-t border-neutral-700">
+          <View className="p-6 border-t border-gray-200">
             <View className="flex-row gap-3">
               <TouchableOpacity
                 onPress={handleClose}
-                className="flex-1 bg-neutral-700 rounded-lg py-3 items-center justify-center"
+                className="flex-1 bg-gray-100 rounded-lg py-3 items-center justify-center"
                 disabled={isLoading}
               >
-                <Text className="text-white font-semibold">Cancel</Text>
+                <Text className="text-gray-900 font-semibold">Cancel</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -363,7 +363,7 @@ export const SellerCounterOfferModal: React.FC<SellerCounterOfferModalProps> = (
                 disabled={isLoading || !counterPrice || !counterQuantity}
                 className={`flex-1 rounded-lg py-3 items-center justify-center ${
                   isLoading || !counterPrice || !counterQuantity
-                    ? 'bg-neutral-600'
+                    ? 'bg-gray-200'
                     : 'bg-gradient-to-r from-orange-500 to-yellow-500'
                 }`}
                 style={{
@@ -380,7 +380,7 @@ export const SellerCounterOfferModal: React.FC<SellerCounterOfferModalProps> = (
                   ) : (
                     <Send color="#FFFFFF" size={18} />
                   )}
-                  <Text className="text-white font-bold ml-2">
+                  <Text className="text-gray-900 font-bold ml-2">
                     {isLoading ? 'Sending...' : 'Send Counter'}
                   </Text>
                 </View>

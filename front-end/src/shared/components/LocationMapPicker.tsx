@@ -264,9 +264,9 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
       {/* Header - Only show if title is provided */}
       {title ? (
         <View className="p-4 bg-gray-700 border-b border-gray-600">
-          <Text className="text-white text-lg font-semibold">{title}</Text>
+          <Text className="text-gray-900 text-lg font-semibold">{title}</Text>
           {selectedLocation?.formattedAddress && (
-            <Text className="text-gray-300 text-sm mt-1" numberOfLines={2}>
+            <Text className="text-gray-600 text-sm mt-1" numberOfLines={2}>
               {isLoadingAddress ? 'Getting address...' : selectedLocation.formattedAddress}
             </Text>
           )}
@@ -274,7 +274,7 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
       ) : selectedLocation?.formattedAddress ? (
         // Compact header when no title
         <View className="p-3 bg-gray-700 border-b border-gray-600">
-          <Text className="text-gray-300 text-sm" numberOfLines={2}>
+          <Text className="text-gray-600 text-sm" numberOfLines={2}>
             {isLoadingAddress ? 'Getting address...' : selectedLocation.formattedAddress}
           </Text>
         </View>
@@ -342,9 +342,9 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
 
         {/* Loading indicator */}
         {(isLoadingLocation || !mapReady) && (
-          <View className="absolute inset-0 bg-black/50 justify-center items-center">
+          <View className="absolute inset-0 bg-white/50 justify-center items-center">
             <ActivityIndicator size="large" color="#3B82F6" />
-            <Text className="text-white mt-2">
+            <Text className="text-gray-900 mt-2">
               {isLoadingLocation ? 'Getting your location...' : 'Loading map...'}
             </Text>
           </View>

@@ -1,12 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  Animated,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, TouchableOpacity, Alert, Animated, ActivityIndicator } from 'react-native';
 import { CheckCircle } from 'lucide-react-native';
 import { useLoginWithOAuth, usePrivy, OAuthProviderType } from '@privy-io/expo';
 import { useOnboardingStore } from '@stores/onboarding.store';
@@ -90,18 +83,21 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
   }, [fadeAnim, scaleAnim, checkmarkScale, textOpacity, onComplete]);
 
   // Helper function to get access token with retry
-  const getAccessTokenWithRetry = useCallback(async (maxRetries = 3, delayMs = 500): Promise<string | null> => {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      const token = await getAccessToken();
-      if (token) {
-        return token;
+  const getAccessTokenWithRetry = useCallback(
+    async (maxRetries = 3, delayMs = 500): Promise<string | null> => {
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        const token = await getAccessToken();
+        if (token) {
+          return token;
+        }
+        if (attempt < maxRetries) {
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
+        }
       }
-      if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, delayMs));
-      }
-    }
-    return null;
-  }, [getAccessToken]);
+      return null;
+    },
+    [getAccessToken]
+  );
 
   // Function to complete authentication with our backend after Privy auth
   const completeBackendAuth = useCallback(async () => {
@@ -128,11 +124,7 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
 
       if (response.data.access_token) {
         // Store tokens and login
-        login(
-          response.data.user,
-          response.data.access_token,
-          response.data.refresh_token
-        );
+        login(response.data.user, response.data.access_token, response.data.refresh_token);
 
         // Show success animation
         showProfileCreatedAnimation();
@@ -145,14 +137,18 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
       setBackendAuthInProgress(false);
       setIsLoading(false);
 
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : 'Please try again later.';
+      const errorMessage = error instanceof Error ? error.message : 'Please try again later.';
 
       Alert.alert('Authentication Failed', errorMessage);
     }
-  }, [getAccessTokenWithRetry, userRole, selectedRole, login, showProfileCreatedAnimation, backendAuthInProgress]);
+  }, [
+    getAccessTokenWithRetry,
+    userRole,
+    selectedRole,
+    login,
+    showProfileCreatedAnimation,
+    backendAuthInProgress,
+  ]);
 
   // Effect: When user becomes authenticated with Privy, complete backend auth
   useEffect(() => {
@@ -186,10 +182,7 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
       setIsLoading(false);
       hasCompletedBackendAuth.current = false;
 
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : 'Please try again later.';
+      const errorMessage = error instanceof Error ? error.message : 'Please try again later.';
 
       Alert.alert('Authentication Failed', errorMessage);
     }

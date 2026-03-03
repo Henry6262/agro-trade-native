@@ -192,7 +192,9 @@ export const authService = {
       .then((response) => response.data);
   },
 
-  updateCompany: async (data: Partial<CompanyInfo>): Promise<{ success: boolean; company: CompanyInfo }> => {
+  updateCompany: async (
+    data: Partial<CompanyInfo>
+  ): Promise<{ success: boolean; company: CompanyInfo }> => {
     // Map frontend field names to backend field names
     const backendData: Record<string, any> = {};
     if (data.companyName !== undefined) backendData.legalName = data.companyName;
@@ -220,20 +222,18 @@ export const authService = {
 
   // Bases (addresses)
   getBases: async (): Promise<{ success: boolean; bases: BaseInfo[] }> => {
-    return apiClient
-      .get<{ success: boolean; bases: any[] }>('/auth/me/bases')
-      .then((response) => ({
-        success: true,
-        bases: (response.data.bases || []).map((b: any) => ({
-          id: b.id,
-          name: b.label,
-          location: [b.street, b.country].filter(Boolean).join(', ') || '',
-          type: (b.addressType || 'warehouse').toLowerCase(),
-          capacity: '',
-          addressType: b.addressType,
-          isDefault: b.isDefault,
-        })),
-      }));
+    return apiClient.get<{ success: boolean; bases: any[] }>('/auth/me/bases').then((response) => ({
+      success: true,
+      bases: (response.data.bases || []).map((b: any) => ({
+        id: b.id,
+        name: b.label,
+        location: [b.street, b.country].filter(Boolean).join(', ') || '',
+        type: (b.addressType || 'warehouse').toLowerCase(),
+        capacity: '',
+        addressType: b.addressType,
+        isDefault: b.isDefault,
+      })),
+    }));
   },
 
   createBase: async (data: {

@@ -1,16 +1,10 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  SafeAreaView,
-  Dimensions,
-  Platform,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, Text, Modal, TouchableOpacity, Dimensions, Platform } from 'react-native';
 import { User, LogIn, UserPlus } from 'lucide-react-native';
-import { Button } from '@shared/components/Button';
+import { GlassCard } from '../../../design-system/GlassCard';
+import { GlassButton } from '../../../design-system/GlassButton';
+import { GlassBadge } from '../../../design-system/GlassBadge';
+import { COLORS } from '../../../design-system/tokens';
 
 interface ExistingAccountModalProps {
   visible: boolean;
@@ -37,76 +31,119 @@ export const ExistingAccountModal: React.FC<ExistingAccountModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
-      <View className="flex-1 bg-black/60 justify-center items-center p-4">
-        <View
-          className="bg-gray-900 rounded-2xl overflow-hidden"
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 16,
+        }}
+      >
+        <GlassCard
+          tier="strong"
           style={{ width: modalWidth, maxWidth: 480 }}
+          animate={false}
+          noPadding
         >
-          <LinearGradient
-            colors={['#10B981', '#059669']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="p-4"
+          {/* Header */}
+          <View
+            style={{
+              padding: 24,
+              alignItems: 'center',
+              borderBottomWidth: 1,
+              borderBottomColor: 'rgba(255,255,255,0.1)',
+            }}
           >
-            <View className="items-center">
-              <View className="bg-white/20 rounded-full p-3 mb-3">
-                <User size={32} color="white" />
-              </View>
-              <Text className="text-white text-xl font-bold">Account Detected</Text>
+            <View
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 36,
+                backgroundColor: 'rgba(74,222,128,0.15)',
+                borderWidth: 1.5,
+                borderColor: 'rgba(74,222,128,0.4)',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 16,
+                shadowColor: '#4ADE80',
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.4,
+                shadowRadius: 10,
+              }}
+            >
+              <User size={36} color="#4ADE80" />
             </View>
-          </LinearGradient>
+            <Text style={{ color: COLORS.textPrimary, fontSize: 20, fontWeight: '700' }}>
+              Account Detected
+            </Text>
+          </View>
 
-          <View className="p-6">
-            <Text className="text-gray-300 text-center mb-6">
+          {/* Body */}
+          <View style={{ padding: 24 }}>
+            <Text
+              style={{
+                color: COLORS.textSecondary,
+                textAlign: 'center',
+                marginBottom: 20,
+                fontSize: 15,
+              }}
+            >
               We found an existing account for:
             </Text>
 
-            <View className="bg-gray-800 rounded-lg p-4 mb-6">
-              <Text className="text-white font-semibold text-lg">{userName}</Text>
-              <Text className="text-gray-400 text-sm mt-1">{userEmail}</Text>
+            {/* User Info Card */}
+            <GlassCard tier="subtle" style={{ marginBottom: 20 }} animate={false}>
+              <Text style={{ color: COLORS.textPrimary, fontWeight: '700', fontSize: 17 }}>
+                {userName}
+              </Text>
+              <Text style={{ color: COLORS.textMuted, fontSize: 13, marginTop: 4 }}>
+                {userEmail}
+              </Text>
               {userRole && (
-                <View className="mt-3 flex-row">
-                  <View className="bg-emerald-500/20 px-3 py-1 rounded-full">
-                    <Text className="text-emerald-400 text-xs font-medium capitalize">
-                      {userRole} Account
-                    </Text>
-                  </View>
+                <View style={{ marginTop: 12 }}>
+                  <GlassBadge label={`${userRole} Account`} variant="success" />
                 </View>
               )}
-            </View>
+            </GlassCard>
 
-            <Text className="text-gray-400 text-center mb-6">
+            <Text
+              style={{
+                color: COLORS.textMuted,
+                textAlign: 'center',
+                marginBottom: 24,
+                fontSize: 14,
+              }}
+            >
               Would you like to login to your existing profile or create a new one?
             </Text>
 
             {/* Action Buttons */}
-            <View className="space-y-3">
-              <TouchableOpacity
+            <View style={{ gap: 12 }}>
+              <GlassButton
+                label="Login to Existing Profile"
                 onPress={onLoginExisting}
-                className="bg-emerald-500 rounded-xl py-4 px-6 flex-row justify-center items-center"
-              >
-                <LogIn size={20} color="white" />
-                <Text className="text-white font-bold text-base ml-2">
-                  Login to Existing Profile
-                </Text>
-              </TouchableOpacity>
+                variant="primary"
+                fullWidth
+                leftIcon={<LogIn size={18} color="#FFFFFF" />}
+              />
 
-              <TouchableOpacity
+              <GlassButton
+                label="Create New Profile"
                 onPress={onCreateNew}
-                className="bg-gray-800 border border-gray-700 rounded-xl py-4 px-6 flex-row justify-center items-center"
-              >
-                <UserPlus size={20} color="#9CA3AF" />
-                <Text className="text-gray-300 font-medium text-base ml-2">Create New Profile</Text>
-              </TouchableOpacity>
+                variant="ghost"
+                fullWidth
+                leftIcon={<UserPlus size={18} color={COLORS.textSecondary} />}
+              />
 
-              <TouchableOpacity onPress={onSwitchAccount} className="py-3">
-                <Text className="text-blue-400 text-center text-sm">
+              <TouchableOpacity onPress={onSwitchAccount} style={{ paddingVertical: 8 }}>
+                <Text style={{ color: '#60A5FA', textAlign: 'center', fontSize: 14 }}>
                   Use a Different Google Account
                 </Text>
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </GlassCard>
       </View>
     </Modal>
   );

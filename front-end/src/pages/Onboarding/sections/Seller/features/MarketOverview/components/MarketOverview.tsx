@@ -80,7 +80,7 @@ export function MarketOverview({
   }, 0);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900">
+    <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView
         contentContainerStyle={{ flexGrow: 1, padding: 16 }}
         showsVerticalScrollIndicator={false}
@@ -97,11 +97,11 @@ export function MarketOverview({
 
           {/* Location Card */}
           {userLocation && (
-            <Card className="p-4 bg-gray-800 border-gray-600 mb-4">
+            <Card className="p-4 bg-white border-gray-600 mb-4">
               <View className="flex-row items-center">
                 <MapPin size={20} color="#3B82F6" />
                 <View className="ml-3 flex-1">
-                  <Text className="text-white font-medium">Your Location</Text>
+                  <Text className="text-gray-900 font-medium">Your Location</Text>
                   <Text className="text-gray-400">
                     {userLocation.city
                       ? `${userLocation.city}, ${userLocation.country}`
@@ -117,7 +117,7 @@ export function MarketOverview({
 
           {/* Regional Pricing Info */}
           {loadingPrices ? (
-            <Card className="p-6 bg-gray-800 border-gray-600 mb-4">
+            <Card className="p-6 bg-white border-gray-600 mb-4">
               <View className="items-center">
                 <ActivityIndicator size="small" color="#3B82F6" />
                 <Text className="text-gray-400 mt-2">Loading regional prices...</Text>
@@ -125,17 +125,17 @@ export function MarketOverview({
             </Card>
           ) : (
             pricingData.length > 0 && (
-              <Card className="p-4 bg-gray-800 border-gray-600 mb-4">
+              <Card className="p-4 bg-white border-gray-600 mb-4">
                 <View className="flex-row items-center mb-3">
                   <DollarSign size={20} color="#10B981" />
-                  <Text className="text-white font-medium ml-2">Regional Market Prices</Text>
+                  <Text className="text-gray-900 font-medium ml-2">Regional Market Prices</Text>
                 </View>
                 {pricingData.map((price, index) => (
                   <View
                     key={index}
-                    className="flex-row justify-between py-2 border-t border-gray-700"
+                    className="flex-row justify-between py-2 border-t border-gray-200"
                   >
-                    <Text className="text-gray-300">{price.productName}</Text>
+                    <Text className="text-gray-600">{price.productName}</Text>
                     <Text className="text-green-400 font-medium">
                       €{price.minPrice}-{price.maxPrice}/{price.unit || 'ton'}
                     </Text>
@@ -147,14 +147,14 @@ export function MarketOverview({
 
           {/* Quick Features */}
           <View className="flex-row justify-between mb-6">
-            <Card className="flex-1 p-3 bg-gray-800 border-gray-600 mr-2">
+            <Card className="flex-1 p-3 bg-white border-gray-600 mr-2">
               <View className="items-center">
                 <Users size={20} color="#22C55E" />
                 <Text className="text-xs text-gray-400 mt-1">Active Buyers</Text>
-                <Text className="text-lg font-bold text-white">1,847</Text>
+                <Text className="text-lg font-bold text-gray-900">1,847</Text>
               </View>
             </Card>
-            <Card className="flex-1 p-3 bg-gray-800 border-gray-600 ml-2">
+            <Card className="flex-1 p-3 bg-white border-gray-600 ml-2">
               <View className="items-center">
                 <Building2 size={20} color="#8B5CF6" />
                 <Text className="text-xs text-gray-400 mt-1">Base Management</Text>
@@ -163,11 +163,11 @@ export function MarketOverview({
             </Card>
           </View>
 
-          <Card className="p-6 bg-gray-800 border-gray-600">
+          <Card className="p-6 bg-white border-gray-600">
             <View className="flex-row items-center justify-between mb-6">
               <View className="flex-row items-center">
                 <ShoppingCart size={20} color="#22C55E" className="mr-2" />
-                <Text className="text-xl font-bold text-white">Your Products</Text>
+                <Text className="text-xl font-bold text-gray-900">Your Products</Text>
               </View>
               <Badge className="bg-primary-500/20 border-primary-500">
                 <Text className="text-primary-500">
@@ -195,19 +195,19 @@ export function MarketOverview({
                 return (
                   <View
                     key={spec.productId}
-                    className="flex-row items-center justify-between p-4 bg-gray-900 rounded-lg border border-gray-600 mb-4"
+                    className="flex-row items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-600 mb-4"
                   >
                     <View className="flex-row items-center">
                       <Text className="text-2xl mr-4">{product.icon}</Text>
                       <View>
-                        <Text className="font-semibold text-white">{product.name}</Text>
+                        <Text className="font-semibold text-gray-900">{product.name}</Text>
                         <Text className="text-sm text-gray-400">
                           {spec.quantity} {spec.unit} • ₹{spec.pricePerKilo}/kg
                         </Text>
                       </View>
                     </View>
                     <View className="items-end">
-                      <Text className="font-semibold text-white">
+                      <Text className="font-semibold text-gray-900">
                         ₹{itemValue.toLocaleString()}
                       </Text>
                       <Text className="text-xs text-gray-400">{itemWeight}kg total</Text>
@@ -220,11 +220,11 @@ export function MarketOverview({
             <View className="border-t border-gray-600 mt-6 pt-4">
               <View className="flex-row justify-between items-center">
                 <View>
-                  <Text className="font-semibold text-white">Total Weight</Text>
+                  <Text className="font-semibold text-gray-900">Total Weight</Text>
                   <Text className="text-sm text-gray-400">{totalWeight.toLocaleString()} kg</Text>
                 </View>
                 <View className="items-end">
-                  <Text className="font-semibold text-white">Total Value</Text>
+                  <Text className="font-semibold text-gray-900">Total Value</Text>
                   <Text className="text-lg font-bold text-primary-500">
                     ₹{totalValue.toLocaleString()}
                   </Text>
@@ -235,23 +235,23 @@ export function MarketOverview({
 
           {/* What's Next Card */}
           <Card className="p-4 bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-500/30 mb-6">
-            <Text className="text-white font-semibold mb-3">✨ After You Complete Setup</Text>
+            <Text className="text-gray-900 font-semibold mb-3">✨ After You Complete Setup</Text>
             <View className="space-y-2">
               <View className="flex-row items-center">
                 <Text className="text-green-400 mr-2">✓</Text>
-                <Text className="text-gray-300 text-sm">Add multiple warehouse/silo locations</Text>
+                <Text className="text-gray-600 text-sm">Add multiple warehouse/silo locations</Text>
               </View>
               <View className="flex-row items-center">
                 <Text className="text-green-400 mr-2">✓</Text>
-                <Text className="text-gray-300 text-sm">Manage inventory across all bases</Text>
+                <Text className="text-gray-600 text-sm">Manage inventory across all bases</Text>
               </View>
               <View className="flex-row items-center">
                 <Text className="text-green-400 mr-2">✓</Text>
-                <Text className="text-gray-300 text-sm">Get matched with verified buyers</Text>
+                <Text className="text-gray-600 text-sm">Get matched with verified buyers</Text>
               </View>
               <View className="flex-row items-center">
                 <Text className="text-green-400 mr-2">✓</Text>
-                <Text className="text-gray-300 text-sm">Access real-time market analytics</Text>
+                <Text className="text-gray-600 text-sm">Access real-time market analytics</Text>
               </View>
             </View>
           </Card>
@@ -282,11 +282,11 @@ export function MarketOverview({
               activeOpacity={0.8}
             >
               <Zap size={20} color="white" className="mr-2" />
-              <Text className="text-white text-lg font-semibold">Complete Setup</Text>
+              <Text className="text-gray-900 text-lg font-semibold">Complete Setup</Text>
             </TouchableOpacity>
 
             <Text className="text-xs text-gray-400 text-center mt-3">
-              You'll be asked to sign in to finalize your account
+              You&apos;ll be asked to sign in to finalize your account
             </Text>
             <Text className="text-xs text-green-400 text-center mt-1">
               Setup time: Less than 5 minutes!

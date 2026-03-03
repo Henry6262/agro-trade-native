@@ -25,9 +25,9 @@ export const DriverCard: React.FC<DriverCardProps> = ({ driver }) => {
   };
 
   return (
-    <View className="bg-gray-900/40 border border-gray-700 rounded-lg p-4 mb-3">
+    <View className="bg-gray-50/40 border border-gray-200 rounded-lg p-4 mb-3">
       <View className="flex-row items-center justify-between mb-2">
-        <Text className="text-white font-semibold flex-1">{driver.name}</Text>
+        <Text className="text-gray-900 font-semibold flex-1">{driver.name}</Text>
         <View className="flex-row items-center gap-2">
           <Badge
             className={
@@ -55,7 +55,7 @@ export const DriverCard: React.FC<DriverCardProps> = ({ driver }) => {
         </View>
       )}
 
-      <Text className="text-gray-300 text-sm">CDL: {driver.license}</Text>
+      <Text className="text-gray-600 text-sm">CDL: {driver.license}</Text>
       <Text className="text-gray-400 text-xs mb-2">Experience: {driver.experienceYears} years</Text>
       <View className="flex-row items-center">
         <Users size={14} color="#94A3B8" />
@@ -64,7 +64,7 @@ export const DriverCard: React.FC<DriverCardProps> = ({ driver }) => {
       {driver.assignment && (
         <View className="flex-row items-center mt-1">
           <MapPin size={14} color="#FBBF24" />
-          <Text className="text-gray-300 text-sm ml-2">{driver.assignment}</Text>
+          <Text className="text-gray-600 text-sm ml-2">{driver.assignment}</Text>
         </View>
       )}
     </View>

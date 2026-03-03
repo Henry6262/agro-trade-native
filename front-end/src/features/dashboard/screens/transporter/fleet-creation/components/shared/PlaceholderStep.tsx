@@ -41,17 +41,17 @@ export const PlaceholderStep: React.FC<PlaceholderStepProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/50">
+      <View className="flex-1 justify-end bg-white/50">
         <Pressable className="flex-1" onPress={onClose} />
 
-        <View className="bg-neutral-900 rounded-t-3xl max-h-[90%]">
+        <View className="bg-white rounded-t-3xl max-h-[90%]">
           {/* Header */}
-          <View className="flex-row items-center justify-between p-6 border-b border-neutral-800">
+          <View className="flex-row items-center justify-between p-6 border-b border-gray-100">
             <View className="flex-row items-center flex-1">
               <TouchableOpacity onPress={onBack} className="mr-4">
                 <ChevronLeft size={24} color="#9CA3AF" />
               </TouchableOpacity>
-              <Text className="text-xl font-bold text-white">
+              <Text className="text-xl font-bold text-gray-900">
                 {flowType === 'truck' ? 'Add New Truck' : 'Add New Driver'}
               </Text>
             </View>
@@ -69,18 +69,18 @@ export const PlaceholderStep: React.FC<PlaceholderStepProps> = ({
 
           {/* Content */}
           <View className="p-6">
-            <Text className="text-lg font-semibold text-white mb-4">{stepName}</Text>
+            <Text className="text-lg font-semibold text-gray-900 mb-4">{stepName}</Text>
 
-            <View className="bg-neutral-800 rounded-lg p-8 items-center">
-              <Text className="text-neutral-400 text-center mb-2">This step is coming soon</Text>
-              <Text className="text-neutral-500 text-sm text-center">
+            <View className="bg-gray-50 rounded-lg p-8 items-center">
+              <Text className="text-gray-500 text-center mb-2">This step is coming soon</Text>
+              <Text className="text-gray-400 text-sm text-center">
                 Click continue to proceed to the next step
               </Text>
             </View>
           </View>
 
           {/* Footer Actions */}
-          <View className="p-6 border-t border-neutral-800">
+          <View className="p-6 border-t border-gray-100">
             <Button
               variant="gradient"
               className={`bg-gradient-to-r ${
@@ -88,7 +88,9 @@ export const PlaceholderStep: React.FC<PlaceholderStepProps> = ({
               }`}
               onPress={handleAction}
             >
-              <Text className="text-white font-semibold">{isLastStep ? 'Submit' : 'Continue'}</Text>
+              <Text className="text-gray-900 font-semibold">
+                {isLastStep ? 'Submit' : 'Continue'}
+              </Text>
             </Button>
           </View>
         </View>

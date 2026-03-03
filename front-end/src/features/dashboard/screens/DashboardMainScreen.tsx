@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StatusBar, Dimensions } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import {
   BarChart3,
   Users,
   Package,
   TrendingUp,
   Bell,
-  RefreshCw,
   Wheat,
   ShoppingCart,
   Truck,
@@ -31,8 +30,8 @@ import { ProfileDrawer } from '../components/ProfileDrawer';
 import { BottomNavigation } from '../components/BottomNavigation';
 import { useAuthStore } from '@stores/auth.store';
 import { AdminPricingZonesScreen } from '../../admin/screens/AdminPricingZonesScreen';
-import { Container } from '../../../shared/components';
 import PendingListingService from '@services/pendingListingService';
+import { GradientBackground, GlassHeader } from '../../../design-system';
 
 type DashboardMainScreenNavigationProp = NativeStackNavigationProp<
   DashboardStackParamList,
@@ -49,34 +48,22 @@ interface NavigationItem {
 export default function DashboardMainScreen() {
   const navigation = useNavigation<DashboardMainScreenNavigationProp>();
   const route = useRoute<DashboardMainScreenRouteProp>();
-  const { width: screenWidth } = Dimensions.get('window');
   const { user, isAuthenticated } = useAuthStore();
 
   const [activeSection, setActiveSection] = useState('overview');
-  // State for testing different dashboards
-  const [testRole, setTestRole] = useState<
-    'admin' | 'seller' | 'buyer' | 'transporter' | 'inspector' | null
-  >(null);
 
   // Normalize user role to lowercase for consistency
   // Note: Backend uses 'FARMER' instead of 'SELLER'
   const userRole = React.useMemo(() => {
-    // If testRole is set, use it (for testing purposes)
-    if (testRole) {
-      return testRole;
-    }
-    // Otherwise use the route param or user's actual role
     const role = route.params?.userRole || user?.role || 'FARMER';
     const normalizedRole = role.toLowerCase();
-    // Map 'farmer' to 'seller' for consistency with frontend naming
     if (normalizedRole === 'farmer') {
       return 'seller' as const;
     }
     return normalizedRole as 'admin' | 'seller' | 'buyer' | 'transporter' | 'inspector';
-  }, [user?.role, route.params?.userRole, testRole]);
+  }, [user?.role, route.params?.userRole]);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-  const [showDashboardSwitcher, setShowDashboardSwitcher] = useState(false);
 
   // Ensure authenticated users stay on dashboard
   React.useEffect(() => {
@@ -197,143 +184,40 @@ export default function DashboardMainScreen() {
     return <CommandCenterScreen />;
   };
 
-  const roleOptions = [
-    { value: 'admin', label: 'Admin', icon: Users },
-    { value: 'seller', label: 'Seller', icon: Wheat },
-    { value: 'buyer', label: 'Buyer', icon: ShoppingCart },
-    { value: 'transporter', label: 'Transporter', icon: Truck },
-    { value: 'inspector', label: 'Inspector', icon: User },
-  ];
+  const profileButton = (
+    <TouchableOpacity
+      onPress={() => setShowProfileDrawer(true)}
+      style={{
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: 'rgba(74,222,128,0.2)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(74,222,128,0.3)',
+      }}
+    >
+      <User size={18} color="#4ADE80" />
+    </TouchableOpacity>
+  );
 
   return (
-    <Container safeArea={true} noPadding={true} backgroundColor="#000000">
-      <StatusBar backgroundColor="#000000" barStyle="light-content" />
+    <GradientBackground>
+      <View style={{ flex: 1 }}>
+        {/* Glass Header */}
+        <GlassHeader showWordmark={true} rightAction={profileButton} />
 
-      <View className="flex-1">
-        {/* Main Content */}
-        <View className="flex-1">
-          {/* Top Toolbar */}
-          <View className="h-16 bg-neutral-800 border-b border-neutral-700 flex-row items-center justify-between px-6">
-            <View className="flex-row items-center gap-4">
-              <Text className="text-green-500 font-bold text-lg tracking-wider">AGRI TRADE</Text>
-            </View>
-            <View className="flex-row items-center gap-4">
-              {/* Dashboard Switcher Button - DEV only */}
-              {__DEV__ && (
-                <TouchableOpacity
-                  onPress={() => setShowDashboardSwitcher(!showDashboardSwitcher)}
-                  className="flex-row items-center bg-neutral-700 px-3 py-2 rounded-lg"
-                >
-                  <LayoutGrid color="#9CA3AF" size={16} />
-                  <Text className="text-neutral-300 text-sm ml-2">Switch Dashboard</Text>
-                </TouchableOpacity>
-              )}
-
-              <TouchableOpacity className="p-2">
-                <Bell color="#9CA3AF" size={16} />
-              </TouchableOpacity>
-              <TouchableOpacity className="p-2">
-                <RefreshCw color="#9CA3AF" size={16} />
-              </TouchableOpacity>
-              <TouchableOpacity className="p-2 ml-2" onPress={() => setShowProfileDrawer(true)}>
-                <View className="w-8 h-8 bg-emerald-500 rounded-full items-center justify-center">
-                  <User color="white" size={16} />
-                </View>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Dashboard Switcher Dropdown - DEV only */}
-          {__DEV__ && showDashboardSwitcher && (
-            <View
-              className="absolute top-16 right-6 bg-neutral-900 border border-neutral-700 rounded-lg p-2 z-50"
-              style={{ minWidth: 200 }}
-            >
-              <Text className="text-neutral-400 text-xs px-3 py-1 mb-1">TEST DASHBOARDS</Text>
-
-              <TouchableOpacity
-                onPress={() => {
-                  setShowDashboardSwitcher(false);
-                  setTestRole('seller');
-                  setActiveSection('products');
-                }}
-                className={`flex-row items-center px-3 py-2 rounded ${
-                  userRole === 'seller' ? 'bg-neutral-800' : ''
-                }`}
-              >
-                <View className="w-2 h-2 bg-blue-500 rounded-full mr-2" />
-                <Text className="text-white">Seller Dashboard</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => {
-                  setShowDashboardSwitcher(false);
-                  setTestRole('buyer');
-                  setActiveSection('orders');
-                }}
-                className={`flex-row items-center px-3 py-2 rounded ${
-                  userRole === 'buyer' ? 'bg-neutral-800' : ''
-                }`}
-              >
-                <View className="w-2 h-2 bg-yellow-500 rounded-full mr-2" />
-                <Text className="text-white">Buyer Dashboard</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => {
-                  setShowDashboardSwitcher(false);
-                  setTestRole('transporter');
-                  setActiveSection('bidding');
-                }}
-                className={`flex-row items-center px-3 py-2 rounded ${
-                  userRole === 'transporter' ? 'bg-neutral-800' : ''
-                }`}
-              >
-                <View className="w-2 h-2 bg-green-500 rounded-full mr-2" />
-                <Text className="text-white">Transporter Dashboard</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => {
-                  setShowDashboardSwitcher(false);
-                  setTestRole('admin');
-                  setActiveSection('overview');
-                }}
-                className={`flex-row items-center px-3 py-2 rounded ${
-                  userRole === 'admin' ? 'bg-neutral-800' : ''
-                }`}
-              >
-                <View className="w-2 h-2 bg-purple-500 rounded-full mr-2" />
-                <Text className="text-white">Admin Dashboard</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={() => {
-                  setShowDashboardSwitcher(false);
-                  setTestRole('inspector');
-                  setActiveSection('active');
-                }}
-                className={`flex-row items-center px-3 py-2 rounded ${
-                  userRole === 'inspector' ? 'bg-neutral-800' : ''
-                }`}
-              >
-                <View className="w-2 h-2 bg-green-500 rounded-full mr-2" />
-                <Text className="text-white">Inspector Dashboard</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* Dashboard Content */}
-          <View className="flex-1">{renderContent()}</View>
-        </View>
-
-        {/* Bottom Navigation */}
-        <BottomNavigation
-          items={navigationItems}
-          activeSection={activeSection}
-          onSectionChange={setActiveSection}
-        />
+        {/* Dashboard Content */}
+        <View style={{ flex: 1 }}>{renderContent()}</View>
       </View>
+
+      {/* Glass Bottom Navigation */}
+      <BottomNavigation
+        items={navigationItems}
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+      />
 
       {/* Profile Drawer */}
       <ProfileDrawer
@@ -344,6 +228,6 @@ export default function DashboardMainScreen() {
         }}
         showSuccessAnimation={showSuccessAnimation}
       />
-    </Container>
+    </GradientBackground>
   );
 }

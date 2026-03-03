@@ -3,13 +3,13 @@ import {
   Modal,
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
   Alert,
   ActivityIndicator,
+  StyleSheet,
 } from 'react-native';
 import {
   X,
@@ -25,22 +25,17 @@ import {
   XCircle,
 } from 'lucide-react-native';
 import { negotiationService } from '@services/negotiationService';
+import { GlassCard, GlassBadge, GlassButton, GlassInput } from '../../../../../design-system';
+import { COLORS } from '../../../../../design-system';
+
+const DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 10 };
 
 interface CounterOfferModalProps {
   visible: boolean;
   onClose: () => void;
   negotiationId: string;
-  currentOffer: {
-    price: number;
-    quantity: number;
-    terms?: string;
-  };
-  counterOffer?: {
-    price: number;
-    quantity: number;
-    terms?: string;
-    reason?: string;
-  };
+  currentOffer: { price: number; quantity: number; terms?: string };
+  counterOffer?: { price: number; quantity: number; terms?: string; reason?: string };
   sellerName?: string;
   buyerMaxPrice?: number;
   targetMargin?: number;
@@ -66,29 +61,23 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  // Initialize with suggested values
   useEffect(() => {
     if (counterOffer && currentOffer) {
-      // Suggest a middle ground price
       const suggestedPrice = ((currentOffer.price + counterOffer.price) / 2).toFixed(2);
       setNewPrice(suggestedPrice);
       setNewQuantity(counterOffer.quantity.toString());
-
-      // Generate appropriate message based on price difference
       const priceDiff = counterOffer.price - currentOffer.price;
-      const percentDiff = ((priceDiff / currentOffer.price) * 100).toFixed(1);
-
       if (Math.abs(priceDiff) < currentOffer.price * 0.05) {
         setResponseMessage(
-          `We're very close to an agreement. This offer represents a fair middle ground.`
+          "We're very close to an agreement. This offer represents a fair middle ground."
         );
       } else if (priceDiff > 0) {
         setResponseMessage(
-          `While we understand your position, this price would impact our margins. We propose a compromise.`
+          'While we understand your position, this price would impact our margins. We propose a compromise.'
         );
       } else {
         setResponseMessage(
-          `We appreciate your flexibility. This adjusted offer ensures a mutually beneficial arrangement.`
+          'We appreciate your flexibility. This adjusted offer ensures a mutually beneficial arrangement.'
         );
       }
     }
@@ -96,17 +85,14 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
 
   const calculateProfitMargin = (price: number) => {
     if (!buyerMaxPrice || buyerMaxPrice === 0) return 0;
-    const margin = ((buyerMaxPrice - price) / buyerMaxPrice) * 100;
-    return margin;
+    return ((buyerMaxPrice - price) / buyerMaxPrice) * 100;
   };
 
   const calculateConvergence = () => {
     if (!counterOffer || !currentOffer) return null;
-
     const currentGap = Math.abs(counterOffer.price - currentOffer.price);
     const newGap = Math.abs(parseFloat(newPrice) - counterOffer.price);
     const convergenceRate = (((currentGap - newGap) / currentGap) * 100).toFixed(1);
-
     return {
       currentGap,
       newGap,
@@ -117,59 +103,34 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
 
   const validateResponse = (): boolean => {
     const errors: string[] = [];
-
     if (responseType === 'COUNTER') {
       const price = parseFloat(newPrice);
       const quantity = parseFloat(newQuantity);
-
-      if (!price || price <= 0) {
-        errors.push('Please enter a valid price');
-      }
-
-      if (!quantity || quantity <= 0) {
-        errors.push('Please enter a valid quantity');
-      }
-
-      if (price > buyerMaxPrice) {
-        errors.push(`Price exceeds buyer's maximum (€${buyerMaxPrice})`);
-      }
-
+      if (!price || price <= 0) errors.push('Please enter a valid price');
+      if (!quantity || quantity <= 0) errors.push('Please enter a valid quantity');
+      if (price > buyerMaxPrice) errors.push(`Price exceeds buyer's maximum (€${buyerMaxPrice})`);
       const margin = calculateProfitMargin(price);
-      if (margin < 5) {
+      if (margin < 5)
         errors.push(`Price results in ${margin.toFixed(1)}% margin (minimum 5% required)`);
-      }
-
-      // Check if the new offer is moving in the right direction
-      if (counterOffer && price >= counterOffer.price) {
+      if (counterOffer && price >= counterOffer.price)
         errors.push("Counter-offer should be lower than seller's current offer");
-      }
     } else if (responseType === 'REJECT' && !rejectReason) {
       errors.push('Please provide a reason for rejection');
     }
-
     setValidationErrors(errors);
     return errors.length === 0;
   };
 
   const handleSubmit = async () => {
-    if (!validateResponse()) {
-      return;
-    }
-
+    if (!validateResponse()) return;
     setIsSubmitting(true);
-
     try {
-      let result;
-
       switch (responseType) {
         case 'ACCEPT':
-          result = await negotiationService.acceptOffer(
-            negotiationId,
-            responseMessage || 'Offer accepted'
-          );
+          await negotiationService.acceptOffer(negotiationId, responseMessage || 'Offer accepted');
           Alert.alert(
             'Offer Accepted',
-            `You have accepted the seller's offer of €${counterOffer?.price || currentOffer.price} for ${counterOffer?.quantity || currentOffer.quantity} units.`,
+            `You have accepted the seller's offer of €${counterOffer?.price || currentOffer.price}.`,
             [
               {
                 text: 'OK',
@@ -181,9 +142,8 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
             ]
           );
           break;
-
         case 'REJECT':
-          result = await negotiationService.rejectOffer(
+          await negotiationService.rejectOffer(
             negotiationId,
             rejectReason || 'Terms not acceptable'
           );
@@ -197,21 +157,15 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
             },
           ]);
           break;
-
-        case 'COUNTER':
-          result = await negotiationService.counterOffer(negotiationId, {
+        case 'COUNTER': {
+          await negotiationService.counterOffer(negotiationId, {
             counterPrice: parseFloat(newPrice),
             message: responseMessage,
           });
-
           const convergence = calculateConvergence();
           Alert.alert(
             'Counter-Offer Sent',
-            `Your counter-offer of €${newPrice} has been sent to ${sellerName}.${
-              convergence?.isConverging
-                ? ` The price gap has narrowed by ${convergence.convergenceRate}%.`
-                : ''
-            }`,
+            `Your counter-offer of €${newPrice} has been sent to ${sellerName}.${convergence?.isConverging ? ` Price gap narrowed by ${convergence.convergenceRate}%.` : ''}`,
             [
               {
                 text: 'OK',
@@ -223,9 +177,9 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
             ]
           );
           break;
+        }
       }
     } catch (error: any) {
-      console.error('Error responding to counter-offer:', error);
       Alert.alert('Error', error?.message || 'Failed to send response. Please try again.');
     } finally {
       setIsSubmitting(false);
@@ -237,235 +191,236 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
   const meetsTarget = profitMargin >= targetMargin;
   const convergence = calculateConvergence();
 
+  const getSubmitVariant = (): 'primary' | 'danger' | 'secondary' => {
+    if (isSubmitting) return 'secondary';
+    if (responseType === 'ACCEPT') return 'primary';
+    if (responseType === 'REJECT') return 'danger';
+    return isProfitable ? 'secondary' : 'secondary';
+  };
+
   return (
     <Modal
       visible={visible}
       animationType="fade"
-      transparent={true}
+      transparent
       presentationStyle="overFullScreen"
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center">
+      <View style={styles.overlay}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          className="w-full h-[95%] px-4"
+          style={styles.kav}
         >
-          <View className="bg-white rounded-2xl h-full w-full">
+          <GlassCard tier="strong" style={styles.card} animate={false} noPadding>
             {/* Header */}
-            <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
-              <View className="flex-1">
-                <Text className="text-lg font-bold text-gray-800">Respond to Counter-Offer</Text>
-                <Text className="text-sm text-gray-600 mt-1">{sellerName}</Text>
+            <View style={styles.header}>
+              <View style={styles.headerText}>
+                <Text style={styles.headerTitle}>Respond to Counter-Offer</Text>
+                <Text style={styles.headerSub}>{sellerName}</Text>
               </View>
-              <TouchableOpacity onPress={onClose} className="p-2 rounded-full bg-gray-100">
-                <X size={20} color="#6B7280" />
+              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                <X size={20} color={COLORS.textSecondary} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView className="flex-1 p-4">
-              {/* Offer Comparison */}
-              <View className="bg-blue-50 rounded-lg p-3 mb-4">
-                <Text className="text-blue-800 font-semibold mb-2">Negotiation Status</Text>
-                <View className="flex-row justify-between mb-2">
+            <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
+              {/* Offer comparison */}
+              <GlassCard tier="subtle" animate={false} style={styles.comparisonCard}>
+                <Text style={styles.comparisonTitle}>Negotiation Status</Text>
+                <View style={styles.comparisonRow}>
                   <View>
-                    <Text className="text-xs text-blue-600">Your Offer</Text>
-                    <Text className="text-blue-800 font-bold">
+                    <Text style={styles.comparisonLabel}>Your Offer</Text>
+                    <Text style={styles.goldPrice}>
                       €{currentOffer.price} × {currentOffer.quantity}
                     </Text>
                   </View>
-                  <View className="justify-center">
-                    <MessageSquare size={20} color="#2563EB" />
-                  </View>
+                  <MessageSquare size={20} color={COLORS.info} />
                   <View>
-                    <Text className="text-xs text-blue-600">Their Counter</Text>
-                    <Text className="text-blue-800 font-bold">
+                    <Text style={styles.comparisonLabel}>Their Counter</Text>
+                    <Text style={styles.goldPrice}>
                       €{counterOffer?.price || 0} × {counterOffer?.quantity || 0}
                     </Text>
                   </View>
                 </View>
                 {counterOffer?.reason && (
-                  <Text className="text-xs text-blue-600 italic mt-1">"{counterOffer.reason}"</Text>
+                  <Text style={styles.counterReason}>&quot;{counterOffer.reason}&quot;</Text>
                 )}
+              </GlassCard>
+
+              {/* Response type selector */}
+              <Text style={styles.sectionLabel}>How do you want to respond?</Text>
+              <View style={styles.typeSelector}>
+                {(['COUNTER', 'ACCEPT', 'REJECT'] as const).map((type) => (
+                  <TouchableOpacity
+                    key={type}
+                    onPress={() => setResponseType(type)}
+                    style={[
+                      styles.typeBtn,
+                      responseType === type && styles.typeBtnActive,
+                      type === 'ACCEPT' && responseType === 'ACCEPT' && styles.typeBtnGreen,
+                      type === 'REJECT' && responseType === 'REJECT' && styles.typeBtnRed,
+                    ]}
+                  >
+                    {type === 'COUNTER' && (
+                      <MessageSquare
+                        size={15}
+                        color={responseType === 'COUNTER' ? COLORS.info : COLORS.textMuted}
+                        style={styles.typeIcon}
+                      />
+                    )}
+                    {type === 'ACCEPT' && (
+                      <CheckCircle
+                        size={15}
+                        color={responseType === 'ACCEPT' ? COLORS.accentGreen : COLORS.textMuted}
+                        style={styles.typeIcon}
+                      />
+                    )}
+                    {type === 'REJECT' && (
+                      <XCircle
+                        size={15}
+                        color={responseType === 'REJECT' ? COLORS.danger : COLORS.textMuted}
+                        style={styles.typeIcon}
+                      />
+                    )}
+                    <Text
+                      style={[
+                        styles.typeBtnText,
+                        responseType === type && styles.typeBtnTextActive,
+                        type === 'ACCEPT' &&
+                          responseType === 'ACCEPT' && { color: COLORS.accentGreen },
+                        type === 'REJECT' && responseType === 'REJECT' && { color: COLORS.danger },
+                      ]}
+                    >
+                      {type === 'COUNTER' ? 'Counter' : type === 'ACCEPT' ? 'Accept' : 'Reject'}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
 
-              {/* Response Type Selection */}
-              <View className="mb-4">
-                <Text className="text-gray-700 font-semibold mb-2">
-                  How do you want to respond?
-                </Text>
-                <View className="flex-row gap-2">
-                  <TouchableOpacity
-                    onPress={() => setResponseType('COUNTER')}
-                    className={`flex-1 py-2 px-3 rounded-lg border ${
-                      responseType === 'COUNTER'
-                        ? 'bg-blue-600 border-blue-600'
-                        : 'bg-white border-gray-300'
-                    }`}
-                  >
-                    <MessageSquare
-                      size={16}
-                      color={responseType === 'COUNTER' ? 'white' : '#6B7280'}
-                      style={{ alignSelf: 'center' }}
-                    />
-                    <Text
-                      className={`text-xs text-center mt-1 ${
-                        responseType === 'COUNTER' ? 'text-white' : 'text-gray-700'
-                      }`}
-                    >
-                      Counter
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => setResponseType('ACCEPT')}
-                    className={`flex-1 py-2 px-3 rounded-lg border ${
-                      responseType === 'ACCEPT'
-                        ? 'bg-green-600 border-green-600'
-                        : 'bg-white border-gray-300'
-                    }`}
-                  >
-                    <CheckCircle
-                      size={16}
-                      color={responseType === 'ACCEPT' ? 'white' : '#6B7280'}
-                      style={{ alignSelf: 'center' }}
-                    />
-                    <Text
-                      className={`text-xs text-center mt-1 ${
-                        responseType === 'ACCEPT' ? 'text-white' : 'text-gray-700'
-                      }`}
-                    >
-                      Accept
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => setResponseType('REJECT')}
-                    className={`flex-1 py-2 px-3 rounded-lg border ${
-                      responseType === 'REJECT'
-                        ? 'bg-red-600 border-red-600'
-                        : 'bg-white border-gray-300'
-                    }`}
-                  >
-                    <XCircle
-                      size={16}
-                      color={responseType === 'REJECT' ? 'white' : '#6B7280'}
-                      style={{ alignSelf: 'center' }}
-                    />
-                    <Text
-                      className={`text-xs text-center mt-1 ${
-                        responseType === 'REJECT' ? 'text-white' : 'text-gray-700'
-                      }`}
-                    >
-                      Reject
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-
-              {/* Validation Errors */}
+              {/* Validation errors */}
               {validationErrors.length > 0 && (
-                <View className="bg-red-50 rounded-lg p-3 mb-4">
+                <GlassCard
+                  tier="subtle"
+                  animate={false}
+                  style={{
+                    backgroundColor: 'rgba(248,113,113,0.1)',
+                    borderColor: 'rgba(248,113,113,0.2)',
+                    marginBottom: 12,
+                  }}
+                >
                   {validationErrors.map((error, index) => (
-                    <View key={index} className="flex-row items-start mb-1">
-                      <AlertCircle size={14} color="#DC2626" style={{ marginTop: 2 }} />
-                      <Text className="text-red-600 text-sm ml-1">{error}</Text>
+                    <View key={index} style={styles.errorRow}>
+                      <AlertCircle size={13} color={COLORS.danger} />
+                      <Text style={styles.errorText}>{error}</Text>
                     </View>
                   ))}
-                </View>
+                </GlassCard>
               )}
 
-              {/* Counter-Offer Form */}
+              {/* Counter form */}
               {responseType === 'COUNTER' && (
                 <>
-                  <View className="mb-4">
-                    <Text className="text-gray-700 font-semibold mb-2">New Price (per unit)</Text>
-                    <View className="flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border border-gray-300">
-                      <DollarSign size={20} color="#6B7280" />
-                      <TextInput
-                        value={newPrice}
-                        onChangeText={setNewPrice}
-                        placeholder={counterOffer?.price.toString() || '0'}
-                        keyboardType="numeric"
-                        className="flex-1 ml-2 text-gray-800"
-                      />
-                      <Text className="text-gray-600">EUR</Text>
-                    </View>
-                    <Text className="text-xs text-gray-500 mt-1">
-                      Seller's offer: €{counterOffer?.price} | Your last: €{currentOffer.price}
-                    </Text>
-                  </View>
+                  <GlassInput
+                    label="New Price (per unit)"
+                    value={newPrice}
+                    onChangeText={setNewPrice}
+                    placeholder={counterOffer?.price.toString() || '0'}
+                    keyboardType="numeric"
+                    leftIcon={<DollarSign size={16} color={COLORS.textMuted} />}
+                  />
+                  <Text style={styles.hintText}>
+                    Seller&apos;s offer: €{counterOffer?.price} | Your last: €{currentOffer.price}
+                  </Text>
 
-                  <View className="mb-4">
-                    <Text className="text-gray-700 font-semibold mb-2">Quantity</Text>
-                    <View className="flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border border-gray-300">
-                      <Package size={20} color="#6B7280" />
-                      <TextInput
-                        value={newQuantity}
-                        onChangeText={setNewQuantity}
-                        placeholder={counterOffer?.quantity.toString() || '0'}
-                        keyboardType="numeric"
-                        className="flex-1 ml-2 text-gray-800"
-                      />
-                      <Text className="text-gray-600">units</Text>
-                    </View>
-                  </View>
+                  <GlassInput
+                    label="Quantity"
+                    value={newQuantity}
+                    onChangeText={setNewQuantity}
+                    placeholder={counterOffer?.quantity.toString() || '0'}
+                    keyboardType="numeric"
+                    leftIcon={<Package size={16} color={COLORS.textMuted} />}
+                  />
 
-                  {/* Convergence Indicator */}
                   {convergence && (
-                    <View
-                      className={`rounded-lg p-3 mb-4 ${
-                        convergence.isConverging ? 'bg-green-50' : 'bg-orange-50'
-                      }`}
+                    <GlassCard
+                      tier="subtle"
+                      animate={false}
+                      style={[
+                        styles.indicatorCard,
+                        {
+                          borderColor: convergence.isConverging
+                            ? 'rgba(74,222,128,0.2)'
+                            : 'rgba(249,115,22,0.2)',
+                        },
+                      ]}
                     >
-                      <View className="flex-row items-center">
+                      <View style={styles.indicatorRow}>
                         {convergence.isConverging ? (
-                          <TrendingDown size={16} color="#10B981" />
+                          <TrendingDown size={15} color={COLORS.accentGreen} />
                         ) : (
-                          <TrendingUp size={16} color="#F97316" />
+                          <TrendingUp size={15} color="#f97316" />
                         )}
                         <Text
-                          className={`font-semibold ml-2 ${
-                            convergence.isConverging ? 'text-green-800' : 'text-orange-800'
-                          }`}
+                          style={[
+                            styles.indicatorLabel,
+                            { color: convergence.isConverging ? COLORS.accentGreen : '#f97316' },
+                          ]}
                         >
                           {convergence.isConverging ? 'Converging' : 'Diverging'} Negotiation
                         </Text>
                       </View>
                       <Text
-                        className={`text-xs mt-1 ${
-                          convergence.isConverging ? 'text-green-600' : 'text-orange-600'
-                        }`}
+                        style={[
+                          styles.indicatorSub,
+                          { color: convergence.isConverging ? COLORS.accentGreen : '#f97316' },
+                        ]}
                       >
                         Price gap: €{convergence.currentGap.toFixed(2)} → €
                         {convergence.newGap.toFixed(2)}
                         {convergence.isConverging && ` (-${convergence.convergenceRate}%)`}
                       </Text>
-                    </View>
+                    </GlassCard>
                   )}
 
-                  {/* Profit Indicator */}
-                  <View
-                    className={`rounded-lg p-3 mb-4 ${
-                      meetsTarget ? 'bg-green-50' : isProfitable ? 'bg-yellow-50' : 'bg-red-50'
-                    }`}
+                  <GlassCard
+                    tier="subtle"
+                    animate={false}
+                    style={[
+                      styles.indicatorCard,
+                      {
+                        borderColor: meetsTarget
+                          ? 'rgba(74,222,128,0.2)'
+                          : isProfitable
+                            ? 'rgba(252,211,77,0.2)'
+                            : 'rgba(248,113,113,0.2)',
+                      },
+                    ]}
                   >
                     <Text
-                      className={`font-semibold ${
-                        meetsTarget
-                          ? 'text-green-800'
-                          : isProfitable
-                            ? 'text-yellow-800'
-                            : 'text-red-800'
-                      }`}
+                      style={[
+                        styles.indicatorLabel,
+                        {
+                          color: meetsTarget
+                            ? COLORS.accentGreen
+                            : isProfitable
+                              ? COLORS.accentGold
+                              : COLORS.danger,
+                        },
+                      ]}
                     >
                       Profit Margin: {profitMargin.toFixed(1)}%
                     </Text>
                     <Text
-                      className={`text-xs mt-1 ${
-                        meetsTarget
-                          ? 'text-green-600'
-                          : isProfitable
-                            ? 'text-yellow-600'
-                            : 'text-red-600'
-                      }`}
+                      style={[
+                        styles.indicatorSub,
+                        {
+                          color: meetsTarget
+                            ? COLORS.accentGreen
+                            : isProfitable
+                              ? COLORS.accentGold
+                              : COLORS.danger,
+                        },
+                      ]}
                     >
                       {meetsTarget
                         ? `Meets target margin (${targetMargin}%)`
@@ -473,129 +428,187 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
                           ? `Below target (${targetMargin}%) but profitable`
                           : 'Below minimum margin (5%)'}
                     </Text>
-                  </View>
+                  </GlassCard>
                 </>
               )}
 
-              {/* Accept Form */}
+              {/* Accept form */}
               {responseType === 'ACCEPT' && (
-                <View className="bg-green-50 rounded-lg p-3 mb-4">
-                  <View className="flex-row items-center mb-2">
-                    <CheckCircle size={20} color="#10B981" />
-                    <Text className="text-green-800 font-semibold ml-2">
+                <GlassCard
+                  tier="subtle"
+                  animate={false}
+                  style={[styles.indicatorCard, { borderColor: 'rgba(74,222,128,0.25)' }]}
+                >
+                  <View style={styles.indicatorRow}>
+                    <CheckCircle size={18} color={COLORS.accentGreen} />
+                    <Text style={[styles.indicatorLabel, { color: COLORS.accentGreen }]}>
                       Accepting Counter-Offer
                     </Text>
                   </View>
-                  <Text className="text-green-700 text-sm">
+                  <Text style={[styles.indicatorSub, { color: COLORS.accentGreen }]}>
                     You will accept: €{counterOffer?.price} × {counterOffer?.quantity} units
                   </Text>
-                  <Text className="text-green-600 text-xs mt-1">
+                  <Text style={styles.hintText}>
                     Total value: €
                     {((counterOffer?.price || 0) * (counterOffer?.quantity || 0)).toFixed(2)}
                   </Text>
-                </View>
+                </GlassCard>
               )}
 
-              {/* Reject Form */}
+              {/* Reject form */}
               {responseType === 'REJECT' && (
-                <View className="mb-4">
-                  <Text className="text-gray-700 font-semibold mb-2">Reason for Rejection</Text>
-                  <TextInput
-                    value={rejectReason}
-                    onChangeText={setRejectReason}
-                    placeholder="Explain why you're rejecting this offer..."
-                    multiline
-                    numberOfLines={3}
-                    className="bg-gray-50 rounded-lg px-3 py-2 border border-gray-300 text-gray-800"
-                    textAlignVertical="top"
-                  />
-                </View>
-              )}
-
-              {/* Message/Note */}
-              <View className="mb-6">
-                <Text className="text-gray-700 font-semibold mb-2">
-                  {responseType === 'REJECT' ? 'Additional Note' : 'Message'} (Optional)
-                </Text>
-                <TextInput
-                  value={responseMessage}
-                  onChangeText={setResponseMessage}
-                  placeholder={
-                    responseType === 'ACCEPT'
-                      ? 'Thank you for your flexibility...'
-                      : responseType === 'REJECT'
-                        ? 'We appreciate your offer but...'
-                        : "Let's find a middle ground..."
-                  }
+                <GlassInput
+                  label="Reason for Rejection"
+                  value={rejectReason}
+                  onChangeText={setRejectReason}
+                  placeholder="Explain why you're rejecting this offer..."
                   multiline
                   numberOfLines={3}
-                  className="bg-gray-50 rounded-lg px-3 py-2 border border-gray-300 text-gray-800"
                   textAlignVertical="top"
                 />
-              </View>
+              )}
 
-              {/* Negotiation Tips */}
-              <View className="bg-gray-50 rounded-lg p-3 mb-4">
-                <View className="flex-row items-center mb-1">
-                  <Info size={14} color="#6B7280" />
-                  <Text className="text-xs font-semibold text-gray-700 ml-1">Negotiation Tips</Text>
+              {/* Message */}
+              <GlassInput
+                label={
+                  responseType === 'REJECT' ? 'Additional Note (Optional)' : 'Message (Optional)'
+                }
+                value={responseMessage}
+                onChangeText={setResponseMessage}
+                placeholder={
+                  responseType === 'ACCEPT'
+                    ? 'Thank you for your flexibility...'
+                    : responseType === 'REJECT'
+                      ? 'We appreciate your offer but...'
+                      : "Let's find a middle ground..."
+                }
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
+
+              {/* Tips */}
+              <GlassCard tier="subtle" animate={false} style={{ marginBottom: 16 }}>
+                <View style={styles.tipsRow}>
+                  <Info size={13} color={COLORS.textMuted} />
+                  <Text style={styles.tipsLabel}>Negotiation Tips</Text>
                 </View>
-                <Text className="text-xs text-gray-600">
+                <Text style={styles.tipsText}>
                   {responseType === 'COUNTER'
                     ? '• Move closer to their price to show willingness\n• Consider quantity adjustments for better pricing\n• Keep communication professional and positive'
                     : responseType === 'ACCEPT'
                       ? '• Accepting builds trust for future deals\n• Consider the long-term relationship value\n• Quick acceptance can expedite delivery'
                       : '• Provide clear reasoning for rejection\n• Leave door open for future negotiations\n• Consider alternative suppliers before rejecting'}
                 </Text>
-              </View>
+              </GlassCard>
             </ScrollView>
 
-            {/* Footer Actions */}
-            <View className="p-4 border-t border-gray-200">
-              <View className="flex-row space-x-3">
-                <TouchableOpacity
+            {/* Footer */}
+            <View style={styles.footer}>
+              <View style={styles.footerButtons}>
+                <GlassButton
+                  label="Cancel"
                   onPress={onClose}
-                  className="flex-1 py-3 rounded-lg border border-gray-300"
+                  variant="ghost"
+                  size="md"
                   disabled={isSubmitting}
-                >
-                  <Text className="text-gray-700 font-semibold text-center">Cancel</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={handleSubmit}
-                  className={`flex-1 py-3 rounded-lg flex-row items-center justify-center ${
+                  style={styles.footerBtn}
+                />
+                <GlassButton
+                  label={
                     isSubmitting
-                      ? 'bg-gray-400'
+                      ? '...'
                       : responseType === 'ACCEPT'
-                        ? 'bg-green-600'
+                        ? 'Accept'
                         : responseType === 'REJECT'
-                          ? 'bg-red-600'
-                          : isProfitable
-                            ? 'bg-blue-600'
-                            : 'bg-orange-600'
-                  }`}
+                          ? 'Reject'
+                          : 'Send Counter'
+                  }
+                  onPress={handleSubmit}
+                  variant={getSubmitVariant()}
+                  size="md"
                   disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <ActivityIndicator color="white" />
-                  ) : (
-                    <>
-                      <Send size={18} color="white" />
-                      <Text className="text-white font-semibold ml-2">
-                        {responseType === 'ACCEPT'
-                          ? 'Accept'
-                          : responseType === 'REJECT'
-                            ? 'Reject'
-                            : 'Send Counter'}
-                      </Text>
-                    </>
-                  )}
-                </TouchableOpacity>
+                  loading={isSubmitting}
+                  leftIcon={<Send size={16} color="#fff" />}
+                  style={styles.footerBtn}
+                />
               </View>
             </View>
-          </View>
+          </GlassCard>
         </KeyboardAvoidingView>
       </View>
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  body: { flex: 1, padding: 20 },
+  card: { height: '100%', width: '100%' },
+  closeBtn: { backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 20, padding: 6 },
+  comparisonCard: { marginBottom: 16 },
+  comparisonLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    marginBottom: 3,
+    textTransform: 'uppercase',
+  },
+  comparisonRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
+  comparisonTitle: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 10,
+    textTransform: 'uppercase',
+  },
+  counterReason: { color: COLORS.info, fontSize: 11, fontStyle: 'italic', marginTop: 6 },
+  errorRow: { alignItems: 'flex-start', flexDirection: 'row', gap: 6, marginBottom: 4 },
+  errorText: { color: COLORS.danger, flex: 1, fontSize: 12 },
+  footer: { borderTopColor: 'rgba(255,255,255,0.08)', borderTopWidth: 1, padding: 20 },
+  footerBtn: { flex: 1 },
+  footerButtons: { flexDirection: 'row', gap: 12 },
+  goldPrice: { color: COLORS.accentGold, fontFamily: 'monospace', fontSize: 14, fontWeight: '700' },
+  header: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+  },
+  headerSub: { color: COLORS.textSecondary, fontSize: 13, marginTop: 2 },
+  headerText: { flex: 1 },
+  headerTitle: { color: COLORS.textPrimary, fontSize: 17, fontWeight: '800' },
+  hintText: { color: COLORS.textMuted, fontSize: 11, marginBottom: 12, marginTop: -8 },
+  indicatorCard: { marginBottom: 12, padding: 12 },
+  indicatorLabel: { fontSize: 13, fontWeight: '700' },
+  indicatorRow: { alignItems: 'center', flexDirection: 'row', gap: 6, marginBottom: 4 },
+  indicatorSub: { fontSize: 12 },
+  kav: { height: '95%', paddingHorizontal: 16, width: '100%' },
+  overlay: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  sectionLabel: { color: COLORS.textSecondary, fontSize: 13, fontWeight: '700', marginBottom: 10 },
+  tipsLabel: { color: COLORS.textSecondary, fontSize: 12, fontWeight: '700' },
+  tipsRow: { alignItems: 'center', flexDirection: 'row', gap: 6, marginBottom: 6 },
+  tipsText: { color: COLORS.textMuted, fontSize: 12, lineHeight: 18 },
+  typeBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 10,
+    borderWidth: 1,
+    flex: 1,
+    paddingVertical: 10,
+  },
+  typeBtnActive: { backgroundColor: 'rgba(96,165,250,0.1)', borderColor: 'rgba(96,165,250,0.4)' },
+  typeBtnGreen: { backgroundColor: 'rgba(74,222,128,0.1)', borderColor: 'rgba(74,222,128,0.4)' },
+  typeBtnRed: { backgroundColor: 'rgba(248,113,113,0.1)', borderColor: 'rgba(248,113,113,0.4)' },
+  typeBtnText: { color: COLORS.textMuted, fontSize: 12, fontWeight: '600' },
+  typeBtnTextActive: { color: COLORS.info },
+  typeIcon: { marginBottom: 4 },
+  typeSelector: { flexDirection: 'row', gap: 8, marginBottom: 16 },
+});

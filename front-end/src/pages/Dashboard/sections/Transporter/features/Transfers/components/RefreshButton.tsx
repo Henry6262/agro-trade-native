@@ -14,7 +14,7 @@ export const TransfersRefreshButton: React.FC<TransfersRefreshButtonProps> = ({
   <TouchableOpacity
     onPress={onRefresh}
     disabled={refreshing}
-    className="flex-row items-center justify-center bg-gray-800/50 border border-gray-700 rounded-lg p-3"
+    className="flex-row items-center justify-center bg-white/50 border border-gray-200 rounded-lg p-3"
   >
     <RefreshCw size={18} color={refreshing ? '#6B7280' : '#60A5FA'} />
     <Text className={`ml-2 ${refreshing ? 'text-gray-500' : 'text-blue-400'}`}>

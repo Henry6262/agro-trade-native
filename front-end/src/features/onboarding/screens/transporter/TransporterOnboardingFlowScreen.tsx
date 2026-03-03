@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { View, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../../../navigation/types';
 import { TransporterOnboarding } from '@pages/Onboarding/sections/Transporter/components/TransporterOnboarding';
 import { useOnboardingStore } from '@stores/onboarding.store';
+import { GradientBackground } from '../../../../design-system';
 
 type NavigationProp = NativeStackNavigationProp<
   OnboardingStackParamList,
@@ -33,9 +34,10 @@ export const TransporterOnboardingFlowScreen: React.FC<Props> = ({ navigation })
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#111827' }}>
-      <StatusBar barStyle="light-content" backgroundColor="#111827" />
-      <TransporterOnboarding onComplete={handleComplete} />
-    </View>
+    <GradientBackground>
+      <SafeAreaView style={{ flex: 1 }}>
+        <TransporterOnboarding onComplete={handleComplete} />
+      </SafeAreaView>
+    </GradientBackground>
   );
 };

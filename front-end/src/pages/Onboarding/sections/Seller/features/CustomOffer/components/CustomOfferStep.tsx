@@ -113,125 +113,125 @@ export function CustomOfferStep() {
   };
 
   return (
-    <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
-        {/* Header */}
-        <View className="mb-6">
-          <Text className="text-3xl font-bold text-white mb-2">Product Specifications</Text>
-          <Text className="text-gray-400">
-            Provide details about your {product?.displayName || product?.name}
-          </Text>
-        </View>
+    <ScrollView
+      className="flex-1"
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 140 }}
+    >
+      {/* Header */}
+      <View className="mb-6">
+        <Text className="text-3xl font-bold text-gray-900 mb-2">Product Specifications</Text>
+        <Text className="text-gray-400">
+          Provide details about your {product?.displayName || product?.name}
+        </Text>
+      </View>
 
-        {/* Product Info Card */}
-        {product && (
-          <View className="bg-gray-800/50 rounded-xl p-4 mb-6 flex-row items-center">
-            {product.image && (
-              <Image
-                source={{
-                  uri: product.image.startsWith('http')
-                    ? product.image
-                    : `${getApiUrl().replace('/api', '')}/static/${product.image}`,
-                }}
-                style={{ width: 60, height: 60 }}
-                className="rounded-xl mr-4"
-                resizeMode="cover"
-              />
-            )}
-            <View className="flex-1">
-              <Text className="text-white text-lg font-semibold">
-                {product.displayName || product.name}
+      {/* Product Info Card */}
+      {product && (
+        <View className="bg-white/50 rounded-xl p-4 mb-6 flex-row items-center">
+          {product.image && (
+            <Image
+              source={{
+                uri: product.image.startsWith('http')
+                  ? product.image
+                  : `${getApiUrl().replace('/api', '')}/static/${product.image}`,
+              }}
+              style={{ width: 60, height: 60 }}
+              className="rounded-xl mr-4"
+              resizeMode="cover"
+            />
+          )}
+          <View className="flex-1">
+            <Text className="text-gray-900 text-lg font-semibold">
+              {product.displayName || product.name}
+            </Text>
+            <View className="flex-row items-center mt-1">
+              <Package size={14} color="#10B981" />
+              <Text className="text-emerald-400 text-sm ml-2">
+                {currentSpecs.quantity} {currentSpecs.unit || product.defaultUnit || 'TON'}
               </Text>
-              <View className="flex-row items-center mt-1">
-                <Package size={14} color="#10B981" />
-                <Text className="text-emerald-400 text-sm ml-2">
-                  {currentSpecs.quantity} {currentSpecs.unit || product.defaultUnit || 'TON'}
-                </Text>
-              </View>
             </View>
           </View>
-        )}
+        </View>
+      )}
 
-        {/* Specifications Form */}
-        {product?.specifications && product.specifications.length > 0 ? (
-          <View className="space-y-3">
-            {product.specifications
-              .sort((a, b) => a.displayOrder - b.displayOrder)
-              .map((spec) => {
-                const specKey = spec.code || spec.id;
-                const isRequired =
-                  spec.importance === 'CRITICAL' || spec.importance === 'IMPORTANT';
+      {/* Specifications Form */}
+      {product?.specifications && product.specifications.length > 0 ? (
+        <View className="space-y-3">
+          {product.specifications
+            .sort((a, b) => a.displayOrder - b.displayOrder)
+            .map((spec) => {
+              const specKey = spec.code || spec.id;
+              const isRequired = spec.importance === 'CRITICAL' || spec.importance === 'IMPORTANT';
 
-                return (
-                  <View
-                    key={specKey}
-                    className="bg-gray-800/50 rounded-2xl p-4 mb-3 border border-gray-700/50"
-                  >
-                    {/* Label Row */}
-                    <View className="mb-3">
-                      <Text className="text-white text-sm font-semibold">
-                        {spec.name || spec.code}
-                        {isRequired && <Text className="text-red-400"> *</Text>}
+              return (
+                <View
+                  key={specKey}
+                  className="bg-white/50 rounded-2xl p-4 mb-3 border border-gray-200/50"
+                >
+                  {/* Label Row */}
+                  <View className="mb-3">
+                    <Text className="text-gray-900 text-sm font-semibold">
+                      {spec.name || spec.code}
+                      {isRequired && <Text className="text-red-400"> *</Text>}
+                    </Text>
+                  </View>
+
+                  {/* Input Field with Unit Square */}
+                  <View className="flex-row items-center">
+                    <TextInput
+                      value={specifications[specKey] || ''}
+                      onChangeText={(value) =>
+                        handleSpecificationChange(specKey, value, spec.dataType)
+                      }
+                      placeholder={`Enter ${spec.name?.toLowerCase() || spec.code}`}
+                      placeholderTextColor="#4B5563"
+                      className="flex-1 bg-gray-50/50 rounded-l-xl px-4 py-3 text-gray-900"
+                      keyboardType={spec.dataType === 'NUMBER' ? 'numeric' : 'default'}
+                    />
+                    {/* Unit/Type Square on the right */}
+                    <View className="bg-gray-50/50 rounded-r-xl border-l border-gray-200 px-4 py-3 min-w-[60px] items-center justify-center">
+                      <Text className="text-emerald-400 font-medium text-sm">
+                        {spec.unit || (spec.dataType === 'NUMBER' ? '#' : 'TXT')}
                       </Text>
                     </View>
+                  </View>
 
-                    {/* Input Field with Unit Square */}
-                    <View className="flex-row items-center">
-                      <TextInput
-                        value={specifications[specKey] || ''}
-                        onChangeText={(value) =>
-                          handleSpecificationChange(specKey, value, spec.dataType)
-                        }
-                        placeholder={`Enter ${spec.name?.toLowerCase() || spec.code}`}
-                        placeholderTextColor="#4B5563"
-                        className="flex-1 bg-gray-900/50 rounded-l-xl px-4 py-3 text-white"
-                        keyboardType={spec.dataType === 'NUMBER' ? 'numeric' : 'default'}
-                      />
-                      {/* Unit/Type Square on the right */}
-                      <View className="bg-gray-900/50 rounded-r-xl border-l border-gray-700 px-4 py-3 min-w-[60px] items-center justify-center">
-                        <Text className="text-emerald-400 font-medium text-sm">
-                          {spec.unit || (spec.dataType === 'NUMBER' ? '#' : 'TXT')}
+                  {/* Valid Range Display */}
+                  {spec.dataType === 'NUMBER' && (spec.minValue || spec.maxValue) && (
+                    <View className="flex-row items-center justify-end mt-2">
+                      <View className="bg-blue-600/10 px-3 py-1 rounded-lg">
+                        <Text className="text-blue-400 text-xs">
+                          Valid range: {spec.minValue || '0'} - {spec.maxValue || '∞'}
                         </Text>
                       </View>
                     </View>
+                  )}
+                </View>
+              );
+            })}
+        </View>
+      ) : (
+        <View className="bg-white/50 rounded-xl p-6 mb-4">
+          <View className="items-center">
+            <Info size={48} color="#6B7280" />
+            <Text className="text-gray-400 text-center mt-3">
+              No specifications required for this product
+            </Text>
+            <Text className="text-gray-500 text-xs text-center mt-2">
+              You can proceed to the next step
+            </Text>
+          </View>
+        </View>
+      )}
 
-                    {/* Valid Range Display */}
-                    {spec.dataType === 'NUMBER' && (spec.minValue || spec.maxValue) && (
-                      <View className="flex-row items-center justify-end mt-2">
-                        <View className="bg-blue-600/10 px-3 py-1 rounded-lg">
-                          <Text className="text-blue-400 text-xs">
-                            Valid range: {spec.minValue || '0'} - {spec.maxValue || '∞'}
-                          </Text>
-                        </View>
-                      </View>
-                    )}
-                  </View>
-                );
-              })}
-          </View>
-        ) : (
-          <View className="bg-gray-800/50 rounded-xl p-6 mb-4">
-            <View className="items-center">
-              <Info size={48} color="#6B7280" />
-              <Text className="text-gray-400 text-center mt-3">
-                No specifications required for this product
-              </Text>
-              <Text className="text-gray-500 text-xs text-center mt-2">
-                You can proceed to the next step
-              </Text>
-            </View>
-          </View>
-        )}
-
-        {/* Submit Button */}
-        <TouchableOpacity
-          onPress={handleSubmit}
-          className="bg-emerald-600 rounded-xl py-4 mt-6 mb-4"
-        >
-          <View className="flex-row items-center justify-center">
-            <Text className="text-white font-semibold text-base mr-2">Continue to Overview</Text>
-            <ChevronRight size={20} color="white" />
-          </View>
-        </TouchableOpacity>
-      </ScrollView>
+      {/* Submit Button */}
+      <TouchableOpacity onPress={handleSubmit} className="bg-emerald-600 rounded-xl py-4 mt-6 mb-4">
+        <View className="flex-row items-center justify-center">
+          <Text className="text-white font-semibold text-base mr-2">Continue to Overview</Text>
+          <ChevronRight size={20} color="white" />
+        </View>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }

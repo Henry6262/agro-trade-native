@@ -28,16 +28,12 @@ export const orderService = {
 
   // Get single order
   getOrder: async (orderId: string): Promise<Order> => {
-    return apiClient
-      .get<Order>(`/orders/${orderId}`)
-      .then((response) => response.data);
+    return apiClient.get<Order>(`/orders/${orderId}`).then((response) => response.data);
   },
 
   // Create new order
   createOrder: async (orderData: OrderCreateForm): Promise<Order> => {
-    return apiClient
-      .post<Order>('/orders', orderData)
-      .then((response) => response.data);
+    return apiClient.post<Order>('/orders', orderData).then((response) => response.data);
   },
 
   // Update order status (usually for sellers)
@@ -74,9 +70,7 @@ export const orderService = {
       location?: string;
     }[];
   }> => {
-    return apiClient
-      .get<any>(`/orders/${orderId}/tracking`)
-      .then((response) => response.data);
+    return apiClient.get<any>(`/orders/${orderId}/tracking`).then((response) => response.data);
   },
 
   // Request refund

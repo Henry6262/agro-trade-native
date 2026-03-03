@@ -87,7 +87,6 @@ export const useLocationTracking = (): UseLocationTrackingReturn => {
           });
         }
       );
-
     } catch (err) {
       console.error('Location tracking error:', err);
       setError(err instanceof Error ? err.message : 'Unknown location error');

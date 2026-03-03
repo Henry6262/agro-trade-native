@@ -48,7 +48,7 @@ export const LocationPriceDisplay: React.FC<LocationPriceDisplayProps> = ({
   }
 
   return (
-    <View className={`bg-gray-800/50 rounded-lg p-3 ${className}`}>
+    <View className={`bg-white/50 rounded-lg p-3 ${className}`}>
       {/* Location Display */}
       <View className="flex-row items-center mb-3">
         <View className="bg-emerald-500/20 p-2 rounded-full mr-3">
@@ -64,7 +64,7 @@ export const LocationPriceDisplay: React.FC<LocationPriceDisplayProps> = ({
 
       {/* Price Display */}
       {priceData && product && (
-        <View className="border-t border-gray-700 pt-3">
+        <View className="border-t border-gray-200 pt-3">
           <View className="flex-row items-center justify-between mb-2">
             <Text className="text-gray-400 text-xs">Regional Market Price</Text>
             {priceData.trend && (
@@ -95,7 +95,7 @@ export const LocationPriceDisplay: React.FC<LocationPriceDisplayProps> = ({
 
           <View className="flex-row items-baseline">
             <DollarSign size={16} color="#10B981" />
-            <Text className="text-white text-lg font-bold">
+            <Text className="text-gray-900 text-lg font-bold">
               {priceData.min} - {priceData.max}
             </Text>
             <Text className="text-gray-400 text-xs ml-2">/ {product.defaultUnit}</Text>
@@ -111,7 +111,7 @@ export const LocationPriceDisplay: React.FC<LocationPriceDisplayProps> = ({
 
       {/* Loading State */}
       {!priceData && product && (
-        <View className="border-t border-gray-700 pt-3">
+        <View className="border-t border-gray-200 pt-3">
           <ActivityIndicator size="small" color="#10B981" />
           <Text className="text-gray-400 text-xs text-center mt-2">
             Fetching regional prices...

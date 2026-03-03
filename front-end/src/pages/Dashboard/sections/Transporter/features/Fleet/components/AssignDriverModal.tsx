@@ -32,13 +32,13 @@ export const AssignDriverModal: React.FC<AssignDriverModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/50">
+      <View className="flex-1 justify-end bg-white/50">
         <Pressable className="flex-1" onPress={onClose} />
 
-        <View className="bg-neutral-900 rounded-t-3xl max-h-[70%]">
+        <View className="bg-white rounded-t-3xl max-h-[70%]">
           {/* Header */}
-          <View className="flex-row items-center justify-between p-6 border-b border-neutral-800">
-            <Text className="text-xl font-bold text-white">Assign Driver</Text>
+          <View className="flex-row items-center justify-between p-6 border-b border-gray-100">
+            <Text className="text-xl font-bold text-gray-900">Assign Driver</Text>
             <TouchableOpacity onPress={onClose}>
               <X size={24} color="#9CA3AF" />
             </TouchableOpacity>
@@ -52,7 +52,7 @@ export const AssignDriverModal: React.FC<AssignDriverModalProps> = ({
               </Text>
 
               {availableDrivers.length === 0 ? (
-                <View className="bg-gray-800/50 rounded-lg p-6 items-center">
+                <View className="bg-white/50 rounded-lg p-6 items-center">
                   <User size={32} color="#6B7280" />
                   <Text className="text-gray-400 text-center mt-2">
                     No available drivers. All drivers are currently assigned.
@@ -67,14 +67,14 @@ export const AssignDriverModal: React.FC<AssignDriverModalProps> = ({
                       className={`mb-3 p-4 rounded-lg border ${
                         selectedDriverId === driver.id
                           ? 'bg-blue-600/20 border-blue-600'
-                          : 'bg-gray-800/50 border-gray-700'
+                          : 'bg-white/50 border-gray-200'
                       }`}
                     >
                       <View className="flex-row items-center justify-between">
                         <View className="flex-1">
                           <Text
                             className={`font-semibold mb-1 ${
-                              selectedDriverId === driver.id ? 'text-blue-400' : 'text-white'
+                              selectedDriverId === driver.id ? 'text-blue-400' : 'text-gray-900'
                             }`}
                           >
                             {driver.name}
@@ -98,14 +98,14 @@ export const AssignDriverModal: React.FC<AssignDriverModalProps> = ({
           </ScrollView>
 
           {/* Footer */}
-          <View className="p-6 border-t border-neutral-800">
+          <View className="p-6 border-t border-gray-100">
             <Button
               variant="gradient"
               className="bg-gradient-to-r from-blue-600 to-blue-700"
               onPress={handleAssign}
               disabled={!selectedDriverId || assignDriverMutation.isPending}
             >
-              <Text className="text-white font-semibold">
+              <Text className="text-gray-900 font-semibold">
                 {assignDriverMutation.isPending ? 'Assigning...' : 'Assign Driver'}
               </Text>
             </Button>

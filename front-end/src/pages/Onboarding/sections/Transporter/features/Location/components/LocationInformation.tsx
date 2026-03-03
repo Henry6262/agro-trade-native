@@ -383,143 +383,143 @@ export function LocationInformation() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
       <View style={{ alignItems: 'center', marginBottom: 32 }}>
-          <View
-            style={{
-              width: 64,
-              height: 64,
-              backgroundColor: 'rgba(37, 99, 235, 0.2)',
-              borderRadius: 32,
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 16,
-            }}
-          >
-            <MapPin size={32} color="#2563eb" />
-          </View>
-          <Text
-            style={{
-              fontSize: 28,
-              fontWeight: 'bold',
-              color: '#FFFFFF',
-              textAlign: 'center',
-              marginBottom: 12,
-            }}
-          >
-            Business Location
-          </Text>
-          <Text style={{ color: '#9CA3AF', maxWidth: 600, textAlign: 'center', fontSize: 16 }}>
-            Confirm your main base location
+        <View
+          style={{
+            width: 64,
+            height: 64,
+            backgroundColor: 'rgba(37, 99, 235, 0.2)',
+            borderRadius: 32,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 16,
+          }}
+        >
+          <MapPin size={32} color="#2563eb" />
+        </View>
+        <Text
+          style={{
+            fontSize: 28,
+            fontWeight: 'bold',
+            color: '#FFFFFF',
+            textAlign: 'center',
+            marginBottom: 12,
+          }}
+        >
+          Business Location
+        </Text>
+        <Text style={{ color: '#9CA3AF', maxWidth: 600, textAlign: 'center', fontSize: 16 }}>
+          Confirm your main base location
+        </Text>
+      </View>
+
+      {/* Location Display */}
+      <View
+        style={{
+          backgroundColor: '#1F2937',
+          borderRadius: 16,
+          padding: 20,
+          borderWidth: 1,
+          borderColor: '#374151',
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+          <MapPin size={22} color="#ea580c" />
+          <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF', marginLeft: 8 }}>
+            Main Base Location
           </Text>
         </View>
 
-        {/* Location Display */}
-        <View
-          style={{
-            backgroundColor: '#1F2937',
-            borderRadius: 16,
-            padding: 20,
-            borderWidth: 1,
-            borderColor: '#374151',
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-            <MapPin size={22} color="#ea580c" />
-            <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF', marginLeft: 8 }}>
-              Main Base Location
-            </Text>
+        {loadingLocation ? (
+          <View style={{ paddingVertical: 32, alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="#ea580c" />
+            <Text style={{ color: '#9CA3AF', marginTop: 12 }}>Detecting your location...</Text>
           </View>
-
-          {loadingLocation ? (
-            <View style={{ paddingVertical: 32, alignItems: 'center' }}>
-              <ActivityIndicator size="large" color="#ea580c" />
-              <Text style={{ color: '#9CA3AF', marginTop: 12 }}>Detecting your location...</Text>
+        ) : !showManualInput && bases.length > 0 ? (
+          <TouchableOpacity
+            onPress={() => setShowManualInput(true)}
+            style={{
+              backgroundColor: '#111827',
+              borderRadius: 12,
+              padding: 16,
+              borderWidth: 1,
+              borderColor: '#374151',
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '500', marginBottom: 4 }}
+                >
+                  {bases[0].city || bases[0].address}
+                </Text>
+                {bases[0].state && bases[0].country && (
+                  <Text style={{ color: '#9CA3AF', fontSize: 14 }}>
+                    {bases[0].state}, {bases[0].country}
+                  </Text>
+                )}
+              </View>
+              <Edit2 size={18} color="#ea580c" />
             </View>
-          ) : !showManualInput && bases.length > 0 ? (
-            <TouchableOpacity
-              onPress={() => setShowManualInput(true)}
+          </TouchableOpacity>
+        ) : (
+          <View>
+            <TextInput
+              value={manualCity}
+              onChangeText={setManualCity}
+              placeholder="Enter your city or region..."
+              placeholderTextColor="#9CA3AF"
               style={{
                 backgroundColor: '#111827',
                 borderRadius: 12,
                 padding: 16,
-                borderWidth: 1,
-                borderColor: '#374151',
+                color: '#FFFFFF',
+                fontSize: 16,
+                borderWidth: 2,
+                borderColor: '#ea580c',
+                marginBottom: 12,
               }}
-            >
-              <View
+              autoFocus
+            />
+            <View style={{ flexDirection: 'row', gap: 12 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowManualInput(false);
+                  setManualCity('');
+                }}
                 style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
+                  flex: 1,
+                  backgroundColor: '#374151',
+                  borderRadius: 8,
+                  paddingVertical: 12,
                 }}
               >
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '500', marginBottom: 4 }}
-                  >
-                    {bases[0].city || bases[0].address}
-                  </Text>
-                  {bases[0].state && bases[0].country && (
-                    <Text style={{ color: '#9CA3AF', fontSize: 14 }}>
-                      {bases[0].state}, {bases[0].country}
-                    </Text>
-                  )}
-                </View>
-                <Edit2 size={18} color="#ea580c" />
-              </View>
-            </TouchableOpacity>
-          ) : (
-            <View>
-              <TextInput
-                value={manualCity}
-                onChangeText={setManualCity}
-                placeholder="Enter your city or region..."
-                placeholderTextColor="#9CA3AF"
+                <Text style={{ color: '#9CA3AF', textAlign: 'center', fontWeight: '500' }}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleManualLocation}
                 style={{
-                  backgroundColor: '#111827',
-                  borderRadius: 12,
-                  padding: 16,
-                  color: '#FFFFFF',
-                  fontSize: 16,
-                  borderWidth: 2,
-                  borderColor: '#ea580c',
-                  marginBottom: 12,
+                  flex: 1,
+                  backgroundColor: '#ea580c',
+                  borderRadius: 8,
+                  paddingVertical: 12,
                 }}
-                autoFocus
-              />
-              <View style={{ flexDirection: 'row', gap: 12 }}>
-                <TouchableOpacity
-                  onPress={() => {
-                    setShowManualInput(false);
-                    setManualCity('');
-                  }}
-                  style={{
-                    flex: 1,
-                    backgroundColor: '#374151',
-                    borderRadius: 8,
-                    paddingVertical: 12,
-                  }}
-                >
-                  <Text style={{ color: '#9CA3AF', textAlign: 'center', fontWeight: '500' }}>
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleManualLocation}
-                  style={{
-                    flex: 1,
-                    backgroundColor: '#ea580c',
-                    borderRadius: 8,
-                    paddingVertical: 12,
-                  }}
-                >
-                  <Text style={{ color: '#FFFFFF', textAlign: 'center', fontWeight: '600' }}>
-                    Set Location
-                  </Text>
-                </TouchableOpacity>
-              </View>
+              >
+                <Text style={{ color: '#FFFFFF', textAlign: 'center', fontWeight: '600' }}>
+                  Set Location
+                </Text>
+              </TouchableOpacity>
             </View>
-          )}
-        </View>
+          </View>
+        )}
+      </View>
 
       {/* Add Base Modal */}
       <Modal visible={showAddBaseModal} transparent animationType="fade">

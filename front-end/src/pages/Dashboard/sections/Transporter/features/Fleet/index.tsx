@@ -34,7 +34,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
   return (
     <>
       <ScrollView
-        className="flex-1 bg-black"
+        className="flex-1 bg-white"
         showsVerticalScrollIndicator={false}
         testID={testID}
         accessibilityLabel={accessibilityLabel}
@@ -54,7 +54,9 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
           />
         </View>
       </ScrollView>
-      {showFleetCreation && <FleetCreationFlow visible={showFleetCreation} onClose={closeFleetCreation} />}
+      {showFleetCreation && (
+        <FleetCreationFlow visible={showFleetCreation} onClose={closeFleetCreation} />
+      )}
     </>
   );
 };

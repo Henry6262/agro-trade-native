@@ -303,7 +303,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
             bottom: 0,
             left: 0,
             right: 0,
-            backgroundColor: '#0F172A',
+            backgroundColor: '#FFFFFF',
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
             transform: [{ translateY: slideAnim }],
@@ -321,7 +321,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
           >
             <SafeAreaView style={{ flex: 1 }}>
               {/* Top Section with Product Info - Dark Background */}
-              <View className="bg-gray-850" style={{ backgroundColor: '#111827' }}>
+              <View className="bg-gray-850" style={{ backgroundColor: '#FFFFFF' }}>
                 {/* Drag Handle */}
                 <View className="items-center py-2">
                   <View className="w-12 h-1 bg-gray-600 rounded-full" />
@@ -348,7 +348,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                         />
                       )}
                       <View className="flex-1 pr-8">
-                        <Text className="text-white text-lg font-semibold">
+                        <Text className="text-gray-900 text-lg font-semibold">
                           {product.displayName || product.name}
                         </Text>
                         <Text className="text-gray-400 text-sm">
@@ -363,7 +363,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
               {/* Main Content Area - Lighter Background */}
               <ScrollView
                 className="flex-1"
-                style={{ backgroundColor: '#0F172A' }}
+                style={{ backgroundColor: '#FFFFFF' }}
                 contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16 }}
                 showsVerticalScrollIndicator={false}
               >
@@ -377,13 +377,13 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                     {/* Location Display with Edit */}
                     <TouchableOpacity
                       onPress={handleLocationChange}
-                      className="bg-gray-800/50 rounded-xl p-3 mb-4 flex-row items-center justify-between"
+                      className="bg-white/50 rounded-xl p-3 mb-4 flex-row items-center justify-between"
                     >
                       <View className="flex-row items-center flex-1">
                         <MapPin size={16} color="#10B981" />
                         <View className="ml-2 flex-1">
                           <Text className="text-gray-400 text-xs">Your Location</Text>
-                          <Text className="text-white text-sm">
+                          <Text className="text-gray-900 text-sm">
                             {location?.city || location?.region || 'Not set'}
                           </Text>
                         </View>
@@ -422,7 +422,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                     <View className="mb-6">
                       <View className="flex-row items-center mb-3">
                         <Weight size={20} color="white" />
-                        <Text className="text-white text-base font-semibold ml-2">
+                        <Text className="text-gray-900 text-base font-semibold ml-2">
                           How much can you supply?
                         </Text>
                       </View>
@@ -439,14 +439,14 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                               className={`py-4 rounded-2xl border-2 ${
                                 selectedQuantity === qty && !showCustomInput
                                   ? 'bg-emerald-600/20 border-emerald-500'
-                                  : 'bg-gray-900/50 border-gray-800'
+                                  : 'bg-gray-50/50 border-gray-200'
                               }`}
                             >
                               <Text
                                 className={`text-center text-lg font-bold ${
                                   selectedQuantity === qty && !showCustomInput
                                     ? 'text-emerald-400'
-                                    : 'text-gray-300'
+                                    : 'text-gray-600'
                                 }`}
                               >
                                 {qty}/t
@@ -459,7 +459,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                       {/* Custom Amount Button */}
                       {!showCustomInput ? (
                         <TouchableOpacity onPress={handleCustomQuantity} className="mb-3">
-                          <View className="py-4 rounded-2xl border-2 bg-gray-900/50 border-gray-800">
+                          <View className="py-4 rounded-2xl border-2 bg-gray-50/50 border-gray-200">
                             <Text className="text-center text-gray-400 font-medium">
                               Custom Amount
                             </Text>
@@ -473,7 +473,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                             placeholder="Enter quantity in tons..."
                             placeholderTextColor="#4B5563"
                             keyboardType="numeric"
-                            className="bg-gray-900/50 border-2 border-emerald-500/30 rounded-2xl px-4 py-4 text-white text-center"
+                            className="bg-gray-50/50 border-2 border-emerald-500/30 rounded-2xl px-4 py-4 text-gray-900 text-center"
                             autoFocus
                           />
                           <TouchableOpacity
@@ -525,7 +525,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                         <Text className="text-gray-400 ml-2">Back to quantity</Text>
                       </TouchableOpacity>
 
-                      <Text className="text-white text-lg font-semibold mb-2">
+                      <Text className="text-gray-900 text-lg font-semibold mb-2">
                         Product Specifications
                       </Text>
                       <Text className="text-gray-400 text-sm mb-4">
@@ -544,11 +544,11 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                           return (
                             <View
                               key={specKey}
-                              className="bg-gray-800/50 rounded-2xl p-4 mb-3 border border-gray-700/50"
+                              className="bg-white/50 rounded-2xl p-4 mb-3 border border-gray-200/50"
                             >
                               {/* Label Row */}
                               <View className="flex-row items-center justify-between mb-3">
-                                <Text className="text-white text-sm font-semibold flex-1">
+                                <Text className="text-gray-900 text-sm font-semibold flex-1">
                                   {spec.name || spec.code}
                                   {isRequired && <Text className="text-red-400"> *</Text>}
                                 </Text>
@@ -582,7 +582,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                                   }}
                                   placeholder={`Enter ${spec.name?.toLowerCase() || spec.code}`}
                                   placeholderTextColor="#4B5563"
-                                  className="bg-gray-900/50 rounded-xl px-4 py-3 text-white flex-1"
+                                  className="bg-gray-50/50 rounded-xl px-4 py-3 text-gray-900 flex-1"
                                   keyboardType={spec.dataType === 'NUMBER' ? 'numeric' : 'default'}
                                 />
                               </View>
@@ -629,7 +629,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                         })}
                       </View>
                     ) : (
-                      <View className="bg-gray-800/50 rounded-xl p-4 mb-4">
+                      <View className="bg-white/50 rounded-xl p-4 mb-4">
                         <Text className="text-gray-400 text-center">
                           No specifications required for this product
                         </Text>
@@ -663,7 +663,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                       </TouchableOpacity>
 
                       <View className="mb-4">
-                        <Text className="text-white text-lg font-semibold mb-2">
+                        <Text className="text-gray-900 text-lg font-semibold mb-2">
                           Sign in to Submit Your Offer
                         </Text>
                         <Text className="text-gray-400 text-sm">
@@ -673,7 +673,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                       </View>
 
                       {/* Display Selected Details */}
-                      <View className="bg-gray-800/50 rounded-xl p-4 mb-6 space-y-3">
+                      <View className="bg-white/50 rounded-xl p-4 mb-6 space-y-3">
                         <View className="flex-row items-center">
                           <Package size={16} color="#10B981" />
                           <Text className="text-emerald-400 text-sm ml-2">
@@ -691,7 +691,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                       </View>
 
                       {/* TODO: InlineAuth component not yet implemented */}
-                      <View className="bg-gray-800/50 rounded-xl p-4">
+                      <View className="bg-white/50 rounded-xl p-4">
                         <Text className="text-gray-400 text-center">
                           Authentication required. Please sign in to continue.
                         </Text>
@@ -703,7 +703,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
 
               {/* Action Buttons */}
               {currentStep !== 'auth' && (
-                <View className="p-4 border-t border-gray-800">
+                <View className="p-4 border-t border-gray-200">
                   {currentStep === 'quantity' ? (
                     <>
                       <View className="flex-row">
@@ -715,7 +715,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                         >
                           <View
                             className={`py-4 rounded-2xl flex-row items-center justify-center ${
-                              product && isFormValid() ? 'bg-blue-600' : 'bg-gray-800'
+                              product && isFormValid() ? 'bg-blue-600' : 'bg-white'
                             }`}
                           >
                             <ShoppingCart
@@ -724,7 +724,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                             />
                             <Text
                               className={`ml-2 font-semibold ${
-                                product && isFormValid() ? 'text-white' : 'text-gray-500'
+                                product && isFormValid() ? 'text-gray-900' : 'text-gray-500'
                               }`}
                             >
                               Create Listing
@@ -740,7 +740,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                         >
                           <View
                             className={`py-4 rounded-2xl flex-row items-center justify-center ${
-                              product && isFormValid() ? 'bg-emerald-600' : 'bg-gray-800'
+                              product && isFormValid() ? 'bg-emerald-600' : 'bg-white'
                             }`}
                           >
                             <Sparkles
@@ -749,7 +749,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                             />
                             <Text
                               className={`ml-2 font-semibold ${
-                                product && isFormValid() ? 'text-white' : 'text-gray-500'
+                                product && isFormValid() ? 'text-gray-900' : 'text-gray-500'
                               }`}
                             >
                               Custom Offer
@@ -774,7 +774,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                       >
                         <View
                           className={`py-4 rounded-2xl flex-row items-center justify-center ${
-                            product && isFormValid() ? 'bg-emerald-600' : 'bg-gray-800'
+                            product && isFormValid() ? 'bg-emerald-600' : 'bg-white'
                           }`}
                         >
                           <Sparkles
@@ -783,7 +783,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                           />
                           <Text
                             className={`ml-2 font-semibold ${
-                              product && isFormValid() ? 'text-white' : 'text-gray-500'
+                              product && isFormValid() ? 'text-gray-900' : 'text-gray-500'
                             }`}
                           >
                             Submit Custom Offer

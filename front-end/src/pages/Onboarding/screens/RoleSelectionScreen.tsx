@@ -104,7 +104,8 @@ export const RoleSelectionScreen: React.FC = () => {
     try {
       if (Platform.OS === 'web') {
         // Web platform - use redirect OAuth
-        const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000/api';
+        const { getApiUrl } = await import('@shared/utils/environment');
+        const apiUrl = getApiUrl();
         window.location.href = `${apiUrl.replace('/api', '')}/api/auth/google`;
       } else {
         // Mobile platform - use Privy OAuth

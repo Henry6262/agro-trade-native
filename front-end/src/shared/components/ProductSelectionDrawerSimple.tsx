@@ -41,7 +41,9 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
     // Fetch products only when drawer opens and products aren't loaded
     if (visible && !isLoadingProducts) {
       // Check if we need to fetch products
-      const currentProducts = Array.isArray(productsRaw) ? productsRaw : (productsRaw as any)?.data || [];
+      const currentProducts = Array.isArray(productsRaw)
+        ? productsRaw
+        : (productsRaw as any)?.data || [];
       if (currentProducts.length === 0) {
         fetchAllData().catch((error) => {
           console.error('Error fetching products:', error);
@@ -146,11 +148,11 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
           onStartShouldSetResponder={() => true}
         >
           {/* Header */}
-          <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
+          <View className="flex-row justify-between items-center p-6 border-b border-gray-200">
             <TouchableOpacity onPress={onClose}>
               <Text className="text-blue-400 font-semibold">Cancel</Text>
             </TouchableOpacity>
-            <Text className="text-xl font-bold text-white">Select Product</Text>
+            <Text className="text-xl font-bold text-gray-900">Select Product</Text>
             <View style={{ width: 50 }} />
           </View>
 
@@ -175,7 +177,7 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
               <View className="p-6 space-y-6">
                 {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
                   <View key={category}>
-                    <Text className="text-lg font-semibold text-white mb-3">
+                    <Text className="text-lg font-semibold text-gray-900 mb-3">
                       {getCategoryDisplayName(category)}
                     </Text>
                     <View className="space-y-3">
@@ -183,10 +185,10 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
                         <TouchableOpacity
                           key={product.id}
                           onPress={() => handleProductSelect(product.id)}
-                          className={`flex-row items-center p-4 bg-neutral-800 rounded-xl border ${
+                          className={`flex-row items-center p-4 bg-gray-50 rounded-xl border ${
                             selectedProductIds.includes(product.id)
                               ? 'border-green-500'
-                              : 'border-neutral-700'
+                              : 'border-gray-200'
                           }`}
                         >
                           <Image
@@ -199,7 +201,7 @@ export const ProductSelectionDrawerSimple: React.FC<ProductSelectionDrawerSimple
                             resizeMode="cover"
                           />
                           <View className="flex-1 ml-4">
-                            <Text className="text-white font-semibold">
+                            <Text className="text-gray-900 font-semibold">
                               {product.displayName || product.name}
                             </Text>
                             <Text className="text-gray-400 text-sm mt-1">

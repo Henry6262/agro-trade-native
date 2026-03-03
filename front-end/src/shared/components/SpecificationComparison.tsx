@@ -274,8 +274,8 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
         return {
           bg: 'bg-neutral-500/10',
           border: 'border-neutral-500/30',
-          text: 'text-neutral-400',
-          label: 'text-neutral-300',
+          text: 'text-gray-500',
+          label: 'text-gray-600',
         };
     }
   };
@@ -294,13 +294,13 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
       {showHeader && (
         <View className="mb-4">
           <View className="flex-row items-center justify-between">
-            <Text className="text-white font-semibold text-lg">Specification Comparison</Text>
+            <Text className="text-gray-900 font-semibold text-lg">Specification Comparison</Text>
             <View className="bg-gradient-to-r from-blue-500/20 to-green-500/20 px-3 py-1 rounded-lg border border-blue-500/30">
               <Text className="text-blue-400 font-bold text-sm">{overallScore}% Overall Match</Text>
             </View>
           </View>
-          <Text className="text-neutral-400 text-sm mt-1">
-            Comparing your requirements with seller's offer
+          <Text className="text-gray-500 text-sm mt-1">
+            Comparing your requirements with seller&apos;s offer
           </Text>
         </View>
       )}
@@ -337,17 +337,17 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
 
                 <View className="flex-row justify-between mt-2">
                   <View className="flex-1 mr-2">
-                    <Text className="text-neutral-400 text-xs mb-1">Your Requirement</Text>
-                    <View className="bg-neutral-800/50 rounded px-2 py-1">
-                      <Text className="text-neutral-300 text-xs">
+                    <Text className="text-gray-500 text-xs mb-1">Your Requirement</Text>
+                    <View className="bg-gray-50/50 rounded px-2 py-1">
+                      <Text className="text-gray-600 text-xs">
                         {match.specification.requiredValue || 'Not specified'}
                       </Text>
                     </View>
                   </View>
                   <View className="flex-1 ml-2">
-                    <Text className="text-neutral-400 text-xs mb-1">Seller's Offer</Text>
-                    <View className="bg-neutral-800/50 rounded px-2 py-1">
-                      <Text className="text-neutral-300 text-xs">
+                    <Text className="text-gray-500 text-xs mb-1">Seller&apos;s Offer</Text>
+                    <View className="bg-gray-50/50 rounded px-2 py-1">
+                      <Text className="text-gray-600 text-xs">
                         {match.offerValue?.value?.toString() || 'Not provided'}
                       </Text>
                     </View>
@@ -358,12 +358,10 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
           })}
 
           {specificationMatches.length === 0 && (
-            <View className="bg-neutral-800/50 rounded-lg p-6 items-center border border-neutral-700/50">
+            <View className="bg-gray-50/50 rounded-lg p-6 items-center border border-gray-200/50">
               <Info size={24} color="#6B7280" />
-              <Text className="text-neutral-400 font-medium mt-2">
-                No Specifications to Compare
-              </Text>
-              <Text className="text-neutral-500 text-sm text-center mt-1">
+              <Text className="text-gray-500 font-medium mt-2">No Specifications to Compare</Text>
+              <Text className="text-gray-400 text-sm text-center mt-1">
                 No detailed specifications provided for comparison
               </Text>
             </View>

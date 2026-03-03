@@ -132,13 +132,13 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
 
   return (
     <Animated.View style={{ transform: [{ scale: scaleAnim }] }} className="mb-4">
-      <View className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 rounded-xl border border-neutral-700/50 overflow-hidden">
+      <View className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 rounded-xl border border-gray-200/50 overflow-hidden">
         {/* Header with Buyer Info and Match Score */}
-        <View className="p-4 border-b border-neutral-700/30">
+        <View className="p-4 border-b border-gray-200/30">
           <View className="flex-row justify-between items-start">
             <View className="flex-1 flex-row items-center">
               {/* Buyer Avatar */}
-              <View className="w-12 h-12 rounded-full bg-neutral-700 overflow-hidden mr-3">
+              <View className="w-12 h-12 rounded-full bg-gray-100 overflow-hidden mr-3">
                 {offer.buyer?.avatar ? (
                   <Image
                     source={{ uri: offer.buyer.avatar }}
@@ -147,7 +147,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
                   />
                 ) : (
                   <View className="w-full h-full bg-gradient-to-br from-blue-500/20 to-green-500/20 items-center justify-center">
-                    <Text className="text-white font-bold text-lg">
+                    <Text className="text-gray-900 font-bold text-lg">
                       {offer.buyer?.name?.charAt(0) || offer.buyer?.company?.charAt(0) || 'B'}
                     </Text>
                   </View>
@@ -156,7 +156,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
 
               <View className="flex-1">
                 <View className="flex-row items-center">
-                  <Text className="text-white font-semibold text-base" numberOfLines={1}>
+                  <Text className="text-gray-900 font-semibold text-base" numberOfLines={1}>
                     {offer.buyer?.company || offer.buyer?.name || 'Buyer'}
                   </Text>
                   {offer.buyer?.verified && (
@@ -169,7 +169,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
                 {offer.buyer?.location && (
                   <View className="flex-row items-center mt-1">
                     <MapPin size={12} color="#10B981" />
-                    <Text className="text-neutral-300 text-xs ml-1" numberOfLines={1}>
+                    <Text className="text-gray-600 text-xs ml-1" numberOfLines={1}>
                       {offer.buyer.location.city}, {offer.buyer.location.country}
                     </Text>
                   </View>
@@ -182,7 +182,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
                       {offer.buyer.rating.toFixed(1)}
                     </Text>
                     {offer.buyer?.reviewCount && (
-                      <Text className="text-neutral-400 text-xs ml-1">
+                      <Text className="text-gray-500 text-xs ml-1">
                         ({offer.buyer.reviewCount})
                       </Text>
                     )}
@@ -205,14 +205,14 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
         </View>
 
         {/* Offer Details Section */}
-        <View className="p-4 border-b border-neutral-700/30">
+        <View className="p-4 border-b border-gray-200/30">
           <View className="flex-row justify-between items-center mb-3">
             <View className="flex-1">
               <View className="flex-row items-baseline">
-                <Text className="text-white font-bold text-2xl">
+                <Text className="text-gray-900 font-bold text-2xl">
                   €{offer.offeredPrice.toFixed(2)}
                 </Text>
-                <Text className="text-neutral-400 text-sm ml-1">/{offer.unit.toLowerCase()}</Text>
+                <Text className="text-gray-500 text-sm ml-1">/{offer.unit.toLowerCase()}</Text>
               </View>
 
               {/* Price Analysis */}
@@ -235,25 +235,25 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
             </View>
 
             <View className="text-right">
-              <Text className="text-white font-semibold text-lg">
+              <Text className="text-gray-900 font-semibold text-lg">
                 {offer.requestedQuantity.toLocaleString()} {offer.unit.toLowerCase()}
               </Text>
-              <Text className="text-neutral-400 text-sm">Requested</Text>
+              <Text className="text-gray-500 text-sm">Requested</Text>
             </View>
           </View>
 
           {/* Total Value and Availability Check */}
-          <View className="bg-neutral-800/50 rounded-lg p-3">
+          <View className="bg-gray-50/50 rounded-lg p-3">
             <View className="flex-row justify-between items-center">
-              <Text className="text-neutral-300 font-medium">Total Value</Text>
+              <Text className="text-gray-600 font-medium">Total Value</Text>
               <Text className="text-green-400 font-bold text-lg">
                 €{offer.totalValue.toLocaleString()}
               </Text>
             </View>
 
             {sellerProduct?.quantity && (
-              <View className="flex-row justify-between items-center mt-2 pt-2 border-t border-neutral-700/30">
-                <Text className="text-neutral-400 text-sm">Your Available</Text>
+              <View className="flex-row justify-between items-center mt-2 pt-2 border-t border-gray-200/30">
+                <Text className="text-gray-500 text-sm">Your Available</Text>
                 <Text
                   className={`text-sm font-medium ${
                     sellerProduct.quantity >= offer.requestedQuantity
@@ -271,8 +271,8 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
 
         {/* Specifications Match */}
         {offer.specifications && offer.specifications.length > 0 && (
-          <View className="p-4 border-b border-neutral-700/30">
-            <Text className="text-neutral-300 text-sm mb-3">Specification Requirements</Text>
+          <View className="p-4 border-b border-gray-200/30">
+            <Text className="text-gray-600 text-sm mb-3">Specification Requirements</Text>
             <View className="flex-row flex-wrap gap-2">
               {offer.specifications.slice(0, 3).map((spec, index) => (
                 <View
@@ -298,9 +298,9 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
               {offer.specifications.length > 3 && (
                 <TouchableOpacity
                   onPress={() => setExpanded(!expanded)}
-                  className="bg-neutral-700/50 px-2 py-1 rounded-md border border-neutral-600/50"
+                  className="bg-gray-100/50 px-2 py-1 rounded-md border border-gray-200/50"
                 >
-                  <Text className="text-neutral-400 text-xs">
+                  <Text className="text-gray-500 text-xs">
                     +{offer.specifications.length - 3} more
                   </Text>
                 </TouchableOpacity>
@@ -311,8 +311,8 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
 
         {/* Message from Buyer */}
         {offer.message && (
-          <View className="p-4 border-b border-neutral-700/30">
-            <Text className="text-neutral-300 text-sm mb-2">Buyer's Message</Text>
+          <View className="p-4 border-b border-gray-200/30">
+            <Text className="text-gray-600 text-sm mb-2">Buyer&apos;s Message</Text>
             <View className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
               <Text className="text-blue-200 text-sm">{offer.message}</Text>
             </View>
@@ -320,11 +320,11 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
         )}
 
         {/* Validity and Timing */}
-        <View className="p-4 border-b border-neutral-700/30">
+        <View className="p-4 border-b border-gray-200/30">
           <View className="flex-row justify-between items-center">
             <View className="flex-row items-center">
               <Clock size={16} color="#FBBF24" />
-              <Text className="text-neutral-300 text-sm ml-2">Valid until</Text>
+              <Text className="text-gray-600 text-sm ml-2">Valid until</Text>
             </View>
             <Text className="text-yellow-400 text-sm font-medium">
               {formatTimeRemaining(offer.validUntil)}

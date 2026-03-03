@@ -139,7 +139,7 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
       onPressOut={handlePressOut}
     >
       <LinearGradient
-        colors={isSelected ? gradient as any : ['#1F2937', '#111827']}
+        colors={isSelected ? (gradient as any) : ['#1F2937', '#111827']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={{

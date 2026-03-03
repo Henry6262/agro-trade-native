@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
+const path = require('path');
 const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
 
@@ -44,7 +45,7 @@ config.resolver.extraNodeModules = {
   url: require.resolve('empty-module'),
   crypto: require.resolve('./cryptoPolyfill'),
   stream: require.resolve('stream-browserify'),
-  buffer: require.resolve('buffer'),
+  buffer: path.resolve(__dirname, 'node_modules/buffer/index.js'),
   http: require.resolve('http-browserify'),
   https: require.resolve('https-browserify'),
   zlib: require.resolve('empty-module'),

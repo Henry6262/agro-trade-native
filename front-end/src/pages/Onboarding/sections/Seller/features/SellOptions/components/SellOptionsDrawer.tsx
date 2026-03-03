@@ -325,9 +325,9 @@ export function SellOptionsDrawer({
           </View>
 
           {/* Product Summary */}
-          <View className="bg-gray-800/50 rounded-xl p-4 mb-6 border border-gray-700">
+          <View className="bg-white/50 rounded-xl p-4 mb-6 border border-gray-200">
             <Text className="text-gray-400 text-sm mb-2">Product Listed</Text>
-            <Text className="text-white font-semibold text-lg mb-1">
+            <Text className="text-gray-900 font-semibold text-lg mb-1">
               {product?.displayName || product?.name}
             </Text>
             <View className="flex-row items-center">
@@ -370,9 +370,9 @@ export function SellOptionsDrawer({
                 setSpecifications({});
                 handleClose();
               }}
-              className="bg-gray-800 rounded-xl p-4 border border-gray-700"
+              className="bg-white rounded-xl p-4 border border-gray-200"
             >
-              <Text className="text-gray-300 font-semibold text-center text-base">
+              <Text className="text-gray-600 font-semibold text-center text-base">
                 Create Another Listing
               </Text>
             </TouchableOpacity>
@@ -398,7 +398,9 @@ export function SellOptionsDrawer({
       return (
         <View className="px-4 py-6">
           <View className="mb-6">
-            <Text className="text-2xl font-bold text-white mb-2">How would you like to sell?</Text>
+            <Text className="text-2xl font-bold text-gray-900 mb-2">
+              How would you like to sell?
+            </Text>
             <Text className="text-gray-400">Choose between quick listing or custom offer</Text>
           </View>
 
@@ -406,7 +408,7 @@ export function SellOptionsDrawer({
             {/* Quick Listing Option */}
             <TouchableOpacity
               onPress={() => handleOfferTypeSelect('listing')}
-              className="bg-gray-800/50 rounded-xl p-4 border border-gray-700 mb-3"
+              className="bg-white/50 rounded-xl p-4 border border-gray-200 mb-3"
             >
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center flex-1">
@@ -427,7 +429,7 @@ export function SellOptionsDrawer({
             {/* Custom Offer Option */}
             <TouchableOpacity
               onPress={() => handleOfferTypeSelect('custom-offer')}
-              className="bg-gray-800/50 rounded-xl p-4 border border-gray-700"
+              className="bg-white/50 rounded-xl p-4 border border-gray-200"
             >
               <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center flex-1">
@@ -462,7 +464,7 @@ export function SellOptionsDrawer({
 
         <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
           <View className="mb-6">
-            <Text className="text-2xl font-bold text-white mb-2">Product Specifications</Text>
+            <Text className="text-2xl font-bold text-gray-900 mb-2">Product Specifications</Text>
             <Text className="text-gray-400">
               Fill in the specifications for your {product?.displayName || product?.name}
             </Text>
@@ -499,7 +501,7 @@ export function SellOptionsDrawer({
                 })}
             </View>
           ) : (
-            <View className="bg-gray-800/50 rounded-xl p-6 mb-4">
+            <View className="bg-white/50 rounded-xl p-6 mb-4">
               <View className="items-center">
                 <AlertCircle size={48} color="#6B7280" />
                 <Text className="text-gray-400 text-center mt-3">
@@ -511,7 +513,7 @@ export function SellOptionsDrawer({
         </ScrollView>
 
         {/* Submit Button - Fixed at bottom */}
-        <View className="px-4 py-4 bg-gray-900 border-t border-gray-800">
+        <View className="px-4 py-4 bg-gray-50 border-t border-gray-200">
           <TouchableOpacity
             onPress={() => handleSubmit()}
             disabled={isSubmitting}
@@ -522,7 +524,7 @@ export function SellOptionsDrawer({
             ) : (
               <View className="flex-row items-center justify-center">
                 <Check size={20} color="white" />
-                <Text className="text-white font-semibold text-base ml-2">Complete</Text>
+                <Text className="text-gray-900 font-semibold text-base ml-2">Complete</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -533,7 +535,7 @@ export function SellOptionsDrawer({
 
   return (
     <Modal visible={visible} animationType="none" transparent={true} onRequestClose={handleClose}>
-      <View className="flex-1 bg-black/60">
+      <View className="flex-1 bg-white/60">
         <TouchableOpacity className="flex-1" activeOpacity={1} onPress={handleClose} />
 
         <Animated.View
@@ -546,7 +548,7 @@ export function SellOptionsDrawer({
           }}
         >
           {/* Header */}
-          <View className="flex-row items-center justify-between p-4 border-b border-gray-800">
+          <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
             <View className="w-10" />
             <View className="h-1 w-12 bg-gray-600 rounded-full" />
             <TouchableOpacity onPress={handleClose} className="p-2">

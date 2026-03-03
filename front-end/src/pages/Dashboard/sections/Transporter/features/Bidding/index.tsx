@@ -54,7 +54,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
   return (
     <>
       <ScrollView
-        className="flex-1 bg-black"
+        className="flex-1 bg-white"
         showsVerticalScrollIndicator={false}
         testID={testID}
         accessibilityLabel={accessibilityLabel}

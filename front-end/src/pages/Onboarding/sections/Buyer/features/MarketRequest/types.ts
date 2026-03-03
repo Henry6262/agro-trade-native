@@ -1,1 +1,1 @@
-export interface FeatureProps {}
+export type FeatureProps = Record<string, never>;

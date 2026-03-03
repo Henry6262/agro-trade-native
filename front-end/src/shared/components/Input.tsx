@@ -37,23 +37,23 @@ export const Input: React.FC<InputProps> = ({
   const getVariantStyles = () => {
     const hasError = !!error;
     const focusedColor = hasError ? 'border-red-500' : 'border-green-500';
-    const defaultColor = hasError ? 'border-red-300' : 'border-neutral-600';
+    const defaultColor = hasError ? 'border-red-300' : 'border-gray-200';
 
     switch (variant) {
       case 'filled':
         return {
-          container: `bg-neutral-800 border-b-2 ${isFocused ? focusedColor : defaultColor}`,
-          input: 'bg-transparent text-white',
+          container: `bg-gray-50 border-b-2 ${isFocused ? focusedColor : defaultColor}`,
+          input: 'bg-transparent text-gray-900',
         };
       case 'outline':
         return {
-          container: `bg-neutral-800 border-2 rounded-lg ${isFocused ? focusedColor : defaultColor}`,
-          input: 'bg-transparent text-white',
+          container: `bg-gray-50 border-2 rounded-lg ${isFocused ? focusedColor : defaultColor}`,
+          input: 'bg-transparent text-gray-900',
         };
       default:
         return {
-          container: `bg-neutral-800 border-b-2 ${isFocused ? focusedColor : defaultColor}`,
-          input: 'bg-transparent text-white',
+          container: `bg-gray-50 border-b-2 ${isFocused ? focusedColor : defaultColor}`,
+          input: 'bg-transparent text-gray-900',
         };
     }
   };
@@ -94,7 +94,7 @@ export const Input: React.FC<InputProps> = ({
   return (
     <View className="w-full">
       {label && (
-        <Text className={`${sizeStyles.label} font-medium text-neutral-300 mb-1`}>
+        <Text className={`${sizeStyles.label} font-medium text-gray-600 mb-1`}>
           {label}
           {required && <Text className="text-red-500 ml-1">*</Text>}
         </Text>
@@ -120,7 +120,7 @@ export const Input: React.FC<InputProps> = ({
 
         {isPassword && (
           <TouchableOpacity onPress={handlePasswordToggle} className="ml-3">
-            <Text className="text-neutral-400 text-sm">{isPasswordVisible ? 'Hide' : 'Show'}</Text>
+            <Text className="text-gray-500 text-sm">{isPasswordVisible ? 'Hide' : 'Show'}</Text>
           </TouchableOpacity>
         )}
 
@@ -128,7 +128,7 @@ export const Input: React.FC<InputProps> = ({
       </View>
 
       {(error || helperText) && (
-        <Text className={`${sizeStyles.label} mt-1 ${error ? 'text-red-500' : 'text-neutral-400'}`}>
+        <Text className={`${sizeStyles.label} mt-1 ${error ? 'text-red-500' : 'text-gray-500'}`}>
           {error || helperText}
         </Text>
       )}

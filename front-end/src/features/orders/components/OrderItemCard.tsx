@@ -54,7 +54,7 @@ export const OrderItemCard: React.FC<OrderItemCardProps> = ({
             onPress={handleIncrement}
             className="w-8 h-8 bg-primary-600 rounded-full items-center justify-center"
           >
-            <Text className="text-lg font-bold text-white">+</Text>
+            <Text className="text-lg font-bold text-gray-900">+</Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -126,8 +126,8 @@ export function TransporterOnboarding({ onComplete }: TransporterOnboardingProps
       case 'preferences':
         // Job preferences component
         return (
-          <View className="flex-1 p-6 bg-gray-800 rounded-xl m-4">
-            <Text className="text-white text-xl font-bold mb-4">Job Preferences</Text>
+          <View className="flex-1 p-6 bg-white rounded-xl m-4">
+            <Text className="text-gray-900 text-xl font-bold mb-4">Job Preferences</Text>
             <Text className="text-gray-400 mb-6">Select your preferred cargo types and routes</Text>
           </View>
         );

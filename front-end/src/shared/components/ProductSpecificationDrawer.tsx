@@ -142,7 +142,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
       case 'BOOLEAN':
         return (
           <View className="flex-row items-center justify-between">
-            <Text className="text-neutral-300 flex-1">{spec.name}</Text>
+            <Text className="text-gray-600 flex-1">{spec.name}</Text>
             <Switch
               value={specifications[spec.code] || false}
               onValueChange={(value) => updateSpecification(spec.code, value)}
@@ -155,7 +155,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
       case 'NUMBER':
         return (
           <View>
-            <Text className="text-neutral-300 mb-2">{spec.name}</Text>
+            <Text className="text-gray-600 mb-2">{spec.name}</Text>
             <View className="flex-row items-center">
               <TextInput
                 value={specifications[spec.code]?.toString() || ''}
@@ -163,12 +163,12 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
                 keyboardType="numeric"
                 placeholder={`Enter ${spec.name.toLowerCase()}`}
                 placeholderTextColor="#6B7280"
-                className="flex-1 bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
+                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-900"
               />
-              {spec.unit && <Text className="ml-2 text-neutral-400">{spec.unit}</Text>}
+              {spec.unit && <Text className="ml-2 text-gray-500">{spec.unit}</Text>}
             </View>
             {spec.minValue !== undefined && spec.maxValue !== undefined && (
-              <Text className="text-xs text-neutral-500 mt-1">
+              <Text className="text-xs text-gray-400 mt-1">
                 Range: {spec.minValue} - {spec.maxValue} {spec.unit || ''}
               </Text>
             )}
@@ -178,13 +178,13 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
       default:
         return (
           <View>
-            <Text className="text-neutral-300 mb-2">{spec.name}</Text>
+            <Text className="text-gray-600 mb-2">{spec.name}</Text>
             <TextInput
               value={specifications[spec.code] || ''}
               onChangeText={(text) => updateSpecification(spec.code, text)}
               placeholder={`Enter ${spec.name.toLowerCase()}`}
               placeholderTextColor="#6B7280"
-              className="bg-neutral-800 border border-neutral-600 rounded-lg px-3 py-2 text-white"
+              className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-900"
             />
           </View>
         );
@@ -198,21 +198,19 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
       case 'IMPORTANT':
         return 'text-yellow-400';
       default:
-        return 'text-neutral-400';
+        return 'text-gray-500';
     }
   };
 
   return (
     <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
-      <View className="flex-1 bg-black/50">
-        <View className="bg-neutral-900 rounded-t-3xl mt-20" style={{ flex: 1 }}>
+      <View className="flex-1 bg-white/50">
+        <View className="bg-white rounded-t-3xl mt-20" style={{ flex: 1 }}>
           {/* Header */}
-          <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
+          <View className="flex-row justify-between items-center p-6 border-b border-gray-200">
             <View>
-              <Text className="text-xl font-bold text-white">Product Details</Text>
-              <Text className="text-sm text-neutral-400 mt-1">
-                {productData?.name || 'Product'}
-              </Text>
+              <Text className="text-xl font-bold text-gray-900">Product Details</Text>
+              <Text className="text-sm text-gray-500 mt-1">{productData?.name || 'Product'}</Text>
             </View>
             <TouchableOpacity onPress={onClose}>
               <X color="#ffffff" size={24} />
@@ -231,7 +229,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
 
               {/* Quantity */}
               <View className="mb-4">
-                <Text className="text-neutral-300 mb-2">
+                <Text className="text-gray-600 mb-2">
                   Quantity <Text className="text-red-400">*</Text>
                 </Text>
                 <View className="flex-row items-center">
@@ -241,13 +239,11 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
                     keyboardType="numeric"
                     placeholder="Enter quantity"
                     placeholderTextColor="#6B7280"
-                    className={`flex-1 bg-neutral-800 border ${
-                      errors.quantity ? 'border-red-500' : 'border-neutral-600'
-                    } rounded-lg px-3 py-2 text-white`}
+                    className={`flex-1 bg-gray-50 border ${
+                      errors.quantity ? 'border-red-500' : 'border-gray-200'
+                    } rounded-lg px-3 py-2 text-gray-900`}
                   />
-                  <Text className="ml-2 text-neutral-400">
-                    {productData?.defaultUnit || 'tons'}
-                  </Text>
+                  <Text className="ml-2 text-gray-500">{productData?.defaultUnit || 'tons'}</Text>
                 </View>
                 {errors.quantity && (
                   <Text className="text-red-400 text-xs mt-1">{errors.quantity}</Text>
@@ -256,7 +252,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
 
               {/* Market Price Range Reference */}
               {productData?.priceRangeMin && productData?.priceRangeMax && (
-                <View className="mb-4 p-3 bg-neutral-800 rounded-lg flex-row items-center">
+                <View className="mb-4 p-3 bg-gray-50 rounded-lg flex-row items-center">
                   <Info size={14} color="#60A5FA" />
                   <Text className="text-sm text-blue-400 ml-2">
                     Market price: €{productData.priceRangeMin} - €{productData.priceRangeMax}/ton
@@ -274,7 +270,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
                   </Text>
                   {onSkip && (
                     <TouchableOpacity onPress={handleSkip}>
-                      <Text className="text-neutral-400 text-sm">Skip</Text>
+                      <Text className="text-gray-500 text-sm">Skip</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -297,14 +293,14 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
           </ScrollView>
 
           {/* Footer */}
-          <View className="absolute bottom-0 left-0 right-0 bg-neutral-800 border-t border-neutral-700 p-4">
+          <View className="absolute bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 p-4">
             <View className="flex-row gap-2">
               {onSkip && (
                 <TouchableOpacity
                   onPress={handleSkip}
-                  className="flex-1 border border-neutral-600 py-3 px-6 rounded-lg"
+                  className="flex-1 border border-gray-200 py-3 px-6 rounded-lg"
                 >
-                  <Text className="text-neutral-300 text-center font-semibold">
+                  <Text className="text-gray-600 text-center font-semibold">
                     Skip Specifications
                   </Text>
                 </TouchableOpacity>
@@ -319,7 +315,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
                 {isLoading ? (
                   <ActivityIndicator color="#ffffff" />
                 ) : (
-                  <Text className="text-white text-center font-semibold">Continue</Text>
+                  <Text className="text-gray-900 text-center font-semibold">Continue</Text>
                 )}
               </TouchableOpacity>
             </View>

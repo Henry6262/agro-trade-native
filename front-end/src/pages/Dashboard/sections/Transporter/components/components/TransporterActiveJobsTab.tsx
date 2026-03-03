@@ -136,7 +136,7 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
 
   return (
     <ScrollView
-      className="flex-1 bg-black"
+      className="flex-1 bg-white"
       showsVerticalScrollIndicator={false}
       testID={testID}
       accessibilityLabel={accessibilityLabel}
@@ -146,7 +146,7 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
         <TouchableOpacity
           onPress={handleRefresh}
           disabled={refreshing}
-          className="flex-row items-center justify-center bg-gray-800/50 border border-gray-700 rounded-lg p-3 mb-4"
+          className="flex-row items-center justify-center bg-white/50 border border-gray-200 rounded-lg p-3 mb-4"
         >
           <Navigation size={18} color={refreshing ? '#6B7280' : '#60A5FA'} />
           <Text className={`ml-2 ${refreshing ? 'text-gray-500' : 'text-blue-400'}`}>
@@ -204,7 +204,7 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
               <Text className="text-gray-400 text-center mt-4">Loading active jobs...</Text>
             </View>
           ) : activeJobs.length === 0 ? (
-            <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
+            <View className="bg-white/50 border border-gray-200 rounded-lg p-8">
               <Package
                 size={48}
                 color="#6B7280"
@@ -230,10 +230,8 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
                   {/* Header - Job Info */}
                   <View className="mb-3">
                     <View className="flex-row items-center justify-between mb-2">
-                      <Text className="text-white font-bold">Job #{job.jobNumber}</Text>
-                      <Badge className={`${statusColor} bg-gray-800/50`}>
-                        {job.status}
-                      </Badge>
+                      <Text className="text-gray-900 font-bold">Job #{job.jobNumber}</Text>
+                      <Badge className={`${statusColor} bg-white/50`}>{job.status}</Badge>
                     </View>
 
                     {/* Job Details */}
@@ -254,10 +252,10 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
                   </View>
 
                   {/* Progress Info */}
-                  <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-3 mb-3">
+                  <View className="bg-white/50 border border-gray-200 rounded-lg p-3 mb-3">
                     <View className="flex-row items-center justify-between mb-2">
                       <Text className="text-gray-400 text-sm">Pickups Completed</Text>
-                      <Text className="text-white font-semibold">
+                      <Text className="text-gray-900 font-semibold">
                         {pickupsCompleted.length} / {pickupPointsTotal}
                       </Text>
                     </View>
@@ -286,7 +284,7 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
                         ) : (
                           <>
                             <Truck size={14} color="#FFFFFF" />
-                            <Text className="ml-1 text-white">START JOB</Text>
+                            <Text className="ml-1 text-gray-900">START JOB</Text>
                           </>
                         )}
                       </Button>
@@ -324,7 +322,7 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
                         ) : (
                           <>
                             <CheckCircle size={14} color="#FFFFFF" />
-                            <Text className="ml-1 text-white">COMPLETE DELIVERY</Text>
+                            <Text className="ml-1 text-gray-900">COMPLETE DELIVERY</Text>
                           </>
                         )}
                       </Button>

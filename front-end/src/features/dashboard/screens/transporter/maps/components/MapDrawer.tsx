@@ -158,7 +158,7 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
         {/* Backdrop */}
         <TouchableOpacity
           testID="drawer-backdrop"
-          className="absolute inset-0 bg-black/50"
+          className="absolute inset-0 bg-white/50"
           activeOpacity={1}
           onPress={closeDrawer}
         />
@@ -167,7 +167,7 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
         <Animated.View
           testID="map-drawer"
           {...panResponder.panHandlers}
-          className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl"
+          className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-50 rounded-t-3xl shadow-2xl"
           style={{
             height: DRAWER_HEIGHT,
             transform: [{ translateY }],
@@ -180,13 +180,13 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
           </View>
 
           {/* Header */}
-          <View className="px-4 pb-4 border-b-2 border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-green-50 dark:from-gray-800 dark:to-gray-800">
+          <View className="px-4 pb-4 border-b-2 border-gray-200 dark:border-gray-200 bg-gradient-to-r from-blue-50 to-green-50 dark:from-gray-800 dark:to-gray-800">
             <View className="flex-row justify-between items-center">
               <View className="flex-row items-center">
                 <View className="bg-blue-500 rounded-full p-2 mr-2">
                   <Route size={20} color="#FFFFFF" />
                 </View>
-                <Text className="text-2xl font-bold text-gray-900 dark:text-white">
+                <Text className="text-2xl font-bold text-white dark:text-white">
                   Route Planning
                 </Text>
               </View>
@@ -229,11 +229,11 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
 
                 {/* Routes Summary */}
                 {routes.length > 0 && (
-                  <View className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-4 shadow-md border border-gray-200 dark:border-gray-700">
+                  <View className="bg-white dark:bg-white rounded-xl p-4 mb-4 shadow-md border border-gray-200 dark:border-gray-200">
                     <View className="flex-row justify-between items-center mb-2">
                       <View className="flex-row items-center">
                         <Route size={16} color="#3B82F6" />
-                        <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-2">
+                        <Text className="text-sm font-medium text-gray-700 dark:text-gray-600 ml-2">
                           Total Distance
                         </Text>
                       </View>
@@ -244,7 +244,7 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
                     <View className="flex-row justify-between items-center">
                       <View className="flex-row items-center">
                         <Clock size={16} color="#3B82F6" />
-                        <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 ml-2">
+                        <Text className="text-sm font-medium text-gray-700 dark:text-gray-600 ml-2">
                           Average Time
                         </Text>
                       </View>
@@ -259,7 +259,7 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
                 {routes.map((route, index) => (
                   <View
                     key={route.truckId}
-                    className="bg-white dark:bg-gray-800 border-2 rounded-xl p-4 mb-3 shadow-sm"
+                    className="bg-white dark:bg-white border-2 rounded-xl p-4 mb-3 shadow-sm"
                     style={{ borderColor: route.color + '40' }}
                   >
                     {/* Truck Header */}
@@ -271,7 +271,7 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
                         <Truck size={18} color="#FFFFFF" />
                       </View>
                       <View className="ml-3 flex-1">
-                        <Text className="text-base font-bold text-gray-900 dark:text-white">
+                        <Text className="text-base font-bold text-gray-900 dark:text-gray-900">
                           {route.truckLabel}
                         </Text>
                         <Text className="text-sm text-gray-600 dark:text-gray-400">
@@ -287,7 +287,7 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
                         <View className="flex-row items-center justify-between mb-1">
                           <View className="flex-row items-center flex-1">
                             <View className="w-2 h-2 bg-blue-500 rounded-full" />
-                            <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 ml-2 mr-2">
+                            <Text className="text-sm font-medium text-gray-800 dark:text-gray-700 ml-2 mr-2">
                               Current → Pickup
                             </Text>
                             <Package size={14} color="#10b981" />
@@ -308,7 +308,7 @@ export const MapDrawer: React.FC<MapDrawerProps> = ({ isOpen, offer, onClose }) 
                         <View className="flex-row items-center justify-between mb-1">
                           <View className="flex-row items-center flex-1">
                             <View className="w-2 h-2 bg-green-500 rounded-full" />
-                            <Text className="text-sm font-medium text-gray-800 dark:text-gray-200 ml-2 mr-2">
+                            <Text className="text-sm font-medium text-gray-800 dark:text-gray-700 ml-2 mr-2">
                               Pickup → Delivery
                             </Text>
                             <Flag size={14} color="#ef4444" />

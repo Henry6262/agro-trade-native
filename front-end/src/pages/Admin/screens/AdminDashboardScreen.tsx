@@ -83,12 +83,12 @@ export function AdminDashboardScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900">
+    <SafeAreaView className="flex-1 bg-gray-50">
       <ScrollView className="flex-1">
         <View className="p-6">
           {/* Header */}
           <View className="mb-8">
-            <Text className="text-3xl font-bold text-white mb-2">Admin Dashboard</Text>
+            <Text className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</Text>
             <Text className="text-gray-400">Manage pricing zones and market data</Text>
           </View>
 
@@ -102,7 +102,7 @@ export function AdminDashboardScreen() {
                 activeOpacity={0.8}
               >
                 <View
-                  className="bg-gray-800 rounded-xl p-5 border border-gray-700"
+                  className="bg-white rounded-xl p-5 border border-gray-200"
                   style={styles.cardShadow}
                 >
                   {/* Icon */}
@@ -114,18 +114,18 @@ export function AdminDashboardScreen() {
                   </View>
 
                   {/* Title & Description */}
-                  <Text className="text-white font-semibold text-lg mb-1">{card.title}</Text>
+                  <Text className="text-gray-900 font-semibold text-lg mb-1">{card.title}</Text>
                   <Text className="text-gray-400 text-sm mb-4" numberOfLines={2}>
                     {card.description}
                   </Text>
 
                   {/* Stats */}
                   {card.stats && (
-                    <View className="border-t border-gray-700 pt-3 mt-3">
+                    <View className="border-t border-gray-200 pt-3 mt-3">
                       {card.stats.map((stat, index) => (
                         <View key={index} className="flex-row justify-between mb-1">
                           <Text className="text-gray-500 text-xs">{stat.label}</Text>
-                          <Text className="text-white text-xs font-medium">{stat.value}</Text>
+                          <Text className="text-gray-900 text-xs font-medium">{stat.value}</Text>
                         </View>
                       ))}
                     </View>
@@ -136,15 +136,15 @@ export function AdminDashboardScreen() {
           </View>
 
           {/* Quick Actions */}
-          <View className="mt-8 bg-gray-800 rounded-xl p-5 border border-gray-700">
-            <Text className="text-white font-semibold text-lg mb-4">Quick Actions</Text>
+          <View className="mt-8 bg-white rounded-xl p-5 border border-gray-200">
+            <Text className="text-gray-900 font-semibold text-lg mb-4">Quick Actions</Text>
             <View className="space-y-3">
               <TouchableOpacity
                 onPress={() => navigation.navigate('BulkPriceUpdate')}
                 className="flex-row items-center bg-gray-700 rounded-lg p-4"
               >
                 <Ionicons name="flash-outline" size={20} color="#F59E0B" />
-                <Text className="text-white ml-3 flex-1">Bulk Update Prices</Text>
+                <Text className="text-gray-900 ml-3 flex-1">Bulk Update Prices</Text>
                 <Ionicons name="chevron-forward-outline" size={20} color="#9CA3AF" />
               </TouchableOpacity>
 
@@ -153,7 +153,7 @@ export function AdminDashboardScreen() {
                 className="flex-row items-center bg-gray-700 rounded-lg p-4"
               >
                 <Ionicons name="download-outline" size={20} color="#10B981" />
-                <Text className="text-white ml-3 flex-1">Import/Export Data</Text>
+                <Text className="text-gray-900 ml-3 flex-1">Import/Export Data</Text>
                 <Ionicons name="chevron-forward-outline" size={20} color="#9CA3AF" />
               </TouchableOpacity>
 
@@ -162,7 +162,7 @@ export function AdminDashboardScreen() {
                 className="flex-row items-center bg-gray-700 rounded-lg p-4"
               >
                 <Ionicons name="map-outline" size={20} color="#3B82F6" />
-                <Text className="text-white ml-3 flex-1">View Zone Map</Text>
+                <Text className="text-gray-900 ml-3 flex-1">View Zone Map</Text>
                 <Ionicons name="chevron-forward-outline" size={20} color="#9CA3AF" />
               </TouchableOpacity>
             </View>

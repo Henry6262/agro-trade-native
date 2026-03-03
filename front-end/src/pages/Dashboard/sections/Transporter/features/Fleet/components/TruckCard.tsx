@@ -41,10 +41,10 @@ export const TruckCard: React.FC<TruckCardProps> = ({ truck, onAssignDriver }) =
   };
 
   return (
-    <View className="bg-gray-900/60 border border-gray-700 rounded-lg p-4 mb-3">
+    <View className="bg-gray-50/60 border border-gray-200 rounded-lg p-4 mb-3">
       <View className="flex-row items-center justify-between mb-2">
         <View className="flex-1">
-          <Text className="text-white font-semibold">{truck.model}</Text>
+          <Text className="text-gray-900 font-semibold">{truck.model}</Text>
           <Text className="text-gray-400 text-sm">{truck.licensePlate}</Text>
         </View>
         <View className="flex-row items-center gap-2">
@@ -90,15 +90,15 @@ export const TruckCard: React.FC<TruckCardProps> = ({ truck, onAssignDriver }) =
         </View>
       )}
 
-      <Text className="text-gray-300 text-sm mb-2">Capacity: {truck.capacityTons} tons</Text>
+      <Text className="text-gray-600 text-sm mb-2">Capacity: {truck.capacityTons} tons</Text>
       <View className="flex-row items-center mb-2">
         <MapPin size={14} color="#60A5FA" />
-        <Text className="text-gray-300 text-sm ml-2">{truck.location}</Text>
+        <Text className="text-gray-600 text-sm ml-2">{truck.location}</Text>
       </View>
       {truck.driver && (
         <View className="flex-row items-center mb-1">
           <User size={14} color="#FDE68A" />
-          <Text className="text-gray-300 text-sm ml-2">{truck.driver}</Text>
+          <Text className="text-gray-600 text-sm ml-2">{truck.driver}</Text>
         </View>
       )}
       {truck.assignment && (

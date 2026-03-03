@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, Pressable, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  Modal,
+  Pressable,
+  TouchableOpacity,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 import { X, ChevronLeft } from 'lucide-react-native';
-import { Input } from '@shared/components/Input';
-import { Button } from '@shared/components/Button';
+import { GlassButton } from '../../../../../../../design-system/GlassButton';
+import { GlassInput } from '../../../../../../../design-system/GlassInput';
 import { ProgressIndicator } from '../shared/ProgressIndicator';
+import { COLORS } from '../../../../../../../design-system/tokens';
 import { DriverInfo as DriverPersonalInfo } from '../../types';
 
 interface DriverPersonalInfoStepProps {
@@ -32,7 +41,6 @@ export const DriverPersonalInfoStep: React.FC<DriverPersonalInfoStepProps> = ({
 
   const handleNext = () => {
     if (!formData.fullName || !formData.phoneNumber) {
-      // Add validation feedback
       return;
     }
     onNext(formData);
@@ -40,95 +48,131 @@ export const DriverPersonalInfoStep: React.FC<DriverPersonalInfoStepProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 justify-end bg-black/50">
-        <Pressable className="flex-1" onPress={onClose} />
+      <View style={styles.overlay}>
+        <Pressable style={styles.backdrop} onPress={onClose} />
 
-        <View className="bg-neutral-900 rounded-t-3xl max-h-[90%]">
+        <View style={styles.sheet}>
           {/* Header */}
-          <View className="flex-row items-center justify-between p-6 border-b border-neutral-800">
-            <View className="flex-row items-center flex-1">
-              <TouchableOpacity onPress={onBack} className="mr-4">
-                <ChevronLeft size={24} color="#9CA3AF" />
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+                <ChevronLeft size={22} color={COLORS.textSecondary} />
               </TouchableOpacity>
-              <Text className="text-xl font-bold text-white">Add New Driver</Text>
+              <Text style={styles.headerTitle}>Add New Driver</Text>
             </View>
-            <TouchableOpacity onPress={onClose}>
-              <X size={24} color="#9CA3AF" />
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <X size={22} color={COLORS.textSecondary} />
             </TouchableOpacity>
           </View>
 
-          {/* Progress Indicator */}
           <ProgressIndicator
             currentStep={0}
             totalSteps={4}
             stepLabels={['Personal Info', 'Licensing', 'Documents', 'Review']}
           />
 
-          {/* Content */}
           <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 400 }}>
-            <View className="p-6">
-              <Text className="text-lg font-semibold text-white mb-4">Personal Information</Text>
+            <View style={styles.content}>
+              <Text style={styles.sectionTitle}>Personal Information</Text>
 
-              {/* Full Name */}
-              <View className="mb-4">
-                <Text className="text-sm text-neutral-400 mb-2">Full Name *</Text>
-                <Input
-                  placeholder="John Smith"
-                  value={formData.fullName}
-                  onChangeText={(text) => setFormData({ ...formData, fullName: text })}
-                  className="bg-neutral-800 border-neutral-700"
-                />
-              </View>
+              <GlassInput
+                label="Full Name *"
+                placeholder="John Smith"
+                value={formData.fullName}
+                onChangeText={(text) => setFormData({ ...formData, fullName: text })}
+              />
 
-              {/* Phone Number */}
-              <View className="mb-4">
-                <Text className="text-sm text-neutral-400 mb-2">Phone Number *</Text>
-                <Input
-                  placeholder="+1 (555) 123-4567"
-                  value={formData.phoneNumber}
-                  onChangeText={(text) => setFormData({ ...formData, phoneNumber: text })}
-                  keyboardType="phone-pad"
-                  className="bg-neutral-800 border-neutral-700"
-                />
-              </View>
+              <GlassInput
+                label="Phone Number *"
+                placeholder="+1 (555) 123-4567"
+                value={formData.phoneNumber}
+                onChangeText={(text) => setFormData({ ...formData, phoneNumber: text })}
+                keyboardType="phone-pad"
+              />
 
-              {/* Email */}
-              <View className="mb-4">
-                <Text className="text-sm text-neutral-400 mb-2">Email Address</Text>
-                <Input
-                  placeholder="john.smith@example.com"
-                  value={formData.email}
-                  onChangeText={(text) => setFormData({ ...formData, email: text })}
-                  keyboardType="email-address"
-                  className="bg-neutral-800 border-neutral-700"
-                />
-              </View>
+              <GlassInput
+                label="Email Address"
+                placeholder="john.smith@example.com"
+                value={formData.email}
+                onChangeText={(text) => setFormData({ ...formData, email: text })}
+                keyboardType="email-address"
+              />
 
-              {/* Date of Birth */}
-              <View className="mb-6">
-                <Text className="text-sm text-neutral-400 mb-2">Date of Birth</Text>
-                <Input
-                  placeholder="MM/DD/YYYY"
-                  value={formData.dateOfBirth}
-                  onChangeText={(text) => setFormData({ ...formData, dateOfBirth: text })}
-                  className="bg-neutral-800 border-neutral-700"
-                />
-              </View>
+              <GlassInput
+                label="Date of Birth"
+                placeholder="MM/DD/YYYY"
+                value={formData.dateOfBirth}
+                onChangeText={(text) => setFormData({ ...formData, dateOfBirth: text })}
+                containerStyle={{ marginBottom: 0 }}
+              />
             </View>
           </ScrollView>
 
-          {/* Footer Actions */}
-          <View className="p-6 border-t border-neutral-800">
-            <Button
-              variant="gradient"
-              className="bg-gradient-to-r from-blue-600 to-blue-700"
-              onPress={handleNext}
-            >
-              <Text className="text-white font-semibold">Continue</Text>
-            </Button>
+          <View style={styles.footer}>
+            <GlassButton label="Continue" onPress={handleNext} variant="primary" fullWidth />
           </View>
         </View>
       </View>
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  backBtn: {
+    marginRight: 12,
+    padding: 4,
+  },
+  backdrop: {
+    flex: 1,
+  },
+  closeBtn: {
+    padding: 4,
+  },
+  content: {
+    padding: 20,
+  },
+  footer: {
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    borderTopWidth: 1,
+    padding: 20,
+  },
+  header: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+  },
+  headerLeft: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
+  },
+  headerTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 19,
+    fontWeight: '700',
+  },
+  overlay: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  sectionTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  sheet: {
+    backgroundColor: 'rgba(5,46,22,0.97)',
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 1,
+    maxHeight: '90%',
+  },
+});

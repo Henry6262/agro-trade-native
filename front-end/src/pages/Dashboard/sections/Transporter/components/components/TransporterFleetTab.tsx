@@ -32,16 +32,16 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
 
   if (isLoading && filteredTrucks.length === 0 && filteredDrivers.length === 0) {
     return (
-      <View className="flex-1 bg-black justify-center items-center" testID={testID}>
+      <View className="flex-1 bg-white justify-center items-center" testID={testID}>
         <ActivityIndicator size="large" color="#fb923c" />
-        <Text className="text-neutral-400 mt-3">Loading fleet overview...</Text>
+        <Text className="text-gray-500 mt-3">Loading fleet overview...</Text>
       </View>
     );
   }
 
   return (
     <ScrollView
-      className="flex-1 bg-black"
+      className="flex-1 bg-white"
       showsVerticalScrollIndicator={false}
       testID={testID}
       accessibilityLabel={accessibilityLabel}
@@ -94,11 +94,11 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
           </View>
         </View>
 
-        <View className="bg-neutral-900 rounded-2xl p-4">
+        <View className="bg-white rounded-2xl p-4">
           <View className="flex-row items-center justify-between mb-3">
             <View>
-              <Text className="text-white font-semibold text-lg">Fleet</Text>
-              <Text className="text-neutral-400 text-sm">Manage your trucks and drivers</Text>
+              <Text className="text-gray-900 font-semibold text-lg">Fleet</Text>
+              <Text className="text-gray-500 text-sm">Manage your trucks and drivers</Text>
             </View>
             <Button size="sm" onPress={openFleetCreation}>
               <Plus size={16} color="#111" />
@@ -109,13 +109,13 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
           <View className="flex-row justify-between mb-2">
             <TouchableOpacity
               className={`flex-1 py-2 rounded-lg mr-2 ${
-                truckTab === 'available' ? 'bg-green-600' : 'bg-neutral-800'
+                truckTab === 'available' ? 'bg-green-600' : 'bg-gray-50'
               }`}
               onPress={() => setTruckTab('available')}
             >
               <Text
                 className={`text-center font-semibold ${
-                  truckTab === 'available' ? 'text-white' : 'text-neutral-300'
+                  truckTab === 'available' ? 'text-gray-900' : 'text-gray-600'
                 }`}
               >
                 Available ({summary.availableTrucks})
@@ -123,13 +123,13 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               className={`flex-1 py-2 rounded-lg ${
-                truckTab === 'in_transit' ? 'bg-yellow-600' : 'bg-neutral-800'
+                truckTab === 'in_transit' ? 'bg-yellow-600' : 'bg-gray-50'
               }`}
               onPress={() => setTruckTab('in_transit')}
             >
               <Text
                 className={`text-center font-semibold ${
-                  truckTab === 'in_transit' ? 'text-white' : 'text-neutral-300'
+                  truckTab === 'in_transit' ? 'text-gray-900' : 'text-gray-600'
                 }`}
               >
                 In Transit ({summary.inTransitTrucks})
@@ -139,26 +139,26 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
 
           {filteredTrucks.length === 0 ? (
             <View className="py-6 items-center">
-              <Text className="text-neutral-400">No trucks in this category yet.</Text>
+              <Text className="text-gray-500">No trucks in this category yet.</Text>
             </View>
           ) : (
             filteredTrucks.map((truck) => (
               <View
                 key={truck.id}
-                className="bg-neutral-800 rounded-xl p-3 flex-row items-start justify-between mb-2"
+                className="bg-gray-50 rounded-xl p-3 flex-row items-start justify-between mb-2"
               >
                 <View className="flex-1">
                   <View className="flex-row items-center mb-2">
                     <Truck color="#60A5FA" size={18} />
-                    <Text className="text-white font-semibold ml-2">{truck.model}</Text>
+                    <Text className="text-gray-900 font-semibold ml-2">{truck.model}</Text>
                   </View>
-                  <Text className="text-neutral-300 text-sm">{truck.licensePlate}</Text>
-                  <Text className="text-neutral-400 text-xs mt-1">
+                  <Text className="text-gray-600 text-sm">{truck.licensePlate}</Text>
+                  <Text className="text-gray-500 text-xs mt-1">
                     Capacity: {truck.capacityTons} tons
                   </Text>
-                  <Text className="text-neutral-400 text-xs">{truck.location}</Text>
+                  <Text className="text-gray-500 text-xs">{truck.location}</Text>
                   {truck.driver && (
-                    <Text className="text-neutral-200 text-xs mt-1">Driver: {truck.driver}</Text>
+                    <Text className="text-gray-700 text-xs mt-1">Driver: {truck.driver}</Text>
                   )}
                 </View>
                 <Badge className={truck.status === 'available' ? 'bg-green-600' : 'bg-yellow-600'}>
@@ -169,30 +169,30 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
           )}
         </View>
 
-        <View className="bg-neutral-900 rounded-2xl p-4">
+        <View className="bg-white rounded-2xl p-4">
           <View className="flex-row items-center justify-between mb-3">
             <View>
-              <Text className="text-white font-semibold text-lg">Drivers</Text>
-              <Text className="text-neutral-400 text-sm">Availability overview</Text>
+              <Text className="text-gray-900 font-semibold text-lg">Drivers</Text>
+              <Text className="text-gray-500 text-sm">Availability overview</Text>
             </View>
             <View className="items-end">
-              <Text className="text-white text-sm font-semibold">
+              <Text className="text-gray-900 text-sm font-semibold">
                 {summary.availableDrivers} available
               </Text>
-              <Text className="text-neutral-400 text-xs">{summary.assignedDrivers} assigned</Text>
+              <Text className="text-gray-500 text-xs">{summary.assignedDrivers} assigned</Text>
             </View>
           </View>
 
           <View className="flex-row justify-between mb-2">
             <TouchableOpacity
               className={`flex-1 py-2 rounded-lg mr-2 ${
-                driverTab === 'available' ? 'bg-blue-600' : 'bg-neutral-800'
+                driverTab === 'available' ? 'bg-blue-600' : 'bg-gray-50'
               }`}
               onPress={() => setDriverTab('available')}
             >
               <Text
                 className={`text-center font-semibold ${
-                  driverTab === 'available' ? 'text-white' : 'text-neutral-300'
+                  driverTab === 'available' ? 'text-gray-900' : 'text-gray-600'
                 }`}
               >
                 Available ({summary.availableDrivers})
@@ -200,13 +200,13 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
             </TouchableOpacity>
             <TouchableOpacity
               className={`flex-1 py-2 rounded-lg ${
-                driverTab === 'assigned' ? 'bg-purple-600' : 'bg-neutral-800'
+                driverTab === 'assigned' ? 'bg-purple-600' : 'bg-gray-50'
               }`}
               onPress={() => setDriverTab('assigned')}
             >
               <Text
                 className={`text-center font-semibold ${
-                  driverTab === 'assigned' ? 'text-white' : 'text-neutral-300'
+                  driverTab === 'assigned' ? 'text-gray-900' : 'text-gray-600'
                 }`}
               >
                 Assigned ({summary.assignedDrivers})
@@ -216,26 +216,26 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
 
           {filteredDrivers.length === 0 ? (
             <View className="py-6 items-center">
-              <Text className="text-neutral-400">No drivers in this category.</Text>
+              <Text className="text-gray-500">No drivers in this category.</Text>
             </View>
           ) : (
             filteredDrivers.map((driver) => (
               <View
                 key={driver.id}
-                className="bg-neutral-800 rounded-xl p-3 flex-row items-start justify-between mb-2"
+                className="bg-gray-50 rounded-xl p-3 flex-row items-start justify-between mb-2"
               >
                 <View className="flex-1">
                   <View className="flex-row items-center mb-2">
                     <User color="#A78BFA" size={18} />
-                    <Text className="text-white font-semibold ml-2">{driver.name}</Text>
+                    <Text className="text-gray-900 font-semibold ml-2">{driver.name}</Text>
                   </View>
-                  <Text className="text-neutral-300 text-sm">{driver.license}</Text>
-                  <Text className="text-neutral-400 text-xs mt-1">{driver.phone}</Text>
-                  <Text className="text-neutral-400 text-xs">
+                  <Text className="text-gray-600 text-sm">{driver.license}</Text>
+                  <Text className="text-gray-500 text-xs mt-1">{driver.phone}</Text>
+                  <Text className="text-gray-500 text-xs">
                     Experience: {driver.experienceYears} years
                   </Text>
                   {driver.assignment && (
-                    <Text className="text-neutral-200 text-xs mt-1">
+                    <Text className="text-gray-700 text-xs mt-1">
                       Assignment: {driver.assignment}
                     </Text>
                   )}
@@ -250,13 +250,13 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
           <View className="flex-row justify-between mt-3">
             <View className="flex-row items-center space-x-2">
               <MapPin color="#fb923c" size={16} />
-              <Text className="text-neutral-300 text-sm">
+              <Text className="text-gray-600 text-sm">
                 Active routes: {summary.inTransitTrucks}
               </Text>
             </View>
             <View className="flex-row items-center space-x-2">
               <Users color="#34d399" size={16} />
-              <Text className="text-neutral-300 text-sm">
+              <Text className="text-gray-600 text-sm">
                 Ready drivers: {summary.availableDrivers}
               </Text>
             </View>

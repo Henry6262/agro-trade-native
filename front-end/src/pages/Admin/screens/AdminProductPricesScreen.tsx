@@ -269,27 +269,27 @@ export function AdminProductPricesScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
+      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
         <LoadingSpinner />
-        <Text className="text-white mt-4">Loading product prices...</Text>
+        <Text className="text-gray-900 mt-4">Loading product prices...</Text>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900">
+    <SafeAreaView className="flex-1 bg-gray-50">
       <View className="flex-1">
         {/* Header */}
-        <View className="flex-row items-center justify-between p-6 border-b border-gray-700">
+        <View className="flex-row items-center justify-between p-6 border-b border-gray-200">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
-            className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center"
+            className="w-10 h-10 rounded-full bg-white items-center justify-center"
           >
             <Ionicons name="chevron-back" size={20} color="#9CA3AF" />
           </TouchableOpacity>
 
           <View className="flex-1 mx-4">
-            <Text className="text-white text-xl font-semibold">Product Pricing</Text>
+            <Text className="text-gray-900 text-xl font-semibold">Product Pricing</Text>
             <Text className="text-gray-400 text-sm">Manage product prices by zone</Text>
           </View>
 
@@ -305,14 +305,14 @@ export function AdminProductPricesScreen() {
         {/* Filters */}
         <View className="px-6 py-4 space-y-4">
           {/* Search Bar */}
-          <View className="bg-gray-800 rounded-lg flex-row items-center px-4 py-3">
+          <View className="bg-white rounded-lg flex-row items-center px-4 py-3">
             <Ionicons name="search" size={20} color="#6B7280" />
             <TextInput
               value={searchTerm}
               onChangeText={setSearchTerm}
               placeholder="Search products or zones..."
               placeholderTextColor="#6B7280"
-              className="flex-1 ml-3 text-white"
+              className="flex-1 ml-3 text-gray-900"
             />
             {searchTerm.length > 0 && (
               <TouchableOpacity onPress={() => setSearchTerm('')}>
@@ -325,8 +325,8 @@ export function AdminProductPricesScreen() {
           <View className="flex-row space-x-4">
             {/* Zone Filter */}
             <View className="flex-1">
-              <Text className="text-gray-300 text-sm mb-2">Zone</Text>
-              <View className="bg-gray-800 rounded-lg">
+              <Text className="text-gray-600 text-sm mb-2">Zone</Text>
+              <View className="bg-white rounded-lg">
                 <Picker
                   selectedValue={selectedZone}
                   onValueChange={setSelectedZone}
@@ -343,8 +343,8 @@ export function AdminProductPricesScreen() {
 
             {/* Category Filter */}
             <View className="flex-1">
-              <Text className="text-gray-300 text-sm mb-2">Category</Text>
-              <View className="bg-gray-800 rounded-lg">
+              <Text className="text-gray-600 text-sm mb-2">Category</Text>
+              <View className="bg-white rounded-lg">
                 <Picker
                   selectedValue={selectedCategory}
                   onValueChange={setSelectedCategory}
@@ -364,16 +364,16 @@ export function AdminProductPricesScreen() {
         {/* Prices List */}
         <ScrollView className="flex-1 px-6">
           {Object.entries(groupedPrices).map(([key, prices]) => (
-            <View key={key} className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700">
+            <View key={key} className="bg-white rounded-xl p-4 mb-4 border border-gray-200">
               {/* Product Header */}
               <View className="flex-row items-center justify-between mb-3">
                 <View className="flex-1">
-                  <Text className="text-white font-semibold text-lg">
+                  <Text className="text-gray-900 font-semibold text-lg">
                     {prices[0].product.displayName}
                   </Text>
                   <View className="flex-row items-center mt-1">
                     <View className="bg-gray-700 rounded-full px-2 py-1 mr-2">
-                      <Text className="text-gray-300 text-xs">{prices[0].product.category}</Text>
+                      <Text className="text-gray-600 text-xs">{prices[0].product.category}</Text>
                     </View>
                     <View
                       className="w-3 h-3 rounded-full mr-2"
@@ -390,7 +390,7 @@ export function AdminProductPricesScreen() {
                   <View className="flex-row items-center justify-between mb-2">
                     <View className="flex-1">
                       <View className="flex-row items-center space-x-4">
-                        <Text className="text-white font-medium">
+                        <Text className="text-gray-900 font-medium">
                           {price.currency} {price.minPrice} - {price.maxPrice}
                         </Text>
                         <Text className="text-gray-400 text-sm">per {price.unit}</Text>
@@ -444,10 +444,10 @@ export function AdminProductPricesScreen() {
         transparent
         onRequestClose={() => setShowCreateModal(false)}
       >
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-gray-800 rounded-t-3xl p-6">
+        <View className="flex-1 bg-white/50 justify-end">
+          <View className="bg-white rounded-t-3xl p-6">
             <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-white font-semibold text-xl">Add Product Price</Text>
+              <Text className="text-gray-900 font-semibold text-xl">Add Product Price</Text>
               <TouchableOpacity onPress={() => setShowCreateModal(false)}>
                 <Ionicons name="close" size={24} color="#9CA3AF" />
               </TouchableOpacity>
@@ -457,7 +457,7 @@ export function AdminProductPricesScreen() {
               <View className="space-y-4">
                 {/* Product Selection */}
                 <View>
-                  <Text className="text-gray-300 text-sm mb-2">Product *</Text>
+                  <Text className="text-gray-600 text-sm mb-2">Product *</Text>
                   <View className="bg-gray-700 rounded-lg">
                     <Picker
                       selectedValue={newPrice.productId}
@@ -479,7 +479,7 @@ export function AdminProductPricesScreen() {
 
                 {/* Zone Selection */}
                 <View>
-                  <Text className="text-gray-300 text-sm mb-2">Pricing Zone *</Text>
+                  <Text className="text-gray-600 text-sm mb-2">Pricing Zone *</Text>
                   <View className="bg-gray-700 rounded-lg">
                     <Picker
                       selectedValue={newPrice.pricingZoneId}
@@ -498,24 +498,24 @@ export function AdminProductPricesScreen() {
                 {/* Price Range */}
                 <View className="flex-row space-x-3">
                   <View className="flex-1">
-                    <Text className="text-gray-300 text-sm mb-2">Min Price *</Text>
+                    <Text className="text-gray-600 text-sm mb-2">Min Price *</Text>
                     <TextInput
                       value={newPrice.minPrice}
                       onChangeText={(text) => setNewPrice({ ...newPrice, minPrice: text })}
                       placeholder="0.00"
                       placeholderTextColor="#6B7280"
-                      className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                      className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                       keyboardType="decimal-pad"
                     />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-gray-300 text-sm mb-2">Max Price *</Text>
+                    <Text className="text-gray-600 text-sm mb-2">Max Price *</Text>
                     <TextInput
                       value={newPrice.maxPrice}
                       onChangeText={(text) => setNewPrice({ ...newPrice, maxPrice: text })}
                       placeholder="0.00"
                       placeholderTextColor="#6B7280"
-                      className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                      className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                       keyboardType="decimal-pad"
                     />
                   </View>
@@ -524,7 +524,7 @@ export function AdminProductPricesScreen() {
                 {/* Currency & Unit */}
                 <View className="flex-row space-x-3">
                   <View className="flex-1">
-                    <Text className="text-gray-300 text-sm mb-2">Currency</Text>
+                    <Text className="text-gray-600 text-sm mb-2">Currency</Text>
                     <View className="bg-gray-700 rounded-lg">
                       <Picker
                         selectedValue={newPrice.currency}
@@ -539,7 +539,7 @@ export function AdminProductPricesScreen() {
                     </View>
                   </View>
                   <View className="flex-1">
-                    <Text className="text-gray-300 text-sm mb-2">Unit</Text>
+                    <Text className="text-gray-600 text-sm mb-2">Unit</Text>
                     <View className="bg-gray-700 rounded-lg">
                       <Picker
                         selectedValue={newPrice.unit}
@@ -557,7 +557,7 @@ export function AdminProductPricesScreen() {
 
                 {/* Quality Grade */}
                 <View>
-                  <Text className="text-gray-300 text-sm mb-2">Quality Grade</Text>
+                  <Text className="text-gray-600 text-sm mb-2">Quality Grade</Text>
                   <View className="bg-gray-700 rounded-lg">
                     <Picker
                       selectedValue={newPrice.qualityGrade}
@@ -575,23 +575,23 @@ export function AdminProductPricesScreen() {
                 {/* Dates */}
                 <View className="flex-row space-x-3">
                   <View className="flex-1">
-                    <Text className="text-gray-300 text-sm mb-2">Effective Date</Text>
+                    <Text className="text-gray-600 text-sm mb-2">Effective Date</Text>
                     <TextInput
                       value={newPrice.effectiveDate}
                       onChangeText={(text) => setNewPrice({ ...newPrice, effectiveDate: text })}
                       placeholder="YYYY-MM-DD"
                       placeholderTextColor="#6B7280"
-                      className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                      className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                     />
                   </View>
                   <View className="flex-1">
-                    <Text className="text-gray-300 text-sm mb-2">Expires Date (Optional)</Text>
+                    <Text className="text-gray-600 text-sm mb-2">Expires Date (Optional)</Text>
                     <TextInput
                       value={newPrice.expiresDate}
                       onChangeText={(text) => setNewPrice({ ...newPrice, expiresDate: text })}
                       placeholder="YYYY-MM-DD"
                       placeholderTextColor="#6B7280"
-                      className="bg-gray-700 rounded-lg px-3 py-3 text-white"
+                      className="bg-gray-700 rounded-lg px-3 py-3 text-gray-900"
                     />
                   </View>
                 </View>
@@ -603,7 +603,7 @@ export function AdminProductPricesScreen() {
                 onPress={() => setShowCreateModal(false)}
                 className="flex-1 bg-gray-700 rounded-lg py-3 items-center"
               >
-                <Text className="text-gray-300 font-medium">Cancel</Text>
+                <Text className="text-gray-600 font-medium">Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={createProductPrice}

@@ -23,7 +23,7 @@ export const TransporterJobList: React.FC<TransporterJobListProps> = ({
 
   if (jobs.length === 0) {
     return (
-      <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
+      <View className="bg-white/50 border border-gray-200 rounded-lg p-8">
         <Package size={48} color="#6B7280" style={{ alignSelf: 'center', marginBottom: 12 }} />
         <Text className="text-gray-400 text-center">No active transport jobs</Text>
         <Text className="text-gray-500 text-center text-sm mt-2">

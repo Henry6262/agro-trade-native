@@ -1,8 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { format } from 'date-fns';
-import { Card, CardContent } from '@shared/components/Card';
-import { Badge } from '@shared/components/Badge';
+import { GlassCard, GlassBadge, COLORS } from '../../../../../../../design-system';
 import { BuyerRequestCard } from '@shared/components/BuyerRequestCard';
 import type { BuyerRequest } from '../types';
 
@@ -11,41 +10,97 @@ interface RequestsListProps {
   onOpenOffers: (request: BuyerRequest) => void;
 }
 
+function getStatusVariant(status: string): 'success' | 'warning' | 'danger' | 'info' | 'muted' {
+  switch (status) {
+    case 'active':
+    case 'matched':
+      return 'success';
+    case 'pending':
+      return 'warning';
+    case 'cancelled':
+    case 'rejected':
+      return 'danger';
+    default:
+      return 'info';
+  }
+}
+
 export const RequestsList: React.FC<RequestsListProps> = ({ requests, onOpenOffers }) => (
-  <View className="space-y-4">
+  <View style={styles.list}>
     {requests.map((request) => (
-      <Card key={request.id} className="bg-neutral-900 border-neutral-800 rounded-2xl">
-        <CardContent className="p-5 space-y-4">
-          <View className="flex-row items-center justify-between">
-            <View>
-              <Text className="text-white font-bold text-lg">{request.product}</Text>
-              <Text className="text-neutral-400 text-sm">{request.deliveryLocation}</Text>
-            </View>
-            <Badge className="bg-blue-500/20 text-blue-300">{request.status}</Badge>
+      <GlassCard key={request.id} tier="subtle" style={styles.card}>
+        <View style={styles.topRow}>
+          <View style={styles.topLeft}>
+            <Text style={styles.productName}>{request.product}</Text>
+            <Text style={styles.locationText}>{request.deliveryLocation}</Text>
           </View>
+          <GlassBadge label={request.status} variant={getStatusVariant(request.status)} />
+        </View>
 
-          <BuyerRequestCard
-            buyerRequest={{
-              id: request.id,
-              product: request.product,
-              quantity: request.quantity,
-              unit: request.unit,
-              budget: request.maxPricePerUnit ?? undefined,
-              deliveryLocation: request.deliveryLocation,
-              qualityRequirements: request.qualityRequirements,
-              createdAt: request.created,
-              offers: request.offers,
-              bestOffer: request.bestOffer ?? undefined,
-              status: request.status,
-            }}
-          />
+        <BuyerRequestCard
+          buyerRequest={{
+            id: request.id,
+            product: request.product,
+            quantity: request.quantity,
+            unit: request.unit,
+            budget: request.maxPricePerUnit ?? undefined,
+            deliveryLocation: request.deliveryLocation,
+            qualityRequirements: request.qualityRequirements,
+            createdAt: request.created,
+            offers: request.offers,
+            bestOffer: request.bestOffer ?? undefined,
+            status: request.status,
+          }}
+        />
 
-          <View className="flex-row justify-between text-sm text-neutral-400 mt-2">
-            <Text>Requested {format(new Date(request.created), 'MMM dd, yyyy')}</Text>
-            <Text>{request.offers} offers</Text>
-          </View>
-        </CardContent>
-      </Card>
+        <View style={styles.footer}>
+          <Text style={styles.footerMuted}>
+            Requested {format(new Date(request.created), 'MMM dd, yyyy')}
+          </Text>
+          <Text style={styles.footerOffers}>{request.offers} offers</Text>
+        </View>
+      </GlassCard>
     ))}
   </View>
 );
+
+const styles = StyleSheet.create({
+  card: {},
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+  },
+  footerMuted: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+  },
+  footerOffers: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  list: {
+    gap: 8,
+  },
+  locationText: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    marginTop: 2,
+  },
+  productName: {
+    color: COLORS.textPrimary,
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  topLeft: {
+    flex: 1,
+    marginRight: 8,
+  },
+  topRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+});

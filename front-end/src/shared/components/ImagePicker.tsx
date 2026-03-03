@@ -102,11 +102,7 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
         <View className="flex-row flex-wrap gap-3 mb-4">
           {images.map((uri, index) => (
             <View key={uri} className="relative">
-              <Image
-                source={{ uri }}
-                className="w-20 h-20 rounded-xl"
-                resizeMode="cover"
-              />
+              <Image source={{ uri }} className="w-20 h-20 rounded-xl" resizeMode="cover" />
               <TouchableOpacity
                 onPress={() => removeImage(index)}
                 className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full items-center justify-center"
@@ -124,14 +120,14 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
           <TouchableOpacity
             onPress={pickFromGallery}
             disabled={uploading}
-            className="flex-1 flex-row items-center justify-center py-3 rounded-xl border border-dashed border-neutral-600 bg-neutral-800/50"
+            className="flex-1 flex-row items-center justify-center py-3 rounded-xl border border-dashed border-gray-200 bg-gray-50/50"
           >
             {uploading ? (
               <ActivityIndicator size="small" color="#10B981" />
             ) : (
               <>
                 <ImagePlus size={18} color="#9CA3AF" />
-                <Text className="text-neutral-400 ml-2 text-sm">Gallery</Text>
+                <Text className="text-gray-500 ml-2 text-sm">Gallery</Text>
               </>
             )}
           </TouchableOpacity>
@@ -139,15 +135,15 @@ export const ImagePicker: React.FC<ImagePickerProps> = ({
           <TouchableOpacity
             onPress={pickFromCamera}
             disabled={uploading}
-            className="flex-1 flex-row items-center justify-center py-3 rounded-xl border border-dashed border-neutral-600 bg-neutral-800/50"
+            className="flex-1 flex-row items-center justify-center py-3 rounded-xl border border-dashed border-gray-200 bg-gray-50/50"
           >
             <Camera size={18} color="#9CA3AF" />
-            <Text className="text-neutral-400 ml-2 text-sm">Camera</Text>
+            <Text className="text-gray-500 ml-2 text-sm">Camera</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      <Text className="text-neutral-500 text-xs mt-2">
+      <Text className="text-gray-400 text-xs mt-2">
         {images.length}/{maxImages} images {uploading ? '- Uploading...' : ''}
       </Text>
     </View>

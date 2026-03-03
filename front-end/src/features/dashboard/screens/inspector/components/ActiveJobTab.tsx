@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Platform } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { MapPin, Navigation, Clock, Package } from 'lucide-react-native';
+import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
 import { ActiveJobTabProps } from '../types';
 import { VerificationForm } from './VerificationForm';
 
@@ -13,7 +14,6 @@ export const ActiveJobTab: React.FC<ActiveJobTabProps> = ({
 }) => {
   const [showVerificationForm, setShowVerificationForm] = useState(false);
 
-  // Use real current location or fallback to mock
   const inspectorCurrentLocation = currentLocation || {
     latitude: 42.6877,
     longitude: 23.3119,
@@ -21,12 +21,10 @@ export const ActiveJobTab: React.FC<ActiveJobTabProps> = ({
 
   if (!activeJob) {
     return (
-      <View className="flex-1 justify-center items-center p-8">
-        <Package size={64} color="#9ca3af" />
-        <Text className="text-xl font-semibold text-gray-700 mt-4">No Active Job</Text>
-        <Text className="text-gray-500 text-center mt-2">
-          Accept a job from the Available Jobs tab
-        </Text>
+      <View style={styles.emptyState}>
+        <Package size={64} color="rgba(255,255,255,0.25)" />
+        <Text style={styles.emptyTitle}>No Active Job</Text>
+        <Text style={styles.emptySubtitle}>Accept a job from the Available Jobs tab</Text>
       </View>
     );
   }
@@ -43,33 +41,38 @@ export const ActiveJobTab: React.FC<ActiveJobTabProps> = ({
 
   const formatSpecs = (specs: Record<string, any>) => {
     return Object.entries(specs).map(([key, value]) => (
-      <Text key={key} className="text-gray-600">
-        {key.charAt(0).toUpperCase() + key.slice(1)}: {value}
+      <Text key={key} style={styles.specRow}>
+        <Text style={styles.specKey}>{key.charAt(0).toUpperCase() + key.slice(1)}: </Text>
+        <Text style={styles.specVal}>{value}</Text>
       </Text>
     ));
   };
 
+  const statusVariant = activeJob.status.includes('IN_PROGRESS') ? 'warning' : 'success';
+
   return (
-    <ScrollView className="flex-1 bg-white">
-      {/* Job Status */}
-      <View className="bg-green-50 px-4 py-3 border-b border-green-200">
-        <View className="flex-row items-center justify-between">
-          <View>
-            <Text className="text-lg font-semibold text-gray-800">
-              {activeJob.productDetails.name}
-            </Text>
-            <Text className="text-sm text-gray-600">{activeJob.location.address}</Text>
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Job Status Header */}
+      <GlassCard tier="medium" style={styles.headerCard}>
+        <View style={styles.headerRow}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.headerTitle}>{activeJob.productDetails.name}</Text>
+            <Text style={styles.headerAddress}>{activeJob.location.address}</Text>
           </View>
-          <View testID="job-status" className="bg-green-600 px-3 py-1 rounded-full">
-            <Text className="text-white text-xs font-medium">
-              {activeJob.status.replace('_', ' ')}
-            </Text>
-          </View>
+          <GlassBadge
+            testID="job-status"
+            label={activeJob.status.replace('_', ' ')}
+            variant={statusVariant}
+          />
         </View>
-      </View>
+      </GlassCard>
 
       {/* Map Section */}
-      <View testID="job-map" style={{ height: 256 }}>
+      <View testID="job-map" style={styles.mapContainer}>
         <MapView
           provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
           style={StyleSheet.absoluteFillObject}
@@ -82,14 +85,12 @@ export const ActiveJobTab: React.FC<ActiveJobTabProps> = ({
               Math.abs(inspectorCurrentLocation.longitude - activeJob.location.longitude) * 1.5,
           }}
         >
-          {/* Inspector Current Location Marker */}
           <Marker coordinate={inspectorCurrentLocation} title="Your Location">
-            <View className="bg-blue-500 p-2 rounded-full">
+            <View style={styles.markerBlue}>
               <Navigation size={20} color="white" />
             </View>
           </Marker>
 
-          {/* Job Destination Marker */}
           <Marker
             coordinate={{
               latitude: activeJob.location.latitude,
@@ -97,12 +98,11 @@ export const ActiveJobTab: React.FC<ActiveJobTabProps> = ({
             }}
             title="Job Location"
           >
-            <View className="bg-red-500 p-2 rounded-full">
+            <View style={styles.markerRed}>
               <MapPin size={20} color="white" />
             </View>
           </Marker>
 
-          {/* Route Line from Inspector to Job */}
           <Polyline
             testID="route-line"
             coordinates={[
@@ -112,66 +112,72 @@ export const ActiveJobTab: React.FC<ActiveJobTabProps> = ({
                 longitude: activeJob.location.longitude,
               },
             ]}
-            strokeColor="#3b82f6"
+            strokeColor="#4ADE80"
             strokeWidth={3}
           />
         </MapView>
 
         {/* Distance Overlay */}
-        <View className="absolute bottom-4 left-4 bg-white px-3 py-2 rounded-lg shadow">
-          <Text className="text-sm font-medium">{activeJob.distance || 12.3} km remaining</Text>
+        <View style={styles.distanceOverlay}>
+          <Text style={styles.distanceText}>{activeJob.distance || 12.3} km remaining</Text>
         </View>
       </View>
 
-      {/* Job Details */}
-      <View className="p-4">
-        <View className="mb-4">
-          <Text className="text-sm font-semibold text-gray-700 mb-2">Product Details</Text>
-          <View className="bg-gray-50 p-3 rounded-lg">
-            <Text className="font-medium">{activeJob.productDetails.type}</Text>
-            <Text className="text-gray-600">
-              Quantity: {activeJob.productDetails.quantity} {activeJob.productDetails.unit}
-            </Text>
-          </View>
+      {/* Progress bar */}
+      <View style={styles.progressWrap}>
+        <View style={styles.progressBg}>
+          <View style={[styles.progressFill, { width: '60%' }]} />
         </View>
+      </View>
 
-        <View className="mb-4">
-          <Text className="text-sm font-semibold text-gray-700 mb-2">Claimed Specifications</Text>
-          <View className="bg-gray-50 p-3 rounded-lg">
-            {formatSpecs(activeJob.productDetails.claimedSpecs)}
-          </View>
-        </View>
+      {/* Details */}
+      <View style={styles.details}>
+        {/* Product Details */}
+        <GlassCard tier="subtle" style={styles.detailCard}>
+          <Text style={styles.sectionLabel}>Product Details</Text>
+          <Text style={styles.detailMain}>{activeJob.productDetails.type}</Text>
+          <Text style={styles.detailSub}>
+            Quantity: {activeJob.productDetails.quantity} {activeJob.productDetails.unit}
+          </Text>
+        </GlassCard>
 
-        <View className="mb-4">
-          <Text className="text-sm font-semibold text-gray-700 mb-2">Location</Text>
-          <View className="bg-gray-50 p-3 rounded-lg">
-            <Text className="font-medium">{activeJob.location.address}</Text>
-            <Text className="text-gray-600">
-              {activeJob.location.city}, {activeJob.location.region}
-            </Text>
-          </View>
-        </View>
+        {/* Claimed Specifications */}
+        <GlassCard tier="subtle" style={styles.detailCard}>
+          <Text style={styles.sectionLabel}>Claimed Specifications</Text>
+          {formatSpecs(activeJob.productDetails.claimedSpecs)}
+        </GlassCard>
 
-        <View className="flex-row items-center mb-4">
-          <Clock size={16} color="#6b7280" />
-          <Text className="text-gray-600 ml-2">
+        {/* Location */}
+        <GlassCard tier="subtle" style={styles.detailCard}>
+          <Text style={styles.sectionLabel}>Location</Text>
+          <Text style={styles.detailMain}>{activeJob.location.address}</Text>
+          <Text style={styles.detailSub}>
+            {activeJob.location.city}, {activeJob.location.region}
+          </Text>
+        </GlassCard>
+
+        {/* Duration */}
+        <View style={styles.durationRow}>
+          <Clock size={15} color="rgba(255,255,255,0.4)" />
+          <Text style={styles.durationText}>
             Estimated duration: {activeJob.estimatedDuration} minutes
           </Text>
         </View>
 
         {/* Action Button */}
         {activeJob.status === 'ASSIGNED' && (
-          <TouchableOpacity
+          <GlassButton
+            label="Start Verification"
             onPress={handleStartVerification}
-            className="bg-green-600 py-3 rounded-lg"
-          >
-            <Text className="text-white text-center font-semibold">Start Verification</Text>
-          </TouchableOpacity>
+            variant="primary"
+            size="lg"
+            fullWidth
+          />
         )}
 
         {/* Verification Form */}
         {showVerificationForm && (
-          <View testID="verification-form" className="mt-4">
+          <View testID="verification-form" style={styles.verificationWrap}>
             <VerificationForm
               job={activeJob}
               onSubmit={handleSubmitVerification}
@@ -183,3 +189,147 @@ export const ActiveJobTab: React.FC<ActiveJobTabProps> = ({
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  detailCard: {
+    gap: 4,
+  },
+  detailMain: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  detailSub: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 13,
+  },
+  details: {
+    gap: 12,
+    padding: 16,
+  },
+  distanceOverlay: {
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    borderRadius: 10,
+    bottom: 12,
+    left: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    position: 'absolute',
+  },
+  distanceText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  durationRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  durationText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+  },
+  emptyState: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 32,
+  },
+  emptySubtitle: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  emptyTitle: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+    marginTop: 16,
+  },
+  headerAddress: {
+    color: 'rgba(255,255,255,0.55)',
+    fontSize: 13,
+    marginTop: 2,
+  },
+  headerCard: {
+    margin: 16,
+    marginBottom: 0,
+  },
+  headerLeft: {
+    flex: 1,
+    marginRight: 12,
+  },
+  headerRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  headerTitle: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  mapContainer: {
+    borderRadius: 16,
+    height: 256,
+    margin: 16,
+    overflow: 'hidden',
+  },
+  markerBlue: {
+    backgroundColor: '#3b82f6',
+    borderRadius: 20,
+    padding: 8,
+  },
+  markerRed: {
+    backgroundColor: '#ef4444',
+    borderRadius: 20,
+    padding: 8,
+  },
+  progressBg: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 2,
+    height: 4,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    backgroundColor: '#4ADE80',
+    borderRadius: 2,
+    height: '100%',
+  },
+  progressWrap: {
+    marginBottom: 8,
+    paddingHorizontal: 16,
+  },
+  scroll: {
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 32,
+  },
+  sectionLabel: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 6,
+    textTransform: 'uppercase',
+  },
+  specKey: {
+    color: 'rgba(255,255,255,0.65)',
+    fontWeight: '600',
+  },
+  specRow: {
+    fontSize: 13,
+    marginBottom: 2,
+  },
+  specVal: {
+    color: 'rgba(255,255,255,0.45)',
+  },
+  verificationWrap: {
+    marginTop: 8,
+  },
+});

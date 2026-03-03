@@ -18,7 +18,7 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
 
   if (isLoading && !isRefreshing) {
     return (
-      <View className="flex-1 bg-black justify-center items-center">
+      <View className="flex-1 bg-white justify-center items-center">
         <ActivityIndicator size="large" color="#34D399" />
         <Text className="text-gray-400 mt-4">Loading transfers...</Text>
       </View>
@@ -26,7 +26,7 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
   }
 
   return (
-    <View className="flex-1 bg-black">
+    <View className="flex-1 bg-white">
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}

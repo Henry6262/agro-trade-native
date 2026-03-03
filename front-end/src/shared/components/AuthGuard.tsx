@@ -49,7 +49,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
   // Show loading spinner while checking auth state
   if (isLoading) {
     return (
-      <View className="flex-1 bg-gray-900 justify-center items-center">
+      <View className="flex-1 bg-gray-50 justify-center items-center">
         <ActivityIndicator size="large" color="#10B981" />
       </View>
     );
@@ -66,7 +66,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
 
   // Otherwise show loading (will redirect soon)
   return (
-    <View className="flex-1 bg-gray-900 justify-center items-center">
+    <View className="flex-1 bg-gray-50 justify-center items-center">
       <ActivityIndicator size="large" color="#10B981" />
     </View>
   );

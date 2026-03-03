@@ -4,18 +4,23 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  SafeAreaView,
   Alert,
   TextInput,
   Modal,
+  StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../navigation/types';
 import { Ionicons } from '@expo/vector-icons';
-import { LoadingSpinner } from '../../../shared/components';
 import { apiClient } from '@services/api';
 import { Picker } from '@react-native-picker/picker';
+import { GradientBackground } from '../../../design-system/GradientBackground';
+import { GlassCard } from '../../../design-system/GlassCard';
+import { GlassButton } from '../../../design-system/GlassButton';
+import { GlassInput } from '../../../design-system/GlassInput';
+import { COLORS } from '../../../design-system/tokens';
 
 type AdminNavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -126,10 +131,8 @@ export function AdminProductPricesScreen() {
         apiClient.get('/admin/pricing-zones'),
         apiClient.get('/products'),
       ]);
-
       setPricingZones(zonesResponse.data.data.filter((zone: PricingZone) => zone.isActive));
       setProducts(productsResponse.data.data);
-
       await fetchAllProductPrices();
     } catch (error) {
       console.error('Failed to fetch initial data:', error);
@@ -141,7 +144,6 @@ export function AdminProductPricesScreen() {
 
   const fetchAllProductPrices = async () => {
     try {
-      // Fetch prices for all zones
       const promises = pricingZones.map((zone) =>
         apiClient.get(`/admin/pricing-zones/${zone.id}/product-prices`)
       );
@@ -172,20 +174,16 @@ export function AdminProductPricesScreen() {
       Alert.alert('Error', 'Please fill in all required fields');
       return;
     }
-
     const minPrice = parseFloat(newPrice.minPrice);
     const maxPrice = parseFloat(newPrice.maxPrice);
-
     if (isNaN(minPrice) || isNaN(maxPrice)) {
       Alert.alert('Error', 'Please enter valid prices');
       return;
     }
-
     if (minPrice >= maxPrice) {
       Alert.alert('Error', 'Minimum price must be less than maximum price');
       return;
     }
-
     try {
       setIsCreating(true);
       const priceData = {
@@ -199,11 +197,8 @@ export function AdminProductPricesScreen() {
         effectiveDate: new Date(newPrice.effectiveDate),
         expiresDate: newPrice.expiresDate ? new Date(newPrice.expiresDate) : undefined,
       };
-
       const response = await apiClient.post('/admin/product-prices', priceData);
       setProductPrices([...productPrices, response.data.data]);
-
-      // Reset form
       setNewPrice({
         productId: '',
         pricingZoneId: '',
@@ -215,7 +210,6 @@ export function AdminProductPricesScreen() {
         effectiveDate: new Date().toISOString().split('T')[0],
         expiresDate: '',
       });
-
       setShowCreateModal(false);
       Alert.alert('Success', 'Product price created successfully');
     } catch (error: any) {
@@ -258,9 +252,7 @@ export function AdminProductPricesScreen() {
   const groupedPrices = filteredPrices.reduce(
     (acc, price) => {
       const key = `${price.product.displayName}-${price.pricingZone.name}`;
-      if (!acc[key]) {
-        acc[key] = [];
-      }
+      if (!acc[key]) acc[key] = [];
       acc[key].push(price);
       return acc;
     },
@@ -269,171 +261,171 @@ export function AdminProductPricesScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-900 justify-center items-center">
-        <LoadingSpinner />
-        <Text className="text-white mt-4">Loading product prices...</Text>
-      </SafeAreaView>
+      <GradientBackground>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator color="#4ADE80" size="large" />
+          <Text style={{ color: COLORS.textSecondary, marginTop: 12 }}>
+            Loading product prices...
+          </Text>
+        </View>
+      </GradientBackground>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900">
-      <View className="flex-1">
+    <GradientBackground>
+      <View style={{ flex: 1 }}>
         {/* Header */}
-        <View className="flex-row items-center justify-between p-6 border-b border-gray-700">
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            className="w-10 h-10 rounded-full bg-gray-800 items-center justify-center"
-          >
-            <Ionicons name="chevron-back" size={20} color="#9CA3AF" />
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+            <Ionicons name="chevron-back" size={20} color={COLORS.textSecondary} />
           </TouchableOpacity>
 
-          <View className="flex-1 mx-4">
-            <Text className="text-white text-xl font-semibold">Product Pricing</Text>
-            <Text className="text-gray-400 text-sm">Manage product prices by zone</Text>
+          <View style={styles.headerMid}>
+            <Text style={styles.headerTitle}>Product Pricing</Text>
+            <Text style={styles.headerSub}>Manage product prices by zone</Text>
           </View>
 
-          <TouchableOpacity
+          <GlassButton
+            label="Add"
             onPress={() => setShowCreateModal(true)}
-            className="bg-green-600 px-4 py-2 rounded-lg flex-row items-center"
-          >
-            <Ionicons name="add" size={20} color="white" />
-            <Text className="text-white font-medium ml-1">Add Price</Text>
-          </TouchableOpacity>
+            variant="primary"
+            size="sm"
+            leftIcon={<Ionicons name="add" size={16} color="#FFFFFF" />}
+          />
         </View>
 
         {/* Filters */}
-        <View className="px-6 py-4 space-y-4">
-          {/* Search Bar */}
-          <View className="bg-gray-800 rounded-lg flex-row items-center px-4 py-3">
-            <Ionicons name="search" size={20} color="#6B7280" />
-            <TextInput
-              value={searchTerm}
-              onChangeText={setSearchTerm}
-              placeholder="Search products or zones..."
-              placeholderTextColor="#6B7280"
-              className="flex-1 ml-3 text-white"
-            />
-            {searchTerm.length > 0 && (
-              <TouchableOpacity onPress={() => setSearchTerm('')}>
-                <Ionicons name="close-circle" size={20} color="#6B7280" />
-              </TouchableOpacity>
-            )}
-          </View>
+        <View style={styles.filters}>
+          {/* Search */}
+          <GlassInput
+            placeholder="Search products or zones..."
+            value={searchTerm}
+            onChangeText={setSearchTerm}
+            leftIcon={<Ionicons name="search" size={18} color={COLORS.textMuted} />}
+            rightIcon={
+              searchTerm.length > 0 ? (
+                <TouchableOpacity onPress={() => setSearchTerm('')}>
+                  <Ionicons name="close-circle" size={18} color={COLORS.textMuted} />
+                </TouchableOpacity>
+              ) : undefined
+            }
+            containerStyle={{ marginBottom: 12 }}
+          />
 
-          {/* Filter Row */}
-          <View className="flex-row space-x-4">
-            {/* Zone Filter */}
-            <View className="flex-1">
-              <Text className="text-gray-300 text-sm mb-2">Zone</Text>
-              <View className="bg-gray-800 rounded-lg">
+          {/* Zone + Category pickers */}
+          <View style={styles.pickerRow}>
+            <View style={styles.pickerWrap}>
+              <Text style={styles.pickerLabel}>ZONE</Text>
+              <GlassCard tier="subtle" animate={false} style={styles.pickerCard}>
                 <Picker
                   selectedValue={selectedZone}
                   onValueChange={setSelectedZone}
-                  style={{ color: 'white' }}
-                  dropdownIconColor="white"
+                  style={{ color: COLORS.textPrimary }}
+                  dropdownIconColor={COLORS.textMuted}
+                  itemStyle={{ color: COLORS.textPrimary }}
                 >
                   <Picker.Item label="All Zones" value="all" />
                   {pricingZones.map((zone) => (
                     <Picker.Item key={zone.id} label={zone.name} value={zone.id} />
                   ))}
                 </Picker>
-              </View>
+              </GlassCard>
             </View>
 
-            {/* Category Filter */}
-            <View className="flex-1">
-              <Text className="text-gray-300 text-sm mb-2">Category</Text>
-              <View className="bg-gray-800 rounded-lg">
+            <View style={styles.pickerWrap}>
+              <Text style={styles.pickerLabel}>CATEGORY</Text>
+              <GlassCard tier="subtle" animate={false} style={styles.pickerCard}>
                 <Picker
                   selectedValue={selectedCategory}
                   onValueChange={setSelectedCategory}
-                  style={{ color: 'white' }}
-                  dropdownIconColor="white"
+                  style={{ color: COLORS.textPrimary }}
+                  dropdownIconColor={COLORS.textMuted}
+                  itemStyle={{ color: COLORS.textPrimary }}
                 >
                   <Picker.Item label="All Categories" value="all" />
                   {categories.map((category) => (
                     <Picker.Item key={category} label={category} value={category} />
                   ))}
                 </Picker>
-              </View>
+              </GlassCard>
             </View>
           </View>
         </View>
 
         {/* Prices List */}
-        <ScrollView className="flex-1 px-6">
+        <ScrollView style={{ flex: 1, paddingHorizontal: 16 }}>
           {Object.entries(groupedPrices).map(([key, prices]) => (
-            <View key={key} className="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700">
+            <GlassCard key={key} tier="subtle" style={{ marginBottom: 12 }}>
               {/* Product Header */}
-              <View className="flex-row items-center justify-between mb-3">
-                <View className="flex-1">
-                  <Text className="text-white font-semibold text-lg">
-                    {prices[0].product.displayName}
-                  </Text>
-                  <View className="flex-row items-center mt-1">
-                    <View className="bg-gray-700 rounded-full px-2 py-1 mr-2">
-                      <Text className="text-gray-300 text-xs">{prices[0].product.category}</Text>
+              <View style={styles.productHeader}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.productName}>{prices[0].product.displayName}</Text>
+                  <View style={styles.productMeta}>
+                    <View style={styles.categoryBadge}>
+                      <Text style={styles.categoryText}>{prices[0].product.category}</Text>
                     </View>
                     <View
-                      className="w-3 h-3 rounded-full mr-2"
-                      style={{ backgroundColor: prices[0].pricingZone.color || '#3B82F6' }}
+                      style={[
+                        styles.zoneDot,
+                        { backgroundColor: prices[0].pricingZone.color || '#60A5FA' },
+                      ]}
                     />
-                    <Text className="text-gray-400 text-sm">{prices[0].pricingZone.name}</Text>
+                    <Text style={styles.zoneName}>{prices[0].pricingZone.name}</Text>
                   </View>
                 </View>
               </View>
 
               {/* Price Variations */}
               {prices.map((price) => (
-                <View key={price.id} className="bg-gray-700 rounded-lg p-3 mb-2">
-                  <View className="flex-row items-center justify-between mb-2">
-                    <View className="flex-1">
-                      <View className="flex-row items-center space-x-4">
-                        <Text className="text-white font-medium">
-                          {price.currency} {price.minPrice} - {price.maxPrice}
-                        </Text>
-                        <Text className="text-gray-400 text-sm">per {price.unit}</Text>
-                        <View className="bg-blue-900 rounded-full px-2 py-1">
-                          <Text className="text-blue-300 text-xs">
-                            {price.qualityGrade || 'Standard'}
+                <GlassCard key={price.id} tier="medium" animate={false} style={{ marginBottom: 8 }}>
+                  <View style={styles.priceRow}>
+                    <View style={{ flex: 1 }}>
+                      <View style={styles.priceValueRow}>
+                        <Text style={styles.priceValue}>
+                          {price.currency}{' '}
+                          <Text style={styles.priceNumbers}>
+                            {price.minPrice} – {price.maxPrice}
                           </Text>
+                        </Text>
+                        <Text style={styles.perUnit}> / {price.unit}</Text>
+                        <View style={styles.gradeBadge}>
+                          <Text style={styles.gradeText}>{price.qualityGrade || 'Standard'}</Text>
                         </View>
                       </View>
-                      <View className="flex-row items-center mt-1">
-                        <Text className="text-gray-500 text-xs">
-                          Effective: {new Date(price.effectiveDate).toLocaleDateString()}
-                        </Text>
-                        {price.expiresDate && (
-                          <Text className="text-gray-500 text-xs ml-4">
-                            Expires: {new Date(price.expiresDate).toLocaleDateString()}
-                          </Text>
-                        )}
-                      </View>
+                      <Text style={styles.dateText}>
+                        Effective: {new Date(price.effectiveDate).toLocaleDateString()}
+                        {price.expiresDate &&
+                          `  ·  Expires: ${new Date(price.expiresDate).toLocaleDateString()}`}
+                      </Text>
                     </View>
 
-                    <TouchableOpacity onPress={() => deleteProductPrice(price.id)} className="p-2">
-                      <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                    <TouchableOpacity
+                      onPress={() => deleteProductPrice(price.id)}
+                      style={styles.deleteBtn}
+                    >
+                      <Ionicons name="trash-outline" size={18} color="#F87171" />
                     </TouchableOpacity>
                   </View>
-                </View>
+                </GlassCard>
               ))}
-            </View>
+            </GlassCard>
           ))}
 
           {Object.keys(groupedPrices).length === 0 && (
-            <View className="items-center py-12">
-              <Ionicons name="pricetag-outline" size={64} color="#4B5563" />
-              <Text className="text-gray-400 text-lg mt-4">
+            <View style={styles.emptyState}>
+              <Ionicons name="pricetag-outline" size={60} color={COLORS.textMuted} />
+              <Text style={styles.emptyTitle}>
                 {searchTerm ? 'No prices found' : 'No product prices yet'}
               </Text>
-              <Text className="text-gray-500 text-center mt-2 px-8">
+              <Text style={styles.emptyDesc}>
                 {searchTerm
                   ? 'Try adjusting your search terms or filters'
                   : 'Create your first product price to get started'}
               </Text>
             </View>
           )}
+          <View style={{ height: 32 }} />
         </ScrollView>
       </View>
 
@@ -444,180 +436,351 @@ export function AdminProductPricesScreen() {
         transparent
         onRequestClose={() => setShowCreateModal(false)}
       >
-        <View className="flex-1 bg-black/50 justify-end">
-          <View className="bg-gray-800 rounded-t-3xl p-6">
-            <View className="flex-row items-center justify-between mb-6">
-              <Text className="text-white font-semibold text-xl">Add Product Price</Text>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalSheet}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add Product Price</Text>
               <TouchableOpacity onPress={() => setShowCreateModal(false)}>
-                <Ionicons name="close" size={24} color="#9CA3AF" />
+                <Ionicons name="close" size={24} color={COLORS.textSecondary} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView className="max-h-96">
-              <View className="space-y-4">
-                {/* Product Selection */}
-                <View>
-                  <Text className="text-gray-300 text-sm mb-2">Product *</Text>
-                  <View className="bg-gray-700 rounded-lg">
+            <ScrollView style={{ maxHeight: 420 }} contentContainerStyle={{ padding: 20 }}>
+              {/* Product */}
+              <Text style={styles.modalLabel}>PRODUCT *</Text>
+              <GlassCard tier="subtle" animate={false} style={{ marginBottom: 16 }}>
+                <Picker
+                  selectedValue={newPrice.productId}
+                  onValueChange={(value) => setNewPrice({ ...newPrice, productId: value })}
+                  style={{ color: COLORS.textPrimary }}
+                  dropdownIconColor={COLORS.textMuted}
+                >
+                  <Picker.Item label="Select Product" value="" />
+                  {products.map((product) => (
+                    <Picker.Item key={product.id} label={product.displayName} value={product.id} />
+                  ))}
+                </Picker>
+              </GlassCard>
+
+              {/* Zone */}
+              <Text style={styles.modalLabel}>PRICING ZONE *</Text>
+              <GlassCard tier="subtle" animate={false} style={{ marginBottom: 16 }}>
+                <Picker
+                  selectedValue={newPrice.pricingZoneId}
+                  onValueChange={(value) => setNewPrice({ ...newPrice, pricingZoneId: value })}
+                  style={{ color: COLORS.textPrimary }}
+                  dropdownIconColor={COLORS.textMuted}
+                >
+                  <Picker.Item label="Select Zone" value="" />
+                  {pricingZones.map((zone) => (
+                    <Picker.Item key={zone.id} label={zone.name} value={zone.id} />
+                  ))}
+                </Picker>
+              </GlassCard>
+
+              {/* Price Range */}
+              <View style={styles.priceInputRow}>
+                <GlassInput
+                  label="Min Price *"
+                  placeholder="0.00"
+                  value={newPrice.minPrice}
+                  onChangeText={(text) => setNewPrice({ ...newPrice, minPrice: text })}
+                  keyboardType="decimal-pad"
+                  containerStyle={{ flex: 1, marginRight: 8 }}
+                />
+                <GlassInput
+                  label="Max Price *"
+                  placeholder="0.00"
+                  value={newPrice.maxPrice}
+                  onChangeText={(text) => setNewPrice({ ...newPrice, maxPrice: text })}
+                  keyboardType="decimal-pad"
+                  containerStyle={{ flex: 1 }}
+                />
+              </View>
+
+              {/* Currency & Unit */}
+              <View style={styles.priceInputRow}>
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text style={styles.modalLabel}>CURRENCY</Text>
+                  <GlassCard tier="subtle" animate={false} style={{ marginBottom: 0 }}>
                     <Picker
-                      selectedValue={newPrice.productId}
-                      onValueChange={(value) => setNewPrice({ ...newPrice, productId: value })}
-                      style={{ color: 'white' }}
-                      dropdownIconColor="white"
+                      selectedValue={newPrice.currency}
+                      onValueChange={(value) => setNewPrice({ ...newPrice, currency: value })}
+                      style={{ color: COLORS.textPrimary }}
+                      dropdownIconColor={COLORS.textMuted}
                     >
-                      <Picker.Item label="Select Product" value="" />
-                      {products.map((product) => (
-                        <Picker.Item
-                          key={product.id}
-                          label={product.displayName}
-                          value={product.id}
-                        />
+                      {currencies.map((c) => (
+                        <Picker.Item key={c} label={c} value={c} />
                       ))}
                     </Picker>
-                  </View>
+                  </GlassCard>
                 </View>
-
-                {/* Zone Selection */}
-                <View>
-                  <Text className="text-gray-300 text-sm mb-2">Pricing Zone *</Text>
-                  <View className="bg-gray-700 rounded-lg">
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.modalLabel}>UNIT</Text>
+                  <GlassCard tier="subtle" animate={false} style={{ marginBottom: 0 }}>
                     <Picker
-                      selectedValue={newPrice.pricingZoneId}
-                      onValueChange={(value) => setNewPrice({ ...newPrice, pricingZoneId: value })}
-                      style={{ color: 'white' }}
-                      dropdownIconColor="white"
+                      selectedValue={newPrice.unit}
+                      onValueChange={(value) => setNewPrice({ ...newPrice, unit: value })}
+                      style={{ color: COLORS.textPrimary }}
+                      dropdownIconColor={COLORS.textMuted}
                     >
-                      <Picker.Item label="Select Zone" value="" />
-                      {pricingZones.map((zone) => (
-                        <Picker.Item key={zone.id} label={zone.name} value={zone.id} />
+                      {units.map((u) => (
+                        <Picker.Item key={u} label={u} value={u} />
                       ))}
                     </Picker>
-                  </View>
+                  </GlassCard>
                 </View>
+              </View>
 
-                {/* Price Range */}
-                <View className="flex-row space-x-3">
-                  <View className="flex-1">
-                    <Text className="text-gray-300 text-sm mb-2">Min Price *</Text>
-                    <TextInput
-                      value={newPrice.minPrice}
-                      onChangeText={(text) => setNewPrice({ ...newPrice, minPrice: text })}
-                      placeholder="0.00"
-                      placeholderTextColor="#6B7280"
-                      className="bg-gray-700 rounded-lg px-3 py-3 text-white"
-                      keyboardType="decimal-pad"
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-gray-300 text-sm mb-2">Max Price *</Text>
-                    <TextInput
-                      value={newPrice.maxPrice}
-                      onChangeText={(text) => setNewPrice({ ...newPrice, maxPrice: text })}
-                      placeholder="0.00"
-                      placeholderTextColor="#6B7280"
-                      className="bg-gray-700 rounded-lg px-3 py-3 text-white"
-                      keyboardType="decimal-pad"
-                    />
-                  </View>
-                </View>
+              {/* Quality Grade */}
+              <Text style={[styles.modalLabel, { marginTop: 16 }]}>QUALITY GRADE</Text>
+              <GlassCard tier="subtle" animate={false} style={{ marginBottom: 16 }}>
+                <Picker
+                  selectedValue={newPrice.qualityGrade}
+                  onValueChange={(value) => setNewPrice({ ...newPrice, qualityGrade: value })}
+                  style={{ color: COLORS.textPrimary }}
+                  dropdownIconColor={COLORS.textMuted}
+                >
+                  {qualityGrades.map((grade) => (
+                    <Picker.Item key={grade} label={grade} value={grade} />
+                  ))}
+                </Picker>
+              </GlassCard>
 
-                {/* Currency & Unit */}
-                <View className="flex-row space-x-3">
-                  <View className="flex-1">
-                    <Text className="text-gray-300 text-sm mb-2">Currency</Text>
-                    <View className="bg-gray-700 rounded-lg">
-                      <Picker
-                        selectedValue={newPrice.currency}
-                        onValueChange={(value) => setNewPrice({ ...newPrice, currency: value })}
-                        style={{ color: 'white' }}
-                        dropdownIconColor="white"
-                      >
-                        {currencies.map((currency) => (
-                          <Picker.Item key={currency} label={currency} value={currency} />
-                        ))}
-                      </Picker>
-                    </View>
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-gray-300 text-sm mb-2">Unit</Text>
-                    <View className="bg-gray-700 rounded-lg">
-                      <Picker
-                        selectedValue={newPrice.unit}
-                        onValueChange={(value) => setNewPrice({ ...newPrice, unit: value })}
-                        style={{ color: 'white' }}
-                        dropdownIconColor="white"
-                      >
-                        {units.map((unit) => (
-                          <Picker.Item key={unit} label={unit} value={unit} />
-                        ))}
-                      </Picker>
-                    </View>
-                  </View>
-                </View>
-
-                {/* Quality Grade */}
-                <View>
-                  <Text className="text-gray-300 text-sm mb-2">Quality Grade</Text>
-                  <View className="bg-gray-700 rounded-lg">
-                    <Picker
-                      selectedValue={newPrice.qualityGrade}
-                      onValueChange={(value) => setNewPrice({ ...newPrice, qualityGrade: value })}
-                      style={{ color: 'white' }}
-                      dropdownIconColor="white"
-                    >
-                      {qualityGrades.map((grade) => (
-                        <Picker.Item key={grade} label={grade} value={grade} />
-                      ))}
-                    </Picker>
-                  </View>
-                </View>
-
-                {/* Dates */}
-                <View className="flex-row space-x-3">
-                  <View className="flex-1">
-                    <Text className="text-gray-300 text-sm mb-2">Effective Date</Text>
-                    <TextInput
-                      value={newPrice.effectiveDate}
-                      onChangeText={(text) => setNewPrice({ ...newPrice, effectiveDate: text })}
-                      placeholder="YYYY-MM-DD"
-                      placeholderTextColor="#6B7280"
-                      className="bg-gray-700 rounded-lg px-3 py-3 text-white"
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-gray-300 text-sm mb-2">Expires Date (Optional)</Text>
-                    <TextInput
-                      value={newPrice.expiresDate}
-                      onChangeText={(text) => setNewPrice({ ...newPrice, expiresDate: text })}
-                      placeholder="YYYY-MM-DD"
-                      placeholderTextColor="#6B7280"
-                      className="bg-gray-700 rounded-lg px-3 py-3 text-white"
-                    />
-                  </View>
-                </View>
+              {/* Dates */}
+              <View style={styles.priceInputRow}>
+                <GlassInput
+                  label="Effective Date"
+                  placeholder="YYYY-MM-DD"
+                  value={newPrice.effectiveDate}
+                  onChangeText={(text) => setNewPrice({ ...newPrice, effectiveDate: text })}
+                  containerStyle={{ flex: 1, marginRight: 8 }}
+                />
+                <GlassInput
+                  label="Expires (Optional)"
+                  placeholder="YYYY-MM-DD"
+                  value={newPrice.expiresDate}
+                  onChangeText={(text) => setNewPrice({ ...newPrice, expiresDate: text })}
+                  containerStyle={{ flex: 1 }}
+                />
               </View>
             </ScrollView>
 
-            <View className="flex-row space-x-3 mt-6">
-              <TouchableOpacity
+            <View style={styles.modalFooter}>
+              <GlassButton
+                label="Cancel"
                 onPress={() => setShowCreateModal(false)}
-                className="flex-1 bg-gray-700 rounded-lg py-3 items-center"
-              >
-                <Text className="text-gray-300 font-medium">Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+                variant="ghost"
+                style={{ flex: 1, marginRight: 8 }}
+              />
+              <GlassButton
+                label={isCreating ? 'Creating...' : 'Create Price'}
                 onPress={createProductPrice}
+                variant="primary"
                 disabled={isCreating}
-                className="flex-1 bg-green-600 rounded-lg py-3 items-center"
-              >
-                <Text className="text-white font-medium">
-                  {isCreating ? 'Creating...' : 'Create Price'}
-                </Text>
-              </TouchableOpacity>
+                loading={isCreating}
+                style={{ flex: 1 }}
+              />
             </View>
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </GradientBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  backBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 18,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  categoryBadge: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 8,
+    marginRight: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  categoryText: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  dateText: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+  },
+  deleteBtn: {
+    marginLeft: 8,
+    padding: 8,
+  },
+  emptyDesc: {
+    color: COLORS.textMuted,
+    fontSize: 13,
+    marginTop: 8,
+    paddingHorizontal: 32,
+    textAlign: 'center',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 48,
+  },
+  emptyTitle: {
+    color: COLORS.textSecondary,
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 16,
+  },
+  filters: {
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+    borderBottomWidth: 1,
+    padding: 16,
+  },
+  gradeBadge: {
+    backgroundColor: 'rgba(96,165,250,0.15)',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  gradeText: {
+    color: '#60A5FA',
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  header: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+    paddingTop: 52,
+  },
+  headerMid: {
+    flex: 1,
+    marginHorizontal: 12,
+  },
+  headerSub: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+  },
+  headerTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  modalFooter: {
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    padding: 20,
+  },
+  modalHeader: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+  },
+  modalLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+  },
+  modalOverlay: {
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: 'rgba(5,46,22,0.98)',
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 1,
+    maxHeight: '85%',
+  },
+  modalTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  perUnit: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+  },
+  pickerCard: {
+    padding: 0,
+  },
+  pickerLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 6,
+  },
+  pickerRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  pickerWrap: {
+    flex: 1,
+  },
+  priceInputRow: {
+    flexDirection: 'row',
+  },
+  priceNumbers: {
+    color: '#FCD34D',
+    fontWeight: '700',
+  },
+  priceRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  priceValue: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  priceValueRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 4,
+  },
+  productHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  productMeta: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  productName: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  zoneDot: {
+    borderRadius: 5,
+    height: 10,
+    marginRight: 6,
+    width: 10,
+  },
+  zoneName: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+  },
+});

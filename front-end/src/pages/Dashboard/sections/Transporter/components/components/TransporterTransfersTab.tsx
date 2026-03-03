@@ -185,7 +185,7 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
 
   if (loading && !refreshing) {
     return (
-      <View className="flex-1 bg-black justify-center items-center">
+      <View className="flex-1 bg-white justify-center items-center">
         <ActivityIndicator size="large" color="#34D399" />
         <Text className="text-gray-400 mt-4">Loading transfers...</Text>
       </View>
@@ -195,7 +195,7 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
   return (
     <>
       <ScrollView
-        className="flex-1 bg-black"
+        className="flex-1 bg-white"
         showsVerticalScrollIndicator={false}
         testID={testID}
         accessibilityLabel={accessibilityLabel}
@@ -258,7 +258,7 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
             </View>
 
             {jobs.length === 0 ? (
-              <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
+              <View className="bg-white/50 border border-gray-200 rounded-lg p-8">
                 <Truck
                   size={48}
                   color="#6B7280"
@@ -284,25 +284,25 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
                 const stageIndex = stageIndexFromStatus(job.status);
 
                 return (
-                  <View key={job.id} className="border border-neutral-700 rounded-lg p-4 mb-3">
+                  <View key={job.id} className="border border-gray-200 rounded-lg p-4 mb-3">
                     <View className="flex-row justify-between items-start mb-4">
                       <View>
-                        <Text className="text-lg font-semibold text-white">{product}</Text>
+                        <Text className="text-lg font-semibold text-gray-900">{product}</Text>
                         <View className="flex-row items-center mt-2">
                           <View className="flex-row items-center mr-4">
                             <Weight size={16} color="#9CA3AF" />
-                            <Text className="text-neutral-400 ml-1">{quantity}</Text>
+                            <Text className="text-gray-500 ml-1">{quantity}</Text>
                           </View>
                           <View className="flex-row items-center mr-4">
                             <Route size={16} color="#9CA3AF" />
-                            <Text className="text-neutral-400 ml-1">
+                            <Text className="text-gray-500 ml-1">
                               {job.transportRequest?.estimatedDistance
                                 ? `${Math.round(job.transportRequest.estimatedDistance)} km`
                                 : '—'}
                             </Text>
                           </View>
                           <View className="flex-row items-center">
-                            <Text className="text-neutral-500">ETA:</Text>
+                            <Text className="text-gray-400">ETA:</Text>
                             <Text className="text-green-400 font-medium ml-1">
                               {job.estimatedArrival
                                 ? formatDate(new Date(job.estimatedArrival))
@@ -320,12 +320,12 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
 
                     <View className="flex-row items-center mb-3">
                       <MapPin size={16} color="#60A5FA" />
-                      <Text className="text-white font-semibold ml-2 flex-1" numberOfLines={1}>
+                      <Text className="text-gray-900 font-semibold ml-2 flex-1" numberOfLines={1}>
                         {pickupLabel}
                       </Text>
-                      <Text className="text-neutral-500 mx-2">→</Text>
+                      <Text className="text-gray-400 mx-2">→</Text>
                       <MapPin size={16} color="#FCD34D" />
-                      <Text className="text-white font-semibold ml-2 flex-1" numberOfLines={1}>
+                      <Text className="text-gray-900 font-semibold ml-2 flex-1" numberOfLines={1}>
                         {deliveryLabel}
                       </Text>
                     </View>
@@ -340,9 +340,9 @@ export const TransporterTransfersTab: React.FC<TransporterTransfersTabProps> = (
                         </View>
                       </TouchableOpacity>
                       <TouchableOpacity className="flex-1" disabled>
-                        <View className="border border-neutral-700 rounded-lg py-2 items-center justify-center">
+                        <View className="border border-gray-200 rounded-lg py-2 items-center justify-center">
                           <Calendar size={16} color="#9CA3AF" />
-                          <Text className="text-neutral-400 text-sm mt-1">SCHEDULE</Text>
+                          <Text className="text-gray-500 text-sm mt-1">SCHEDULE</Text>
                         </View>
                       </TouchableOpacity>
                     </View>

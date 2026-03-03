@@ -17,7 +17,7 @@ export const TradeStageTimeline: React.FC<TradeStageTimelineProps> = ({ currentS
       className={`relative mb-6 ${isMobile ? 'mx-auto' : ''}`}
       style={{ maxWidth: progressWidth }}
     >
-      <View className="absolute top-4 left-4 right-4 h-0.5 bg-neutral-700 z-0" />
+      <View className="absolute top-4 left-4 right-4 h-0.5 bg-gray-100 z-0" />
       <View
         className="absolute top-4 left-4 h-0.5 bg-green-500 z-0"
         style={{ width: (currentStage / (stages.length - 1)) * (progressWidth - 32) }}
@@ -31,7 +31,7 @@ export const TradeStageTimeline: React.FC<TradeStageTimelineProps> = ({ currentS
             <View key={stage.name} className="flex flex-col items-center">
               <View
                 className={`w-8 h-8 rounded-full flex items-center justify-center relative ${
-                  isCompleted ? 'bg-green-500' : isCurrent ? 'bg-yellow-500' : 'bg-neutral-700'
+                  isCompleted ? 'bg-green-500' : isCurrent ? 'bg-yellow-500' : 'bg-gray-100'
                 }`}
               >
                 <IconComponent color={isCompleted || isCurrent ? '#ffffff' : '#9CA3AF'} size={16} />
@@ -41,11 +41,7 @@ export const TradeStageTimeline: React.FC<TradeStageTimelineProps> = ({ currentS
               </View>
               <Text
                 className={`text-xs text-center mt-2 max-w-16 ${
-                  isCompleted
-                    ? 'text-green-400'
-                    : isCurrent
-                      ? 'text-yellow-400'
-                      : 'text-neutral-500'
+                  isCompleted ? 'text-green-400' : isCurrent ? 'text-yellow-400' : 'text-gray-400'
                 }`}
               >
                 {stage.name}

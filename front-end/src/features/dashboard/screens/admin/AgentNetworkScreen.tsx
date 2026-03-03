@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Modal,
-  Dimensions,
-  Platform,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { Search, Filter, MapPin, Users, Truck, ShoppingCart, Wheat, X } from 'lucide-react-native';
+import {
+  GlassCard,
+  GlassBadge,
+  GlassButton,
+  GlassInput,
+  StatCard,
+} from '../../../../design-system';
+import { COLORS } from '../../../../design-system';
 
-const { width: screenWidth } = Dimensions.get('window');
+const DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 4 };
 
 export default function AgentNetworkScreen() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,7 +19,7 @@ export default function AgentNetworkScreen() {
 
   const users = [
     {
-      id: 'F-078W',
+      id: 'F-1042',
       name: 'Green Valley Farms',
       type: 'farmer',
       location: 'Iowa, USA',
@@ -30,7 +29,7 @@ export default function AgentNetworkScreen() {
       products: ['Corn', 'Soybeans'],
     },
     {
-      id: 'B-079X',
+      id: 'B-2018',
       name: 'Fresh Market Co',
       type: 'buyer',
       location: 'Chicago, IL',
@@ -40,47 +39,47 @@ export default function AgentNetworkScreen() {
       products: ['Vegetables', 'Grains'],
     },
     {
-      id: 'F-080Y',
+      id: 'F-1056',
       name: 'Sunrise Orchards',
       type: 'farmer',
       location: 'California, USA',
       lastActive: '1 min ago',
       trades: 63,
       rating: 4.9,
-      products: ['Apples', 'Citrus'],
+      products: ['Apples', 'Citrus', 'Avocados'],
     },
     {
-      id: 'T-081Z',
+      id: 'T-3007',
       name: 'Swift Transport LLC',
       type: 'transporter',
       location: 'Texas, USA',
       lastActive: '3 hours ago',
       trades: 28,
       rating: 4.2,
-      products: ['Refrigerated', 'Bulk'],
+      products: ['Refrigerated', 'Bulk Grain'],
     },
     {
-      id: 'B-082A',
+      id: 'B-2031',
       name: 'Global Food Distributors',
       type: 'buyer',
       location: 'New York, NY',
       lastActive: '5 min ago',
       trades: 41,
       rating: 4.6,
-      products: ['Organic', 'Processed'],
+      products: ['Organic', 'Non-GMO'],
     },
     {
-      id: 'F-083B',
+      id: 'F-1089',
       name: 'Prairie Wheat Co',
       type: 'farmer',
       location: 'Kansas, USA',
       lastActive: '1 day ago',
       trades: 12,
       rating: 4.3,
-      products: ['Wheat', 'Barley'],
+      products: ['Wheat', 'Barley', 'Sorghum'],
     },
     {
-      id: 'B-084C',
+      id: 'B-2044',
       name: 'Restaurant Supply Chain',
       type: 'buyer',
       location: 'Los Angeles, CA',
@@ -90,7 +89,7 @@ export default function AgentNetworkScreen() {
       products: ['Fresh Produce', 'Dairy'],
     },
     {
-      id: 'T-085D',
+      id: 'T-3015',
       name: 'AgriLogistics Pro',
       type: 'transporter',
       location: 'Florida, USA',
@@ -106,165 +105,145 @@ export default function AgentNetworkScreen() {
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.location.toLowerCase().includes(searchTerm.toLowerCase());
-
     const matchesType = userTypeFilter === 'all' || user.type === userTypeFilter;
-
     return matchesSearch && matchesType;
   });
 
   const getUserTypeIcon = (type: string, size = 16) => {
-    const iconProps = { width: size, height: size };
     switch (type) {
       case 'farmer':
-        return <Wheat {...iconProps} color="#22c55e" />;
+        return <Wheat width={size} height={size} color={COLORS.accentGreen} />;
       case 'buyer':
-        return <ShoppingCart {...iconProps} color="#3b82f6" />;
+        return <ShoppingCart width={size} height={size} color={COLORS.info} />;
       case 'transporter':
-        return <Truck {...iconProps} color="#f97316" />;
+        return <Truck width={size} height={size} color="#f97316" />;
       default:
-        return <Users {...iconProps} color="#a3a3a3" />;
+        return <Users width={size} height={size} color={COLORS.textMuted} />;
+    }
+  };
+
+  const getTypeVariant = (type: string): 'success' | 'info' | 'warning' | 'muted' => {
+    switch (type) {
+      case 'farmer':
+        return 'success';
+      case 'buyer':
+        return 'info';
+      case 'transporter':
+        return 'warning';
+      default:
+        return 'muted';
     }
   };
 
   return (
-    <View className="flex-1 bg-black">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <View className="p-6 space-y-6">
-          {/* Header */}
-          <View
-            className={`${screenWidth >= 768 ? 'flex-row justify-between items-center' : 'space-y-4'}`}
-          >
-            <View>
-              <Text className="text-2xl font-bold text-white tracking-wider">NETWORK</Text>
-              <Text className="text-sm text-neutral-400">
-                Manage farmers, buyers, and transporters
-              </Text>
-            </View>
-            <View className="flex-row gap-2">
-              <TouchableOpacity className="bg-green-600 px-4 py-2 rounded-lg flex-row items-center">
-                <Text className="text-white font-medium">Add User</Text>
-              </TouchableOpacity>
-              <TouchableOpacity className="bg-green-600 px-4 py-2 rounded-lg flex-row items-center">
-                <Filter width={16} height={16} color="white" style={{ marginRight: 8 }} />
-                <Text className="text-white font-medium">Filter</Text>
-              </TouchableOpacity>
-            </View>
+    <View style={styles.root}>
+      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+        {/* Header actions */}
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.title}>NETWORK</Text>
+            <Text style={styles.subtitle}>Manage farmers, buyers, and transporters</Text>
           </View>
-
-          {/* Search and Stats */}
-          <View className={`${screenWidth >= 768 ? 'flex-row' : 'space-y-2'} gap-2`}>
-            <View className="flex-1 bg-neutral-900 border border-neutral-700 rounded-lg p-3">
-              <View className="relative">
-                <Search
-                  width={16}
-                  height={16}
-                  color="#a3a3a3"
-                  style={{ position: 'absolute', left: 12, top: 10, zIndex: 1 }}
-                />
-                <TextInput
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChangeText={setSearchTerm}
-                  placeholderTextColor="#a3a3a3"
-                  className="pl-10 pr-3 py-2 bg-neutral-800 border border-neutral-600 rounded-lg text-white text-sm"
-                />
-              </View>
-            </View>
-
-            <View className="flex-1 bg-neutral-900 border border-neutral-700 rounded-lg p-3">
-              <View className="flex-row items-center justify-between">
-                <View>
-                  <Text className="text-xs text-neutral-400 tracking-wider">FARMERS</Text>
-                  <Text className="text-2xl font-bold text-white font-mono">247</Text>
-                </View>
-                <Users width={32} height={32} color="#22c55e" />
-              </View>
-            </View>
-
-            <View className="flex-1 bg-neutral-900 border border-neutral-700 rounded-lg p-3">
-              <View className="flex-row items-center justify-between">
-                <View>
-                  <Text className="text-xs text-neutral-400 tracking-wider">BUYERS</Text>
-                  <Text className="text-2xl font-bold text-blue-500 font-mono">183</Text>
-                </View>
-                <Users width={32} height={32} color="#3b82f6" />
-              </View>
-            </View>
-
-            <View className="flex-1 bg-neutral-900 border border-neutral-700 rounded-lg p-3">
-              <View className="flex-row items-center justify-between">
-                <View>
-                  <Text className="text-xs text-neutral-400 tracking-wider">TRANSPORT</Text>
-                  <Text className="text-2xl font-bold text-orange-500 font-mono">45</Text>
-                </View>
-                <Users width={32} height={32} color="#f97316" />
-              </View>
-            </View>
-          </View>
-
-          {/* User List */}
-          <View className="bg-neutral-900 border border-neutral-700 rounded-lg">
-            <View className="p-4 border-b border-neutral-700">
-              <Text className="text-sm font-medium text-neutral-300 tracking-wider">
-                NETWORK DIRECTORY
-              </Text>
-            </View>
-            <View>
-              {/* Table Header */}
-              <View className="flex-row border-b border-neutral-700 px-4 py-3">
-                <View className="w-12">
-                  <Text className="text-xs font-medium text-neutral-400 tracking-wider">TYPE</Text>
-                </View>
-                <View className="flex-1 px-2">
-                  <Text className="text-xs font-medium text-neutral-400 tracking-wider">NAME</Text>
-                </View>
-                <View className="flex-1 px-2">
-                  <Text className="text-xs font-medium text-neutral-400 tracking-wider">
-                    LOCATION
-                  </Text>
-                </View>
-                <View className="w-16 px-2">
-                  <Text className="text-xs font-medium text-neutral-400 tracking-wider">
-                    TRADES
-                  </Text>
-                </View>
-                <View className="w-16">
-                  <Text className="text-xs font-medium text-neutral-400 tracking-wider">
-                    RATING
-                  </Text>
-                </View>
-              </View>
-
-              {/* Table Body */}
-              {filteredUsers.map((user, index) => (
-                <TouchableOpacity
-                  key={user.id}
-                  onPress={() => setSelectedUser(user)}
-                  className={`flex-row border-b border-neutral-800 px-4 py-3 ${
-                    index % 2 === 0 ? 'bg-neutral-900' : 'bg-neutral-850'
-                  }`}
-                  activeOpacity={0.7}
-                >
-                  <View className="w-12 justify-center">{getUserTypeIcon(user.type)}</View>
-                  <View className="flex-1 px-2 justify-center">
-                    <Text className="text-sm text-white">{user.name}</Text>
-                  </View>
-                  <View className="flex-1 px-2 flex-row items-center">
-                    <MapPin width={12} height={12} color="#a3a3a3" style={{ marginRight: 4 }} />
-                    <Text className="text-sm text-neutral-300">{user.location}</Text>
-                  </View>
-                  <View className="w-16 px-2 justify-center">
-                    <Text className="text-sm text-white font-mono">{user.trades}</Text>
-                  </View>
-                  <View className="w-16 flex-row items-center">
-                    <Text className="text-sm text-white font-mono">{user.rating}</Text>
-                    <Text className="text-xs text-neutral-400 ml-1">★</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
+          <View style={styles.headerButtons}>
+            <GlassButton label="Add User" onPress={() => {}} variant="primary" size="sm" />
+            <GlassButton
+              label="Filter"
+              onPress={() => {}}
+              variant="secondary"
+              size="sm"
+              leftIcon={<Filter size={14} color={COLORS.textPrimary} />}
+            />
           </View>
         </View>
+
+        {/* Stats row */}
+        <View style={styles.statsRow}>
+          <StatCard
+            label="Farmers"
+            value={247}
+            color={COLORS.accentGreen}
+            icon={<Wheat size={16} color={COLORS.accentGreen} />}
+            style={styles.statCard}
+            delay={0}
+          />
+          <StatCard
+            label="Buyers"
+            value={183}
+            color={COLORS.info}
+            icon={<ShoppingCart size={16} color={COLORS.info} />}
+            style={styles.statCard}
+            delay={60}
+          />
+          <StatCard
+            label="Transport"
+            value={45}
+            color="#f97316"
+            icon={<Truck size={16} color="#f97316" />}
+            style={styles.statCard}
+            delay={120}
+          />
+        </View>
+
+        {/* Search */}
+        <GlassInput
+          placeholder="Search by name, type, or location..."
+          value={searchTerm}
+          onChangeText={setSearchTerm}
+          leftIcon={<Search size={16} color={COLORS.textMuted} />}
+          containerStyle={styles.searchInput}
+        />
+
+        {/* User list */}
+        <GlassCard tier="medium" delay={160} noPadding>
+          <View style={styles.dirHeader}>
+            <Text style={styles.dirTitle}>NETWORK DIRECTORY</Text>
+          </View>
+          {/* Column headers */}
+          <View style={styles.tableHeader}>
+            <View style={styles.colType}>
+              <Text style={styles.colLabel}>TYPE</Text>
+            </View>
+            <View style={styles.colName}>
+              <Text style={styles.colLabel}>NAME</Text>
+            </View>
+            <View style={styles.colLoc}>
+              <Text style={styles.colLabel}>LOCATION</Text>
+            </View>
+            <View style={styles.colNum}>
+              <Text style={styles.colLabel}>TRADES</Text>
+            </View>
+            <View style={styles.colNum}>
+              <Text style={styles.colLabel}>RATING</Text>
+            </View>
+          </View>
+          {filteredUsers.map((user) => (
+            <TouchableOpacity
+              key={user.id}
+              onPress={() => setSelectedUser(user)}
+              style={styles.userRow}
+              activeOpacity={0.7}
+            >
+              <View style={styles.colType}>{getUserTypeIcon(user.type)}</View>
+              <View style={styles.colName}>
+                <Text style={styles.userName}>{user.name}</Text>
+                <Text style={styles.userId}>{user.id}</Text>
+              </View>
+              <View style={styles.colLoc}>
+                <View style={styles.locationRow}>
+                  <MapPin size={10} color={COLORS.textMuted} />
+                  <Text style={styles.locationText}>{user.location}</Text>
+                </View>
+              </View>
+              <View style={styles.colNum}>
+                <Text style={styles.goldNum}>{user.trades}</Text>
+              </View>
+              <View style={styles.colNum}>
+                <Text style={styles.goldNum}>{user.rating}</Text>
+                <Text style={styles.star}> ★</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </GlassCard>
       </ScrollView>
 
       {/* User Detail Modal */}
@@ -274,77 +253,183 @@ export default function AgentNetworkScreen() {
         animationType="fade"
         onRequestClose={() => setSelectedUser(null)}
       >
-        <View className="flex-1 bg-black/50 justify-center items-center p-4">
-          <View className="bg-neutral-900 border border-neutral-700 rounded-lg w-full max-w-2xl">
-            <View className="flex-row items-center justify-between p-4 border-b border-neutral-700">
+        <View style={styles.modalOverlay}>
+          <GlassCard tier="strong" style={styles.modalCard} animate={false}>
+            <View style={styles.modalHeader}>
               <View>
-                <Text className="text-lg font-bold text-white tracking-wider">
-                  {selectedUser?.name}
-                </Text>
-                <Text className="text-sm text-neutral-400 font-mono">{selectedUser?.id}</Text>
+                <Text style={styles.modalName}>{selectedUser?.name}</Text>
+                <Text style={styles.modalId}>{selectedUser?.id}</Text>
               </View>
-              <TouchableOpacity onPress={() => setSelectedUser(null)}>
-                <X width={24} height={24} color="#a3a3a3" />
+              <TouchableOpacity onPress={() => setSelectedUser(null)} style={styles.closeBtn}>
+                <X size={20} color={COLORS.textSecondary} />
               </TouchableOpacity>
             </View>
 
-            <View className="p-4 space-y-4">
-              <View className="flex-row flex-wrap">
-                <View className="w-1/2 mb-4">
-                  <Text className="text-xs text-neutral-400 tracking-wider mb-1">TYPE</Text>
-                  <View className="flex-row items-center">
-                    {selectedUser && getUserTypeIcon(selectedUser.type)}
-                    <Text className="text-sm text-white uppercase tracking-wider ml-2">
-                      {selectedUser?.type}
-                    </Text>
+            <View style={DIVIDER} />
+
+            <View style={styles.modalBody}>
+              <View style={styles.modalRow}>
+                <View style={styles.modalField}>
+                  <Text style={styles.fieldLabel}>TYPE</Text>
+                  <View style={styles.fieldRow}>
+                    {selectedUser && getUserTypeIcon(selectedUser.type, 14)}
+                    <Text style={styles.fieldValue}> {selectedUser?.type?.toUpperCase()}</Text>
                   </View>
                 </View>
-                <View className="w-1/2 mb-4">
-                  <Text className="text-xs text-neutral-400 tracking-wider mb-1">LOCATION</Text>
-                  <Text className="text-sm text-white">{selectedUser?.location}</Text>
-                </View>
-                <View className="w-1/2 mb-4">
-                  <Text className="text-xs text-neutral-400 tracking-wider mb-1">
-                    COMPLETED TRADES
-                  </Text>
-                  <Text className="text-sm text-white font-mono">{selectedUser?.trades}</Text>
-                </View>
-                <View className="w-1/2 mb-4">
-                  <Text className="text-xs text-neutral-400 tracking-wider mb-1">RATING</Text>
-                  <View className="flex-row items-center">
-                    <Text className="text-sm text-white font-mono">{selectedUser?.rating}</Text>
-                    <Text className="text-xs text-neutral-400 ml-1">★</Text>
-                  </View>
-                </View>
-                <View className="w-full">
-                  <Text className="text-xs text-neutral-400 tracking-wider mb-1">
-                    PRODUCTS/SERVICES
-                  </Text>
-                  <View className="flex-row flex-wrap gap-1">
-                    {selectedUser?.products.map((product: string, idx: number) => (
-                      <View key={idx} className="px-2 py-1 bg-neutral-800 rounded">
-                        <Text className="text-xs text-neutral-300">{product}</Text>
-                      </View>
-                    ))}
-                  </View>
+                <View style={styles.modalField}>
+                  <Text style={styles.fieldLabel}>LOCATION</Text>
+                  <Text style={styles.fieldValue}>{selectedUser?.location}</Text>
                 </View>
               </View>
-
-              <View className="flex-row gap-2 pt-4">
-                <TouchableOpacity className="flex-1 bg-green-600 px-4 py-2 rounded-lg">
-                  <Text className="text-white text-center font-medium">Create Order</Text>
-                </TouchableOpacity>
-                <TouchableOpacity className="flex-1 border border-neutral-700 px-4 py-2 rounded-lg">
-                  <Text className="text-neutral-400 text-center">View History</Text>
-                </TouchableOpacity>
-                <TouchableOpacity className="flex-1 border border-neutral-700 px-4 py-2 rounded-lg">
-                  <Text className="text-neutral-400 text-center">Send Message</Text>
-                </TouchableOpacity>
+              <View style={styles.modalRow}>
+                <View style={styles.modalField}>
+                  <Text style={styles.fieldLabel}>COMPLETED TRADES</Text>
+                  <Text style={styles.goldValue}>{selectedUser?.trades}</Text>
+                </View>
+                <View style={styles.modalField}>
+                  <Text style={styles.fieldLabel}>RATING</Text>
+                  <Text style={styles.goldValue}>{selectedUser?.rating} ★</Text>
+                </View>
+              </View>
+              <View style={styles.tagsSection}>
+                <Text style={styles.fieldLabel}>PRODUCTS / SERVICES</Text>
+                <View style={styles.tagsRow}>
+                  {selectedUser?.products.map((product: string, idx: number) => (
+                    <GlassBadge
+                      key={idx}
+                      label={product}
+                      variant="muted"
+                      size="sm"
+                      style={styles.tag}
+                    />
+                  ))}
+                </View>
               </View>
             </View>
-          </View>
+
+            <View style={DIVIDER} />
+
+            <View style={styles.modalActions}>
+              <GlassButton
+                label="Create Order"
+                onPress={() => setSelectedUser(null)}
+                variant="primary"
+                size="sm"
+                style={styles.modalBtn}
+              />
+              <GlassButton
+                label="View History"
+                onPress={() => {}}
+                variant="secondary"
+                size="sm"
+                style={styles.modalBtn}
+              />
+              <GlassButton
+                label="Send Message"
+                onPress={() => {}}
+                variant="ghost"
+                size="sm"
+                style={styles.modalBtn}
+              />
+            </View>
+          </GlassCard>
         </View>
       </Modal>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  headerButtons: { flexDirection: 'row', gap: 8 },
+  headerRow: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  root: { backgroundColor: 'transparent', flex: 1 },
+  scroll: { flex: 1, padding: 16 },
+  searchInput: { marginBottom: 16 },
+  statCard: { flex: 1 },
+  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
+  subtitle: { color: COLORS.textSecondary, fontSize: 12, marginTop: 2 },
+  title: { color: COLORS.textPrimary, fontSize: 22, fontWeight: '800', letterSpacing: 1 },
+  // eslint-disable-next-line react-native/sort-styles
+  dirHeader: { paddingBottom: 10, paddingHorizontal: 16, paddingTop: 14 },
+  dirTitle: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+  },
+  tableHeader: {
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  colLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  colType: { justifyContent: 'center', width: 40 },
+  colName: { flex: 2, paddingHorizontal: 6 },
+  colLoc: { flex: 2, paddingHorizontal: 6 },
+  colNum: { alignItems: 'center', flexDirection: 'row', width: 56 },
+  userRow: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  userName: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '600' },
+  userId: { color: COLORS.textMuted, fontFamily: 'monospace', fontSize: 10, marginTop: 1 },
+  locationRow: { alignItems: 'center', flexDirection: 'row', gap: 4 },
+  locationText: { color: COLORS.textSecondary, fontSize: 12 },
+  goldNum: { color: COLORS.accentGold, fontFamily: 'monospace', fontSize: 13, fontWeight: '700' },
+  star: { color: COLORS.accentGold, fontSize: 11 },
+  // Modal
+  modalOverlay: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalCard: { maxWidth: 480, width: '100%' },
+  modalHeader: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  modalName: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '800' },
+  modalId: { color: COLORS.textMuted, fontFamily: 'monospace', fontSize: 11, marginTop: 2 },
+  closeBtn: { padding: 4 },
+  modalBody: { gap: 12, marginVertical: 12 },
+  modalRow: { flexDirection: 'row', gap: 16 },
+  modalField: { flex: 1 },
+  fieldLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  fieldRow: { alignItems: 'center', flexDirection: 'row' },
+  fieldValue: { color: COLORS.textPrimary, fontSize: 13 },
+  goldValue: { color: COLORS.accentGold, fontFamily: 'monospace', fontSize: 16, fontWeight: '800' },
+  tagsSection: { gap: 6 },
+  tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  tag: {},
+  modalActions: { flexDirection: 'row', gap: 8, marginTop: 12 },
+  modalBtn: { flex: 1 },
+});

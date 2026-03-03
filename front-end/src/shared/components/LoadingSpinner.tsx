@@ -18,7 +18,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   accessibilityLabel,
 }) => {
   const containerClass = overlay
-    ? 'absolute inset-0 bg-black bg-opacity-50 items-center justify-center z-50'
+    ? 'absolute inset-0 bg-white bg-opacity-50 items-center justify-center z-50'
     : 'items-center justify-center p-4';
 
   return (

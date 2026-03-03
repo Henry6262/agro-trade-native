@@ -29,7 +29,7 @@ export function Navigation({
   return (
     <View
       className={`
-        absolute bottom-0 left-0 right-0 z-[9999] border-t border-gray-600/80 bg-gray-900/[0.98]
+        absolute bottom-0 left-0 right-0 z-[9999] border-t border-gray-600/80 bg-gray-50/[0.98]
         ${isMobile ? 'px-3 py-3' : 'px-4 py-4'}
       `}
       style={{
@@ -44,7 +44,7 @@ export function Navigation({
       <View className="flex-row justify-between w-full">
         <TouchableOpacity
           className={`
-            flex-row items-center bg-gray-800/90 border border-gray-600
+            flex-row items-center bg-white/90 border border-gray-600
             ${isMobile ? 'rounded-md px-3 py-2.5 min-w-[80px]' : 'rounded-lg px-4 py-3 min-w-[100px]'}
             ${isBackDisabled ? 'opacity-40' : 'opacity-100'}
           `}
@@ -89,7 +89,7 @@ export function Navigation({
         >
           <Text
             className={`
-              text-white font-semibold
+              text-gray-900 font-semibold
               ${isMobile ? 'text-sm' : 'text-base'}
             `}
           >

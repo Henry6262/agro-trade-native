@@ -5,6 +5,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // LIGHT THEME REMAP: neutral scale intentionally inverted for dark→light transition
+        // The semantic inversion (300=dark, 700=light) is DELIBERATE:
+        //   - neutral-800/900 were used as dark bg surfaces → now white/gray-50 (light surfaces)
+        //   - neutral-700 was used as dark border → now #E5E7EB (light border)
+        //   - neutral-300 was used as light text on dark bg → now #1F2937 (dark text on white bg)
+        // This allows 49 files using bg-neutral-800/900 to go light without individual edits.
+        // Do NOT swap 300/700 — the inversion is load-bearing for the theme flip.
         primary: {
           50: '#F0FDF4',
           100: '#DCFCE7',

@@ -345,6 +345,16 @@ export const transportService = {
     }
   },
 
+  // Update job location (GPS tracking during IN_TRANSIT)
+  async updateJobLocation(jobId: string, latitude: number, longitude: number): Promise<void> {
+    try {
+      await apiClient.put(`/transport/jobs/${jobId}/location`, { latitude, longitude });
+    } catch (error) {
+      console.error('Error updating job location:', error);
+      throw error;
+    }
+  },
+
   // Get transporter performance metrics
   async getTransporterPerformance(transporterId: string): Promise<TransporterPerformance> {
     try {

@@ -103,7 +103,7 @@ export const JobMarker: React.FC<JobMarkerProps> = ({ job, size = 'medium', zoom
             position: 'absolute',
             top: -8,
             right: -8,
-            backgroundColor: '#1f2937', // gray-800
+            backgroundColor: '#FFFFFF',
             paddingHorizontal: 6,
             paddingVertical: 2,
             borderRadius: 10,

@@ -51,7 +51,7 @@ export const BuyerRequestCard: React.FC<BuyerRequestCardProps> = ({
                 <Text className="text-yellow-400 font-semibold ml-1">
                   Max €{buyerRequest.maxPricePerUnit}
                 </Text>
-                <Text className="text-neutral-400 text-sm ml-1">
+                <Text className="text-gray-500 text-sm ml-1">
                   /{buyerRequest.unit?.toLowerCase() || 'unit'}
                 </Text>
               </View>
@@ -94,7 +94,7 @@ export const BuyerRequestCard: React.FC<BuyerRequestCardProps> = ({
                   </Badge>
                 ))}
                 {buyerRequest.qualityRequirements.length > 4 && (
-                  <Badge className="text-xs bg-neutral-700/50 border-neutral-600/50 text-neutral-400">
+                  <Badge className="text-xs bg-gray-100/50 border-gray-200/50 text-gray-500">
                     +{buyerRequest.qualityRequirements.length - 4} more
                   </Badge>
                 )}

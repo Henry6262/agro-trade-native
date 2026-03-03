@@ -1,5 +1,14 @@
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, Alert, RefreshControl, ScrollView, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+  StyleSheet,
+} from 'react-native';
+import { COLORS } from '../../../../../../design-system';
 import { useBuyerOrders, useBuyerTimeline } from './hooks';
 import { OrdersStatsGrid, ActiveOrdersList, IncomingOffersList, BuyerTimeline } from './components';
 import { tradeOperationService } from '@services/tradeOperationService';
@@ -51,6 +60,7 @@ export default function BuyerOrdersTab() {
                 });
                 Alert.alert('Success', 'Delivery confirmed. Trade operation completed.');
                 await handleRefresh();
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
               } catch (err: any) {
                 Alert.alert(
                   'Error',
@@ -69,30 +79,36 @@ export default function BuyerOrdersTab() {
 
   if (isLoading && !isRefreshing) {
     return (
-      <View className="flex-1 bg-black items-center justify-center">
-        <ActivityIndicator size="large" color="#60A5FA" />
-        <Text className="text-gray-400 mt-4">Loading your orders...</Text>
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color={COLORS.info} />
+        <Text style={styles.loadingText}>Loading your orders...</Text>
       </View>
     );
   }
 
   return (
     <ScrollView
-      className="flex-1 bg-black"
+      style={styles.scroll}
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior="automatic"
       refreshControl={
-        <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor="#60A5FA" />
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+          tintColor={COLORS.info}
+        />
       }
     >
-      <View className="p-6 space-y-6">
-        <View>
-          <Text className="text-2xl font-bold text-white">My Orders</Text>
-          <Text className="text-neutral-400">Track your orders and purchase performance</Text>
+      <View style={styles.content}>
+        <View style={styles.pageHeader}>
+          <Text style={styles.pageTitle}>My Orders</Text>
+          <Text style={styles.pageSubtitle}>Track your orders and purchase performance</Text>
         </View>
+
         <OrdersStatsGrid stats={stats} />
-        <View className="space-y-3">
-          <Text className="text-white font-semibold text-lg">Active Orders</Text>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Active Orders</Text>
           <ActiveOrdersList
             orders={orders}
             expandedOrderId={expandedOrderId}
@@ -101,10 +117,12 @@ export default function BuyerOrdersTab() {
             confirmingDeliveryId={confirmingDeliveryId}
           />
         </View>
-        <View className="space-y-3">
-          <Text className="text-white font-semibold text-lg">Incoming Offers</Text>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Incoming Offers</Text>
           <IncomingOffersList offers={incomingOffers} />
         </View>
+
         <BuyerTimeline
           events={timelineEvents}
           isLoading={isTimelineLoading}
@@ -114,3 +132,45 @@ export default function BuyerOrdersTab() {
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  centered: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  content: {
+    gap: 20,
+    padding: 16,
+  },
+  loadingText: {
+    color: COLORS.textSecondary,
+    fontSize: 15,
+    marginTop: 12,
+  },
+  pageHeader: {},
+  pageSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    marginTop: 2,
+  },
+  pageTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  scroll: {
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
+  section: {
+    gap: 8,
+  },
+  sectionTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 17,
+    fontWeight: '700',
+  },
+});

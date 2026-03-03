@@ -43,7 +43,9 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
     // Check isLoadingProducts to prevent multiple simultaneous fetches
     if (visible && !isLoadingProducts) {
       // Check if we need to fetch products
-      const currentProducts = Array.isArray(productsRaw) ? productsRaw : (productsRaw as any)?.data || [];
+      const currentProducts = Array.isArray(productsRaw)
+        ? productsRaw
+        : (productsRaw as any)?.data || [];
       if (currentProducts.length === 0) {
         fetchAllData().catch((error) => {
           console.error('Error fetching products:', error);
@@ -153,7 +155,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
     >
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }}>
         <View
-          className="bg-neutral-900 rounded-t-3xl"
+          className="bg-white rounded-t-3xl"
           style={{
             flex: 1,
             marginTop: Platform.OS === 'web' ? 80 : 100,
@@ -161,11 +163,11 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
           }}
         >
           {/* Header */}
-          <View className="flex-row justify-between items-center p-6 border-b border-neutral-700">
+          <View className="flex-row justify-between items-center p-6 border-b border-gray-200">
             <TouchableOpacity onPress={onClose}>
               <Text className="text-blue-400 font-semibold">Cancel</Text>
             </TouchableOpacity>
-            <Text className="text-xl font-bold text-white">Select Product</Text>
+            <Text className="text-xl font-bold text-gray-900">Select Product</Text>
             <View style={{ width: 50 }} />
           </View>
 
@@ -208,12 +210,12 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
                           className="w-1/2 p-2"
                         >
                           <View
-                            className={`bg-neutral-800 rounded-lg overflow-hidden border-2 ${
+                            className={`bg-gray-50 rounded-lg overflow-hidden border-2 ${
                               isSelected ? 'border-green-500' : 'border-transparent'
                             }`}
                           >
                             {/* Product Image */}
-                            <View className="aspect-square bg-neutral-700">
+                            <View className="aspect-square bg-gray-100">
                               <Image
                                 source={{
                                   uri: product.image || getFallbackImage(product.category),
@@ -232,7 +234,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
 
                             {/* Product Info */}
                             <View className="p-3">
-                              <Text className="text-white font-medium text-sm" numberOfLines={2}>
+                              <Text className="text-gray-900 font-medium text-sm" numberOfLines={2}>
                                 {product.displayName || product.name}
                               </Text>
 
@@ -262,7 +264,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
 
           {/* Footer for multiple selection */}
           {mode === 'multiple' && selectedProductIds.length > 0 && (
-            <View className="absolute bottom-0 left-0 right-0 bg-neutral-800 border-t border-neutral-700 p-4">
+            <View className="absolute bottom-0 left-0 right-0 bg-gray-50 border-t border-gray-200 p-4">
               <TouchableOpacity
                 onPress={handleConfirmMultiple}
                 className="bg-green-500 py-3 px-6 rounded-lg"

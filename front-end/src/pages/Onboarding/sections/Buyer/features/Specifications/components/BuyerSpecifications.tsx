@@ -109,11 +109,11 @@ export function BuyerSpecifications({
 
   if (!selectedProduct) {
     return (
-      <View className="bg-gray-800 border border-gray-700 rounded-lg p-8 items-center">
+      <View className="bg-white border border-gray-200 rounded-lg p-8 items-center">
         <View className="w-16 h-16 bg-gray-700 rounded-full items-center justify-center mb-4">
           <Package size={32} color="#6B7280" />
         </View>
-        <Text className="text-lg font-semibold text-white mb-2">No Product Selected</Text>
+        <Text className="text-lg font-semibold text-gray-900 mb-2">No Product Selected</Text>
         <Text className="text-sm text-gray-400 text-center">
           Please go back and select a product first
         </Text>
@@ -131,96 +131,96 @@ export function BuyerSpecifications({
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
-        {/* Header */}
-        <View className="mb-6">
-          <Text className="text-3xl font-bold text-blue-500 mb-3">Product Specifications</Text>
-          <Text className="text-gray-400 text-base">
-            Specify your requirements for {selectedProduct.displayName || selectedProduct.name}
-          </Text>
-        </View>
+      {/* Header */}
+      <View className="mb-6">
+        <Text className="text-3xl font-bold text-blue-500 mb-3">Product Specifications</Text>
+        <Text className="text-gray-400 text-base">
+          Specify your requirements for {selectedProduct.displayName || selectedProduct.name}
+        </Text>
+      </View>
 
-        {/* ===== SECTION 1: PRODUCT INFO ===== */}
-        <View className="bg-gray-800/30 rounded-2xl p-5 mb-6 border border-gray-700/50">
+      {/* ===== SECTION 1: PRODUCT INFO ===== */}
+      <View className="bg-white/30 rounded-2xl p-5 mb-6 border border-gray-200/50">
+        <View className="flex-row items-center mb-4">
+          <Package size={22} color="#3B82F6" />
+          <Text className="text-gray-900 text-xl font-bold ml-2">Selected Product</Text>
+        </View>
+        <View className="flex-row items-center">
+          {imageUrl ? (
+            <Image
+              source={{ uri: imageUrl }}
+              className="w-20 h-20 rounded-xl mr-4"
+              resizeMode="cover"
+            />
+          ) : (
+            <View className="w-20 h-20 rounded-xl bg-gray-700 items-center justify-center mr-4">
+              <Package size={32} color="#9CA3AF" />
+            </View>
+          )}
+          <View className="flex-1">
+            <Text className="text-xl font-bold text-gray-900">
+              {selectedProduct.displayName || selectedProduct.name}
+            </Text>
+            <Text className="text-sm text-gray-400 mt-1">{selectedProduct.category}</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* ===== SECTION 2: PRODUCT SPECIFICATIONS ===== */}
+      {productSpecs && productSpecs.length > 0 ? (
+        <View className="bg-white/30 rounded-2xl p-5 mb-6 border border-gray-200/50">
           <View className="flex-row items-center mb-4">
             <Package size={22} color="#3B82F6" />
-            <Text className="text-white text-xl font-bold ml-2">Selected Product</Text>
+            <Text className="text-gray-900 text-xl font-bold ml-2">Product Requirements</Text>
           </View>
-          <View className="flex-row items-center">
-            {imageUrl ? (
-              <Image
-                source={{ uri: imageUrl }}
-                className="w-20 h-20 rounded-xl mr-4"
-                resizeMode="cover"
+          <Text className="text-sm text-gray-400 mb-4">
+            Specify your requirements for each specification
+          </Text>
+
+          {productSpecs.map((spec: any) => {
+            const specKey = spec.code || spec.id || '';
+            return (
+              <ProductSpecificationInput
+                key={specKey}
+                spec={spec}
+                value={specValues[specKey] || ''}
+                onChange={(value) => handleSpecChange(specKey, value)}
               />
-            ) : (
-              <View className="w-20 h-20 rounded-xl bg-gray-700 items-center justify-center mr-4">
-                <Package size={32} color="#9CA3AF" />
-              </View>
-            )}
-            <View className="flex-1">
-              <Text className="text-xl font-bold text-white">
-                {selectedProduct.displayName || selectedProduct.name}
-              </Text>
-              <Text className="text-sm text-gray-400 mt-1">{selectedProduct.category}</Text>
-            </View>
-          </View>
+            );
+          })}
         </View>
-
-        {/* ===== SECTION 2: PRODUCT SPECIFICATIONS ===== */}
-        {productSpecs && productSpecs.length > 0 ? (
-          <View className="bg-gray-800/30 rounded-2xl p-5 mb-6 border border-gray-700/50">
-            <View className="flex-row items-center mb-4">
-              <Package size={22} color="#3B82F6" />
-              <Text className="text-white text-xl font-bold ml-2">Product Requirements</Text>
-            </View>
-            <Text className="text-sm text-gray-400 mb-4">
-              Specify your requirements for each specification
-            </Text>
-
-            {productSpecs.map((spec: any) => {
-              const specKey = spec.code || spec.id || '';
-              return (
-                <ProductSpecificationInput
-                  key={specKey}
-                  spec={spec}
-                  value={specValues[specKey] || ''}
-                  onChange={(value) => handleSpecChange(specKey, value)}
-                />
-              );
-            })}
-          </View>
-        ) : (
-          <View className="bg-gray-800/30 rounded-2xl p-5 mb-6 border border-gray-700/50">
-            <View className="flex-row items-center mb-4">
-              <Package size={22} color="#3B82F6" />
-              <Text className="text-white text-xl font-bold ml-2">Product Requirements</Text>
-            </View>
-            <Text className="text-gray-400 text-center">
-              No specifications available for this product
-            </Text>
-          </View>
-        )}
-
-        {/* ===== SECTION 3: ADDITIONAL REQUIREMENTS ===== */}
-        <View className="bg-gray-800/30 rounded-2xl p-5 mb-6 border border-gray-700/50">
+      ) : (
+        <View className="bg-white/30 rounded-2xl p-5 mb-6 border border-gray-200/50">
           <View className="flex-row items-center mb-4">
             <Package size={22} color="#3B82F6" />
-            <Text className="text-white text-xl font-bold ml-2">Additional Requirements</Text>
+            <Text className="text-gray-900 text-xl font-bold ml-2">Product Requirements</Text>
           </View>
-          <Text className="text-white text-sm font-semibold mb-3">
-            Additional Notes or Special Requirements
+          <Text className="text-gray-400 text-center">
+            No specifications available for this product
           </Text>
-          <TextInput
-            value={additionalNotes}
-            onChangeText={handleNotesChange}
-            placeholder="Enter any additional requirements, quality standards, certification needs, etc."
-            placeholderTextColor="#9CA3AF"
-            multiline
-            numberOfLines={4}
-            className="bg-white rounded-xl px-4 py-3 text-gray-900 min-h-[100px]"
-            textAlignVertical="top"
-          />
         </View>
-      </ScrollView>
+      )}
+
+      {/* ===== SECTION 3: ADDITIONAL REQUIREMENTS ===== */}
+      <View className="bg-white/30 rounded-2xl p-5 mb-6 border border-gray-200/50">
+        <View className="flex-row items-center mb-4">
+          <Package size={22} color="#3B82F6" />
+          <Text className="text-gray-900 text-xl font-bold ml-2">Additional Requirements</Text>
+        </View>
+        <Text className="text-gray-900 text-sm font-semibold mb-3">
+          Additional Notes or Special Requirements
+        </Text>
+        <TextInput
+          value={additionalNotes}
+          onChangeText={handleNotesChange}
+          placeholder="Enter any additional requirements, quality standards, certification needs, etc."
+          placeholderTextColor="#9CA3AF"
+          multiline
+          numberOfLines={4}
+          className="bg-white rounded-xl px-4 py-3 text-gray-900 min-h-[100px]"
+          textAlignVertical="top"
+        />
+      </View>
+    </ScrollView>
   );
 }

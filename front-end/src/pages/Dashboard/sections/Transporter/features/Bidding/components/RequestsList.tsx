@@ -35,7 +35,7 @@ export const TransporterBiddingRequestsList: React.FC<TransporterBiddingRequests
 }) => {
   if (isLoading && !isRefreshing) {
     return (
-      <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8 items-center">
+      <View className="bg-white/50 border border-gray-200 rounded-lg p-8 items-center">
         <Package size={48} color="#6B7280" />
         <Text className="text-gray-400 text-center mt-2">Loading transport requests...</Text>
       </View>
@@ -44,7 +44,7 @@ export const TransporterBiddingRequestsList: React.FC<TransporterBiddingRequests
 
   if (requests.length === 0) {
     return (
-      <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
+      <View className="bg-white/50 border border-gray-200 rounded-lg p-8">
         <Package size={48} color="#6B7280" style={{ alignSelf: 'center', marginBottom: 12 }} />
         <Text className="text-gray-400 text-center">No open requests right now</Text>
         <Text className="text-gray-500 text-center text-sm mt-2">

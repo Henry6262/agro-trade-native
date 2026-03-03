@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, SafeAreaView } from 'react-native';
 import type { OnboardingStep, ProductSpecification } from '@shared/types/onboarding';
 import { simplifiedRoleSteps } from '@shared/constants/simplifiedOnboarding';
+import { products as onboardingProducts } from '@shared/constants/onboarding';
 import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import { ProductSelectionUnified } from '@pages/Onboarding/features/shared/ProductSelection';
 import { QuantityPricingStep } from '@pages/Onboarding/sections/Seller/features/QuantityPricing/components/QuantityPricingStep';
@@ -38,8 +39,7 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
   // Fetch product data on mount
   useEffect(() => {
     fetchAllData()
-      .then(() => {
-      })
+      .then(() => {})
       .catch((error) => {
         console.error('SellerOnboarding: Failed to fetch product data:', error);
       });
@@ -71,10 +71,8 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
   useEffect(() => {
     if (selectedProducts.length > 0) {
       // Import products data to get product names and categories
-      const { products } = require('@shared/constants/onboarding');
-
       const productSelections = selectedProducts.map((productId) => {
-        const product = products.find((p: any) => p.id === productId);
+        const product = onboardingProducts.find((p: any) => p.id === productId);
         const specs = sellerSpecifications[productId] || {};
 
         return {

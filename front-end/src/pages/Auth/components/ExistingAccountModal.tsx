@@ -37,9 +37,9 @@ export const ExistingAccountModal: React.FC<ExistingAccountModalProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
-      <View className="flex-1 bg-black/60 justify-center items-center p-4">
+      <View className="flex-1 bg-white/60 justify-center items-center p-4">
         <View
-          className="bg-gray-900 rounded-2xl overflow-hidden"
+          className="bg-gray-50 rounded-2xl overflow-hidden"
           style={{ width: modalWidth, maxWidth: 480 }}
         >
           <LinearGradient
@@ -52,17 +52,17 @@ export const ExistingAccountModal: React.FC<ExistingAccountModalProps> = ({
               <View className="bg-white/20 rounded-full p-3 mb-3">
                 <User size={32} color="white" />
               </View>
-              <Text className="text-white text-xl font-bold">Account Detected</Text>
+              <Text className="text-gray-900 text-xl font-bold">Account Detected</Text>
             </View>
           </LinearGradient>
 
           <View className="p-6">
-            <Text className="text-gray-300 text-center mb-6">
+            <Text className="text-gray-600 text-center mb-6">
               We found an existing account for:
             </Text>
 
-            <View className="bg-gray-800 rounded-lg p-4 mb-6">
-              <Text className="text-white font-semibold text-lg">{userName}</Text>
+            <View className="bg-white rounded-lg p-4 mb-6">
+              <Text className="text-gray-900 font-semibold text-lg">{userName}</Text>
               <Text className="text-gray-400 text-sm mt-1">{userEmail}</Text>
               {userRole && (
                 <View className="mt-3 flex-row">
@@ -93,10 +93,10 @@ export const ExistingAccountModal: React.FC<ExistingAccountModalProps> = ({
 
               <TouchableOpacity
                 onPress={onCreateNew}
-                className="bg-gray-800 border border-gray-700 rounded-xl py-4 px-6 flex-row justify-center items-center"
+                className="bg-white border border-gray-200 rounded-xl py-4 px-6 flex-row justify-center items-center"
               >
                 <UserPlus size={20} color="#9CA3AF" />
-                <Text className="text-gray-300 font-medium text-base ml-2">Create New Profile</Text>
+                <Text className="text-gray-600 font-medium text-base ml-2">Create New Profile</Text>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={onSwitchAccount} className="py-3">

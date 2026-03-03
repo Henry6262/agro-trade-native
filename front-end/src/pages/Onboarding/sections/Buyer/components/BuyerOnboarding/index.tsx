@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, ScrollView, Text } from 'react-native';
 import type { OnboardingStep, ProductSpecification } from '@shared/types/onboarding';
 import { simplifiedRoleSteps } from '@shared/constants/simplifiedOnboarding';
+import { products as onboardingProducts } from '@shared/constants/onboarding';
 import { OnboardingLayout } from '@pages/Onboarding/components/shared/OnboardingLayout';
 import { ProductSelectionUnified } from '@pages/Onboarding/features/shared/ProductSelection';
 import { BuyerQuantityLocation } from '@pages/Onboarding/sections/Buyer/features/Quantity/components/BuyerQuantityLocation';
@@ -42,8 +43,7 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
   // Fetch product data on mount
   useEffect(() => {
     fetchAllData()
-      .then(() => {
-      })
+      .then(() => {})
       .catch((error) => {
         console.error('BuyerOnboarding: Failed to fetch product data:', error);
       });
@@ -105,10 +105,8 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
   useEffect(() => {
     if (selectedProducts.length > 0) {
       // Import products data to get product names and categories
-      const { products } = require('@shared/constants/onboarding');
-
       const requirements = selectedProducts.map((productId) => {
-        const product = products.find((p: any) => p.id === productId);
+        const product = onboardingProducts.find((p: any) => p.id === productId);
         const specs = buyerSpecifications[productId] || {};
 
         return {

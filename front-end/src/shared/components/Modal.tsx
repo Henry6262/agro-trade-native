@@ -82,22 +82,22 @@ export const Modal: React.FC<ModalProps> = ({
       accessibilityLabel={accessibilityLabel}
     >
       <TouchableWithoutFeedback onPress={handleOverlayPress}>
-        <View className="flex-1 bg-black/50 justify-center items-center px-4">
+        <View className="flex-1 bg-white/50 justify-center items-center px-4">
           <TouchableWithoutFeedback onPress={handleContentPress}>
             <View
-              className="bg-neutral-900 border border-neutral-700 rounded-xl overflow-hidden"
+              className="bg-white border border-gray-200 rounded-xl overflow-hidden"
               style={sizeStyles}
             >
               {/* Header */}
               {(title || closable) && (
-                <View className="flex-row items-center justify-between p-4 border-b border-neutral-700">
+                <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
                   {title && (
-                    <Text className="text-lg font-semibold text-white flex-1 mr-4">{title}</Text>
+                    <Text className="text-lg font-semibold text-gray-900 flex-1 mr-4">{title}</Text>
                   )}
                   {closable && (
                     <TouchableOpacity
                       onPress={onClose}
-                      className="w-8 h-8 rounded-full bg-neutral-800 items-center justify-center"
+                      className="w-8 h-8 rounded-full bg-gray-50 items-center justify-center"
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
                       <X size={18} color="#9CA3AF" />

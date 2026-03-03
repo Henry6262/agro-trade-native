@@ -106,7 +106,6 @@ export function BuyerSubmitDrawer({
     // Get fresh auth state
     const currentAuth = useAuthStore.getState();
     if (!currentAuth.isAuthenticated) {
-
       // Store the pending buyer listing data before authentication
       const buyerSpec = buyerSpecifications[productId] || specifications;
       const { location } = useOnboardingStore.getState();
@@ -124,7 +123,6 @@ export function BuyerSubmitDrawer({
       setShowAuth(true);
       return;
     }
-
 
     setIsSubmitting(true);
     try {
@@ -161,7 +159,6 @@ export function BuyerSubmitDrawer({
         notes: buyerSpec.notes,
         status: 'ACTIVE',
       };
-
 
       // WORKAROUND: Skip onboarding completely for now
       // The onboarding endpoint expects different data than what we have
@@ -223,10 +220,11 @@ export function BuyerSubmitDrawer({
             </Text>
           </View>
 
-          <View className="bg-gray-800/50 rounded-xl p-4 mb-6 border border-gray-700">
+          <View className="bg-white/50 rounded-xl p-4 mb-6 border border-gray-200">
             <Text className="text-gray-400 text-sm mb-2">What happens next?</Text>
-            <Text className="text-white">
-              • Sellers will review your request{'\n'}• You'll receive quotes within 24-48 hours
+            <Text className="text-gray-900">
+              • Sellers will review your request{'\n'}• You&apos;ll receive quotes within 24-48
+              hours
               {'\n'}• Compare offers and choose the best one
             </Text>
           </View>
@@ -265,7 +263,7 @@ export function BuyerSubmitDrawer({
     return (
       <View className="px-4 py-6">
         <View className="mb-6">
-          <Text className="text-2xl font-bold text-white mb-2">Submit Purchase Request?</Text>
+          <Text className="text-2xl font-bold text-gray-900 mb-2">Submit Purchase Request?</Text>
           <Text className="text-gray-400">Your request will be sent to verified sellers</Text>
         </View>
 
@@ -293,7 +291,7 @@ export function BuyerSubmitDrawer({
           ) : (
             <View className="flex-row items-center justify-center">
               <ShoppingCart size={20} color="white" />
-              <Text className="text-white font-semibold text-base ml-2">
+              <Text className="text-gray-900 font-semibold text-base ml-2">
                 {isAuthenticated ? 'Submit Request' : 'Sign In & Submit'}
               </Text>
             </View>
@@ -302,7 +300,7 @@ export function BuyerSubmitDrawer({
 
         <TouchableOpacity
           onPress={handleClose}
-          className="bg-gray-800 rounded-xl p-4 border border-gray-700"
+          className="bg-white rounded-xl p-4 border border-gray-200"
         >
           <Text className="text-gray-400 font-semibold text-center">Cancel</Text>
         </TouchableOpacity>
@@ -312,11 +310,11 @@ export function BuyerSubmitDrawer({
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={handleClose}>
-      <View className="flex-1 bg-black/50">
+      <View className="flex-1 bg-white/50">
         <TouchableOpacity className="flex-1" activeOpacity={1} onPress={handleClose} />
 
         <Animated.View
-          className="bg-gray-900 rounded-t-3xl overflow-hidden"
+          className="bg-gray-50 rounded-t-3xl overflow-hidden"
           style={{
             transform: [{ translateY: slideAnim }],
             minHeight: Dimensions.get('window').height * 0.4,
@@ -324,7 +322,7 @@ export function BuyerSubmitDrawer({
           }}
         >
           {/* Header */}
-          <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-800">
+          <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200">
             <TouchableOpacity onPress={onBack || handleClose} className="p-2">
               <Text className="text-blue-400 font-semibold">Back</Text>
             </TouchableOpacity>

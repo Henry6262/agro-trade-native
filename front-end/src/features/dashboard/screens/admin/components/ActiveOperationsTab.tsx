@@ -7,24 +7,23 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
+  StyleSheet,
 } from 'react-native';
 import {
   Package,
   Clock,
   CheckCircle,
-  XCircle,
   AlertTriangle,
-  Users,
   TrendingUp,
   MessageSquare,
   Send,
   Eye,
-  Timer,
-  ArrowUpRight,
-  ArrowDownRight,
+  XCircle,
 } from 'lucide-react-native';
 import { tradeOperationService } from '@services/tradeOperationService';
 import { negotiationService } from '@services/negotiationService';
+import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
+import { COLORS } from '../../../../../design-system';
 
 interface Negotiation {
   id: string;
@@ -87,6 +86,26 @@ interface Props {
   onCounterOffer: (negotiationId: string) => void;
 }
 
+type NegotiationBadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'muted' | 'gold';
+
+const getNegotiationBadgeVariant = (status: string): NegotiationBadgeVariant => {
+  switch (status) {
+    case 'ACCEPTED':
+      return 'success';
+    case 'COUNTERED':
+      return 'info';
+    case 'REJECTED':
+      return 'danger';
+    case 'PENDING':
+      return 'warning';
+    case 'EXPIRED':
+    case 'WITHDRAWN':
+      return 'muted';
+    default:
+      return 'muted';
+  }
+};
+
 export const ActiveOperationsTab: React.FC<Props> = ({
   onSelectOperation,
   onSendOffer,
@@ -101,7 +120,6 @@ export const ActiveOperationsTab: React.FC<Props> = ({
     try {
       const ops = await tradeOperationService.getTradeOperations('ACTIVE');
 
-      // Load negotiations for each operation
       const opsWithNegotiations = await Promise.all(
         ops.map(async (op) => {
           try {
@@ -130,7 +148,6 @@ export const ActiveOperationsTab: React.FC<Props> = ({
 
   useEffect(() => {
     loadOperations();
-    // Set up polling for updates every 30 seconds
     const interval = setInterval(loadOperations, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -147,103 +164,96 @@ export const ActiveOperationsTab: React.FC<Props> = ({
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PENDING':
-        return { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock };
-      case 'ACCEPTED':
-        return { bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle };
-      case 'REJECTED':
-        return { bg: 'bg-red-100', text: 'text-red-800', icon: XCircle };
-      case 'COUNTERED':
-        return { bg: 'bg-blue-100', text: 'text-blue-800', icon: MessageSquare };
-      case 'EXPIRED':
-        return { bg: 'bg-gray-100', text: 'text-gray-800', icon: Timer };
-      case 'WITHDRAWN':
-        return { bg: 'bg-gray-100', text: 'text-gray-600', icon: XCircle };
-      default:
-        return { bg: 'bg-gray-100', text: 'text-gray-800', icon: Package };
-    }
-  };
-
-  const renderNegotiationItem = (negotiation: Negotiation, operation: TradeOperation) => {
-    const status = getStatusColor(negotiation.status);
-    const StatusIcon = status.icon;
-
+  const renderNegotiationItem = (negotiation: Negotiation, _operation: TradeOperation) => {
     return (
-      <View key={negotiation.id} className="bg-white rounded-lg p-3 mb-2 border border-gray-200">
-        <View className="flex-row justify-between items-start">
-          <View className="flex-1">
-            <View className="flex-row items-center mb-1">
-              <Text className="font-semibold text-gray-800">
-                {negotiation.tradeSeller.seller.name}
-              </Text>
-              <View className={`ml-2 px-2 py-0.5 rounded-full ${status.bg}`}>
-                <Text className={`text-xs font-medium ${status.text}`}>{negotiation.status}</Text>
-              </View>
+      <GlassCard key={negotiation.id} tier="subtle" animate={false} style={styles.negoCard}>
+        <View style={styles.negoHeader}>
+          <View style={styles.negoLeft}>
+            <View style={styles.negoTitleRow}>
+              <Text style={styles.negoName}>{negotiation.tradeSeller.seller.name}</Text>
+              <GlassBadge
+                label={negotiation.status}
+                variant={getNegotiationBadgeVariant(negotiation.status)}
+                size="sm"
+                style={styles.negoBadge}
+              />
             </View>
 
-            <View className="flex-row items-center space-x-4">
-              <Text className="text-sm text-gray-600">
-                €{negotiation.currentOffer.price}/unit × {negotiation.currentOffer.quantity} units
+            <View style={styles.negoOfferRow}>
+              <Text style={styles.negoPrice}>
+                <Text style={styles.goldText}>€{negotiation.currentOffer.price}</Text>
+                <Text style={styles.negoUnit}>
+                  /unit × {negotiation.currentOffer.quantity} units
+                </Text>
               </Text>
               {negotiation.counterOffer && (
-                <View className="flex-row items-center">
-                  <ArrowUpRight size={14} color="#EF4444" />
-                  <Text className="text-sm text-red-600 ml-1">
-                    €{negotiation.counterOffer.price}
+                <View style={styles.counterRow}>
+                  <TrendingUp size={13} color={COLORS.danger} />
+                  <Text style={[styles.counterPrice, { color: COLORS.danger }]}>
+                    {' '}
+                    Counter: €{negotiation.counterOffer.price}
                   </Text>
                 </View>
               )}
             </View>
 
             {negotiation.isExpiringSoon && (
-              <View className="flex-row items-center mt-1">
-                <AlertTriangle size={14} color="#F59E0B" />
-                <Text className="text-xs text-amber-600 ml-1">
+              <View style={styles.expiryRow}>
+                <AlertTriangle size={13} color="#F59E0B" />
+                <Text style={styles.expiryText}>
+                  {' '}
                   Expires in {Math.floor(negotiation.hoursUntilExpiry || 0)}h
                 </Text>
               </View>
             )}
 
             {negotiation.profitImpact && (
-              <View className="flex-row items-center mt-1">
+              <View style={styles.marginRow}>
                 <TrendingUp
-                  size={14}
-                  color={negotiation.profitImpact.profitMargin >= 5 ? '#10B981' : '#EF4444'}
+                  size={13}
+                  color={
+                    negotiation.profitImpact.profitMargin >= 5 ? COLORS.accentGreen : COLORS.danger
+                  }
                 />
                 <Text
-                  className={`text-xs ml-1 ${
-                    negotiation.profitImpact.profitMargin >= 5 ? 'text-green-600' : 'text-red-600'
-                  }`}
+                  style={[
+                    styles.marginText,
+                    {
+                      color:
+                        negotiation.profitImpact.profitMargin >= 5
+                          ? COLORS.accentGreen
+                          : COLORS.danger,
+                    },
+                  ]}
                 >
+                  {' '}
                   Margin: {negotiation.profitImpact.profitMargin.toFixed(1)}%
-                  {negotiation.profitImpact.warning && ' ⚠️'}
+                  {negotiation.profitImpact.warning ? ' ⚠' : ''}
                 </Text>
               </View>
             )}
           </View>
 
-          <View className="flex-row items-center space-x-2">
+          <View style={styles.negoActions}>
             {negotiation.status === 'COUNTERED' && (
-              <TouchableOpacity
+              <GlassButton
+                label="Respond"
                 onPress={() => onCounterOffer(negotiation.id)}
-                className="px-3 py-1.5 bg-blue-600 rounded-lg"
-              >
-                <Text className="text-white text-xs font-medium">Respond</Text>
-              </TouchableOpacity>
+                variant="secondary"
+                size="sm"
+              />
             )}
             {negotiation.status === 'PENDING' && negotiation.isExpiringSoon && (
-              <TouchableOpacity
+              <GlassButton
+                label="Follow Up"
                 onPress={() => Alert.alert('Follow Up', 'Send reminder to seller?')}
-                className="px-3 py-1.5 bg-amber-600 rounded-lg"
-              >
-                <Text className="text-white text-xs font-medium">Follow Up</Text>
-              </TouchableOpacity>
+                variant="ghost"
+                size="sm"
+              />
             )}
           </View>
         </View>
-      </View>
+      </GlassCard>
     );
   };
 
@@ -255,108 +265,118 @@ export const ActiveOperationsTab: React.FC<Props> = ({
     );
 
     return (
-      <TouchableOpacity
-        key={operation.id}
-        onPress={() => toggleExpanded(operation.id)}
-        className="bg-white rounded-lg p-4 mb-3 border border-gray-200"
-      >
-        {/* Header */}
-        <View className="flex-row justify-between items-start mb-3">
-          <View className="flex-1">
-            <View className="flex-row items-center">
-              <Text className="text-lg font-bold text-gray-800">{operation.operationNumber}</Text>
-              {hasUrgentItems && (
-                <View className="ml-2 px-2 py-0.5 bg-amber-100 rounded-full">
-                  <Text className="text-xs font-medium text-amber-800">Action Required</Text>
-                </View>
-              )}
+      <GlassCard key={operation.id} tier="medium" animate={false} style={styles.opCard}>
+        {/* Header row */}
+        <TouchableOpacity onPress={() => toggleExpanded(operation.id)} activeOpacity={0.8}>
+          <View style={styles.opHeader}>
+            <View style={styles.opHeaderLeft}>
+              <View style={styles.opTitleRow}>
+                <Text style={styles.opNumber}>{operation.operationNumber}</Text>
+                {hasUrgentItems && (
+                  <GlassBadge
+                    label="Action Required"
+                    variant="warning"
+                    size="sm"
+                    style={styles.urgentBadge}
+                  />
+                )}
+              </View>
+              <Text style={styles.opSubtitle}>
+                {operation.buyListing?.product?.name || 'Product'} -{' '}
+                {operation.buyListing?.quantity || 0} units
+              </Text>
             </View>
-            <Text className="text-gray-600 text-sm mt-1">
-              {operation.buyListing?.product?.name || 'Product'} -{' '}
-              {operation.buyListing?.quantity || 0} units
-            </Text>
+
+            <TouchableOpacity
+              onPress={(e) => {
+                e.stopPropagation();
+                onSelectOperation(operation);
+              }}
+              style={styles.eyeBtn}
+            >
+              <Eye size={20} color={COLORS.textSecondary} />
+            </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            onPress={(e) => {
-              e.stopPropagation();
-              onSelectOperation(operation);
-            }}
-            className="p-2"
-          >
-            <Eye size={20} color="#6B7280" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Negotiation Summary */}
-        {summary && (
-          <View className="bg-gray-50 rounded-lg p-3 mb-3">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">Negotiation Status</Text>
-            <View className="flex-row flex-wrap">
+          {/* Negotiation summary chips */}
+          {summary && (
+            <View style={styles.summaryRow}>
               {summary.pending > 0 && (
-                <View className="flex-row items-center mr-4 mb-1">
-                  <Clock size={14} color="#F59E0B" />
-                  <Text className="text-xs text-gray-600 ml-1">{summary.pending} Pending</Text>
+                <View style={styles.summaryChip}>
+                  <Clock size={12} color="#F59E0B" />
+                  <Text style={[styles.summaryChipText, { color: COLORS.textSecondary }]}>
+                    {' '}
+                    {summary.pending} Pending
+                  </Text>
                 </View>
               )}
               {summary.countered > 0 && (
-                <View className="flex-row items-center mr-4 mb-1">
-                  <MessageSquare size={14} color="#3B82F6" />
-                  <Text className="text-xs text-gray-600 ml-1">{summary.countered} Countered</Text>
+                <View style={styles.summaryChip}>
+                  <MessageSquare size={12} color={COLORS.info} />
+                  <Text style={[styles.summaryChipText, { color: COLORS.textSecondary }]}>
+                    {' '}
+                    {summary.countered} Countered
+                  </Text>
                 </View>
               )}
               {summary.accepted > 0 && (
-                <View className="flex-row items-center mr-4 mb-1">
-                  <CheckCircle size={14} color="#10B981" />
-                  <Text className="text-xs text-gray-600 ml-1">{summary.accepted} Accepted</Text>
+                <View style={styles.summaryChip}>
+                  <CheckCircle size={12} color={COLORS.accentGreen} />
+                  <Text style={[styles.summaryChipText, { color: COLORS.textSecondary }]}>
+                    {' '}
+                    {summary.accepted} Accepted
+                  </Text>
                 </View>
               )}
               {summary.rejected > 0 && (
-                <View className="flex-row items-center mr-4 mb-1">
-                  <XCircle size={14} color="#EF4444" />
-                  <Text className="text-xs text-gray-600 ml-1">{summary.rejected} Rejected</Text>
+                <View style={styles.summaryChip}>
+                  <XCircle size={12} color={COLORS.danger} />
+                  <Text style={[styles.summaryChipText, { color: COLORS.textSecondary }]}>
+                    {' '}
+                    {summary.rejected} Rejected
+                  </Text>
                 </View>
               )}
             </View>
-          </View>
-        )}
-
-        {/* Profit Metrics */}
-        <View className="flex-row justify-between items-center mb-2">
-          <View className="flex-row items-center">
-            <TrendingUp size={16} color="#6B7280" />
-            <Text className="text-sm text-gray-600 ml-2">
-              Target Margin: {operation.profitMargin || 0}%
-            </Text>
-          </View>
-          {operation.estimatedProfit && (
-            <Text
-              className={`text-sm font-semibold ${
-                operation.estimatedProfit > 0 ? 'text-green-600' : 'text-red-600'
-              }`}
-            >
-              €{operation.estimatedProfit.toFixed(0)}
-            </Text>
           )}
-        </View>
 
-        {/* Verification Status */}
-        {operation.sellers && operation.sellers.length > 0 && (
-          <View className="flex-row items-center mb-2">
-            <CheckCircle size={14} color="#16A34A" />
-            <Text className="text-xs text-gray-600 ml-1">
-              {operation.sellers.filter((s) => s.isVerified).length}/{operation.sellers.length}{' '}
-              sellers verified
-            </Text>
+          {/* Profit metrics */}
+          <View style={styles.profitRow}>
+            <View style={styles.profitLeft}>
+              <TrendingUp size={14} color={COLORS.textMuted} />
+              <Text style={styles.profitLabel}> Target Margin: {operation.profitMargin || 0}%</Text>
+            </View>
+            {operation.estimatedProfit !== undefined && (
+              <Text
+                style={[
+                  styles.profitValue,
+                  { color: operation.estimatedProfit > 0 ? COLORS.accentGreen : COLORS.danger },
+                ]}
+              >
+                €{operation.estimatedProfit.toFixed(0)}
+              </Text>
+            )}
           </View>
-        )}
 
-        {/* Sellers without negotiations */}
+          {/* Sellers verified */}
+          {operation.sellers && operation.sellers.length > 0 && (
+            <View style={styles.verifiedRow}>
+              <CheckCircle size={13} color={COLORS.accentGreen} />
+              <Text style={styles.verifiedText}>
+                {' '}
+                {operation.sellers.filter((s) => s.isVerified).length}/{operation.sellers.length}{' '}
+                sellers verified
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        {/* Sellers awaiting offers */}
         {(operation.sellers || []).filter(
           (s) => !operation.negotiations?.find((n) => n.tradeSellerId === s.id)
-        )?.length > 0 && (
-          <View className="bg-blue-50 rounded-lg p-2 mb-2">
-            <Text className="text-xs text-blue-800 font-medium">
+        ).length > 0 && (
+          <GlassCard tier="subtle" animate={false} style={styles.awaitingCard}>
+            <Text style={styles.awaitingText}>
               {
                 (operation.sellers || []).filter(
                   (s) => !operation.negotiations?.find((n) => n.tradeSellerId === s.id)
@@ -374,42 +394,43 @@ export const ActiveOperationsTab: React.FC<Props> = ({
                   onSendOffer(operation.id, sellersWithoutOffers[0].id);
                 }
               }}
-              className="mt-1 flex-row items-center"
+              style={styles.sendOffersBtn}
             >
-              <Send size={14} color="#2563EB" />
-              <Text className="text-xs text-blue-600 ml-1 font-medium">Send Offers</Text>
+              <Send size={13} color={COLORS.info} />
+              <Text style={styles.sendOffersText}> Send Offers</Text>
             </TouchableOpacity>
-          </View>
+          </GlassCard>
         )}
 
-        {/* Expanded Negotiations List */}
+        {/* Expanded negotiations */}
         {isExpanded && operation.negotiations && operation.negotiations.length > 0 && (
-          <View className="mt-3 pt-3 border-t border-gray-200">
-            <Text className="text-sm font-semibold text-gray-700 mb-2">Active Negotiations</Text>
+          <View style={styles.negoList}>
+            <View style={styles.divider} />
+            <Text style={styles.negoListTitle}>Active Negotiations</Text>
             {operation.negotiations.map((negotiation) =>
               renderNegotiationItem(negotiation, operation)
             )}
           </View>
         )}
-      </TouchableOpacity>
+      </GlassCard>
     );
   };
 
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50">
-        <ActivityIndicator size="large" color="#2563EB" />
-        <Text className="text-gray-600 mt-2">Loading active operations...</Text>
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={COLORS.accentGreen} />
+        <Text style={styles.loadingText}>Loading active operations...</Text>
       </View>
     );
   }
 
   if (operations.length === 0) {
     return (
-      <View className="flex-1 justify-center items-center bg-gray-50 p-8">
-        <Package size={64} color="#9CA3AF" />
-        <Text className="text-gray-600 text-lg font-semibold mt-4">No Active Operations</Text>
-        <Text className="text-gray-500 text-center mt-2">
+      <View style={styles.emptyContainer}>
+        <Package size={56} color={COLORS.textMuted} />
+        <Text style={styles.emptyTitle}>No Active Operations</Text>
+        <Text style={styles.emptySubtitle}>
           Create a new trade operation to start managing negotiations
         </Text>
       </View>
@@ -418,10 +439,12 @@ export const ActiveOperationsTab: React.FC<Props> = ({
 
   return (
     <ScrollView
-      className="flex-1 bg-gray-50"
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
+          tintColor={COLORS.accentGreen}
           onRefresh={() => {
             setRefreshing(true);
             loadOperations();
@@ -429,14 +452,10 @@ export const ActiveOperationsTab: React.FC<Props> = ({
         />
       }
     >
-      <View className="p-4">
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-xl font-bold text-gray-800">Active Trade Operations</Text>
-          <View className="flex-row items-center space-x-2">
-            <View className="px-3 py-1 bg-blue-100 rounded-full">
-              <Text className="text-blue-600 text-sm font-medium">{operations.length} Active</Text>
-            </View>
-          </View>
+      <View style={styles.inner}>
+        <View style={styles.listHeader}>
+          <Text style={styles.listTitle}>Active Trade Operations</Text>
+          <GlassBadge label={`${operations.length} Active`} variant="info" size="sm" />
         </View>
 
         {operations.map(renderOperation)}
@@ -444,3 +463,127 @@ export const ActiveOperationsTab: React.FC<Props> = ({
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  awaitingCard: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  awaitingText: { color: COLORS.info, flex: 1, fontSize: 12, fontWeight: '600' },
+
+  centerContainer: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  container: { backgroundColor: 'transparent', flex: 1 },
+
+  counterPrice: { fontSize: 12, fontWeight: '600' },
+  counterRow: { alignItems: 'center', flexDirection: 'row' },
+  divider: { backgroundColor: 'rgba(255,255,255,0.08)', height: 1, marginVertical: 12 },
+
+  emptyContainer: {
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 32,
+  },
+  emptySubtitle: { color: COLORS.textSecondary, fontSize: 13, marginTop: 8, textAlign: 'center' },
+
+  emptyTitle: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '700', marginTop: 16 },
+  expiryRow: { alignItems: 'center', flexDirection: 'row', marginBottom: 3 },
+  expiryText: { color: '#F59E0B', fontSize: 12 },
+  eyeBtn: { marginLeft: 8, padding: 6 },
+  goldText: { color: COLORS.accentGold, fontFamily: 'monospace', fontWeight: '700' },
+  inner: { padding: 16, paddingBottom: 32 },
+  listHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  listTitle: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '800' },
+
+  loadingText: { color: COLORS.textSecondary, fontSize: 14, marginTop: 12 },
+  marginRow: { alignItems: 'center', flexDirection: 'row' },
+  marginText: { fontSize: 12, fontWeight: '600' },
+
+  negoActions: { gap: 6, marginLeft: 8 },
+  negoBadge: {},
+  negoCard: { marginBottom: 8 },
+  negoHeader: { alignItems: 'flex-start', flexDirection: 'row' },
+
+  negoLeft: { flex: 1 },
+  negoList: {},
+
+  negoListTitle: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  negoName: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '700' },
+  negoOfferRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 3,
+  },
+  negoPrice: { fontSize: 13 },
+
+  negoTitleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 4,
+  },
+  negoUnit: { color: COLORS.textSecondary, fontSize: 12 },
+  opCard: { marginBottom: 12 },
+
+  opHeader: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  opHeaderLeft: { flex: 1 },
+  opNumber: { color: COLORS.textPrimary, fontSize: 16, fontWeight: '800' },
+  opSubtitle: { color: COLORS.textSecondary, fontSize: 13 },
+  opTitleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 3,
+  },
+  profitLabel: { color: COLORS.textSecondary, fontSize: 13 },
+  profitLeft: { alignItems: 'center', flexDirection: 'row' },
+  profitRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  profitValue: { fontFamily: 'monospace', fontSize: 14, fontWeight: '700' },
+  sendOffersBtn: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  sendOffersText: { color: COLORS.info, fontSize: 12, fontWeight: '600' },
+  summaryChip: { alignItems: 'center', flexDirection: 'row' },
+  summaryChipText: { fontSize: 12 },
+  summaryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 10 },
+  urgentBadge: {},
+  verifiedRow: { alignItems: 'center', flexDirection: 'row', marginTop: 2 },
+  verifiedText: { color: COLORS.textMuted, fontSize: 12 },
+});

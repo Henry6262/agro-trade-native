@@ -3,18 +3,20 @@ import {
   Modal,
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
   Alert,
   ActivityIndicator,
+  StyleSheet,
 } from 'react-native';
 import { X, Send, AlertCircle, DollarSign, Package } from 'lucide-react-native';
 import { MatchingSeller, TradeOperation, TradeSeller } from '../../../../../types/trade-operations';
 import { negotiationService } from '@services/negotiationService';
 import { apiClient } from '@services/api';
+import { GlassCard, GlassButton, GlassInput } from '../../../../../design-system';
+import { COLORS } from '../../../../../design-system';
 
 interface OfferModalProps {
   visible: boolean;
@@ -46,18 +48,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  // Initialize default values when seller changes
   useEffect(() => {
     if (seller) {
-      // Default to seller's asking price
       setOfferPrice(seller.askingPrice?.toString() || '');
-      // Default to minimum of available quantity or required quantity
       const defaultQuantity = Math.min(
         seller.availableQuantity || 0,
         requiredQuantity || seller.availableQuantity || 0
       );
       setOfferQuantity(defaultQuantity.toString());
-      // Set default terms
       setTerms('Standard trade terms apply. Payment upon delivery confirmation.');
       setMessage('');
       setValidationErrors([]);
@@ -68,25 +66,14 @@ export const OfferModal: React.FC<OfferModalProps> = ({
     const errors: string[] = [];
     const price = parseFloat(offerPrice);
     const quantity = parseFloat(offerQuantity);
-
-    if (!price || price <= 0) {
-      errors.push('Please enter a valid price');
-    }
-
-    if (!quantity || quantity <= 0) {
-      errors.push('Please enter a valid quantity');
-    }
-
-    if (price > buyerMaxPrice) {
-      errors.push(`Price exceeds buyer's maximum (€${buyerMaxPrice})`);
-    }
-
+    if (!price || price <= 0) errors.push('Please enter a valid price');
+    if (!quantity || quantity <= 0) errors.push('Please enter a valid quantity');
+    if (price > buyerMaxPrice) errors.push(`Price exceeds buyer's maximum (€${buyerMaxPrice})`);
     if (seller && quantity > (seller.availableQuantity || 0)) {
       errors.push(
         `Quantity exceeds available (${seller.availableQuantity} ${(seller.saleListing as any)?.unit || 'units'})`
       );
     }
-
     setValidationErrors(errors);
     return errors.length === 0;
   };
@@ -94,26 +81,16 @@ export const OfferModal: React.FC<OfferModalProps> = ({
   const calculateProfitMargin = () => {
     const price = parseFloat(offerPrice) || 0;
     if (!price || !buyerMaxPrice) return 0;
-    const margin = ((buyerMaxPrice - price) / buyerMaxPrice) * 100;
-    return margin.toFixed(1);
+    return ((buyerMaxPrice - price) / buyerMaxPrice) * 100;
   };
 
   const handleSubmit = async () => {
-    if (!validateOffer() || (!seller && !sellerId)) {
-      return;
-    }
-
+    if (!validateOffer() || (!seller && !sellerId)) return;
     setIsSubmitting(true);
-
     try {
-      // First check if this seller is already added to the trade operation
       let tradeSeller = tradeOperation?.sellers?.find((ts) => ts.sellerId === seller?.sellerId);
-
-      // If seller is not added to trade operation yet, add them first
       if (!tradeSeller) {
-
         try {
-          // Add the seller to the trade operation
           const response = await apiClient.post(`/trade-operations/${tradeOperationId}/sellers`, {
             sellers: [
               {
@@ -125,34 +102,27 @@ export const OfferModal: React.FC<OfferModalProps> = ({
               },
             ],
           });
-
           const result = response.data;
-
-          // Now the seller should have a TradeSeller ID
-          // We need to get it from the response or refresh the trade operation
           if (result.sellersAdded && result.sellersAdded.length > 0) {
             tradeSeller = result.sellersAdded[0];
           } else {
-            // If the response doesn't include the TradeSeller details, we'll use the sellerId directly
-            // The backend negotiation endpoint should handle both TradeSeller ID and regular seller ID
-            tradeSeller = { id: seller?.sellerId || '', sellerId: seller?.sellerId || '' } as TradeSeller;
+            tradeSeller = {
+              id: seller?.sellerId || '',
+              sellerId: seller?.sellerId || '',
+            } as TradeSeller;
           }
         } catch (error) {
-          console.error('Error adding seller to trade:', error);
           Alert.alert('Error', 'Failed to add seller to trade operation. Please try again.');
           setIsSubmitting(false);
           return;
         }
       }
-
-      // Now send the offer using the TradeSeller ID
       await negotiationService.sendOffer(tradeOperationId, {
-        tradeSellerId: sellerId || tradeSeller?.id || seller?.sellerId || '', // Use provided sellerId or fallback
+        tradeSellerId: sellerId || tradeSeller?.id || seller?.sellerId || '',
         price: parseFloat(offerPrice),
         quantity: parseFloat(offerQuantity),
         terms: terms || undefined,
       });
-
       Alert.alert(
         'Offer Sent',
         `Your offer of €${offerPrice} for ${offerQuantity} units has been sent to ${seller?.sellerName || 'seller'}.`,
@@ -167,7 +137,6 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         ]
       );
     } catch (error: any) {
-      console.error('Error sending offer:', error);
       Alert.alert(
         'Error',
         error?.response?.data?.message ||
@@ -181,182 +150,219 @@ export const OfferModal: React.FC<OfferModalProps> = ({
 
   if (!seller && !sellerId) return null;
 
-  const profitMargin = calculateProfitMargin();
-  const isProfitable = parseFloat(profitMargin || '0') >= 5; // 5% minimum margin
+  const profitMarginNum = calculateProfitMargin();
+  const isProfitable = profitMarginNum >= 5;
 
   return (
     <Modal
       visible={visible}
       animationType="fade"
-      transparent={true}
+      transparent
       presentationStyle="overFullScreen"
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/50 justify-center items-center">
+      <View style={styles.overlay}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          className="w-full h-[95%] px-4"
+          style={styles.kav}
         >
-          <View className="bg-white rounded-2xl h-full w-full">
+          <GlassCard tier="strong" style={styles.card} animate={false} noPadding>
             {/* Header */}
-            <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
-              <View className="flex-1">
-                <Text className="text-lg font-bold text-gray-800">Create Offer</Text>
-                <Text className="text-sm text-gray-600 mt-1">
-                  {seller?.sellerName || `Seller ${sellerId}`}
-                </Text>
+            <View style={styles.header}>
+              <View style={styles.headerText}>
+                <Text style={styles.headerTitle}>Create Offer</Text>
+                <Text style={styles.headerSub}>{seller?.sellerName || `Seller ${sellerId}`}</Text>
               </View>
-              <TouchableOpacity onPress={onClose} className="p-2 rounded-full bg-gray-100">
-                <X size={20} color="#6B7280" />
+              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                <X size={20} color={COLORS.textSecondary} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView className="flex-1 p-4">
-              {/* Seller Info */}
+            <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
+              {/* Seller info */}
               {seller && (
-                <View className="bg-blue-50 rounded-lg p-3 mb-4">
-                  <Text className="text-blue-800 font-semibold mb-1">Seller Information</Text>
-                  <Text className="text-blue-700 text-sm">
+                <GlassCard tier="subtle" animate={false} style={styles.infoCard}>
+                  <Text style={styles.infoTitle}>Seller Information</Text>
+                  <Text style={styles.infoText}>
                     Location: {seller.location?.displayName || 'Unknown'}
                   </Text>
-                  <Text className="text-blue-700 text-sm">
-                    Available: {seller.availableQuantity} {(seller.saleListing as any)?.unit || 'units'}
+                  <Text style={styles.infoText}>
+                    Available: {seller.availableQuantity}{' '}
+                    {(seller.saleListing as any)?.unit || 'units'}
                   </Text>
-                  <Text className="text-blue-700 text-sm">
-                    Asking Price: €{seller.askingPrice}/unit
+                  <Text style={styles.infoText}>
+                    Asking Price: <Text style={styles.goldPrice}>€{seller.askingPrice}/unit</Text>
                   </Text>
-                </View>
+                </GlassCard>
               )}
 
-              {/* Validation Errors */}
+              {/* Validation errors */}
               {validationErrors.length > 0 && (
-                <View className="bg-red-50 rounded-lg p-3 mb-4">
+                <GlassCard
+                  tier="subtle"
+                  animate={false}
+                  style={{
+                    backgroundColor: 'rgba(248,113,113,0.1)',
+                    borderColor: 'rgba(248,113,113,0.2)',
+                    marginBottom: 12,
+                  }}
+                >
                   {validationErrors.map((error, index) => (
-                    <View key={index} className="flex-row items-start mb-1">
-                      <AlertCircle size={14} color="#DC2626" style={{ marginTop: 2 }} />
-                      <Text className="text-red-600 text-sm ml-1">{error}</Text>
+                    <View key={index} style={styles.errorRow}>
+                      <AlertCircle size={13} color={COLORS.danger} />
+                      <Text style={styles.errorText}>{error}</Text>
                     </View>
                   ))}
-                </View>
+                </GlassCard>
               )}
 
-              {/* Price Input */}
-              <View className="mb-4">
-                <Text className="text-gray-700 font-semibold mb-2">Offer Price (per unit)</Text>
-                <View className="flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border border-gray-300">
-                  <DollarSign size={20} color="#6B7280" />
-                  <TextInput
-                    value={offerPrice}
-                    onChangeText={setOfferPrice}
-                    placeholder={seller?.askingPrice?.toString() || '0'}
-                    keyboardType="numeric"
-                    className="flex-1 ml-2 text-gray-800"
-                  />
-                  <Text className="text-gray-600">EUR</Text>
-                </View>
-                <Text className="text-xs text-gray-500 mt-1">
-                  Max buyer price: €{buyerMaxPrice}
-                </Text>
-              </View>
+              {/* Price */}
+              <GlassInput
+                label="Offer Price (per unit)"
+                value={offerPrice}
+                onChangeText={setOfferPrice}
+                placeholder={seller?.askingPrice?.toString() || '0'}
+                keyboardType="numeric"
+                leftIcon={<DollarSign size={16} color={COLORS.textMuted} />}
+              />
+              <Text style={styles.hintText}>Max buyer price: €{buyerMaxPrice}</Text>
 
-              {/* Quantity Input */}
-              <View className="mb-4">
-                <Text className="text-gray-700 font-semibold mb-2">Quantity</Text>
-                <View className="flex-row items-center bg-gray-50 rounded-lg px-3 py-2 border border-gray-300">
-                  <Package size={20} color="#6B7280" />
-                  <TextInput
-                    value={offerQuantity}
-                    onChangeText={setOfferQuantity}
-                    placeholder={seller?.availableQuantity?.toString() || '0'}
-                    keyboardType="numeric"
-                    className="flex-1 ml-2 text-gray-800"
-                  />
-                  <Text className="text-gray-600">{(seller?.saleListing as any)?.unit || 'units'}</Text>
-                </View>
-                <Text className="text-xs text-gray-500 mt-1">
-                  Available: {seller?.availableQuantity} | Required: {requiredQuantity}
-                </Text>
-              </View>
+              {/* Quantity */}
+              <GlassInput
+                label="Quantity"
+                value={offerQuantity}
+                onChangeText={setOfferQuantity}
+                placeholder={seller?.availableQuantity?.toString() || '0'}
+                keyboardType="numeric"
+                leftIcon={<Package size={16} color={COLORS.textMuted} />}
+              />
+              <Text style={styles.hintText}>
+                Available: {seller?.availableQuantity} | Required: {requiredQuantity}
+              </Text>
 
-              {/* Profit Indicator */}
-              <View
-                className={`rounded-lg p-3 mb-4 ${isProfitable ? 'bg-green-50' : 'bg-orange-50'}`}
+              {/* Profit indicator */}
+              <GlassCard
+                tier="subtle"
+                animate={false}
+                style={[
+                  styles.profitCard,
+                  { borderColor: isProfitable ? 'rgba(74,222,128,0.25)' : 'rgba(249,115,22,0.25)' },
+                ]}
               >
                 <Text
-                  className={`font-semibold ${isProfitable ? 'text-green-800' : 'text-orange-800'}`}
+                  style={[
+                    styles.profitLabel,
+                    { color: isProfitable ? COLORS.accentGreen : '#f97316' },
+                  ]}
                 >
-                  Estimated Profit Margin: {profitMargin}%
+                  Estimated Profit Margin: {profitMarginNum.toFixed(1)}%
                 </Text>
                 <Text
-                  className={`text-sm mt-1 ${isProfitable ? 'text-green-600' : 'text-orange-600'}`}
+                  style={[
+                    styles.profitSub,
+                    { color: isProfitable ? COLORS.accentGreen : '#f97316' },
+                  ]}
                 >
                   {isProfitable
                     ? 'This offer meets minimum profit requirements'
                     : 'Warning: Below 5% minimum margin'}
                 </Text>
-              </View>
+              </GlassCard>
 
-              {/* Terms Input */}
-              <View className="mb-4">
-                <Text className="text-gray-700 font-semibold mb-2">Terms & Conditions</Text>
-                <TextInput
-                  value={terms}
-                  onChangeText={setTerms}
-                  placeholder="Enter trade terms..."
-                  multiline
-                  numberOfLines={3}
-                  className="bg-gray-50 rounded-lg px-3 py-2 border border-gray-300 text-gray-800"
-                  textAlignVertical="top"
-                />
-              </View>
+              {/* Terms */}
+              <GlassInput
+                label="Terms & Conditions"
+                value={terms}
+                onChangeText={setTerms}
+                placeholder="Enter trade terms..."
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+              />
 
-              {/* Message Input */}
-              <View className="mb-6">
-                <Text className="text-gray-700 font-semibold mb-2">Message (Optional)</Text>
-                <TextInput
-                  value={message}
-                  onChangeText={setMessage}
-                  placeholder="Add a personal message to the seller..."
-                  multiline
-                  numberOfLines={3}
-                  className="bg-gray-50 rounded-lg px-3 py-2 border border-gray-300 text-gray-800"
-                  textAlignVertical="top"
-                />
-              </View>
+              {/* Message */}
+              <GlassInput
+                label="Message (Optional)"
+                value={message}
+                onChangeText={setMessage}
+                placeholder="Add a personal message to the seller..."
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                containerStyle={{ marginBottom: 8 }}
+              />
             </ScrollView>
 
-            {/* Footer Actions */}
-            <View className="p-4 border-t border-gray-200">
-              <View className="flex-row space-x-3">
-                <TouchableOpacity
+            {/* Footer */}
+            <View style={styles.footer}>
+              <View style={styles.footerButtons}>
+                <GlassButton
+                  label="Cancel"
                   onPress={onClose}
-                  className="flex-1 py-3 rounded-lg border border-gray-300"
+                  variant="ghost"
+                  size="md"
                   disabled={isSubmitting}
-                >
-                  <Text className="text-gray-700 font-semibold text-center">Cancel</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
+                  style={styles.footerBtn}
+                />
+                <GlassButton
+                  label={isSubmitting ? '...' : 'Send Offer'}
                   onPress={handleSubmit}
-                  className={`flex-1 py-3 rounded-lg flex-row items-center justify-center ${
-                    isSubmitting ? 'bg-gray-400' : isProfitable ? 'bg-blue-500' : 'bg-orange-500'
-                  }`}
+                  variant="primary"
+                  size="md"
                   disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <ActivityIndicator color="white" />
-                  ) : (
-                    <>
-                      <Send size={18} color="white" />
-                      <Text className="text-white font-semibold ml-2">Send Offer</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
+                  loading={isSubmitting}
+                  leftIcon={<Send size={16} color="#fff" />}
+                  style={styles.footerBtn}
+                />
               </View>
             </View>
-          </View>
+          </GlassCard>
         </KeyboardAvoidingView>
       </View>
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  body: { flex: 1, padding: 20 },
+  card: { height: '100%', width: '100%' },
+  closeBtn: { backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 20, padding: 6 },
+  errorRow: { alignItems: 'flex-start', flexDirection: 'row', gap: 6, marginBottom: 4 },
+  errorText: { color: COLORS.danger, flex: 1, fontSize: 12 },
+  footer: { borderTopColor: 'rgba(255,255,255,0.08)', borderTopWidth: 1, padding: 20 },
+  footerBtn: { flex: 1 },
+  footerButtons: { flexDirection: 'row', gap: 12 },
+  goldPrice: { color: COLORS.accentGold, fontFamily: 'monospace', fontWeight: '700' },
+  header: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+  },
+  headerSub: { color: COLORS.textSecondary, fontSize: 13, marginTop: 2 },
+  headerText: { flex: 1 },
+  headerTitle: { color: COLORS.textPrimary, fontSize: 17, fontWeight: '800' },
+  hintText: { color: COLORS.textMuted, fontSize: 11, marginBottom: 12, marginTop: -8 },
+  infoCard: { marginBottom: 16 },
+  infoText: { color: COLORS.textSecondary, fontSize: 13, marginBottom: 3 },
+  infoTitle: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  kav: { height: '95%', paddingHorizontal: 16, width: '100%' },
+  overlay: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  profitCard: { marginBottom: 16, padding: 14 },
+  profitLabel: { fontSize: 13, fontWeight: '700', marginBottom: 4 },
+  profitSub: { fontSize: 12 },
+});

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, Alert, StyleSheet } from 'react-native';
 import {
   Truck,
   MapPin,
@@ -8,11 +8,8 @@ import {
   CheckCircle,
   Navigation,
   Camera,
-  AlertCircle,
 } from 'lucide-react-native';
-import { Button } from '@shared/components/Button';
-import { Badge } from '@shared/components/Badge';
-import { MetricCard } from '../../components/MetricCard';
+import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
 import { BaseComponentProps } from '@shared/types';
 import transportService, { TransportJob } from '@services/transportService';
 import { format } from 'date-fns';
@@ -21,8 +18,16 @@ interface TransporterActiveJobsTabProps extends BaseComponentProps {
   id?: string;
 }
 
+type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'muted' | 'gold';
+
+const STATUS_VARIANT: Record<string, BadgeVariant> = {
+  ASSIGNED: 'info',
+  IN_TRANSIT: 'warning',
+  DELIVERING: 'gold',
+  COMPLETED: 'success',
+};
+
 export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> = ({
-  id,
   testID,
   accessibilityLabel,
 }) => {
@@ -73,13 +78,11 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
   const handleCompletePickup = async (jobId: string) => {
     try {
       setUpdatingJob(jobId);
-      // In production, you'd show a modal to collect pickup details
       const pickupData = {
         pickupNotes: 'Pickup completed successfully',
         actualWeight: 100,
         pickupPhotos: [],
       };
-
       await transportService.completePickup(jobId, pickupData);
       Alert.alert('Success', 'Pickup completed');
       await loadActiveJobs();
@@ -94,13 +97,11 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
   const handleCompleteDelivery = async (jobId: string) => {
     try {
       setUpdatingJob(jobId);
-      // In production, you'd show a modal to collect delivery details
       const deliveryData = {
         deliveryNotes: 'Delivery completed successfully',
         deliveryPhotos: [],
         recipientSignature: 'Signed digitally',
       };
-
       await transportService.completeDelivery(jobId, deliveryData);
       Alert.alert('Success', 'Delivery completed');
       await loadActiveJobs();
@@ -109,21 +110,6 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
       Alert.alert('Error', 'Failed to complete delivery');
     } finally {
       setUpdatingJob(null);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status?.toUpperCase()) {
-      case 'ASSIGNED':
-        return 'text-blue-400';
-      case 'IN_TRANSIT':
-        return 'text-yellow-400';
-      case 'DELIVERING':
-        return 'text-orange-400';
-      case 'COMPLETED':
-        return 'text-green-400';
-      default:
-        return 'text-gray-400';
     }
   };
 
@@ -137,210 +123,329 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
 
   return (
     <ScrollView
-      className="flex-1 bg-black"
+      style={styles.scroll}
       showsVerticalScrollIndicator={false}
       testID={testID}
       accessibilityLabel={accessibilityLabel}
     >
-      <View className="p-4 space-y-4">
+      <View style={styles.content}>
         {/* Refresh Button */}
-        <TouchableOpacity
+        <GlassButton
+          label={refreshing ? 'Refreshing...' : 'Refresh Jobs'}
           onPress={handleRefresh}
-          disabled={refreshing}
-          className="flex-row items-center justify-center bg-gray-800/50 border border-gray-700 rounded-lg p-3 mb-4"
-        >
-          <Navigation size={18} color={refreshing ? '#6B7280' : '#60A5FA'} />
-          <Text className={`ml-2 ${refreshing ? 'text-gray-500' : 'text-blue-400'}`}>
-            {refreshing ? 'Refreshing...' : 'Refresh Jobs'}
-          </Text>
-        </TouchableOpacity>
+          variant="secondary"
+          size="sm"
+          fullWidth
+          loading={refreshing}
+          leftIcon={<Navigation size={16} color="#60A5FA" />}
+        />
 
         {/* Stats Grid */}
-        <View className="flex-row flex-wrap -mx-1">
-          <View className="w-1/3 px-1 mb-2">
-            <MetricCard
-              title="ACTIVE"
-              value={activeCount.toString()}
-              icon={Truck}
-              gradient="from-blue-500/10 to-blue-600/5"
-              borderColor="border-blue-500/20"
-              iconColor="#60A5FA"
-              valueColor="text-blue-400"
-            />
-          </View>
-          <View className="w-1/3 px-1 mb-2">
-            <MetricCard
-              title="IN TRANSIT"
-              value={inTransitCount.toString()}
-              icon={Navigation}
-              gradient="from-yellow-500/10 to-yellow-600/5"
-              borderColor="border-yellow-500/20"
-              iconColor="#FCD34D"
-              valueColor="text-yellow-400"
-            />
-          </View>
-          <View className="w-1/3 px-1 mb-2">
-            <MetricCard
-              title="TODAY"
-              value={completedToday.toString()}
-              icon={CheckCircle}
-              gradient="from-green-500/10 to-green-600/5"
-              borderColor="border-green-500/20"
-              iconColor="#34D399"
-              valueColor="text-green-400"
-            />
-          </View>
+        <View style={styles.statsGrid}>
+          <GlassCard tier="subtle" style={styles.statCard}>
+            <Truck size={18} color="#60A5FA" />
+            <Text style={styles.statValue}>{activeCount}</Text>
+            <Text style={styles.statLabel}>ACTIVE</Text>
+          </GlassCard>
+          <GlassCard tier="subtle" style={styles.statCard}>
+            <Navigation size={18} color="#FCD34D" />
+            <Text style={[styles.statValue, { color: '#FCD34D' }]}>{inTransitCount}</Text>
+            <Text style={styles.statLabel}>IN TRANSIT</Text>
+          </GlassCard>
+          <GlassCard tier="subtle" style={styles.statCard}>
+            <CheckCircle size={18} color="#4ADE80" />
+            <Text style={[styles.statValue, { color: '#4ADE80' }]}>{completedToday}</Text>
+            <Text style={styles.statLabel}>TODAY</Text>
+          </GlassCard>
         </View>
 
         {/* Active Jobs Section */}
-        <View className="mt-4">
-          <View className="flex-row items-center mb-3">
-            <Truck size={20} color="#60A5FA" />
-            <Text className="text-lg font-semibold text-blue-400 ml-2">ACTIVE TRANSPORT JOBS</Text>
+        <View style={styles.sectionHeader}>
+          <Truck size={18} color="#60A5FA" />
+          <Text style={styles.sectionTitle}>ACTIVE TRANSPORT JOBS</Text>
+        </View>
+
+        {loading ? (
+          <View style={styles.loadingWrap}>
+            <ActivityIndicator size="large" color="#60A5FA" />
+            <Text style={styles.loadingText}>Loading active jobs...</Text>
           </View>
+        ) : activeJobs.length === 0 ? (
+          <GlassCard tier="subtle" style={styles.emptyCard}>
+            <Package size={44} color="rgba(255,255,255,0.25)" style={styles.emptyIcon} />
+            <Text style={styles.emptyTitle}>No active transport jobs</Text>
+            <Text style={styles.emptySubtitle}>Submit bids to get transport jobs</Text>
+          </GlassCard>
+        ) : (
+          activeJobs.map((job) => {
+            const badgeVariant: BadgeVariant = STATUS_VARIANT[job.status?.toUpperCase()] ?? 'muted';
+            const pickupsCompleted = job.pickupsCompleted ?? [];
+            const pickupPointsTotal = job.transportRequest?.pickupPoints?.length ?? 1;
+            const totalWeight = job.transportRequest?.totalWeight ?? 'N/A';
 
-          {loading ? (
-            <View className="p-8">
-              <ActivityIndicator size="large" color="#60A5FA" />
-              <Text className="text-gray-400 text-center mt-4">Loading active jobs...</Text>
-            </View>
-          ) : activeJobs.length === 0 ? (
-            <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
-              <Package
-                size={48}
-                color="#6B7280"
-                style={{ alignSelf: 'center', marginBottom: 12 }}
-              />
-              <Text className="text-gray-400 text-center">No active transport jobs</Text>
-              <Text className="text-gray-500 text-center text-sm mt-2">
-                Submit bids to get transport jobs
-              </Text>
-            </View>
-          ) : (
-            activeJobs.map((job) => {
-              const statusColor = getStatusColor(job.status);
-              const pickupsCompleted = job.pickupsCompleted ?? [];
-              const pickupPointsTotal = job.transportRequest?.pickupPoints?.length ?? 1;
-              const totalWeight = job.transportRequest?.totalWeight ?? 'N/A';
-
-              return (
-                <View
-                  key={job.id}
-                  className="bg-gradient-to-r from-blue-500/10 to-purple-500/5 border border-blue-500/30 rounded-lg p-6 mb-3 mx-2"
-                >
-                  {/* Header - Job Info */}
-                  <View className="mb-3">
-                    <View className="flex-row items-center justify-between mb-2">
-                      <Text className="text-white font-bold">Job #{job.jobNumber}</Text>
-                      <Badge className={`${statusColor} bg-gray-800/50`}>{job.status}</Badge>
-                    </View>
-
-                    {/* Job Details */}
-                    <View className="flex-row items-center justify-between mb-2">
-                      <View className="flex-row items-center">
-                        <Package size={16} color="#9CA3AF" />
-                        <Text className="text-gray-400 ml-1">{totalWeight} tons</Text>
-                      </View>
+            return (
+              <GlassCard key={job.id} tier="medium" style={styles.jobCard}>
+                {/* Header */}
+                <View style={styles.jobHeader}>
+                  <View style={styles.jobHeaderLeft}>
+                    <Text style={styles.jobNumber}>Job #{job.jobNumber}</Text>
+                    <View style={styles.jobMeta}>
+                      <Package size={14} color="rgba(255,255,255,0.4)" />
+                      <Text style={styles.jobMetaText}>{totalWeight} tons</Text>
                       {job.estimatedArrival && (
-                        <View className="flex-row items-center">
-                          <Clock size={16} color="#9CA3AF" />
-                          <Text className="text-gray-400 ml-1">
+                        <>
+                          <Clock size={14} color="rgba(255,255,255,0.4)" />
+                          <Text style={styles.jobMetaText}>
                             ETA: {format(new Date(job.estimatedArrival), 'MMM dd, HH:mm')}
                           </Text>
-                        </View>
+                        </>
                       )}
                     </View>
                   </View>
+                  <GlassBadge label={job.status} variant={badgeVariant} />
+                </View>
 
-                  {/* Progress Info */}
-                  <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-3 mb-3">
-                    <View className="flex-row items-center justify-between mb-2">
-                      <Text className="text-gray-400 text-sm">Pickups Completed</Text>
-                      <Text className="text-white font-semibold">
-                        {pickupsCompleted.length} / {pickupPointsTotal}
+                {/* Separator */}
+                <View style={styles.separator} />
+
+                {/* Progress Info */}
+                <GlassCard tier="subtle" style={styles.progressCard} animate={false}>
+                  <View style={styles.progressRow}>
+                    <Text style={styles.progressLabel}>Pickups Completed</Text>
+                    <Text style={styles.progressValue}>
+                      {pickupsCompleted.length} / {pickupPointsTotal}
+                    </Text>
+                  </View>
+                  {/* Progress bar */}
+                  <View style={styles.progressBarBg}>
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        {
+                          width: `${
+                            pickupPointsTotal > 0
+                              ? (pickupsCompleted.length / pickupPointsTotal) * 100
+                              : 0
+                          }%`,
+                        },
+                      ]}
+                    />
+                  </View>
+                  {job.currentLocation && (
+                    <View style={styles.locationRow}>
+                      <MapPin size={13} color="#60A5FA" />
+                      <Text style={styles.locationText}>
+                        {job.currentLocation.address || 'Location updating...'}
                       </Text>
                     </View>
-                    {job.currentLocation && (
-                      <View className="flex-row items-center">
-                        <MapPin size={14} color="#60A5FA" />
-                        <Text className="text-blue-400 text-sm ml-1">
-                          {job.currentLocation.address || 'Location updating...'}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
+                  )}
+                </GlassCard>
 
-                  {/* Action Buttons based on status */}
-                  <View className="flex-row items-center justify-between">
-                    {job.status === 'ASSIGNED' && (
-                      <Button
-                        size="sm"
-                        variant="gradient"
-                        className="bg-gradient-to-r from-green-600 to-green-700 flex-1"
-                        onPress={() => handleStartJob(job.id)}
-                        disabled={updatingJob === job.id}
-                      >
-                        {updatingJob === job.id ? (
-                          <ActivityIndicator size="small" color="#FFFFFF" />
-                        ) : (
-                          <>
-                            <Truck size={14} color="#FFFFFF" />
-                            <Text className="ml-1 text-white">START JOB</Text>
-                          </>
-                        )}
-                      </Button>
-                    )}
+                {/* Action Buttons */}
+                <View style={styles.actionRow}>
+                  {job.status === 'ASSIGNED' && (
+                    <GlassButton
+                      label="START JOB"
+                      onPress={() => handleStartJob(job.id)}
+                      variant="primary"
+                      size="sm"
+                      fullWidth
+                      loading={updatingJob === job.id}
+                      leftIcon={<Truck size={14} color="#FFFFFF" />}
+                    />
+                  )}
 
-                    {job.status === 'IN_TRANSIT' && !job.allPickupsComplete && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-yellow-500/50 flex-1"
-                        onPress={() => handleCompletePickup(job.id)}
-                        disabled={updatingJob === job.id}
-                      >
-                        {updatingJob === job.id ? (
-                          <ActivityIndicator size="small" color="#FCD34D" />
-                        ) : (
-                          <>
-                            <Camera size={14} color="#FCD34D" />
-                            <Text className="text-yellow-400 ml-1">COMPLETE PICKUP</Text>
-                          </>
-                        )}
-                      </Button>
-                    )}
+                  {job.status === 'IN_TRANSIT' && !job.allPickupsComplete && (
+                    <GlassButton
+                      label="COMPLETE PICKUP"
+                      onPress={() => handleCompletePickup(job.id)}
+                      variant="secondary"
+                      size="sm"
+                      fullWidth
+                      loading={updatingJob === job.id}
+                      leftIcon={<Camera size={14} color="#FCD34D" />}
+                    />
+                  )}
 
-                    {job.status === 'IN_TRANSIT' && job.allPickupsComplete && (
-                      <Button
-                        size="sm"
-                        variant="gradient"
-                        className="bg-gradient-to-r from-green-600 to-green-700 flex-1"
-                        onPress={() => handleCompleteDelivery(job.id)}
-                        disabled={updatingJob === job.id}
-                      >
-                        {updatingJob === job.id ? (
-                          <ActivityIndicator size="small" color="#FFFFFF" />
-                        ) : (
-                          <>
-                            <CheckCircle size={14} color="#FFFFFF" />
-                            <Text className="ml-1 text-white">COMPLETE DELIVERY</Text>
-                          </>
-                        )}
-                      </Button>
-                    )}
+                  {job.status === 'IN_TRANSIT' && job.allPickupsComplete && (
+                    <GlassButton
+                      label="COMPLETE DELIVERY"
+                      onPress={() => handleCompleteDelivery(job.id)}
+                      variant="primary"
+                      size="sm"
+                      fullWidth
+                      loading={updatingJob === job.id}
+                      leftIcon={<CheckCircle size={14} color="#FFFFFF" />}
+                    />
+                  )}
 
-                    {job.status === 'COMPLETED' && (
-                      <View className="flex-1 bg-green-500/10 border border-green-500/20 rounded-lg py-2">
-                        <Text className="text-green-400 text-center text-sm">Job Completed</Text>
-                      </View>
-                    )}
-                  </View>
+                  {job.status === 'COMPLETED' && (
+                    <View style={styles.completedBadge}>
+                      <Text style={styles.completedText}>Job Completed</Text>
+                    </View>
+                  )}
                 </View>
-              );
-            })
-          )}
-        </View>
+              </GlassCard>
+            );
+          })
+        )}
       </View>
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  actionRow: {
+    marginTop: 4,
+  },
+  completedBadge: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.1)',
+    borderColor: 'rgba(74,222,128,0.2)',
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingVertical: 10,
+  },
+  completedText: {
+    color: '#4ADE80',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  content: {
+    gap: 14,
+    padding: 16,
+  },
+  emptyCard: {
+    alignItems: 'center',
+    paddingVertical: 32,
+  },
+  emptyIcon: {
+    marginBottom: 12,
+  },
+  emptySubtitle: {
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: 13,
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  emptyTitle: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  jobCard: {
+    gap: 12,
+  },
+  jobHeader: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  jobHeaderLeft: {
+    flex: 1,
+    gap: 4,
+    marginRight: 12,
+  },
+  jobMeta: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  jobMetaText: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 12,
+  },
+  jobNumber: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  loadingText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+  },
+  loadingWrap: {
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 40,
+  },
+  locationRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 6,
+  },
+  locationText: {
+    color: '#60A5FA',
+    flex: 1,
+    fontSize: 12,
+  },
+  progressBarBg: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 2,
+    height: 4,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    backgroundColor: '#4ADE80',
+    borderRadius: 2,
+    height: '100%',
+  },
+  progressCard: {
+    gap: 8,
+  },
+  progressLabel: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+  },
+  progressRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  progressValue: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  scroll: {
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 4,
+  },
+  sectionTitle: {
+    color: '#60A5FA',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  separator: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    height: 1,
+  },
+  statCard: {
+    alignItems: 'center',
+    flex: 1,
+    gap: 4,
+  },
+  statLabel: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+  },
+  statValue: {
+    color: '#60A5FA',
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+});

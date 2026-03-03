@@ -238,7 +238,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
 
   if (loading && !refreshing) {
     return (
-      <View className="flex-1 bg-black justify-center items-center">
+      <View className="flex-1 bg-white justify-center items-center">
         <ActivityIndicator size="large" color="#34D399" />
         <Text className="text-gray-400 mt-4">Loading transport requests...</Text>
       </View>
@@ -248,7 +248,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
   return (
     <>
       <ScrollView
-        className="flex-1 bg-black"
+        className="flex-1 bg-white"
         showsVerticalScrollIndicator={false}
         testID={testID}
         accessibilityLabel={accessibilityLabel}
@@ -311,7 +311,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                   <Shield size={32} color="#FCD34D" />
                   <View className="ml-3 flex-1">
                     <Text className="font-semibold text-yellow-400">Verification Required</Text>
-                    <Text className="text-sm text-neutral-300">
+                    <Text className="text-sm text-gray-600">
                       Complete verification to unlock premium bidding features
                     </Text>
                   </View>
@@ -340,7 +340,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
             </View>
 
             {transportRequests.length === 0 ? (
-              <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
+              <View className="bg-white/50 border border-gray-200 rounded-lg p-8">
                 <Package
                   size={48}
                   color="#6B7280"
@@ -374,7 +374,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                 return (
                   <View
                     key={request.id}
-                    className="border border-neutral-700 rounded-lg p-6 mb-3 mx-2"
+                    className="border border-gray-200 rounded-lg p-6 mb-3 mx-2"
                   >
                     {/* Header */}
                     <View className="mb-3">
@@ -383,7 +383,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                           <Text className="text-xl">{productName.charAt(0).toUpperCase()}</Text>
                         </View>
                         <View className="ml-3 flex-1">
-                          <Text className="font-bold text-white mb-2">
+                          <Text className="font-bold text-gray-900 mb-2">
                             {request.requestNumber || productName}
                           </Text>
                           <View className="flex-row items-center space-x-4">
@@ -414,15 +414,15 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                       <View className="flex-row items-center mb-3" style={{ minHeight: 24 }}>
                         <Text className="text-base">🚚</Text>
                         <Text
-                          className="text-white font-bold mx-1"
+                          className="text-gray-900 font-bold mx-1"
                           numberOfLines={1}
                           style={{ maxWidth: '35%' }}
                         >
                           {pickupLabel}
                         </Text>
-                        <Text className="text-neutral-500 mx-1">→</Text>
+                        <Text className="text-gray-400 mx-1">→</Text>
                         <Text className="text-base">📦</Text>
-                        <Text className="text-white font-bold mx-1 flex-1" numberOfLines={1}>
+                        <Text className="text-gray-900 font-bold mx-1 flex-1" numberOfLines={1}>
                           {deliveryLabel}
                         </Text>
                       </View>
@@ -433,7 +433,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                       <View className="flex-1 mr-4">
                         <View className="flex-row items-center mb-2">
                           <Navigation size={16} color="#9CA3AF" />
-                          <Text className="text-neutral-400 ml-2">
+                          <Text className="text-gray-500 ml-2">
                             Max budget:{' '}
                             <Text className="text-gray-400 font-medium">
                               {request.maxBudget
@@ -450,7 +450,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                           {lowestBidDisplay}
                         </Text>
                         <View className="flex-row justify-between">
-                          <Text className="text-xs text-neutral-400">{totalBids} bids</Text>
+                          <Text className="text-xs text-gray-500">{totalBids} bids</Text>
                           <Text className="text-xs text-green-300 font-medium">
                             {pricePerKmDisplay}
                           </Text>
@@ -486,7 +486,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                                 value={bidAmount}
                                 onChangeText={setBidAmount}
                                 keyboardType="numeric"
-                                className="w-full h-8 pl-6 bg-neutral-700 border-neutral-600 text-white text-sm"
+                                className="w-full h-8 pl-6 bg-gray-100 border-gray-200 text-gray-900 text-sm"
                               />
                             </View>
                             <Button
@@ -497,7 +497,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                               onPress={() => handleSubmitBid(request.id)}
                             >
                               <Zap size={14} color="#FFFFFF" />
-                              <Text className="ml-1 text-white font-semibold">BID</Text>
+                              <Text className="ml-1 text-gray-900 font-semibold">BID</Text>
                             </Button>
                             <TouchableOpacity
                               onPress={() => {
@@ -506,7 +506,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                               }}
                               className="px-2 py-1"
                             >
-                              <Text className="text-neutral-400">✕</Text>
+                              <Text className="text-gray-500">✕</Text>
                             </TouchableOpacity>
                           </View>
                         ) : (
@@ -518,7 +518,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                             disabled={!isVerified || hasBid}
                           >
                             <Target size={14} color="#FFFFFF" />
-                            <Text className="ml-1 text-white font-semibold">PLACE BID</Text>
+                            <Text className="ml-1 text-gray-900 font-semibold">PLACE BID</Text>
                           </Button>
                         )}
                       </View>

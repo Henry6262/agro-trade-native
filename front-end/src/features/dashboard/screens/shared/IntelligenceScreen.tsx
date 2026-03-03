@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import {
   Search,
   FileText,
@@ -12,10 +12,16 @@ import {
   BarChart3,
   AlertTriangle,
 } from 'lucide-react-native';
+import {
+  GlassCard,
+  GlassBadge,
+  GlassButton,
+  GlassInput,
+  StatCard,
+} from '../../../../design-system';
+import { COLORS } from '../../../../design-system';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@shared/components/Card';
-import { Badge } from '@shared/components/Badge';
-import { Button } from '@shared/components/Button';
+const DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 8 };
 
 interface IntelligenceScreenProps {
   id?: string;
@@ -36,11 +42,11 @@ interface Report {
   confidence: number;
 }
 
-export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {}) {
+export default function IntelligenceScreen({ id: _id }: IntelligenceScreenProps = {}) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
 
-  const reports = [
+  const reports: Report[] = [
     {
       id: 'MKT-2025-001',
       title: 'CORN FUTURES PRICE ANALYSIS',
@@ -117,48 +123,50 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
     },
   ];
 
-  const getCategoryColor = (category: string) => {
+  const getCategoryVariant = (
+    category: string
+  ): 'info' | 'success' | 'muted' | 'danger' | 'warning' => {
     switch (category) {
       case 'PRICE FORECAST':
-        return 'bg-blue-500/20 text-blue-500';
+        return 'info';
       case 'DEMAND ANALYSIS':
-        return 'bg-green-500/20 text-green-500';
+        return 'success';
       case 'TRADE ANALYSIS':
-        return 'bg-purple-500/20 text-purple-500';
+        return 'muted';
       case 'RISK ANALYSIS':
-        return 'bg-red-500/20 text-red-500';
+        return 'danger';
       case 'TREND ANALYSIS':
-        return 'bg-orange-500/20 text-orange-500';
+        return 'warning';
       default:
-        return 'bg-neutral-500/20 text-neutral-300';
+        return 'muted';
     }
   };
 
-  const getImpactColor = (impact: string) => {
+  const getImpactVariant = (impact: string): 'danger' | 'warning' | 'muted' | 'success' => {
     switch (impact) {
       case 'critical':
-        return 'bg-red-500/20 text-red-500';
+        return 'danger';
       case 'high':
-        return 'bg-orange-500/20 text-orange-500';
+        return 'warning';
       case 'medium':
-        return 'bg-neutral-500/20 text-neutral-300';
+        return 'muted';
       case 'low':
-        return 'bg-green-500/20 text-green-500';
+        return 'success';
       default:
-        return 'bg-neutral-500/20 text-neutral-300';
+        return 'muted';
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string): 'success' | 'info' | 'danger' | 'muted' => {
     switch (status) {
       case 'current':
-        return 'bg-green-500/20 text-green-500';
+        return 'success';
       case 'trending':
-        return 'bg-blue-500/20 text-blue-500';
+        return 'info';
       case 'alert':
-        return 'bg-red-500/20 text-red-500';
+        return 'danger';
       default:
-        return 'bg-neutral-500/20 text-neutral-300';
+        return 'muted';
     }
   };
 
@@ -170,300 +178,356 @@ export default function IntelligenceScreen({ id }: IntelligenceScreenProps = {})
   );
 
   return (
-    <ScrollView className="flex-1 p-6 space-y-6">
+    <ScrollView style={styles.root} showsVerticalScrollIndicator={false}>
       {/* Header */}
-      <View className="flex-col gap-4">
+      <View style={styles.headerRow}>
         <View>
-          <Text className="text-2xl font-bold text-white tracking-wider">MARKET INTELLIGENCE</Text>
-          <Text className="text-sm text-neutral-400">
-            Agricultural market analysis and forecasting
-          </Text>
+          <Text style={styles.title}>MARKET INTELLIGENCE</Text>
+          <Text style={styles.subtitle}>Agricultural market analysis and forecasting</Text>
         </View>
-        <View className="flex-row gap-2">
-          <Button className="bg-green-600">
-            <Text className="text-white">New Analysis</Text>
-          </Button>
-          <Button className="bg-green-600 flex-row items-center gap-2">
-            <Filter color="#ffffff" size={16} />
-            <Text className="text-white">Filter</Text>
-          </Button>
-        </View>
-      </View>
-
-      {/* Stats and Search */}
-      <View className="flex-row flex-wrap gap-4">
-        {/* Search Card */}
-        <View className="flex-1 min-w-[200px]">
-          <Card className="bg-neutral-900 border-neutral-700">
-            <CardContent className="p-4">
-              <View className="relative">
-                <Search
-                  color="#9CA3AF"
-                  size={16}
-                  style={{ position: 'absolute', left: 12, top: 12, zIndex: 10 }}
-                />
-                <TextInput
-                  placeholder="Search market reports..."
-                  placeholderTextColor="#9CA3AF"
-                  value={searchTerm}
-                  onChangeText={setSearchTerm}
-                  className="pl-10 bg-neutral-800 border border-neutral-600 text-white placeholder:text-neutral-400 rounded p-3"
-                />
-              </View>
-            </CardContent>
-          </Card>
-        </View>
-
-        {/* Stats Cards */}
-        <View className="flex-1 min-w-[120px]">
-          <Card className="bg-neutral-900 border-neutral-700">
-            <CardContent className="p-4">
-              <View className="flex-row items-center justify-between">
-                <View>
-                  <Text className="text-xs text-neutral-400 tracking-wider">TOTAL REPORTS</Text>
-                  <Text className="text-2xl font-bold text-white font-mono">847</Text>
-                </View>
-                <FileText color="#ffffff" size={32} />
-              </View>
-            </CardContent>
-          </Card>
-        </View>
-
-        <View className="flex-1 min-w-[120px]">
-          <Card className="bg-neutral-900 border-neutral-700">
-            <CardContent className="p-4">
-              <View className="flex-row items-center justify-between">
-                <View>
-                  <Text className="text-xs text-neutral-400 tracking-wider">PRICE ALERTS</Text>
-                  <Text className="text-2xl font-bold text-red-500 font-mono">7</Text>
-                </View>
-                <AlertTriangle color="#ef4444" size={32} />
-              </View>
-            </CardContent>
-          </Card>
-        </View>
-
-        <View className="flex-1 min-w-[120px]">
-          <Card className="bg-neutral-900 border-neutral-700">
-            <CardContent className="p-4">
-              <View className="flex-row items-center justify-between">
-                <View>
-                  <Text className="text-xs text-neutral-400 tracking-wider">MARKET TRENDS</Text>
-                  <Text className="text-2xl font-bold text-white font-mono">23</Text>
-                </View>
-                <TrendingUp color="#22c55e" size={32} />
-              </View>
-            </CardContent>
-          </Card>
+        <View style={styles.headerButtons}>
+          <GlassButton label="New Analysis" onPress={() => {}} variant="primary" size="sm" />
+          <GlassButton
+            label="Filter"
+            onPress={() => {}}
+            variant="secondary"
+            size="sm"
+            leftIcon={<Filter size={14} color={COLORS.textPrimary} />}
+          />
         </View>
       </View>
 
-      {/* Market Intelligence Reports */}
-      <Card className="bg-neutral-900 border-neutral-700">
-        <CardHeader>
-          <Text className="text-sm font-medium text-neutral-300 tracking-wider">
-            MARKET REPORTS
-          </Text>
-        </CardHeader>
-        <CardContent>
-          <View className="space-y-4">
-            {filteredReports.map((report) => (
-              <TouchableOpacity
-                key={report.id}
-                onPress={() => setSelectedReport(report)}
-                className="border border-neutral-700 rounded p-4 bg-neutral-800"
-                activeOpacity={0.7}
-              >
-                <View className="flex-col gap-4">
-                  <View className="flex-1 space-y-2">
-                    <View className="flex-row items-start gap-3">
-                      <BarChart3 color="#9CA3AF" size={20} />
-                      <View className="flex-1">
-                        <Text className="text-sm font-bold text-white tracking-wider">
-                          {report.title}
-                        </Text>
-                        <Text className="text-xs text-neutral-400 font-mono">{report.id}</Text>
-                      </View>
-                    </View>
+      {/* Stats */}
+      <View style={styles.statsRow}>
+        <StatCard
+          label="Total Reports"
+          value={847}
+          icon={<FileText size={16} color={COLORS.textSecondary} />}
+          color={COLORS.textPrimary}
+          style={styles.statCard}
+          delay={0}
+        />
+        <StatCard
+          label="Price Alerts"
+          value={7}
+          icon={<AlertTriangle size={16} color={COLORS.danger} />}
+          color={COLORS.danger}
+          style={styles.statCard}
+          delay={60}
+        />
+        <StatCard
+          label="Market Trends"
+          value={23}
+          icon={<TrendingUp size={16} color={COLORS.accentGreen} />}
+          color={COLORS.accentGreen}
+          style={styles.statCard}
+          delay={120}
+        />
+      </View>
 
-                    <Text className="text-sm text-neutral-300 ml-8">{report.summary}</Text>
+      {/* Search */}
+      <GlassInput
+        placeholder="Search market reports..."
+        value={searchTerm}
+        onChangeText={setSearchTerm}
+        leftIcon={<Search size={16} color={COLORS.textMuted} />}
+        containerStyle={styles.searchInput}
+      />
 
-                    <View className="flex-row flex-wrap gap-2 ml-8">
-                      {report.tags.map((tag) => (
-                        <Badge key={tag} className="bg-neutral-800 text-neutral-300 text-xs">
-                          <Text className="text-neutral-300">{tag}</Text>
-                        </Badge>
-                      ))}
-                    </View>
-                  </View>
-
-                  <View className="flex-col items-end gap-2">
-                    <View className="flex-row flex-wrap gap-2">
-                      <Badge className={getCategoryColor(report.category)}>
-                        <Text>{report.category}</Text>
-                      </Badge>
-                      <Badge className={getImpactColor(report.impact)}>
-                        <Text>{report.impact.toUpperCase()}</Text>
-                      </Badge>
-                      <Badge className={getStatusColor(report.status)}>
-                        <Text>{report.status.toUpperCase()}</Text>
-                      </Badge>
-                    </View>
-
-                    <View className="flex-col gap-1">
-                      <View className="flex-row items-center gap-2">
-                        <TrendingUp color="#22c55e" size={12} />
-                        <Text className="text-green-400 font-mono text-xs">
-                          {report.priceChange}
-                        </Text>
-                      </View>
-                      <View className="flex-row items-center gap-2">
-                        <BarChart3 color="#9CA3AF" size={12} />
-                        <Text className="text-neutral-400 text-xs">{report.region}</Text>
-                      </View>
-                      <Text className="font-mono text-xs text-neutral-400">{report.date}</Text>
-                    </View>
-                  </View>
+      {/* Reports List */}
+      <GlassCard tier="medium" delay={180} noPadding>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>MARKET REPORTS</Text>
+        </View>
+        {filteredReports.map((report, index) => (
+          <TouchableOpacity
+            key={report.id}
+            onPress={() => setSelectedReport(report)}
+            activeOpacity={0.7}
+            style={[styles.reportRow, index < filteredReports.length - 1 && styles.reportBorder]}
+          >
+            <View style={styles.reportLeft}>
+              <BarChart3 size={18} color={COLORS.textMuted} style={styles.reportIcon} />
+              <View style={styles.reportMeta}>
+                <Text style={styles.reportTitle}>{report.title}</Text>
+                <Text style={styles.reportId}>{report.id}</Text>
+                <Text style={styles.reportSummary}>{report.summary}</Text>
+                <View style={styles.tagsRow}>
+                  {report.tags.map((tag) => (
+                    <GlassBadge
+                      key={tag}
+                      label={tag}
+                      variant="muted"
+                      size="sm"
+                      style={styles.tag}
+                    />
+                  ))}
                 </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </CardContent>
-      </Card>
+              </View>
+            </View>
+            <View style={styles.reportRight}>
+              <GlassBadge
+                label={report.category}
+                variant={getCategoryVariant(report.category)}
+                size="sm"
+                style={styles.badge}
+              />
+              <GlassBadge
+                label={report.impact.toUpperCase()}
+                variant={getImpactVariant(report.impact)}
+                size="sm"
+                style={styles.badge}
+              />
+              <GlassBadge
+                label={report.status.toUpperCase()}
+                variant={getStatusVariant(report.status)}
+                size="sm"
+                style={styles.badge}
+              />
+              <View style={styles.priceRow}>
+                <TrendingUp size={11} color={COLORS.accentGreen} />
+                <Text style={styles.priceChange}>{report.priceChange}</Text>
+              </View>
+              <Text style={styles.reportDate}>{report.date}</Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </GlassCard>
 
       {/* Report Detail Modal */}
       {selectedReport && (
         <Modal
           visible={!!selectedReport}
-          transparent={true}
+          transparent
           animationType="slide"
           onRequestClose={() => setSelectedReport(null)}
         >
-          <View className="flex-1 bg-black/50 items-center justify-center p-4">
-            <ScrollView className="bg-neutral-900 border border-neutral-700 w-full max-w-4xl max-h-[90%] rounded-lg">
-              <View className="flex-row items-center justify-between p-6 border-b border-neutral-700">
-                <View>
-                  <Text className="text-xl font-bold text-white tracking-wider">
-                    {selectedReport.title}
-                  </Text>
-                  <Text className="text-sm text-neutral-400 font-mono">{selectedReport.id}</Text>
-                </View>
-                <TouchableOpacity onPress={() => setSelectedReport(null)} className="p-2">
-                  <Text className="text-neutral-400 text-xl">✕</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View className="p-6 space-y-6">
-                <View className="flex-row gap-6">
-                  <View className="flex-1 space-y-4">
-                    <View>
-                      <Text className="text-sm font-medium text-neutral-300 tracking-wider mb-2">
-                        ANALYSIS TYPE
-                      </Text>
-                      <View className="flex-row gap-2">
-                        <Badge className={getCategoryColor(selectedReport.category)}>
-                          <Text>{selectedReport.category}</Text>
-                        </Badge>
-                        <Badge className={getImpactColor(selectedReport.impact)}>
-                          <Text>IMPACT: {selectedReport.impact.toUpperCase()}</Text>
-                        </Badge>
-                      </View>
-                    </View>
-
-                    <View>
-                      <Text className="text-sm font-medium text-neutral-300 tracking-wider mb-2">
-                        MARKET DETAILS
-                      </Text>
-                      <View className="space-y-2">
-                        <View className="flex-row justify-between">
-                          <Text className="text-neutral-400">Data Source:</Text>
-                          <Text className="text-white font-mono">{selectedReport.source}</Text>
-                        </View>
-                        <View className="flex-row justify-between">
-                          <Text className="text-neutral-400">Region:</Text>
-                          <Text className="text-white">{selectedReport.region}</Text>
-                        </View>
-                        <View className="flex-row justify-between">
-                          <Text className="text-neutral-400">Date:</Text>
-                          <Text className="text-white font-mono">{selectedReport.date}</Text>
-                        </View>
-                        <View className="flex-row justify-between items-center">
-                          <Text className="text-neutral-400">Status:</Text>
-                          <Badge className={getStatusColor(selectedReport.status)}>
-                            <Text>{selectedReport.status.toUpperCase()}</Text>
-                          </Badge>
-                        </View>
-                      </View>
-                    </View>
+          <View style={styles.modalOverlay}>
+            <GlassCard tier="strong" style={styles.modalCard} animate={false} noPadding>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.modalHeader}>
+                  <View style={styles.modalHeaderText}>
+                    <Text style={styles.modalTitle}>{selectedReport.title}</Text>
+                    <Text style={styles.modalId}>{selectedReport.id}</Text>
                   </View>
+                  <TouchableOpacity onPress={() => setSelectedReport(null)} style={styles.closeBtn}>
+                    <Text style={styles.closeX}>✕</Text>
+                  </TouchableOpacity>
+                </View>
 
-                  <View className="flex-1 space-y-4">
-                    <View>
-                      <Text className="text-sm font-medium text-neutral-300 tracking-wider mb-2">
-                        MARKET INDICATORS
-                      </Text>
-                      <View className="space-y-3">
-                        <View className="flex-row justify-between items-center">
-                          <Text className="text-neutral-400 text-sm">Price Change</Text>
-                          <Text className="text-green-400 font-mono text-lg">
-                            {selectedReport.priceChange}
-                          </Text>
-                        </View>
-                        <View className="flex-row justify-between items-center">
-                          <Text className="text-neutral-400 text-sm">Confidence Level</Text>
-                          <Text className="text-white font-mono">{selectedReport.confidence}%</Text>
-                        </View>
-                        <View className="w-full bg-neutral-800 rounded-full h-2">
-                          <View
-                            className="bg-green-500 h-2 rounded-full"
-                            style={{ width: `${selectedReport.confidence}%` }}
-                          />
-                        </View>
+                <View style={DIVIDER} />
+
+                <View style={styles.modalBody}>
+                  <View style={styles.modalColumns}>
+                    <View style={styles.modalCol}>
+                      <Text style={styles.fieldLabel}>ANALYSIS TYPE</Text>
+                      <View style={styles.badgeRow}>
+                        <GlassBadge
+                          label={selectedReport.category}
+                          variant={getCategoryVariant(selectedReport.category)}
+                          style={styles.badge}
+                        />
+                        <GlassBadge
+                          label={`IMPACT: ${selectedReport.impact.toUpperCase()}`}
+                          variant={getImpactVariant(selectedReport.impact)}
+                          style={styles.badge}
+                        />
+                      </View>
+
+                      <Text style={[styles.fieldLabel, { marginTop: 16 }]}>MARKET DETAILS</Text>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailKey}>Source:</Text>
+                        <Text style={styles.detailVal}>{selectedReport.source}</Text>
+                      </View>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailKey}>Region:</Text>
+                        <Text style={styles.detailVal}>{selectedReport.region}</Text>
+                      </View>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailKey}>Date:</Text>
+                        <Text style={styles.detailVal}>{selectedReport.date}</Text>
+                      </View>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailKey}>Status:</Text>
+                        <GlassBadge
+                          label={selectedReport.status.toUpperCase()}
+                          variant={getStatusVariant(selectedReport.status)}
+                          size="sm"
+                        />
                       </View>
                     </View>
 
-                    <View>
-                      <Text className="text-sm font-medium text-neutral-300 tracking-wider mb-2">
-                        TAGS
-                      </Text>
-                      <View className="flex-row flex-wrap gap-2">
+                    <View style={styles.modalCol}>
+                      <Text style={styles.fieldLabel}>MARKET INDICATORS</Text>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailKey}>Price Change</Text>
+                        <Text style={styles.priceChangeLarge}>{selectedReport.priceChange}</Text>
+                      </View>
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailKey}>Confidence Level</Text>
+                        <Text style={styles.detailVal}>{selectedReport.confidence}%</Text>
+                      </View>
+                      <View style={styles.progressBg}>
+                        <View
+                          style={[styles.progressBar, { width: `${selectedReport.confidence}%` }]}
+                        />
+                      </View>
+
+                      <Text style={[styles.fieldLabel, { marginTop: 16 }]}>TAGS</Text>
+                      <View style={styles.tagsRow}>
                         {selectedReport.tags.map((tag) => (
-                          <Badge key={tag} className="bg-neutral-800 text-neutral-300">
-                            <Text className="text-neutral-300">{tag}</Text>
-                          </Badge>
+                          <GlassBadge
+                            key={tag}
+                            label={tag}
+                            variant="muted"
+                            size="sm"
+                            style={styles.tag}
+                          />
                         ))}
                       </View>
                     </View>
                   </View>
-                </View>
 
-                <View>
-                  <Text className="text-sm font-medium text-neutral-300 tracking-wider mb-2">
-                    EXECUTIVE SUMMARY
-                  </Text>
-                  <Text className="text-sm text-neutral-300 leading-relaxed">
-                    {selectedReport.summary}
-                  </Text>
-                </View>
+                  <View style={DIVIDER} />
+                  <Text style={styles.fieldLabel}>EXECUTIVE SUMMARY</Text>
+                  <Text style={styles.summaryText}>{selectedReport.summary}</Text>
 
-                <View className="flex-row gap-2 pt-4 border-t border-neutral-700">
-                  <Button className="bg-green-600 flex-row items-center gap-2">
-                    <Eye color="#ffffff" size={16} />
-                    <Text className="text-white">View Full Analysis</Text>
-                  </Button>
-                  <Button className="border border-neutral-700 text-neutral-400 bg-transparent flex-row items-center gap-2">
-                    <Download color="#9CA3AF" size={16} />
-                    <Text className="text-neutral-400">Export Data</Text>
-                  </Button>
-                  <Button className="border border-neutral-700 text-neutral-400 bg-transparent">
-                    <Text className="text-neutral-400">Share Report</Text>
-                  </Button>
+                  <View style={DIVIDER} />
+                  <View style={styles.modalActions}>
+                    <GlassButton
+                      label="View Full Analysis"
+                      onPress={() => {}}
+                      variant="primary"
+                      size="sm"
+                      leftIcon={<Eye size={14} color="#fff" />}
+                      style={styles.modalBtn}
+                    />
+                    <GlassButton
+                      label="Export Data"
+                      onPress={() => {}}
+                      variant="secondary"
+                      size="sm"
+                      leftIcon={<Download size={14} color={COLORS.textPrimary} />}
+                      style={styles.modalBtn}
+                    />
+                    <GlassButton
+                      label="Share Report"
+                      onPress={() => {}}
+                      variant="ghost"
+                      size="sm"
+                      style={styles.modalBtn}
+                    />
+                  </View>
                 </View>
-              </View>
-            </ScrollView>
+              </ScrollView>
+            </GlassCard>
           </View>
         </Modal>
       )}
     </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  headerButtons: { flexDirection: 'row', gap: 8 },
+  headerRow: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  root: { backgroundColor: 'transparent', flex: 1, padding: 16 },
+  searchInput: { marginBottom: 16 },
+  statCard: { flex: 1 },
+  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
+  subtitle: { color: COLORS.textSecondary, fontSize: 12, marginTop: 2 },
+  title: { color: COLORS.textPrimary, fontSize: 22, fontWeight: '800', letterSpacing: 1 },
+  // eslint-disable-next-line react-native/sort-styles
+  sectionHeader: { paddingBottom: 10, paddingHorizontal: 16, paddingTop: 14 },
+  sectionTitle: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+  },
+  reportRow: { flexDirection: 'row', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
+  reportBorder: { borderBottomColor: 'rgba(255,255,255,0.08)', borderBottomWidth: 1 },
+  reportLeft: { flex: 3, flexDirection: 'row', gap: 10 },
+  reportIcon: { marginTop: 2 },
+  reportMeta: { flex: 1, gap: 4 },
+  reportTitle: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '700', letterSpacing: 0.5 },
+  reportId: { color: COLORS.textMuted, fontFamily: 'monospace', fontSize: 10 },
+  reportSummary: { color: COLORS.textSecondary, fontSize: 12, lineHeight: 17 },
+  tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 },
+  tag: {},
+  reportRight: { alignItems: 'flex-end', flex: 1, gap: 5 },
+  badge: { alignSelf: 'flex-end' },
+  badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
+  priceRow: { alignItems: 'center', flexDirection: 'row', gap: 4, marginTop: 4 },
+  priceChange: {
+    color: COLORS.accentGold,
+    fontFamily: 'monospace',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  reportDate: { color: COLORS.textMuted, fontFamily: 'monospace', fontSize: 10 },
+  // Modal
+  modalOverlay: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 16,
+  },
+  modalCard: { maxHeight: '90%', maxWidth: 600, width: '100%' },
+  modalHeader: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+  },
+  modalHeaderText: { flex: 1 },
+  modalTitle: { color: COLORS.textPrimary, fontSize: 17, fontWeight: '800', letterSpacing: 0.5 },
+  modalId: { color: COLORS.textMuted, fontFamily: 'monospace', fontSize: 11, marginTop: 3 },
+  closeBtn: { padding: 4 },
+  closeX: { color: COLORS.textSecondary, fontSize: 18 },
+  modalBody: { gap: 12, padding: 20 },
+  modalColumns: { flexDirection: 'row', gap: 16 },
+  modalCol: { flex: 1, gap: 6 },
+  fieldLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 6,
+    textTransform: 'uppercase',
+  },
+  detailRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  detailKey: { color: COLORS.textSecondary, fontSize: 12 },
+  detailVal: { color: COLORS.textPrimary, fontFamily: 'monospace', fontSize: 12 },
+  priceChangeLarge: {
+    color: COLORS.accentGold,
+    fontFamily: 'monospace',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  progressBg: {
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 3,
+    height: 6,
+    marginTop: 4,
+    overflow: 'hidden',
+  },
+  progressBar: { backgroundColor: COLORS.accentGreen, borderRadius: 3, height: '100%' },
+  summaryText: { color: COLORS.textSecondary, fontSize: 13, lineHeight: 20 },
+  modalActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  modalBtn: { flex: 1, minWidth: 120 },
+});

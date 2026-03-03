@@ -184,13 +184,13 @@ export const OfferCard: React.FC<OfferCardProps> = ({
 
   return (
     <Animated.View style={{ transform: [{ scale: scaleAnim }] }} className="mb-4">
-      <View className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 rounded-xl border border-neutral-700/50 overflow-hidden">
+      <View className="bg-gradient-to-br from-neutral-800/90 to-neutral-900/80 rounded-xl border border-gray-200/50 overflow-hidden">
         {/* Header with Seller Info and Match Score */}
-        <View className="p-4 border-b border-neutral-700/30">
+        <View className="p-4 border-b border-gray-200/30">
           <View className="flex-row justify-between items-start">
             <View className="flex-1 flex-row items-center">
               {/* Seller Avatar */}
-              <View className="w-12 h-12 rounded-full bg-neutral-700 overflow-hidden mr-3">
+              <View className="w-12 h-12 rounded-full bg-gray-100 overflow-hidden mr-3">
                 {offer.seller?.avatar ? (
                   <Image
                     source={{ uri: offer.seller.avatar }}
@@ -199,7 +199,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
                   />
                 ) : (
                   <View className="w-full h-full bg-gradient-to-br from-blue-500/20 to-green-500/20 items-center justify-center">
-                    <Text className="text-white font-bold text-lg">
+                    <Text className="text-gray-900 font-bold text-lg">
                       {offer.seller?.name?.charAt(0) || 'S'}
                     </Text>
                   </View>
@@ -208,7 +208,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
 
               <View className="flex-1">
                 <View className="flex-row items-center">
-                  <Text className="text-white font-semibold text-base" numberOfLines={1}>
+                  <Text className="text-gray-900 font-semibold text-base" numberOfLines={1}>
                     {offer.seller?.businessName || offer.seller?.name || 'Seller'}
                   </Text>
                   {offer.seller?.verified && (
@@ -221,7 +221,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
                 {offer.seller?.location && (
                   <View className="flex-row items-center mt-1">
                     <MapPin size={12} color="#10B981" />
-                    <Text className="text-neutral-300 text-xs ml-1" numberOfLines={1}>
+                    <Text className="text-gray-600 text-xs ml-1" numberOfLines={1}>
                       {offer.seller.location.city}, {offer.seller.location.country}
                     </Text>
                   </View>
@@ -234,7 +234,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
                       {offer.seller.rating.toFixed(1)}
                     </Text>
                     {offer.seller?.reviewCount && (
-                      <Text className="text-neutral-400 text-xs ml-1">
+                      <Text className="text-gray-500 text-xs ml-1">
                         ({offer.seller.reviewCount})
                       </Text>
                     )}
@@ -253,14 +253,14 @@ export const OfferCard: React.FC<OfferCardProps> = ({
         </View>
 
         {/* Price and Quantity Section */}
-        <View className="p-4 border-b border-neutral-700/30">
+        <View className="p-4 border-b border-gray-200/30">
           <View className="flex-row justify-between items-center">
             <View className="flex-1">
               <View className="flex-row items-baseline">
-                <Text className="text-white font-bold text-2xl">
+                <Text className="text-gray-900 font-bold text-2xl">
                   €{offer.pricePerUnit.toFixed(2)}
                 </Text>
-                <Text className="text-neutral-400 text-sm ml-1">/{offer.unit.toLowerCase()}</Text>
+                <Text className="text-gray-500 text-sm ml-1">/{offer.unit.toLowerCase()}</Text>
               </View>
 
               {priceComparison && (
@@ -278,7 +278,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
             </View>
 
             <View className="text-right">
-              <Text className="text-white font-semibold text-lg">
+              <Text className="text-gray-900 font-semibold text-lg">
                 {offer.quantity.toLocaleString()} {offer.unit.toLowerCase()}
               </Text>
               {quantityComparison && (
@@ -294,8 +294,8 @@ export const OfferCard: React.FC<OfferCardProps> = ({
 
         {/* Specifications Preview */}
         {specificationMatches.length > 0 && (
-          <View className="p-4 border-b border-neutral-700/30">
-            <Text className="text-neutral-300 text-sm mb-3">Specifications Match</Text>
+          <View className="p-4 border-b border-gray-200/30">
+            <Text className="text-gray-600 text-sm mb-3">Specifications Match</Text>
             <View className="flex-row flex-wrap gap-2">
               {specificationMatches.slice(0, 3).map((match, index) => (
                 <View
@@ -331,9 +331,9 @@ export const OfferCard: React.FC<OfferCardProps> = ({
               {specificationMatches.length > 3 && (
                 <TouchableOpacity
                   onPress={() => setExpanded(!expanded)}
-                  className="bg-neutral-700/50 px-2 py-1 rounded-md border border-neutral-600/50"
+                  className="bg-gray-100/50 px-2 py-1 rounded-md border border-gray-200/50"
                 >
-                  <Text className="text-neutral-400 text-xs">
+                  <Text className="text-gray-500 text-xs">
                     +{specificationMatches.length - 3} more
                   </Text>
                 </TouchableOpacity>
@@ -344,11 +344,11 @@ export const OfferCard: React.FC<OfferCardProps> = ({
 
         {/* Delivery Terms */}
         {offer.deliveryTerms && (
-          <View className="p-4 border-b border-neutral-700/30">
+          <View className="p-4 border-b border-gray-200/30">
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center">
                 <Truck size={16} color="#60A5FA" />
-                <Text className="text-neutral-300 text-sm ml-2">
+                <Text className="text-gray-600 text-sm ml-2">
                   {offer.deliveryTerms.deliveryMethod?.charAt(0).toUpperCase()}
                   {offer.deliveryTerms.deliveryMethod?.slice(1)} delivery
                 </Text>

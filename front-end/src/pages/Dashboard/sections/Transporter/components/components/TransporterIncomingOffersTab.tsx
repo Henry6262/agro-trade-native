@@ -175,7 +175,7 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
   return (
     <>
       <ScrollView
-        className="flex-1 bg-black"
+        className="flex-1 bg-white"
         showsVerticalScrollIndicator={false}
         testID={testID}
         accessibilityLabel={accessibilityLabel}
@@ -185,7 +185,7 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
           <TouchableOpacity
             onPress={handleRefresh}
             disabled={refreshing}
-            className="flex-row items-center justify-center bg-gray-800/50 border border-gray-700 rounded-lg p-3 mb-4"
+            className="flex-row items-center justify-center bg-white/50 border border-gray-200 rounded-lg p-3 mb-4"
           >
             <RefreshCw size={18} color={refreshing ? '#6B7280' : '#60A5FA'} />
             <Text className={`ml-2 ${refreshing ? 'text-gray-500' : 'text-blue-400'}`}>
@@ -260,7 +260,7 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
                 </Text>
               </View>
             ) : availableRequests.length === 0 ? (
-              <View className="bg-gray-800/50 border border-gray-700 rounded-lg p-8">
+              <View className="bg-white/50 border border-gray-200 rounded-lg p-8">
                 <Truck
                   size={48}
                   color="#6B7280"
@@ -294,10 +294,10 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
                     <View className="mb-3">
                       {/* Request Number and Status */}
                       <View className="flex-row items-center justify-between mb-3">
-                        <Text className="text-white font-bold">
+                        <Text className="text-gray-900 font-bold">
                           Request #{request.requestNumber}
                         </Text>
-                        <Badge className={`${urgencyColor} bg-gray-800/50`}>
+                        <Badge className={`${urgencyColor} bg-white/50`}>
                           {request.urgencyLevel}
                         </Badge>
                       </View>
@@ -386,17 +386,17 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
                           {submittingBid === request.id ? (
                             <>
                               <ActivityIndicator size="small" color="#FFFFFF" />
-                              <Text className="ml-1 text-white">Submitting...</Text>
+                              <Text className="ml-1 text-gray-900">Submitting...</Text>
                             </>
                           ) : (
                             <>
                               <CheckCircle size={14} color="#FFFFFF" />
-                              <Text className="ml-1 text-white">SUBMIT BID</Text>
+                              <Text className="ml-1 text-gray-900">SUBMIT BID</Text>
                             </>
                           )}
                         </Button>
                       ) : (
-                        <View className="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg py-2">
+                        <View className="flex-1 bg-white/50 border border-gray-200 rounded-lg py-2">
                           <Text className="text-gray-500 text-center text-sm">Bid Submitted</Text>
                         </View>
                       )}

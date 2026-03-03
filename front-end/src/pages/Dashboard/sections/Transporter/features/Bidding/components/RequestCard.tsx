@@ -39,14 +39,14 @@ export const TransporterBiddingRequestCard: React.FC<TransporterBiddingRequestCa
   onCancelSelection,
   onViewRoute,
 }) => (
-  <View className="border border-neutral-700 rounded-lg p-6 mb-3 mx-2">
+  <View className="border border-gray-200 rounded-lg p-6 mb-3 mx-2">
     <View className="mb-3">
       <View className="flex-row items-start mb-3">
         <View className="w-12 h-12 bg-gradient-to-br from-green-500/30 to-green-600/10 rounded-lg items-center justify-center border border-green-500/30">
           <Text className="text-xl">{request.productInitial}</Text>
         </View>
         <View className="ml-3 flex-1">
-          <Text className="font-bold text-white mb-2">{request.reference}</Text>
+          <Text className="font-bold text-gray-900 mb-2">{request.reference}</Text>
           <View className="flex-row items-center space-x-4">
             <View className="flex-row items-center">
               <Weight size={14} color="#9CA3AF" />
@@ -64,15 +64,15 @@ export const TransporterBiddingRequestCard: React.FC<TransporterBiddingRequestCa
         </View>
       </View>
 
-      <View className="bg-neutral-800/60 p-3 rounded-lg border border-neutral-700 mb-3">
+      <View className="bg-gray-50/60 p-3 rounded-lg border border-gray-200 mb-3">
         <View className="flex-row justify-between">
           <View className="flex-1 mr-4">
-            <Text className="text-xs text-neutral-400 mb-1">PICKUP</Text>
-            <Text className="text-sm text-white">{request.pickupLabel}</Text>
+            <Text className="text-xs text-gray-500 mb-1">PICKUP</Text>
+            <Text className="text-sm text-gray-900">{request.pickupLabel}</Text>
           </View>
           <View className="flex-1">
-            <Text className="text-xs text-neutral-400 mb-1">DELIVERY</Text>
-            <Text className="text-sm text-white">{request.deliveryLabel}</Text>
+            <Text className="text-xs text-gray-500 mb-1">DELIVERY</Text>
+            <Text className="text-sm text-gray-900">{request.deliveryLabel}</Text>
           </View>
         </View>
         <Text className="text-xs text-blue-300 mt-2">
@@ -85,7 +85,7 @@ export const TransporterBiddingRequestCard: React.FC<TransporterBiddingRequestCa
       <View className="flex-1 mr-4">
         <View className="flex-row items-center mb-2">
           <Navigation size={16} color="#9CA3AF" />
-          <Text className="text-neutral-400 ml-2">
+          <Text className="text-gray-500 ml-2">
             Max budget: <Text className="text-gray-400 font-medium">{request.maxBudgetLabel}</Text>
           </Text>
         </View>
@@ -95,7 +95,7 @@ export const TransporterBiddingRequestCard: React.FC<TransporterBiddingRequestCa
         <Text className="text-xs text-green-400 font-medium">CURRENT BID</Text>
         <Text className="text-2xl font-bold text-green-400">{request.lowestBidLabel}</Text>
         <View className="flex-row justify-between">
-          <Text className="text-xs text-neutral-400">{request.bidsCountLabel}</Text>
+          <Text className="text-xs text-gray-500">{request.bidsCountLabel}</Text>
           <Text className="text-xs text-green-300 font-medium">{request.pricePerKmLabel}</Text>
         </View>
       </View>
@@ -126,7 +126,7 @@ export const TransporterBiddingRequestCard: React.FC<TransporterBiddingRequestCa
                 value={bidAmount}
                 onChangeText={onBidAmountChange}
                 keyboardType="numeric"
-                className="w-full h-8 pl-6 bg-neutral-700 border-neutral-600 text-white text-sm"
+                className="w-full h-8 pl-6 bg-gray-100 border-gray-200 text-gray-900 text-sm"
               />
             </View>
             <Button
@@ -141,12 +141,12 @@ export const TransporterBiddingRequestCard: React.FC<TransporterBiddingRequestCa
               ) : (
                 <>
                   <Zap size={14} color="#FFFFFF" />
-                  <Text className="ml-1 text-white font-semibold">BID</Text>
+                  <Text className="ml-1 text-gray-900 font-semibold">BID</Text>
                 </>
               )}
             </Button>
             <TouchableOpacity onPress={onCancelSelection} className="px-2 py-1">
-              <Text className="text-neutral-400">✕</Text>
+              <Text className="text-gray-500">✕</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -158,7 +158,7 @@ export const TransporterBiddingRequestCard: React.FC<TransporterBiddingRequestCa
             disabled={!isVerified || request.hasBid}
           >
             <Target size={14} color="#FFFFFF" />
-            <Text className="ml-1 text-white font-semibold">PLACE BID</Text>
+            <Text className="ml-1 text-gray-900 font-semibold">PLACE BID</Text>
           </Button>
         )}
       </View>
