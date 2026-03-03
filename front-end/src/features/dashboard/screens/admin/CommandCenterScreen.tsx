@@ -10,7 +10,7 @@ import {
   Clock,
   ArrowRight,
 } from 'lucide-react-native';
-import { GlassCard, GlassBadge, StatCard } from '../../../../design-system';
+import { GlassCard, GlassBadge } from '../../../../design-system';
 import { COLORS } from '../../../../design-system';
 
 const DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 6 };
@@ -156,30 +156,25 @@ export default function CommandCenterScreen() {
 
   return (
     <View style={styles.root}>
-      {/* Stats row */}
-      <View style={styles.statsRow}>
-        <StatCard
-          label="Sell Orders"
-          value={51}
-          color={COLORS.accentGreen}
-          style={styles.statCard}
-          delay={0}
-        />
-        <StatCard
-          label="Buy Orders"
-          value={68}
-          color={COLORS.info}
-          style={styles.statCard}
-          delay={60}
-        />
-        <StatCard
-          label="Matched"
-          value={27}
-          color={COLORS.accentGold}
-          style={styles.statCard}
-          delay={120}
-        />
-      </View>
+      {/* Compact stats strip */}
+      <GlassCard tier="subtle" style={styles.statsStrip} animate={false}>
+        <View style={styles.statsInner}>
+          <View style={styles.statCell}>
+            <Text style={styles.statValue}>51</Text>
+            <Text style={styles.statLabel}>SELL</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCell}>
+            <Text style={styles.statValue}>68</Text>
+            <Text style={styles.statLabel}>BUY</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCell}>
+            <Text style={[styles.statValue, styles.statValueGreen]}>27</Text>
+            <Text style={styles.statLabel}>MATCHED</Text>
+          </View>
+        </View>
+      </GlassCard>
 
       <View style={styles.cardsRow}>
         {/* Order Overview */}
@@ -417,12 +412,39 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
-  statCard: {
+  statCell: {
+    alignItems: 'center',
     flex: 1,
+    paddingVertical: 10,
   },
-  statsRow: {
+  statDivider: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    height: 32,
+    width: 1,
+  },
+  statLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    marginTop: 2,
+    textTransform: 'uppercase',
+  },
+  statValue: {
+    color: COLORS.textPrimary,
+    fontFamily: 'monospace',
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  statValueGreen: {
+    color: COLORS.accentGreen,
+  },
+  statsInner: {
+    alignItems: 'center',
     flexDirection: 'row',
-    gap: 12,
+  },
+  statsStrip: {
+    paddingVertical: 0,
   },
   traderName: {
     color: COLORS.accentGreen,
