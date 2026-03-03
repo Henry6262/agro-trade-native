@@ -1,18 +1,21 @@
+import { useMarketStore } from '../market.store';
+import { act, renderHook } from '@testing-library/react-native';
+
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')
 );
 
+const mockAddNotification = jest.fn();
+
 jest.mock('../notification.store', () => ({
   useNotificationStore: {
-    getState: () => ({ addNotification: jest.fn() }),
+    getState: () => ({ addNotification: mockAddNotification }),
   },
 }));
 
-import { useMarketStore } from '../market.store';
-import { act, renderHook } from '@testing-library/react-native';
-
 // Reset store between tests
 beforeEach(() => {
+  mockAddNotification.mockClear();
   useMarketStore.setState({
     prices: [],
     news: [],
@@ -95,5 +98,7 @@ describe('market.store — checkAlerts', () => {
 
     // triggered stays true, no duplicate notifications
     expect(result.current.alerts[0].triggered).toBe(true);
+    // notification should only have fired once, not twice
+    expect(mockAddNotification).toHaveBeenCalledTimes(1);
   });
 });

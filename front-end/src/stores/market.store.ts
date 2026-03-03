@@ -108,6 +108,8 @@ export const useMarketStore = create<MarketState & MarketActions>()(
           const prices = await marketDataService.getPrices();
           set({ prices, lastPriceFetch: Date.now() });
           get().checkAlerts();
+        } catch (error) {
+          console.warn('[marketStore] fetchPrices failed:', error);
         } finally {
           set({ isLoadingPrices: false });
         }
@@ -123,6 +125,8 @@ export const useMarketStore = create<MarketState & MarketActions>()(
           const { newsService } = await import('../services/newsService');
           const news = await newsService.getAgriNews();
           set({ news, lastNewsFetch: Date.now() });
+        } catch (error) {
+          console.warn('[marketStore] fetchNews failed:', error);
         } finally {
           set({ isLoadingNews: false });
         }
