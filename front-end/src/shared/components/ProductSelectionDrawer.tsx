@@ -191,7 +191,7 @@ export const ProductSelectionDrawer: React.FC<ProductSelectionDrawerProps> = ({
               contentContainerStyle={{ paddingBottom: 100 }}
             >
               {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
-                <View key={} className="mb-6">
+                <View key={category} className="mb-6">
                   <Text className="text-lg font-semibold text-green-400 px-6 py-2">
                     {getCategoryDisplayName(category)}
                   </Text>
