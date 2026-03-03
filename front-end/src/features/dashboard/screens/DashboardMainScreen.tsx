@@ -109,40 +109,40 @@ export default function DashboardMainScreen() {
   const getNavigationItems = (): NavigationItem[] => {
     if (userRole === 'seller') {
       return [
-        { id: 'products', icon: Wheat, label: 'MY PRODUCTS' },
-        { id: 'offers', icon: Bell, label: 'MY OFFERS' },
-        { id: 'trades', icon: Package, label: 'MY TRADES' },
-        { id: 'intelligence', icon: TrendingUp, label: 'MARKET INTEL' },
+        { id: 'products', icon: Wheat, label: 'PRODUCTS' },
+        { id: 'offers', icon: Bell, label: 'OFFERS' },
+        { id: 'trades', icon: Package, label: 'TRADES' },
+        { id: 'intelligence', icon: TrendingUp, label: 'MARKET' },
       ];
     }
     if (userRole === 'buyer') {
       return [
-        { id: 'orders', icon: ShoppingCart, label: 'MY ORDERS' },
-        { id: 'requests', icon: Package, label: 'MY REQUESTS' },
-        { id: 'intelligence', icon: TrendingUp, label: 'MARKET INTEL' },
+        { id: 'orders', icon: ShoppingCart, label: 'ORDERS' },
+        { id: 'requests', icon: Package, label: 'REQUESTS' },
+        { id: 'intelligence', icon: TrendingUp, label: 'MARKET' },
       ];
     }
     if (userRole === 'transporter') {
       return [
         { id: 'bidding', icon: Package, label: 'BIDDING' },
-        { id: 'offers', icon: Bell, label: 'INCOMING OFFERS' },
-        { id: 'transfers', icon: Truck, label: 'MY TRANSFERS' },
-        { id: 'fleet', icon: Users, label: 'MY FLEET' },
-        { id: 'intelligence', icon: TrendingUp, label: 'MARKET INTEL' },
+        { id: 'offers', icon: Bell, label: 'OFFERS' },
+        { id: 'transfers', icon: Truck, label: 'TRANSFERS' },
+        { id: 'fleet', icon: Users, label: 'FLEET' },
+        { id: 'intelligence', icon: TrendingUp, label: 'MARKET' },
       ];
     }
     if (userRole === 'inspector') {
       return [
-        { id: 'active', icon: Package, label: 'ACTIVE JOB' },
-        { id: 'available', icon: LayoutGrid, label: 'AVAILABLE JOBS' },
+        { id: 'active', icon: Package, label: 'ACTIVE' },
+        { id: 'available', icon: LayoutGrid, label: 'AVAILABLE' },
       ];
     }
     // Admin navigation (default)
     return [
-      { id: 'overview', icon: BarChart3, label: 'ORDER CENTER' },
+      { id: 'overview', icon: BarChart3, label: 'ORDERS' },
       { id: 'agents', icon: Users, label: 'NETWORK' },
       { id: 'operations', icon: Package, label: 'TRADE OPS' },
-      { id: 'intelligence', icon: TrendingUp, label: 'MARKET INTEL' },
+      { id: 'intelligence', icon: TrendingUp, label: 'MARKET' },
     ];
   };
 

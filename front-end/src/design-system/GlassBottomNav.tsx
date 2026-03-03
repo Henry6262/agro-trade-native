@@ -41,7 +41,7 @@ export const GlassBottomNav: React.FC<GlassBottomNavProps> = ({ items, activeId,
               activeOpacity={0.7}
             >
               <View style={[styles.tabInner, isActive && styles.tabActive]}>
-                <Icon size={20} color={isActive ? COLORS.accentGreen : 'rgba(255,255,255,0.4)'} />
+                <Icon size={24} color={isActive ? COLORS.accentGreen : 'rgba(255,255,255,0.4)'} />
                 <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]} numberOfLines={1}>
                   {item.label}
                 </Text>
@@ -68,19 +68,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(5,20,10,0.88)',
     borderColor: 'rgba(255,255,255,0.12)',
-    borderRadius: 40,
+    borderRadius: 44,
     borderWidth: 1,
     elevation: 24,
     flexDirection: 'row',
+    overflow: 'hidden',
     paddingHorizontal: 6,
-    paddingVertical: 6,
+    paddingVertical: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.55,
     shadowRadius: 20,
     width: '100%',
-    // Inner top highlight for depth
-    overflow: 'hidden',
   },
   tab: {
     alignItems: 'center',
@@ -96,9 +95,9 @@ const styles = StyleSheet.create({
   },
   tabInner: {
     alignItems: 'center',
-    borderRadius: 32,
+    borderRadius: 36,
     paddingHorizontal: 8,
-    paddingVertical: 8,
+    paddingVertical: 10,
     width: '100%',
   },
   tabActive: {
@@ -112,10 +111,10 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     color: 'rgba(255,255,255,0.38)',
-    fontSize: 8,
+    fontSize: 9,
     fontWeight: '700',
-    letterSpacing: 0.4,
-    marginTop: 3,
+    letterSpacing: 0.5,
+    marginTop: 4,
     textAlign: 'center',
   },
   tabLabelActive: {
