@@ -19,15 +19,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import {
-  Bell,
-  BellOff,
-  ChevronDown,
-  ChevronUp,
-  ImageIcon,
-  TrendingDown,
-  TrendingUp,
-} from 'lucide-react-native';
+import { ChevronDown, ChevronUp, ImageIcon, TrendingDown, TrendingUp } from 'lucide-react-native';
 import { GlassCard, GlassBadge, GlassButton, GlassInput } from '../../../../design-system';
 import { COLORS, GLASS } from '../../../../design-system/tokens';
 import { useMarketStore, PriceAlert } from '../../../../stores/market.store';
@@ -246,6 +238,14 @@ const COMMODITY_NAMES: Record<CommoditySymbol, string> = {
   COFFEE: 'Coffee',
 };
 
+const COMMODITY_EMOJI: Record<CommoditySymbol, string> = {
+  WHEAT: '🌾',
+  CORN: '🌽',
+  COTTON: '🪴',
+  SUGAR: '🍬',
+  COFFEE: '☕',
+};
+
 const AlertsSection: React.FC = () => {
   const alerts = useMarketStore((s) => s.alerts);
   const prices = useMarketStore((s) => s.prices);
@@ -272,40 +272,72 @@ const AlertsSection: React.FC = () => {
 
   return (
     <View>
-      <Text style={styles.sectionTitle}>🔔 PRICE ALERTS ({alerts.length} active)</Text>
+      {/* Header row: title left, + ADD button right */}
+      <View style={styles.alertsHeader}>
+        <Text style={styles.sectionTitleNoMargin}>🔔 PRICE ALERTS ({alerts.length} active)</Text>
+        {!isAdding && (
+          <GlassButton label="+ ADD" onPress={() => setIsAdding(true)} variant="ghost" size="sm" />
+        )}
+      </View>
 
+      {/* Empty state */}
       {alerts.length === 0 && !isAdding && (
         <GlassCard tier="subtle">
-          <Text style={styles.emptyText}>No alerts set. Tap below to add one.</Text>
+          <View style={styles.alertsEmpty}>
+            <Text style={styles.alertsEmptyIcon}>🔔</Text>
+            <Text style={styles.alertsEmptyTitle}>No price alerts set</Text>
+            <Text style={styles.alertsEmptySubtitle}>Tap + to monitor a commodity</Text>
+          </View>
         </GlassCard>
       )}
 
+      {/* Alert pill rows */}
       {alerts.map((alert: PriceAlert) => (
-        <GlassCard key={alert.id} tier="subtle" style={styles.alertCard}>
-          <View style={styles.alertRow}>
-            <View style={styles.alertLeft}>
-              {alert.triggered ? (
-                <Bell size={14} color={COLORS.accentGold} />
-              ) : (
-                <BellOff size={14} color={COLORS.textMuted} />
-              )}
-              <Text style={styles.alertText}>
-                <Text style={styles.alertSymbol}>
-                  {COMMODITY_NAMES[alert.symbol] ?? alert.symbol}
-                </Text>{' '}
-                {alert.condition}{' '}
-                <Text style={styles.alertThreshold}>${alert.threshold.toFixed(2)}</Text>
+        <GlassCard
+          key={alert.id}
+          tier="subtle"
+          style={[styles.alertPillCard, alert.triggered && styles.alertPillCardTriggered]}
+        >
+          <View style={styles.alertPillRow}>
+            <Text style={styles.alertPillCommodity}>
+              {COMMODITY_EMOJI[alert.symbol] ?? '📊'}{' '}
+              <Text style={styles.alertPillName}>
+                {COMMODITY_NAMES[alert.symbol] ?? alert.symbol}
               </Text>
-              {alert.triggered && <GlassBadge label="TRIGGERED" variant="muted" />}
+            </Text>
+
+            <View
+              style={[
+                styles.condPill,
+                alert.condition === 'above' ? styles.condPillUp : styles.condPillDown,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.condPillText,
+                  alert.condition === 'above' ? styles.condPillTextUp : styles.condPillTextDown,
+                ]}
+              >
+                {alert.condition === 'above' ? '▲ ABOVE' : '▼ BELOW'}
+              </Text>
             </View>
+
+            <Text style={styles.alertPillThreshold}>${alert.threshold.toFixed(2)}</Text>
+
+            <GlassBadge
+              label={alert.triggered ? '✓ HIT' : '● LIVE'}
+              variant={alert.triggered ? 'gold' : 'muted'}
+            />
+
             <TouchableOpacity onPress={() => removeAlert(alert.id)} hitSlop={8}>
-              <Text style={styles.removeText}>Remove</Text>
+              <Text style={styles.alertPillRemove}>✕</Text>
             </TouchableOpacity>
           </View>
         </GlassCard>
       ))}
 
-      {isAdding ? (
+      {/* Add form */}
+      {isAdding && (
         <GlassCard tier="medium">
           <Text style={styles.addAlertLabel}>Commodity</Text>
           <View style={styles.symbolRow}>
@@ -318,7 +350,7 @@ const AlertsSection: React.FC = () => {
                 <Text
                   style={[styles.symbolChipText, newSymbol === sym && styles.symbolChipTextActive]}
                 >
-                  {COMMODITY_NAMES[sym] ?? sym}
+                  {COMMODITY_EMOJI[sym]} {COMMODITY_NAMES[sym] ?? sym}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -374,13 +406,6 @@ const AlertsSection: React.FC = () => {
             <GlassButton label="Set Alert" onPress={handleAdd} variant="primary" size="sm" />
           </View>
         </GlassCard>
-      ) : (
-        <GlassButton
-          label="+ Set new alert"
-          onPress={() => setIsAdding(true)}
-          variant="ghost"
-          size="sm"
-        />
       )}
     </View>
   );
@@ -442,31 +467,59 @@ const styles = StyleSheet.create({
     marginTop: 12,
     textTransform: 'uppercase',
   },
-  alertCard: {
+  alertPillCard: {
     marginBottom: 6,
   },
-  alertLeft: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-    gap: 8,
+  alertPillCardTriggered: {
+    borderColor: 'rgba(252,211,77,0.28)',
   },
-  alertRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  alertPillCommodity: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    minWidth: 76,
   },
-  alertSymbol: {
+  alertPillName: {
     color: COLORS.textPrimary,
     fontWeight: '700',
   },
-  alertText: {
+  alertPillRemove: {
+    color: COLORS.danger,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  alertPillRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  alertPillThreshold: {
+    color: COLORS.accentGold,
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  alertsEmpty: {
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
+  },
+  alertsEmptyIcon: {
+    fontSize: 28,
+  },
+  alertsEmptySubtitle: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+  },
+  alertsEmptyTitle: {
     color: COLORS.textSecondary,
     fontSize: 13,
+    fontWeight: '600',
   },
-  alertThreshold: {
-    color: COLORS.accentGold,
-    fontWeight: '700',
+  alertsHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
   condChip: {
     alignItems: 'center',
@@ -491,6 +544,31 @@ const styles = StyleSheet.create({
   },
   condChipTextUp: {
     color: COLORS.accentGreen,
+  },
+  condPill: {
+    borderRadius: 6,
+    borderWidth: 1,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+  },
+  condPillDown: {
+    backgroundColor: 'rgba(248,113,113,0.12)',
+    borderColor: 'rgba(248,113,113,0.28)',
+  },
+  condPillText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+  },
+  condPillTextDown: {
+    color: COLORS.danger,
+  },
+  condPillTextUp: {
+    color: COLORS.accentGreen,
+  },
+  condPillUp: {
+    backgroundColor: 'rgba(74,222,128,0.12)',
+    borderColor: 'rgba(74,222,128,0.28)',
   },
   conditionRow: {
     flexDirection: 'row',
@@ -551,11 +629,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     lineHeight: 19,
   },
-  removeText: {
-    color: COLORS.danger,
-    fontSize: 12,
-    fontWeight: '600',
-  },
   root: {
     backgroundColor: 'transparent',
     flex: 1,
@@ -566,6 +639,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1,
     marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  sectionTitleNoMargin: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 0,
     textTransform: 'uppercase',
   },
   skeletonBody: {
