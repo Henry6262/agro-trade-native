@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
 import { Package, Plus, AlertTriangle, DollarSign, Truck, Calendar } from 'lucide-react-native';
 
 import { useTradeOperations } from './hooks/useTradeOperations';
@@ -10,6 +17,8 @@ import { ActiveOperationsTab } from './components/ActiveOperationsTab';
 import { OfferModal } from './components/OfferModal';
 import { NegotiationManagementScreen } from './components/NegotiationManagementScreen';
 import { CounterOfferModal } from './components/CounterOfferModal';
+import { GlassCard } from '../../../../design-system';
+import { COLORS } from '../../../../design-system';
 import type { BuyListing, TradeOperation } from '@services/tradeOperationService';
 
 export default function OperationsScreenRefactored() {
@@ -81,10 +90,12 @@ export default function OperationsScreenRefactored() {
   const TabButton = ({ id, label, count, isActive }: any) => (
     <TouchableOpacity
       onPress={() => setActiveTab(id)}
-      className={`flex-1 py-3 border-b-2 ${isActive ? 'border-blue-600' : 'border-transparent'}`}
+      style={[styles.tab, isActive && styles.tabActive]}
+      activeOpacity={0.7}
     >
-      <Text className={`text-center font-semibold ${isActive ? 'text-blue-600' : 'text-gray-600'}`}>
-        {label} {count > 0 && `(${count})`}
+      <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
+        {label}
+        {count > 0 ? ` (${count})` : ''}
       </Text>
     </TouchableOpacity>
   );
@@ -93,7 +104,6 @@ export default function OperationsScreenRefactored() {
   const renderActiveOperations = () => (
     <ActiveOperationsTab
       onSelectOperation={(operation) => {
-        // Open negotiation management instead of detail drawer
         setNegotiationOperationId(operation.id);
         setShowNegotiationManagement(true);
       }}
@@ -102,7 +112,6 @@ export default function OperationsScreenRefactored() {
         setShowOfferModal(true);
       }}
       onCounterOffer={(negotiationId) => {
-        // Open counter offer modal - would fetch negotiation details in real app
         setCounterOfferData({
           negotiationId,
           currentOffer: { price: 0, quantity: 0 },
@@ -113,229 +122,226 @@ export default function OperationsScreenRefactored() {
     />
   );
 
-  // Render Seller Listings Tab
+  // Seller Listings Tab
   const renderSellers = () => (
-    <ScrollView className="flex-1 bg-gray-50">
-      <View className="p-4">
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-lg font-bold text-gray-800">Available Seller Listings</Text>
+    <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <View style={styles.tabContent}>
+        {/* Header row */}
+        <View style={styles.contentHeader}>
+          <Text style={styles.contentTitle}>Available Seller Listings</Text>
           <TouchableOpacity
             onPress={loadSellListings}
             disabled={isLoadingSellListings}
-            className="px-3 py-1 bg-blue-100 rounded-full"
+            style={styles.refreshBtn}
           >
-            <Text className="text-blue-600 text-sm font-medium">
+            <Text style={styles.refreshText}>
               {isLoadingSellListings ? 'Loading...' : 'Refresh'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {isLoadingSellListings ? (
-          <View className="flex-1 justify-center items-center py-8">
-            <ActivityIndicator size="large" color="#2563EB" />
-            <Text className="text-gray-600 mt-2">Loading seller listings...</Text>
+          <View style={styles.centerState}>
+            <ActivityIndicator size="large" color={COLORS.accentGreen} />
+            <Text style={styles.stateText}>Loading seller listings...</Text>
           </View>
         ) : sellListings.length === 0 ? (
-          <View className="flex-1 justify-center items-center py-8">
-            <Package size={48} color="#9CA3AF" />
-            <Text className="text-gray-600 mt-2">No seller listings available</Text>
+          <View style={styles.centerState}>
+            <Package size={48} color={COLORS.textMuted} />
+            <Text style={styles.emptyTitle}>No Seller Listings</Text>
+            <Text style={styles.stateText}>No seller listings available right now</Text>
           </View>
         ) : (
-          <>
-            {sellListings.map((listing) => (
-              <View
-                key={listing.id}
-                className="bg-white rounded-lg p-4 mb-3 border border-gray-200"
-              >
-                {/* Seller Listing Header */}
-                <View className="flex-row justify-between items-start mb-2">
-                  <View className="flex-1">
-                    <Text className="text-lg font-bold text-gray-800">
-                      {listing.product?.name || 'Unknown Product'}
-                    </Text>
-                    <Text className="text-sm text-gray-600 mt-1">
-                      {listing.seller?.name || 'Unknown Seller'}
-                    </Text>
-                  </View>
-                  <View
-                    className={`px-3 py-1 rounded-full ${
-                      listing.quality === 'premium'
-                        ? 'bg-purple-100'
-                        : listing.quality === 'standard'
-                          ? 'bg-green-100'
-                          : 'bg-gray-100'
-                    }`}
-                  >
-                    <Text
-                      className={`text-sm font-medium ${
-                        listing.quality === 'premium'
-                          ? 'text-purple-800'
-                          : listing.quality === 'standard'
-                            ? 'text-green-800'
-                            : 'text-gray-800'
-                      }`}
-                    >
-                      {listing.quality || 'Standard'}
-                    </Text>
-                  </View>
+          sellListings.map((listing) => (
+            <GlassCard key={listing.id} tier="medium" animate={false} style={styles.listingCard}>
+              {/* Header */}
+              <View style={styles.listingHeader}>
+                <View style={styles.listingHeaderLeft}>
+                  <Text style={styles.listingTitle}>
+                    {listing.product?.name || 'Unknown Product'}
+                  </Text>
+                  <Text style={styles.listingSubtitle}>
+                    {listing.seller?.name || 'Unknown Seller'}
+                  </Text>
                 </View>
-
-                {/* Product Categories */}
-                {listing.categories && listing.categories.length > 0 && (
-                  <View className="flex-row flex-wrap gap-1 mb-2">
-                    {listing.categories.slice(0, 3).map((cat, idx) => (
-                      <View key={idx} className="px-2 py-1 bg-gray-100 rounded">
-                        <Text className="text-xs text-gray-600">{cat}</Text>
-                      </View>
-                    ))}
-                  </View>
-                )}
-
-                {/* Seller Listing Details */}
-                <View className="space-y-2">
-                  <View className="flex-row justify-between items-center">
-                    <View className="flex-row items-center">
-                      <Package size={16} color="#6B7280" />
-                      <Text className="text-sm text-gray-600 ml-2">
-                        {listing.quantity} {listing.unit} available
-                      </Text>
-                    </View>
-                    <View className="flex-row items-center">
-                      <DollarSign size={16} color="#10B981" />
-                      <Text className="text-green-600 font-bold text-sm ml-1">
-                        ${listing.askingPrice}/{listing.unit}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {listing.harvestDate && (
-                    <View className="flex-row items-center">
-                      <Calendar size={16} color="#6B7280" />
-                      <Text className="text-gray-600 ml-2 text-sm">
-                        Harvest: {new Date(listing.harvestDate).toLocaleDateString()}
-                      </Text>
-                    </View>
-                  )}
-
-                  {listing.location && (
-                    <View className="flex-row items-center">
-                      <Truck size={16} color="#6B7280" />
-                      <Text className="text-gray-600 ml-2 text-sm">
-                        Location: {listing.location?.city || 'N/A'},{' '}
-                        {listing.location?.country || 'N/A'}
-                      </Text>
-                    </View>
-                  )}
+                <View
+                  style={[
+                    styles.qualityBadge,
+                    listing.quality === 'premium'
+                      ? styles.qualityPremium
+                      : listing.quality === 'standard'
+                        ? styles.qualityStandard
+                        : styles.qualityDefault,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.qualityText,
+                      listing.quality === 'premium'
+                        ? { color: '#C4B5FD' }
+                        : listing.quality === 'standard'
+                          ? { color: COLORS.accentGreen }
+                          : { color: COLORS.textSecondary },
+                    ]}
+                  >
+                    {listing.quality || 'Standard'}
+                  </Text>
                 </View>
               </View>
-            ))}
-          </>
+
+              {/* Categories */}
+              {listing.categories && listing.categories.length > 0 && (
+                <View style={styles.tagsRow}>
+                  {listing.categories.slice(0, 3).map((cat: string, idx: number) => (
+                    <View key={idx} style={styles.tag}>
+                      <Text style={styles.tagText}>{cat}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Details */}
+              <View style={styles.detailsColumn}>
+                <View style={styles.detailRow}>
+                  <View style={styles.detailItem}>
+                    <Package size={15} color={COLORS.textMuted} />
+                    <Text style={styles.detailText}>
+                      {listing.quantity} {listing.unit} available
+                    </Text>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <DollarSign size={15} color={COLORS.accentGreen} />
+                    <Text style={styles.priceText}>
+                      ${listing.askingPrice}/{listing.unit}
+                    </Text>
+                  </View>
+                </View>
+                {listing.harvestDate && (
+                  <View style={styles.detailItem}>
+                    <Calendar size={15} color={COLORS.textMuted} />
+                    <Text style={styles.detailText}>
+                      Harvest: {new Date(listing.harvestDate).toLocaleDateString()}
+                    </Text>
+                  </View>
+                )}
+                {listing.location && (
+                  <View style={styles.detailItem}>
+                    <Truck size={15} color={COLORS.textMuted} />
+                    <Text style={styles.detailText}>
+                      {listing.location?.city || 'N/A'}, {listing.location?.country || 'N/A'}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </GlassCard>
+          ))
         )}
       </View>
     </ScrollView>
   );
 
-  // Render Create Trade Tab
+  // Create Trade Tab
   const renderCreateTrade = () => (
-    <ScrollView className="flex-1 bg-gray-50">
-      <View className="p-4">
-        <Text className="text-lg font-bold text-gray-800 mb-4">Available Buy Orders</Text>
+    <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <View style={styles.tabContent}>
+        <Text style={styles.contentTitle}>Available Buy Orders</Text>
 
         {isLoadingBuyListings ? (
-          <View className="flex-1 justify-center items-center py-8">
-            <ActivityIndicator size="large" color="#2563EB" />
-            <Text className="text-gray-600 mt-2">Loading buy orders...</Text>
+          <View style={styles.centerState}>
+            <ActivityIndicator size="large" color={COLORS.accentGreen} />
+            <Text style={styles.stateText}>Loading buy orders...</Text>
           </View>
         ) : buyListings.length === 0 ? (
-          <View className="flex-1 justify-center items-center py-8">
-            <Package size={48} color="#9CA3AF" />
-            <Text className="text-gray-600 mt-2">No buy orders available</Text>
+          <View style={styles.centerState}>
+            <Package size={48} color={COLORS.textMuted} />
+            <Text style={styles.emptyTitle}>No Buy Orders</Text>
+            <Text style={styles.stateText}>No buy orders available right now</Text>
           </View>
         ) : (
-          <>
-            {buyListings.map((listing) => (
-              <TouchableOpacity
-                key={listing.id}
-                onPress={() => {
-                  setSelectedBuyListing(listing);
-                  setShowCreationDrawer(true);
-                }}
-                className="bg-white rounded-lg p-4 mb-3 border border-gray-200"
-              >
-                {/* Buy Order Header */}
-                <View className="flex-row justify-between items-start mb-2">
-                  <View className="flex-1">
-                    <Text className="text-lg font-bold text-gray-800">
+          buyListings.map((listing) => (
+            <TouchableOpacity
+              key={listing.id}
+              onPress={() => {
+                setSelectedBuyListing(listing);
+                setShowCreationDrawer(true);
+              }}
+              activeOpacity={0.8}
+            >
+              <GlassCard tier="medium" animate={false} style={styles.listingCard}>
+                {/* Header */}
+                <View style={styles.listingHeader}>
+                  <View style={styles.listingHeaderLeft}>
+                    <Text style={styles.listingTitle}>
                       {listing.product?.name || 'Unknown Product'}
                     </Text>
-                    <Text className="text-sm text-gray-600 mt-1">
+                    <Text style={styles.listingSubtitle}>
                       {listing.buyer?.name || 'Unknown Buyer'}
                     </Text>
                   </View>
                   <View
-                    className={`px-3 py-1 rounded-full ${
+                    style={[
+                      styles.qualityBadge,
                       listing.urgency === 'critical'
-                        ? 'bg-red-100'
+                        ? styles.urgencyCritical
                         : listing.urgency === 'high'
-                          ? 'bg-orange-100'
-                          : 'bg-blue-100'
-                    }`}
+                          ? styles.urgencyHigh
+                          : styles.urgencyNormal,
+                    ]}
                   >
                     <Text
-                      className={`text-sm font-medium ${
+                      style={[
+                        styles.qualityText,
                         listing.urgency === 'critical'
-                          ? 'text-red-800'
+                          ? { color: COLORS.danger }
                           : listing.urgency === 'high'
-                            ? 'text-orange-800'
-                            : 'text-blue-800'
-                      }`}
+                            ? { color: '#FB923C' }
+                            : { color: COLORS.info },
+                      ]}
                     >
                       {listing.urgency || listing.status}
                     </Text>
                   </View>
                 </View>
 
-                {/* Product Requirements */}
+                {/* Requirements */}
                 {listing.requirements && listing.requirements.length > 0 && (
-                  <View className="flex-row flex-wrap gap-1 mb-2">
-                    {listing.requirements.slice(0, 3).map((req, idx) => (
-                      <View key={idx} className="px-2 py-1 bg-gray-100 rounded">
-                        <Text className="text-xs text-gray-600">{req}</Text>
+                  <View style={styles.tagsRow}>
+                    {listing.requirements.slice(0, 3).map((req: string, idx: number) => (
+                      <View key={idx} style={styles.tag}>
+                        <Text style={styles.tagText}>{req}</Text>
                       </View>
                     ))}
                   </View>
                 )}
 
-                {/* Buy Order Details */}
-                <View className="space-y-2">
-                  <View className="flex-row justify-between items-center">
-                    <View className="flex-row items-center">
-                      <Package size={16} color="#6B7280" />
-                      <Text className="text-sm text-gray-600 ml-2">
+                {/* Details */}
+                <View style={styles.detailsColumn}>
+                  <View style={styles.detailRow}>
+                    <View style={styles.detailItem}>
+                      <Package size={15} color={COLORS.textMuted} />
+                      <Text style={styles.detailText}>
                         {listing.quantity} {listing.unit}
                       </Text>
                     </View>
-                    <View className="flex-row items-center">
-                      <DollarSign size={16} color="#10B981" />
-                      <Text className="text-green-600 font-bold text-sm ml-1">
+                    <View style={styles.detailItem}>
+                      <DollarSign size={15} color={COLORS.accentGreen} />
+                      <Text style={styles.priceText}>
                         ${listing.maxPricePerUnit}/{listing.unit}
                       </Text>
                     </View>
                   </View>
-
                   {listing.neededBy && (
-                    <View className="flex-row items-center">
-                      <Calendar size={16} color="#6B7280" />
-                      <Text className="text-gray-600 ml-2 text-sm">
+                    <View style={styles.detailItem}>
+                      <Calendar size={15} color={COLORS.textMuted} />
+                      <Text style={styles.detailText}>
                         Needed by: {new Date(listing.neededBy).toLocaleDateString()}
                       </Text>
                     </View>
                   )}
-
                   {listing.deliveryAddress && (
-                    <View className="flex-row items-center">
-                      <Truck size={16} color="#6B7280" />
-                      <Text className="text-gray-600 ml-2 text-sm">
+                    <View style={styles.detailItem}>
+                      <Truck size={15} color={COLORS.textMuted} />
+                      <Text style={styles.detailText}>
                         Delivery: {listing.deliveryAddress?.city || 'N/A'},{' '}
                         {listing.deliveryAddress?.country || 'N/A'}
                       </Text>
@@ -343,20 +349,20 @@ export default function OperationsScreenRefactored() {
                   )}
                 </View>
 
-                {/* Create Trade Button */}
+                {/* CTA */}
                 <TouchableOpacity
                   onPress={() => {
                     setSelectedBuyListing(listing);
                     setShowCreationDrawer(true);
                   }}
-                  className="mt-4 bg-green-600 py-3 rounded-lg flex-row items-center justify-center"
+                  style={styles.ctaBtn}
                 >
-                  <Plus size={18} color="white" />
-                  <Text className="text-white font-semibold ml-2">Create Trade Operation</Text>
+                  <Plus size={16} color="#fff" />
+                  <Text style={styles.ctaBtnText}>Create Trade Operation</Text>
                 </TouchableOpacity>
-              </TouchableOpacity>
-            ))}
-          </>
+              </GlassCard>
+            </TouchableOpacity>
+          ))
         )}
       </View>
     </ScrollView>
@@ -370,10 +376,9 @@ export default function OperationsScreenRefactored() {
         onBack={() => {
           setShowNegotiationManagement(false);
           setNegotiationOperationId(null);
-          loadTradeOperations(); // Refresh operations when returning
+          loadTradeOperations();
         }}
         onCounterOffer={(negotiationId, currentOffer) => {
-          // For now, use placeholder data - in real app, would fetch full negotiation details
           setCounterOfferData({
             negotiationId,
             currentOffer: currentOffer || { price: 0, quantity: 0 },
@@ -387,40 +392,38 @@ export default function OperationsScreenRefactored() {
   }
 
   return (
-    <View className="flex-1 bg-white">
-      {/* Header */}
-      <View className="bg-white px-4 py-3 border-b border-gray-200">
-        <Text className="text-xl font-bold text-gray-800">Trade Operations</Text>
-        <Text className="text-gray-600 text-sm">Manage and create trade operations</Text>
+    <View style={styles.root}>
+      {/* Screen Header */}
+      <View style={styles.screenHeader}>
+        <Text style={styles.screenTitle}>Trade Operations</Text>
+        <Text style={styles.screenSubtitle}>Manage and create trade operations</Text>
       </View>
 
       {/* Error Display */}
       {error && (
-        <View className="bg-red-50 border-l-4 border-red-500 p-3 mx-4 mt-2">
-          <View className="flex-row items-center">
-            <AlertTriangle size={18} color="#EF4444" />
-            <Text className="text-red-800 ml-2">{error}</Text>
-          </View>
+        <View style={styles.errorBanner}>
+          <AlertTriangle size={16} color={COLORS.danger} />
+          <Text style={styles.errorText}>{error}</Text>
         </View>
       )}
 
       {/* Tabs */}
-      <View className="flex-row bg-white border-b border-gray-200">
+      <View style={styles.tabBar}>
         <TabButton
           id="active"
-          label="Active Operations"
+          label="Active"
           count={tradeOperations.length}
           isActive={activeTab === 'active'}
         />
         <TabButton
           id="create"
-          label="Create Trade"
+          label="Create"
           count={buyListings.length}
           isActive={activeTab === 'create'}
         />
         <TabButton
           id="sellers"
-          label="Seller Listings"
+          label="Sellers"
           count={sellListings.length}
           isActive={activeTab === 'sellers'}
         />
@@ -445,7 +448,6 @@ export default function OperationsScreenRefactored() {
           loadTradeOperations();
           setActiveTab('active');
         }}
-        // Pass hook functions
         findMatchingSellers={findMatchingSellers}
         createTradeOperation={createTradeOperation}
         selectSellers={selectSellers}
@@ -453,7 +455,6 @@ export default function OperationsScreenRefactored() {
         refreshCurrentTrade={refreshCurrentTrade}
         estimateTransportCost={estimateTransportCost}
         sendBulkOffers={sendBulkOffers}
-        // Pass data
         currentTradeOperation={currentTradeOperation}
         matchingSellers={matchingSellers}
         profitCalculation={profitCalculation}
@@ -464,7 +465,7 @@ export default function OperationsScreenRefactored() {
         isSendingOffers={isSendingOffers}
       />
 
-      {/* Transport Map Modal (for viewing existing operations) */}
+      {/* Transport Map Modal */}
       <TransportMapModal
         visible={showTransportMap}
         onClose={() => setShowTransportMap(false)}
@@ -490,7 +491,7 @@ export default function OperationsScreenRefactored() {
           onClose={() => {
             setShowOfferModal(false);
             setOfferModalData(null);
-            loadTradeOperations(); // Refresh after sending offer
+            loadTradeOperations();
           }}
           tradeOperationId={offerModalData.tradeOperationId}
           sellerId={offerModalData.tradeSellerId}
@@ -512,10 +513,243 @@ export default function OperationsScreenRefactored() {
           buyerMaxPrice={selectedOperation?.buyListing?.maxPricePerUnit}
           targetMargin={selectedOperation?.targetProfitMargin}
           onOfferSent={() => {
-            loadTradeOperations(); // Refresh after responding
+            loadTradeOperations();
           }}
         />
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  centerState: {
+    alignItems: 'center',
+    gap: 10,
+    justifyContent: 'center',
+    paddingVertical: 48,
+  },
+  contentHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 14,
+  },
+  contentTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  ctaBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.18)',
+    borderColor: 'rgba(74,222,128,0.35)',
+    borderRadius: 10,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 6,
+    justifyContent: 'center',
+    marginTop: 12,
+    paddingVertical: 11,
+  },
+  ctaBtnText: {
+    color: COLORS.accentGreen,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  detailItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 5,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  detailText: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+  },
+  detailsColumn: {
+    gap: 6,
+  },
+  emptyTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  errorBanner: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(248,113,113,0.12)',
+    borderColor: 'rgba(248,113,113,0.25)',
+    borderLeftWidth: 3,
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 8,
+    marginHorizontal: 16,
+    padding: 10,
+  },
+  errorText: {
+    color: COLORS.danger,
+    flex: 1,
+    fontSize: 13,
+  },
+  listingCard: {
+    marginBottom: 12,
+  },
+  listingHeader: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  listingHeaderLeft: {
+    flex: 1,
+    marginRight: 8,
+  },
+  listingSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  listingTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  priceText: {
+    color: COLORS.accentGreen,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  qualityBadge: {
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  qualityDefault: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.12)',
+  },
+  qualityPremium: {
+    backgroundColor: 'rgba(167,139,250,0.12)',
+    borderColor: 'rgba(167,139,250,0.25)',
+  },
+  qualityStandard: {
+    backgroundColor: 'rgba(74,222,128,0.12)',
+    borderColor: 'rgba(74,222,128,0.25)',
+  },
+  qualityText: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  refreshBtn: {
+    backgroundColor: 'rgba(74,222,128,0.12)',
+    borderColor: 'rgba(74,222,128,0.25)',
+    borderRadius: 20,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  refreshText: {
+    color: COLORS.accentGreen,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  root: {
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
+  screenHeader: {
+    paddingBottom: 12,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+  },
+  screenSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    marginTop: 2,
+  },
+  screenTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  stateText: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  tab: {
+    alignItems: 'center',
+    borderBottomColor: 'transparent',
+    borderBottomWidth: 2,
+    flex: 1,
+    paddingVertical: 10,
+  },
+  tabActive: {
+    backgroundColor: 'rgba(74,222,128,0.08)',
+    borderBottomColor: COLORS.accentGreen,
+  },
+  tabBar: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 1,
+    borderRadius: 10,
+    flexDirection: 'row',
+    marginBottom: 8,
+    marginHorizontal: 16,
+    overflow: 'hidden',
+  },
+  tabContent: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  tabText: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+  },
+  tabTextActive: {
+    color: COLORS.accentGreen,
+  },
+  tag: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 6,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  tagText: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+  },
+  tagsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 10,
+  },
+  urgencyCritical: {
+    backgroundColor: 'rgba(248,113,113,0.12)',
+    borderColor: 'rgba(248,113,113,0.25)',
+  },
+  urgencyHigh: {
+    backgroundColor: 'rgba(251,146,60,0.12)',
+    borderColor: 'rgba(251,146,60,0.25)',
+  },
+  urgencyNormal: {
+    backgroundColor: 'rgba(96,165,250,0.12)',
+    borderColor: 'rgba(96,165,250,0.25)',
+  },
+});
