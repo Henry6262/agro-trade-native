@@ -8,9 +8,9 @@
  * Fine-tune topPct/heightPct if layout changes.
  */
 export interface SpotlightArea {
-  topPct: number;    // distance from top as fraction of screen height
-  leftPct: number;   // distance from left as fraction of screen width
-  widthPct: number;  // width as fraction of screen width
+  topPct: number; // distance from top as fraction of screen height
+  leftPct: number; // distance from left as fraction of screen width
+  widthPct: number; // width as fraction of screen width
   heightPct: number; // height as fraction of screen height
 }
 
@@ -48,7 +48,8 @@ const BUYER_STEPS: TourStep[] = [
   },
   {
     title: "You're all set! 🎉",
-    message: 'Use the tabs below to browse products, place orders, and manage your profile. Happy buying!',
+    message:
+      'Use the tabs below to browse products, place orders, and manage your profile. Happy buying!',
     spotlight: { topPct: 0.88, leftPct: 0, widthPct: 1, heightPct: 0.12 },
   },
 ];
@@ -57,8 +58,7 @@ const BUYER_STEPS: TourStep[] = [
 const SELLER_STEPS: TourStep[] = [
   {
     title: 'Welcome, Seller! 🌱',
-    message:
-      "I'm your AgroTrade guide. Let me give you a quick tour of your selling dashboard!",
+    message: "I'm your AgroTrade guide. Let me give you a quick tour of your selling dashboard!",
     spotlight: null,
   },
   {
@@ -76,7 +76,7 @@ const SELLER_STEPS: TourStep[] = [
   {
     title: 'Price Alerts 🔔',
     message:
-      "Get notified when prices hit your target. Great for timing when to list your produce.",
+      'Get notified when prices hit your target. Great for timing when to list your produce.',
     spotlight: { topPct: 0.65, leftPct: 0, widthPct: 1, heightPct: 0.22 },
   },
   {
@@ -110,11 +110,11 @@ const TRANSPORT_STEPS: TourStep[] = [
   {
     title: 'Price Alerts 🔔',
     message:
-      "Set alerts for commodities in your region. Price spikes often mean urgent transport needs.",
+      'Set alerts for commodities in your region. Price spikes often mean urgent transport needs.',
     spotlight: { topPct: 0.65, leftPct: 0, widthPct: 1, heightPct: 0.22 },
   },
   {
-    title: "Hit the road! 🎉",
+    title: 'Hit the road! 🎉',
     message:
       'Use the tabs below to browse available transport jobs, manage your routes, and update your profile.',
     spotlight: { topPct: 0.88, leftPct: 0, widthPct: 1, heightPct: 0.12 },

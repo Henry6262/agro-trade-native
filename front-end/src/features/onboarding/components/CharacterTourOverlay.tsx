@@ -1,14 +1,7 @@
 // src/features/onboarding/components/CharacterTourOverlay.tsx
 
 import React, { useEffect } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  useWindowDimensions,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Image, Pressable, useWindowDimensions, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -37,24 +30,40 @@ const Spotlight: React.FC<SpotlightProps> = ({ area, W, H }) => {
 
   if (!area) {
     // Full-screen dim — no hole
-    return <View style={[StyleSheet.absoluteFill, { backgroundColor: DIM }]} pointerEvents="none" />;
+    return (
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: DIM }]} pointerEvents="none" />
+    );
   }
 
-  const top    = area.topPct    * H;
-  const left   = area.leftPct   * W;
-  const width  = area.widthPct  * W;
+  const top = area.topPct * H;
+  const left = area.leftPct * W;
+  const width = area.widthPct * W;
   const height = area.heightPct * H;
 
   return (
     <>
       {/* Top strip */}
       <View
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: top, backgroundColor: DIM }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: top,
+          backgroundColor: DIM,
+        }}
         pointerEvents="none"
       />
       {/* Bottom strip */}
       <View
-        style={{ position: 'absolute', top: top + height, left: 0, right: 0, bottom: 0, backgroundColor: DIM }}
+        style={{
+          position: 'absolute',
+          top: top + height,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: DIM,
+        }}
         pointerEvents="none"
       />
       {/* Left strip */}
@@ -64,7 +73,14 @@ const Spotlight: React.FC<SpotlightProps> = ({ area, W, H }) => {
       />
       {/* Right strip */}
       <View
-        style={{ position: 'absolute', top, left: left + width, right: 0, height, backgroundColor: DIM }}
+        style={{
+          position: 'absolute',
+          top,
+          left: left + width,
+          right: 0,
+          height,
+          backgroundColor: DIM,
+        }}
         pointerEvents="none"
       />
       {/* Glow border around the spotlight hole */}
@@ -108,12 +124,12 @@ export const CharacterTourOverlay: React.FC = () => {
   }, [currentStep]);
 
   const overlayStyle = useAnimatedStyle(() => ({ opacity: overlayOpacity.value }));
-  const bubbleStyle  = useAnimatedStyle(() => ({ opacity: bubbleOpacity.value }));
+  const bubbleStyle = useAnimatedStyle(() => ({ opacity: bubbleOpacity.value }));
 
   if (!isTourActive || !tourRole) return null;
 
   const steps = TOUR_STEPS[tourRole];
-  const step  = steps[currentStep];
+  const step = steps[currentStep];
   const isLastStep = currentStep === steps.length - 1;
 
   if (!step) {
@@ -123,8 +139,10 @@ export const CharacterTourOverlay: React.FC = () => {
   }
 
   return (
-    <Animated.View style={[StyleSheet.absoluteFill, overlayStyle, { zIndex: 9999 }]} pointerEvents="box-none">
-
+    <Animated.View
+      style={[StyleSheet.absoluteFill, overlayStyle, { zIndex: 9999 }]}
+      pointerEvents="box-none"
+    >
       {/* Spotlight */}
       <Spotlight area={step.spotlight} W={W} H={H} />
 
@@ -147,7 +165,7 @@ export const CharacterTourOverlay: React.FC = () => {
           bubbleStyle,
           {
             position: 'absolute',
-            bottom: 206,   // sits above character (88 + 110 + 8)
+            bottom: 206, // sits above character (88 + 110 + 8)
             right: 16,
             left: 20,
             backgroundColor: 'rgba(255, 255, 255, 0.97)',
@@ -184,13 +202,17 @@ export const CharacterTourOverlay: React.FC = () => {
         </Text>
 
         {/* Step message */}
-        <Text style={{ fontSize: 14, color: '#374151', lineHeight: 20 }}>
-          {step.message}
-        </Text>
+        <Text style={{ fontSize: 14, color: '#374151', lineHeight: 20 }}>{step.message}</Text>
 
         {/* Footer: skip | dots | next */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
-
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: 16,
+          }}
+        >
           {/* Skip */}
           <Pressable onPress={skipTour} hitSlop={8}>
             <Text style={{ color: '#9CA3AF', fontSize: 13, fontWeight: '500' }}>Skip</Text>
