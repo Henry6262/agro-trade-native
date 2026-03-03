@@ -9,3 +9,7 @@ export { negotiationService } from './negotiationService';
 export { sellerOfferService } from './sellerOfferService';
 export { default as sellerService } from './sellerService';
 export { default as buyerService } from './buyerService';
+export { marketDataService } from './marketDataService';
+export type { CommodityPrice, CommoditySymbol } from './marketDataService';
+export { newsService } from './newsService';
+export type { NewsArticle } from './newsService';
