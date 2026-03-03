@@ -1,533 +1,582 @@
 'use client';
 
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, StyleSheet } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Search,
-  FileText,
-  Eye,
-  Download,
-  Filter,
+  ActivityIndicator,
+  FlatList,
+  Linking,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {
+  Bell,
+  BellOff,
+  ChevronDown,
+  ChevronUp,
+  TrendingDown,
   TrendingUp,
-  BarChart3,
-  AlertTriangle,
 } from 'lucide-react-native';
-import {
-  GlassCard,
-  GlassBadge,
-  GlassButton,
-  GlassInput,
-  StatCard,
-} from '../../../../design-system';
-import { COLORS } from '../../../../design-system';
+import { GlassCard, GlassBadge, GlassButton } from '../../../../design-system';
+import { COLORS } from '../../../../design-system/tokens';
+import { useMarketStore, PriceAlert } from '../../../../stores/market.store';
+import { CommoditySymbol } from '../../../../services/marketDataService';
 
-const DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 8 };
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface IntelligenceScreenProps {
   id?: string;
 }
 
-interface Report {
-  id: string;
-  title: string;
-  category: string;
-  source: string;
-  region: string;
-  date: string;
-  status: string;
-  impact: string;
-  summary: string;
-  tags: string[];
-  priceChange: string;
-  confidence: number;
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function formatTimeAgo(isoString: string): string {
+  const ms = Date.now() - new Date(isoString).getTime();
+  const mins = Math.floor(ms / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export default function IntelligenceScreen({ id: _id }: IntelligenceScreenProps = {}) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+function formatLastUpdated(timestamp: number): string {
+  if (!timestamp) return 'never';
+  return formatTimeAgo(new Date(timestamp).toISOString());
+}
 
-  const reports: Report[] = [
-    {
-      id: 'MKT-2025-001',
-      title: 'CORN FUTURES PRICE ANALYSIS',
-      category: 'PRICE FORECAST',
-      source: 'MARKET DATA',
-      region: 'Midwest USA',
-      date: '2025-06-17',
-      status: 'current',
-      impact: 'high',
-      summary:
-        'Detailed analysis of corn futures showing 15% price increase expected due to weather conditions',
-      tags: ['corn', 'futures', 'weather', 'pricing'],
-      priceChange: '+12.5%',
-      confidence: 85,
-    },
-    {
-      id: 'MKT-2025-002',
-      title: 'ORGANIC PRODUCE DEMAND SURGE',
-      category: 'DEMAND ANALYSIS',
-      source: 'CONSUMER DATA',
-      region: 'California',
-      date: '2025-06-16',
-      status: 'trending',
-      impact: 'critical',
-      summary:
-        'Consumer demand for organic produce increased 28% quarter-over-quarter in major metropolitan areas',
-      tags: ['organic', 'demand', 'consumer', 'growth'],
-      priceChange: '+28.3%',
-      confidence: 92,
-    },
-    {
-      id: 'MKT-2025-003',
-      title: 'WHEAT EXPORT OPPORTUNITIES',
-      category: 'TRADE ANALYSIS',
-      source: 'EXPORT DATA',
-      region: 'Great Plains',
-      date: '2025-06-15',
-      status: 'current',
-      impact: 'medium',
-      summary: 'New trade agreements opening wheat export channels to Southeast Asian markets',
-      tags: ['wheat', 'export', 'trade', 'asia'],
-      priceChange: '+8.7%',
-      confidence: 78,
-    },
-    {
-      id: 'MKT-2025-004',
-      title: 'DROUGHT IMPACT ASSESSMENT',
-      category: 'RISK ANALYSIS',
-      source: 'WEATHER DATA',
-      region: 'Southwest USA',
-      date: '2025-06-14',
-      status: 'alert',
-      impact: 'critical',
-      summary:
-        'Extended drought conditions threatening crop yields across multiple agricultural regions',
-      tags: ['drought', 'risk', 'yield', 'climate'],
-      priceChange: '+22.1%',
-      confidence: 89,
-    },
-    {
-      id: 'MKT-2025-005',
-      title: 'SUSTAINABLE FARMING TRENDS',
-      category: 'TREND ANALYSIS',
-      source: 'INDUSTRY REPORTS',
-      region: 'National',
-      date: '2025-06-13',
-      status: 'current',
-      impact: 'low',
-      summary:
-        'Growing adoption of sustainable farming practices creating new market opportunities',
-      tags: ['sustainability', 'trends', 'innovation', 'practices'],
-      priceChange: '+5.2%',
-      confidence: 71,
-    },
-  ];
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
-  const getCategoryVariant = (
-    category: string
-  ): 'info' | 'success' | 'muted' | 'danger' | 'warning' => {
-    switch (category) {
-      case 'PRICE FORECAST':
-        return 'info';
-      case 'DEMAND ANALYSIS':
-        return 'success';
-      case 'TRADE ANALYSIS':
-        return 'muted';
-      case 'RISK ANALYSIS':
-        return 'danger';
-      case 'TREND ANALYSIS':
-        return 'warning';
-      default:
-        return 'muted';
-    }
-  };
+const PriceTicker: React.FC = () => {
+  const prices = useMarketStore((s) => s.prices);
+  const isLoading = useMarketStore((s) => s.isLoadingPrices);
 
-  const getImpactVariant = (impact: string): 'danger' | 'warning' | 'muted' | 'success' => {
-    switch (impact) {
-      case 'critical':
-        return 'danger';
-      case 'high':
-        return 'warning';
-      case 'medium':
-        return 'muted';
-      case 'low':
-        return 'success';
-      default:
-        return 'muted';
-    }
-  };
+  if (isLoading && prices.length === 0) {
+    return (
+      <GlassCard tier="subtle" style={styles.tickerCard}>
+        <ActivityIndicator color={COLORS.accentGreen} />
+      </GlassCard>
+    );
+  }
 
-  const getStatusVariant = (status: string): 'success' | 'info' | 'danger' | 'muted' => {
-    switch (status) {
-      case 'current':
-        return 'success';
-      case 'trending':
-        return 'info';
-      case 'alert':
-        return 'danger';
-      default:
-        return 'muted';
-    }
-  };
-
-  const filteredReports = reports.filter(
-    (report) =>
-      report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      report.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      report.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  if (!isLoading && prices.length === 0) {
+    return (
+      <GlassCard tier="subtle" style={styles.tickerCard}>
+        <Text style={styles.emptyText}>Unable to load prices</Text>
+      </GlassCard>
+    );
+  }
 
   return (
-    <ScrollView style={styles.root} showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View style={styles.headerRow}>
-        <View>
-          <Text style={styles.title}>MARKET INTELLIGENCE</Text>
-          <Text style={styles.subtitle}>Agricultural market analysis and forecasting</Text>
-        </View>
-        <View style={styles.headerButtons}>
-          <GlassButton label="New Analysis" onPress={() => {}} variant="primary" size="sm" />
-          <GlassButton
-            label="Filter"
-            onPress={() => {}}
-            variant="secondary"
-            size="sm"
-            leftIcon={<Filter size={14} color={COLORS.textPrimary} />}
-          />
-        </View>
-      </View>
+    <GlassCard tier="subtle" noPadding style={styles.tickerCard}>
+      <FlatList
+        data={prices}
+        horizontal
+        keyExtractor={(item) => item.symbol}
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tickerList}
+        renderItem={({ item }) => {
+          const isUp = item.change >= 0;
+          const changeColor = isUp ? COLORS.accentGreen : COLORS.danger;
+          const ChangeIcon = isUp ? TrendingUp : TrendingDown;
 
-      {/* Stats */}
-      <View style={styles.statsRow}>
-        <StatCard
-          label="Total Reports"
-          value={847}
-          icon={<FileText size={16} color={COLORS.textSecondary} />}
-          color={COLORS.textPrimary}
-          style={styles.statCard}
-          delay={0}
-        />
-        <StatCard
-          label="Price Alerts"
-          value={7}
-          icon={<AlertTriangle size={16} color={COLORS.danger} />}
-          color={COLORS.danger}
-          style={styles.statCard}
-          delay={60}
-        />
-        <StatCard
-          label="Market Trends"
-          value={23}
-          icon={<TrendingUp size={16} color={COLORS.accentGreen} />}
-          color={COLORS.accentGreen}
-          style={styles.statCard}
-          delay={120}
-        />
-      </View>
-
-      {/* Search */}
-      <GlassInput
-        placeholder="Search market reports..."
-        value={searchTerm}
-        onChangeText={setSearchTerm}
-        leftIcon={<Search size={16} color={COLORS.textMuted} />}
-        containerStyle={styles.searchInput}
+          return (
+            <View style={styles.tickerItem}>
+              <Text style={styles.tickerSymbol}>{item.symbol}</Text>
+              <Text style={styles.tickerPrice}>${item.price.toFixed(2)}</Text>
+              <View style={styles.tickerChange}>
+                <ChangeIcon size={10} color={changeColor} />
+                <Text style={[styles.tickerChangePct, { color: changeColor }]}>
+                  {item.changePct > 0 ? '+' : ''}
+                  {item.changePct.toFixed(1)}%
+                </Text>
+              </View>
+            </View>
+          );
+        }}
+        ItemSeparatorComponent={() => <View style={styles.tickerSeparator} />}
       />
+    </GlassCard>
+  );
+};
 
-      {/* Reports List */}
-      <GlassCard tier="medium" delay={180} noPadding>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>MARKET REPORTS</Text>
-        </View>
-        {filteredReports.map((report, index) => (
-          <TouchableOpacity
-            key={report.id}
-            onPress={() => setSelectedReport(report)}
-            activeOpacity={0.7}
-            style={[styles.reportRow, index < filteredReports.length - 1 && styles.reportBorder]}
-          >
-            <View style={styles.reportLeft}>
-              <BarChart3 size={18} color={COLORS.textMuted} style={styles.reportIcon} />
-              <View style={styles.reportMeta}>
-                <Text style={styles.reportTitle}>{report.title}</Text>
-                <Text style={styles.reportId}>{report.id}</Text>
-                <Text style={styles.reportSummary}>{report.summary}</Text>
-                <View style={styles.tagsRow}>
-                  {report.tags.map((tag) => (
-                    <GlassBadge
-                      key={tag}
-                      label={tag}
-                      variant="muted"
-                      size="sm"
-                      style={styles.tag}
-                    />
-                  ))}
-                </View>
-              </View>
-            </View>
-            <View style={styles.reportRight}>
-              <GlassBadge
-                label={report.category}
-                variant={getCategoryVariant(report.category)}
-                size="sm"
-                style={styles.badge}
-              />
-              <GlassBadge
-                label={report.impact.toUpperCase()}
-                variant={getImpactVariant(report.impact)}
-                size="sm"
-                style={styles.badge}
-              />
-              <GlassBadge
-                label={report.status.toUpperCase()}
-                variant={getStatusVariant(report.status)}
-                size="sm"
-                style={styles.badge}
-              />
-              <View style={styles.priceRow}>
-                <TrendingUp size={11} color={COLORS.accentGreen} />
-                <Text style={styles.priceChange}>{report.priceChange}</Text>
-              </View>
-              <Text style={styles.reportDate}>{report.date}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </GlassCard>
+const StatsStrip: React.FC = () => {
+  const prices = useMarketStore((s) => s.prices);
+  const alerts = useMarketStore((s) => s.alerts);
+  const lastPriceFetch = useMarketStore((s) => s.lastPriceFetch);
 
-      {/* Report Detail Modal */}
-      {selectedReport && (
-        <Modal
-          visible={!!selectedReport}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setSelectedReport(null)}
-        >
-          <View style={styles.modalOverlay}>
-            <GlassCard tier="strong" style={styles.modalCard} animate={false} noPadding>
-              <ScrollView showsVerticalScrollIndicator={false}>
-                <View style={styles.modalHeader}>
-                  <View style={styles.modalHeaderText}>
-                    <Text style={styles.modalTitle}>{selectedReport.title}</Text>
-                    <Text style={styles.modalId}>{selectedReport.id}</Text>
-                  </View>
-                  <TouchableOpacity onPress={() => setSelectedReport(null)} style={styles.closeBtn}>
-                    <Text style={styles.closeX}>✕</Text>
-                  </TouchableOpacity>
-                </View>
+  return (
+    <View style={styles.statsStrip}>
+      <Text style={styles.statItem}>
+        <Text style={styles.statValue}>{prices.length}</Text>
+        <Text style={styles.statLabel}> tracked</Text>
+      </Text>
+      <View style={styles.statDot} />
+      <Text style={styles.statItem}>
+        <Text style={styles.statValue}>{alerts.length}</Text>
+        <Text style={styles.statLabel}> alerts</Text>
+      </Text>
+      <View style={styles.statDot} />
+      <Text style={styles.statLabel}>{formatLastUpdated(lastPriceFetch)}</Text>
+    </View>
+  );
+};
 
-                <View style={DIVIDER} />
+const NewsSection: React.FC = () => {
+  const news = useMarketStore((s) => s.news);
+  const isLoading = useMarketStore((s) => s.isLoadingNews);
 
-                <View style={styles.modalBody}>
-                  <View style={styles.modalColumns}>
-                    <View style={styles.modalCol}>
-                      <Text style={styles.fieldLabel}>ANALYSIS TYPE</Text>
-                      <View style={styles.badgeRow}>
-                        <GlassBadge
-                          label={selectedReport.category}
-                          variant={getCategoryVariant(selectedReport.category)}
-                          style={styles.badge}
-                        />
-                        <GlassBadge
-                          label={`IMPACT: ${selectedReport.impact.toUpperCase()}`}
-                          variant={getImpactVariant(selectedReport.impact)}
-                          style={styles.badge}
-                        />
-                      </View>
+  const openArticle = useCallback((url: string) => {
+    Linking.openURL(url).catch(() => {
+      console.warn('[IntelligenceScreen] Could not open URL:', url);
+    });
+  }, []);
 
-                      <Text style={[styles.fieldLabel, { marginTop: 16 }]}>MARKET DETAILS</Text>
-                      <View style={styles.detailRow}>
-                        <Text style={styles.detailKey}>Source:</Text>
-                        <Text style={styles.detailVal}>{selectedReport.source}</Text>
-                      </View>
-                      <View style={styles.detailRow}>
-                        <Text style={styles.detailKey}>Region:</Text>
-                        <Text style={styles.detailVal}>{selectedReport.region}</Text>
-                      </View>
-                      <View style={styles.detailRow}>
-                        <Text style={styles.detailKey}>Date:</Text>
-                        <Text style={styles.detailVal}>{selectedReport.date}</Text>
-                      </View>
-                      <View style={styles.detailRow}>
-                        <Text style={styles.detailKey}>Status:</Text>
-                        <GlassBadge
-                          label={selectedReport.status.toUpperCase()}
-                          variant={getStatusVariant(selectedReport.status)}
-                          size="sm"
-                        />
-                      </View>
-                    </View>
+  return (
+    <View>
+      <Text style={styles.sectionTitle}>📰 LIVE NEWS</Text>
 
-                    <View style={styles.modalCol}>
-                      <Text style={styles.fieldLabel}>MARKET INDICATORS</Text>
-                      <View style={styles.detailRow}>
-                        <Text style={styles.detailKey}>Price Change</Text>
-                        <Text style={styles.priceChangeLarge}>{selectedReport.priceChange}</Text>
-                      </View>
-                      <View style={styles.detailRow}>
-                        <Text style={styles.detailKey}>Confidence Level</Text>
-                        <Text style={styles.detailVal}>{selectedReport.confidence}%</Text>
-                      </View>
-                      <View style={styles.progressBg}>
-                        <View
-                          style={[styles.progressBar, { width: `${selectedReport.confidence}%` }]}
-                        />
-                      </View>
-
-                      <Text style={[styles.fieldLabel, { marginTop: 16 }]}>TAGS</Text>
-                      <View style={styles.tagsRow}>
-                        {selectedReport.tags.map((tag) => (
-                          <GlassBadge
-                            key={tag}
-                            label={tag}
-                            variant="muted"
-                            size="sm"
-                            style={styles.tag}
-                          />
-                        ))}
-                      </View>
-                    </View>
-                  </View>
-
-                  <View style={DIVIDER} />
-                  <Text style={styles.fieldLabel}>EXECUTIVE SUMMARY</Text>
-                  <Text style={styles.summaryText}>{selectedReport.summary}</Text>
-
-                  <View style={DIVIDER} />
-                  <View style={styles.modalActions}>
-                    <GlassButton
-                      label="View Full Analysis"
-                      onPress={() => {}}
-                      variant="primary"
-                      size="sm"
-                      leftIcon={<Eye size={14} color="#fff" />}
-                      style={styles.modalBtn}
-                    />
-                    <GlassButton
-                      label="Export Data"
-                      onPress={() => {}}
-                      variant="secondary"
-                      size="sm"
-                      leftIcon={<Download size={14} color={COLORS.textPrimary} />}
-                      style={styles.modalBtn}
-                    />
-                    <GlassButton
-                      label="Share Report"
-                      onPress={() => {}}
-                      variant="ghost"
-                      size="sm"
-                      style={styles.modalBtn}
-                    />
-                  </View>
-                </View>
-              </ScrollView>
-            </GlassCard>
-          </View>
-        </Modal>
+      {isLoading && news.length === 0 && (
+        <GlassCard tier="subtle">
+          <ActivityIndicator color={COLORS.accentGreen} />
+        </GlassCard>
       )}
+
+      {!isLoading && news.length === 0 && (
+        <GlassCard tier="subtle">
+          <Text style={styles.emptyText}>Check back soon</Text>
+        </GlassCard>
+      )}
+
+      {news.map((article, index) => (
+        <TouchableOpacity
+          key={`${article.url}-${index}`}
+          onPress={() => openArticle(article.url)}
+          activeOpacity={0.75}
+          style={styles.newsCardWrapper}
+        >
+          <GlassCard tier="subtle" animate delay={index * 40}>
+            <View style={styles.newsCardHeader}>
+              <GlassBadge label={article.source} variant="muted" />
+              <Text style={styles.newsTime}>{formatTimeAgo(article.publishedAt)}</Text>
+            </View>
+            <Text style={styles.newsTitle} numberOfLines={2}>
+              {article.title}
+            </Text>
+            {!!article.description && (
+              <Text style={styles.newsDescription} numberOfLines={2}>
+                {article.description}
+              </Text>
+            )}
+          </GlassCard>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+};
+
+const COMMODITY_NAMES: Record<CommoditySymbol, string> = {
+  WHEAT: 'Wheat',
+  CORN: 'Corn',
+  COTTON: 'Cotton',
+  SUGAR: 'Sugar',
+  COFFEE: 'Coffee',
+  NATURAL_GAS: 'Gas',
+};
+
+const AlertsSection: React.FC = () => {
+  const alerts = useMarketStore((s) => s.alerts);
+  const prices = useMarketStore((s) => s.prices);
+  const addAlert = useMarketStore((s) => s.addAlert);
+  const removeAlert = useMarketStore((s) => s.removeAlert);
+
+  const [isAdding, setIsAdding] = useState(false);
+  const [newSymbol, setNewSymbol] = useState<CommoditySymbol>('WHEAT');
+  const [newCondition, setNewCondition] = useState<'above' | 'below'>('above');
+  const [newThreshold, setNewThreshold] = useState('');
+
+  const availableSymbols = prices.map((p) => p.symbol);
+  const displaySymbols: CommoditySymbol[] =
+    availableSymbols.length > 0
+      ? availableSymbols
+      : ['WHEAT', 'CORN', 'COTTON', 'SUGAR', 'COFFEE', 'NATURAL_GAS'];
+
+  const handleAdd = useCallback(() => {
+    const threshold = parseFloat(newThreshold);
+    if (!isNaN(threshold) && threshold > 0) {
+      addAlert({ symbol: newSymbol, condition: newCondition, threshold });
+      setNewThreshold('');
+      setIsAdding(false);
+    }
+  }, [addAlert, newSymbol, newCondition, newThreshold]);
+
+  return (
+    <View>
+      <Text style={styles.sectionTitle}>🔔 PRICE ALERTS ({alerts.length} active)</Text>
+
+      {alerts.length === 0 && !isAdding && (
+        <GlassCard tier="subtle">
+          <Text style={styles.emptyText}>No alerts set. Tap below to add one.</Text>
+        </GlassCard>
+      )}
+
+      {alerts.map((alert: PriceAlert) => (
+        <GlassCard key={alert.id} tier="subtle" style={styles.alertCard}>
+          <View style={styles.alertRow}>
+            <View style={styles.alertLeft}>
+              {alert.triggered ? (
+                <Bell size={14} color={COLORS.accentGold} />
+              ) : (
+                <BellOff size={14} color={COLORS.textMuted} />
+              )}
+              <Text style={styles.alertText}>
+                <Text style={styles.alertSymbol}>
+                  {COMMODITY_NAMES[alert.symbol] ?? alert.symbol}
+                </Text>{' '}
+                {alert.condition}{' '}
+                <Text style={styles.alertThreshold}>${alert.threshold.toFixed(2)}</Text>
+              </Text>
+              {alert.triggered && <GlassBadge label="TRIGGERED" variant="muted" />}
+            </View>
+            <TouchableOpacity onPress={() => removeAlert(alert.id)} hitSlop={8}>
+              <Text style={styles.removeText}>Remove</Text>
+            </TouchableOpacity>
+          </View>
+        </GlassCard>
+      ))}
+
+      {isAdding ? (
+        <GlassCard tier="medium">
+          <Text style={styles.addAlertLabel}>Commodity</Text>
+          <View style={styles.symbolRow}>
+            {displaySymbols.map((sym) => (
+              <TouchableOpacity
+                key={sym}
+                style={[styles.symbolChip, newSymbol === sym && styles.symbolChipActive]}
+                onPress={() => setNewSymbol(sym)}
+              >
+                <Text
+                  style={[styles.symbolChipText, newSymbol === sym && styles.symbolChipTextActive]}
+                >
+                  {COMMODITY_NAMES[sym] ?? sym}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <Text style={styles.addAlertLabel}>Condition</Text>
+          <View style={styles.conditionRow}>
+            {(['above', 'below'] as const).map((cond) => (
+              <TouchableOpacity
+                key={cond}
+                style={[styles.condChip, newCondition === cond && styles.condChipActive]}
+                onPress={() => setNewCondition(cond)}
+              >
+                {cond === 'above' ? (
+                  <ChevronUp
+                    size={12}
+                    color={newCondition === cond ? COLORS.accentGreen : COLORS.textMuted}
+                  />
+                ) : (
+                  <ChevronDown
+                    size={12}
+                    color={newCondition === cond ? COLORS.danger : COLORS.textMuted}
+                  />
+                )}
+                <Text
+                  style={[
+                    styles.condChipText,
+                    newCondition === cond &&
+                      (cond === 'above' ? styles.condChipTextUp : styles.condChipTextDown),
+                  ]}
+                >
+                  {cond.toUpperCase()}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          <Text style={styles.addAlertLabel}>Threshold (USD)</Text>
+          <View style={styles.thresholdRow}>
+            <GlassButton
+              label="Cancel"
+              onPress={() => setIsAdding(false)}
+              variant="ghost"
+              size="sm"
+            />
+            <GlassButton label="Set Alert" onPress={handleAdd} variant="primary" size="sm" />
+          </View>
+        </GlassCard>
+      ) : (
+        <GlassButton
+          label="+ Set new alert"
+          onPress={() => setIsAdding(true)}
+          variant="ghost"
+          size="sm"
+        />
+      )}
+    </View>
+  );
+};
+
+// ─── Main Screen ──────────────────────────────────────────────────────────────
+
+export default function IntelligenceScreen({ id: _id }: IntelligenceScreenProps = {}) {
+  const fetchPrices = useMarketStore((s) => s.fetchPrices);
+  const fetchNews = useMarketStore((s) => s.fetchNews);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = useCallback(async () => {
+    await Promise.all([fetchPrices(), fetchNews()]);
+  }, [fetchPrices, fetchNews]);
+
+  const handleRefresh = useCallback(async () => {
+    useMarketStore.setState({ lastPriceFetch: 0, lastNewsFetch: 0 });
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
+  }, [load]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return (
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          tintColor={COLORS.accentGreen}
+        />
+      }
+    >
+      <PriceTicker />
+      <StatsStrip />
+      <NewsSection />
+      <AlertsSection />
     </ScrollView>
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  headerButtons: { flexDirection: 'row', gap: 8 },
-  headerRow: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    justifyContent: 'space-between',
-    marginBottom: 16,
+  addAlertLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 6,
+    marginTop: 12,
+    textTransform: 'uppercase',
   },
-  root: { backgroundColor: 'transparent', flex: 1, padding: 16 },
-  searchInput: { marginBottom: 16 },
-  statCard: { flex: 1 },
-  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
-  subtitle: { color: COLORS.textSecondary, fontSize: 12, marginTop: 2 },
-  title: { color: COLORS.textPrimary, fontSize: 22, fontWeight: '800', letterSpacing: 1 },
-  // eslint-disable-next-line react-native/sort-styles
-  sectionHeader: { paddingBottom: 10, paddingHorizontal: 16, paddingTop: 14 },
+  alertCard: {
+    marginBottom: 6,
+  },
+  alertLeft: {
+    alignItems: 'center',
+    flex: 1,
+    flexDirection: 'row',
+    gap: 8,
+  },
+  alertRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  alertSymbol: {
+    color: COLORS.textPrimary,
+    fontWeight: '700',
+  },
+  alertText: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+  },
+  alertThreshold: {
+    color: COLORS.accentGold,
+    fontWeight: '700',
+  },
+  condChip: {
+    alignItems: 'center',
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 8,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  condChipActive: {
+    borderColor: 'rgba(255,255,255,0.3)',
+  },
+  condChipText: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  condChipTextDown: {
+    color: COLORS.danger,
+  },
+  condChipTextUp: {
+    color: COLORS.accentGreen,
+  },
+  conditionRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 8,
+  },
+  content: {
+    gap: 12,
+    padding: 16,
+    paddingBottom: 100,
+  },
+  emptyText: {
+    color: COLORS.textMuted,
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  newsCardHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  newsCardWrapper: {
+    marginBottom: 8,
+  },
+  newsDescription: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 4,
+  },
+  newsTime: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+  },
+  newsTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '600',
+    lineHeight: 19,
+  },
+  removeText: {
+    color: COLORS.danger,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  root: {
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
   sectionTitle: {
     color: COLORS.textSecondary,
     fontSize: 11,
     fontWeight: '700',
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-  },
-  reportRow: { flexDirection: 'row', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
-  reportBorder: { borderBottomColor: 'rgba(255,255,255,0.08)', borderBottomWidth: 1 },
-  reportLeft: { flex: 3, flexDirection: 'row', gap: 10 },
-  reportIcon: { marginTop: 2 },
-  reportMeta: { flex: 1, gap: 4 },
-  reportTitle: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '700', letterSpacing: 0.5 },
-  reportId: { color: COLORS.textMuted, fontFamily: 'monospace', fontSize: 10 },
-  reportSummary: { color: COLORS.textSecondary, fontSize: 12, lineHeight: 17 },
-  tagsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 4 },
-  tag: {},
-  reportRight: { alignItems: 'flex-end', flex: 1, gap: 5 },
-  badge: { alignSelf: 'flex-end' },
-  badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
-  priceRow: { alignItems: 'center', flexDirection: 'row', gap: 4, marginTop: 4 },
-  priceChange: {
-    color: COLORS.accentGold,
-    fontFamily: 'monospace',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  reportDate: { color: COLORS.textMuted, fontFamily: 'monospace', fontSize: 10 },
-  // Modal
-  modalOverlay: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    flex: 1,
-    justifyContent: 'center',
-    padding: 16,
-  },
-  modalCard: { maxHeight: '90%', maxWidth: 600, width: '100%' },
-  modalHeader: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 20,
-  },
-  modalHeaderText: { flex: 1 },
-  modalTitle: { color: COLORS.textPrimary, fontSize: 17, fontWeight: '800', letterSpacing: 0.5 },
-  modalId: { color: COLORS.textMuted, fontFamily: 'monospace', fontSize: 11, marginTop: 3 },
-  closeBtn: { padding: 4 },
-  closeX: { color: COLORS.textSecondary, fontSize: 18 },
-  modalBody: { gap: 12, padding: 20 },
-  modalColumns: { flexDirection: 'row', gap: 16 },
-  modalCol: { flex: 1, gap: 6 },
-  fieldLabel: {
-    color: COLORS.textMuted,
-    fontSize: 10,
-    fontWeight: '700',
     letterSpacing: 1,
-    marginBottom: 6,
+    marginBottom: 8,
     textTransform: 'uppercase',
   },
-  detailRow: {
+  statDot: {
+    backgroundColor: COLORS.textMuted,
+    borderRadius: 2,
+    height: 3,
+    width: 3,
+  },
+  statItem: {
+    fontSize: 12,
+  },
+  statLabel: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+  },
+  statValue: {
+    color: COLORS.textPrimary,
+    fontWeight: '700',
+  },
+  statsStrip: {
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
+    gap: 8,
+    justifyContent: 'center',
+    paddingVertical: 4,
   },
-  detailKey: { color: COLORS.textSecondary, fontSize: 12 },
-  detailVal: { color: COLORS.textPrimary, fontFamily: 'monospace', fontSize: 12 },
-  priceChangeLarge: {
-    color: COLORS.accentGold,
-    fontFamily: 'monospace',
-    fontSize: 18,
-    fontWeight: '800',
+  symbolChip: {
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
-  progressBg: {
-    backgroundColor: 'rgba(255,255,255,0.12)',
-    borderRadius: 3,
-    height: 6,
-    marginTop: 4,
+  symbolChipActive: {
+    backgroundColor: 'rgba(74,222,128,0.14)',
+    borderColor: COLORS.accentGreen,
+  },
+  symbolChipText: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  symbolChipTextActive: {
+    color: COLORS.accentGreen,
+  },
+  symbolRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 8,
+  },
+  thresholdRow: {
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'flex-end',
+    marginTop: 12,
+  },
+  tickerCard: {
     overflow: 'hidden',
   },
-  progressBar: { backgroundColor: COLORS.accentGreen, borderRadius: 3, height: '100%' },
-  summaryText: { color: COLORS.textSecondary, fontSize: 13, lineHeight: 20 },
-  modalActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  modalBtn: { flex: 1, minWidth: 120 },
+  tickerChange: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 2,
+    marginTop: 2,
+  },
+  tickerChangePct: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  tickerItem: {
+    alignItems: 'center',
+    minWidth: 72,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  tickerList: {
+    paddingHorizontal: 4,
+  },
+  tickerPrice: {
+    color: COLORS.textPrimary,
+    fontSize: 15,
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  tickerSeparator: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    height: '60%',
+    width: 1,
+  },
+  tickerSymbol: {
+    color: COLORS.textMuted,
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+  },
 });
