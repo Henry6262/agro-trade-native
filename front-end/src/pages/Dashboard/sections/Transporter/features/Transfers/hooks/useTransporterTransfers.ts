@@ -1,5 +1,5 @@
 import { useAuthStore } from '@stores/auth.store';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { transporterTransfersService } from '../service';
 import type { TransporterTransfersHookResult, TransfersJobView, TransfersSummary } from '../types';
 import { summarizeTransfers, mapJobsToView } from '../utils';
@@ -22,6 +22,7 @@ export const useTransporterTransfers = (): TransporterTransfersHookResult => {
   const [selectedOffer, setSelectedOffer] = useState<TransfersJobView['mapOffer'] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const hasFetched = useRef(false);
 
   const loadJobs = useCallback(async () => {
     const rawJobs = await transporterTransfersService.fetchJobs();
@@ -30,6 +31,8 @@ export const useTransporterTransfers = (): TransporterTransfersHookResult => {
   }, []);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     setIsLoading(true);
     loadJobs()
       .catch((error) => console.error('Failed to load transfer jobs', error))

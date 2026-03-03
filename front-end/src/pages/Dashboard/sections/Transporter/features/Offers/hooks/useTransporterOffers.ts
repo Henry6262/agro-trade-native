@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { transporterOffersService } from '../service';
 import type {
   TransportOffersBid,
@@ -18,6 +18,7 @@ export const useTransporterOffers = (): TransporterOffersHookResult => {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [submittingBid, setSubmittingBid] = useState<string | null>(null);
+  const hasFetched = useRef(false);
 
   const summary: TransportOfferSummary = useMemo(() => summarizeRequests(requests), [requests]);
 
@@ -31,6 +32,8 @@ export const useTransporterOffers = (): TransporterOffersHookResult => {
   }, []);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     setIsLoading(true);
     loadTransportRequests()
       .catch((error) => console.error('Failed to load transport requests', error))

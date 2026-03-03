@@ -21,6 +21,7 @@ export const useTransporterJobs = (): TransporterJobsHookResult => {
   const [actionJobId, setActionJobId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const locationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const hasFetched = useRef(false);
 
   const loadJobs = useCallback(async () => {
     try {
@@ -37,6 +38,8 @@ export const useTransporterJobs = (): TransporterJobsHookResult => {
   }, []);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     setIsLoading(true);
     loadJobs().catch((error) => console.error('Error loading transporter jobs', error));
   }, [loadJobs]);

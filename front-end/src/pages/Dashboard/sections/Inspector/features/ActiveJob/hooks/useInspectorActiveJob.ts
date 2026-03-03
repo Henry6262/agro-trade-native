@@ -1,5 +1,5 @@
 import { useAuthStore } from '@stores/auth.store';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { InspectorActiveJobHookResult, InspectorVerificationFormValues } from '../types';
 import { inspectorActiveJobService } from '../service';
 
@@ -20,6 +20,7 @@ export const useInspectorActiveJob = (): InspectorActiveJobHookResult => {
   const [error, setError] = useState<string | null>(null);
   const [showVerificationForm, setShowVerificationForm] = useState(false);
   const [currentLocation] = useState(DEFAULT_LOCATION);
+  const hasFetched = useRef(false);
 
   const loadJob = useCallback(async () => {
     try {
@@ -36,6 +37,8 @@ export const useInspectorActiveJob = (): InspectorActiveJobHookResult => {
   }, [inspectorId]);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     loadJob();
   }, [loadJob]);
 

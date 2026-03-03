@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import {
   BarChart3,
   Users,
@@ -25,6 +25,7 @@ import IntelligenceScreen from './shared/IntelligenceScreen';
 import SellerDashboardSection from '../../../pages/Dashboard/sections/Seller';
 import BuyerDashboardSection from '../../../pages/Dashboard/sections/Buyer';
 import TransporterDashboardScreen from './transporter/TransporterDashboardScreen';
+import type { TransporterDashboardSectionProps } from '../../../pages/Dashboard/sections/Transporter/types';
 import { InspectorDashboard } from './inspector/InspectorDashboard';
 import { ProfileDrawer } from '../components/ProfileDrawer';
 import { BottomNavigation } from '../components/BottomNavigation';
@@ -148,67 +149,107 @@ export default function DashboardMainScreen() {
 
   const navigationItems = getNavigationItems();
 
+  // Render all role-appropriate sections simultaneously, hiding inactive ones.
+  // This prevents unmount/remount on tab switch, eliminating redundant data fetches.
   const renderContent = () => {
     if (userRole === 'seller') {
-      if (activeSection === 'intelligence') {
-        return <IntelligenceScreen />;
-      }
-      // Pass all seller tabs to SellerDashboardSection (products, offers, trades)
+      const sellerContentTabs = ['products', 'offers', 'trades'] as const;
+      const isSellerContentTab = sellerContentTabs.includes(
+        activeSection as 'products' | 'offers' | 'trades'
+      );
       return (
-        <SellerDashboardSection activeTab={activeSection as 'products' | 'offers' | 'trades'} />
+        <>
+          {/* Seller tabs (products, offers, trades) — kept mounted, hidden when not active */}
+          <View style={isSellerContentTab ? styles.sectionVisible : styles.sectionHidden}>
+            <SellerDashboardSection activeTab={activeSection as 'products' | 'offers' | 'trades'} />
+          </View>
+          {/* Intelligence tab — kept mounted, hidden when not active */}
+          <View
+            style={activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden}
+          >
+            <IntelligenceScreen />
+          </View>
+        </>
       );
     }
     if (userRole === 'buyer') {
-      if (activeSection === 'intelligence') {
-        return <IntelligenceScreen />;
-      }
-      return <BuyerDashboardSection activeTab={activeSection as 'orders' | 'requests'} />;
+      const buyerContentTabs = ['orders', 'requests'] as const;
+      const isBuyerContentTab = buyerContentTabs.includes(activeSection as 'orders' | 'requests');
+      return (
+        <>
+          <View style={isBuyerContentTab ? styles.sectionVisible : styles.sectionHidden}>
+            <BuyerDashboardSection activeTab={activeSection as 'orders' | 'requests'} />
+          </View>
+          <View
+            style={activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden}
+          >
+            <IntelligenceScreen />
+          </View>
+        </>
+      );
     }
     if (userRole === 'transporter') {
-      if (activeSection === 'intelligence') {
-        return <IntelligenceScreen />;
-      }
-      return <TransporterDashboardScreen activeTab={activeSection as any} />;
+      const transporterContentTabs = ['bidding', 'offers', 'transfers', 'fleet'] as const;
+      const isTransporterContentTab = transporterContentTabs.includes(
+        activeSection as 'bidding' | 'offers' | 'transfers' | 'fleet'
+      );
+      return (
+        <>
+          <View style={isTransporterContentTab ? styles.sectionVisible : styles.sectionHidden}>
+            <TransporterDashboardScreen
+              activeTab={activeSection as TransporterDashboardSectionProps['activeTab']}
+            />
+          </View>
+          <View
+            style={activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden}
+          >
+            <IntelligenceScreen />
+          </View>
+        </>
+      );
     }
     if (userRole === 'inspector') {
-      // Inspector doesn't need activeTab - it handles its own tabs internally
+      // Inspector handles its own tabs internally — single component, no switching needed
       return <InspectorDashboard />;
     }
-    // Admin content
-    if (activeSection === 'overview') return <CommandCenterScreen />;
-    if (activeSection === 'agents') return <AgentNetworkScreen />;
-    if (activeSection === 'operations') return <OperationsScreen />;
-    if (activeSection === 'intelligence') return <IntelligenceScreen />;
-    if (activeSection === 'pricing') return <AdminPricingZonesScreen />;
-    return <CommandCenterScreen />;
+    // Admin content — keep all panels mounted
+    return (
+      <>
+        <View style={activeSection === 'overview' ? styles.sectionVisible : styles.sectionHidden}>
+          <CommandCenterScreen />
+        </View>
+        <View style={activeSection === 'agents' ? styles.sectionVisible : styles.sectionHidden}>
+          <AgentNetworkScreen />
+        </View>
+        <View style={activeSection === 'operations' ? styles.sectionVisible : styles.sectionHidden}>
+          <OperationsScreen />
+        </View>
+        <View
+          style={activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden}
+        >
+          <IntelligenceScreen />
+        </View>
+        <View style={activeSection === 'pricing' ? styles.sectionVisible : styles.sectionHidden}>
+          <AdminPricingZonesScreen />
+        </View>
+      </>
+    );
   };
 
   const profileButton = (
-    <TouchableOpacity
-      onPress={() => setShowProfileDrawer(true)}
-      style={{
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: 'rgba(74,222,128,0.2)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 1,
-        borderColor: 'rgba(74,222,128,0.3)',
-      }}
-    >
+    <TouchableOpacity onPress={() => setShowProfileDrawer(true)} style={styles.profileBtn}>
       <User size={18} color="#4ADE80" />
     </TouchableOpacity>
   );
 
   return (
     <GradientBackground>
-      <View style={{ flex: 1 }}>
+      <View style={styles.root}>
         {/* Glass Header */}
         <GlassHeader showWordmark={true} rightAction={profileButton} />
 
         {/* Dashboard Content — bottom padding so content clears the floating pill nav */}
-        <View style={{ flex: 1, paddingBottom: 90 }}>{renderContent()}</View>
+        <View style={styles.contentWrapper}>{renderContent()}</View>
       </View>
 
       {/* Floating Pill Bottom Navigation */}
@@ -230,3 +271,33 @@ export default function DashboardMainScreen() {
     </GradientBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  contentWrapper: {
+    flex: 1,
+    paddingBottom: 90,
+  },
+  profileBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.2)',
+    borderColor: 'rgba(74,222,128,0.3)',
+    borderRadius: 18,
+    borderWidth: 1,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  root: {
+    flex: 1,
+  },
+  // Section visibility helpers — used to keep all tab panels mounted while
+  // hiding inactive ones, preventing remount and redundant data fetches.
+  sectionHidden: {
+    display: 'none',
+    flex: 1,
+  },
+  sectionVisible: {
+    display: 'flex',
+    flex: 1,
+  },
+});

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { transporterBiddingService } from '../service';
 import type {
   TransporterBiddingHookResult,
@@ -22,6 +22,7 @@ export const useTransporterBidding = (): TransporterBiddingHookResult => {
   const [mapOffer, setMapOffer] = useState<MapOffer | null>(null);
   const [isMapDrawerOpen, setIsMapDrawerOpen] = useState(false);
 
+  const hasFetched = useRef(false);
   const isVerified = true;
 
   const loadData = useCallback(async () => {
@@ -46,6 +47,8 @@ export const useTransporterBidding = (): TransporterBiddingHookResult => {
   }, []);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     setIsLoading(true);
     loadData().catch((error) => console.error('Failed to load transporter bidding data', error));
   }, [loadData]);

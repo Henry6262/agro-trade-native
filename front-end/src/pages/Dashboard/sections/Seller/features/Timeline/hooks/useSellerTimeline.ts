@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { sellerTimelineService } from '../service';
 import type { SellerTimelineEvent, SellerTimelineHookResult } from '../types';
 
 export const useSellerTimeline = (limit = 10): SellerTimelineHookResult => {
   const [events, setEvents] = useState<SellerTimelineEvent[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const hasFetched = useRef(false);
 
   const loadTimeline = useCallback(async () => {
     setIsLoading(true);
@@ -19,6 +20,8 @@ export const useSellerTimeline = (limit = 10): SellerTimelineHookResult => {
   }, [limit]);
 
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     loadTimeline().catch((error) => console.error('Timeline init failed', error));
   }, [loadTimeline]);
 
