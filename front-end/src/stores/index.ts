@@ -3,6 +3,7 @@ export { useAuthStore } from './auth.store';
 export { useMarketplaceStore } from './marketplace.store';
 export { useOrderStore } from './order.store';
 export { useOnboardingStore } from './onboarding.store';
+export { useTourStore } from './tour.store';
 export { useProductStore, prefetchProductData } from './product.store';
 export type {
   ProductWithSpecs,
