@@ -1,15 +1,8 @@
-const BASE_URL = 'https://www.alphavantage.co/query';
+// Yahoo Finance commodity futures — no API key, no rate limits
+// Symbols: ZW=F (Wheat), ZC=F (Corn), CT=F (Cotton), SB=F (Sugar), KC=F (Coffee)
+const BASE_URL = 'https://query1.finance.yahoo.com/v8/finance/chart';
 
-const COMMODITY_SYMBOLS = ['WHEAT', 'CORN', 'COTTON', 'SUGAR', 'COFFEE'] as const;
-
-// Delay between requests to stay within Alpha Vantage free tier (5 req/min)
-const RATE_LIMIT_DELAY_MS = 13000; // 13 seconds between each request
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-export type CommoditySymbol = (typeof COMMODITY_SYMBOLS)[number];
+export type CommoditySymbol = 'WHEAT' | 'CORN' | 'COTTON' | 'SUGAR' | 'COFFEE';
 
 export interface CommodityPrice {
   symbol: CommoditySymbol;
@@ -21,45 +14,73 @@ export interface CommodityPrice {
   updatedAt: string;
 }
 
-interface AlphaVantageDataPoint {
-  date: string;
-  value: string;
+interface YahooMeta {
+  symbol: string;
+  regularMarketPrice: number;
+  chartPreviousClose?: number;
+  previousClose?: number;
+  currency?: string;
+  longName?: string;
+  shortName?: string;
+  regularMarketTime?: number;
 }
 
-interface AlphaVantageResponse {
-  Information?: string; // present when rate-limited or error
-  name: string;
-  unit: string;
-  data: AlphaVantageDataPoint[];
-}
-
-function parseResponse(symbol: CommoditySymbol, raw: AlphaVantageResponse): CommodityPrice {
-  const data = raw.data ?? [];
-  const latestRaw = data[0]?.value ?? '.';
-  const previousRaw = data[1]?.value ?? '.';
-
-  const price = latestRaw === '.' ? 0 : parseFloat(latestRaw);
-  const previous = previousRaw === '.' ? price : parseFloat(previousRaw);
-  const change = parseFloat((price - previous).toFixed(4));
-  const changePct = previous === 0 ? 0 : parseFloat(((change / previous) * 100).toFixed(2));
-
-  return {
-    symbol,
-    name: raw.name ?? symbol,
-    price,
-    change,
-    changePct,
-    unit: raw.unit ?? '',
-    updatedAt: data[0]?.date ?? new Date().toISOString(),
+interface YahooChartResponse {
+  chart: {
+    result: { meta: YahooMeta }[] | null;
+    error: { code: string; description: string } | null;
   };
 }
 
-async function fetchCommodity(
-  symbol: CommoditySymbol,
-  apiKey: string
-): Promise<CommodityPrice | null> {
+const YAHOO_SYMBOLS: Record<CommoditySymbol, string> = {
+  WHEAT: 'ZW=F',
+  CORN: 'ZC=F',
+  COTTON: 'CT=F',
+  SUGAR: 'SB=F',
+  COFFEE: 'KC=F',
+};
+
+const COMMODITY_UNITS: Record<CommoditySymbol, string> = {
+  WHEAT: 'c/bu',
+  CORN: 'c/bu',
+  COTTON: 'c/lb',
+  SUGAR: 'c/lb',
+  COFFEE: 'c/lb',
+};
+
+const COMMODITY_NAMES: Record<CommoditySymbol, string> = {
+  WHEAT: 'Wheat',
+  CORN: 'Corn',
+  COTTON: 'Cotton',
+  SUGAR: 'Sugar',
+  COFFEE: 'Coffee',
+};
+
+function parseMeta(symbol: CommoditySymbol, meta: YahooMeta): CommodityPrice {
+  const price = meta.regularMarketPrice ?? 0;
+  const previous = meta.chartPreviousClose ?? meta.previousClose ?? price;
+  const change = parseFloat((price - previous).toFixed(4));
+  const changePct = previous === 0 ? 0 : parseFloat(((change / previous) * 100).toFixed(2));
+
+  const updatedAt = meta.regularMarketTime
+    ? new Date(meta.regularMarketTime * 1000).toISOString()
+    : new Date().toISOString();
+
+  return {
+    symbol,
+    name: COMMODITY_NAMES[symbol],
+    price,
+    change,
+    changePct,
+    unit: COMMODITY_UNITS[symbol],
+    updatedAt,
+  };
+}
+
+async function fetchCommodity(symbol: CommoditySymbol): Promise<CommodityPrice | null> {
+  const yahooSymbol = YAHOO_SYMBOLS[symbol];
   try {
-    const url = `${BASE_URL}?function=${symbol}&interval=monthly&apikey=${apiKey}`;
+    const url = `${BASE_URL}/${yahooSymbol}?interval=1d&range=5d`;
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -67,48 +88,46 @@ async function fetchCommodity(
       return null;
     }
 
-    const json = (await response.json()) as AlphaVantageResponse;
+    const json = (await response.json()) as YahooChartResponse;
 
-    if (json.Information) {
-      console.warn(`[marketDataService] ${symbol} rate limited or error:`, json.Information);
+    if (json.chart.error) {
+      console.warn(`[marketDataService] ${symbol} error:`, json.chart.error.description);
       return null;
     }
 
-    return parseResponse(symbol, json);
+    const meta = json.chart.result?.[0]?.meta;
+    if (!meta) {
+      console.warn(`[marketDataService] ${symbol} no result`);
+      return null;
+    }
+
+    return parseMeta(symbol, meta);
   } catch (error) {
-    console.warn(`[marketDataService] ${symbol} error:`, error);
+    console.warn(`[marketDataService] ${symbol} exception:`, error);
     return null;
   }
 }
 
 async function getPrices(onProgress?: (price: CommodityPrice) => void): Promise<CommodityPrice[]> {
-  const apiKey = process.env.EXPO_PUBLIC_ALPHA_VANTAGE_KEY ?? '';
-
-  if (!apiKey) {
-    console.warn('[marketDataService] No Alpha Vantage API key set');
-    return [];
-  }
+  const symbols = Object.keys(YAHOO_SYMBOLS) as CommoditySymbol[];
 
   const results: CommodityPrice[] = [];
 
-  for (let i = 0; i < COMMODITY_SYMBOLS.length; i++) {
-    const symbol = COMMODITY_SYMBOLS[i];
-
-    if (i > 0) {
-      await sleep(RATE_LIMIT_DELAY_MS);
-    }
-
-    const price = await fetchCommodity(symbol, apiKey);
-    if (price) {
-      results.push(price);
-      onProgress?.(price); // progressively update caller
-    }
-  }
+  // Fire all requests in parallel — no rate limit delays needed
+  await Promise.allSettled(
+    symbols.map(async (symbol) => {
+      const price = await fetchCommodity(symbol);
+      if (price) {
+        results.push(price);
+        onProgress?.(price);
+      }
+    })
+  );
 
   return results;
 }
 
 export const marketDataService = {
   getPrices,
-  parseResponse, // exported for testing
+  parseMeta, // exported for testing
 };
