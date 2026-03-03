@@ -6,6 +6,7 @@ import type { OnboardingStackParamList } from '../../../navigation/types';
 import { CheckCircle } from 'lucide-react-native';
 import { useAuthStore } from '@stores/auth.store';
 import { useOnboardingStore } from '@stores/onboarding.store';
+import { useTourStore } from '@stores/tour.store';
 import { GradientBackground, GlassCard, GlassButton, GlassBadge } from '../../../design-system';
 
 type OnboardingCompleteScreenNavigationProp = NativeStackNavigationProp<
@@ -21,9 +22,16 @@ interface Props {
 export const OnboardingCompleteScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuthStore();
   const { selectedRole, resetOnboarding } = useOnboardingStore();
+  const { startTour } = useTourStore();
 
   const handleContinue = () => {
     const userRole = selectedRole || user?.role;
+
+    // Trigger character tour on first dashboard entry
+    const roleForTour = selectedRole || user?.role;
+    if (roleForTour && !useTourStore.getState().hasSeenTour) {
+      startTour(roleForTour as 'buyer' | 'seller' | 'transport');
+    }
 
     // Navigate to dashboard with success animation via parent navigator
     navigation.getParent()?.dispatch(
