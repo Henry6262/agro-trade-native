@@ -190,9 +190,9 @@ const NewsSection: React.FC = () => {
         </GlassCard>
       )}
 
-      {news.map((article, index) => (
+      {news.map((article) => (
         <TouchableOpacity
-          key={`${article.url}-${index}`}
+          key={article.url}
           onPress={() => openArticle(article.url)}
           activeOpacity={0.75}
           style={styles.newsCardWrapper}
