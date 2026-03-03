@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -65,10 +65,10 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   const [showSuccess, setShowSuccess] = useState(showSuccessAnimation);
   const [isSaving, setIsSaving] = useState(false);
 
-  const slideAnim = new Animated.Value(Dimensions.get('window').width);
-  const successOpacity = new Animated.Value(0);
-  const successScale = new Animated.Value(0.3);
-  const checkmarkRotation = new Animated.Value(0);
+  const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current;
+  const successOpacity = useRef(new Animated.Value(0)).current;
+  const successScale = useRef(new Animated.Value(0.3)).current;
+  const checkmarkRotation = useRef(new Animated.Value(0)).current;
 
   React.useEffect(() => {
     if (visible) {
