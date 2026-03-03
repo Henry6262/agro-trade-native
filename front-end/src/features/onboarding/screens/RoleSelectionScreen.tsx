@@ -12,6 +12,12 @@ import { useLoginWithOAuth, usePrivy, OAuthProviderType } from '@privy-io/expo';
 import { apiClient } from '@services/api';
 import { GradientBackground, GlassButton, GlassBadge } from '../../../design-system';
 
+const ROLE_IMAGES = {
+  buyer: require('../../../../assets/UserTypes/Buyer.png'),
+  seller: require('../../../../assets/UserTypes/Seller.png'),
+  transport: require('../../../../assets/UserTypes/transporter.png'),
+} as const;
+
 type RoleSelectionScreenNavigationProp = NativeStackNavigationProp<
   OnboardingStackParamList,
   'RoleSelection'
@@ -54,18 +60,21 @@ export const RoleSelectionScreen: React.FC = () => {
       title: 'Buyer',
       color: '#60A5FA',
       gradient: ['#3B82F6', '#1E40AF'],
+      imageSource: ROLE_IMAGES.buyer,
     },
     {
       id: 'seller' as const,
       title: 'Seller',
       color: '#4ADE80',
       gradient: ['#10B981', '#065F46'],
+      imageSource: ROLE_IMAGES.seller,
     },
     {
       id: 'transport' as const,
       title: 'Transporter',
       color: '#A78BFA',
       gradient: ['#8B5CF6', '#5B21B6'],
+      imageSource: ROLE_IMAGES.transport,
     },
   ];
 
@@ -246,6 +255,7 @@ export const RoleSelectionScreen: React.FC = () => {
                     title={card.title}
                     color={card.color}
                     gradient={card.gradient}
+                    imageSource={card.imageSource}
                     isSelected={selectedRole === card.id}
                     onPress={() => handleRoleSelect(card.id)}
                     delay={index * 100}

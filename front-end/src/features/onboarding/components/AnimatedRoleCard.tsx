@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable } from 'react-native';
-import { ShoppingCart, Wheat, Truck } from 'lucide-react-native';
+import { View, Text, Pressable, Image, ImageSourcePropType } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -16,6 +15,7 @@ interface AnimatedRoleCardProps {
   title: string;
   color: string;
   gradient: string[];
+  imageSource: ImageSourcePropType;
   isSelected?: boolean;
   onPress: () => void;
   delay?: number;
@@ -30,6 +30,7 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   isSelected = false,
   onPress,
   delay = 0,
+  imageSource,
 }) => {
   const scale = useSharedValue(0.9);
   const opacity = useSharedValue(0);
@@ -100,20 +101,6 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
     pressed.value = withSpring(0, { damping: 15, stiffness: 200 });
   };
 
-  const getIcon = () => {
-    const iconColor = isSelected ? color : 'rgba(255,255,255,0.5)';
-    const iconProps = { size: 32, color: iconColor };
-
-    switch (id) {
-      case 'buyer':
-        return <ShoppingCart {...iconProps} />;
-      case 'seller':
-        return <Wheat {...iconProps} />;
-      case 'transport':
-        return <Truck {...iconProps} />;
-    }
-  };
-
   const getRoleDescription = () => {
     switch (id) {
       case 'buyer':
@@ -129,12 +116,6 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   const cardBg = isSelected ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.08)';
   const cardBorder = isSelected ? '#4ADE80' : 'rgba(255,255,255,0.15)';
   const cardBorderWidth = isSelected ? 2 : 1;
-
-  // Icon circle
-  const iconBg = isSelected
-    ? `${color}26` // ~15% opacity hex
-    : 'rgba(255,255,255,0.06)';
-  const iconBorderColor = isSelected ? color : 'rgba(255,255,255,0.12)';
 
   return (
     <AnimatedPressable
@@ -165,21 +146,20 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
         }}
       >
         {/* Animated Icon */}
-        <View
-          style={{
-            width: 64,
-            height: 64,
-            marginRight: 20,
-            backgroundColor: iconBg,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: iconBorderColor,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Animated.View style={iconAnimatedStyle}>{getIcon()}</Animated.View>
-        </View>
+        <Animated.View style={[iconAnimatedStyle, {
+          width: 72,
+          height: 72,
+          marginRight: 16,
+        }]}>
+          <Image
+            source={imageSource}
+            style={{
+              width: 72,
+              height: 72,
+              resizeMode: 'contain',
+            }}
+          />
+        </Animated.View>
 
         {/* Text content */}
         <View style={{ flex: 1 }}>
