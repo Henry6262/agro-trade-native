@@ -21,6 +21,30 @@ import { GlassCard } from '../../../../design-system';
 import { COLORS } from '../../../../design-system';
 import type { BuyListing, TradeOperation } from '@services/tradeOperationService';
 
+const PRODUCT_EMOJI: Record<string, string> = {
+  wheat: '🌾',
+  corn: '🌽',
+  maize: '🌽',
+  rice: '🍚',
+  soy: '🫘',
+  soybean: '🫘',
+  barley: '🌿',
+  sunflower: '🌻',
+  potato: '🥔',
+  tomato: '🍅',
+  vegetable: '🥬',
+  fruit: '🍎',
+};
+
+const productEmoji = (product?: { name?: string; category?: string }): string => {
+  if (!product) return '📦';
+  const hay = `${product.category ?? ''} ${product.name ?? ''}`.toLowerCase();
+  for (const [key, emoji] of Object.entries(PRODUCT_EMOJI)) {
+    if (hay.includes(key)) return emoji;
+  }
+  return '📦';
+};
+
 export default function OperationsScreenRefactored() {
   const {
     // Data
@@ -153,9 +177,17 @@ export default function OperationsScreenRefactored() {
           </View>
         ) : (
           sellListings.map((listing) => (
-            <GlassCard key={listing.id} tier="medium" animate={false} style={styles.listingCard}>
-              {/* Header */}
-              <View style={styles.listingHeader}>
+            <GlassCard
+              key={listing.id}
+              tier="medium"
+              animate={false}
+              style={[styles.listingCard, styles.darkCard]}
+            >
+              {/* Product emoji header */}
+              <View style={styles.productEmojiRow}>
+                <View style={styles.emojiCircle}>
+                  <Text style={styles.emojiText}>{productEmoji(listing.product)}</Text>
+                </View>
                 <View style={styles.listingHeaderLeft}>
                   <Text style={styles.listingTitle}>
                     {listing.product?.name || 'Unknown Product'}
@@ -267,9 +299,16 @@ export default function OperationsScreenRefactored() {
               }}
               activeOpacity={0.8}
             >
-              <GlassCard tier="medium" animate={false} style={styles.listingCard}>
-                {/* Header */}
-                <View style={styles.listingHeader}>
+              <GlassCard
+                tier="medium"
+                animate={false}
+                style={[styles.listingCard, styles.darkCard]}
+              >
+                {/* Product emoji header */}
+                <View style={styles.productEmojiRow}>
+                  <View style={styles.emojiCircle}>
+                    <Text style={styles.emojiText}>{productEmoji(listing.product)}</Text>
+                  </View>
                   <View style={styles.listingHeaderLeft}>
                     <Text style={styles.listingTitle}>
                       {listing.product?.name || 'Unknown Product'}
@@ -556,6 +595,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
+  darkCard: {
+    backgroundColor: 'rgba(8,22,12,0.82)',
+    borderColor: 'rgba(74,222,128,0.22)',
+    shadowColor: '#00ff6a',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+  },
   detailItem: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -571,6 +617,19 @@ const styles = StyleSheet.create({
   },
   detailsColumn: {
     gap: 6,
+  },
+  emojiCircle: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.10)',
+    borderColor: 'rgba(74,222,128,0.22)',
+    borderRadius: 22,
+    borderWidth: 1,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  emojiText: {
+    fontSize: 22,
   },
   emptyTitle: {
     color: COLORS.textPrimary,
@@ -598,12 +657,6 @@ const styles = StyleSheet.create({
   listingCard: {
     marginBottom: 12,
   },
-  listingHeader: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
   listingHeaderLeft: {
     flex: 1,
     marginRight: 8,
@@ -622,6 +675,12 @@ const styles = StyleSheet.create({
     color: COLORS.accentGreen,
     fontSize: 13,
     fontWeight: '700',
+  },
+  productEmojiRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 10,
   },
   qualityBadge: {
     borderRadius: 12,
