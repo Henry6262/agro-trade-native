@@ -98,9 +98,12 @@ export function AdminPricingZonesScreen() {
       setIsLoading(true);
       const response = await apiClient.get('/admin/pricing-zones');
       setZones(response.data.data);
-    } catch (error) {
-      console.error('Failed to fetch pricing zones:', error);
-      Alert.alert('Error', 'Failed to load pricing zones');
+    } catch (error: any) {
+      // 404 means endpoint not yet available — show empty state silently
+      if (error?.response?.status !== 404) {
+        console.error('Failed to fetch pricing zones:', error);
+        Alert.alert('Error', 'Failed to load pricing zones');
+      }
     } finally {
       setIsLoading(false);
     }
