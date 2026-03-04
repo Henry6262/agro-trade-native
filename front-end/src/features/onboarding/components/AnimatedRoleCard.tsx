@@ -26,7 +26,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   id,
   title,
-  color,
+  color: _color,
   isSelected = false,
   onPress,
   delay = 0,
@@ -146,11 +146,16 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
         }}
       >
         {/* Animated Icon */}
-        <Animated.View style={[iconAnimatedStyle, {
-          width: 72,
-          height: 72,
-          marginRight: 16,
-        }]}>
+        <Animated.View
+          style={[
+            iconAnimatedStyle,
+            {
+              width: 72,
+              height: 72,
+              marginRight: 16,
+            },
+          ]}
+        >
           <Image
             source={imageSource}
             style={{
