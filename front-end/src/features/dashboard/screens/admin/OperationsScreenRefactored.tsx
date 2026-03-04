@@ -20,30 +20,7 @@ import { CounterOfferModal } from './components/CounterOfferModal';
 import { GlassCard } from '../../../../design-system';
 import { COLORS } from '../../../../design-system';
 import type { BuyListing, TradeOperation } from '@services/tradeOperationService';
-
-const PRODUCT_EMOJI: Record<string, string> = {
-  wheat: '🌾',
-  corn: '🌽',
-  maize: '🌽',
-  rice: '🍚',
-  soy: '🫘',
-  soybean: '🫘',
-  barley: '🌿',
-  sunflower: '🌻',
-  potato: '🥔',
-  tomato: '🍅',
-  vegetable: '🥬',
-  fruit: '🍎',
-};
-
-const productEmoji = (product?: { name?: string; category?: string }): string => {
-  if (!product) return '📦';
-  const hay = `${product.category ?? ''} ${product.name ?? ''}`.toLowerCase();
-  for (const [key, emoji] of Object.entries(PRODUCT_EMOJI)) {
-    if (hay.includes(key)) return emoji;
-  }
-  return '📦';
-};
+import { getProductEmoji } from '../../../../shared/utils/productEmoji';
 
 export default function OperationsScreenRefactored() {
   const {
@@ -186,7 +163,7 @@ export default function OperationsScreenRefactored() {
               {/* Product emoji header */}
               <View style={styles.productEmojiRow}>
                 <View style={styles.emojiCircle}>
-                  <Text style={styles.emojiText}>{productEmoji(listing.product)}</Text>
+                  <Text style={styles.emojiText}>{getProductEmoji(listing.product)}</Text>
                 </View>
                 <View style={styles.listingHeaderLeft}>
                   <Text style={styles.listingTitle}>
@@ -307,7 +284,7 @@ export default function OperationsScreenRefactored() {
                 {/* Product emoji header */}
                 <View style={styles.productEmojiRow}>
                   <View style={styles.emojiCircle}>
-                    <Text style={styles.emojiText}>{productEmoji(listing.product)}</Text>
+                    <Text style={styles.emojiText}>{getProductEmoji(listing.product)}</Text>
                   </View>
                   <View style={styles.listingHeaderLeft}>
                     <Text style={styles.listingTitle}>

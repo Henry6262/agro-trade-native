@@ -24,6 +24,7 @@ import { tradeOperationService } from '@services/tradeOperationService';
 import { negotiationService } from '@services/negotiationService';
 import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
 import { COLORS } from '../../../../../design-system';
+import { getProductEmoji } from '../../../../../shared/utils/productEmoji';
 
 interface Negotiation {
   id: string;
@@ -114,32 +115,6 @@ const formatProductName = (name?: string): string => {
 
 // "OP-1772440681414" → "#681414"
 const formatOpRef = (opNumber: string): string => `#${opNumber.slice(-6)}`;
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  wheat: '🌾',
-  corn: '🌽',
-  maize: '🌽',
-  rice: '🍚',
-  soy: '🫘',
-  soybean: '🫘',
-  barley: '🌿',
-  oat: '🌿',
-  sunflower: '🌻',
-  cotton: '🪴',
-  potato: '🥔',
-  tomato: '🍅',
-  vegetable: '🥬',
-  fruit: '🍎',
-};
-
-const getProductEmoji = (product?: { name?: string; category?: string }): string => {
-  if (!product) return '📦';
-  const hay = `${product.category ?? ''} ${product.name ?? ''}`.toLowerCase();
-  for (const [key, emoji] of Object.entries(CATEGORY_EMOJI)) {
-    if (hay.includes(key)) return emoji;
-  }
-  return '📦';
-};
 
 export const ActiveOperationsTab: React.FC<Props> = ({
   onSelectOperation,
