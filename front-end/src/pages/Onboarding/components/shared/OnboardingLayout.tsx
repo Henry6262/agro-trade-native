@@ -45,7 +45,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
 
   const containerStyle: ViewStyle = {
     flex: 1,
-    backgroundColor: '#111827', // bg-gray-50
+    backgroundColor: 'transparent',
     ...style,
   };
 
@@ -64,7 +64,7 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
         style={{
           flex: 1,
           flexDirection: 'row',
-          backgroundColor: '#111827',
+          backgroundColor: 'transparent',
           height: windowHeight, // Explicit height to prevent overflow
           maxHeight: windowHeight, // Ensure it doesn't exceed screen
           overflow: 'hidden', // Clip any overflow
