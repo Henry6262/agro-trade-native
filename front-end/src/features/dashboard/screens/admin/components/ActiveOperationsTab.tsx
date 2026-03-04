@@ -115,6 +115,32 @@ const formatProductName = (name?: string): string => {
 // "OP-1772440681414" → "#681414"
 const formatOpRef = (opNumber: string): string => `#${opNumber.slice(-6)}`;
 
+const CATEGORY_EMOJI: Record<string, string> = {
+  wheat: '🌾',
+  corn: '🌽',
+  maize: '🌽',
+  rice: '🍚',
+  soy: '🫘',
+  soybean: '🫘',
+  barley: '🌿',
+  oat: '🌿',
+  sunflower: '🌻',
+  cotton: '🪴',
+  potato: '🥔',
+  tomato: '🍅',
+  vegetable: '🥬',
+  fruit: '🍎',
+};
+
+const getProductEmoji = (product?: { name?: string; category?: string }): string => {
+  if (!product) return '📦';
+  const hay = `${product.category ?? ''} ${product.name ?? ''}`.toLowerCase();
+  for (const [key, emoji] of Object.entries(CATEGORY_EMOJI)) {
+    if (hay.includes(key)) return emoji;
+  }
+  return '📦';
+};
+
 export const ActiveOperationsTab: React.FC<Props> = ({
   onSelectOperation,
   onSendOffer,
@@ -289,28 +315,41 @@ export const ActiveOperationsTab: React.FC<Props> = ({
     );
 
     return (
-      <GlassCard key={operation.id} tier="medium" animate={false} style={styles.opCard}>
+      <GlassCard
+        key={operation.id}
+        tier="medium"
+        animate={false}
+        style={[styles.opCard, styles.darkCard]}
+      >
         {/* Header row */}
         <TouchableOpacity onPress={() => toggleExpanded(operation.id)} activeOpacity={0.8}>
           <View style={styles.opHeader}>
-            <View style={styles.opHeaderLeft}>
-              <View style={styles.opTitleRow}>
-                <Text style={styles.opProductName}>
-                  {formatProductName(operation.buyListing?.product?.name)}
+            {/* Product visual + title row */}
+            <View style={styles.productRow}>
+              <View style={styles.emojiCircle}>
+                <Text style={styles.emojiText}>
+                  {getProductEmoji(operation.buyListing?.product)}
                 </Text>
-                {hasUrgentItems && (
-                  <GlassBadge
-                    label="Action Required"
-                    variant="warning"
-                    size="sm"
-                    style={styles.urgentBadge}
-                  />
-                )}
               </View>
-              <Text style={styles.opMeta}>
-                {operation.buyListing?.quantity || 0} units ·{' '}
-                {formatOpRef(operation.operationNumber)}
-              </Text>
+              <View style={styles.opHeaderLeft}>
+                <View style={styles.opTitleRow}>
+                  <Text style={styles.opProductName}>
+                    {formatProductName(operation.buyListing?.product?.name)}
+                  </Text>
+                  {hasUrgentItems && (
+                    <GlassBadge
+                      label="Action Required"
+                      variant="warning"
+                      size="sm"
+                      style={styles.urgentBadge}
+                    />
+                  )}
+                </View>
+                <Text style={styles.opMeta}>
+                  {operation.buyListing?.quantity || 0} units ·{' '}
+                  {formatOpRef(operation.operationNumber)}
+                </Text>
+              </View>
             </View>
 
             <TouchableOpacity
@@ -395,7 +434,11 @@ export const ActiveOperationsTab: React.FC<Props> = ({
         {(operation.sellers || []).filter(
           (s) => !operation.negotiations?.find((n) => n.tradeSellerId === s.id)
         ).length > 0 && (
-          <GlassCard tier="subtle" animate={false} style={styles.awaitingCard}>
+          <GlassCard
+            tier="subtle"
+            animate={false}
+            style={[styles.awaitingCard, styles.awaitingDarkCard]}
+          >
             <Text style={styles.awaitingText}>
               {
                 (operation.sellers || []).filter(
@@ -415,8 +458,9 @@ export const ActiveOperationsTab: React.FC<Props> = ({
                 }
               }}
               style={styles.sendOffersBtn}
+              activeOpacity={0.75}
             >
-              <Send size={13} color={COLORS.accentGreen} />
+              <Send size={14} color={COLORS.accentGreen} />
               <Text style={styles.sendOffersText}> Send Offers</Text>
             </TouchableOpacity>
           </GlassCard>
@@ -491,6 +535,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 10,
   },
+  awaitingDarkCard: {
+    backgroundColor: 'rgba(8,22,12,0.60)',
+    borderColor: 'rgba(74,222,128,0.18)',
+  },
   awaitingText: { color: COLORS.textSecondary, flex: 1, fontSize: 12, fontWeight: '600' },
 
   centerContainer: {
@@ -503,7 +551,28 @@ const styles = StyleSheet.create({
 
   counterPrice: { fontSize: 12, fontWeight: '600' },
   counterRow: { alignItems: 'center', flexDirection: 'row' },
+  darkCard: {
+    backgroundColor: 'rgba(8,22,12,0.82)',
+    borderColor: 'rgba(74,222,128,0.22)',
+    shadowColor: '#00ff6a',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+  },
   divider: { backgroundColor: 'rgba(255,255,255,0.08)', height: 1, marginVertical: 12 },
+
+  emojiCircle: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.10)',
+    borderColor: 'rgba(74,222,128,0.22)',
+    borderRadius: 24,
+    borderWidth: 1,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
+  },
+  emojiText: {
+    fontSize: 24,
+  },
 
   emptyContainer: {
     alignItems: 'center',
@@ -513,7 +582,6 @@ const styles = StyleSheet.create({
     padding: 32,
   },
   emptySubtitle: { color: COLORS.textSecondary, fontSize: 13, marginTop: 8, textAlign: 'center' },
-
   emptyTitle: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '700', marginTop: 16 },
   expiryRow: { alignItems: 'center', flexDirection: 'row', marginBottom: 3 },
   expiryText: { color: '#F59E0B', fontSize: 12 },
@@ -594,6 +662,12 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 3,
   },
+  productRow: {
+    alignItems: 'center',
+    flex: 1,
+    flexDirection: 'row',
+    gap: 12,
+  },
   profitLabel: { color: COLORS.textSecondary, fontSize: 13 },
   profitLeft: { alignItems: 'center', flexDirection: 'row' },
   profitRow: {
@@ -605,11 +679,16 @@ const styles = StyleSheet.create({
   profitValue: { fontFamily: 'monospace', fontSize: 14, fontWeight: '700' },
   sendOffersBtn: {
     alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.16)',
+    borderColor: 'rgba(74,222,128,0.45)',
+    borderRadius: 20,
+    borderWidth: 1,
     flexDirection: 'row',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    gap: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
   },
-  sendOffersText: { color: COLORS.accentGreen, fontSize: 12, fontWeight: '600' },
+  sendOffersText: { color: COLORS.accentGreen, fontSize: 13, fontWeight: '700' },
   summaryChip: { alignItems: 'center', flexDirection: 'row' },
   summaryChipDanger: { color: COLORS.danger },
   summaryChipGreen: { color: COLORS.accentGreen },
