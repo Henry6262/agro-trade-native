@@ -119,7 +119,10 @@ export const RoleSelectionScreen: React.FC = () => {
         const apiUrl = getApiUrl();
         window.location.href = `${apiUrl.replace('/api', '')}/api/auth/google`;
       } else {
-        await loginWithOAuth({ provider: 'google' as OAuthProviderType });
+        // If already authenticated with Privy, skip OAuth — just grab the token
+        if (!privyUserRef.current) {
+          await loginWithOAuth({ provider: 'google' as OAuthProviderType });
+        }
 
         const privyToken = await getAccessToken();
         if (!privyToken) {

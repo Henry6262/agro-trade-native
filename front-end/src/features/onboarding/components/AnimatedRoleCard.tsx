@@ -147,13 +147,6 @@ const styles = StyleSheet.create({
     width: 20,
   },
   checkText: { color: '#052e16', fontSize: 11, fontWeight: '800' },
-  descText: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 12,
-    lineHeight: 17,
-    marginTop: 6,
-    maxWidth: 175,
-  },
   dot: {
     borderRadius: 4,
     height: 8,
@@ -170,6 +163,7 @@ const styles = StyleSheet.create({
     right: 0,
   },
   textBlock: {
+    flex: 1,
     justifyContent: 'center',
     paddingLeft: 20,
     paddingRight: IMG_W + 8,
