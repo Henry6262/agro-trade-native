@@ -1,5 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Alert, Platform, ToastAndroid, SafeAreaView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Alert,
+  Platform,
+  ToastAndroid,
+  SafeAreaView,
+  StyleSheet,
+} from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../../navigation/types';
@@ -32,7 +41,10 @@ export const RoleSelectionScreen: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<'buyer' | 'seller' | 'transport' | null>(null);
 
   // Privy hooks
-  const { getAccessToken } = usePrivy();
+  const { getAccessToken, user: privyUser } = usePrivy();
+  // Use a ref so the async handler always reads the latest Privy user after OAuth resolves
+  const privyUserRef = useRef(privyUser);
+  privyUserRef.current = privyUser;
   const { login: loginWithOAuth, state: oauthState } = useLoginWithOAuth({});
 
   // Redirect to main app if already authenticated
@@ -83,7 +95,6 @@ export const RoleSelectionScreen: React.FC = () => {
     setRole(role);
     setSelectedRole(role);
 
-    // Navigate to the appropriate onboarding flow
     setTimeout(() => {
       switch (role) {
         case 'buyer':
@@ -104,37 +115,40 @@ export const RoleSelectionScreen: React.FC = () => {
 
     try {
       if (Platform.OS === 'web') {
-        // Web platform - use redirect OAuth
         const { getApiUrl } = await import('@shared/utils/environment');
         const apiUrl = getApiUrl();
         window.location.href = `${apiUrl.replace('/api', '')}/api/auth/google`;
       } else {
-        // Mobile platform - use Privy OAuth
         await loginWithOAuth({ provider: 'google' as OAuthProviderType });
 
-        // Get Privy access token
         const privyToken = await getAccessToken();
         if (!privyToken) {
           throw new Error('Failed to get Privy access token');
         }
 
-        // Send to backend for authentication (no role for existing users)
+        // Extract email from Privy user (ref is updated after loginWithOAuth resolves)
+        const currentPrivyUser = privyUserRef.current as Record<string, unknown>;
+        const linkedAccounts = currentPrivyUser?.linkedAccounts as
+          | { type: string; address?: string }[]
+          | undefined;
+        const linkedEmail: string | undefined =
+          (currentPrivyUser?.email as string | undefined) ||
+          linkedAccounts?.find((a) => a.type === 'google_oauth' || a.type === 'email')?.address ||
+          undefined;
+
         const authResponse = await apiClient.post<{
           success: boolean;
           access_token: string;
           refresh_token: string;
-          user: any;
+          user: Record<string, unknown>;
         }>('/auth/privy/login', {
           privyToken,
+          ...(linkedEmail ? { email: linkedEmail } : {}),
         });
 
         if (authResponse?.data?.access_token) {
           const { access_token, refresh_token, user: userData } = authResponse.data;
-
-          // Store auth data
           login(userData, access_token, refresh_token);
-
-          // Navigate to main app
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
@@ -159,65 +173,34 @@ export const RoleSelectionScreen: React.FC = () => {
   return (
     <AuthGuard requireAuth={false} redirectTo="Main">
       <GradientBackground>
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={styles.safeArea}>
+          {/* Fixed top header — logo + brand */}
+          <View style={styles.topHeader}>
+            <View style={styles.logoWrapper}>
+              <Image
+                source={require('../../../../assets/agra-logo.png')}
+                style={styles.logoImage}
+                resizeMode="cover"
+              />
+            </View>
+            <View style={styles.brandText}>
+              <Text style={styles.brandName}>AGRO TRADE</Text>
+              <Text style={styles.brandTagline}>Agricultural marketplace</Text>
+            </View>
+          </View>
+
           <ScrollView
-            contentContainerStyle={{
-              flexGrow: 1,
-              paddingTop: 48,
-              paddingHorizontal: 24,
-              paddingBottom: 32,
-            }}
+            contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            <View style={{ maxWidth: 600, width: '100%', alignSelf: 'center' }}>
-              {/* Header */}
-              <View style={{ marginBottom: 36, alignItems: 'center' }}>
-                {/* App logo replacing the badge */}
-                <View
-                  style={{
-                    shadowColor: '#4ADE80',
-                    shadowOffset: { width: 0, height: 0 },
-                    shadowOpacity: 0.5,
-                    shadowRadius: 20,
-                    elevation: 10,
-                    marginBottom: 20,
-                    borderRadius: 22,
-                  }}
-                >
-                  <Image
-                    source={require('../../../../assets/agra-logo.png')}
-                    style={{
-                      width: 88,
-                      height: 88,
-                      borderRadius: 22,
-                    }}
-                    resizeMode="contain"
-                  />
-                </View>
-                <Text
-                  style={{
-                    fontSize: 30,
-                    fontWeight: '800',
-                    color: '#FFFFFF',
-                    textAlign: 'center',
-                    marginBottom: 8,
-                    letterSpacing: 0.2,
-                  }}
-                >
-                  I am a...
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 15,
-                    color: 'rgba(255,255,255,0.55)',
-                    textAlign: 'center',
-                  }}
-                >
-                  Choose your role to get started
-                </Text>
+            <View style={styles.inner}>
+              {/* Heading */}
+              <View style={styles.headingBlock}>
+                <Text style={styles.heading}>Select your role</Text>
+                <Text style={styles.subheading}>Choose how you want to use the platform</Text>
               </View>
 
-              {/* Sign In Button for Existing Users */}
+              {/* Sign In */}
               <GlassButton
                 label={isPending ? 'Signing in...' : 'Sign In'}
                 onPress={handleExistingUserSignIn}
@@ -225,47 +208,19 @@ export const RoleSelectionScreen: React.FC = () => {
                 fullWidth
                 loading={isPending}
                 disabled={isPending}
-                leftIcon={<LogIn size={20} color="rgba(255,255,255,0.65)" />}
-                style={{ marginBottom: 28 }}
+                leftIcon={<LogIn size={18} color="rgba(255,255,255,0.7)" />}
+                style={styles.signInBtn}
               />
 
               {/* Divider */}
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 24,
-                }}
-              >
-                <View
-                  style={{
-                    flex: 1,
-                    height: 1,
-                    backgroundColor: 'rgba(255,255,255,0.12)',
-                  }}
-                />
-                <Text
-                  style={{
-                    color: 'rgba(255,255,255,0.35)',
-                    marginHorizontal: 16,
-                    fontSize: 12,
-                    fontWeight: '600',
-                    letterSpacing: 0.8,
-                  }}
-                >
-                  OR CREATE NEW ACCOUNT
-                </Text>
-                <View
-                  style={{
-                    flex: 1,
-                    height: 1,
-                    backgroundColor: 'rgba(255,255,255,0.12)',
-                  }}
-                />
+              <View style={styles.divider}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>OR CREATE NEW ACCOUNT</Text>
+                <View style={styles.dividerLine} />
               </View>
 
               {/* Role Cards */}
-              <View style={{ gap: 0 }}>
+              <View>
                 {roleCards.map((card, index) => (
                   <AnimatedRoleCard
                     key={card.id}
@@ -282,7 +237,7 @@ export const RoleSelectionScreen: React.FC = () => {
               </View>
 
               {/* Continue Button */}
-              <View style={{ marginTop: 20 }}>
+              <View style={styles.continueWrap}>
                 <GlassButton
                   label="Continue"
                   onPress={() => selectedRole && handleRoleSelect(selectedRole)}
@@ -294,15 +249,7 @@ export const RoleSelectionScreen: React.FC = () => {
               </View>
 
               {/* Footer */}
-              <Text
-                style={{
-                  color: 'rgba(255,255,255,0.35)',
-                  fontSize: 12,
-                  textAlign: 'center',
-                  marginTop: 24,
-                  lineHeight: 18,
-                }}
-              >
+              <Text style={styles.footer}>
                 By continuing, you agree to our Terms of Service and Privacy Policy
               </Text>
             </View>
@@ -312,3 +259,104 @@ export const RoleSelectionScreen: React.FC = () => {
     </AuthGuard>
   );
 };
+
+const styles = StyleSheet.create({
+  brandName: {
+    color: '#4ADE80',
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: 2.5,
+  },
+  brandTagline: {
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: 11,
+    letterSpacing: 0.3,
+    marginTop: 1,
+  },
+  brandText: {
+    marginLeft: 12,
+  },
+  continueWrap: {
+    marginTop: 20,
+  },
+  divider: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  dividerLine: {
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    flex: 1,
+    height: 1,
+  },
+  dividerText: {
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.8,
+    marginHorizontal: 14,
+  },
+  footer: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 11,
+    lineHeight: 17,
+    marginTop: 20,
+    textAlign: 'center',
+  },
+  heading: {
+    color: '#FFFFFF',
+    fontSize: 30,
+    fontWeight: '900',
+    letterSpacing: -0.3,
+    marginBottom: 6,
+  },
+  headingBlock: {
+    marginBottom: 28,
+  },
+  inner: {
+    alignSelf: 'center',
+    maxWidth: 600,
+    width: '100%',
+  },
+  logoImage: {
+    height: 44,
+    width: 44,
+  },
+  logoWrapper: {
+    borderRadius: 12,
+    elevation: 6,
+    height: 44,
+    overflow: 'hidden',
+    shadowColor: '#4ADE80',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    width: 44,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 32,
+    paddingHorizontal: 24,
+    paddingTop: 28,
+  },
+  signInBtn: {
+    marginBottom: 24,
+  },
+  subheading: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 14,
+    letterSpacing: 0.1,
+  },
+  topHeader: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(255,255,255,0.07)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    paddingBottom: 12,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+  },
+});

@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Modal, Pressable } from 'react-native';
-import { Plus, Truck, Trash2, ChevronDown, Minus } from 'lucide-react-native';
-import { Card } from '@shared/components/Card';
-import { Badge } from '@shared/components/Badge';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
+import { Plus, Truck, Trash2, ChevronDown, Minus, CheckCircle } from 'lucide-react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import type { VehicleType } from '@shared/types';
 
@@ -21,6 +28,12 @@ const truckTypes = [
 
 const PRESET_CAPACITIES = [5, 10, 15, 20, 25];
 
+const GREEN = '#4ADE80';
+const GREEN_BG = 'rgba(74,222,128,0.12)';
+const GREEN_BORDER = 'rgba(74,222,128,0.4)';
+const GLASS_BG = 'rgba(255,255,255,0.05)';
+const GLASS_BORDER = 'rgba(255,255,255,0.09)';
+
 export function FleetInformation() {
   const { transportData, setFleetInfo } = useOnboardingStore();
   const [newTruck, setNewTruck] = useState({
@@ -28,12 +41,11 @@ export function FleetInformation() {
     unit: 'tons' as 'tons' | 'kg',
     type: 'Standard',
   });
-  const [batchMode] = useState(true); // Always active
+  const [batchMode] = useState(true);
   const [batchCount, setBatchCount] = useState('1');
   const [showTruckTypeModal, setShowTruckTypeModal] = useState(false);
   const [showCustomCapacity, setShowCustomCapacity] = useState(false);
 
-  // Get current fleet from store or initialize empty
   const currentFleet = transportData?.fleetInfo?.vehicleTypes || [];
   const totalCapacity = transportData?.fleetInfo?.capacity?.total || 0;
 
@@ -41,7 +53,6 @@ export function FleetInformation() {
     if (newTruck.capacity && Number.parseFloat(newTruck.capacity) > 0) {
       const count = batchMode && batchCount ? Math.max(1, Number.parseInt(batchCount)) : 1;
 
-      // Check if a similar truck configuration already exists
       const existingTruckIndex = currentFleet.findIndex(
         (truck) =>
           truck.capacity === Number.parseFloat(newTruck.capacity) &&
@@ -52,7 +63,6 @@ export function FleetInformation() {
       let updatedFleet: TruckInfo[];
 
       if (existingTruckIndex !== -1 && batchMode) {
-        // Update existing truck count
         updatedFleet = [...currentFleet];
         const existingCount = updatedFleet[existingTruckIndex].count || 1;
         updatedFleet[existingTruckIndex] = {
@@ -60,7 +70,6 @@ export function FleetInformation() {
           count: existingCount + count,
         };
       } else {
-        // Add new truck with count
         const newTruckInfo: TruckInfo = {
           id: `truck-${Date.now()}`,
           name: newTruck.type,
@@ -125,399 +134,205 @@ export function FleetInformation() {
     });
   };
 
-  return (
-    <>
-      <View style={{ alignItems: 'center', marginBottom: 32 }}>
-        <View
-          style={{
-            width: 64,
-            height: 64,
-            backgroundColor: 'rgba(234, 88, 12, 0.2)',
-            borderRadius: 32,
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: 16,
-          }}
-        >
-          <Truck size={32} color="#ea580c" />
-        </View>
-        <Text
-          style={{
-            fontSize: 28,
-            fontWeight: 'bold',
-            color: '#FFFFFF',
-            textAlign: 'center',
-            marginBottom: 12,
-          }}
-        >
-          Fleet Information
-        </Text>
-        <Text style={{ color: '#9CA3AF', maxWidth: 600, textAlign: 'center', fontSize: 16 }}>
-          Add your fleet vehicles
-        </Text>
-      </View>
+  const selectedCapacityNum = Number.parseFloat(newTruck.capacity) || 0;
+  const batchNum = Number.parseInt(batchCount) || 1;
+  const totalTruckCount = currentFleet.reduce((sum, truck) => sum + (truck.count || 1), 0);
 
+  return (
+    <ScrollView
+      style={styles.scroll}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.scrollContent}
+    >
+      {/* Fleet Summary */}
       {currentFleet.length > 0 && (
-        <Card
-          style={{
-            backgroundColor: 'rgba(234, 88, 12, 0.1)',
-            borderColor: '#ea580c',
-            padding: 24,
-            marginBottom: 32,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
+        <View style={styles.summaryCard}>
+          <View style={styles.summaryRow}>
             <View>
-              <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF' }}>
-                Fleet Summary
-              </Text>
-              <Text style={{ color: '#9CA3AF' }}>Total capacity across all vehicles</Text>
+              <Text style={styles.summaryLabel}>Fleet Total</Text>
+              <Text style={styles.summaryCount}>{totalTruckCount} trucks</Text>
             </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#ea580c' }}>
-                {totalCapacity}
-              </Text>
-              <Text style={{ fontSize: 14, color: '#9CA3AF' }}>tons total capacity</Text>
+            <View style={styles.summaryCapacityBlock}>
+              <Text style={styles.summaryCapacity}>{totalCapacity}t</Text>
+              <Text style={styles.summaryCapacityLabel}>total capacity</Text>
             </View>
           </View>
-        </Card>
+        </View>
       )}
 
-      <Card
-        style={{
-          padding: 24,
-          borderWidth: 2,
-          borderStyle: 'dashed',
-          borderColor: '#374151',
-          backgroundColor: '#1F2937',
-          marginBottom: 32,
-        }}
-      >
-        <View style={{ marginBottom: 16 }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 16,
-            }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Plus size={20} color="#ea580c" />
-              <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF', marginLeft: 8 }}>
-                Add Trucks to Fleet
-              </Text>
+      {/* Add Trucks Card */}
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <View style={styles.iconCircle}>
+            <Plus size={16} color={GREEN} />
+          </View>
+          <Text style={styles.cardTitle}>Add Trucks to Fleet</Text>
+          {currentFleet.length > 0 && (
+            <CheckCircle size={16} color={GREEN} style={styles.checkIcon} />
+          )}
+        </View>
+
+        {/* Capacity */}
+        <Text style={styles.fieldLabel}>Capacity (tons)</Text>
+        {!showCustomCapacity ? (
+          <View>
+            <View style={styles.capacityGrid}>
+              {PRESET_CAPACITIES.map((capacity) => {
+                const active = newTruck.capacity === capacity.toString() && !showCustomCapacity;
+                return (
+                  <TouchableOpacity
+                    key={capacity}
+                    style={[styles.capacityBtn, active && styles.capacityBtnActive]}
+                    onPress={() => {
+                      setNewTruck({ ...newTruck, capacity: capacity.toString() });
+                      setShowCustomCapacity(false);
+                    }}
+                    activeOpacity={0.75}
+                  >
+                    <Text style={[styles.capacityBtnNum, active && styles.capacityBtnNumActive]}>
+                      {capacity}
+                    </Text>
+                    <Text style={[styles.capacityBtnUnit, active && styles.capacityBtnUnitActive]}>
+                      tons
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-          </View>
-
-          {/* Capacity Selection */}
-          <View style={{ marginBottom: 16 }}>
-            <Text style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}>
-              Capacity (tons)
-            </Text>
-            {!showCustomCapacity ? (
-              <View>
-                {/* Preset Capacities */}
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 8 }}>
-                  {PRESET_CAPACITIES.map((capacity) => (
-                    <TouchableOpacity
-                      key={capacity}
-                      onPress={() => {
-                        setNewTruck({ ...newTruck, capacity: capacity.toString() });
-                        setShowCustomCapacity(false);
-                      }}
-                      style={{
-                        paddingVertical: 12,
-                        paddingHorizontal: 16,
-                        borderRadius: 8,
-                        borderWidth: 2,
-                        borderColor:
-                          newTruck.capacity === capacity.toString() ? '#ea580c' : '#374151',
-                        backgroundColor:
-                          newTruck.capacity === capacity.toString()
-                            ? 'rgba(234, 88, 12, 0.2)'
-                            : '#111827',
-                        marginRight: 8,
-                        marginBottom: 8,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: newTruck.capacity === capacity.toString() ? '#ea580c' : '#9CA3AF',
-                          fontWeight: newTruck.capacity === capacity.toString() ? '600' : '400',
-                          fontSize: 16,
-                        }}
-                      >
-                        {capacity}t
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                {/* Custom Option */}
-                <TouchableOpacity
-                  onPress={() => {
-                    setShowCustomCapacity(true);
-                    setNewTruck({ ...newTruck, capacity: '' });
-                  }}
-                  style={{
-                    paddingVertical: 10,
-                    paddingHorizontal: 16,
-                    borderRadius: 8,
-                    borderWidth: 1,
-                    borderColor: '#374151',
-                    backgroundColor: '#111827',
-                  }}
-                >
-                  <Text style={{ color: '#9CA3AF', fontSize: 14, textAlign: 'center' }}>
-                    Custom Amount
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <View>
-                <TextInput
-                  keyboardType="numeric"
-                  placeholder="Enter capacity in tons"
-                  value={newTruck.capacity}
-                  onChangeText={(text) => setNewTruck({ ...newTruck, capacity: text })}
-                  style={{
-                    fontSize: 16,
-                    borderWidth: 2,
-                    borderColor: '#ea580c',
-                    borderRadius: 8,
-                    paddingHorizontal: 12,
-                    paddingVertical: 8,
-                    backgroundColor: '#111827',
-                    color: '#FFFFFF',
-                    marginBottom: 8,
-                  }}
-                  placeholderTextColor="#9CA3AF"
-                  autoFocus
-                />
-                <TouchableOpacity
-                  onPress={() => {
-                    setShowCustomCapacity(false);
-                    setNewTruck({ ...newTruck, capacity: '' });
-                  }}
-                  style={{ paddingVertical: 4 }}
-                >
-                  <Text style={{ color: '#9CA3AF', fontSize: 12, textAlign: 'center' }}>
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-
-          {/* Quantity Counter */}
-          <View style={{ marginBottom: 16 }}>
-            <Text style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}>
-              Quantity
-            </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#111827',
-                borderRadius: 8,
-                borderWidth: 1,
-                borderColor: '#374151',
-                paddingVertical: 8,
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => {
-                  const currentCount = Number.parseInt(batchCount) || 1;
-                  if (currentCount > 1) {
-                    setBatchCount((currentCount - 1).toString());
-                  }
-                }}
-                disabled={Number.parseInt(batchCount) <= 1}
-                style={{
-                  width: 40,
-                  height: 40,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor:
-                    Number.parseInt(batchCount) <= 1 ? 'transparent' : 'rgba(234, 88, 12, 0.2)',
-                  borderRadius: 8,
-                }}
-              >
-                <Minus size={20} color={Number.parseInt(batchCount) <= 1 ? '#4B5563' : '#ea580c'} />
-              </TouchableOpacity>
-
-              <Text
-                style={{
-                  fontSize: 24,
-                  fontWeight: 'bold',
-                  color: '#FFFFFF',
-                  marginHorizontal: 32,
-                  minWidth: 40,
-                  textAlign: 'center',
-                }}
-              >
-                {batchCount || '1'}
-              </Text>
-
-              <TouchableOpacity
-                onPress={() => {
-                  const currentCount = Number.parseInt(batchCount) || 1;
-                  setBatchCount((currentCount + 1).toString());
-                }}
-                style={{
-                  width: 40,
-                  height: 40,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: 'rgba(234, 88, 12, 0.2)',
-                  borderRadius: 8,
-                }}
-              >
-                <Plus size={20} color="#ea580c" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={{ marginBottom: 16 }}>
-            <Text style={{ fontSize: 14, fontWeight: '500', color: '#9CA3AF', marginBottom: 8 }}>
-              Truck Type
-            </Text>
             <TouchableOpacity
-              onPress={() => setShowTruckTypeModal(true)}
-              style={{
-                borderWidth: 1,
-                borderColor: '#374151',
-                borderRadius: 8,
-                paddingHorizontal: 12,
-                paddingVertical: 10,
-                backgroundColor: '#111827',
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
+              style={styles.customBtn}
+              onPress={() => {
+                setShowCustomCapacity(true);
+                setNewTruck({ ...newTruck, capacity: '' });
               }}
+              activeOpacity={0.75}
             >
-              <Text style={{ color: '#FFFFFF', fontSize: 16 }}>{newTruck.type}</Text>
-              <ChevronDown size={20} color="#9CA3AF" />
+              <Text style={styles.customBtnText}>Custom Amount</Text>
             </TouchableOpacity>
           </View>
+        ) : (
+          <View style={styles.customInputWrap}>
+            <TextInput
+              keyboardType="numeric"
+              placeholder="Enter capacity in tons"
+              value={newTruck.capacity}
+              onChangeText={(text) => setNewTruck({ ...newTruck, capacity: text })}
+              style={styles.textInput}
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              autoFocus
+            />
+            <TouchableOpacity
+              onPress={() => {
+                setShowCustomCapacity(false);
+                setNewTruck({ ...newTruck, capacity: '' });
+              }}
+            >
+              <Text style={styles.cancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
+        {/* Quantity */}
+        <Text style={[styles.fieldLabel, styles.fieldLabelSpaced]}>Quantity</Text>
+        <View style={styles.counterRow}>
           <TouchableOpacity
-            onPress={handleAddTruck}
-            disabled={!newTruck.capacity || Number.parseFloat(newTruck.capacity) <= 0}
-            style={{
-              borderRadius: 8,
-              paddingHorizontal: 24,
-              paddingVertical: 12,
-              backgroundColor:
-                !newTruck.capacity || Number.parseFloat(newTruck.capacity) <= 0
-                  ? '#374151'
-                  : '#ea580c',
+            onPress={() => {
+              if (batchNum > 1) setBatchCount((batchNum - 1).toString());
             }}
-            activeOpacity={0.8}
+            disabled={batchNum <= 1}
+            style={[styles.counterBtn, batchNum <= 1 && styles.counterBtnDisabled]}
+            activeOpacity={0.75}
           >
-            <Text style={{ color: 'white', fontWeight: '500', textAlign: 'center' }}>
-              {batchCount && Number(batchCount) > 1 ? `Add ${batchCount} Trucks` : 'Add Truck'}
-            </Text>
+            <Minus size={18} color={batchNum <= 1 ? 'rgba(255,255,255,0.2)' : GREEN} />
+          </TouchableOpacity>
+          <Text style={styles.counterValue}>{batchCount || '1'}</Text>
+          <TouchableOpacity
+            onPress={() => setBatchCount((batchNum + 1).toString())}
+            style={styles.counterBtn}
+            activeOpacity={0.75}
+          >
+            <Plus size={18} color={GREEN} />
           </TouchableOpacity>
         </View>
-      </Card>
 
-      {currentFleet.length > 0 && (
-        <View style={{ marginBottom: 32 }}>
-          <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF', marginBottom: 16 }}>
-            Your Fleet ({currentFleet.reduce((sum, truck) => sum + (truck.count || 1), 0)} trucks)
+        {/* Truck Type */}
+        <Text style={[styles.fieldLabel, styles.fieldLabelSpaced]}>Truck Type</Text>
+        <TouchableOpacity
+          onPress={() => setShowTruckTypeModal(true)}
+          style={styles.typeSelector}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.typeSelectorText}>{newTruck.type}</Text>
+          <ChevronDown size={18} color="rgba(255,255,255,0.4)" />
+        </TouchableOpacity>
+
+        {/* Add Button */}
+        <TouchableOpacity
+          onPress={handleAddTruck}
+          disabled={!newTruck.capacity || selectedCapacityNum <= 0}
+          style={[
+            styles.addBtn,
+            (!newTruck.capacity || selectedCapacityNum <= 0) && styles.addBtnDisabled,
+          ]}
+          activeOpacity={0.8}
+        >
+          <Text
+            style={[
+              styles.addBtnText,
+              (!newTruck.capacity || selectedCapacityNum <= 0) && styles.addBtnTextDisabled,
+            ]}
+          >
+            {batchNum > 1 ? `Add ${batchNum} Trucks` : 'Add Truck'}
           </Text>
-          <View>
-            {currentFleet.map((truck, _index) => {
-              const truckCount = truck.count || 1;
-              const totalCapacity = truck.capacity * truckCount;
+        </TouchableOpacity>
+      </View>
 
-              return (
-                <Card
-                  key={truck.id}
-                  style={{
-                    padding: 16,
-                    backgroundColor: '#1F2937',
-                    borderColor: '#374151',
-                    marginBottom: 12,
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <View
-                        style={{
-                          width: 40,
-                          height: 40,
-                          backgroundColor: 'rgba(234, 88, 12, 0.2)',
-                          borderRadius: 8,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginRight: 12,
-                        }}
-                      >
-                        <Truck size={20} color="#ea580c" />
-                      </View>
-                      <View>
-                        <View
-                          style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}
-                        >
-                          <Text style={{ fontWeight: '600', color: '#FFFFFF', marginRight: 8 }}>
-                            {truck.type}
-                          </Text>
-                          {truckCount > 1 && (
-                            <Badge variant="default" style={{ backgroundColor: '#ea580c' }}>
-                              <Text style={{ fontSize: 10, color: '#FFFFFF', fontWeight: '600' }}>
-                                x{truckCount}
-                              </Text>
-                            </Badge>
-                          )}
-                        </View>
-                        <Text style={{ fontSize: 14, color: '#9CA3AF', marginBottom: 4 }}>
-                          {truckCount === 1
-                            ? `${truck.capacity} ${truck.unit}`
-                            : `${truck.capacity} ${truck.unit} each`}
-                        </Text>
-                        {truckCount > 1 && (
-                          <Text style={{ fontSize: 12, color: '#10b981', fontWeight: '500' }}>
-                            Total: {totalCapacity} {truck.unit}
-                          </Text>
-                        )}
-                      </View>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => handleRemoveTruck(truck.id)}
-                      style={{ padding: 8, borderRadius: 8 }}
-                      activeOpacity={0.7}
-                    >
-                      <Trash2 size={16} color="#dc2626" />
-                    </TouchableOpacity>
+      {/* Fleet List */}
+      {currentFleet.length > 0 && (
+        <View>
+          <Text style={styles.sectionTitle}>Your Fleet ({totalTruckCount} trucks)</Text>
+          {currentFleet.map((truck) => {
+            const truckCount = truck.count || 1;
+            const truckTotalCap = truck.capacity * truckCount;
+            return (
+              <View key={truck.id} style={styles.truckCard}>
+                <View style={styles.truckCardRow}>
+                  <View style={styles.truckIconCircle}>
+                    <Truck size={16} color={GREEN} />
                   </View>
-                </Card>
-              );
-            })}
-          </View>
+                  <View style={styles.truckInfo}>
+                    <View style={styles.truckNameRow}>
+                      <Text style={styles.truckType}>{truck.type}</Text>
+                      {truckCount > 1 && (
+                        <View style={styles.countBadge}>
+                          <Text style={styles.countBadgeText}>×{truckCount}</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.truckCapacity}>
+                      {truckCount === 1
+                        ? `${truck.capacity} ${truck.unit}`
+                        : `${truck.capacity} ${truck.unit} each · ${truckTotalCap}t total`}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => handleRemoveTruck(truck.id)}
+                    style={styles.removeBtn}
+                    activeOpacity={0.7}
+                  >
+                    <Trash2 size={15} color="rgba(239,68,68,0.7)" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            );
+          })}
         </View>
       )}
 
       {currentFleet.length === 0 && (
-        <View style={{ alignItems: 'center', paddingVertical: 48 }}>
-          <Truck size={64} color="#9CA3AF" />
-          <Text style={{ color: '#9CA3AF', marginTop: 16, textAlign: 'center' }}>
-            No trucks added yet. Add your first truck to get started.
-          </Text>
+        <View style={styles.emptyState}>
+          <Truck size={40} color="rgba(255,255,255,0.15)" />
+          <Text style={styles.emptyText}>No trucks added yet</Text>
         </View>
       )}
 
@@ -528,39 +343,9 @@ export function FleetInformation() {
         animationType="fade"
         onRequestClose={() => setShowTruckTypeModal(false)}
       >
-        <Pressable
-          style={{
-            flex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.75)',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-          onPress={() => setShowTruckTypeModal(false)}
-        >
-          <View
-            style={{
-              backgroundColor: 'rgba(3,15,9,0.97)',
-              borderRadius: 16,
-              padding: 20,
-              width: '80%',
-              maxWidth: 400,
-              borderWidth: 1,
-              borderColor: 'rgba(74,222,128,0.2)',
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: '600',
-                color: '#FFFFFF',
-                marginBottom: 16,
-                borderBottomWidth: 1,
-                borderBottomColor: 'rgba(74,222,128,0.12)',
-                paddingBottom: 12,
-              }}
-            >
-              Select Truck Type
-            </Text>
+        <Pressable style={styles.modalOverlay} onPress={() => setShowTruckTypeModal(false)}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Select Truck Type</Text>
             {truckTypes.map((type) => (
               <TouchableOpacity
                 key={type}
@@ -568,23 +353,13 @@ export function FleetInformation() {
                   setNewTruck({ ...newTruck, type });
                   setShowTruckTypeModal(false);
                 }}
-                style={{
-                  paddingVertical: 12,
-                  paddingHorizontal: 16,
-                  borderRadius: 8,
-                  backgroundColor:
-                    newTruck.type === type ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)',
-                  marginBottom: 8,
-                  borderWidth: newTruck.type === type ? 1 : 0,
-                  borderColor: 'rgba(74,222,128,0.3)',
-                }}
+                style={[styles.modalOption, newTruck.type === type && styles.modalOptionActive]}
               >
                 <Text
-                  style={{
-                    color: newTruck.type === type ? '#4ADE80' : 'rgba(255,255,255,0.6)',
-                    fontSize: 16,
-                    fontWeight: newTruck.type === type ? '600' : '400',
-                  }}
+                  style={[
+                    styles.modalOptionText,
+                    newTruck.type === type && styles.modalOptionTextActive,
+                  ]}
                 >
                   {type}
                 </Text>
@@ -593,6 +368,360 @@ export function FleetInformation() {
           </View>
         </Pressable>
       </Modal>
-    </>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  addBtn: {
+    alignItems: 'center',
+    backgroundColor: GREEN_BG,
+    borderColor: GREEN_BORDER,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginTop: 16,
+    paddingVertical: 15,
+  },
+  addBtnDisabled: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  addBtnText: {
+    color: GREEN,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  addBtnTextDisabled: {
+    color: 'rgba(255,255,255,0.25)',
+  },
+  cancelText: {
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 6,
+    textAlign: 'center',
+  },
+  capacityBtn: {
+    alignItems: 'center',
+    backgroundColor: GLASS_BG,
+    borderColor: GLASS_BORDER,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 8,
+    paddingVertical: 14,
+    width: '31%',
+  },
+  capacityBtnActive: {
+    backgroundColor: GREEN_BG,
+    borderColor: GREEN_BORDER,
+  },
+  capacityBtnNum: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  capacityBtnNumActive: {
+    color: GREEN,
+  },
+  capacityBtnUnit: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 2,
+    textTransform: 'uppercase',
+  },
+  capacityBtnUnitActive: {
+    color: 'rgba(74,222,128,0.6)',
+  },
+  capacityGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 0,
+  },
+  card: {
+    backgroundColor: GLASS_BG,
+    borderColor: GLASS_BORDER,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginBottom: 14,
+    padding: 18,
+  },
+  cardHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 16,
+  },
+  cardTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    marginLeft: 10,
+  },
+  checkIcon: {
+    marginLeft: 'auto',
+  },
+  countBadge: {
+    backgroundColor: GREEN_BG,
+    borderColor: GREEN_BORDER,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginLeft: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+  },
+  countBadgeText: {
+    color: GREEN,
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  counterBtn: {
+    alignItems: 'center',
+    backgroundColor: GREEN_BG,
+    borderColor: GREEN_BORDER,
+    borderRadius: 12,
+    borderWidth: 1,
+    height: 44,
+    justifyContent: 'center',
+    width: 44,
+  },
+  counterBtnDisabled: {
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderColor: 'rgba(255,255,255,0.07)',
+  },
+  counterRow: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderColor: GLASS_BORDER,
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 8,
+  },
+  counterValue: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: '800',
+    marginHorizontal: 32,
+    minWidth: 40,
+    textAlign: 'center',
+  },
+  customBtn: {
+    alignItems: 'center',
+    backgroundColor: GLASS_BG,
+    borderColor: GLASS_BORDER,
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingVertical: 13,
+  },
+  customBtnText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  customInputWrap: {
+    gap: 0,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 32,
+  },
+  emptyText: {
+    color: 'rgba(255,255,255,0.25)',
+    fontSize: 14,
+    marginTop: 12,
+  },
+  fieldLabel: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+    textTransform: 'uppercase',
+  },
+  fieldLabelSpaced: {
+    marginTop: 16,
+  },
+  iconCircle: {
+    alignItems: 'center',
+    backgroundColor: GREEN_BG,
+    borderColor: GREEN_BORDER,
+    borderRadius: 10,
+    borderWidth: 1,
+    height: 32,
+    justifyContent: 'center',
+    width: 32,
+  },
+  modalBox: {
+    backgroundColor: 'rgba(3,15,9,0.97)',
+    borderColor: 'rgba(74,222,128,0.2)',
+    borderRadius: 20,
+    borderWidth: 1,
+    maxWidth: 400,
+    padding: 20,
+    width: '85%',
+  },
+  modalOption: {
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 12,
+    marginBottom: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+  },
+  modalOptionActive: {
+    backgroundColor: GREEN_BG,
+    borderColor: GREEN_BORDER,
+    borderWidth: 1,
+  },
+  modalOptionText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  modalOptionTextActive: {
+    color: GREEN,
+    fontWeight: '700',
+  },
+  modalOverlay: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  modalTitle: {
+    borderBottomColor: 'rgba(74,222,128,0.12)',
+    borderBottomWidth: 1,
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '700',
+    marginBottom: 14,
+    paddingBottom: 12,
+  },
+  removeBtn: {
+    alignItems: 'center',
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 140,
+  },
+  sectionTitle: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    marginBottom: 10,
+    textTransform: 'uppercase',
+  },
+  summaryCapacity: {
+    color: GREEN,
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  summaryCapacityBlock: {
+    alignItems: 'flex-end',
+  },
+  summaryCapacityLabel: {
+    color: 'rgba(74,222,128,0.6)',
+    fontSize: 11,
+    marginTop: 2,
+  },
+  summaryCard: {
+    backgroundColor: GREEN_BG,
+    borderColor: GREEN_BORDER,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 14,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+  },
+  summaryCount: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  summaryLabel: {
+    color: 'rgba(74,222,128,0.7)',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.4,
+    textTransform: 'uppercase',
+  },
+  summaryRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  textInput: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: GLASS_BORDER,
+    borderRadius: 14,
+    borderWidth: 1,
+    color: '#FFFFFF',
+    fontSize: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
+  },
+  truckCapacity: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  truckCard: {
+    backgroundColor: GLASS_BG,
+    borderColor: GLASS_BORDER,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 10,
+    padding: 14,
+  },
+  truckCardRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  truckIconCircle: {
+    alignItems: 'center',
+    backgroundColor: GREEN_BG,
+    borderColor: GREEN_BORDER,
+    borderRadius: 10,
+    borderWidth: 1,
+    height: 36,
+    justifyContent: 'center',
+    marginRight: 12,
+    width: 36,
+  },
+  truckInfo: {
+    flex: 1,
+  },
+  truckNameRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  truckType: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  typeSelector: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderColor: GLASS_BORDER,
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  typeSelectorText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+});

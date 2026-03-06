@@ -5,9 +5,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   withSpring,
-  withRepeat,
   interpolate,
-  Easing,
 } from 'react-native-reanimated';
 
 interface AnimatedRoleCardProps {
@@ -23,13 +21,9 @@ interface AnimatedRoleCardProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-// Card has a fixed height; image is taller and anchored to the bottom
-// so it naturally overflows above the card top
-const CARD_H = 115;
-const IMG_W = 190;
-const IMG_H = 240;
-// How far the image peeks above the card
-const IMG_OVERFLOW = IMG_H - CARD_H; // 85px
+const CARD_H = 100;
+const IMG_W = 130;
+const IMG_H = 100;
 
 const ROLE_ACCENT = {
   buyer: {
@@ -61,38 +55,14 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   const opacity = useSharedValue(0);
   const pressed = useSharedValue(0);
   const selected = useSharedValue(isSelected ? 1 : 0);
-  const iconFloat = useSharedValue(0);
-  const iconRotation = useSharedValue(0);
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
       scale.value = withSpring(1, { damping: 14, stiffness: 140 });
       opacity.value = withTiming(1, { duration: 380 });
     }, delay);
-
-    // Idle float / sway per role
-    if (id === 'buyer') {
-      iconFloat.value = withRepeat(
-        withTiming(-7, { duration: 1900, easing: Easing.inOut(Easing.ease) }),
-        -1,
-        true
-      );
-    } else if (id === 'seller') {
-      iconRotation.value = withRepeat(
-        withTiming(5, { duration: 2300, easing: Easing.inOut(Easing.ease) }),
-        -1,
-        true
-      );
-    } else {
-      iconFloat.value = withRepeat(
-        withTiming(-5, { duration: 2700, easing: Easing.inOut(Easing.ease) }),
-        -1,
-        true
-      );
-    }
-
     return () => clearTimeout(timer);
-  }, [delay, scale, opacity, id]);
+  }, [delay, scale, opacity]);
 
   React.useEffect(() => {
     selected.value = withSpring(isSelected ? 1 : 0, { damping: 14, stiffness: 140 });
@@ -107,24 +77,9 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
     };
   });
 
-  const iconAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: iconFloat.value }, { rotate: `${iconRotation.value}deg` }],
-  }));
-
   const accent = ROLE_ACCENT[id];
   const cardBg = isSelected ? accent.bg : 'rgba(255,255,255,0.07)';
   const cardBorder = isSelected ? accent.border : 'rgba(255,255,255,0.1)';
-
-  const getRoleDescription = () => {
-    switch (id) {
-      case 'buyer':
-        return 'Browse and purchase quality agricultural products';
-      case 'seller':
-        return 'List your produce and connect with buyers';
-      case 'transport':
-        return 'Deliver goods and grow your logistics business';
-    }
-  };
 
   return (
     <AnimatedPressable
@@ -137,48 +92,38 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
         pressed.value = withSpring(0, { damping: 15, stiffness: 200 });
       }}
     >
-      {/*
-        paddingTop gives breathing room above the card for the overflowing image.
-        The card has a fixed height; image is absolutely positioned to the right,
-        anchored at the bottom, and taller than the card so it peeks above.
-      */}
-      <View style={styles.outerWrapper}>
-        <View
-          style={[
-            styles.card,
-            {
-              backgroundColor: cardBg,
-              borderColor: cardBorder,
-              ...(isSelected && {
-                shadowColor: accent.glow,
-                shadowOffset: { width: 0, height: 6 },
-                shadowOpacity: 0.5,
-                shadowRadius: 16,
-                elevation: 10,
-              }),
-            },
-          ]}
-        >
-          {/* Left: text content — paddingRight leaves room for the image */}
-          <View style={styles.textBlock}>
-            <View style={styles.titleRow}>
-              <View style={[styles.dot, { backgroundColor: accent.glow }]} />
-              <Text style={styles.titleText}>{title}</Text>
-
-              {isSelected && (
-                <View style={[styles.checkBadge, { backgroundColor: accent.glow }]}>
-                  <Text style={styles.checkText}>✓</Text>
-                </View>
-              )}
-            </View>
-
-            <Text style={styles.descText}>{getRoleDescription()}</Text>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: cardBg,
+            borderColor: cardBorder,
+            ...(isSelected && {
+              shadowColor: accent.glow,
+              shadowOffset: { width: 0, height: 6 },
+              shadowOpacity: 0.5,
+              shadowRadius: 16,
+              elevation: 10,
+            }),
+          },
+        ]}
+      >
+        {/* Left: title only */}
+        <View style={styles.textBlock}>
+          <View style={styles.titleRow}>
+            <View style={[styles.dot, { backgroundColor: accent.glow }]} />
+            <Text style={styles.titleText}>{title}</Text>
+            {isSelected && (
+              <View style={[styles.checkBadge, { backgroundColor: accent.glow }]}>
+                <Text style={styles.checkText}>✓</Text>
+              </View>
+            )}
           </View>
+        </View>
 
-          {/* Right: character — absolutely positioned, anchored bottom, overflows top */}
-          <Animated.View style={[iconAnimatedStyle, styles.imageWrapper]}>
-            <Image source={imageSource} style={styles.image} resizeMode="contain" />
-          </Animated.View>
+        {/* Right: character image — inside the card, anchored to bottom-right */}
+        <View style={styles.imageWrapper}>
+          <Image source={imageSource} style={styles.image} resizeMode="contain" />
         </View>
       </View>
     </AnimatedPressable>
@@ -190,7 +135,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1,
     height: CARD_H,
-    overflow: 'visible',
+    overflow: 'hidden',
     position: 'relative',
   },
   checkBadge: {
@@ -219,25 +164,15 @@ const styles = StyleSheet.create({
     height: IMG_H,
     width: IMG_W,
   },
-  // Anchored to bottom-right of card; taller than card so overflows above
   imageWrapper: {
     bottom: 0,
     position: 'absolute',
     right: 0,
   },
-  outerWrapper: {
-    // paddingTop reserves space above the card for the overflow
-    overflow: 'visible',
-    paddingTop: IMG_OVERFLOW,
-    zIndex: 1,
-  },
   textBlock: {
     justifyContent: 'center',
-    paddingBottom: 18,
     paddingLeft: 20,
-    // Right padding keeps text clear of the character image
     paddingRight: IMG_W + 8,
-    paddingTop: 20,
   },
   titleRow: {
     alignItems: 'center',
@@ -250,8 +185,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   wrapper: {
-    // negative marginBottom cancels out the next card's paddingTop overflow space,
-    // leaving only ~10px of real visual gap between card bodies
-    marginBottom: -(IMG_OVERFLOW - 10),
+    marginBottom: 12,
   },
 });

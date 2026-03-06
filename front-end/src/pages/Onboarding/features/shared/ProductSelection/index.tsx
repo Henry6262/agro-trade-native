@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useOnboardingStore } from '@stores/onboarding.store';
@@ -28,12 +29,9 @@ export const ProductSelectionUnified: React.FC = () => {
   const { products, isLoadingProducts, fetchAllData } = useProductStore();
 
   useEffect(() => {
-    // Initialize with stored selections
     if (storeSelectedProducts && storeSelectedProducts.length > 0) {
       setSelectedProductIds(storeSelectedProducts);
     }
-
-    // Fetch products if not already loaded
     if (products.length === 0) {
       fetchAllData().catch((error) => {
         console.error('Error fetching products:', error);
@@ -44,68 +42,56 @@ export const ProductSelectionUnified: React.FC = () => {
 
   const toggleProduct = (productId: string) => {
     if (role === 'seller' || role === 'buyer') {
-      // For both sellers and buyers: directly select and move to next step
-
-      // Update selected products
       setSelectedProductIds([productId]);
       updateSelectedProducts([productId]);
-
-      // Update metadata with product specifications
       const metadata = productSelectionService.buildMetadata(products, [productId]);
       setSelectedProductsMetadata(metadata);
-
-      // Move to next step
       setTimeout(() => {
         nextStep();
       }, 100);
     } else {
-      // Multi-selection for other roles (if any)
       const newSelection = selectedProductIds.includes(productId)
         ? selectedProductIds.filter((id) => id !== productId)
         : [...selectedProductIds, productId];
-
       setSelectedProductIds(newSelection);
       updateSelectedProducts(newSelection);
-
-      // Update metadata with product specifications
       setSelectedProductsMetadata(productSelectionService.buildMetadata(products, newSelection));
     }
   };
 
   if (isLoadingProducts) {
     return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color="#10B981" />
-        <Text className="mt-4 text-gray-400">Loading products...</Text>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4ADE80" />
+        <Text style={styles.loadingText}>Loading products...</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1">
+    <View style={styles.root}>
       {/* Header */}
-      <View className="mb-6">
-        <Text className="text-3xl font-bold text-primary-500 mb-2">
+      <View style={styles.header}>
+        <Text style={styles.title}>
           {role === 'buyer' ? 'What do you need?' : 'What do you offer?'}
         </Text>
-        <Text className="text-gray-400">
+        <Text style={styles.subtitle}>
           {role === 'buyer'
             ? 'Select one agricultural product you want to purchase'
             : 'Select one agricultural product you want to sell'}
         </Text>
       </View>
 
-      {/* Product Grid - Fixed 2 columns */}
+      {/* Product Grid */}
       <ScrollView
         showsVerticalScrollIndicator={false}
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: 140 }}
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
       >
         {products && products.length > 0 ? (
           <View>
-            {/* Create rows of 2 items each */}
             {Array.from({ length: Math.ceil(products.length / 2) }, (_, rowIndex) => (
-              <View key={rowIndex} className="flex-row mb-3">
+              <View key={rowIndex} style={styles.row}>
                 {products.slice(rowIndex * 2, rowIndex * 2 + 2).map((product, colIndex) => {
                   const isSelected =
                     selectedProductIds.includes(product.id) ||
@@ -115,69 +101,196 @@ export const ProductSelectionUnified: React.FC = () => {
                     <TouchableOpacity
                       key={product.id}
                       onPress={() => toggleProduct(product.id)}
-                      className={`flex-1 rounded-xl overflow-hidden border ${
-                        colIndex === 0 ? 'mr-1.5' : 'ml-1.5'
-                      } ${
-                        isSelected
-                          ? 'bg-emerald-500/10 border-emerald-500'
-                          : 'bg-white/50 border-gray-200'
-                      }`}
-                      style={{
-                        backgroundColor: isSelected
-                          ? 'rgba(16, 185, 129, 0.1)'
-                          : 'rgba(31, 41, 55, 0.5)',
-                      }}
+                      activeOpacity={0.82}
+                      style={[
+                        styles.card,
+                        colIndex === 0 ? styles.cardLeft : styles.cardRight,
+                        isSelected && styles.cardSelected,
+                      ]}
                     >
-                      {/* Product Image */}
-                      {product.image && (
-                        <View className="relative w-full h-32">
+                      {/* Image fills most of the card */}
+                      <View style={styles.imageContainer}>
+                        {product.image ? (
                           <Image
                             source={{
                               uri:
                                 productSelectionService.resolveImageUri(product.image || null) ??
                                 undefined,
                             }}
-                            style={{ width: '100%', height: '100%' }}
+                            style={styles.image}
                             resizeMode="cover"
                           />
-                          {isSelected && (
-                            <View className="absolute top-2 right-2 bg-emerald-500 rounded-full p-1">
-                              <Ionicons name="checkmark" size={16} color="white" />
-                            </View>
-                          )}
-                        </View>
-                      )}
+                        ) : (
+                          <View style={styles.imagePlaceholder} />
+                        )}
 
-                      {/* Product Info */}
-                      <View className="p-3">
+                        {/* Gradient overlay at bottom */}
+                        <View style={styles.imageOverlay} />
+
+                        {/* Selected checkmark */}
+                        {isSelected && (
+                          <View style={styles.checkBadge}>
+                            <Ionicons name="checkmark" size={13} color="#052e16" />
+                          </View>
+                        )}
+                      </View>
+
+                      {/* Product name footer */}
+                      <View style={styles.footer}>
                         <Text
-                          className={`text-sm font-medium text-center ${isSelected ? 'text-gray-900' : 'text-gray-600'}`}
-                          numberOfLines={2}
+                          style={[styles.productName, isSelected && styles.productNameSelected]}
+                          numberOfLines={1}
                         >
                           {product.displayName || product.name}
                         </Text>
-                        {(role === 'seller' || role === 'buyer') && (
-                          <Text className="text-xs text-gray-400 text-center mt-1">
-                            Tap to select
-                          </Text>
-                        )}
+                        <Text style={styles.tapHint}>Tap to select</Text>
                       </View>
                     </TouchableOpacity>
                   );
                 })}
-                {/* Add empty space if odd number of products in last row */}
+                {/* Filler for odd row */}
                 {rowIndex === Math.ceil(products.length / 2) - 1 && products.length % 2 === 1 && (
-                  <View className="flex-1 ml-1.5" />
+                  <View style={[styles.card, styles.cardRight, styles.cardFiller]} />
                 )}
               </View>
             ))}
           </View>
         ) : (
-          <View className="flex-1 justify-center items-center">
-            <Text className="text-gray-500">No products available</Text>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No products available</Text>
           </View>
         )}
       </ScrollView>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 18,
+    borderWidth: 1,
+    flex: 1,
+    overflow: 'hidden',
+  },
+  cardFiller: {
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
+  },
+  cardLeft: {
+    marginRight: 6,
+  },
+  cardRight: {
+    marginLeft: 6,
+  },
+  cardSelected: {
+    backgroundColor: 'rgba(74,222,128,0.1)',
+    borderColor: 'rgba(74,222,128,0.55)',
+    elevation: 8,
+    shadowColor: '#4ADE80',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+  },
+  checkBadge: {
+    alignItems: 'center',
+    backgroundColor: '#4ADE80',
+    borderRadius: 10,
+    height: 22,
+    justifyContent: 'center',
+    position: 'absolute',
+    right: 8,
+    top: 8,
+    width: 22,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    paddingTop: 60,
+  },
+  emptyText: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 14,
+  },
+  footer: {
+    paddingBottom: 12,
+    paddingHorizontal: 12,
+    paddingTop: 10,
+  },
+  header: {
+    marginBottom: 20,
+  },
+  image: {
+    height: '100%',
+    width: '100%',
+  },
+  imageContainer: {
+    height: 130,
+    position: 'relative',
+    width: '100%',
+  },
+  imageOverlay: {
+    backgroundColor: 'rgba(3,15,9,0.35)',
+    bottom: 0,
+    height: 40,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+  },
+  imagePlaceholder: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    flex: 1,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  loadingText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 14,
+    marginTop: 12,
+  },
+  productName: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 13,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  productNameSelected: {
+    color: '#4ADE80',
+  },
+  root: {
+    flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    marginBottom: 12,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 140,
+  },
+  subtitle: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 4,
+  },
+  tapHint: {
+    color: 'rgba(255,255,255,0.3)',
+    fontSize: 11,
+    marginTop: 3,
+    textAlign: 'center',
+  },
+  title: {
+    color: '#4ADE80',
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+});

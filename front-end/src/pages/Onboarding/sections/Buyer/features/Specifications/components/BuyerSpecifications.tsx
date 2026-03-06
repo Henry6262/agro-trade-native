@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, ScrollView, Image, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  ScrollView,
+  Image,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
 import { Package } from 'lucide-react-native';
 import type { ProductSpecification } from '@shared/types/onboarding';
 import { useOnboardingStore } from '@stores/onboarding.store';
@@ -27,26 +35,21 @@ export function BuyerSpecifications({
   const [specValues, setSpecValues] = useState<Record<string, string>>({});
   const [additionalNotes, setAdditionalNotes] = useState('');
 
-  // Get the selected product
   const selectedProductId = selectedProducts[0];
   const selectedProduct = products.find((p) => p.id === selectedProductId);
   const productMetadata = selectedProductsMetadata.find((m) => m.id === selectedProductId);
   const currentSpecs = buyerSpecifications[selectedProductId] || {};
 
-  // Load product specifications and existing data
   useEffect(() => {
     if (selectedProductId) {
       setLoading(true);
       try {
-        // Get specifications for the selected product
         const specs = getProductSpecifications(selectedProductId);
         setProductSpecs(specs);
 
-        // Initialize specification values from existing data
         const existingSpec =
           specifications.find((s) => s.productId === selectedProductId) || currentSpecs;
         if (existingSpec) {
-          // Load existing values
           const values: Record<string, string> = {};
           specs.forEach((spec: any) => {
             const key = spec.code || spec.id;
@@ -65,22 +68,16 @@ export function BuyerSpecifications({
     }
   }, [selectedProductId]);
 
-  // Update specification value
   const handleSpecChange = (specKey: string, value: string) => {
-    setSpecValues((prev) => ({
-      ...prev,
-      [specKey]: value,
-    }));
+    setSpecValues((prev) => ({ ...prev, [specKey]: value }));
     updateSpec(specKey, value);
   };
 
-  // Update additional notes
   const handleNotesChange = (text: string) => {
     setAdditionalNotes(text);
     updateSpec('notes', text);
   };
 
-  // Update specification in store
   const updateSpec = (key: string, value: string) => {
     const updatedSpec = {
       ...currentSpecs,
@@ -88,139 +85,262 @@ export function BuyerSpecifications({
       ...specValues,
       [key]: value,
       notes: additionalNotes,
-      // Preserve quantity and price from previous step
       quantity: currentSpecs.quantity || '',
       unit: currentSpecs.unit || 'tons',
       pricePerKilo: currentSpecs.pricePerKilo || '',
     };
-
     onSpecificationsChange([updatedSpec]);
     updateBuyerSpecification(selectedProductId, updatedSpec);
   };
 
-  if (loading) {
-    return (
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" color="#10B981" />
-        <Text className="text-gray-400 mt-4">Loading product specifications...</Text>
-      </View>
-    );
-  }
-
-  if (!selectedProduct) {
-    return (
-      <View className="bg-white border border-gray-200 rounded-lg p-8 items-center">
-        <View className="w-16 h-16 bg-gray-700 rounded-full items-center justify-center mb-4">
-          <Package size={32} color="#6B7280" />
-        </View>
-        <Text className="text-lg font-semibold text-gray-900 mb-2">No Product Selected</Text>
-        <Text className="text-sm text-gray-400 text-center">
-          Please go back and select a product first
-        </Text>
-      </View>
-    );
-  }
-
-  // Get product image URL
-  const productImage = selectedProduct.image || productMetadata?.image;
+  const productImage = selectedProduct?.image || productMetadata?.image;
   const imageUrl = productImage
     ? productImage.startsWith('http')
       ? productImage
       : `${getApiUrl().replace('/api', '')}/static/${productImage}`
     : null;
 
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#4ADE80" />
+        <Text style={styles.loadingText}>Loading product specifications...</Text>
+      </View>
+    );
+  }
+
+  if (!selectedProduct) {
+    return (
+      <View style={styles.emptyCard}>
+        <View style={styles.emptyIcon}>
+          <Package size={32} color="rgba(255,255,255,0.3)" />
+        </View>
+        <Text style={styles.emptyTitle}>No Product Selected</Text>
+        <Text style={styles.emptySubtitle}>Please go back and select a product first</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 140 }}>
+    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
       {/* Header */}
-      <View className="mb-6">
-        <Text className="text-3xl font-bold text-blue-500 mb-3">Product Specifications</Text>
-        <Text className="text-gray-400 text-base">
+      <View style={styles.header}>
+        <Text style={styles.title}>Product Specifications</Text>
+        <Text style={styles.subtitle}>
           Specify your requirements for {selectedProduct.displayName || selectedProduct.name}
         </Text>
       </View>
 
-      {/* ===== SECTION 1: PRODUCT INFO ===== */}
-      <View className="bg-white/30 rounded-2xl p-5 mb-6 border border-gray-200/50">
-        <View className="flex-row items-center mb-4">
-          <Package size={22} color="#3B82F6" />
-          <Text className="text-gray-900 text-xl font-bold ml-2">Selected Product</Text>
+      {/* Selected Product */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Package size={20} color="#4ADE80" />
+          <Text style={styles.sectionTitle}>Selected Product</Text>
         </View>
-        <View className="flex-row items-center">
+        <View style={styles.productRow}>
           {imageUrl ? (
-            <Image
-              source={{ uri: imageUrl }}
-              className="w-20 h-20 rounded-xl mr-4"
-              resizeMode="cover"
-            />
+            <Image source={{ uri: imageUrl }} style={styles.productImage} resizeMode="cover" />
           ) : (
-            <View className="w-20 h-20 rounded-xl bg-gray-700 items-center justify-center mr-4">
-              <Package size={32} color="#9CA3AF" />
+            <View style={styles.productImageFallback}>
+              <Package size={28} color="rgba(255,255,255,0.25)" />
             </View>
           )}
-          <View className="flex-1">
-            <Text className="text-xl font-bold text-gray-900">
+          <View style={styles.productInfo}>
+            <Text style={styles.productName}>
               {selectedProduct.displayName || selectedProduct.name}
             </Text>
-            <Text className="text-sm text-gray-400 mt-1">{selectedProduct.category}</Text>
+            <Text style={styles.productCategory}>{selectedProduct.category}</Text>
           </View>
         </View>
       </View>
 
-      {/* ===== SECTION 2: PRODUCT SPECIFICATIONS ===== */}
-      {productSpecs && productSpecs.length > 0 ? (
-        <View className="bg-white/30 rounded-2xl p-5 mb-6 border border-gray-200/50">
-          <View className="flex-row items-center mb-4">
-            <Package size={22} color="#3B82F6" />
-            <Text className="text-gray-900 text-xl font-bold ml-2">Product Requirements</Text>
-          </View>
-          <Text className="text-sm text-gray-400 mb-4">
-            Specify your requirements for each specification
-          </Text>
+      {/* Product Requirements */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Package size={20} color="#4ADE80" />
+          <Text style={styles.sectionTitle}>Product Requirements</Text>
+        </View>
 
-          {productSpecs.map((spec: any) => {
-            const specKey = spec.code || spec.id || '';
-            return (
-              <ProductSpecificationInput
-                key={specKey}
-                spec={spec}
-                value={specValues[specKey] || ''}
-                onChange={(value) => handleSpecChange(specKey, value)}
-              />
-            );
-          })}
-        </View>
-      ) : (
-        <View className="bg-white/30 rounded-2xl p-5 mb-6 border border-gray-200/50">
-          <View className="flex-row items-center mb-4">
-            <Package size={22} color="#3B82F6" />
-            <Text className="text-gray-900 text-xl font-bold ml-2">Product Requirements</Text>
-          </View>
-          <Text className="text-gray-400 text-center">
-            No specifications available for this product
-          </Text>
-        </View>
-      )}
+        {productSpecs && productSpecs.length > 0 ? (
+          <>
+            <Text style={styles.specHint}>Specify your requirements for each field</Text>
+            {productSpecs.map((spec: any) => {
+              const specKey = spec.code || spec.id || '';
+              return (
+                <ProductSpecificationInput
+                  key={specKey}
+                  spec={spec}
+                  value={specValues[specKey] || ''}
+                  onChange={(value) => handleSpecChange(specKey, value)}
+                />
+              );
+            })}
+          </>
+        ) : (
+          <Text style={styles.noSpecsText}>No specifications available for this product</Text>
+        )}
+      </View>
 
-      {/* ===== SECTION 3: ADDITIONAL REQUIREMENTS ===== */}
-      <View className="bg-white/30 rounded-2xl p-5 mb-6 border border-gray-200/50">
-        <View className="flex-row items-center mb-4">
-          <Package size={22} color="#3B82F6" />
-          <Text className="text-gray-900 text-xl font-bold ml-2">Additional Requirements</Text>
+      {/* Additional Requirements */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Package size={20} color="#4ADE80" />
+          <Text style={styles.sectionTitle}>Additional Requirements</Text>
         </View>
-        <Text className="text-gray-900 text-sm font-semibold mb-3">
-          Additional Notes or Special Requirements
-        </Text>
+        <Text style={styles.fieldLabel}>Notes or Special Requirements</Text>
         <TextInput
           value={additionalNotes}
           onChangeText={handleNotesChange}
           placeholder="Enter any additional requirements, quality standards, certification needs, etc."
-          placeholderTextColor="#9CA3AF"
+          placeholderTextColor="rgba(255,255,255,0.3)"
           multiline
           numberOfLines={4}
-          className="bg-white rounded-xl px-4 py-3 text-gray-900 min-h-[100px]"
+          style={styles.notesInput}
           textAlignVertical="top"
         />
       </View>
     </ScrollView>
   );
 }
+
+const GLASS_BG = 'rgba(255,255,255,0.06)';
+const GLASS_BORDER = 'rgba(255,255,255,0.1)';
+const GREEN = '#4ADE80';
+
+const styles = StyleSheet.create({
+  centered: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  emptyCard: {
+    alignItems: 'center',
+    backgroundColor: GLASS_BG,
+    borderColor: GLASS_BORDER,
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 40,
+  },
+  emptyIcon: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 40,
+    height: 72,
+    justifyContent: 'center',
+    marginBottom: 16,
+    width: 72,
+  },
+  emptySubtitle: {
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  emptyTitle: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  fieldLabel: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  header: {
+    marginBottom: 20,
+  },
+  loadingText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 14,
+    marginTop: 12,
+  },
+  noSpecsText: {
+    color: 'rgba(255,255,255,0.35)',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  notesInput: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderColor: GLASS_BORDER,
+    borderRadius: 14,
+    borderWidth: 1,
+    color: '#FFFFFF',
+    fontSize: 14,
+    minHeight: 110,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  productCategory: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    marginTop: 3,
+    textTransform: 'capitalize',
+  },
+  productImage: {
+    borderRadius: 12,
+    height: 72,
+    marginRight: 14,
+    width: 72,
+  },
+  productImageFallback: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 12,
+    height: 72,
+    justifyContent: 'center',
+    marginRight: 14,
+    width: 72,
+  },
+  productInfo: {
+    flex: 1,
+  },
+  productName: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  productRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  scrollContent: {
+    paddingBottom: 140,
+  },
+  section: {
+    backgroundColor: GLASS_BG,
+    borderColor: GLASS_BORDER,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginBottom: 16,
+    padding: 18,
+  },
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 14,
+  },
+  sectionTitle: {
+    color: '#FFFFFF',
+    fontSize: 17,
+    fontWeight: '700',
+    marginLeft: 10,
+  },
+  specHint: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 13,
+    marginBottom: 14,
+  },
+  subtitle: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 4,
+  },
+  title: {
+    color: GREEN,
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+});
