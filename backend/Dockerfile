@@ -9,17 +9,20 @@ RUN apt-get update -y && \
 
 WORKDIR /app
 
-# Copy package files and install
+# Copy package files + prisma schema first so postinstall (prisma generate) has the schema
 COPY package*.json ./
 COPY prisma ./prisma/
 RUN npm ci
+
+# Explicitly regenerate with binaryTargets to guarantee correct binary for this OS
 RUN npx prisma generate
 
-# Copy source and build with tsc (not webpack)
+# Copy remaining source and build
 COPY . .
 RUN npm run build
 
 EXPOSE 3000
 
-# Start: migrations then app with proper error visibility
-CMD ["sh", "-c", "echo 'Running migrations...' && npx prisma migrate deploy && echo 'Starting app on port ${PORT:-4000}...' && node dist/main.js"]
+# Start: run migrations, then launch the app.
+# Uses exec so Node.js is PID 1 and Railway can send SIGTERM directly.
+CMD ["sh", "-c", "npx prisma migrate deploy && exec node dist/main.js"]
