@@ -256,9 +256,10 @@ export class PrivyAuthDto {
   @IsString()
   privyToken: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsString()
-  role: string;
+  role?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
