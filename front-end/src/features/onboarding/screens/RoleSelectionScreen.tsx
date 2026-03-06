@@ -4,13 +4,14 @@ import { useNavigation, CommonActions } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../../navigation/types';
 import { LogIn } from 'lucide-react-native';
+import { Image } from 'react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useAuthStore } from '@stores/auth.store';
 import { AnimatedRoleCard } from '../components/AnimatedRoleCard';
 import { AuthGuard } from '@shared/components/AuthGuard';
 import { useLoginWithOAuth, usePrivy, OAuthProviderType } from '@privy-io/expo';
 import { apiClient } from '@services/api';
-import { GradientBackground, GlassButton, GlassBadge } from '../../../design-system';
+import { GradientBackground, GlassButton } from '../../../design-system';
 
 const ROLE_IMAGES = {
   buyer: require('../../../../assets/UserTypes/Buyer.png'),
@@ -170,20 +171,37 @@ export const RoleSelectionScreen: React.FC = () => {
           >
             <View style={{ maxWidth: 600, width: '100%', alignSelf: 'center' }}>
               {/* Header */}
-              <View style={{ marginBottom: 40, alignItems: 'center' }}>
-                <GlassBadge
-                  label="AgroTrade"
-                  variant="success"
-                  size="md"
-                  style={{ marginBottom: 20 }}
-                />
+              <View style={{ marginBottom: 36, alignItems: 'center' }}>
+                {/* App logo replacing the badge */}
+                <View
+                  style={{
+                    shadowColor: '#4ADE80',
+                    shadowOffset: { width: 0, height: 0 },
+                    shadowOpacity: 0.5,
+                    shadowRadius: 20,
+                    elevation: 10,
+                    marginBottom: 20,
+                    borderRadius: 22,
+                  }}
+                >
+                  <Image
+                    source={require('../../../../assets/agra-logo.png')}
+                    style={{
+                      width: 88,
+                      height: 88,
+                      borderRadius: 22,
+                    }}
+                    resizeMode="contain"
+                  />
+                </View>
                 <Text
                   style={{
-                    fontSize: 28,
-                    fontWeight: 'bold',
+                    fontSize: 30,
+                    fontWeight: '800',
                     color: '#FFFFFF',
                     textAlign: 'center',
                     marginBottom: 8,
+                    letterSpacing: 0.2,
                   }}
                 >
                   I am a...
@@ -191,7 +209,7 @@ export const RoleSelectionScreen: React.FC = () => {
                 <Text
                   style={{
                     fontSize: 15,
-                    color: 'rgba(255,255,255,0.65)',
+                    color: 'rgba(255,255,255,0.55)',
                     textAlign: 'center',
                   }}
                 >

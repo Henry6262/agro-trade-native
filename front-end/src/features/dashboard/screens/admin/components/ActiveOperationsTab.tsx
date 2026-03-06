@@ -373,73 +373,69 @@ export const ActiveOperationsTab: React.FC<Props> = ({
               )}
             </View>
           )}
-
-          {/* Profit metrics */}
-          <View style={styles.profitRow}>
-            <View style={styles.profitLeft}>
-              <TrendingUp size={14} color={COLORS.textMuted} />
-              <Text style={styles.profitLabel}> Target Margin: {operation.profitMargin || 0}%</Text>
-            </View>
-            {operation.estimatedProfit != null && (
-              <Text
-                style={[
-                  styles.profitValue,
-                  { color: operation.estimatedProfit > 0 ? COLORS.accentGreen : COLORS.danger },
-                ]}
-              >
-                €{operation.estimatedProfit.toFixed(0)}
-              </Text>
-            )}
-          </View>
-
-          {/* Sellers verified */}
-          {operation.sellers && operation.sellers.length > 0 && (
-            <View style={styles.verifiedRow}>
-              <CheckCircle size={13} color={COLORS.accentGreen} />
-              <Text style={styles.verifiedText}>
-                {' '}
-                {operation.sellers.filter((s) => s.isVerified).length}/{operation.sellers.length}{' '}
-                sellers verified
-              </Text>
-            </View>
-          )}
         </TouchableOpacity>
 
-        {/* Sellers awaiting offers */}
-        {(operation.sellers || []).filter(
-          (s) => !operation.negotiations?.find((n) => n.tradeSellerId === s.id)
-        ).length > 0 && (
-          <GlassCard
-            tier="subtle"
-            animate={false}
-            style={[styles.awaitingCard, styles.awaitingDarkCard]}
-          >
-            <Text style={styles.awaitingText}>
-              {
-                (operation.sellers || []).filter(
-                  (s) => !operation.negotiations?.find((n) => n.tradeSellerId === s.id)
-                ).length
-              }{' '}
-              sellers awaiting offers
-            </Text>
-            <TouchableOpacity
-              onPress={() => {
-                const sellersWithoutOffers =
-                  operation.sellers?.filter(
-                    (s) => !operation.negotiations?.find((n) => n.tradeSellerId === s.id)
-                  ) || [];
-                if (sellersWithoutOffers.length > 0) {
-                  onSendOffer(operation.id, sellersWithoutOffers[0].id);
-                }
-              }}
-              style={styles.sendOffersBtn}
-              activeOpacity={0.75}
-            >
-              <Send size={14} color={COLORS.accentGreen} />
-              <Text style={styles.sendOffersText}> Send Offers</Text>
-            </TouchableOpacity>
-          </GlassCard>
-        )}
+        {/* Metrics + Send Offers inline row */}
+        {(() => {
+          const sellersAwaiting = (operation.sellers || []).filter(
+            (s) => !operation.negotiations?.find((n) => n.tradeSellerId === s.id)
+          );
+          return (
+            <View style={styles.metricsActionRow}>
+              {/* Left: margin + verified stacked */}
+              <View style={styles.metricsLeft}>
+                <View style={styles.profitLeft}>
+                  <TrendingUp size={14} color={COLORS.textMuted} />
+                  <Text style={styles.profitLabel}>
+                    {' '}
+                    Target Margin: {operation.profitMargin || 0}%
+                  </Text>
+                  {operation.estimatedProfit != null && (
+                    <Text
+                      style={[
+                        styles.profitValue,
+                        {
+                          color: operation.estimatedProfit > 0 ? COLORS.accentGreen : COLORS.danger,
+                        },
+                      ]}
+                    >
+                      {'  '}€{operation.estimatedProfit.toFixed(0)}
+                    </Text>
+                  )}
+                </View>
+                {operation.sellers && operation.sellers.length > 0 && (
+                  <View style={[styles.verifiedRow, { marginTop: 5 }]}>
+                    <CheckCircle size={13} color={COLORS.accentGreen} />
+                    <Text style={styles.verifiedText}>
+                      {' '}
+                      {operation.sellers.filter((s) => s.isVerified).length}/
+                      {operation.sellers.length} sellers verified
+                    </Text>
+                  </View>
+                )}
+              </View>
+
+              {/* Right: Send Offers button */}
+              {sellersAwaiting.length > 0 && (
+                <View style={styles.sendOffersRight}>
+                  <Text style={styles.awaitingCount}>{sellersAwaiting.length} awaiting</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (sellersAwaiting.length > 0) {
+                        onSendOffer(operation.id, sellersAwaiting[0].id);
+                      }
+                    }}
+                    style={styles.sendOffersBtn}
+                    activeOpacity={0.75}
+                  >
+                    <Send size={14} color={COLORS.accentGreen} />
+                    <Text style={styles.sendOffersText}> Send Offers</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          );
+        })()}
 
         {/* Expanded negotiations */}
         {isExpanded && operation.negotiations && operation.negotiations.length > 0 && (
@@ -504,17 +500,13 @@ export const ActiveOperationsTab: React.FC<Props> = ({
 };
 
 const styles = StyleSheet.create({
-  awaitingCard: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
+  awaitingCount: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    fontWeight: '600',
+    marginBottom: 6,
+    textAlign: 'center',
   },
-  awaitingDarkCard: {
-    backgroundColor: 'rgba(8,22,12,0.60)',
-    borderColor: 'rgba(74,222,128,0.18)',
-  },
-  awaitingText: { color: COLORS.textSecondary, flex: 1, fontSize: 12, fontWeight: '600' },
 
   centerContainer: {
     alignItems: 'center',
@@ -575,14 +567,21 @@ const styles = StyleSheet.create({
   marginRow: { alignItems: 'center', flexDirection: 'row' },
   marginText: { fontSize: 12, fontWeight: '600' },
 
+  metricsActionRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  metricsLeft: { flex: 1 },
   negoActions: { gap: 6, marginLeft: 8 },
   negoBadge: {},
+
   negoCard: { marginBottom: 8 },
   negoHeader: { alignItems: 'flex-start', flexDirection: 'row' },
 
   negoLeft: { flex: 1 },
   negoList: {},
-
   negoListTitle: {
     color: COLORS.textSecondary,
     fontSize: 12,
@@ -592,6 +591,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   negoName: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '700' },
+
   negoOfferRow: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -600,7 +600,6 @@ const styles = StyleSheet.create({
     marginBottom: 3,
   },
   negoPrice: { fontSize: 13 },
-
   negoTitleRow: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -608,9 +607,9 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 4,
   },
+
   negoUnit: { color: COLORS.textSecondary, fontSize: 12 },
   opCard: { marginBottom: 12 },
-
   opHeader: {
     alignItems: 'flex-start',
     flexDirection: 'row',
@@ -645,12 +644,6 @@ const styles = StyleSheet.create({
   },
   profitLabel: { color: COLORS.textSecondary, fontSize: 13 },
   profitLeft: { alignItems: 'center', flexDirection: 'row' },
-  profitRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
   profitValue: { fontFamily: 'monospace', fontSize: 14, fontWeight: '700' },
   sendOffersBtn: {
     alignItems: 'center',
@@ -662,6 +655,10 @@ const styles = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 14,
     paddingVertical: 7,
+  },
+  sendOffersRight: {
+    alignItems: 'center',
+    marginLeft: 12,
   },
   sendOffersText: { color: COLORS.accentGreen, fontSize: 13, fontWeight: '700' },
   summaryChip: { alignItems: 'center', flexDirection: 'row' },

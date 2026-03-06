@@ -247,7 +247,7 @@ export function LocationInformation() {
         <TouchableOpacity
           style={{
             flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            backgroundColor: 'rgba(0,0,0,0.75)',
             justifyContent: 'center',
             padding: 16,
           }}
@@ -255,7 +255,14 @@ export function LocationInformation() {
           activeOpacity={1}
         >
           <TouchableOpacity
-            style={{ backgroundColor: '#1F2937', borderRadius: 12, padding: 24, maxHeight: '80%' }}
+            style={{
+              backgroundColor: 'rgba(3,15,9,0.97)',
+              borderRadius: 16,
+              padding: 24,
+              maxHeight: '80%',
+              borderWidth: 1,
+              borderColor: 'rgba(74,222,128,0.18)',
+            }}
             onPress={(e) => e.stopPropagation()}
             activeOpacity={1}
           >
@@ -318,7 +325,7 @@ export function LocationInformation() {
 
             <TouchableOpacity
               style={{
-                backgroundColor: '#2563eb',
+                backgroundColor: '#4ADE80',
                 borderRadius: 8,
                 paddingVertical: 12,
                 marginTop: 16,
@@ -330,7 +337,7 @@ export function LocationInformation() {
                 setShowTruckAssignmentModal(false);
               }}
             >
-              <Text style={{ color: '#FFFFFF', textAlign: 'center', fontWeight: '600' }}>
+              <Text style={{ color: '#052e16', textAlign: 'center', fontWeight: '700' }}>
                 Assign {selectedTrucks.length} Trucks
               </Text>
             </TouchableOpacity>
@@ -341,7 +348,7 @@ export function LocationInformation() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#111827' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
       <View style={{ alignItems: 'center', marginBottom: 32 }}>
         <View
           style={{
@@ -375,11 +382,11 @@ export function LocationInformation() {
       {/* Location Display */}
       <View
         style={{
-          backgroundColor: '#1F2937',
+          backgroundColor: 'rgba(3,15,9,0.95)',
           borderRadius: 16,
           padding: 20,
           borderWidth: 1,
-          borderColor: '#374151',
+          borderColor: 'rgba(74,222,128,0.18)',
         }}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
@@ -398,11 +405,11 @@ export function LocationInformation() {
           <TouchableOpacity
             onPress={() => setShowManualInput(true)}
             style={{
-              backgroundColor: '#111827',
+              backgroundColor: 'rgba(255,255,255,0.06)',
               borderRadius: 12,
               padding: 16,
               borderWidth: 1,
-              borderColor: '#374151',
+              borderColor: 'rgba(255,255,255,0.1)',
             }}
           >
             <View
@@ -486,7 +493,7 @@ export function LocationInformation() {
         <TouchableOpacity
           style={{
             flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.5)',
+            backgroundColor: 'rgba(0,0,0,0.75)',
             justifyContent: 'center',
             padding: 16,
           }}
@@ -494,7 +501,14 @@ export function LocationInformation() {
           activeOpacity={1}
         >
           <TouchableOpacity
-            style={{ backgroundColor: '#1F2937', borderRadius: 12, padding: 24, maxHeight: '80%' }}
+            style={{
+              backgroundColor: 'rgba(3,15,9,0.97)',
+              borderRadius: 16,
+              padding: 24,
+              maxHeight: '80%',
+              borderWidth: 1,
+              borderColor: 'rgba(74,222,128,0.18)',
+            }}
             onPress={(e) => e.stopPropagation()}
             activeOpacity={1}
           >
@@ -527,11 +541,11 @@ export function LocationInformation() {
                   onChangeText={(text) => setNewBase({ ...newBase, name: text })}
                   style={{
                     borderWidth: 1,
-                    borderColor: '#374151',
+                    borderColor: 'rgba(74,222,128,0.15)',
                     borderRadius: 8,
                     paddingHorizontal: 12,
                     paddingVertical: 8,
-                    backgroundColor: '#111827',
+                    backgroundColor: 'rgba(255,255,255,0.06)',
                     color: '#FFFFFF',
                   }}
                   placeholderTextColor="#9CA3AF"
@@ -550,11 +564,11 @@ export function LocationInformation() {
                   onChangeText={(text) => setNewBase({ ...newBase, city: text })}
                   style={{
                     borderWidth: 1,
-                    borderColor: '#374151',
+                    borderColor: 'rgba(74,222,128,0.15)',
                     borderRadius: 8,
                     paddingHorizontal: 12,
                     paddingVertical: 8,
-                    backgroundColor: '#111827',
+                    backgroundColor: 'rgba(255,255,255,0.06)',
                     color: '#FFFFFF',
                   }}
                   placeholderTextColor="#9CA3AF"
@@ -622,11 +636,11 @@ export function LocationInformation() {
                   numberOfLines={2}
                   style={{
                     borderWidth: 1,
-                    borderColor: '#374151',
+                    borderColor: 'rgba(74,222,128,0.15)',
                     borderRadius: 8,
                     paddingHorizontal: 12,
                     paddingVertical: 8,
-                    backgroundColor: '#111827',
+                    backgroundColor: 'rgba(255,255,255,0.06)',
                     color: '#FFFFFF',
                     textAlignVertical: 'top',
                   }}
@@ -646,11 +660,11 @@ export function LocationInformation() {
                   onChangeText={(text) => setNewBase({ ...newBase, zipCode: text })}
                   style={{
                     borderWidth: 1,
-                    borderColor: '#374151',
+                    borderColor: 'rgba(74,222,128,0.15)',
                     borderRadius: 8,
                     paddingHorizontal: 12,
                     paddingVertical: 8,
-                    backgroundColor: '#111827',
+                    backgroundColor: 'rgba(255,255,255,0.06)',
                     color: '#FFFFFF',
                   }}
                   placeholderTextColor="#9CA3AF"
@@ -661,7 +675,9 @@ export function LocationInformation() {
             <TouchableOpacity
               style={{
                 backgroundColor:
-                  newBase.name && newBase.city && newBase.country ? '#2563eb' : '#374151',
+                  newBase.name && newBase.city && newBase.country
+                    ? '#4ADE80'
+                    : 'rgba(255,255,255,0.1)',
                 borderRadius: 8,
                 paddingVertical: 12,
                 marginTop: 8,

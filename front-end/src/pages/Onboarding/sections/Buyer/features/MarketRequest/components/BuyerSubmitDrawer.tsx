@@ -10,6 +10,7 @@ import {
   Platform,
   UIManager,
   Alert,
+  StyleSheet,
 } from 'react-native';
 import { X, ShoppingCart, Check, AlertCircle } from 'lucide-react-native';
 import { PrivyAuthNative } from '@pages/Onboarding/components/shared/PrivyAuthNative';
@@ -143,7 +144,7 @@ export function BuyerSubmitDrawer({
       const buyListingData = {
         productId,
         quantity: parseFloat(buyerSpec.quantity || '0'),
-        unit: 'TON' as const, // Map 'tons' to backend enum 'TON'
+        unit: 'TON' as const,
         maxPricePerUnit: parseFloat(buyerSpec.pricePerKilo || buyerSpec.maxPrice || '0'),
         neededBy,
         deliveryLocation: {
@@ -158,11 +159,6 @@ export function BuyerSubmitDrawer({
         notes: buyerSpec.notes,
         status: 'ACTIVE',
       };
-
-      // WORKAROUND: Skip onboarding completely for now
-      // The onboarding endpoint expects different data than what we have
-
-      // Create the buy listing regardless of role
 
       await apiClient.post('/buyer/listings', buyListingData);
 
@@ -187,7 +183,6 @@ export function BuyerSubmitDrawer({
       console.error('Failed to submit purchase request:', error);
       console.error('Error details:', error.response?.data || error.message);
 
-      // Show error to user
       Alert.alert(
         'Submission Failed',
         error.response?.data?.message || 'Failed to create purchase request. Please try again.',
@@ -202,26 +197,28 @@ export function BuyerSubmitDrawer({
     if (showSuccess) {
       return (
         <Animated.View
-          className="px-4 py-8"
-          style={{
-            opacity: successAnimOpacity,
-            transform: [{ scale: successAnimScale }],
-          }}
+          style={[
+            styles.contentPad,
+            {
+              opacity: successAnimOpacity,
+              transform: [{ scale: successAnimScale }],
+            },
+          ]}
         >
           {/* Success State */}
-          <View className="items-center mb-6">
-            <View className="bg-emerald-600/20 p-4 rounded-full mb-4">
-              <Check size={48} color="#10B981" />
+          <View style={styles.successIconWrap}>
+            <View style={styles.successIcon}>
+              <Check size={48} color="#4ADE80" />
             </View>
-            <Text className="text-2xl font-bold text-white mb-2">Request Submitted!</Text>
-            <Text className="text-gray-400 text-center">
+            <Text style={styles.successTitle}>Request Submitted!</Text>
+            <Text style={styles.mutedText}>
               Your purchase request has been sent to verified sellers
             </Text>
           </View>
 
-          <View className="bg-white/50 rounded-xl p-4 mb-6 border border-gray-200">
-            <Text className="text-gray-400 text-sm mb-2">What happens next?</Text>
-            <Text className="text-gray-900">
+          <View style={styles.infoCard}>
+            <Text style={styles.mutedSmallText}>What happens next?</Text>
+            <Text style={styles.bodyText}>
               • Sellers will review your request{'\n'}• You&apos;ll receive quotes within 24-48
               hours
               {'\n'}• Compare offers and choose the best one
@@ -229,30 +226,25 @@ export function BuyerSubmitDrawer({
           </View>
 
           {/* Action Buttons */}
-          <View className="space-y-3">
-            <TouchableOpacity
-              onPress={() => {
-                handleClose();
-                // Navigate to main app (dashboard)
-                navigation.reset({
-                  index: 0,
-                  routes: [{ name: 'Main' }],
-                });
-              }}
-              className="bg-blue-600 rounded-xl p-4"
-            >
-              <Text className="text-white font-semibold text-center text-base">
-                Go to Dashboard
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            onPress={() => {
+              handleClose();
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Main' }],
+              });
+            }}
+            style={styles.primaryBtn}
+          >
+            <Text style={styles.primaryBtnText}>Go to Dashboard</Text>
+          </TouchableOpacity>
         </Animated.View>
       );
     }
 
     if (showAuth) {
       return (
-        <View className="flex-1">
+        <View style={{ flex: 1 }}>
           <PrivyAuthNative onComplete={handleAuthComplete} userRole="buyer" mode="inline" />
         </View>
       );
@@ -260,18 +252,18 @@ export function BuyerSubmitDrawer({
 
     // Default state - confirm submission
     return (
-      <View className="px-4 py-6">
-        <View className="mb-6">
-          <Text className="text-2xl font-bold text-gray-900 mb-2">Submit Purchase Request?</Text>
-          <Text className="text-gray-400">Your request will be sent to verified sellers</Text>
+      <View style={styles.contentPad}>
+        <View style={{ marginBottom: 24 }}>
+          <Text style={styles.drawerTitle}>Submit Purchase Request?</Text>
+          <Text style={styles.mutedText}>Your request will be sent to verified sellers</Text>
         </View>
 
-        <View className="bg-blue-900/20 rounded-xl p-4 mb-6 border border-blue-700/30">
-          <View className="flex-row">
-            <AlertCircle size={20} color="#60a5fa" />
-            <View className="ml-3 flex-1">
-              <Text className="text-blue-400 font-semibold mb-1">Quick Setup</Text>
-              <Text className="text-blue-300 text-sm">
+        <View style={styles.blueInfoBox}>
+          <View style={{ flexDirection: 'row' }}>
+            <AlertCircle size={20} color="#60A5FA" />
+            <View style={{ marginLeft: 12, flex: 1 }}>
+              <Text style={styles.blueLabel}>Quick Setup</Text>
+              <Text style={styles.blueSubtext}>
                 {isAuthenticated
                   ? 'Your request will be submitted immediately'
                   : 'Sign in with Google to submit your request'}
@@ -282,26 +274,23 @@ export function BuyerSubmitDrawer({
 
         <TouchableOpacity
           onPress={isAuthenticated ? handleSubmit : () => setShowAuth(true)}
-          className="bg-blue-600 rounded-xl p-4 mb-3"
+          style={styles.primaryBtn}
           disabled={isSubmitting}
         >
           {isSubmitting ? (
             <ActivityIndicator color="white" />
           ) : (
-            <View className="flex-row items-center justify-center">
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
               <ShoppingCart size={20} color="white" />
-              <Text className="text-gray-900 font-semibold text-base ml-2">
+              <Text style={[styles.primaryBtnText, { marginLeft: 8 }]}>
                 {isAuthenticated ? 'Submit Request' : 'Sign In & Submit'}
               </Text>
             </View>
           )}
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={handleClose}
-          className="bg-white rounded-xl p-4 border border-gray-200"
-        >
-          <Text className="text-gray-400 font-semibold text-center">Cancel</Text>
+        <TouchableOpacity onPress={handleClose} style={styles.secondaryBtn}>
+          <Text style={styles.secondaryBtnText}>Cancel</Text>
         </TouchableOpacity>
       </View>
     );
@@ -309,25 +298,27 @@ export function BuyerSubmitDrawer({
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={handleClose}>
-      <View className="flex-1 bg-white/50">
-        <TouchableOpacity className="flex-1" activeOpacity={1} onPress={handleClose} />
+      <View style={styles.backdrop}>
+        <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={handleClose} />
 
         <Animated.View
-          className="bg-gray-50 rounded-t-3xl overflow-hidden"
-          style={{
-            transform: [{ translateY: slideAnim }],
-            minHeight: Dimensions.get('window').height * 0.4,
-            maxHeight: Dimensions.get('window').height * 0.8,
-          }}
+          style={[
+            styles.drawerContainer,
+            {
+              transform: [{ translateY: slideAnim }],
+              minHeight: Dimensions.get('window').height * 0.4,
+              maxHeight: Dimensions.get('window').height * 0.8,
+            },
+          ]}
         >
           {/* Header */}
-          <View className="flex-row items-center justify-between px-4 py-3 border-b border-gray-200">
-            <TouchableOpacity onPress={onBack || handleClose} className="p-2">
-              <Text className="text-blue-400 font-semibold">Back</Text>
+          <View style={styles.drawerHeader}>
+            <TouchableOpacity onPress={onBack || handleClose} style={styles.backBtn}>
+              <Text style={styles.backBtnText}>Back</Text>
             </TouchableOpacity>
-            <View className="h-1 w-12 bg-gray-700 rounded-full" />
-            <TouchableOpacity onPress={handleClose} className="p-2">
-              <X size={20} color="#9CA3AF" />
+            <View style={styles.dragHandle} />
+            <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
+              <X size={20} color="rgba(255,255,255,0.5)" />
             </TouchableOpacity>
           </View>
 
@@ -337,3 +328,143 @@ export function BuyerSubmitDrawer({
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  backBtn: {
+    padding: 8,
+  },
+  backBtnText: {
+    color: '#4ADE80',
+    fontWeight: '600',
+  },
+  backdrop: {
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    flex: 1,
+  },
+  blueInfoBox: {
+    backgroundColor: 'rgba(59,130,246,0.1)',
+    borderColor: 'rgba(59,130,246,0.2)',
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 24,
+    padding: 16,
+  },
+  blueLabel: {
+    color: '#60A5FA',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  blueSubtext: {
+    color: 'rgba(147,197,253,0.8)',
+    fontSize: 13,
+  },
+  bodyText: {
+    color: '#FFFFFF',
+    lineHeight: 22,
+  },
+  closeBtn: {
+    padding: 8,
+  },
+  contentPad: {
+    padding: 16,
+    paddingBottom: 24,
+  },
+  dragHandle: {
+    backgroundColor: 'rgba(74,222,128,0.3)',
+    borderRadius: 2,
+    height: 4,
+    width: 48,
+  },
+  drawerContainer: {
+    backgroundColor: 'rgba(3,15,9,0.97)',
+    borderTopColor: 'rgba(74,222,128,0.2)',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 1,
+    elevation: 20,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+  },
+  drawerHeader: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(74,222,128,0.1)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  drawerTitle: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  infoCard: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 24,
+    padding: 16,
+  },
+  mutedSmallText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  mutedText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 14,
+  },
+  primaryBtn: {
+    alignItems: 'center',
+    backgroundColor: '#4ADE80',
+    borderRadius: 12,
+    elevation: 6,
+    marginBottom: 12,
+    paddingVertical: 16,
+    shadowColor: '#4ADE80',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  primaryBtnText: {
+    color: '#052e16',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  secondaryBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingVertical: 16,
+  },
+  secondaryBtnText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontWeight: '600',
+  },
+  successIcon: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.15)',
+    borderRadius: 50,
+    justifyContent: 'center',
+    marginBottom: 16,
+    padding: 16,
+  },
+  successIconWrap: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  successTitle: {
+    color: '#FFFFFF',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+});

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StatusBar, Dimensions, ScrollView } from 'react-native';
-import { ChevronRight, Menu, User } from 'lucide-react-native';
+import { ChevronRight, LogOut, Menu, User } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ProfileDrawer } from './ProfileDrawer';
 import { useAuthStore } from '@stores/auth.store';
@@ -252,6 +252,20 @@ export default function DashboardWrapper({
 
             <TouchableOpacity onPress={() => setShowProfileDrawer(true)} style={{ padding: 8 }}>
               <User color="#FFFFFF" size={24} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => useAuthStore.getState().logout()}
+              style={{
+                padding: 8,
+                marginLeft: 4,
+                backgroundColor: 'rgba(239,68,68,0.15)',
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: 'rgba(239,68,68,0.3)',
+              }}
+            >
+              <LogOut color="#EF4444" size={18} />
             </TouchableOpacity>
           </View>
 

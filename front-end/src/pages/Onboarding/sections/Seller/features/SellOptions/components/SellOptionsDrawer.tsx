@@ -12,6 +12,7 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  StyleSheet,
 } from 'react-native';
 import {
   X,
@@ -104,7 +105,6 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
 
   // Update height when offer type changes
   useEffect(() => {
-    // Configure smooth animation
     LayoutAnimation.configureNext(
       LayoutAnimation.create(
         300,
@@ -114,10 +114,8 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
     );
 
     if (offerType === 'custom-offer') {
-      // Expand to 75% height for specifications form
       setDrawerHeight(Dimensions.get('window').height * 0.75);
     } else if (offerType === null) {
-      // Contract to 40% height for selection
       setDrawerHeight(Dimensions.get('window').height * 0.4);
     }
   }, [offerType]);
@@ -129,7 +127,6 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
     setShowSuccess(false);
     setListingCreated(false);
     setSpecifications({});
-    // Reset animations
     successAnimScale.setValue(0);
     successAnimOpacity.setValue(0);
     onClose();
@@ -138,7 +135,6 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
   const handleBack = () => {
     setOfferType(null);
     setErrors({});
-    // Height animation is handled by the useEffect
   };
 
   const validateSpecifications = (): boolean => {
@@ -179,34 +175,28 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
     setOfferType(type);
 
     if (type === 'listing') {
-      // For quick listing, proceed directly
       handleSubmit(type);
     }
-    // For custom offer, show specifications form
   };
 
   const handleSubmit = async (type: OfferType = offerType) => {
     if (!type) return;
 
-    // For custom offer, validate specifications
     if (type === 'custom-offer' && !validateSpecifications()) {
       Alert.alert('Missing Information', 'Please fill in all required specifications');
       return;
     }
 
-    // Save the offer type and specifications
     updateSellerSpecification(productId, {
       action: type,
       specifications: type === 'custom-offer' ? specifications : undefined,
     });
 
-    // Check authentication
     if (!isAuthenticated) {
       setShowAuth(true);
       return;
     }
 
-    // Submit to backend
     await submitListing(type);
   };
 
@@ -269,7 +259,6 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
     if (success) {
       setListingCreated(true);
       setShowSuccess(true);
-      // Animate success screen
       Animated.parallel([
         Animated.spring(successAnimScale, {
           toValue: 1,
@@ -289,8 +278,10 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
   const renderContent = () => {
     if (!productId) {
       return (
-        <View className="p-6">
-          <Text className="text-red-400 text-center">Error: No product ID provided</Text>
+        <View style={{ padding: 24 }}>
+          <Text style={{ color: '#F87171', textAlign: 'center' }}>
+            Error: No product ID provided
+          </Text>
         </View>
       );
     }
@@ -298,21 +289,22 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
     if (showSuccess) {
       return (
         <Animated.View
-          className="flex-1 p-6"
-          style={{
-            opacity: successAnimOpacity,
-            transform: [{ scale: successAnimScale }],
-          }}
+          style={[
+            styles.contentPad,
+            {
+              flex: 1,
+              opacity: successAnimOpacity,
+              transform: [{ scale: successAnimScale }],
+            },
+          ]}
         >
           {/* Success Animation */}
-          <View className="items-center mb-8">
-            <View className="bg-emerald-600/20 p-6 rounded-full mb-4">
-              <Check size={48} color="#10B981" />
+          <View style={styles.successCenter}>
+            <View style={styles.successIconCircle}>
+              <Check size={48} color="#4ADE80" />
             </View>
-            <Text className="text-2xl font-bold text-white mb-2">
-              Listing Created Successfully!
-            </Text>
-            <Text className="text-gray-400 text-center">
+            <Text style={styles.successTitle}>Listing Created Successfully!</Text>
+            <Text style={styles.mutedText}>
               {offerType === 'custom-offer'
                 ? 'Your custom offer request has been submitted. You will receive a quote within 24 hours.'
                 : 'Your listing is now live on the marketplace.'}
@@ -320,56 +312,48 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
           </View>
 
           {/* Product Summary */}
-          <View className="bg-white/50 rounded-xl p-4 mb-6 border border-gray-200">
-            <Text className="text-gray-400 text-sm mb-2">Product Listed</Text>
-            <Text className="text-gray-900 font-semibold text-lg mb-1">
-              {product?.displayName || product?.name}
-            </Text>
-            <View className="flex-row items-center">
-              <Text className="text-gray-400">
+          <View style={styles.darkCard}>
+            <Text style={styles.mutedSmallText}>Product Listed</Text>
+            <Text style={styles.cardTitle}>{product?.displayName || product?.name}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.mutedText}>
                 {currentSpecs.quantity} {currentSpecs.unit || product?.defaultUnit}
               </Text>
               {location?.city && (
                 <>
-                  <Text className="text-gray-600 mx-2">•</Text>
-                  <Text className="text-gray-400">{location.city}</Text>
+                  <Text style={[styles.mutedText, { marginHorizontal: 8 }]}>•</Text>
+                  <Text style={styles.mutedText}>{location.city}</Text>
                 </>
               )}
             </View>
           </View>
 
           {/* Action Buttons */}
-          <View className="space-y-3">
+          <View style={{ gap: 12, marginTop: 8 }}>
             <TouchableOpacity
               onPress={() => {
                 handleClose();
-                // Navigate to main app (dashboard)
                 navigation.reset({
                   index: 0,
                   routes: [{ name: 'Main' }],
                 });
               }}
-              className="bg-emerald-600 rounded-xl p-4"
+              style={styles.primaryBtn}
             >
-              <Text className="text-white font-semibold text-center text-base">
-                Go to Dashboard
-              </Text>
+              <Text style={styles.primaryBtnText}>Go to Dashboard</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => {
-                // Reset states
                 setShowSuccess(false);
                 setListingCreated(false);
                 setOfferType(null);
                 setSpecifications({});
                 handleClose();
               }}
-              className="bg-white rounded-xl p-4 border border-gray-200"
+              style={styles.secondaryBtn}
             >
-              <Text className="text-gray-600 font-semibold text-center text-base">
-                Create Another Listing
-              </Text>
+              <Text style={styles.secondaryBtnText}>Create Another Listing</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -378,7 +362,7 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
 
     if (showAuth) {
       return (
-        <View className="flex-1">
+        <View style={{ flex: 1 }}>
           <PrivyAuthNative
             onComplete={handleAuthComplete}
             userRole={selectedRole || 'seller'}
@@ -391,54 +375,60 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
     if (!offerType) {
       // Show offer type selection
       return (
-        <View className="px-4 py-6">
-          <View className="mb-6">
-            <Text className="text-2xl font-bold text-gray-900 mb-2">
-              How would you like to sell?
-            </Text>
-            <Text className="text-gray-400">Choose between quick listing or custom offer</Text>
+        <View style={styles.contentPad}>
+          <View style={{ marginBottom: 24 }}>
+            <Text style={styles.drawerTitle}>How would you like to sell?</Text>
+            <Text style={styles.mutedText}>Choose between quick listing or custom offer</Text>
           </View>
 
           <View>
             {/* Quick Listing Option */}
             <TouchableOpacity
               onPress={() => handleOfferTypeSelect('listing')}
-              className="bg-white/50 rounded-xl p-4 border border-gray-200 mb-3"
+              style={[styles.optionCard, { marginBottom: 12 }]}
             >
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center flex-1">
-                  <View className="bg-blue-600/20 p-3 rounded-xl">
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                  <View style={styles.optionIconWrapBlue}>
                     <ShoppingCart size={24} color="#3B82F6" />
                   </View>
-                  <View className="ml-4 flex-1">
-                    <Text className="text-white font-semibold text-base">Quick Listing</Text>
-                    <Text className="text-gray-400 text-sm mt-1">
-                      List instantly on the marketplace
-                    </Text>
+                  <View style={{ marginLeft: 16, flex: 1 }}>
+                    <Text style={styles.optionTitle}>Quick Listing</Text>
+                    <Text style={styles.mutedText}>List instantly on the marketplace</Text>
                   </View>
                 </View>
-                <ChevronRight size={20} color="#6B7280" />
+                <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
               </View>
             </TouchableOpacity>
 
             {/* Custom Offer Option */}
             <TouchableOpacity
               onPress={() => handleOfferTypeSelect('custom-offer')}
-              className="bg-white/50 rounded-xl p-4 border border-gray-200"
+              style={styles.optionCard}
             >
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center flex-1">
-                  <View className="bg-emerald-600/20 p-3 rounded-xl">
-                    <Sparkles size={24} color="#10B981" />
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                  <View style={styles.optionIconWrapGreen}>
+                    <Sparkles size={24} color="#4ADE80" />
                   </View>
-                  <View className="ml-4 flex-1">
-                    <Text className="text-white font-semibold text-base">Custom Offer</Text>
-                    <Text className="text-gray-400 text-sm mt-1">
-                      Get personalized quote with specifications
-                    </Text>
+                  <View style={{ marginLeft: 16, flex: 1 }}>
+                    <Text style={styles.optionTitle}>Custom Offer</Text>
+                    <Text style={styles.mutedText}>Get personalized quote with specifications</Text>
                   </View>
                 </View>
-                <ChevronRight size={20} color="#6B7280" />
+                <ChevronRight size={20} color="rgba(255,255,255,0.3)" />
               </View>
             </TouchableOpacity>
           </View>
@@ -448,19 +438,29 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
 
     // Show specifications form for custom offer
     return (
-      <View className="flex-1">
+      <View style={{ flex: 1 }}>
         {/* Back button header */}
-        <View className="flex-row items-center px-4 pb-3">
-          <TouchableOpacity onPress={handleBack} className="flex-row items-center">
-            <ChevronLeft size={20} color="#10B981" />
-            <Text className="text-emerald-400 ml-1">Back</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingBottom: 12,
+          }}
+        >
+          <TouchableOpacity
+            onPress={handleBack}
+            style={{ flexDirection: 'row', alignItems: 'center' }}
+          >
+            <ChevronLeft size={20} color="#4ADE80" />
+            <Text style={styles.greenText}>Back</Text>
           </TouchableOpacity>
         </View>
 
-        <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
-          <View className="mb-6">
-            <Text className="text-2xl font-bold text-gray-900 mb-2">Product Specifications</Text>
-            <Text className="text-gray-400">
+        <ScrollView style={{ flex: 1, paddingHorizontal: 16 }} showsVerticalScrollIndicator={false}>
+          <View style={{ marginBottom: 24 }}>
+            <Text style={styles.drawerTitle}>Product Specifications</Text>
+            <Text style={styles.mutedText}>
               Fill in the specifications for your {product?.displayName || product?.name}
             </Text>
           </View>
@@ -477,11 +477,7 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
                       spec={spec}
                       value={specifications[specKey] || ''}
                       onChange={(value) => {
-                        setSpecifications((prev) => ({
-                          ...prev,
-                          [specKey]: value,
-                        }));
-                        // Clear error when user types
+                        setSpecifications((prev) => ({ ...prev, [specKey]: value }));
                         if (errors[specKey]) {
                           setErrors((prev) => {
                             const newErrors = { ...prev };
@@ -496,10 +492,10 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
                 })}
             </View>
           ) : (
-            <View className="bg-white/50 rounded-xl p-6 mb-4">
-              <View className="items-center">
-                <AlertCircle size={48} color="#6B7280" />
-                <Text className="text-gray-400 text-center mt-3">
+            <View style={[styles.darkCard, { padding: 24, marginBottom: 16 }]}>
+              <View style={{ alignItems: 'center' }}>
+                <AlertCircle size={48} color="rgba(255,255,255,0.3)" />
+                <Text style={[styles.mutedText, { textAlign: 'center', marginTop: 12 }]}>
                   No specifications required for this product
                 </Text>
               </View>
@@ -508,18 +504,20 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
         </ScrollView>
 
         {/* Submit Button - Fixed at bottom */}
-        <View className="px-4 py-4 bg-gray-50 border-t border-gray-200">
+        <View style={styles.submitBar}>
           <TouchableOpacity
             onPress={() => handleSubmit()}
             disabled={isSubmitting}
-            className={`rounded-xl py-4 ${isSubmitting ? 'bg-gray-700' : 'bg-emerald-600'}`}
+            style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
           >
             {isSubmitting ? (
               <ActivityIndicator color="white" />
             ) : (
-              <View className="flex-row items-center justify-center">
-                <Check size={20} color="white" />
-                <Text className="text-gray-900 font-semibold text-base ml-2">Complete</Text>
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}
+              >
+                <Check size={20} color="#052e16" />
+                <Text style={styles.submitBtnText}>Complete</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -530,31 +528,206 @@ export function SellOptionsDrawer({ visible, onClose, productId }: SellOptionsDr
 
   return (
     <Modal visible={visible} animationType="none" transparent={true} onRequestClose={handleClose}>
-      <View className="flex-1 bg-white/60">
-        <TouchableOpacity className="flex-1" activeOpacity={1} onPress={handleClose} />
+      <View style={styles.backdrop}>
+        <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={handleClose} />
 
         <Animated.View
-          style={{
-            transform: [{ translateY: slideAnim }],
-            backgroundColor: '#111827',
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            height: drawerHeight,
-          }}
+          style={[
+            styles.drawerContainer,
+            {
+              transform: [{ translateY: slideAnim }],
+              height: drawerHeight,
+            },
+          ]}
         >
           {/* Header */}
-          <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
-            <View className="w-10" />
-            <View className="h-1 w-12 bg-gray-600 rounded-full" />
-            <TouchableOpacity onPress={handleClose} className="p-2">
-              <X size={24} color="white" />
+          <View style={styles.drawerHeader}>
+            <View style={{ width: 40 }} />
+            <View style={styles.dragHandle} />
+            <TouchableOpacity onPress={handleClose} style={{ padding: 8 }}>
+              <X size={24} color="rgba(255,255,255,0.6)" />
             </TouchableOpacity>
           </View>
 
           {/* Content */}
-          <View className="flex-1">{renderContent()}</View>
+          <View style={{ flex: 1 }}>{renderContent()}</View>
         </Animated.View>
       </View>
     </Modal>
   );
 }
+
+const styles = StyleSheet.create({
+  backdrop: {
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    flex: 1,
+  },
+  cardTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 4,
+    marginTop: 4,
+  },
+  contentPad: {
+    padding: 16,
+  },
+  darkCard: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 16,
+    padding: 16,
+  },
+  dragHandle: {
+    backgroundColor: 'rgba(74,222,128,0.3)',
+    borderRadius: 2,
+    height: 4,
+    width: 48,
+  },
+  drawerContainer: {
+    backgroundColor: 'rgba(3,15,9,0.97)',
+    borderTopColor: 'rgba(74,222,128,0.2)',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 1,
+    elevation: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+  },
+  drawerHeader: {
+    alignItems: 'center',
+    borderBottomColor: 'rgba(74,222,128,0.1)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+  },
+  drawerTitle: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  greenText: {
+    color: '#4ADE80',
+    marginLeft: 4,
+  },
+  mutedSmallText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  mutedText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 14,
+  },
+  optionCard: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 16,
+  },
+  optionIconWrapBlue: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(59,130,246,0.15)',
+    borderRadius: 12,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
+  },
+  optionIconWrapGreen: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.15)',
+    borderRadius: 12,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
+  },
+  optionTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  primaryBtn: {
+    alignItems: 'center',
+    backgroundColor: '#4ADE80',
+    borderRadius: 12,
+    elevation: 6,
+    paddingVertical: 16,
+    shadowColor: '#4ADE80',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  primaryBtnText: {
+    color: '#052e16',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  secondaryBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingVertical: 16,
+  },
+  secondaryBtnText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontWeight: '600',
+  },
+  submitBar: {
+    backgroundColor: 'rgba(3,15,9,0.95)',
+    borderTopColor: 'rgba(74,222,128,0.12)',
+    borderTopWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  submitBtn: {
+    alignItems: 'center',
+    backgroundColor: '#4ADE80',
+    borderRadius: 12,
+    elevation: 6,
+    paddingVertical: 16,
+    shadowColor: '#4ADE80',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  submitBtnDisabled: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  submitBtnText: {
+    color: '#052e16',
+    fontSize: 16,
+    fontWeight: '700',
+    marginLeft: 8,
+  },
+  successCenter: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  successIconCircle: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.15)',
+    borderRadius: 50,
+    justifyContent: 'center',
+    marginBottom: 16,
+    padding: 24,
+  },
+  successTitle: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+});

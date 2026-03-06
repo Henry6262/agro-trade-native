@@ -14,6 +14,7 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
   Alert,
+  StyleSheet,
 } from 'react-native';
 import {
   X,
@@ -271,47 +272,30 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
 
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
-      <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+      <View style={{ flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.75)' }}>
         <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
 
-        <Animated.View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            backgroundColor: '#FFFFFF',
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            transform: [{ translateY: slideAnim }],
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.25,
-            shadowRadius: 10,
-            elevation: 5,
-            maxHeight: '75%',
-          }}
-        >
+        <Animated.View style={[styles.drawerContainer, { transform: [{ translateY: slideAnim }] }]}>
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={{ flex: 1 }}
           >
             <SafeAreaView style={{ flex: 1 }}>
-              {/* Top Section with Product Info - Dark Background */}
-              <View className="bg-gray-850" style={{ backgroundColor: '#FFFFFF' }}>
+              {/* Top Section with Product Info */}
+              <View style={styles.drawerHeader}>
                 {/* Drag Handle */}
-                <View className="items-center py-2">
-                  <View className="w-12 h-1 bg-gray-600 rounded-full" />
+                <View style={styles.dragHandleContainer}>
+                  <View style={styles.dragHandle} />
                 </View>
 
                 {/* Header with Product Info */}
-                <View className="px-4 pb-3">
-                  <TouchableOpacity onPress={onClose} className="absolute right-4 top-2 p-2 z-10">
-                    <X size={24} color="#9CA3AF" />
+                <View style={styles.productHeaderRow}>
+                  <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                    <X size={24} color="rgba(255,255,255,0.5)" />
                   </TouchableOpacity>
 
                   {product && (
-                    <View className="flex-row items-center">
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       {product.image && (
                         <Image
                           source={{
@@ -319,16 +303,15 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                               ? product.image
                               : `${getApiUrl().replace('/api', '')}/static/${product.image}`,
                           }}
-                          style={{ width: 50, height: 50 }}
-                          className="rounded-xl mr-3"
+                          style={{ width: 50, height: 50, borderRadius: 12, marginRight: 12 }}
                           resizeMode="cover"
                         />
                       )}
-                      <View className="flex-1 pr-8">
-                        <Text className="text-gray-900 text-lg font-semibold">
+                      <View style={{ flex: 1, paddingRight: 32 }}>
+                        <Text style={styles.productName}>
                           {product.displayName || product.name}
                         </Text>
-                        <Text className="text-gray-400 text-sm">
+                        <Text style={styles.productCategory}>
                           {product.category.replace(/_/g, ' ')}
                         </Text>
                       </View>
@@ -337,94 +320,95 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                 </View>
               </View>
 
-              {/* Main Content Area - Lighter Background */}
+              {/* Main Content Area */}
               <ScrollView
-                className="flex-1"
-                style={{ backgroundColor: '#FFFFFF' }}
+                style={{ flex: 1, backgroundColor: 'transparent' }}
                 contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 16 }}
                 showsVerticalScrollIndicator={false}
               >
                 {!product ? (
-                  <View className="flex-1 items-center justify-center py-10">
-                    <ActivityIndicator size="large" color="#10B981" />
-                    <Text className="text-gray-400 mt-3">Loading product details...</Text>
+                  <View
+                    style={{
+                      flex: 1,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      paddingVertical: 40,
+                    }}
+                  >
+                    <ActivityIndicator size="large" color="#4ADE80" />
+                    <Text style={styles.mutedText}>Loading product details...</Text>
                   </View>
                 ) : currentStep === 'quantity' ? (
                   <>
                     {/* Location Display with Edit */}
-                    <TouchableOpacity
-                      onPress={handleLocationChange}
-                      className="bg-white/50 rounded-xl p-3 mb-4 flex-row items-center justify-between"
-                    >
-                      <View className="flex-row items-center flex-1">
-                        <MapPin size={16} color="#10B981" />
-                        <View className="ml-2 flex-1">
-                          <Text className="text-gray-400 text-xs">Your Location</Text>
-                          <Text className="text-gray-900 text-sm">
+                    <TouchableOpacity onPress={handleLocationChange} style={styles.locationRow}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                        <MapPin size={16} color="#4ADE80" />
+                        <View style={{ marginLeft: 8, flex: 1 }}>
+                          <Text style={styles.mutedSmallText}>Your Location</Text>
+                          <Text style={styles.bodyText}>
                             {location?.city || location?.region || 'Not set'}
                           </Text>
                         </View>
                       </View>
-                      <Edit2 size={16} color="#6B7280" />
+                      <Edit2 size={16} color="rgba(255,255,255,0.4)" />
                     </TouchableOpacity>
 
                     {/* Compact Price Badge */}
                     {location && priceOffer ? (
-                      <View className="items-center mb-6">
-                        <View className="bg-emerald-600 rounded-full px-6 py-3 flex-row items-center">
+                      <View style={{ alignItems: 'center', marginBottom: 24 }}>
+                        <View style={styles.priceBadge}>
                           <DollarSign size={18} color="white" />
-                          <Text className="text-white text-xl font-bold mx-1">
+                          <Text style={styles.priceText}>
                             {priceOffer.min} - {priceOffer.max}
                           </Text>
-                          <Text className="text-emerald-100 text-sm">
-                            /{product.defaultUnit || 'TON'}
-                          </Text>
+                          <Text style={styles.priceUnit}>/{product.defaultUnit || 'TON'}</Text>
                         </View>
-                        <Text className="text-gray-500 text-xs mt-2">
-                          Price range for your region
-                        </Text>
+                        <Text style={styles.mutedSmallText}>Price range for your region</Text>
                       </View>
                     ) : !location ? (
-                      <View className="bg-amber-500/10 rounded-xl p-3 mb-6 border border-amber-500/20">
-                        <View className="flex-row items-center">
+                      <View style={styles.infoBox}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                           <Info size={14} color="#F59E0B" />
-                          <Text className="text-amber-400 text-xs font-medium ml-2">
-                            Set location to see regional prices
-                          </Text>
+                          <Text style={styles.amberText}>Set location to see regional prices</Text>
                         </View>
                       </View>
                     ) : null}
 
                     {/* Quantity Selection */}
-                    <View className="mb-6">
-                      <View className="flex-row items-center mb-3">
+                    <View style={{ marginBottom: 24 }}>
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}
+                      >
                         <Weight size={20} color="white" />
-                        <Text className="text-gray-900 text-base font-semibold ml-2">
+                        <Text style={[styles.sectionTitle, { marginLeft: 8 }]}>
                           How much can you supply?
                         </Text>
                       </View>
 
                       {/* Preset Quantities */}
-                      <View className="flex-row mb-3">
+                      <View style={{ flexDirection: 'row', marginBottom: 12 }}>
                         {PRESET_QUANTITIES.map((qty) => (
                           <TouchableOpacity
                             key={qty}
                             onPress={() => handleQuantitySelect(qty)}
-                            className="flex-1 mx-1"
+                            style={{ flex: 1, marginHorizontal: 4 }}
                           >
                             <View
-                              className={`py-4 rounded-2xl border-2 ${
+                              style={[
+                                styles.qtyCard,
                                 selectedQuantity === qty && !showCustomInput
-                                  ? 'bg-emerald-600/20 border-emerald-500'
-                                  : 'bg-gray-50/50 border-gray-200'
-                              }`}
+                                  ? styles.qtyCardSelected
+                                  : styles.qtyCardUnselected,
+                              ]}
                             >
                               <Text
-                                className={`text-center text-lg font-bold ${
+                                style={[
+                                  styles.qtyText,
                                   selectedQuantity === qty && !showCustomInput
-                                    ? 'text-emerald-400'
-                                    : 'text-gray-600'
-                                }`}
+                                    ? styles.qtyTextSelected
+                                    : styles.qtyTextUnselected,
+                                ]}
                               >
                                 {qty}/t
                               </Text>
@@ -435,22 +419,23 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
 
                       {/* Custom Amount Button */}
                       {!showCustomInput ? (
-                        <TouchableOpacity onPress={handleCustomQuantity} className="mb-3">
-                          <View className="py-4 rounded-2xl border-2 bg-gray-50/50 border-gray-200">
-                            <Text className="text-center text-gray-400 font-medium">
-                              Custom Amount
-                            </Text>
+                        <TouchableOpacity
+                          onPress={handleCustomQuantity}
+                          style={{ marginBottom: 12 }}
+                        >
+                          <View style={styles.qtyCardUnselected}>
+                            <Text style={styles.mutedText}>Custom Amount</Text>
                           </View>
                         </TouchableOpacity>
                       ) : (
-                        <View className="mb-3">
+                        <View style={{ marginBottom: 12 }}>
                           <TextInput
                             value={customQuantity}
                             onChangeText={handleCustomQuantityChange}
                             placeholder="Enter quantity in tons..."
-                            placeholderTextColor="#4B5563"
+                            placeholderTextColor="rgba(255,255,255,0.3)"
                             keyboardType="numeric"
-                            className="bg-gray-50/50 border-2 border-emerald-500/30 rounded-2xl px-4 py-4 text-gray-900 text-center"
+                            style={styles.customInput}
                             autoFocus
                           />
                           <TouchableOpacity
@@ -459,27 +444,26 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                               setCustomQuantity('');
                               setSelectedQuantity(null);
                             }}
-                            className="mt-2"
+                            style={{ marginTop: 8 }}
                           >
-                            <Text className="text-center text-gray-500 text-sm">Cancel</Text>
+                            <Text style={[styles.mutedSmallText, { textAlign: 'center' }]}>
+                              Cancel
+                            </Text>
                           </TouchableOpacity>
                         </View>
                       )}
                     </View>
 
                     {/* Info Text */}
-                    <View className="bg-blue-500/10 rounded-xl p-3 mb-4 border border-blue-500/20">
-                      <View className="flex-row items-start">
+                    <View style={styles.infoBoxBlue}>
+                      <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
                         <Info size={14} color="#3B82F6" />
-                        <View className="flex-1 ml-2">
-                          <Text className="text-blue-400 text-xs font-medium mb-1">
-                            Choose your selling option
-                          </Text>
-                          <Text className="text-blue-400/70 text-xs leading-4">
-                            <Text className="font-semibold">Create Listing:</Text> List your product
-                            on the marketplace.
-                            {'\n'}
-                            <Text className="font-semibold">Custom Offer:</Text> Provide
+                        <View style={{ flex: 1, marginLeft: 8 }}>
+                          <Text style={styles.blueText}>Choose your selling option</Text>
+                          <Text style={styles.blueMutedText}>
+                            <Text style={{ fontWeight: '600' }}>Create Listing:</Text> List your
+                            product on the marketplace.{'\n'}
+                            <Text style={{ fontWeight: '600' }}>Custom Offer:</Text> Provide
                             specifications for a personalized quote.
                           </Text>
                         </View>
@@ -489,86 +473,85 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                 ) : currentStep === 'specifications' ? (
                   <>
                     {/* Step 2: Specifications for Custom Offer */}
-                    <View className="mb-4">
+                    <View style={{ marginBottom: 16 }}>
                       <TouchableOpacity
                         onPress={() => setCurrentStep('quantity')}
-                        className="flex-row items-center mb-4"
+                        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}
                       >
                         <ChevronRight
                           size={20}
-                          color="#6B7280"
+                          color="rgba(255,255,255,0.4)"
                           style={{ transform: [{ rotate: '180deg' }] }}
                         />
-                        <Text className="text-gray-400 ml-2">Back to quantity</Text>
+                        <Text style={[styles.mutedText, { marginLeft: 8 }]}>Back to quantity</Text>
                       </TouchableOpacity>
 
-                      <Text className="text-gray-900 text-lg font-semibold mb-2">
-                        Product Specifications
-                      </Text>
-                      <Text className="text-gray-400 text-sm mb-4">
+                      <Text style={styles.sectionTitle}>Product Specifications</Text>
+                      <Text style={[styles.mutedText, { marginBottom: 16 }]}>
                         Provide details about your {product.displayName || product.name}
                       </Text>
                     </View>
 
                     {/* Specification Fields */}
                     {product.specifications && product.specifications.length > 0 ? (
-                      <View className="space-y-3">
+                      <View>
                         {product.specifications.map((spec) => {
                           const specKey = spec.code || spec.id;
                           const isRequired =
                             spec.importance === 'CRITICAL' || spec.importance === 'IMPORTANT';
 
                           return (
-                            <View
-                              key={specKey}
-                              className="bg-white/50 rounded-2xl p-4 mb-3 border border-gray-200/50"
-                            >
+                            <View key={specKey} style={styles.specCard}>
                               {/* Label Row */}
-                              <View className="flex-row items-center justify-between mb-3">
-                                <Text className="text-gray-900 text-sm font-semibold flex-1">
+                              <View
+                                style={{
+                                  flexDirection: 'row',
+                                  alignItems: 'center',
+                                  justifyContent: 'space-between',
+                                  marginBottom: 12,
+                                }}
+                              >
+                                <Text style={[styles.specLabel, { flex: 1 }]}>
                                   {spec.name || spec.code}
-                                  {isRequired && <Text className="text-red-400"> *</Text>}
+                                  {isRequired && <Text style={{ color: '#F87171' }}> *</Text>}
                                 </Text>
                                 {spec.unit && (
-                                  <View className="bg-emerald-600/20 px-3 py-1 rounded-full">
-                                    <Text className="text-emerald-400 text-xs font-medium">
-                                      {spec.unit}
-                                    </Text>
+                                  <View style={styles.unitBadge}>
+                                    <Text style={styles.unitText}>{spec.unit}</Text>
                                   </View>
                                 )}
                               </View>
 
                               {/* Input Field */}
-                              <View className="flex-row items-center">
+                              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                                 <TextInput
                                   value={specifications[specKey] || ''}
                                   onChangeText={(value) => {
-                                    // Validate numeric inputs
                                     if (spec.dataType === 'NUMBER') {
                                       const numValue = value.replace(/[^0-9.]/g, '');
-                                      setSpecifications({
-                                        ...specifications,
-                                        [specKey]: numValue,
-                                      });
+                                      setSpecifications({ ...specifications, [specKey]: numValue });
                                     } else {
-                                      setSpecifications({
-                                        ...specifications,
-                                        [specKey]: value,
-                                      });
+                                      setSpecifications({ ...specifications, [specKey]: value });
                                     }
                                   }}
                                   placeholder={`Enter ${spec.name?.toLowerCase() || spec.code}`}
-                                  placeholderTextColor="#4B5563"
-                                  className="bg-gray-50/50 rounded-xl px-4 py-3 text-gray-900 flex-1"
+                                  placeholderTextColor="rgba(255,255,255,0.3)"
+                                  style={styles.specInput}
                                   keyboardType={spec.dataType === 'NUMBER' ? 'numeric' : 'default'}
                                 />
                               </View>
 
                               {/* Valid Range Display */}
                               {spec.dataType === 'NUMBER' && (spec.minValue || spec.maxValue) && (
-                                <View className="flex-row items-center justify-end mt-2">
-                                  <View className="bg-blue-600/10 px-3 py-1 rounded-lg">
-                                    <Text className="text-blue-400 text-xs">
+                                <View
+                                  style={{
+                                    flexDirection: 'row',
+                                    justifyContent: 'flex-end',
+                                    marginTop: 8,
+                                  }}
+                                >
+                                  <View style={styles.rangeTag}>
+                                    <Text style={styles.blueText}>
                                       Valid range: {spec.minValue || '0'} - {spec.maxValue || '∞'}
                                     </Text>
                                   </View>
@@ -577,24 +560,32 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
 
                               {/* Importance Badge */}
                               {spec.importance && (
-                                <View className="flex-row items-center mt-2">
+                                <View
+                                  style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    marginTop: 8,
+                                  }}
+                                >
                                   <View
-                                    className={`px-2 py-0.5 rounded ${
+                                    style={[
+                                      styles.importanceBadge,
                                       spec.importance === 'CRITICAL'
-                                        ? 'bg-red-600/20'
+                                        ? { backgroundColor: 'rgba(220,38,38,0.15)' }
                                         : spec.importance === 'IMPORTANT'
-                                          ? 'bg-amber-600/20'
-                                          : 'bg-gray-600/20'
-                                    }`}
+                                          ? { backgroundColor: 'rgba(245,158,11,0.15)' }
+                                          : { backgroundColor: 'rgba(255,255,255,0.08)' },
+                                    ]}
                                   >
                                     <Text
-                                      className={`text-xs ${
+                                      style={[
+                                        styles.importanceText,
                                         spec.importance === 'CRITICAL'
-                                          ? 'text-red-400'
+                                          ? { color: '#F87171' }
                                           : spec.importance === 'IMPORTANT'
-                                            ? 'text-amber-400'
-                                            : 'text-gray-400'
-                                      }`}
+                                            ? { color: '#FCD34D' }
+                                            : { color: 'rgba(255,255,255,0.4)' },
+                                      ]}
                                     >
                                       {spec.importance.toLowerCase()}
                                     </Text>
@@ -606,18 +597,18 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                         })}
                       </View>
                     ) : (
-                      <View className="bg-white/50 rounded-xl p-4 mb-4">
-                        <Text className="text-gray-400 text-center">
+                      <View style={styles.darkCard}>
+                        <Text style={[styles.mutedText, { textAlign: 'center' }]}>
                           No specifications required for this product
                         </Text>
                       </View>
                     )}
 
                     {/* Selected Quantity Reminder */}
-                    <View className="bg-emerald-500/10 rounded-xl p-3 mt-4 border border-emerald-500/20">
-                      <View className="flex-row items-center">
-                        <Package size={14} color="#10B981" />
-                        <Text className="text-emerald-400 text-sm ml-2">
+                    <View style={styles.greenInfoBox}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Package size={14} color="#4ADE80" />
+                        <Text style={[styles.greenText, { marginLeft: 8 }]}>
                           Quantity: {getQuantity()} {product.defaultUnit || 'TON'}
                         </Text>
                       </View>
@@ -626,41 +617,43 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                 ) : currentStep === 'auth' ? (
                   <>
                     {/* Authentication Step */}
-                    <View className="py-4">
+                    <View style={{ paddingVertical: 16 }}>
                       <TouchableOpacity
                         onPress={() => setCurrentStep('specifications')}
-                        className="flex-row items-center mb-4"
+                        style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}
                       >
                         <ChevronRight
                           size={20}
-                          color="#6B7280"
+                          color="rgba(255,255,255,0.4)"
                           style={{ transform: [{ rotate: '180deg' }] }}
                         />
-                        <Text className="text-gray-400 ml-2">Back to specifications</Text>
+                        <Text style={[styles.mutedText, { marginLeft: 8 }]}>
+                          Back to specifications
+                        </Text>
                       </TouchableOpacity>
 
-                      <View className="mb-4">
-                        <Text className="text-gray-900 text-lg font-semibold mb-2">
-                          Sign in to Submit Your Offer
-                        </Text>
-                        <Text className="text-gray-400 text-sm">
+                      <View style={{ marginBottom: 16 }}>
+                        <Text style={styles.sectionTitle}>Sign in to Submit Your Offer</Text>
+                        <Text style={styles.mutedText}>
                           Create an account or sign in to submit your custom offer for{' '}
                           {product?.displayName || product?.name}
                         </Text>
                       </View>
 
                       {/* Display Selected Details */}
-                      <View className="bg-white/50 rounded-xl p-4 mb-6 space-y-3">
-                        <View className="flex-row items-center">
-                          <Package size={16} color="#10B981" />
-                          <Text className="text-emerald-400 text-sm ml-2">
+                      <View style={[styles.darkCard, { marginBottom: 24 }]}>
+                        <View
+                          style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}
+                        >
+                          <Package size={16} color="#4ADE80" />
+                          <Text style={[styles.greenText, { marginLeft: 8 }]}>
                             Quantity: {getQuantity()} {product?.defaultUnit || 'TON'}
                           </Text>
                         </View>
                         {Object.keys(specifications).length > 0 && (
-                          <View className="flex-row items-center">
+                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Info size={16} color="#3B82F6" />
-                            <Text className="text-blue-400 text-sm ml-2">
+                            <Text style={[styles.blueText, { marginLeft: 8 }]}>
                               {Object.keys(specifications).length} specifications provided
                             </Text>
                           </View>
@@ -668,8 +661,8 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                       </View>
 
                       {/* TODO: InlineAuth component not yet implemented */}
-                      <View className="bg-white/50 rounded-xl p-4">
-                        <Text className="text-gray-400 text-center">
+                      <View style={styles.darkCard}>
+                        <Text style={[styles.mutedText, { textAlign: 'center' }]}>
                           Authentication required. Please sign in to continue.
                         </Text>
                       </View>
@@ -680,54 +673,64 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
 
               {/* Action Buttons */}
               {currentStep !== 'auth' && (
-                <View className="p-4 border-t border-gray-200">
+                <View style={styles.actionBar}>
                   {currentStep === 'quantity' ? (
                     <>
-                      <View className="flex-row">
+                      <View style={{ flexDirection: 'row' }}>
                         {/* Create Listing Button */}
                         <TouchableOpacity
                           onPress={() => handleAction('listing')}
                           disabled={!product || !isFormValid()}
-                          className="flex-1 mr-2"
+                          style={{ flex: 1, marginRight: 8 }}
                         >
                           <View
-                            className={`py-4 rounded-2xl flex-row items-center justify-center ${
-                              product && isFormValid() ? 'bg-blue-600' : 'bg-white'
-                            }`}
+                            style={[
+                              styles.actionBtn,
+                              product && isFormValid()
+                                ? styles.actionBtnBlue
+                                : styles.actionBtnDisabled,
+                            ]}
                           >
                             <ShoppingCart
                               size={18}
-                              color={product && isFormValid() ? 'white' : '#6B7280'}
+                              color={product && isFormValid() ? 'white' : 'rgba(255,255,255,0.3)'}
                             />
                             <Text
-                              className={`ml-2 font-semibold ${
-                                product && isFormValid() ? 'text-gray-900' : 'text-gray-500'
-                              }`}
+                              style={[
+                                styles.actionBtnText,
+                                !(product && isFormValid()) && styles.actionBtnTextDisabled,
+                              ]}
                             >
                               Create Listing
                             </Text>
                           </View>
                         </TouchableOpacity>
 
-                        {/* Custom Offer Button - Green */}
+                        {/* Custom Offer Button */}
                         <TouchableOpacity
                           onPress={() => handleAction('custom-offer')}
                           disabled={!product || !isFormValid()}
-                          className="flex-1 ml-2"
+                          style={{ flex: 1, marginLeft: 8 }}
                         >
                           <View
-                            className={`py-4 rounded-2xl flex-row items-center justify-center ${
-                              product && isFormValid() ? 'bg-emerald-600' : 'bg-white'
-                            }`}
+                            style={[
+                              styles.actionBtn,
+                              product && isFormValid()
+                                ? styles.actionBtnGreen
+                                : styles.actionBtnDisabled,
+                            ]}
                           >
                             <Sparkles
                               size={18}
-                              color={product && isFormValid() ? 'white' : '#6B7280'}
+                              color={product && isFormValid() ? '#052e16' : 'rgba(255,255,255,0.3)'}
                             />
                             <Text
-                              className={`ml-2 font-semibold ${
-                                product && isFormValid() ? 'text-gray-900' : 'text-gray-500'
-                              }`}
+                              style={[
+                                styles.actionBtnText,
+                                product && isFormValid()
+                                  ? styles.actionBtnTextGreen
+                                  : styles.actionBtnTextDisabled,
+                              ]}
                             >
                               Custom Offer
                             </Text>
@@ -737,7 +740,9 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
 
                       {/* Display selected quantity */}
                       {isFormValid() && (
-                        <Text className="text-center text-gray-500 text-xs mt-3">
+                        <Text
+                          style={[styles.mutedSmallText, { textAlign: 'center', marginTop: 12 }]}
+                        >
                           {getQuantity()} {product?.defaultUnit || 'TON'} selected
                         </Text>
                       )}
@@ -750,18 +755,24 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                         disabled={!product || !isFormValid()}
                       >
                         <View
-                          className={`py-4 rounded-2xl flex-row items-center justify-center ${
-                            product && isFormValid() ? 'bg-emerald-600' : 'bg-white'
-                          }`}
+                          style={[
+                            styles.actionBtn,
+                            product && isFormValid()
+                              ? styles.actionBtnGreen
+                              : styles.actionBtnDisabled,
+                          ]}
                         >
                           <Sparkles
                             size={18}
-                            color={product && isFormValid() ? 'white' : '#6B7280'}
+                            color={product && isFormValid() ? '#052e16' : 'rgba(255,255,255,0.3)'}
                           />
                           <Text
-                            className={`ml-2 font-semibold ${
-                              product && isFormValid() ? 'text-gray-900' : 'text-gray-500'
-                            }`}
+                            style={[
+                              styles.actionBtnText,
+                              product && isFormValid()
+                                ? styles.actionBtnTextGreen
+                                : styles.actionBtnTextDisabled,
+                            ]}
                           >
                             Submit Custom Offer
                           </Text>
@@ -778,3 +789,287 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  actionBar: {
+    borderTopColor: 'rgba(74,222,128,0.12)',
+    borderTopWidth: 1,
+    padding: 16,
+  },
+  actionBtn: {
+    alignItems: 'center',
+    borderRadius: 16,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 16,
+  },
+  actionBtnBlue: {
+    backgroundColor: '#2563EB',
+  },
+  actionBtnDisabled: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderWidth: 1,
+  },
+  actionBtnGreen: {
+    backgroundColor: '#4ADE80',
+    elevation: 6,
+    shadowColor: '#4ADE80',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  actionBtnText: {
+    color: 'white',
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  actionBtnTextDisabled: {
+    color: 'rgba(255,255,255,0.3)',
+  },
+  actionBtnTextGreen: {
+    color: '#052e16',
+    fontWeight: '700',
+  },
+  amberText: {
+    color: '#FCD34D',
+    fontSize: 12,
+    fontWeight: '500',
+    marginLeft: 8,
+  },
+  blueMutedText: {
+    color: 'rgba(147,197,253,0.7)',
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  blueText: {
+    color: '#60A5FA',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  bodyText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+  },
+  closeButton: {
+    padding: 8,
+    position: 'absolute',
+    right: 16,
+    top: 8,
+    zIndex: 10,
+  },
+  customInput: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: 'rgba(74,222,128,0.3)',
+    borderRadius: 16,
+    borderWidth: 2,
+    color: '#FFFFFF',
+    fontSize: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    textAlign: 'center',
+  },
+  darkCard: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 16,
+  },
+  dragHandle: {
+    backgroundColor: 'rgba(74,222,128,0.35)',
+    borderRadius: 2,
+    height: 4,
+    width: 48,
+  },
+  dragHandleContainer: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  drawerContainer: {
+    backgroundColor: 'rgba(3,15,9,0.97)',
+    borderTopColor: 'rgba(74,222,128,0.2)',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 1,
+    bottom: 0,
+    elevation: 20,
+    left: 0,
+    maxHeight: '75%',
+    position: 'absolute',
+    right: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+  },
+  drawerHeader: {
+    backgroundColor: 'transparent',
+  },
+  greenInfoBox: {
+    backgroundColor: 'rgba(74,222,128,0.08)',
+    borderColor: 'rgba(74,222,128,0.2)',
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 16,
+    padding: 12,
+  },
+  greenText: {
+    color: '#4ADE80',
+    fontSize: 14,
+  },
+  importanceBadge: {
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  importanceText: {
+    fontSize: 11,
+  },
+  infoBox: {
+    backgroundColor: 'rgba(245,158,11,0.08)',
+    borderColor: 'rgba(245,158,11,0.2)',
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 24,
+    padding: 12,
+  },
+  infoBoxBlue: {
+    backgroundColor: 'rgba(59,130,246,0.08)',
+    borderColor: 'rgba(59,130,246,0.2)',
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 16,
+    padding: 12,
+  },
+  locationRow: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    padding: 12,
+  },
+  mutedSmallText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    marginTop: 4,
+  },
+  mutedText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 14,
+  },
+  priceBadge: {
+    alignItems: 'center',
+    backgroundColor: '#4ADE80',
+    borderRadius: 100,
+    elevation: 6,
+    flexDirection: 'row',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    shadowColor: '#4ADE80',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  priceText: {
+    color: '#052e16',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginHorizontal: 4,
+  },
+  priceUnit: {
+    color: 'rgba(5,46,22,0.7)',
+    fontSize: 14,
+  },
+  productCategory: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+  },
+  productHeaderRow: {
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+  },
+  productName: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  qtyCard: {
+    alignItems: 'center',
+    borderRadius: 16,
+    borderWidth: 2,
+    paddingVertical: 16,
+  },
+  qtyCardSelected: {
+    backgroundColor: 'rgba(74,222,128,0.15)',
+    borderColor: '#4ADE80',
+  },
+  qtyCardUnselected: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 16,
+    borderWidth: 2,
+    paddingVertical: 16,
+  },
+  qtyText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  qtyTextSelected: {
+    color: '#4ADE80',
+  },
+  qtyTextUnselected: {
+    color: 'rgba(255,255,255,0.5)',
+  },
+  rangeTag: {
+    backgroundColor: 'rgba(59,130,246,0.1)',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  sectionTitle: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  specCard: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 12,
+    padding: 16,
+  },
+  specInput: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+    color: '#FFFFFF',
+    flex: 1,
+    fontSize: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  specLabel: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  unitBadge: {
+    backgroundColor: 'rgba(74,222,128,0.15)',
+    borderRadius: 100,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  unitText: {
+    color: '#4ADE80',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+});

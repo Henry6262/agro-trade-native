@@ -531,7 +531,7 @@ export function FleetInformation() {
         <Pressable
           style={{
             flex: 1,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
             justifyContent: 'center',
             alignItems: 'center',
           }}
@@ -539,16 +539,26 @@ export function FleetInformation() {
         >
           <View
             style={{
-              backgroundColor: '#1F2937',
-              borderRadius: 12,
+              backgroundColor: 'rgba(3,15,9,0.97)',
+              borderRadius: 16,
               padding: 20,
               width: '80%',
               maxWidth: 400,
               borderWidth: 1,
-              borderColor: '#374151',
+              borderColor: 'rgba(74,222,128,0.2)',
             }}
           >
-            <Text style={{ fontSize: 18, fontWeight: '600', color: '#FFFFFF', marginBottom: 16 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '600',
+                color: '#FFFFFF',
+                marginBottom: 16,
+                borderBottomWidth: 1,
+                borderBottomColor: 'rgba(74,222,128,0.12)',
+                paddingBottom: 12,
+              }}
+            >
               Select Truck Type
             </Text>
             {truckTypes.map((type) => (
@@ -562,13 +572,16 @@ export function FleetInformation() {
                   paddingVertical: 12,
                   paddingHorizontal: 16,
                   borderRadius: 8,
-                  backgroundColor: newTruck.type === type ? '#ea580c' : 'transparent',
+                  backgroundColor:
+                    newTruck.type === type ? 'rgba(74,222,128,0.15)' : 'rgba(255,255,255,0.05)',
                   marginBottom: 8,
+                  borderWidth: newTruck.type === type ? 1 : 0,
+                  borderColor: 'rgba(74,222,128,0.3)',
                 }}
               >
                 <Text
                   style={{
-                    color: newTruck.type === type ? '#FFFFFF' : '#9CA3AF',
+                    color: newTruck.type === type ? '#4ADE80' : 'rgba(255,255,255,0.6)',
                     fontSize: 16,
                     fontWeight: newTruck.type === type ? '600' : '400',
                   }}

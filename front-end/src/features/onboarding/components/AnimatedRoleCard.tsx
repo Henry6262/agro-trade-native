@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Pressable, Image, ImageSourcePropType } from 'react-native';
+import { View, Text, Pressable, Image, ImageSourcePropType, StyleSheet } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -23,48 +23,69 @@ interface AnimatedRoleCardProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
+// Card has a fixed height; image is taller and anchored to the bottom
+// so it naturally overflows above the card top
+const CARD_H = 115;
+const IMG_W = 190;
+const IMG_H = 240;
+// How far the image peeks above the card
+const IMG_OVERFLOW = IMG_H - CARD_H; // 85px
+
+const ROLE_ACCENT = {
+  buyer: {
+    bg: 'rgba(96,165,250,0.11)',
+    border: 'rgba(96,165,250,0.55)',
+    glow: '#60A5FA',
+  },
+  seller: {
+    bg: 'rgba(74,222,128,0.11)',
+    border: 'rgba(74,222,128,0.55)',
+    glow: '#4ADE80',
+  },
+  transport: {
+    bg: 'rgba(167,139,250,0.11)',
+    border: 'rgba(167,139,250,0.55)',
+    glow: '#A78BFA',
+  },
+};
+
 export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   id,
   title,
-  color: _color,
   isSelected = false,
   onPress,
   delay = 0,
   imageSource,
 }) => {
-  const scale = useSharedValue(0.9);
+  const scale = useSharedValue(0.88);
   const opacity = useSharedValue(0);
   const pressed = useSharedValue(0);
   const selected = useSharedValue(isSelected ? 1 : 0);
+  const iconFloat = useSharedValue(0);
   const iconRotation = useSharedValue(0);
-  const iconScale = useSharedValue(1);
 
   React.useEffect(() => {
-    // Entry animation
     const timer = setTimeout(() => {
-      scale.value = withSpring(1, { damping: 15, stiffness: 150 });
-      opacity.value = withTiming(1, { duration: 400 });
+      scale.value = withSpring(1, { damping: 14, stiffness: 140 });
+      opacity.value = withTiming(1, { duration: 380 });
     }, delay);
 
-    // Icon animation based on role
-    if (id === 'seller') {
-      // Gentle rotation for seller (wheat)
-      iconRotation.value = withRepeat(
-        withTiming(10, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+    // Idle float / sway per role
+    if (id === 'buyer') {
+      iconFloat.value = withRepeat(
+        withTiming(-7, { duration: 1900, easing: Easing.inOut(Easing.ease) }),
         -1,
         true
       );
-    } else if (id === 'buyer') {
-      // Bounce effect for buyer (cart)
-      iconScale.value = withRepeat(
-        withTiming(1.1, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
+    } else if (id === 'seller') {
+      iconRotation.value = withRepeat(
+        withTiming(5, { duration: 2300, easing: Easing.inOut(Easing.ease) }),
         -1,
         true
       );
     } else {
-      // Slide effect for transporter (truck)
-      iconRotation.value = withRepeat(
-        withTiming(5, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+      iconFloat.value = withRepeat(
+        withTiming(-5, { duration: 2700, easing: Easing.inOut(Easing.ease) }),
         -1,
         true
       );
@@ -74,32 +95,25 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
   }, [delay, scale, opacity, id]);
 
   React.useEffect(() => {
-    selected.value = withSpring(isSelected ? 1 : 0, { damping: 15, stiffness: 150 });
+    selected.value = withSpring(isSelected ? 1 : 0, { damping: 14, stiffness: 140 });
   }, [isSelected, selected]);
 
-  const animatedStyle = useAnimatedStyle(() => {
+  const cardAnimatedStyle = useAnimatedStyle(() => {
     const pressScale = interpolate(pressed.value, [0, 1], [1, 0.97]);
-    const selectedScale = interpolate(selected.value, [0, 1], [1, 1.02]);
-
+    const selectedScale = interpolate(selected.value, [0, 1], [1, 1.015]);
     return {
       transform: [{ scale: scale.value * pressScale * selectedScale }],
       opacity: opacity.value,
     };
   });
 
-  const iconAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ rotate: `${iconRotation.value}deg` }, { scale: iconScale.value }],
-    };
-  });
+  const iconAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: iconFloat.value }, { rotate: `${iconRotation.value}deg` }],
+  }));
 
-  const handlePressIn = () => {
-    pressed.value = withSpring(1, { damping: 15, stiffness: 200 });
-  };
-
-  const handlePressOut = () => {
-    pressed.value = withSpring(0, { damping: 15, stiffness: 200 });
-  };
+  const accent = ROLE_ACCENT[id];
+  const cardBg = isSelected ? accent.bg : 'rgba(255,255,255,0.07)';
+  const cardBorder = isSelected ? accent.border : 'rgba(255,255,255,0.1)';
 
   const getRoleDescription = () => {
     switch (id) {
@@ -112,100 +126,132 @@ export const AnimatedRoleCard: React.FC<AnimatedRoleCardProps> = ({
     }
   };
 
-  // Glass card styles based on selection state
-  const cardBg = isSelected ? 'rgba(74,222,128,0.2)' : 'rgba(255,255,255,0.08)';
-  const cardBorder = isSelected ? '#4ADE80' : 'rgba(255,255,255,0.15)';
-  const cardBorderWidth = isSelected ? 2 : 1;
-
   return (
     <AnimatedPressable
-      style={[animatedStyle, { marginBottom: 12 }]}
+      style={[cardAnimatedStyle, styles.wrapper]}
       onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
+      onPressIn={() => {
+        pressed.value = withSpring(1, { damping: 15, stiffness: 200 });
+      }}
+      onPressOut={() => {
+        pressed.value = withSpring(0, { damping: 15, stiffness: 200 });
+      }}
     >
-      <View
-        style={{
-          backgroundColor: cardBg,
-          borderRadius: 16,
-          borderWidth: cardBorderWidth,
-          borderColor: cardBorder,
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingVertical: 16,
-          paddingHorizontal: 20,
-          minHeight: 90,
-          // Green glow when selected
-          ...(isSelected && {
-            shadowColor: '#4ADE80',
-            shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: 0.4,
-            shadowRadius: 12,
-            elevation: 6,
-          }),
-        }}
-      >
-        {/* Animated Icon */}
-        <Animated.View
+      {/*
+        paddingTop gives breathing room above the card for the overflowing image.
+        The card has a fixed height; image is absolutely positioned to the right,
+        anchored at the bottom, and taller than the card so it peeks above.
+      */}
+      <View style={styles.outerWrapper}>
+        <View
           style={[
-            iconAnimatedStyle,
+            styles.card,
             {
-              width: 72,
-              height: 72,
-              marginRight: 16,
+              backgroundColor: cardBg,
+              borderColor: cardBorder,
+              ...(isSelected && {
+                shadowColor: accent.glow,
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.5,
+                shadowRadius: 16,
+                elevation: 10,
+              }),
             },
           ]}
         >
-          <Image
-            source={imageSource}
-            style={{
-              width: 72,
-              height: 72,
-              resizeMode: 'contain',
-            }}
-          />
-        </Animated.View>
+          {/* Left: text content — paddingRight leaves room for the image */}
+          <View style={styles.textBlock}>
+            <View style={styles.titleRow}>
+              <View style={[styles.dot, { backgroundColor: accent.glow }]} />
+              <Text style={styles.titleText}>{title}</Text>
 
-        {/* Text content */}
-        <View style={{ flex: 1 }}>
-          <Text
-            style={{
-              color: '#FFFFFF',
-              fontSize: 20,
-              fontWeight: 'bold',
-              marginBottom: 4,
-            }}
-          >
-            {title}
-          </Text>
-          <Text
-            style={{
-              color: 'rgba(255,255,255,0.65)',
-              fontSize: 13,
-              lineHeight: 18,
-            }}
-          >
-            {getRoleDescription()}
-          </Text>
-        </View>
+              {isSelected && (
+                <View style={[styles.checkBadge, { backgroundColor: accent.glow }]}>
+                  <Text style={styles.checkText}>✓</Text>
+                </View>
+              )}
+            </View>
 
-        {/* Selection checkmark */}
-        {isSelected && (
-          <View
-            style={{
-              width: 24,
-              height: 24,
-              borderRadius: 12,
-              backgroundColor: '#4ADE80',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginLeft: 12,
-            }}
-          >
-            <Text style={{ color: '#052e16', fontSize: 14, fontWeight: 'bold' }}>✓</Text>
+            <Text style={styles.descText}>{getRoleDescription()}</Text>
           </View>
-        )}
+
+          {/* Right: character — absolutely positioned, anchored bottom, overflows top */}
+          <Animated.View style={[iconAnimatedStyle, styles.imageWrapper]}>
+            <Image source={imageSource} style={styles.image} resizeMode="contain" />
+          </Animated.View>
+        </View>
       </View>
     </AnimatedPressable>
   );
 };
+
+const styles = StyleSheet.create({
+  card: {
+    borderRadius: 20,
+    borderWidth: 1,
+    height: CARD_H,
+    overflow: 'visible',
+    position: 'relative',
+  },
+  checkBadge: {
+    alignItems: 'center',
+    borderRadius: 10,
+    height: 20,
+    justifyContent: 'center',
+    marginLeft: 8,
+    width: 20,
+  },
+  checkText: { color: '#052e16', fontSize: 11, fontWeight: '800' },
+  descText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 6,
+    maxWidth: 175,
+  },
+  dot: {
+    borderRadius: 4,
+    height: 8,
+    marginRight: 8,
+    width: 8,
+  },
+  image: {
+    height: IMG_H,
+    width: IMG_W,
+  },
+  // Anchored to bottom-right of card; taller than card so overflows above
+  imageWrapper: {
+    bottom: 0,
+    position: 'absolute',
+    right: 0,
+  },
+  outerWrapper: {
+    // paddingTop reserves space above the card for the overflow
+    overflow: 'visible',
+    paddingTop: IMG_OVERFLOW,
+    zIndex: 1,
+  },
+  textBlock: {
+    justifyContent: 'center',
+    paddingBottom: 18,
+    paddingLeft: 20,
+    // Right padding keeps text clear of the character image
+    paddingRight: IMG_W + 8,
+    paddingTop: 20,
+  },
+  titleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  titleText: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: 0.2,
+  },
+  wrapper: {
+    // negative marginBottom cancels out the next card's paddingTop overflow space,
+    // leaving only ~10px of real visual gap between card bodies
+    marginBottom: -(IMG_OVERFLOW - 10),
+  },
+});
