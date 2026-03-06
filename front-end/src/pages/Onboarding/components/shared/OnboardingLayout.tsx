@@ -1,23 +1,20 @@
 import React from 'react';
-import { View, ScrollView, ViewStyle, useWindowDimensions } from 'react-native';
+import { View, Text, ScrollView, ViewStyle, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import type { OnboardingStep } from '@shared/types/onboarding';
-import { ProgressSidebar } from './ProgressSidebar';
 import { Navigation } from './Navigation';
 
 interface OnboardingLayoutProps {
   children: React.ReactNode;
-  // Progress sidebar props
   steps?: OnboardingStep[];
   currentStepIndex?: number;
   progressLineHeight?: number;
   isAnimating?: boolean;
-  // Navigation props
   showNavigation?: boolean;
   canProceedToNext?: boolean;
   onNext?: () => void;
   onBack?: () => void;
-  // Layout customization
   scrollable?: boolean;
   style?: ViewStyle;
   contentStyle?: ViewStyle;
@@ -27,7 +24,6 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   children,
   steps,
   currentStepIndex = 0,
-  progressLineHeight = 0,
   isAnimating = false,
   showNavigation = true,
   canProceedToNext = true,
@@ -38,76 +34,101 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
   contentStyle,
 }) => {
   const insets = useSafeAreaInsets();
-  const { width, height: windowHeight } = useWindowDimensions();
+  const hasSteps = steps && steps.length > 0;
 
-  // Calculate 10% margins for left and right
-  const horizontalMargin = width * 0.1;
+  // Animated progress bar width
+  const progressValue = useSharedValue(
+    hasSteps && steps.length > 1 ? (currentStepIndex / (steps.length - 1)) * 100 : 0
+  );
 
-  const containerStyle: ViewStyle = {
-    flex: 1,
-    backgroundColor: 'transparent',
-    ...style,
-  };
+  React.useEffect(() => {
+    if (hasSteps && steps.length > 1) {
+      progressValue.value = withTiming((currentStepIndex / (steps.length - 1)) * 100, {
+        duration: 600,
+      });
+    }
+  }, [currentStepIndex, hasSteps, steps?.length]);
+
+  const progressBarStyle = useAnimatedStyle(() => ({
+    width: `${progressValue.value}%` as any,
+  }));
+
+  const currentStep = hasSteps ? steps[currentStepIndex] : null;
+  const totalSteps = hasSteps ? steps.length : 0;
 
   const contentContainerStyle: ViewStyle = {
     flexGrow: 1,
-    paddingHorizontal: horizontalMargin,
-    paddingTop: insets.top,
-    paddingBottom: 120, // Space for navigation buttons (already has safe area in Navigation component)
+    paddingHorizontal: 20,
+    paddingBottom: 120,
     ...contentStyle,
   };
 
-  // If steps are provided, render with ProgressSidebar (dashboard mode)
-  if (steps && steps.length > 0) {
+  if (hasSteps) {
     return (
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-          backgroundColor: 'transparent',
-          height: windowHeight, // Explicit height to prevent overflow
-          maxHeight: windowHeight, // Ensure it doesn't exceed screen
-          overflow: 'hidden', // Clip any overflow
-        }}
-      >
-        {/* Fixed Progress Sidebar */}
-        <ProgressSidebar
-          steps={steps}
-          currentStepIndex={currentStepIndex}
-          progressLineHeight={progressLineHeight}
-          isAnimating={isAnimating}
-        />
+      <View style={[styles.root, { paddingTop: insets.top }, style]}>
+        {/* ── Top progress header ── */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            {/* Left: step counter */}
+            <View style={styles.stepCounterPill}>
+              <Text style={styles.stepCounterText}>
+                {currentStepIndex + 1} / {totalSteps}
+              </Text>
+            </View>
 
-        {/* Main Content Area */}
-        <View style={{ flex: 1, overflow: 'hidden' }}>
+            {/* Centre: step title + description */}
+            <View style={styles.headerMid}>
+              <Text style={styles.stepTitle} numberOfLines={1}>
+                {currentStep?.title ?? ''}
+              </Text>
+              {currentStep?.description ? (
+                <Text style={styles.stepDesc} numberOfLines={1}>
+                  {currentStep.description}
+                </Text>
+              ) : null}
+            </View>
+
+            {/* Right: dot indicators */}
+            <View style={styles.dotsRow}>
+              {steps.map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.headerDot,
+                    i < currentStepIndex && styles.headerDotDone,
+                    i === currentStepIndex && styles.headerDotActive,
+                  ]}
+                />
+              ))}
+            </View>
+          </View>
+
+          {/* Thin animated progress bar */}
+          <View style={styles.progressTrack}>
+            <Animated.View style={[styles.progressFill, progressBarStyle]} />
+          </View>
+        </View>
+
+        {/* ── Content ── */}
+        <View style={styles.contentArea}>
           {scrollable ? (
             <ScrollView
               contentContainerStyle={contentContainerStyle}
               showsVerticalScrollIndicator={false}
-              bounces={true}
-              scrollEnabled={true}
+              bounces
               keyboardShouldPersistTaps="handled"
             >
               {children}
             </ScrollView>
           ) : (
-            <View
-              style={{
-                flex: 1,
-                paddingHorizontal: horizontalMargin,
-                paddingTop: insets.top,
-                overflow: 'hidden',
-              }}
-            >
-              {children}
-            </View>
+            <View style={[styles.contentArea, { paddingHorizontal: 20 }]}>{children}</View>
           )}
 
-          {/* Navigation */}
+          {/* ── Bottom navigation ── */}
           {showNavigation && onNext && onBack && (
             <Navigation
               currentStepIndex={currentStepIndex}
-              totalSteps={steps.length}
+              totalSteps={totalSteps}
               canProceedToNext={canProceedToNext}
               isAnimating={isAnimating}
               onBack={onBack}
@@ -119,15 +140,20 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     );
   }
 
-  // Fallback: Simple content wrapper (backward compatibility)
+  // Fallback: no steps — simple wrapper
+  const fallbackStyle: ViewStyle = {
+    flex: 1,
+    backgroundColor: 'transparent',
+    ...style,
+  };
+
   if (scrollable) {
     return (
-      <View style={containerStyle}>
+      <View style={fallbackStyle}>
         <ScrollView
           contentContainerStyle={contentContainerStyle}
           showsVerticalScrollIndicator={false}
-          bounces={true}
-          scrollEnabled={true}
+          bounces
           keyboardShouldPersistTaps="handled"
         >
           {children}
@@ -136,5 +162,94 @@ export const OnboardingLayout: React.FC<OnboardingLayoutProps> = ({
     );
   }
 
-  return <View style={[containerStyle, contentContainerStyle]}>{children}</View>;
+  return <View style={[fallbackStyle, contentContainerStyle]}>{children}</View>;
 };
+
+const styles = StyleSheet.create({
+  contentArea: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+  dotsRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 5,
+  },
+  header: {
+    backgroundColor: 'rgba(3,15,9,0.85)',
+    borderBottomColor: 'rgba(74,222,128,0.12)',
+    borderBottomWidth: 1,
+    paddingBottom: 0,
+    paddingHorizontal: 20,
+    paddingTop: 14,
+  },
+  headerDot: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 3,
+    height: 6,
+    width: 6,
+  },
+  headerDotActive: {
+    backgroundColor: '#4ADE80',
+    borderRadius: 3,
+    width: 18,
+  },
+  headerDotDone: {
+    backgroundColor: 'rgba(74,222,128,0.45)',
+  },
+  headerMid: {
+    alignItems: 'center',
+    flex: 1,
+    paddingHorizontal: 12,
+  },
+  headerTop: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  progressFill: {
+    backgroundColor: '#4ADE80',
+    borderRadius: 2,
+    height: '100%',
+    shadowColor: '#4ADE80',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.7,
+    shadowRadius: 4,
+  },
+  progressTrack: {
+    backgroundColor: 'rgba(74,222,128,0.12)',
+    borderRadius: 2,
+    height: 3,
+    overflow: 'hidden',
+    width: '100%',
+  },
+  root: {
+    backgroundColor: 'transparent',
+    flex: 1,
+  },
+  stepCounterPill: {
+    backgroundColor: 'rgba(74,222,128,0.12)',
+    borderColor: 'rgba(74,222,128,0.25)',
+    borderRadius: 20,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  stepCounterText: {
+    color: '#4ADE80',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  stepDesc: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 11,
+    marginTop: 1,
+  },
+  stepTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.1,
+  },
+});
