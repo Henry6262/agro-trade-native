@@ -207,7 +207,7 @@ export class AuthService {
       const privyAppId = this.configService.get<string>("PRIVY_APP_ID");
 
       // Fetch JWKS from Privy
-      const jwksUrl = `https://auth.privy.io/api/v1/apps/${privyAppId}/.well-known/jwks.json`;
+      const jwksUrl = `https://auth.privy.io/api/v1/apps/${privyAppId}/jwks.json`;
       const jwksResponse = await axios.get(jwksUrl);
       const jwks = jwksResponse.data;
 
@@ -222,11 +222,11 @@ export class AuthService {
       // Convert JWK to PEM format for verification
       const publicKey = this.jwkToPem(signingKey);
 
-      // Verify the token
+      // Verify the token — Privy signs with ES256 (P-256 elliptic curve)
       const verifiedToken = jwt.verify(token, publicKey, {
         issuer: "privy.io",
         audience: privyAppId,
-        algorithms: ["RS256"],
+        algorithms: ["ES256"],
       }) as PrivyTokenPayload;
 
       return verifiedToken;
