@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MapPin, DollarSign, Weight, Calendar, Star } from 'lucide-react-native';
 import { GlassCard, GlassBadge, GlassButton, COLORS } from '../../../../../../../design-system';
-import { PhaseBadge } from '@shared/components';
 import type { SellerTrade, TradeStage } from '../types';
 import { getTradeStages } from '../utils';
 import { TradeStageTimeline } from './TradeStageTimeline';
@@ -54,10 +53,7 @@ export const SellerTradeCard: React.FC<SellerTradeCardProps> = ({ trade }) => {
             </View>
           </View>
         </View>
-        <View style={styles.headerBadges}>
-          <PhaseBadge phase={trade.status} />
-          <GlassBadge label={trade.status} variant={getStatusBadgeVariant(trade.status)} />
-        </View>
+        <GlassBadge label={trade.status} variant={getStatusBadgeVariant(trade.status)} />
       </View>
 
       {/* Stage timeline */}
@@ -207,10 +203,6 @@ const styles = StyleSheet.create({
     color: COLORS.accentGold,
     fontSize: 12,
     fontWeight: '700',
-  },
-  headerBadges: {
-    alignItems: 'flex-end',
-    gap: 6,
   },
   headerLeft: {
     flex: 1,
