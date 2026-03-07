@@ -98,7 +98,12 @@ export default function PhoneAuthScreen() {
     setLoading(true);
     try {
       const result = await authService.phoneOtpVerify(fullPhone, code);
-      login(result.user as User, result.access_token, result.refresh_token);
+      const user = {
+        ...result.user,
+        phone:
+          (result.user as unknown as { phoneNumber?: string }).phoneNumber ?? result.user.phone,
+      } as User;
+      login(user, result.access_token, result.refresh_token);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       Alert.alert(t('common.error'), msg ?? t('auth.phone.errors.verifyFailed'));

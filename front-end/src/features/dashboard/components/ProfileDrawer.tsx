@@ -30,6 +30,8 @@ import {
   Trash2,
 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LANGUAGE_STORAGE_KEY } from '../../../i18n';
 import { useAuthStore } from '@stores/auth.store';
 import { useNavigation } from '@react-navigation/native';
 import { authService } from '@services/authService';
@@ -71,6 +73,9 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
 
   const toggleLanguage = (lang: 'en' | 'bg') => {
     i18nInstance.changeLanguage(lang);
+    AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, lang).catch(() => {
+      // Non-critical: language will reset on next app start
+    });
   };
 
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current;
