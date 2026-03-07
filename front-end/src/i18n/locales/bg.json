@@ -46,7 +46,17 @@
     "INSPECTION_REQUESTED": "Поискана инспекция",
     "INSPECTION_IN_PROGRESS": "Инспекцията е в ход",
     "INSPECTION_COMPLETED": "Инспекцията е завършена",
-    "ARBITRATION": "Арбитраж"
+    "ARBITRATION": "Арбитраж",
+    "INITIATION": "Инициирана",
+    "SELLER_NEGOTIATION": "Преговори",
+    "INSPECTION_PENDING": "Очакване на инспекция",
+    "TRANSPORT_PENDING": "Очакване на транспорт",
+    "TRANSPORT_MATCHING": "Търсене на транспорт",
+    "TRANSPORT_BIDDING": "Наддаване за транспорт",
+    "DELIVERY_CONFIRMATION": "Потвърждаване",
+    "PAYMENT_PROCESSING": "Плащане",
+    "PAYMENT": "Плащане",
+    "UNKNOWN": "Неизвестно"
   },
   "common": {
     "loading": "Зареждане...",

@@ -46,7 +46,17 @@
     "INSPECTION_REQUESTED": "Inspection Requested",
     "INSPECTION_IN_PROGRESS": "Inspection In Progress",
     "INSPECTION_COMPLETED": "Inspection Completed",
-    "ARBITRATION": "Arbitration"
+    "ARBITRATION": "Arbitration",
+    "INITIATION": "Initiated",
+    "SELLER_NEGOTIATION": "Negotiating",
+    "INSPECTION_PENDING": "Inspection Pending",
+    "TRANSPORT_PENDING": "Transport Pending",
+    "TRANSPORT_MATCHING": "Finding Transport",
+    "TRANSPORT_BIDDING": "Transport Bidding",
+    "DELIVERY_CONFIRMATION": "Confirming",
+    "PAYMENT_PROCESSING": "Payment",
+    "PAYMENT": "Payment",
+    "UNKNOWN": "Unknown"
   },
   "common": {
     "loading": "Loading...",
