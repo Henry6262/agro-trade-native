@@ -12,6 +12,7 @@ import { User, UserRole } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 import axios from "axios";
+import { randomInt } from "crypto";
 
 export interface JwtPayload {
   sub: string;
@@ -282,7 +283,7 @@ export class AuthService {
     }
 
     // Generate 6-digit code and hash it
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = randomInt(100_000, 1_000_000).toString();
     const codeHash = await bcrypt.hash(code, 10);
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
@@ -325,8 +326,14 @@ export class AuthService {
       throw new BadRequestException('Invalid OTP code.');
     }
 
-    // Mark OTP as used
-    await this.prisma.phoneOtp.update({ where: { id: otp.id }, data: { used: true } });
+    // Atomic update: only succeeds if OTP is still unused (prevents TOCTOU race)
+    const claimResult = await this.prisma.phoneOtp.updateMany({
+      where: { id: otp.id, used: false },
+      data: { used: true },
+    });
+    if (claimResult.count === 0) {
+      throw new BadRequestException('OTP already used. Please request a new code.');
+    }
 
     // Find or create user by phone number
     let user = await this.prisma.user.findUnique({ where: { phoneNumber: phone } });

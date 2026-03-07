@@ -19,6 +19,7 @@ describe('AuthService - Phone OTP', () => {
         create: jest.fn().mockResolvedValue({ id: 'otp-1' }),
         findFirst: jest.fn(),
         update: jest.fn().mockResolvedValue({}),
+        updateMany: jest.fn().mockResolvedValue({ count: 1 }),
       },
       user: {
         findUnique: jest.fn().mockResolvedValue(null),
