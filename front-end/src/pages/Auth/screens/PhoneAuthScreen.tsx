@@ -11,9 +11,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { GlassButton } from '../../../design-system/GlassButton';
 import { useAuthStore } from '../../../stores/auth.store';
 import { authService } from '../../../services/authService';
+import type { AuthStackParamList } from '../../../navigation/types';
+import type { User } from '../../../shared/types';
 
 type Step = 'phone' | 'otp';
 
@@ -25,7 +28,7 @@ const COUNTRY_CODES = [
 ];
 
 export default function PhoneAuthScreen() {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
   const { login } = useAuthStore();
 
   const [step, setStep] = useState<Step>('phone');
@@ -62,11 +65,9 @@ export default function PhoneAuthScreen() {
       setResendAt(Date.now() + 60_000);
       setSecondsLeft(60);
       setStep('otp');
-    } catch (err: any) {
-      Alert.alert(
-        'Error',
-        err?.response?.data?.message ?? 'Failed to send code. Please try again.'
-      );
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      Alert.alert('Error', msg ?? 'Failed to send code. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -95,9 +96,10 @@ export default function PhoneAuthScreen() {
     setLoading(true);
     try {
       const result = await authService.phoneOtpVerify(fullPhone, code);
-      login(result.user, result.access_token, result.refresh_token);
-    } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.message ?? 'Invalid code. Please try again.');
+      login(result.user as User, result.access_token, result.refresh_token);
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      Alert.alert('Error', msg ?? 'Invalid code. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { AuthStackParamList } from '../../../navigation/types';
 
 interface AuthTileProps {
   icon: string;
@@ -21,7 +23,7 @@ function AuthTile({ icon, title, subtitle, onPress }: AuthTileProps) {
 }
 
 export default function WelcomeScreen() {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
 
   return (
     <SafeAreaView style={styles.safe}>
