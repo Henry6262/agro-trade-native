@@ -4,6 +4,7 @@ import { Weight, Clock, CheckCircle2, Users } from 'lucide-react-native';
 import { format } from 'date-fns';
 import { Card, CardContent } from '@shared/components/Card';
 import { Badge } from '@shared/components/Badge';
+import { PhaseBadge } from '@shared/components';
 import { OrderStageIndicator } from '@pages/Dashboard/sections/Buyer/features/Orders/components/OrderStageIndicator';
 import type { BuyerOrder, MatchedSeller } from '../types';
 
@@ -79,7 +80,10 @@ export const ActiveOrdersList: React.FC<ActiveOrdersListProps> = ({
               </Text>
               <Text className="text-sm text-gray-500">{order.product}</Text>
             </View>
-            <Badge className="bg-blue-500/20 text-blue-300">{order.status}</Badge>
+            <View className="items-end gap-1">
+              <PhaseBadge phase={order.phase} />
+              <Badge className="bg-blue-500/20 text-blue-300">{order.status}</Badge>
+            </View>
           </View>
           <OrderStageIndicator currentStage={order.currentStage} />
           <View className="flex-row justify-between">
