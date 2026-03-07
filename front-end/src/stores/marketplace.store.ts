@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { Product, ProductCategory } from '../shared/types';
+import { apiClient } from '../services/api';
 
 interface MarketplaceState {
   // Products
@@ -30,6 +31,13 @@ interface MarketplaceState {
     total: number;
     hasMore: boolean;
   };
+
+  // Listings (role-scoped)
+  listings: {
+    buyer: unknown[];
+    seller: unknown[];
+  };
+  fetchListings: (role: 'buyer' | 'seller' | 'both') => Promise<void>;
 
   // Actions
   setProducts: (products: Product[]) => void;
@@ -67,6 +75,10 @@ export const useMarketplaceStore = create<MarketplaceState>()(
     products: [],
     featuredProducts: [],
     categories: [],
+    listings: {
+      buyer: [],
+      seller: [],
+    },
     searchQuery: '',
     selectedCategory: null,
     filters: initialFilters,
@@ -154,6 +166,25 @@ export const useMarketplaceStore = create<MarketplaceState>()(
       set((state) => {
         state.pagination = initialPagination;
       });
+    },
+
+    fetchListings: async (role) => {
+      set((state) => { state.isLoading = true; state.error = null; });
+      try {
+        if (role === 'buyer' || role === 'both') {
+          const res = await apiClient.get('/buyer/listings');
+          set((state) => { state.listings.buyer = res.data ?? []; });
+        }
+        if (role === 'seller' || role === 'both') {
+          const res = await apiClient.get('/seller/listings');
+          set((state) => { state.listings.seller = res.data ?? []; });
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Failed to load listings';
+        set((state) => { state.error = msg; });
+      } finally {
+        set((state) => { state.isLoading = false; });
+      }
     },
   }))
 );
