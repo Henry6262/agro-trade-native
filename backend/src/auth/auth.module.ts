@@ -8,6 +8,7 @@ import { PermissionsService } from "./services/permissions.service";
 import { GoogleStrategy } from "./strategies/google.strategy";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { PrismaModule } from "../prisma/prisma.module";
+import { SmsModule } from "../sms/sms.module";
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PrismaModule } from "../prisma/prisma.module";
       inject: [ConfigService],
     }),
     PrismaModule,
+    SmsModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, PermissionsService, GoogleStrategy, JwtStrategy],

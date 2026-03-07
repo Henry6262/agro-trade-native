@@ -363,6 +363,19 @@ export class CompanyResponseDto {
   updatedAt: string;
 }
 
+export class PhoneSendOtpDto {
+  @IsString()
+  phone: string;
+}
+
+export class PhoneVerifyOtpDto {
+  @IsString()
+  phone: string;
+
+  @IsString()
+  code: string;
+}
+
 // ==================== Base (Address) DTOs ====================
 
 export class CreateBaseDto {
