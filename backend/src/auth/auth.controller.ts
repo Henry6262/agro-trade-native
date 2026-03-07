@@ -344,6 +344,7 @@ export class AuthController {
   @Post("phone/send")
   @ApiOperation({ summary: "Send OTP to phone number via SMS" })
   @ApiBody({ type: PhoneSendOtpDto })
+  @ApiOkResponse({ schema: { example: { expiresIn: 300 } } })
   async phoneOtpSend(@Body() dto: PhoneSendOtpDto) {
     return this.authService.sendPhoneOtp(dto.phone);
   }
