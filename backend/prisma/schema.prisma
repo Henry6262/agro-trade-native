@@ -58,6 +58,19 @@ model User {
   @@map("users")
 }
 
+model PhoneOtp {
+  id        String   @id @default(cuid())
+  phone     String
+  codeHash  String   @map("code_hash")
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([phone, used])
+  @@map("phone_otps")
+}
+
 model Company {
   id String @id @default(cuid())
 
@@ -511,7 +524,7 @@ enum UserRole {
   FARMER
   BUYER
   TRANSPORTER
-  COMPANY_ADMIN  // Transport company administrators
+  COMPANY_ADMIN // Transport company administrators
   INSPECTOR
 }
 
