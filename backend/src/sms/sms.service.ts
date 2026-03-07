@@ -13,10 +13,14 @@ export class SmsService {
   constructor(private configService: ConfigService) {
     const accountSid = this.configService.get<string>('TWILIO_ACCOUNT_SID');
     const authToken = this.configService.get<string>('TWILIO_AUTH_TOKEN');
-    this.fromNumber = this.configService.get<string>('TWILIO_FROM_NUMBER') ?? '';
+    const fromNumber = this.configService.get<string>('TWILIO_FROM_NUMBER');
+    this.fromNumber = fromNumber ?? '';
 
-    if (accountSid && authToken) {
+    if (accountSid && authToken && fromNumber) {
       this.client = Twilio(accountSid, authToken);
+    } else if (accountSid || authToken || fromNumber) {
+      // Some vars set but not all — warn about misconfiguration
+      this.logger.warn('Twilio partially configured — SMS disabled. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_FROM_NUMBER.');
     }
   }
 
@@ -25,7 +29,8 @@ export class SmsService {
 
     if (!this.client) {
       // Dev mode: log instead of sending
-      this.logger.warn(`[DEV] SMS to ${phone}: ${body}`);
+      const maskedDev = phone.slice(-4).padStart(phone.length, '*');
+      this.logger.warn(`[DEV] OTP would be sent to ${maskedDev} (set TWILIO_* env vars to enable SMS)`);
       return;
     }
 
