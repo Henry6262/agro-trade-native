@@ -167,6 +167,24 @@ export const authService = {
       .then((response) => response.data);
   },
 
+  // Phone OTP authentication
+  phoneOtpSend: async (phone: string): Promise<{ expiresIn: number }> => {
+    return apiClient.post<{ expiresIn: number }>('/auth/phone/send', { phone }).then((r) => r.data);
+  },
+
+  phoneOtpVerify: async (
+    phone: string,
+    code: string
+  ): Promise<{ access_token: string; refresh_token: string; user: any }> => {
+    return apiClient
+      .post<{
+        access_token: string;
+        refresh_token: string;
+        user: any;
+      }>('/auth/phone/verify', { phone, code })
+      .then((r) => r.data);
+  },
+
   // Onboarding registration
   registerWithCompany: async (data: RegisterWithCompanyDto): Promise<RegisterResponse> => {
     return apiClient
