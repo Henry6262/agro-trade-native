@@ -21,3 +21,4 @@ export { NegotiationDrawer } from './NegotiationDrawer';
 export { AcceptOfferModal } from './AcceptOfferModal';
 export { RejectOfferModal } from './RejectOfferModal';
 export { SkeletonCard } from './SkeletonCard';
+export { PhaseBadge } from './PhaseBadge';
