@@ -1,3 +1,4 @@
+import './src/i18n'; // side-effect import — must be first
 import './src/styles/nativewind.setup';
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
