@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import type { AuthStackParamList } from '../../../navigation/types';
 
 interface AuthTileProps {
@@ -24,28 +25,29 @@ function AuthTile({ icon, title, subtitle, onPress }: AuthTileProps) {
 
 export default function WelcomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+  const { t } = useTranslation();
 
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.logo}>🌾</Text>
-          <Text style={styles.appName}>AgroTrade</Text>
-          <Text style={styles.tagline}>Connect. Trade. Grow.</Text>
+          <Text style={styles.appName}>{t('auth.welcome.title')}</Text>
+          <Text style={styles.tagline}>{t('auth.welcome.tagline')}</Text>
         </View>
 
-        <Text style={styles.chooseLabel}>How would you like to sign in?</Text>
+        <Text style={styles.chooseLabel}>{t('auth.welcome.chooseMethod')}</Text>
         <View style={styles.tilesRow}>
           <AuthTile
             icon="📱"
-            title="Phone"
-            subtitle="No crypto needed"
+            title={t('auth.welcome.phoneMethod')}
+            subtitle={t('auth.welcome.phoneSubtitle')}
             onPress={() => navigation.navigate('PhoneAuth')}
           />
           <AuthTile
             icon="🔐"
-            title="Wallet"
-            subtitle="Privy wallet"
+            title={t('auth.welcome.walletMethod')}
+            subtitle={t('auth.welcome.walletSubtitle')}
             onPress={() => navigation.navigate('Login')}
           />
         </View>

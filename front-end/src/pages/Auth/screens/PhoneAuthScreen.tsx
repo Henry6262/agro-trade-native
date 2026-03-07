@@ -12,6 +12,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { GlassButton } from '../../../design-system/GlassButton';
 import { useAuthStore } from '../../../stores/auth.store';
 import { authService } from '../../../services/authService';
@@ -30,6 +31,7 @@ const COUNTRY_CODES = [
 export default function PhoneAuthScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
   const { login } = useAuthStore();
+  const { t } = useTranslation();
 
   const [step, setStep] = useState<Step>('phone');
   const [countryIndex, setCountryIndex] = useState(0);
@@ -56,7 +58,7 @@ export default function PhoneAuthScreen() {
 
   const handleSend = async () => {
     if (phone.trim().length < 7) {
-      Alert.alert('Invalid phone', 'Please enter a valid phone number.');
+      Alert.alert(t('common.error'), t('auth.phone.errors.invalidPhone'));
       return;
     }
     setLoading(true);
@@ -90,7 +92,7 @@ export default function PhoneAuthScreen() {
   const handleVerify = async () => {
     const code = otp.join('');
     if (code.length < 6) {
-      Alert.alert('Incomplete code', 'Please enter the full 6-digit code.');
+      Alert.alert(t('common.error'), t('auth.phone.errors.incompleteOtp'));
       return;
     }
     setLoading(true);
@@ -113,8 +115,8 @@ export default function PhoneAuthScreen() {
           style={styles.kav}
         >
           <View style={styles.card}>
-            <Text style={styles.title}>Enter your phone</Text>
-            <Text style={styles.subtitle}>We&apos;ll send a 6-digit code to verify</Text>
+            <Text style={styles.title}>{t('auth.phone.title')}</Text>
+            <Text style={styles.subtitle}>{t('auth.phone.subtitle')}</Text>
 
             <View style={styles.phoneRow}>
               <TouchableOpacity
@@ -128,7 +130,7 @@ export default function PhoneAuthScreen() {
 
               <TextInput
                 style={styles.phoneInput}
-                placeholder="88 123 456"
+                placeholder={t('auth.phone.phonePlaceholder')}
                 placeholderTextColor="rgba(255,255,255,0.3)"
                 keyboardType="phone-pad"
                 value={phone}
@@ -138,7 +140,7 @@ export default function PhoneAuthScreen() {
             </View>
 
             <GlassButton
-              label={loading ? 'Sending…' : 'Send Code'}
+              label={loading ? t('auth.phone.sending') : t('auth.phone.sendCode')}
               onPress={handleSend}
               variant="primary"
               disabled={loading}
@@ -162,8 +164,10 @@ export default function PhoneAuthScreen() {
         style={styles.kav}
       >
         <View style={styles.card}>
-          <Text style={styles.title}>Enter the code</Text>
-          <Text style={styles.subtitle}>Sent to {fullPhone}</Text>
+          <Text style={styles.title}>{t('auth.phone.otpTitle')}</Text>
+          <Text style={styles.subtitle}>
+            {t('auth.phone.otpSubtitle')} {fullPhone}
+          </Text>
 
           <View style={styles.otpRow}>
             {otp.map((digit, i) => (
@@ -184,7 +188,7 @@ export default function PhoneAuthScreen() {
           </View>
 
           <GlassButton
-            label={loading ? 'Verifying…' : 'Verify'}
+            label={loading ? t('auth.phone.verifying') : t('auth.phone.verify')}
             onPress={handleVerify}
             variant="primary"
             disabled={loading}
@@ -197,7 +201,9 @@ export default function PhoneAuthScreen() {
             style={styles.backBtn}
           >
             <Text style={[styles.backText, secondsLeft > 0 && styles.dimmed]}>
-              {secondsLeft > 0 ? `Resend in ${secondsLeft}s` : 'Resend code'}
+              {secondsLeft > 0
+                ? t('auth.phone.resendIn', { seconds: secondsLeft })
+                : t('auth.phone.resend')}
             </Text>
           </TouchableOpacity>
 
