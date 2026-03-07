@@ -14,6 +14,7 @@ import {
   User,
   LayoutGrid,
 } from 'lucide-react-native';
+import type { LucideIcon } from 'lucide-react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
@@ -29,9 +30,19 @@ import type { TransporterDashboardSectionProps } from '../../../pages/Dashboard/
 import { InspectorDashboard } from './inspector/InspectorDashboard';
 import { ProfileDrawer } from '../components/ProfileDrawer';
 import { BottomNavigation } from '../components/BottomNavigation';
+import { CharacterTourOverlay } from '@features/onboarding/components';
 import { useAuthStore } from '@stores/auth.store';
+import { useTourStore } from '@stores/tour.store';
+import { useNotificationStore } from '@stores/notification.store';
 import { AdminPricingZonesScreen } from '../../admin/screens/AdminPricingZonesScreen';
 import PendingListingService from '@services/pendingListingService';
+import { socketService } from '@services/socketService';
+import {
+  registerForPushNotifications,
+  sendPushTokenToBackend,
+} from '@services/notificationService';
+import { ErrorBoundary } from '@shared/components/ErrorBoundary';
+import { OfflineBanner } from '@shared/components/OfflineBanner';
 import { GradientBackground, GlassHeader } from '../../../design-system';
 
 type DashboardMainScreenNavigationProp = NativeStackNavigationProp<
@@ -42,7 +53,7 @@ type DashboardMainScreenRouteProp = RouteProp<DashboardStackParamList, 'Dashboar
 
 interface NavigationItem {
   id: string;
-  icon: any;
+  icon: LucideIcon;
   label: string;
 }
 
@@ -65,6 +76,7 @@ export default function DashboardMainScreen() {
   }, [user?.role, route.params?.userRole]);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const { hasSeenTour, startTour } = useTourStore();
 
   // Ensure authenticated users stay on dashboard
   React.useEffect(() => {
@@ -85,7 +97,52 @@ export default function DashboardMainScreen() {
       };
       checkPendingListing();
     }
-  }, [isAuthenticated, route.params]);
+  }, [isAuthenticated, navigation, route.params]);
+
+  // WebSocket: connect on auth, subscribe to live events
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+    socketService.connect();
+    const addNotification = useNotificationStore.getState().addNotification;
+    const handleOffer = (payload: { productName?: string; buyerName?: string }) => {
+      addNotification({
+        type: 'offer',
+        title: 'New Offer Received',
+        body: `${payload.buyerName ?? 'A buyer'} made an offer on ${payload.productName ?? 'your listing'}`,
+      });
+    };
+    socketService.on('offer:received', handleOffer);
+    return () => {
+      socketService.off('offer:received', handleOffer);
+      socketService.disconnect();
+    };
+  }, [isAuthenticated]);
+
+  // Push notifications: register token with backend
+  React.useEffect(() => {
+    if (!isAuthenticated) return;
+    registerForPushNotifications()
+      .then((token) => {
+        if (token) return sendPushTokenToBackend(token);
+      })
+      .catch(console.warn);
+  }, [isAuthenticated]);
+
+  // Start character tour for first-time users
+  React.useEffect(() => {
+    if (!isAuthenticated || hasSeenTour) return;
+    const tourRole =
+      userRole === 'buyer'
+        ? 'buyer'
+        : userRole === 'seller'
+          ? 'seller'
+          : userRole === 'transporter'
+            ? 'transport'
+            : null;
+    if (!tourRole) return;
+    const timer = setTimeout(() => startTour(tourRole), 1500);
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, hasSeenTour, userRole, startTour]);
 
   // Update active section when role changes
   React.useEffect(() => {
@@ -158,34 +215,44 @@ export default function DashboardMainScreen() {
         activeSection as 'products' | 'offers' | 'trades'
       );
       return (
-        <>
-          {/* Seller tabs (products, offers, trades) — kept mounted, hidden when not active */}
-          <View style={isSellerContentTab ? styles.sectionVisible : styles.sectionHidden}>
-            <SellerDashboardSection activeTab={activeSection as 'products' | 'offers' | 'trades'} />
-          </View>
-          {/* Intelligence tab — kept mounted, hidden when not active */}
-          <View
-            style={activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden}
-          >
-            <IntelligenceScreen />
-          </View>
-        </>
+        <ErrorBoundary key={`seller-${activeSection}`}>
+          <>
+            {/* Seller tabs (products, offers, trades) — kept mounted, hidden when not active */}
+            <View style={isSellerContentTab ? styles.sectionVisible : styles.sectionHidden}>
+              <SellerDashboardSection
+                activeTab={activeSection as 'products' | 'offers' | 'trades'}
+              />
+            </View>
+            {/* Intelligence tab — kept mounted, hidden when not active */}
+            <View
+              style={
+                activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden
+              }
+            >
+              <IntelligenceScreen />
+            </View>
+          </>
+        </ErrorBoundary>
       );
     }
     if (userRole === 'buyer') {
       const buyerContentTabs = ['orders', 'requests'] as const;
       const isBuyerContentTab = buyerContentTabs.includes(activeSection as 'orders' | 'requests');
       return (
-        <>
-          <View style={isBuyerContentTab ? styles.sectionVisible : styles.sectionHidden}>
-            <BuyerDashboardSection activeTab={activeSection as 'orders' | 'requests'} />
-          </View>
-          <View
-            style={activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden}
-          >
-            <IntelligenceScreen />
-          </View>
-        </>
+        <ErrorBoundary key={`buyer-${activeSection}`}>
+          <>
+            <View style={isBuyerContentTab ? styles.sectionVisible : styles.sectionHidden}>
+              <BuyerDashboardSection activeTab={activeSection as 'orders' | 'requests'} />
+            </View>
+            <View
+              style={
+                activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden
+              }
+            >
+              <IntelligenceScreen />
+            </View>
+          </>
+        </ErrorBoundary>
       );
     }
     if (userRole === 'transporter') {
@@ -194,45 +261,57 @@ export default function DashboardMainScreen() {
         activeSection as 'bidding' | 'offers' | 'transfers' | 'fleet'
       );
       return (
+        <ErrorBoundary key={`transporter-${activeSection}`}>
+          <>
+            <View style={isTransporterContentTab ? styles.sectionVisible : styles.sectionHidden}>
+              <TransporterDashboardScreen
+                activeTab={activeSection as TransporterDashboardSectionProps['activeTab']}
+              />
+            </View>
+            <View
+              style={
+                activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden
+              }
+            >
+              <IntelligenceScreen />
+            </View>
+          </>
+        </ErrorBoundary>
+      );
+    }
+    if (userRole === 'inspector') {
+      // Inspector handles its own tabs internally — single component, no switching needed
+      return (
+        <ErrorBoundary key="inspector">
+          <InspectorDashboard />
+        </ErrorBoundary>
+      );
+    }
+    // Admin content — keep all panels mounted
+    return (
+      <ErrorBoundary key={`admin-${activeSection}`}>
         <>
-          <View style={isTransporterContentTab ? styles.sectionVisible : styles.sectionHidden}>
-            <TransporterDashboardScreen
-              activeTab={activeSection as TransporterDashboardSectionProps['activeTab']}
-            />
+          <View style={activeSection === 'overview' ? styles.sectionVisible : styles.sectionHidden}>
+            <CommandCenterScreen />
+          </View>
+          <View style={activeSection === 'agents' ? styles.sectionVisible : styles.sectionHidden}>
+            <AgentNetworkScreen />
+          </View>
+          <View
+            style={activeSection === 'operations' ? styles.sectionVisible : styles.sectionHidden}
+          >
+            <OperationsScreen />
           </View>
           <View
             style={activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden}
           >
             <IntelligenceScreen />
           </View>
+          <View style={activeSection === 'pricing' ? styles.sectionVisible : styles.sectionHidden}>
+            <AdminPricingZonesScreen />
+          </View>
         </>
-      );
-    }
-    if (userRole === 'inspector') {
-      // Inspector handles its own tabs internally — single component, no switching needed
-      return <InspectorDashboard />;
-    }
-    // Admin content — keep all panels mounted
-    return (
-      <>
-        <View style={activeSection === 'overview' ? styles.sectionVisible : styles.sectionHidden}>
-          <CommandCenterScreen />
-        </View>
-        <View style={activeSection === 'agents' ? styles.sectionVisible : styles.sectionHidden}>
-          <AgentNetworkScreen />
-        </View>
-        <View style={activeSection === 'operations' ? styles.sectionVisible : styles.sectionHidden}>
-          <OperationsScreen />
-        </View>
-        <View
-          style={activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden}
-        >
-          <IntelligenceScreen />
-        </View>
-        <View style={activeSection === 'pricing' ? styles.sectionVisible : styles.sectionHidden}>
-          <AdminPricingZonesScreen />
-        </View>
-      </>
+      </ErrorBoundary>
     );
   };
 
@@ -244,6 +323,7 @@ export default function DashboardMainScreen() {
 
   return (
     <GradientBackground>
+      <OfflineBanner />
       <View style={styles.root}>
         {/* Glass Header */}
         <GlassHeader showWordmark={true} rightAction={profileButton} />
@@ -268,6 +348,9 @@ export default function DashboardMainScreen() {
         }}
         showSuccessAnimation={showSuccessAnimation}
       />
+
+      {/* Character Tour Overlay — rendered last so it sits above everything */}
+      <CharacterTourOverlay />
     </GradientBackground>
   );
 }

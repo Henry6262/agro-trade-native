@@ -2,31 +2,47 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { GlassButton } from '../../design-system';
+import { BaseComponentProps } from '../types';
 
-interface EmptyStateProps {
+interface EmptyStateProps extends BaseComponentProps {
   icon?: React.ReactNode;
   title: string;
   subtitle?: string;
   cta?: string;
   onPress?: () => void;
+  // Legacy backward-compat props
+  description?: string;
+  actionLabel?: string;
+  onAction?: () => void;
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({
   icon,
   title,
   subtitle,
+  description,
   cta,
   onPress,
-}) => (
-  <View style={styles.container}>
-    {icon && <View style={styles.iconWrap}>{icon}</View>}
-    <Text style={styles.title}>{title}</Text>
-    {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
-    {cta && onPress && (
-      <GlassButton label={cta} onPress={onPress} variant="secondary" size="sm" style={styles.btn} />
-    )}
-  </View>
-);
+  actionLabel,
+  onAction,
+  testID,
+  accessibilityLabel,
+}) => {
+  const subtitleText = subtitle ?? description;
+  const ctaLabel = cta ?? actionLabel;
+  const ctaPress = onPress ?? onAction;
+
+  return (
+    <View style={styles.container} testID={testID} accessibilityLabel={accessibilityLabel}>
+      {icon && <View style={styles.iconWrap}>{icon}</View>}
+      <Text style={styles.title}>{title}</Text>
+      {subtitleText && <Text style={styles.subtitle}>{subtitleText}</Text>}
+      {ctaLabel && ctaPress && (
+        <GlassButton label={ctaLabel} onPress={ctaPress} variant="secondary" size="sm" style={styles.btn} />
+      )}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   btn: {

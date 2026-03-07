@@ -1,34 +1,24 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  StyleSheet,
+} from 'react-native';
 import { Truck, CheckCircle, Shield, Route, User, MapPin, Users } from 'lucide-react-native';
 import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
 import { BaseComponentProps } from '@shared/types';
+import transportService, {
+  TransportFleetTruck,
+  TransportFleetDriver,
+  TransportFleetSummary,
+} from '@services/transportService';
 import { FleetCreationFlow } from '../fleet-creation';
 
 interface TransporterFleetTabProps extends BaseComponentProps {
   id?: string;
-}
-
-interface FleetTruck {
-  id: string;
-  licensePlate: string;
-  model: string;
-  capacity: string;
-  status: 'available' | 'assigned';
-  location: string;
-  verified: boolean;
-  driver?: string;
-  assignment?: string;
-}
-
-interface FleetDriver {
-  id: string;
-  name: string;
-  license: string;
-  phone: string;
-  status: 'available' | 'assigned';
-  experience: string;
-  assignment?: string;
 }
 
 type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'muted' | 'gold';
@@ -40,91 +30,46 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
   const [showFleetCreation, setShowFleetCreation] = useState(false);
   const [truckTab, setTruckTab] = useState<'available' | 'in_transit'>('available');
   const [driverTab, setDriverTab] = useState<'available' | 'assigned'>('available');
+  const [trucks, setTrucks] = useState<TransportFleetTruck[]>([]);
+  const [drivers, setDrivers] = useState<TransportFleetDriver[]>([]);
+  const [summary, setSummary] = useState<TransportFleetSummary | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const mockTrucks: FleetTruck[] = [
-    {
-      id: 'T001',
-      licensePlate: 'ABC-1234',
-      model: 'Volvo FH16',
-      capacity: '40 tons',
-      status: 'available',
-      location: 'Chicago, IL 🇺🇸',
-      verified: true,
-    },
-    {
-      id: 'T002',
-      licensePlate: 'DEF-5678',
-      model: 'Mercedes Actros',
-      capacity: '35 tons',
-      status: 'assigned',
-      location: 'En route to Kansas 🇺🇸',
-      verified: true,
-      driver: 'Mike Johnson',
-      assignment: 'Wheat Transport - Iowa to Chicago',
-    },
-    {
-      id: 'T003',
-      licensePlate: 'GHI-9012',
-      model: 'Scania R500',
-      capacity: '45 tons',
-      status: 'assigned',
-      location: 'Milwaukee, WI 🇺🇸',
-      verified: true,
-      driver: 'Sarah Davis',
-      assignment: 'Corn Transport - Wisconsin to Kansas',
-    },
-    {
-      id: 'T004',
-      licensePlate: 'JKL-3456',
-      model: 'Peterbilt 579',
-      capacity: '38 tons',
-      status: 'available',
-      location: 'Des Moines, IA 🇺🇸',
-      verified: false,
-    },
-  ];
+  const loadFleet = useCallback(async () => {
+    try {
+      setLoading(true);
+      const fleet = await transportService.getMyFleet();
+      setTrucks(fleet.trucks ?? []);
+      setDrivers(fleet.drivers ?? []);
+      setSummary(fleet.summary ?? null);
+    } catch (error) {
+      console.warn('Failed to load fleet data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const mockDrivers: FleetDriver[] = [
-    {
-      id: 'D001',
-      name: 'John Smith',
-      license: 'CDL123456789',
-      phone: '+1 (555) 123-4567',
-      status: 'available',
-      experience: '8 years',
-    },
-    {
-      id: 'D002',
-      name: 'Mike Johnson',
-      license: 'CDL987654321',
-      phone: '+1 (555) 987-6543',
-      status: 'assigned',
-      experience: '12 years',
-      assignment: 'Truck DEF-5678',
-    },
-    {
-      id: 'D003',
-      name: 'Sarah Davis',
-      license: 'CDL456789123',
-      phone: '+1 (555) 456-7890',
-      status: 'assigned',
-      experience: '6 years',
-      assignment: 'Truck GHI-9012',
-    },
-  ];
+  useEffect(() => {
+    loadFleet();
+  }, [loadFleet]);
 
-  const filteredTrucks = mockTrucks.filter((truck) =>
+  const filteredTrucks = trucks.filter((truck) =>
     truckTab === 'available' ? truck.status === 'available' : truck.status === 'assigned'
   );
 
-  const filteredDrivers = mockDrivers.filter((driver) =>
+  const filteredDrivers = drivers.filter((driver) =>
     driverTab === 'available' ? driver.status === 'available' : driver.status === 'assigned'
   );
 
-  const availableTrucksCount = mockTrucks.filter((t) => t.status === 'available').length;
-  const inTransitTrucksCount = mockTrucks.filter((t) => t.status === 'assigned').length;
-  const availableDriversCount = mockDrivers.filter((d) => d.status === 'available').length;
-  const assignedDriversCount = mockDrivers.filter((d) => d.status === 'assigned').length;
+  const availableTrucksCount =
+    summary?.availableTrucks ?? trucks.filter((t) => t.status === 'available').length;
+  const inTransitTrucksCount =
+    summary?.inTransitTrucks ?? trucks.filter((t) => t.status === 'assigned').length;
+  const availableDriversCount =
+    summary?.availableDrivers ?? drivers.filter((d) => d.status === 'available').length;
+  const assignedDriversCount =
+    summary?.assignedDrivers ?? drivers.filter((d) => d.status === 'assigned').length;
+  const totalCapacity = trucks.reduce((sum, t) => sum + (t.capacityTons ?? 0), 0);
 
   const TabPill: React.FC<{
     label: string;
@@ -132,7 +77,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
     active: boolean;
     onPress: () => void;
     activeVariant?: BadgeVariant;
-  }> = ({ label, count, active, onPress, _activeVariant = 'success' }) => (
+  }> = ({ label, count, active, onPress }) => (
     <TouchableOpacity onPress={onPress} style={[styles.tabPill, active && styles.tabPillActive]}>
       <Text style={[styles.tabPillText, active && styles.tabPillTextActive]}>
         {label} ({count})
@@ -148,29 +93,48 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
       accessibilityLabel={accessibilityLabel}
     >
       <View style={styles.content}>
+        {loading && trucks.length === 0 ? (
+          <View style={styles.loadingWrap}>
+            <ActivityIndicator size="large" color="#4ADE80" />
+            <Text style={styles.loadingText}>Loading fleet data...</Text>
+          </View>
+        ) : null}
+
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
           <GlassCard tier="subtle" style={styles.statCard}>
             <Truck size={16} color="#60A5FA" />
-            <Text style={[styles.statValue, { color: '#60A5FA' }]}>12</Text>
+            <Text style={[styles.statValue, { color: '#60A5FA' }]}>
+              {summary?.totalTrucks ?? trucks.length}
+            </Text>
             <Text style={styles.statLabel}>TOTAL</Text>
           </GlassCard>
           <GlassCard tier="subtle" style={styles.statCard}>
             <CheckCircle size={16} color="#4ADE80" />
-            <Text style={[styles.statValue, { color: '#4ADE80' }]}>8</Text>
+            <Text style={[styles.statValue, { color: '#4ADE80' }]}>{availableTrucksCount}</Text>
             <Text style={styles.statLabel}>AVAILABLE</Text>
           </GlassCard>
           <GlassCard tier="subtle" style={styles.statCard}>
             <Route size={16} color="#FCD34D" />
-            <Text style={[styles.statValue, { color: '#FCD34D' }]}>4</Text>
+            <Text style={[styles.statValue, { color: '#FCD34D' }]}>{inTransitTrucksCount}</Text>
             <Text style={styles.statLabel}>IN TRANSIT</Text>
           </GlassCard>
           <GlassCard tier="subtle" style={styles.statCard}>
             <Shield size={16} color="#A78BFA" />
-            <Text style={[styles.statValue, { color: '#A78BFA' }]}>10</Text>
+            <Text style={[styles.statValue, { color: '#A78BFA' }]}>
+              {summary?.verifiedTrucks ?? trucks.filter((t) => t.verified).length}
+            </Text>
             <Text style={styles.statLabel}>VERIFIED</Text>
           </GlassCard>
         </View>
+
+        {/* Capacity Summary */}
+        {totalCapacity > 0 && (
+          <GlassCard tier="subtle" style={styles.capacitySummary}>
+            <Text style={styles.capacityLabel}>Total Fleet Capacity</Text>
+            <Text style={styles.capacityValue}>{totalCapacity} tons</Text>
+          </GlassCard>
+        )}
 
         {/* Add to Fleet */}
         <GlassButton
@@ -222,7 +186,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
                       {truck.verified && <Shield size={14} color="#4ADE80" />}
                     </View>
                     <Text style={styles.fleetCardSub}>
-                      {truck.model} • {truck.capacity}
+                      {truck.model} • {truck.capacityTons} tons
                     </Text>
                   </View>
                   <GlassBadge label={truck.status.toUpperCase()} variant={statusVariant} />
@@ -303,7 +267,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
                   </View>
                   <View style={styles.fleetCardInfo}>
                     <Text style={styles.fleetCardTitle}>{driver.name}</Text>
-                    <Text style={styles.fleetCardSub}>{driver.experience} experience</Text>
+                    <Text style={styles.fleetCardSub}>{driver.experienceYears} yrs experience</Text>
                     {driver.assignment && (
                       <Text style={styles.assignmentText}>Assigned to: {driver.assignment}</Text>
                     )}
@@ -331,10 +295,11 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
         visible={showFleetCreation}
         onClose={() => setShowFleetCreation(false)}
         onSuccess={() => {
-          // TODO: Refresh fleet data
+          setShowFleetCreation(false);
+          loadFleet();
         }}
         onError={(error) => {
-          console.error('Fleet creation error:', error);
+          console.warn('Fleet creation error:', error);
         }}
       />
     </ScrollView>
@@ -346,6 +311,25 @@ const styles = StyleSheet.create({
     color: '#4ADE80',
     fontSize: 11,
     marginTop: 2,
+  },
+  capacityLabel: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  capacitySummary: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  capacityValue: {
+    color: '#4ADE80',
+    fontSize: 18,
+    fontWeight: '800',
   },
   content: {
     gap: 14,
@@ -409,6 +393,15 @@ const styles = StyleSheet.create({
   },
   fleetDetails: {
     gap: 6,
+  },
+  loadingText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+  },
+  loadingWrap: {
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 40,
   },
   scroll: {
     backgroundColor: 'transparent',

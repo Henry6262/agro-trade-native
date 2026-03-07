@@ -1,5 +1,6 @@
-import { useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { socketService } from '@services/socketService';
 import { sellerTradesService } from '../service';
 import type { EarningsSummary, SellerTrade } from '../types';
 import type { SellerStats, SellerTradeRecord } from '@services/sellerService';
@@ -82,9 +83,15 @@ const buildSummary = (
 };
 
 export const useSellerTrades = () => {
+  const [extraTrades, setExtraTrades] = useState<SellerTradeRecord[]>([]);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const isFetchingMoreRef = useRef(false);
+
   const tradesQuery = useQuery({
     queryKey: ['seller', 'trades'],
-    queryFn: sellerTradesService.fetchTrades,
+    queryFn: () => sellerTradesService.fetchTrades({ limit: 20 }),
   });
 
   const statsQuery = useQuery({
@@ -92,17 +99,66 @@ export const useSellerTrades = () => {
     queryFn: sellerTradesService.fetchStats,
   });
 
-  const trades = useMemo(() => tradesQuery.data?.map(mapTradeRecord) ?? [], [tradesQuery.data]);
+  // When initial page loads, initialise cursor state
+  useEffect(() => {
+    if (tradesQuery.data) {
+      setCursor(tradesQuery.data.nextCursor);
+      setHasMore(!!tradesQuery.data.nextCursor);
+      setExtraTrades([]);
+    }
+  }, [tradesQuery.data]);
+
+  const fetchMore = useCallback(async () => {
+    if (!hasMore || isFetchingMoreRef.current || !cursor) return;
+    isFetchingMoreRef.current = true;
+    setIsFetchingMore(true);
+    try {
+      const res = await sellerTradesService.fetchTrades({ limit: 20, cursor });
+      if (res.items.length) {
+        setExtraTrades((prev) => [...prev, ...res.items]);
+        setCursor(res.nextCursor);
+        setHasMore(!!res.nextCursor);
+      } else {
+        setHasMore(false);
+      }
+    } finally {
+      isFetchingMoreRef.current = false;
+      setIsFetchingMore(false);
+    }
+  }, [cursor, hasMore]);
+
+  const allRecords = useMemo(
+    () => [...(tradesQuery.data?.items ?? []), ...extraTrades],
+    [tradesQuery.data?.items, extraTrades]
+  );
+  const trades = useMemo(() => allRecords.map(mapTradeRecord), [allRecords]);
   const summary = useMemo(() => buildSummary(statsQuery.data, trades), [statsQuery.data, trades]);
 
   const isLoading = tradesQuery.isLoading || statsQuery.isLoading;
+
+  // Subscribe to real-time trade updates via WebSocket
+  useEffect(() => {
+    const handleTradeUpdate = () => {
+      void tradesQuery.refetch();
+    };
+    socketService.on('trade-operation:updated', handleTradeUpdate);
+    return () => {
+      socketService.off('trade-operation:updated', handleTradeUpdate);
+    };
+  }, [tradesQuery]);
 
   return {
     trades,
     summary,
     isLoading,
+    isFetchingMore,
+    hasMore,
     isError: tradesQuery.isError || statsQuery.isError,
+    fetchMore,
     refresh: () => {
+      setExtraTrades([]);
+      setCursor(null);
+      setHasMore(true);
       void tradesQuery.refetch();
       void statsQuery.refetch();
     },

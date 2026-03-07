@@ -123,8 +123,19 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
       });
 
       if (response.data.access_token) {
+        // Normalise user object before storing:
+        // 1. Map backend `phoneNumber` → frontend `phone`
+        // 2. Normalise role to lowercase ('FARMER' → 'farmer', 'BUYER' → 'buyer', etc.)
+        const rawUser = response.data.user;
+        const normalizedUser = {
+          ...rawUser,
+          phone: rawUser.phoneNumber ?? rawUser.phone ?? '',
+          role: (rawUser.role as string)?.toLowerCase() ?? rawUser.role,
+          createdAt: rawUser.createdAt ?? new Date().toISOString(),
+          updatedAt: rawUser.updatedAt ?? new Date().toISOString(),
+        };
         // Store tokens and login
-        login(response.data.user, response.data.access_token, response.data.refresh_token);
+        login(normalizedUser, response.data.access_token, response.data.refresh_token);
 
         // Show success animation
         showProfileCreatedAnimation();

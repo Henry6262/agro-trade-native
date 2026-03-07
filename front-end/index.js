@@ -13,6 +13,9 @@ import EventEmitter from 'eventemitter3';
 import http from 'http-browserify';
 import https from 'https-browserify';
 
+// Now import the Expo app entry point
+import 'expo/AppEntry';
+
 // Set up globals BEFORE importing the app
 global.Buffer = Buffer;
 if (typeof global.crypto !== 'object') {
@@ -24,6 +27,3 @@ global.Writable = Writable;
 global.EventEmitter = EventEmitter;
 global.http = http;
 global.https = https;
-
-// Now import the Expo app entry point
-import 'expo/AppEntry';

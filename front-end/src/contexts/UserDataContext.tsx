@@ -338,15 +338,40 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (isAuthenticated && user) {
       const userRole = user.role?.toLowerCase();
 
-      // Map FARMER to seller
+      // FARMER and SELLER both map to the seller dashboard
       if (userRole === 'farmer' || userRole === 'seller') {
-        // Fetch seller-specific data
         fetchSellerProducts();
         fetchSellerOffers();
         fetchSellerTrades();
         fetchSellerStats();
       }
-      // Add other role checks here (buyer, transporter, admin)
+      // Buyer pre-fetch: listings and offers (trade operations load lazily via React Query)
+      if (userRole === 'buyer') {
+        apiClient.get('/buyer/listings').catch(() => {
+          /* silent – React Query owns error UI */
+        });
+        apiClient.get('/buyer/offers').catch(() => {
+          /* silent */
+        });
+      }
+      // Transporter pre-fetch
+      if (userRole === 'transporter') {
+        apiClient.get('/transport/requests/available').catch(() => {
+          /* silent */
+        });
+        apiClient.get('/transport/jobs').catch(() => {
+          /* silent */
+        });
+      }
+      // Inspector pre-fetch
+      if (userRole === 'inspector') {
+        apiClient.get('/inspector/jobs/active').catch(() => {
+          /* silent */
+        });
+        apiClient.get('/inspector/jobs/available').catch(() => {
+          /* silent */
+        });
+      }
     }
   }, [
     isAuthenticated,

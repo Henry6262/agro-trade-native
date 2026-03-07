@@ -120,14 +120,17 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
 
   const redirectToDashboard = (role: string) => {
     onClose();
-    switch (role) {
+    // Normalise to lowercase — handles legacy persisted uppercase ('BUYER') and new values ('buyer')
+    switch (role?.toLowerCase()) {
       case 'buyer':
         navigation.navigate('BuyerDashboard' as never);
         break;
       case 'seller':
+      case 'farmer':
         navigation.navigate('SellerDashboard' as never);
         break;
       case 'transport':
+      case 'transporter':
         navigation.navigate('TransporterDashboard' as never);
         break;
       default:

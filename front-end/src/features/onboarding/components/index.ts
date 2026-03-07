@@ -4,4 +4,5 @@ export * from './transporter';
 
 // Local components
 export * from './AnimatedRoleCard';
+export * from './CharacterTourOverlay';
 export * from './ProductDetailDrawer';

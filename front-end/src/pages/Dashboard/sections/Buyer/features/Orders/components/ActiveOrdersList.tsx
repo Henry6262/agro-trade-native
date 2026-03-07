@@ -80,7 +80,7 @@ export const ActiveOrdersList: React.FC<ActiveOrdersListProps> = ({
               </Text>
               <Text className="text-sm text-gray-500">{order.product}</Text>
             </View>
-            <View className="items-end gap-1">
+<View className="items-end gap-1">
               <PhaseBadge phase={order.phase} />
               <Badge className="bg-blue-500/20 text-blue-300">{order.status}</Badge>
             </View>

@@ -24,6 +24,7 @@ import { tradeOperationService } from '@services/tradeOperationService';
 import { negotiationService } from '@services/negotiationService';
 import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
 import { COLORS } from '../../../../../design-system';
+import { PhaseBadge } from '../../../../../shared/components/PhaseBadge';
 import { getProductEmoji } from '../../../../../shared/utils/productEmoji';
 
 interface Negotiation {
@@ -324,6 +325,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
                   {operation.buyListing?.quantity || 0} units ·{' '}
                   {formatOpRef(operation.operationNumber)}
                 </Text>
+                {!!operation.phase && <PhaseBadge phase={operation.phase} />}
               </View>
             </View>
 

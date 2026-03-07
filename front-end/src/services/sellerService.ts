@@ -157,8 +157,13 @@ class SellerService {
     return this.get<SellerTimelineResponse>('/seller/timeline', params);
   }
 
-  async getMyTrades(): Promise<SellerTradeRecord[]> {
-    return this.get<SellerTradeRecord[]>('/seller/trades');
+  async getMyTrades(params?: {
+    limit?: number;
+    cursor?: string;
+  }): Promise<SellerTradeRecord[] | { items: SellerTradeRecord[]; nextCursor: string | null }> {
+    return this.get<
+      SellerTradeRecord[] | { items: SellerTradeRecord[]; nextCursor: string | null }
+    >('/seller/trades', params);
   }
 
   async getMyStats(): Promise<SellerStats> {

@@ -4,8 +4,9 @@
     {
       "name": "agro-trade",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["expo", "start", "--clear", "--ios"],
-      "port": 8081
+      "runtimeArgs": ["expo", "start", "--ios"],
+      "port": 8081,
+      "cwd": "front-end"
     }
   ]
 }

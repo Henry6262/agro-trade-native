@@ -1,5 +1,12 @@
 import React from 'react';
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Map, List } from 'lucide-react-native';
 import type { BaseComponentProps } from '@shared/types';
 import type { VerificationJob } from '@features/dashboard/screens/inspector/types';
@@ -40,28 +47,26 @@ export const AvailableJobsTab: React.FC<InspectorAvailableJobsTabProps> = ({
 
   if (isLoading && !isRefreshing) {
     return (
-      <View className="flex-1 bg-white justify-center items-center p-8">
-        <ActivityIndicator size="large" color="#16a34a" />
-        <Text className="text-gray-500 mt-4">Loading available jobs…</Text>
+      <View style={styles.loadingWrap}>
+        <ActivityIndicator size="large" color="#4ADE80" />
+        <Text style={styles.loadingText}>Loading available jobs…</Text>
       </View>
     );
   }
 
   if (!displayedJobs.length) {
     return (
-      <View className="flex-1 justify-center items-center p-8 bg-white">
-        <Text className="text-xl font-semibold text-gray-700">No Available Jobs</Text>
-        <Text className="text-gray-500 text-center mt-2">
-          Check back later for new verification assignments.
-        </Text>
+      <View style={styles.emptyWrap}>
+        <Text style={styles.emptyTitle}>No Available Jobs</Text>
+        <Text style={styles.emptySubtitle}>Check back later for new verification assignments.</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 bg-white" testID={testID} accessibilityLabel={accessibilityLabel}>
-      <View className="bg-gray-50 px-4 py-2 border-b border-gray-200">
-        <View className="flex-row items-center justify-between">
+    <View style={styles.root} testID={testID} accessibilityLabel={accessibilityLabel}>
+      <View style={styles.toolbar}>
+        <View style={styles.toolbarRow}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {filterButtons.map(({ label, value }) => {
               const isActive = priorityFilter === value;
@@ -69,9 +74,9 @@ export const AvailableJobsTab: React.FC<InspectorAvailableJobsTabProps> = ({
                 <TouchableOpacity
                   key={label}
                   onPress={() => setPriorityFilter(value)}
-                  className={`px-3 py-1 rounded-full mr-2 ${isActive ? 'bg-green-600' : 'bg-gray-200'}`}
+                  style={[styles.filterChip, isActive && styles.filterChipActive]}
                 >
-                  <Text className={isActive ? 'text-white font-semibold' : 'text-gray-700'}>
+                  <Text style={[styles.filterChipText, isActive && styles.filterChipTextActive]}>
                     {label}
                     {value === null ? ` (${displayedJobs.length})` : ''}
                   </Text>
@@ -80,23 +85,31 @@ export const AvailableJobsTab: React.FC<InspectorAvailableJobsTabProps> = ({
             })}
           </ScrollView>
 
-          <View className="flex-row ml-2">
+          <View style={styles.viewToggle}>
             <TouchableOpacity
               onPress={() => setViewMode('list')}
-              className={`p-2 ${viewMode === 'list' ? 'bg-green-600' : 'bg-gray-200'} rounded-l-lg`}
+              style={[
+                styles.viewBtn,
+                styles.viewBtnLeft,
+                viewMode === 'list' && styles.viewBtnActive,
+              ]}
             >
-              <List size={20} color={viewMode === 'list' ? 'white' : '#4b5563'} />
+              <List size={20} color={viewMode === 'list' ? '#fff' : 'rgba(255,255,255,0.5)'} />
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setViewMode('map')}
-              className={`p-2 ${viewMode === 'map' ? 'bg-green-600' : 'bg-gray-200'} rounded-r-lg`}
+              style={[
+                styles.viewBtn,
+                styles.viewBtnRight,
+                viewMode === 'map' && styles.viewBtnActive,
+              ]}
             >
-              <Map size={20} color={viewMode === 'map' ? 'white' : '#4b5563'} />
+              <Map size={20} color={viewMode === 'map' ? '#fff' : 'rgba(255,255,255,0.5)'} />
             </TouchableOpacity>
           </View>
         </View>
 
-        <View className="flex-row mt-2">
+        <View style={styles.sortRow}>
           {[
             { label: 'Sort by Distance', value: 'distance' },
             { label: 'Sort by Priority', value: 'priority' },
@@ -104,9 +117,9 @@ export const AvailableJobsTab: React.FC<InspectorAvailableJobsTabProps> = ({
             <TouchableOpacity
               key={label}
               onPress={() => setSortBy(value as 'distance' | 'priority')}
-              className={`mr-3 ${sortBy === value ? 'border-b-2 border-green-600' : ''}`}
+              style={[styles.sortBtn, sortBy === value && styles.sortBtnActive]}
             >
-              <Text className={sortBy === value ? 'text-green-600 font-medium' : 'text-gray-600'}>
+              <Text style={[styles.sortBtnText, sortBy === value && styles.sortBtnTextActive]}>
                 {label}
               </Text>
             </TouchableOpacity>
@@ -114,7 +127,7 @@ export const AvailableJobsTab: React.FC<InspectorAvailableJobsTabProps> = ({
         </View>
       </View>
 
-      <View className="flex-1">
+      <View style={styles.content}>
         {viewMode === 'list' ? (
           <JobListView
             jobs={displayedJobs}
@@ -135,3 +148,109 @@ export const AvailableJobsTab: React.FC<InspectorAvailableJobsTabProps> = ({
 };
 
 export default AvailableJobsTab;
+
+const styles = StyleSheet.create({
+  content: {
+    flex: 1,
+  },
+  emptySubtitle: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  emptyTitle: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  emptyWrap: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 32,
+  },
+  filterChip: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 20,
+    marginRight: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  filterChipActive: {
+    backgroundColor: '#4ADE80',
+  },
+  filterChipText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  filterChipTextActive: {
+    color: '#000',
+    fontWeight: '700',
+  },
+  loadingText: {
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: 16,
+  },
+  loadingWrap: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 32,
+  },
+  root: {
+    flex: 1,
+  },
+  sortBtn: {
+    marginRight: 12,
+    paddingBottom: 6,
+    paddingTop: 2,
+  },
+  sortBtnActive: {
+    borderBottomColor: '#4ADE80',
+    borderBottomWidth: 2,
+  },
+  sortBtnText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+  },
+  sortBtnTextActive: {
+    color: '#4ADE80',
+    fontWeight: '500',
+  },
+  sortRow: {
+    flexDirection: 'row',
+    marginTop: 8,
+  },
+  toolbar: {
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  toolbarRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  viewBtn: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    padding: 8,
+  },
+  viewBtnActive: {
+    backgroundColor: '#4ADE80',
+  },
+  viewBtnLeft: {
+    borderBottomLeftRadius: 8,
+    borderTopLeftRadius: 8,
+  },
+  viewBtnRight: {
+    borderBottomRightRadius: 8,
+    borderTopRightRadius: 8,
+  },
+  viewToggle: {
+    flexDirection: 'row',
+    marginLeft: 8,
+  },
+});

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MapPin, DollarSign, Weight, Calendar, Star } from 'lucide-react-native';
 import { GlassCard, GlassBadge, GlassButton, COLORS } from '../../../../../../../design-system';
+import { PhaseBadge } from '@shared/components/PhaseBadge';
 import type { SellerTrade, TradeStage } from '../types';
 import { getTradeStages } from '../utils';
 import { TradeStageTimeline } from './TradeStageTimeline';
@@ -28,7 +29,9 @@ interface SellerTradeCardProps {
   trade: SellerTrade;
 }
 
-export const SellerTradeCard: React.FC<SellerTradeCardProps> = ({ trade }) => {
+export const SellerTradeCard: React.FC<SellerTradeCardProps> = React.memo(function SellerTradeCard({
+  trade,
+}) {
   const [expanded, setExpanded] = useState(false);
   const stages: TradeStage[] = getTradeStages();
 
@@ -38,6 +41,9 @@ export const SellerTradeCard: React.FC<SellerTradeCardProps> = ({ trade }) => {
       <View style={styles.headerRow}>
         <View style={styles.headerLeft}>
           <Text style={styles.productName}>{trade.product}</Text>
+          <View style={styles.phaseBadgeWrap}>
+            <PhaseBadge phase={trade.status} />
+          </View>
           <View style={styles.chipsRow}>
             <View style={styles.chip}>
               <Weight color={COLORS.accentGreen} size={14} />
@@ -130,7 +136,7 @@ export const SellerTradeCard: React.FC<SellerTradeCardProps> = ({ trade }) => {
       )}
     </GlassCard>
   );
-};
+});
 
 const styles = StyleSheet.create({
   card: {
@@ -228,6 +234,10 @@ const styles = StyleSheet.create({
   metaText: {
     color: COLORS.textSecondary,
     fontSize: 11,
+  },
+  phaseBadgeWrap: {
+    marginBottom: 6,
+    marginTop: 4,
   },
   productName: {
     color: COLORS.textPrimary,

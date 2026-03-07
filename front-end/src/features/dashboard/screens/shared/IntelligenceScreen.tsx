@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   Linking,
   RefreshControl,
   ScrollView,
@@ -18,9 +17,9 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronDown, ChevronUp, ImageIcon, TrendingDown, TrendingUp } from 'lucide-react-native';
-import { GlassCard, GlassBadge, GlassButton, GlassInput } from '../../../../design-system';
+import { ChevronDown, ChevronUp, TrendingDown, TrendingUp } from 'lucide-react-native';
+import { AlertPill, NewsCard } from '../intelligence/components';
+import { GlassCard, GlassButton, GlassInput } from '../../../../design-system';
 import { COLORS, GLASS } from '../../../../design-system/tokens';
 import { useMarketStore, PriceAlert } from '../../../../stores/market.store';
 import { CommoditySymbol } from '../../../../services';
@@ -183,48 +182,7 @@ const NewsSection: React.FC = () => {
       )}
 
       {news.map((article, index) => (
-        <TouchableOpacity
-          key={article.url}
-          onPress={() => openArticle(article.url)}
-          activeOpacity={0.75}
-          style={styles.newsCardWrapper}
-        >
-          <GlassCard tier="subtle" noPadding animate delay={index * 50}>
-            <View style={styles.newsImageContainer}>
-              {article.imageUrl ? (
-                <Image
-                  source={{ uri: article.imageUrl }}
-                  style={styles.newsImage}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={styles.newsImagePlaceholder}>
-                  <ImageIcon size={22} color={COLORS.textMuted} />
-                </View>
-              )}
-              <LinearGradient
-                colors={['transparent', 'rgba(0,0,0,0.45)']}
-                style={StyleSheet.absoluteFillObject}
-                pointerEvents="none"
-              />
-            </View>
-
-            <View style={styles.newsContent}>
-              <View style={styles.newsCardHeader}>
-                <GlassBadge label={article.source} variant="muted" />
-                <Text style={styles.newsTime}>{formatTimeAgo(article.publishedAt)}</Text>
-              </View>
-              <Text style={styles.newsTitle} numberOfLines={2}>
-                {article.title}
-              </Text>
-              {!!article.description && (
-                <Text style={styles.newsDescription} numberOfLines={2}>
-                  {article.description}
-                </Text>
-              )}
-            </View>
-          </GlassCard>
-        </TouchableOpacity>
+        <NewsCard key={article.url} article={article} onPress={openArticle} delay={index * 50} />
       ))}
     </View>
   );
@@ -293,47 +251,7 @@ const AlertsSection: React.FC = () => {
 
       {/* Alert pill rows */}
       {alerts.map((alert: PriceAlert) => (
-        <GlassCard
-          key={alert.id}
-          tier="subtle"
-          style={[styles.alertPillCard, alert.triggered && styles.alertPillCardTriggered]}
-        >
-          <View style={styles.alertPillRow}>
-            <Text style={styles.alertPillCommodity}>
-              {COMMODITY_EMOJI[alert.symbol] ?? '📊'}{' '}
-              <Text style={styles.alertPillName}>
-                {COMMODITY_NAMES[alert.symbol] ?? alert.symbol}
-              </Text>
-            </Text>
-
-            <View
-              style={[
-                styles.condPill,
-                alert.condition === 'above' ? styles.condPillUp : styles.condPillDown,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.condPillText,
-                  alert.condition === 'above' ? styles.condPillTextUp : styles.condPillTextDown,
-                ]}
-              >
-                {alert.condition === 'above' ? '▲ ABOVE' : '▼ BELOW'}
-              </Text>
-            </View>
-
-            <Text style={styles.alertPillThreshold}>${alert.threshold.toFixed(2)}</Text>
-
-            <GlassBadge
-              label={alert.triggered ? '✓ HIT' : '● LIVE'}
-              variant={alert.triggered ? 'gold' : 'muted'}
-            />
-
-            <TouchableOpacity onPress={() => removeAlert(alert.id)} hitSlop={8}>
-              <Text style={styles.alertPillRemove}>✕</Text>
-            </TouchableOpacity>
-          </View>
-        </GlassCard>
+        <AlertPill key={alert.id} alert={alert} onRemove={removeAlert} />
       ))}
 
       {/* Add form */}
@@ -467,37 +385,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     textTransform: 'uppercase',
   },
-  alertPillCard: {
-    marginBottom: 6,
-  },
-  alertPillCardTriggered: {
-    borderColor: 'rgba(252,211,77,0.28)',
-  },
-  alertPillCommodity: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    minWidth: 76,
-  },
-  alertPillName: {
-    color: COLORS.textPrimary,
-    fontWeight: '700',
-  },
-  alertPillRemove: {
-    color: COLORS.danger,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  alertPillRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 8,
-  },
-  alertPillThreshold: {
-    color: COLORS.accentGold,
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '700',
-  },
   alertsEmpty: {
     alignItems: 'center',
     gap: 6,
@@ -545,31 +432,6 @@ const styles = StyleSheet.create({
   condChipTextUp: {
     color: COLORS.accentGreen,
   },
-  condPill: {
-    borderRadius: 6,
-    borderWidth: 1,
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-  },
-  condPillDown: {
-    backgroundColor: 'rgba(248,113,113,0.12)',
-    borderColor: 'rgba(248,113,113,0.28)',
-  },
-  condPillText: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.4,
-  },
-  condPillTextDown: {
-    color: COLORS.danger,
-  },
-  condPillTextUp: {
-    color: COLORS.accentGreen,
-  },
-  condPillUp: {
-    backgroundColor: 'rgba(74,222,128,0.12)',
-    borderColor: 'rgba(74,222,128,0.28)',
-  },
   conditionRow: {
     flexDirection: 'row',
     gap: 8,
@@ -584,50 +446,6 @@ const styles = StyleSheet.create({
     color: COLORS.textMuted,
     fontSize: 13,
     textAlign: 'center',
-  },
-  newsCardHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  newsCardWrapper: {
-    marginBottom: 10,
-  },
-  newsContent: {
-    padding: 12,
-  },
-  newsDescription: {
-    color: COLORS.textMuted,
-    fontSize: 12,
-    lineHeight: 17,
-    marginTop: 4,
-  },
-  newsImage: {
-    height: 140,
-    width: '100%',
-  },
-  newsImageContainer: {
-    height: 140,
-    overflow: 'hidden',
-    width: '100%',
-  },
-  newsImagePlaceholder: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    height: 140,
-    justifyContent: 'center',
-    width: '100%',
-  },
-  newsTime: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-  },
-  newsTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 14,
-    fontWeight: '600',
-    lineHeight: 19,
   },
   root: {
     backgroundColor: 'transparent',

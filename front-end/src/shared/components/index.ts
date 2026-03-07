@@ -1,4 +1,7 @@
 // Export all common components
+export { SkeletonCard } from './SkeletonCard';
+export { PhaseBadge } from './PhaseBadge';
+export { ErrorBoundary } from './ErrorBoundary';
 export { Button } from './Button';
 export { Input } from './Input';
 export { LoadingSpinner } from './LoadingSpinner';
@@ -13,6 +16,8 @@ export { WebLayoutFix } from './WebLayoutFix';
 export { AuthGuard } from './AuthGuard';
 export { PermissionGuard } from './PermissionGuard';
 export { Container, PageContainer, ContentContainer } from './Container';
+
+export { OfflineBanner } from './OfflineBanner';
 
 // Export new offers system components
 export { OfferCard } from './OfferCard';

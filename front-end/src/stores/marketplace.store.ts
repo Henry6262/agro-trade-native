@@ -53,6 +53,13 @@ interface MarketplaceState {
   setError: (error: string | null) => void;
   updatePagination: (pagination: Partial<MarketplaceState['pagination']>) => void;
   resetPagination: () => void;
+
+  // Listings
+  listings: {
+    buyer: unknown[];
+    seller: unknown[];
+  };
+  fetchListings: (role: 'buyer' | 'seller' | 'both') => Promise<void>;
 }
 
 const initialFilters = {
@@ -86,6 +93,7 @@ export const useMarketplaceStore = create<MarketplaceState>()(
     isRefreshing: false,
     error: null,
     pagination: initialPagination,
+    listings: { buyer: [], seller: [] },
 
     // Actions
     setProducts: (products: Product[]) => {
@@ -169,21 +177,32 @@ export const useMarketplaceStore = create<MarketplaceState>()(
     },
 
     fetchListings: async (role) => {
-      set((state) => { state.isLoading = true; state.error = null; });
+      set((state) => {
+        state.isLoading = true;
+        state.error = null;
+      });
       try {
         if (role === 'buyer' || role === 'both') {
           const res = await apiClient.get('/buyer/listings');
-          set((state) => { state.listings.buyer = res.data ?? []; });
+          set((state) => {
+            state.listings.buyer = res.data ?? [];
+          });
         }
         if (role === 'seller' || role === 'both') {
           const res = await apiClient.get('/seller/listings');
-          set((state) => { state.listings.seller = res.data ?? []; });
+          set((state) => {
+            state.listings.seller = res.data ?? [];
+          });
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Failed to load listings';
-        set((state) => { state.error = msg; });
+        set((state) => {
+          state.error = msg;
+        });
       } finally {
-        set((state) => { state.isLoading = false; });
+        set((state) => {
+          state.isLoading = false;
+        });
       }
     },
   }))

@@ -60,4 +60,5 @@ backend/prisma/*.db
 backend/prisma/*.db-journal
 
 # Frontend specific
-front-end/.expo/
+front-end/.expo/.worktrees/
+.worktrees/

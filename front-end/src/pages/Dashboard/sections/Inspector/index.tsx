@@ -1,47 +1,71 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import type { InspectorDashboardSectionProps } from './types';
-import { PermissionGuard } from '@shared/components/PermissionGuard';
 import ActiveJobFeature from './features/ActiveJob';
 import AvailableJobsFeature from './features/AvailableJobs';
 
+const TABS = [
+  { id: 'available' as const, label: 'Available Jobs' },
+  { id: 'active' as const, label: 'My Assignments' },
+] as const;
+
+type TabId = (typeof TABS)[number]['id'];
+
 export function InspectorDashboardSection({
-  activeTab = 'active',
+  activeTab = 'available',
 }: InspectorDashboardSectionProps) {
-  const [tab, setTab] = useState<'active' | 'available'>(activeTab);
+  const [tab, setTab] = useState<TabId>(activeTab as TabId);
 
   return (
-    <PermissionGuard requireLocation>
-      <View className="flex-1 bg-white">
-        <View className="bg-green-600 px-4 py-3">
-          <Text className="text-white text-xl font-bold">Inspector Dashboard</Text>
-        </View>
-        <View className="flex-row bg-gray-100 border-b border-gray-200">
+    <View style={styles.root}>
+      <View style={styles.tabBar}>
+        {TABS.map((t) => (
           <TouchableOpacity
-            className={`flex-1 py-3 ${tab === 'active' ? 'border-b-2 border-green-600' : ''}`}
-            onPress={() => setTab('active')}
+            key={t.id}
+            style={[styles.tabBtn, tab === t.id && styles.tabBtnActive]}
+            onPress={() => setTab(t.id)}
           >
-            <Text
-              className={`text-center font-medium ${tab === 'active' ? 'text-green-600' : 'text-gray-600'}`}
-            >
-              Active Job
-            </Text>
+            <Text style={[styles.tabText, tab === t.id && styles.tabTextActive]}>{t.label}</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            className={`flex-1 py-3 ${tab === 'available' ? 'border-b-2 border-green-600' : ''}`}
-            onPress={() => setTab('available')}
-          >
-            <Text
-              className={`text-center font-medium ${tab === 'available' ? 'text-green-600' : 'text-gray-600'}`}
-            >
-              Available Jobs
-            </Text>
-          </TouchableOpacity>
-        </View>
-        <View className="flex-1">
-          {tab === 'active' ? <ActiveJobFeature /> : <AvailableJobsFeature />}
-        </View>
+        ))}
       </View>
-    </PermissionGuard>
+      <View style={styles.content}>
+        {tab === 'available' ? <AvailableJobsFeature /> : <ActiveJobFeature />}
+      </View>
+    </View>
   );
 }
+
+export default InspectorDashboardSection;
+
+const styles = StyleSheet.create({
+  content: {
+    flex: 1,
+  },
+  root: {
+    flex: 1,
+  },
+  tabBar: {
+    borderBottomColor: 'rgba(255,255,255,0.08)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+  },
+  tabBtn: {
+    marginRight: 24,
+    paddingBottom: 12,
+    paddingTop: 8,
+  },
+  tabBtnActive: {
+    borderBottomColor: '#4ADE80',
+    borderBottomWidth: 2,
+  },
+  tabText: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  tabTextActive: {
+    color: '#4ADE80',
+  },
+});

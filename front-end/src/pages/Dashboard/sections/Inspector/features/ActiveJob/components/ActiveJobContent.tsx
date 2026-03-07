@@ -26,6 +26,7 @@ interface ActiveJobContentProps {
   onStartVerification: () => void;
   onCancelVerification: () => void;
   onSubmitVerification: (values: InspectorVerificationFormValues) => void | Promise<void>;
+  onExecuteInspection?: () => void;
   testID?: string;
   accessibilityLabel?: string;
 }
@@ -39,6 +40,7 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
   onStartVerification,
   onCancelVerification,
   onSubmitVerification,
+  onExecuteInspection,
   testID,
   accessibilityLabel,
 }) => {
@@ -178,9 +180,22 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
         </View>
 
         {!showVerificationForm && (
-          <TouchableOpacity onPress={onStartVerification} className="bg-green-600 py-3 rounded-lg">
-            <Text className="text-white text-center font-semibold">Start Verification</Text>
-          </TouchableOpacity>
+          <View>
+            <TouchableOpacity
+              onPress={onStartVerification}
+              className="bg-green-600 py-3 rounded-lg"
+            >
+              <Text className="text-white text-center font-semibold">Start Verification</Text>
+            </TouchableOpacity>
+            {onExecuteInspection && (
+              <TouchableOpacity
+                onPress={onExecuteInspection}
+                className="mt-3 bg-green-700 py-3 rounded-lg"
+              >
+                <Text className="text-white text-center font-semibold">Execute Inspection</Text>
+              </TouchableOpacity>
+            )}
+          </View>
         )}
 
         {showVerificationForm && (
