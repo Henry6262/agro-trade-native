@@ -22,3 +22,4 @@ export { AcceptOfferModal } from './AcceptOfferModal';
 export { RejectOfferModal } from './RejectOfferModal';
 export { SkeletonCard } from './SkeletonCard';
 export { PhaseBadge } from './PhaseBadge';
+export { ErrorBoundary } from './ErrorBoundary';
