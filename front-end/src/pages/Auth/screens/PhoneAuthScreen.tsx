@@ -78,7 +78,12 @@ export default function PhoneAuthScreen() {
     next[index] = digit;
     setOtp(next);
     if (digit && index < 5) otpRefs.current[index + 1]?.focus();
-    if (!digit && index > 0) otpRefs.current[index - 1]?.focus();
+  };
+
+  const handleOtpKeyPress = (index: number, key: string) => {
+    if (key === 'Backspace' && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
   };
 
   const handleVerify = async () => {
@@ -134,6 +139,7 @@ export default function PhoneAuthScreen() {
               label={loading ? 'Sending…' : 'Send Code'}
               onPress={handleSend}
               variant="primary"
+              disabled={loading}
               style={styles.cta}
             />
 
@@ -169,6 +175,7 @@ export default function PhoneAuthScreen() {
                 maxLength={1}
                 value={digit}
                 onChangeText={(v) => handleOtpChange(i, v)}
+                onKeyPress={({ nativeEvent }) => handleOtpKeyPress(i, nativeEvent.key)}
                 selectTextOnFocus
               />
             ))}
@@ -178,10 +185,15 @@ export default function PhoneAuthScreen() {
             label={loading ? 'Verifying…' : 'Verify'}
             onPress={handleVerify}
             variant="primary"
+            disabled={loading}
             style={styles.cta}
           />
 
-          <TouchableOpacity disabled={secondsLeft > 0} onPress={handleSend} style={styles.backBtn}>
+          <TouchableOpacity
+            disabled={secondsLeft > 0 || loading}
+            onPress={handleSend}
+            style={styles.backBtn}
+          >
             <Text style={[styles.backText, secondsLeft > 0 && styles.dimmed]}>
               {secondsLeft > 0 ? `Resend in ${secondsLeft}s` : 'Resend code'}
             </Text>
