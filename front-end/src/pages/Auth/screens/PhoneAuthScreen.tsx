@@ -69,7 +69,7 @@ export default function PhoneAuthScreen() {
       setStep('otp');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      Alert.alert('Error', msg ?? 'Failed to send code. Please try again.');
+      Alert.alert(t('common.error'), msg ?? t('auth.phone.errors.sendFailed'));
     } finally {
       setLoading(false);
     }
@@ -101,7 +101,7 @@ export default function PhoneAuthScreen() {
       login(result.user as User, result.access_token, result.refresh_token);
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      Alert.alert('Error', msg ?? 'Invalid code. Please try again.');
+      Alert.alert(t('common.error'), msg ?? t('auth.phone.errors.verifyFailed'));
     } finally {
       setLoading(false);
     }
@@ -148,7 +148,7 @@ export default function PhoneAuthScreen() {
             />
 
             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-              <Text style={styles.backText}>← Back</Text>
+              <Text style={styles.backText}>← {t('common.back')}</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -165,9 +165,7 @@ export default function PhoneAuthScreen() {
       >
         <View style={styles.card}>
           <Text style={styles.title}>{t('auth.phone.otpTitle')}</Text>
-          <Text style={styles.subtitle}>
-            {t('auth.phone.otpSubtitle')} {fullPhone}
-          </Text>
+          <Text style={styles.subtitle}>{t('auth.phone.otpSubtitle', { phone: fullPhone })}</Text>
 
           <View style={styles.otpRow}>
             {otp.map((digit, i) => (
@@ -208,7 +206,7 @@ export default function PhoneAuthScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => setStep('phone')} style={styles.backBtn}>
-            <Text style={styles.backText}>← Change number</Text>
+            <Text style={styles.backText}>{t('auth.phone.changeNumber')}</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>

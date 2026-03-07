@@ -15,7 +15,8 @@
       "phonePlaceholder": "Phone number",
       "sendCode": "Send Code",
       "otpTitle": "Enter Code",
-      "otpSubtitle": "Enter the 6-digit code sent to",
+      "otpSubtitle": "Enter the 6-digit code sent to {{phone}}",
+      "changeNumber": "← Change number",
       "verify": "Verify",
       "resend": "Resend code",
       "resendIn": "Resend in {{seconds}}s",
@@ -23,7 +24,9 @@
       "verifying": "Verifying...",
       "errors": {
         "invalidPhone": "Please enter a valid phone number",
-        "incompleteOtp": "Please enter the complete 6-digit code"
+        "incompleteOtp": "Please enter the complete 6-digit code",
+        "sendFailed": "Failed to send code. Please try again.",
+        "verifyFailed": "Invalid code. Please try again."
       }
     }
   },
