@@ -75,8 +75,8 @@ export default function OperationsScreenRefactored() {
   const [showCounterOfferModal, setShowCounterOfferModal] = useState(false);
   const [counterOfferData, setCounterOfferData] = useState<{
     negotiationId: string;
-    currentOffer: any;
-    counterOffer?: any;
+    currentOffer: { price: number; quantity: number; terms?: string };
+    counterOffer?: { price: number; quantity: number; terms?: string; reason?: string };
     sellerName?: string;
   } | null>(null);
 
@@ -85,10 +85,20 @@ export default function OperationsScreenRefactored() {
     loadBuyListings();
     loadSellListings();
     loadTradeOperations();
-  }, []);
+  }, [loadBuyListings, loadSellListings, loadTradeOperations]);
 
   // Tab Component
-  const TabButton = ({ id, label, count, isActive }: any) => (
+  const TabButton = ({
+    id,
+    label,
+    count,
+    isActive,
+  }: {
+    id: 'active' | 'create' | 'sellers';
+    label: string;
+    count: number;
+    isActive: boolean;
+  }) => (
     <TouchableOpacity
       onPress={() => setActiveTab(id)}
       style={[styles.tab, isActive && styles.tabActive]}
@@ -158,7 +168,7 @@ export default function OperationsScreenRefactored() {
               key={listing.id}
               tier="medium"
               animate={false}
-              style={[styles.listingCard, styles.darkCard]}
+              style={StyleSheet.flatten([styles.listingCard, styles.darkCard])}
             >
               {/* Product emoji header */}
               <View style={styles.productEmojiRow}>
@@ -187,10 +197,10 @@ export default function OperationsScreenRefactored() {
                     style={[
                       styles.qualityText,
                       listing.quality === 'premium'
-                        ? { color: '#C4B5FD' }
+                        ? styles.qualityTextPremium
                         : listing.quality === 'standard'
-                          ? { color: COLORS.accentGreen }
-                          : { color: COLORS.textSecondary },
+                          ? styles.qualityTextStandard
+                          : styles.qualityTextDefault,
                     ]}
                   >
                     {listing.quality || 'Standard'}
@@ -279,7 +289,7 @@ export default function OperationsScreenRefactored() {
               <GlassCard
                 tier="medium"
                 animate={false}
-                style={[styles.listingCard, styles.darkCard]}
+                style={StyleSheet.flatten([styles.listingCard, styles.darkCard])}
               >
                 {/* Product emoji header */}
                 <View style={styles.productEmojiRow}>
@@ -308,10 +318,10 @@ export default function OperationsScreenRefactored() {
                       style={[
                         styles.qualityText,
                         listing.urgency === 'critical'
-                          ? { color: COLORS.danger }
+                          ? styles.urgencyTextCritical
                           : listing.urgency === 'high'
-                            ? { color: '#FB923C' }
-                            : { color: COLORS.info },
+                            ? styles.urgencyTextHigh
+                            : styles.urgencyTextNormal,
                       ]}
                     >
                       {listing.urgency || listing.status}
@@ -682,6 +692,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.3,
   },
+  qualityTextDefault: { color: COLORS.textSecondary },
+  qualityTextPremium: { color: '#C4B5FD' },
+  qualityTextStandard: { color: COLORS.accentGreen },
   refreshBtn: {
     backgroundColor: 'rgba(74,222,128,0.12)',
     borderColor: 'rgba(74,222,128,0.25)',
@@ -788,4 +801,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(96,165,250,0.12)',
     borderColor: 'rgba(96,165,250,0.25)',
   },
+  urgencyTextCritical: { color: COLORS.danger },
+  urgencyTextHigh: { color: '#FB923C' },
+  urgencyTextNormal: { color: COLORS.info },
 });
