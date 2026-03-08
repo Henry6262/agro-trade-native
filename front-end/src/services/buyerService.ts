@@ -35,9 +35,9 @@ export interface TradeOperation {
   estimatedTransportCost: number;
   createdAt: string;
   updatedAt: string;
-  sellers?: any[];
-  transportRequest?: any;
-  transportJob?: any;
+  sellers?: unknown[];
+  transportRequest?: unknown;
+  transportJob?: unknown;
 }
 
 export interface BuyerTimelineEvent {
@@ -135,7 +135,7 @@ class BuyerService {
   }
 
   // Accept an offer from a seller (approve negotiation)
-  async acceptOffer(negotiationId: string): Promise<any> {
+  async acceptOffer(negotiationId: string): Promise<unknown> {
     try {
       const headers = await this.getHeaders();
       const response = await fetch(`${API_URL}/negotiations/${negotiationId}/accept`, {
@@ -155,7 +155,7 @@ class BuyerService {
   }
 
   // Reject an offer from a seller
-  async rejectOffer(negotiationId: string, reason?: string): Promise<any> {
+  async rejectOffer(negotiationId: string, reason?: string): Promise<unknown> {
     try {
       const headers = await this.getHeaders();
       const response = await fetch(`${API_URL}/negotiations/${negotiationId}/reject`, {
@@ -180,7 +180,7 @@ class BuyerService {
     negotiationId: string,
     counterPrice: number,
     counterQuantity: number
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       const headers = await this.getHeaders();
       const response = await fetch(`${API_URL}/negotiations/${negotiationId}/counter`, {
@@ -221,7 +221,7 @@ class BuyerService {
   }
 
   // Track delivery status via transport request
-  async getDeliveryStatus(transportRequestId: string): Promise<any> {
+  async getDeliveryStatus(transportRequestId: string): Promise<unknown> {
     try {
       const headers = await this.getHeaders();
       const response = await fetch(`${API_URL}/transport/requests/${transportRequestId}`, {
@@ -265,6 +265,19 @@ class BuyerService {
 
     return await response.json();
   }
+  async confirmDelivery(orderId: string): Promise<{ success: boolean; message: string }> {
+    const headers = await this.getHeaders();
+    const response = await fetch(`${API_URL}/buyer/orders/${orderId}/confirm-receipt`, {
+      method: 'POST',
+      headers,
+    });
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error((error as { message?: string }).message ?? 'Failed to confirm delivery');
+    }
+    return response.json() as Promise<{ success: boolean; message: string }>;
+  }
+
   async getMyOffers(): Promise<BuyerOffer[]> {
     try {
       const headers = await this.getHeaders();

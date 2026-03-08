@@ -80,7 +80,8 @@
           "cameraPermission": "Allow AgroTrade to use the camera to take product photos."
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "expo-camera"
     ],
     "owner": "henry6262",
     "extra": {

@@ -11,7 +11,7 @@ import {
 import { COLORS } from '../../../../../../design-system';
 import { useBuyerOrders, useBuyerTimeline } from './hooks';
 import { OrdersStatsGrid, ActiveOrdersList, IncomingOffersList, BuyerTimeline } from './components';
-import { tradeOperationService } from '@services/tradeOperationService';
+import buyerService from '@services/buyerService';
 
 export default function BuyerOrdersTab() {
   const {
@@ -38,10 +38,6 @@ export default function BuyerOrdersTab() {
 
   const handleConfirmDelivery = useCallback(
     async (orderId: string) => {
-      // TODO: Backend needs a buyer-specific delivery confirmation endpoint.
-      // POST /trade-operations/:id/finalize is currently ADMIN-only.
-      // Once a buyer-facing endpoint (e.g. POST /buyer/orders/:id/confirm-receipt) is added,
-      // replace this call with that endpoint.
       Alert.alert(
         'Confirm Delivery',
         'Confirm that you have received the goods in satisfactory condition?',
@@ -53,19 +49,15 @@ export default function BuyerOrdersTab() {
             onPress: async () => {
               try {
                 setConfirmingDeliveryId(orderId);
-                await tradeOperationService.finalizeTradeOperation(orderId, {
-                  finalSellingPrice: 0,
-                  finalPurchasePrices: [],
-                  actualTransportCost: 0,
-                });
+                await buyerService.confirmDelivery(orderId);
                 Alert.alert('Success', 'Delivery confirmed. Trade operation completed.');
                 await handleRefresh();
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              } catch (err: any) {
-                Alert.alert(
-                  'Error',
-                  err?.message ?? 'Failed to confirm delivery. Please try again.'
-                );
+              } catch (err: unknown) {
+                const message =
+                  err instanceof Error
+                    ? err.message
+                    : 'Failed to confirm delivery. Please try again.';
+                Alert.alert('Error', message);
               } finally {
                 setConfirmingDeliveryId(null);
               }

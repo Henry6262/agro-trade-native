@@ -21,6 +21,7 @@ import {
 } from "@nestjs/swagger";
 import { plainToInstance } from "class-transformer";
 import { BuyerService } from "./buyer.service";
+import { TradeOperationService } from "../trade-operations/services/trade-operation.service";
 import {
   CreateBuyListingDto,
   UpdateBuyListingDto,
@@ -44,7 +45,10 @@ interface AuthRequest {
 @Controller("buyer")
 @UseGuards(JwtAuthGuard)
 export class BuyerController {
-  constructor(private readonly buyerService: BuyerService) {}
+  constructor(
+    private readonly buyerService: BuyerService,
+    private readonly tradeOperationService: TradeOperationService,
+  ) {}
 
   @Post("listings")
   @ApiOperation({ summary: "Create a buy listing" })
@@ -206,6 +210,30 @@ export class BuyerController {
     );
 
     return this.serializeBuyListing(listing);
+  }
+
+  @Post("orders/:orderId/confirm-receipt")
+  @ApiOperation({ summary: "Buyer confirms delivery of goods" })
+  @ApiOkResponse({
+    description: "Delivery confirmed",
+    schema: {
+      type: "object",
+      properties: {
+        success: { type: "boolean" },
+        message: { type: "string" },
+        id: { type: "string" },
+      },
+    },
+  })
+  async confirmDelivery(
+    @Param("orderId") orderId: string,
+    @Request() req: AuthRequest,
+  ) {
+    const updated = await this.tradeOperationService.buyerConfirmDelivery(
+      orderId,
+      req.user.id,
+    );
+    return { success: true, message: "Delivery confirmed", id: updated.id };
   }
 
   @Delete("listings/:id")
