@@ -111,17 +111,23 @@ export const CharacterTourOverlay: React.FC = () => {
   const overlayStyle = useAnimatedStyle(() => ({ opacity: overlayOpacity.value }));
   const bubbleStyle = useAnimatedStyle(() => ({ opacity: bubbleOpacity.value }));
 
+  const steps = isTourActive && tourRole ? TOUR_STEPS[tourRole] : null;
+
+  // Complete tour when currentStep advances past the last step (must not call during render)
+  useEffect(() => {
+    if (isTourActive && steps && currentStep >= steps.length) {
+      completeTour();
+    }
+  }, [currentStep, steps, isTourActive, completeTour]);
+
   if (!isTourActive || !tourRole) return null;
 
-  const steps = TOUR_STEPS[tourRole];
-  const step = steps[currentStep];
-  const isLastStep = currentStep === steps.length - 1;
+  // tourRole is narrowed to non-null here; re-derive so TypeScript knows steps is defined
+  const activeSteps = TOUR_STEPS[tourRole];
+  const step = activeSteps[currentStep];
+  const isLastStep = currentStep === activeSteps.length - 1;
 
-  if (!step) {
-    // Stepped past the last step — complete
-    completeTour();
-    return null;
-  }
+  if (!step) return null;
 
   return (
     <Animated.View
@@ -154,7 +160,7 @@ export const CharacterTourOverlay: React.FC = () => {
 
           {/* Step dots */}
           <View style={styles.dotsRow}>
-            {steps.map((_, i) => (
+            {activeSteps.map((_, i) => (
               <View
                 key={i}
                 style={[styles.dot, i === currentStep ? styles.dotActive : styles.dotInactive]}
@@ -164,7 +170,7 @@ export const CharacterTourOverlay: React.FC = () => {
 
           {/* Next / Done */}
           <Pressable onPress={isLastStep ? completeTour : nextStep} style={styles.nextBtn}>
-            <Text style={styles.nextText}>{isLastStep ? 'Done 🎉' : 'Next →'}</Text>
+            <Text style={styles.nextText}>{isLastStep ? 'Get Started' : 'Next →'}</Text>
           </Pressable>
         </View>
       </Animated.View>
