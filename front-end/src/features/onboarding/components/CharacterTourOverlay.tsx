@@ -25,6 +25,7 @@ interface SpotlightProps {
   H: number;
 }
 
+/* eslint-disable react-native/no-inline-styles -- Spotlight strips require runtime-computed pixel dimensions */
 const Spotlight: React.FC<SpotlightProps> = ({ area, W, H }) => {
   const DIM = 'rgba(0,0,0,0.82)';
 
@@ -42,64 +43,46 @@ const Spotlight: React.FC<SpotlightProps> = ({ area, W, H }) => {
 
   return (
     <>
-      {/* Top strip */}
+      {/* Top strip — height is runtime-computed from screen dimensions */}
       <View
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: top,
-          backgroundColor: DIM,
-        }}
+        style={[styles.strip, { top: 0, left: 0, right: 0, height: top, backgroundColor: DIM }]}
         pointerEvents="none"
       />
-      {/* Bottom strip */}
+      {/* Bottom strip — top offset is runtime-computed */}
       <View
-        style={{
-          position: 'absolute',
-          top: top + height,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: DIM,
-        }}
+        style={[
+          styles.strip,
+          { top: top + height, left: 0, right: 0, bottom: 0, backgroundColor: DIM },
+        ]}
         pointerEvents="none"
       />
-      {/* Left strip */}
+      {/* Left strip — width is runtime-computed */}
       <View
-        style={{ position: 'absolute', top, left: 0, width: left, height, backgroundColor: DIM }}
+        style={[styles.strip, { top, left: 0, width: left, height, backgroundColor: DIM }]}
         pointerEvents="none"
       />
-      {/* Right strip */}
+      {/* Right strip — left offset is runtime-computed */}
       <View
-        style={{
-          position: 'absolute',
-          top,
-          left: left + width,
-          right: 0,
-          height,
-          backgroundColor: DIM,
-        }}
+        style={[styles.strip, { top, left: left + width, right: 0, height, backgroundColor: DIM }]}
         pointerEvents="none"
       />
       {/* Glow border around the spotlight hole */}
       <View
-        style={{
-          position: 'absolute',
-          top: top - 2,
-          left: left - 2,
-          width: width + 4,
-          height: height + 4,
-          borderRadius: 10,
-          borderWidth: 2,
-          borderColor: 'rgba(74, 222, 128, 0.85)',
-        }}
+        style={[
+          styles.spotlightGlow,
+          {
+            top: top - 2,
+            left: left - 2,
+            width: width + 4,
+            height: height + 4,
+          },
+        ]}
         pointerEvents="none"
       />
     </>
   );
 };
+/* eslint-enable react-native/no-inline-styles */
 
 // ─── Main overlay ────────────────────────────────────────────────────────────
 export const CharacterTourOverlay: React.FC = () => {
@@ -109,11 +92,11 @@ export const CharacterTourOverlay: React.FC = () => {
   // Fade-in the overlay when it becomes active
   const overlayOpacity = useSharedValue(0);
   useEffect(() => {
-    if (isTourActive) {
-      overlayOpacity.value = withTiming(1, { duration: 350, easing: Easing.out(Easing.ease) });
-    } else {
-      overlayOpacity.value = 0;
-    }
+    overlayOpacity.value = isTourActive
+      ? withTiming(1, { duration: 350, easing: Easing.out(Easing.ease) })
+      : 0;
+    // overlayOpacity is a shared value object (stable ref) — intentionally omitted
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTourActive]);
 
   // Fade bubble when step changes
@@ -121,6 +104,8 @@ export const CharacterTourOverlay: React.FC = () => {
   useEffect(() => {
     bubbleOpacity.value = 0;
     bubbleOpacity.value = withTiming(1, { duration: 250 });
+    // bubbleOpacity is a shared value object (stable ref) — intentionally omitted
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep]);
 
   const overlayStyle = useAnimatedStyle(() => ({ opacity: overlayOpacity.value }));
@@ -140,115 +125,149 @@ export const CharacterTourOverlay: React.FC = () => {
 
   return (
     <Animated.View
-      style={[StyleSheet.absoluteFill, overlayStyle, { zIndex: 9999 }]}
+      style={[StyleSheet.absoluteFill, overlayStyle, styles.overlay]}
       pointerEvents="box-none"
     >
       {/* Spotlight */}
       <Spotlight area={step.spotlight} W={W} H={H} />
 
       {/* Character image — bottom-right corner */}
-      <Image
-        source={CHARACTER_IMAGES[tourRole]}
-        style={{
-          position: 'absolute',
-          bottom: 88,
-          right: 20,
-          width: 110,
-          height: 110,
-          resizeMode: 'contain',
-        }}
-      />
+      <Image source={CHARACTER_IMAGES[tourRole]} style={styles.characterImage} />
 
       {/* Speech bubble */}
-      <Animated.View
-        style={[
-          bubbleStyle,
-          {
-            position: 'absolute',
-            bottom: 206, // sits above character (88 + 110 + 8)
-            right: 16,
-            left: 20,
-            backgroundColor: 'rgba(255, 255, 255, 0.97)',
-            borderRadius: 18,
-            padding: 18,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 6 },
-            shadowOpacity: 0.25,
-            shadowRadius: 12,
-            elevation: 14,
-          },
-        ]}
-      >
+      <Animated.View style={[bubbleStyle, styles.bubble]}>
         {/* Bubble tail (triangle pointing down-right toward character) */}
-        <View
-          style={{
-            position: 'absolute',
-            bottom: -11,
-            right: 48,
-            width: 0,
-            height: 0,
-            borderLeftWidth: 11,
-            borderRightWidth: 11,
-            borderTopWidth: 11,
-            borderLeftColor: 'transparent',
-            borderRightColor: 'transparent',
-            borderTopColor: 'rgba(255, 255, 255, 0.97)',
-          }}
-        />
+        <View style={styles.bubbleTail} />
 
         {/* Step title */}
-        <Text style={{ fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 6 }}>
-          {step.title}
-        </Text>
+        <Text style={styles.stepTitle}>{step.title}</Text>
 
         {/* Step message */}
-        <Text style={{ fontSize: 14, color: '#374151', lineHeight: 20 }}>{step.message}</Text>
+        <Text style={styles.stepMessage}>{step.message}</Text>
 
         {/* Footer: skip | dots | next */}
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: 16,
-          }}
-        >
+        <View style={styles.footer}>
           {/* Skip */}
           <Pressable onPress={skipTour} hitSlop={8}>
-            <Text style={{ color: '#9CA3AF', fontSize: 13, fontWeight: '500' }}>Skip</Text>
+            <Text style={styles.skipText}>Skip</Text>
           </Pressable>
 
           {/* Step dots */}
-          <View style={{ flexDirection: 'row', gap: 5, alignItems: 'center' }}>
+          <View style={styles.dotsRow}>
             {steps.map((_, i) => (
               <View
                 key={i}
-                style={{
-                  width: i === currentStep ? 18 : 6,
-                  height: 6,
-                  borderRadius: 3,
-                  backgroundColor: i === currentStep ? '#4ADE80' : '#D1FAE5',
-                }}
+                style={[styles.dot, i === currentStep ? styles.dotActive : styles.dotInactive]}
               />
             ))}
           </View>
 
           {/* Next / Done */}
-          <Pressable
-            onPress={isLastStep ? completeTour : nextStep}
-            style={{
-              backgroundColor: '#4ADE80',
-              paddingHorizontal: 18,
-              paddingVertical: 9,
-              borderRadius: 22,
-            }}
-          >
-            <Text style={{ color: '#052e16', fontWeight: '700', fontSize: 14 }}>
-              {isLastStep ? 'Done 🎉' : 'Next →'}
-            </Text>
+          <Pressable onPress={isLastStep ? completeTour : nextStep} style={styles.nextBtn}>
+            <Text style={styles.nextText}>{isLastStep ? 'Done 🎉' : 'Next →'}</Text>
           </Pressable>
         </View>
       </Animated.View>
     </Animated.View>
   );
 };
+
+const styles = StyleSheet.create({
+  bubble: {
+    backgroundColor: 'rgba(255, 255, 255, 0.97)',
+    borderRadius: 18,
+    bottom: 206, // sits above character (88 + 110 + 8)
+    elevation: 14,
+    left: 20,
+    padding: 18,
+    position: 'absolute',
+    right: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+  },
+  bubbleTail: {
+    borderLeftColor: 'transparent',
+    borderLeftWidth: 11,
+    borderRightColor: 'transparent',
+    borderRightWidth: 11,
+    borderTopColor: 'rgba(255, 255, 255, 0.97)',
+    borderTopWidth: 11,
+    bottom: -11,
+    height: 0,
+    position: 'absolute',
+    right: 48,
+    width: 0,
+  },
+  characterImage: {
+    bottom: 88,
+    height: 110,
+    position: 'absolute',
+    resizeMode: 'contain',
+    right: 20,
+    width: 110,
+  },
+  dot: {
+    borderRadius: 3,
+    height: 6,
+  },
+  dotActive: {
+    backgroundColor: '#4ADE80',
+    width: 18,
+  },
+  dotInactive: {
+    backgroundColor: '#D1FAE5',
+    width: 6,
+  },
+  dotsRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 5,
+  },
+  footer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  nextBtn: {
+    backgroundColor: '#4ADE80',
+    borderRadius: 22,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+  },
+  nextText: {
+    color: '#052e16',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  overlay: {
+    zIndex: 9999,
+  },
+  skipText: {
+    color: '#9CA3AF',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  spotlightGlow: {
+    borderColor: 'rgba(74, 222, 128, 0.85)',
+    borderRadius: 10,
+    borderWidth: 2,
+    position: 'absolute',
+  },
+  stepMessage: {
+    color: '#374151',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  stepTitle: {
+    color: '#111827',
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  strip: {
+    position: 'absolute',
+  },
+});
