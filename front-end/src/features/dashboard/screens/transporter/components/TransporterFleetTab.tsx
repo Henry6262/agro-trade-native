@@ -8,7 +8,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import { Truck, CheckCircle, Shield, Route, User, MapPin, Users } from 'lucide-react-native';
+import { Truck, Shield, Route, User, MapPin, Users } from 'lucide-react-native';
 import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
 import { EmptyState } from '@shared/components/EmptyState';
 import { SkeletonCard } from '@shared/components/SkeletonCard';
@@ -51,6 +51,26 @@ const DRIVER_STATUS_LABEL: Record<string, string> = {
   offline: 'OFFLINE',
   on_break: 'ON BREAK',
 };
+
+// ---------------------------------------------------------------------------
+// TabPill — module-level so the component type is stable across renders
+// ---------------------------------------------------------------------------
+interface TabPillProps {
+  label: string;
+  count: number;
+  active: boolean;
+  onPress: () => void;
+}
+
+const TabPill: React.FC<TabPillProps> = ({ label, count, active, onPress }) => (
+  <TouchableOpacity onPress={onPress} style={[styles.tabPill, active && styles.tabPillActive]}>
+    <Text style={[styles.tabPillText, active && styles.tabPillTextActive]}>
+      {label} ({count})
+    </Text>
+  </TouchableOpacity>
+);
+
+// ---------------------------------------------------------------------------
 
 export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
   testID,
@@ -136,19 +156,6 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
 
   const hasAnyData = trucks.length > 0 || drivers.length > 0;
 
-  const TabPill: React.FC<{
-    label: string;
-    count: number;
-    active: boolean;
-    onPress: () => void;
-  }> = ({ label, count, active, onPress }) => (
-    <TouchableOpacity onPress={onPress} style={[styles.tabPill, active && styles.tabPillActive]}>
-      <Text style={[styles.tabPillText, active && styles.tabPillTextActive]}>
-        {label} ({count})
-      </Text>
-    </TouchableOpacity>
-  );
-
   return (
     <ScrollView
       style={styles.scroll}
@@ -171,39 +178,35 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
 
         {!loading && (
           <>
-            {/* Stats Grid */}
-            <View style={styles.statsGrid}>
-              <GlassCard tier="subtle" style={styles.statCard}>
-                <Truck size={16} color="#60A5FA" />
-                <Text style={styles.statValueBlue}>{summary?.totalTrucks ?? trucks.length}</Text>
-                <Text style={styles.statLabel}>TOTAL</Text>
-              </GlassCard>
-              <GlassCard tier="subtle" style={styles.statCard}>
-                <CheckCircle size={16} color="#4ADE80" />
-                <Text style={styles.statValueGreen}>{availableTrucksCount}</Text>
-                <Text style={styles.statLabel}>AVAILABLE</Text>
-              </GlassCard>
-              <GlassCard tier="subtle" style={styles.statCard}>
-                <Route size={16} color="#FCD34D" />
-                <Text style={styles.statValueAmber}>{inTransitTrucksCount}</Text>
-                <Text style={styles.statLabel}>IN TRANSIT</Text>
-              </GlassCard>
-              <GlassCard tier="subtle" style={styles.statCard}>
-                <Shield size={16} color="#A78BFA" />
-                <Text style={styles.statValuePurple}>
-                  {summary?.verifiedTrucks ?? trucks.filter((t) => t.verified).length}
-                </Text>
-                <Text style={styles.statLabel}>VERIFIED</Text>
-              </GlassCard>
-            </View>
-
-            {/* Capacity Summary */}
-            {totalCapacity > 0 && (
-              <GlassCard tier="subtle" style={styles.capacitySummary}>
-                <Text style={styles.capacityLabel}>Total Fleet Capacity</Text>
-                <Text style={styles.capacityValue}>{totalCapacity} tons</Text>
-              </GlassCard>
-            )}
+            {/* Capacity Summary Card — single GlassCard with stat pills */}
+            <GlassCard style={styles.summaryCard}>
+              <View style={styles.summaryRow}>
+                <View style={styles.statPill}>
+                  <Text style={styles.statValue}>
+                    {summary?.totalTrucks ?? trucks.length + drivers.length}
+                  </Text>
+                  <Text style={styles.statLabel}>TOTAL</Text>
+                </View>
+                <View style={styles.divider} />
+                <View style={styles.statPill}>
+                  <Text style={[styles.statValue, styles.statValueGreen]}>
+                    {availableTrucksCount}
+                  </Text>
+                  <Text style={styles.statLabel}>AVAILABLE</Text>
+                </View>
+                {totalCapacity > 0 && (
+                  <>
+                    <View style={styles.divider} />
+                    <View style={styles.statPill}>
+                      <Text style={[styles.statValue, styles.statValueAmber]}>
+                        {totalCapacity}t
+                      </Text>
+                      <Text style={styles.statLabel}>CAPACITY</Text>
+                    </View>
+                  </>
+                )}
+              </View>
+            </GlassCard>
 
             {/* Add to Fleet */}
             <GlassButton
@@ -383,25 +386,6 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 2,
   },
-  capacityLabel: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  capacitySummary: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  capacityValue: {
-    color: '#4ADE80',
-    fontSize: 18,
-    fontWeight: '800',
-  },
   content: {
     gap: 14,
     padding: 16,
@@ -414,6 +398,11 @@ const styles = StyleSheet.create({
   detailText: {
     color: 'rgba(255,255,255,0.6)',
     fontSize: 13,
+  },
+  divider: {
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    height: 32,
+    width: 1,
   },
   driverActions: {
     alignItems: 'flex-end',
@@ -487,11 +476,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
     height: 1,
   },
-  statCard: {
-    alignItems: 'center',
-    flex: 1,
-    gap: 4,
-  },
   statLabel: {
     color: 'rgba(255,255,255,0.4)',
     fontSize: 9,
@@ -499,29 +483,30 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
     textAlign: 'center',
   },
-  statValueAmber: {
-    color: '#FCD34D',
-    fontSize: 20,
-    fontWeight: '800',
+  statPill: {
+    alignItems: 'center',
+    flex: 1,
+    gap: 4,
   },
-  statValueBlue: {
+  statValue: {
     color: '#60A5FA',
     fontSize: 20,
     fontWeight: '800',
   },
+  statValueAmber: {
+    color: '#FCD34D',
+  },
   statValueGreen: {
     color: '#4ADE80',
-    fontSize: 20,
-    fontWeight: '800',
   },
-  statValuePurple: {
-    color: '#A78BFA',
-    fontSize: 20,
-    fontWeight: '800',
+  summaryCard: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
-  statsGrid: {
+  summaryRow: {
+    alignItems: 'center',
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'space-around',
   },
   tabPill: {
     alignItems: 'center',
