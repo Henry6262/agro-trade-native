@@ -38,6 +38,8 @@ import {
   CompanyResponseDto,
   CreateBaseDto,
   BaseResponseDto,
+  PhoneSendOtpDto,
+  PhoneVerifyOtpDto,
 } from "./dto/auth.dto";
 import { CurrentUser } from "./decorators/current-user.decorator";
 import { Public } from "./decorators/public.decorator";
@@ -336,6 +338,25 @@ export class AuthController {
         error?.message || "Failed to authenticate with Privy",
       );
     }
+  }
+
+  @Public()
+  @Post("phone/send")
+  @ApiOperation({ summary: "Send OTP to phone number via SMS" })
+  @ApiBody({ type: PhoneSendOtpDto })
+  @ApiOkResponse({ schema: { example: { expiresIn: 300 } } })
+  async phoneOtpSend(@Body() dto: PhoneSendOtpDto) {
+    return this.authService.sendPhoneOtp(dto.phone);
+  }
+
+  @Public()
+  @Post("phone/verify")
+  @ApiOperation({ summary: "Verify phone OTP and receive JWT tokens" })
+  @ApiBody({ type: PhoneVerifyOtpDto })
+  @ApiOkResponse({ type: AuthSuccessResponseDto })
+  async phoneOtpVerify(@Body() dto: PhoneVerifyOtpDto) {
+    const result = await this.authService.verifyPhoneOtp(dto.phone, dto.code);
+    return this.serializeAuthResult(result, "Phone authentication successful");
   }
 
   @Public()

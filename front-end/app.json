@@ -24,7 +24,10 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby bases and optimize delivery routes.",
         "NSCameraUsageDescription": "This app uses the camera to take photos of your agricultural products.",
         "NSPhotoLibraryUsageDescription": "This app accesses your photo library to upload product images.",
-        "UIBackgroundModes": ["remote-notification", "location"]
+        "UIBackgroundModes": [
+          "remote-notification",
+          "location"
+        ]
       }
     },
     "android": {
@@ -76,7 +79,8 @@
           "photosPermission": "Allow AgroTrade to access your photos for product images.",
           "cameraPermission": "Allow AgroTrade to use the camera to take product photos."
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "owner": "henry6262",
     "extra": {

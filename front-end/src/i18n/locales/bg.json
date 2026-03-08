@@ -1,0 +1,69 @@
+{
+  "auth": {
+    "welcome": {
+      "title": "AgroTrade",
+      "tagline": "Свързвай. Търгувай. Расти.",
+      "chooseMethod": "Как искате да влезете?",
+      "phoneMethod": "Телефон",
+      "phoneSubtitle": "Без крипто",
+      "walletMethod": "Портфейл",
+      "walletSubtitle": "Privy портфейл"
+    },
+    "phone": {
+      "title": "Вход с телефон",
+      "subtitle": "Ще изпратим код за потвърждение на вашия номер",
+      "phonePlaceholder": "Телефонен номер",
+      "sendCode": "Изпрати код",
+      "otpTitle": "Въведете код",
+      "otpSubtitle": "Въведете 6-цифрения код, изпратен на {{phone}}",
+      "changeNumber": "← Смени номера",
+      "verify": "Потвърди",
+      "resend": "Изпрати отново",
+      "resendIn": "Изпрати след {{seconds}}с",
+      "sending": "Изпращане...",
+      "verifying": "Проверка...",
+      "errors": {
+        "invalidPhone": "Моля, въведете валиден телефонен номер",
+        "incompleteOtp": "Моля, въведете пълния 6-цифрен код",
+        "sendFailed": "Неуспешно изпращане на код. Моля, опитайте отново.",
+        "verifyFailed": "Невалиден код. Моля, опитайте отново."
+      }
+    }
+  },
+  "phases": {
+    "PENDING": "Изчакване",
+    "CONFIRMED": "Потвърдена",
+    "IN_TRANSIT": "В транзит",
+    "QUALITY_CHECK": "Проверка на качеството",
+    "DELIVERED": "Доставена",
+    "CANCELLED": "Отменена",
+    "DISPUTED": "Оспорена",
+    "COMPLETED": "Завършена",
+    "PAYMENT_PENDING": "Очакване на плащане",
+    "PAYMENT_RELEASED": "Плащането е освободено",
+    "AWAITING_DEPOSIT": "Очакване на депозит",
+    "DEPOSIT_HELD": "Депозитът е задържан",
+    "INSPECTION_REQUESTED": "Поискана инспекция",
+    "INSPECTION_IN_PROGRESS": "Инспекцията е в ход",
+    "INSPECTION_COMPLETED": "Инспекцията е завършена",
+    "ARBITRATION": "Арбитраж",
+    "INITIATION": "Инициирана",
+    "SELLER_NEGOTIATION": "Преговори",
+    "INSPECTION_PENDING": "Очакване на инспекция",
+    "TRANSPORT_PENDING": "Очакване на транспорт",
+    "TRANSPORT_MATCHING": "Търсене на транспорт",
+    "TRANSPORT_BIDDING": "Наддаване за транспорт",
+    "DELIVERY_CONFIRMATION": "Потвърждаване",
+    "PAYMENT_PROCESSING": "Плащане",
+    "PAYMENT": "Плащане",
+    "UNKNOWN": "Неизвестно"
+  },
+  "common": {
+    "loading": "Зареждане...",
+    "error": "Нещо се обърка",
+    "retry": "Опитай отново",
+    "cancel": "Отказ",
+    "save": "Запази",
+    "back": "Назад"
+  }
+}

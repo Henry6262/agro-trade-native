@@ -1,6 +1,7 @@
 // src/shared/components/PhaseBadge.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 type TradePhase =
   | 'INITIATION'
@@ -22,30 +23,32 @@ interface PhaseBadgeProps {
   phase: TradePhase | string;
 }
 
-const PHASE_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
-  INITIATION: { label: 'Initiated', bg: 'rgba(148,163,184,0.15)', text: '#94A3B8' },
-  SELLER_NEGOTIATION: { label: 'Negotiating', bg: 'rgba(96,165,250,0.15)', text: '#60A5FA' },
-  INSPECTION_PENDING: { label: 'Inspection Pending', bg: 'rgba(251,191,36,0.15)', text: '#FBBF24' },
-  INSPECTION_IN_PROGRESS: { label: 'Inspecting', bg: 'rgba(251,191,36,0.2)', text: '#FCD34D' },
-  TRANSPORT_PENDING: { label: 'Transport Pending', bg: 'rgba(167,139,250,0.15)', text: '#A78BFA' },
-  TRANSPORT_MATCHING: { label: 'Finding Transport', bg: 'rgba(167,139,250,0.1)', text: '#A78BFA' },
-  TRANSPORT_BIDDING: { label: 'Transport Bidding', bg: 'rgba(167,139,250,0.15)', text: '#A78BFA' },
-  IN_TRANSIT: { label: 'In Transit', bg: 'rgba(167,139,250,0.2)', text: '#C4B5FD' },
-  DELIVERY_CONFIRMATION: { label: 'Confirming', bg: 'rgba(52,211,153,0.15)', text: '#34D399' },
-  DELIVERED: { label: 'Delivered', bg: 'rgba(52,211,153,0.25)', text: '#10B981' },
-  PAYMENT_PROCESSING: { label: 'Payment', bg: 'rgba(52,211,153,0.2)', text: '#6EE7B7' },
-  PAYMENT: { label: 'Payment', bg: 'rgba(52,211,153,0.2)', text: '#6EE7B7' },
-  COMPLETED: { label: 'Completed', bg: 'rgba(74,222,128,0.15)', text: '#4ADE80' },
-  CANCELLED: { label: 'Cancelled', bg: 'rgba(239,68,68,0.15)', text: '#F87171' },
+const PHASE_STYLE: Record<string, { bg: string; text: string }> = {
+  INITIATION: { bg: 'rgba(148,163,184,0.15)', text: '#94A3B8' },
+  SELLER_NEGOTIATION: { bg: 'rgba(96,165,250,0.15)', text: '#60A5FA' },
+  INSPECTION_PENDING: { bg: 'rgba(251,191,36,0.15)', text: '#FBBF24' },
+  INSPECTION_IN_PROGRESS: { bg: 'rgba(251,191,36,0.2)', text: '#FCD34D' },
+  TRANSPORT_PENDING: { bg: 'rgba(167,139,250,0.15)', text: '#A78BFA' },
+  TRANSPORT_MATCHING: { bg: 'rgba(167,139,250,0.1)', text: '#A78BFA' },
+  TRANSPORT_BIDDING: { bg: 'rgba(167,139,250,0.15)', text: '#A78BFA' },
+  IN_TRANSIT: { bg: 'rgba(167,139,250,0.2)', text: '#C4B5FD' },
+  DELIVERY_CONFIRMATION: { bg: 'rgba(52,211,153,0.15)', text: '#34D399' },
+  DELIVERED: { bg: 'rgba(52,211,153,0.25)', text: '#10B981' },
+  PAYMENT_PROCESSING: { bg: 'rgba(52,211,153,0.2)', text: '#6EE7B7' },
+  PAYMENT: { bg: 'rgba(52,211,153,0.2)', text: '#6EE7B7' },
+  COMPLETED: { bg: 'rgba(74,222,128,0.15)', text: '#4ADE80' },
+  CANCELLED: { bg: 'rgba(239,68,68,0.15)', text: '#F87171' },
 };
 
-const DEFAULT_CONFIG = { label: 'Unknown', bg: 'rgba(255,255,255,0.08)', text: 'rgba(255,255,255,0.5)' };
+const DEFAULT_STYLE = { bg: 'rgba(255,255,255,0.08)', text: 'rgba(255,255,255,0.5)' };
 
 export const PhaseBadge: React.FC<PhaseBadgeProps> = ({ phase }) => {
-  const config = PHASE_CONFIG[phase] ?? DEFAULT_CONFIG;
+  const { t } = useTranslation();
+  const style = PHASE_STYLE[phase] ?? DEFAULT_STYLE;
+  const label = t(`phases.${phase}`, { defaultValue: t('phases.UNKNOWN') });
   return (
-    <View style={[styles.badge, { backgroundColor: config.bg }]}>
-      <Text style={[styles.label, { color: config.text }]}>{config.label}</Text>
+    <View style={[styles.badge, { backgroundColor: style.bg }]}>
+      <Text style={[styles.label, { color: style.text }]}>{label}</Text>
     </View>
   );
 };

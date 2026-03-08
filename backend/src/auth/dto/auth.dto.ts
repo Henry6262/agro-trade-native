@@ -363,6 +363,22 @@ export class CompanyResponseDto {
   updatedAt: string;
 }
 
+export class PhoneSendOtpDto {
+  @ApiProperty({ example: '+35988123456', description: 'E.164 format phone number' })
+  @IsPhoneNumber(undefined, { message: 'Phone number must be in E.164 format (e.g. +35988123456)' })
+  phone: string;
+}
+
+export class PhoneVerifyOtpDto {
+  @ApiProperty({ example: '+35988123456', description: 'E.164 format phone number' })
+  @IsPhoneNumber(undefined, { message: 'Phone number must be in E.164 format (e.g. +35988123456)' })
+  phone: string;
+
+  @ApiProperty({ example: '123456', description: '6-digit OTP code' })
+  @IsString()
+  code: string;
+}
+
 // ==================== Base (Address) DTOs ====================
 
 export class CreateBaseDto {

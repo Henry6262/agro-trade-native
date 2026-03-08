@@ -26,6 +26,19 @@ export interface GoogleAuthResponse {
   };
 }
 
+export interface PhoneVerifyResponse {
+  access_token: string;
+  refresh_token: string;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    phone?: string;
+    role: UserRole;
+    hasProfile: boolean;
+  };
+}
+
 export interface CompanyInfo {
   companyName: string;
   vatNumber?: string;
@@ -100,14 +113,18 @@ export const authService = {
 
   updateProfile: async (userData: Partial<User>): Promise<User> => {
     // Transform frontend User fields to backend fields
-    const backendData: any = {
+    const backendData: Record<string, string | undefined> = {
       name: userData.name,
       email: userData.email,
       phoneNumber: userData.phone, // Frontend uses 'phone', backend uses 'phoneNumber'
     };
 
     return apiClient
-      .patch<{ success: boolean; message: string; user: any }>('/auth/me', backendData)
+      .patch<{
+        success: boolean;
+        message: string;
+        user: User & { phoneNumber?: string };
+      }>('/auth/me', backendData)
       .then((response) => {
         // Transform backend response to frontend User format
         const backendUser = response.data.user;
@@ -167,6 +184,17 @@ export const authService = {
       .then((response) => response.data);
   },
 
+  // Phone OTP authentication
+  phoneOtpSend: async (phone: string): Promise<{ expiresIn: number }> => {
+    return apiClient.post<{ expiresIn: number }>('/auth/phone/send', { phone }).then((r) => r.data);
+  },
+
+  phoneOtpVerify: async (phone: string, code: string): Promise<PhoneVerifyResponse> => {
+    return apiClient
+      .post<PhoneVerifyResponse>('/auth/phone/verify', { phone, code })
+      .then((r) => r.data);
+  },
+
   // Onboarding registration
   registerWithCompany: async (data: RegisterWithCompanyDto): Promise<RegisterResponse> => {
     return apiClient
@@ -196,14 +224,24 @@ export const authService = {
     data: Partial<CompanyInfo>
   ): Promise<{ success: boolean; company: CompanyInfo }> => {
     // Map frontend field names to backend field names
-    const backendData: Record<string, any> = {};
+    const backendData: Record<string, unknown> = {};
     if (data.companyName !== undefined) backendData.legalName = data.companyName;
     if (data.vatNumber !== undefined) backendData.vatNumber = data.vatNumber;
     if (data.companyAddress !== undefined) backendData.registrationNumber = undefined; // address is not a direct field
     if (data.website !== undefined) backendData.website = data.website;
 
     return apiClient
-      .patch<{ success: boolean; company: any }>('/auth/me/company', backendData)
+      .patch<{
+        success: boolean;
+        company: {
+          legalName: string;
+          vatNumber?: string;
+          registrationNumber?: string;
+          website?: string;
+          email?: string;
+          phoneNumber?: string;
+        };
+      }>('/auth/me/company', backendData)
       .then((response) => {
         const c = response.data.company;
         return {
@@ -222,18 +260,28 @@ export const authService = {
 
   // Bases (addresses)
   getBases: async (): Promise<{ success: boolean; bases: BaseInfo[] }> => {
-    return apiClient.get<{ success: boolean; bases: any[] }>('/auth/me/bases').then((response) => ({
-      success: true,
-      bases: (response.data.bases || []).map((b: any) => ({
-        id: b.id,
-        name: b.label,
-        location: [b.street, b.country].filter(Boolean).join(', ') || '',
-        type: (b.addressType || 'warehouse').toLowerCase(),
-        capacity: '',
-        addressType: b.addressType,
-        isDefault: b.isDefault,
-      })),
-    }));
+    type RawBase = {
+      id: string;
+      label: string;
+      street?: string;
+      country?: string;
+      addressType?: string;
+      isDefault?: boolean;
+    };
+    return apiClient
+      .get<{ success: boolean; bases: RawBase[] }>('/auth/me/bases')
+      .then((response) => ({
+        success: true,
+        bases: (response.data.bases || []).map((b) => ({
+          id: b.id,
+          name: b.label,
+          location: [b.street, b.country].filter(Boolean).join(', ') || '',
+          type: (b.addressType || 'warehouse').toLowerCase(),
+          capacity: '',
+          addressType: b.addressType,
+          isDefault: b.isDefault,
+        })),
+      }));
   },
 
   createBase: async (data: {
@@ -242,9 +290,9 @@ export const authService = {
     street?: string;
     country?: string;
     isDefault?: boolean;
-  }): Promise<{ success: boolean; base: any }> => {
+  }): Promise<{ success: boolean; base: BaseInfo }> => {
     return apiClient
-      .post<{ success: boolean; base: any }>('/auth/me/bases', data)
+      .post<{ success: boolean; base: BaseInfo }>('/auth/me/bases', data)
       .then((response) => response.data);
   },
 

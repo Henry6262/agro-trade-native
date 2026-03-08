@@ -7,10 +7,12 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../prisma/prisma.service";
+import { SmsService } from "../sms/sms.service";
 import { User, UserRole } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 import axios from "axios";
+import { randomInt } from "crypto";
 
 export interface JwtPayload {
   sub: string;
@@ -39,6 +41,7 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private smsService: SmsService,
   ) {}
 
   async validateGoogleUser(profile: GoogleProfile): Promise<User> {
@@ -264,6 +267,102 @@ export class AuthService {
         "jwk-to-pem library required for JWT verification. Run: npm install jwk-to-pem",
       );
     }
+  }
+
+  async sendPhoneOtp(phone: string): Promise<{ expiresIn: number }> {
+    const normalizedPhone = phone.replace(/\s+/g, '');
+
+    // Rate limit: max 3 OTP sends per phone per 10 minutes
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    const recentCount = await this.prisma.phoneOtp.count({
+      where: { phone: normalizedPhone, createdAt: { gte: tenMinutesAgo } },
+    });
+
+    if (recentCount >= 3) {
+      throw new BadRequestException(
+        'Too many OTP requests. Please wait 10 minutes before trying again.',
+      );
+    }
+
+    // Generate 6-digit code and hash it
+    const code = randomInt(100_000, 1_000_000).toString();
+    const codeHash = await bcrypt.hash(code, 10);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    await this.prisma.phoneOtp.create({
+      data: { phone: normalizedPhone, codeHash, expiresAt },
+    });
+
+    await this.smsService.sendOtp(normalizedPhone, code);
+
+    return { expiresIn: 300 };
+  }
+
+  async verifyPhoneOtp(phone: string, code: string) {
+    const normalizedPhone = phone.replace(/\s+/g, '');
+
+    // Find the most recent non-used, non-expired OTP for this phone
+    const otp = await this.prisma.phoneOtp.findFirst({
+      where: {
+        phone: normalizedPhone,
+        used: false,
+        expiresAt: { gt: new Date() },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!otp) {
+      throw new BadRequestException('No valid OTP found. Please request a new code.');
+    }
+
+    if (otp.attempts >= 5) {
+      await this.prisma.phoneOtp.updateMany({ where: { id: otp.id, used: false }, data: { used: true } });
+      throw new BadRequestException('OTP exhausted after too many attempts. Please request a new code.');
+    }
+
+    const isValid = await bcrypt.compare(code, otp.codeHash);
+
+    if (!isValid) {
+      const incrementResult = await this.prisma.phoneOtp.updateMany({
+        where: { id: otp.id, used: false, attempts: { lt: 5 } },
+        data: { attempts: { increment: 1 } },
+      });
+      if (incrementResult.count === 0) {
+        // Another concurrent request already exhausted attempts
+        throw new BadRequestException('OTP exhausted after too many attempts. Please request a new code.');
+      }
+      throw new BadRequestException('Invalid OTP code.');
+    }
+
+    // Atomic update: only succeeds if OTP is still unused (prevents TOCTOU race)
+    const claimResult = await this.prisma.phoneOtp.updateMany({
+      where: { id: otp.id, used: false },
+      data: { used: true },
+    });
+    if (claimResult.count === 0) {
+      throw new BadRequestException('OTP already used. Please request a new code.');
+    }
+
+    // Find or create user by phone number
+    let user = await this.prisma.user.findUnique({ where: { phoneNumber: normalizedPhone } });
+
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          email: `phone-${normalizedPhone.replace(/\D/g, '')}@agrotrade.local`,
+          phoneNumber: normalizedPhone,
+          isPhoneVerified: true,
+          isActive: true,
+        },
+      });
+    } else {
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { isPhoneVerified: true },
+      });
+    }
+
+    return this.login(user);
   }
 
   /**

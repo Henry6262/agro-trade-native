@@ -13,6 +13,7 @@ import {
   ToastAndroid,
   Alert,
   ActivityIndicator,
+  StyleSheet,
 } from 'react-native';
 import {
   X,
@@ -28,6 +29,9 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { LANGUAGE_STORAGE_KEY } from '../../../i18n';
 import { useAuthStore } from '@stores/auth.store';
 import { useNavigation } from '@react-navigation/native';
 import { authService } from '@services/authService';
@@ -60,10 +64,19 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
 }) => {
   const { user, logout, setUser } = useAuthStore();
   const navigation = useNavigation();
+  const { i18n: i18nInstance } = useTranslation();
+  const currentLang = i18nInstance.language;
   const [editMode, setEditMode] = useState(false);
   const [activeTab, setActiveTab] = useState<'personal' | 'company' | 'bases'>('personal');
   const [showSuccess, setShowSuccess] = useState(showSuccessAnimation);
   const [isSaving, setIsSaving] = useState(false);
+
+  const toggleLanguage = (lang: 'en' | 'bg') => {
+    i18nInstance.changeLanguage(lang);
+    AsyncStorage.setItem(LANGUAGE_STORAGE_KEY, lang).catch(() => {
+      // Non-critical: language will reset on next app start
+    });
+  };
 
   const slideAnim = useRef(new Animated.Value(Dimensions.get('window').width)).current;
   const successOpacity = useRef(new Animated.Value(0)).current;
@@ -544,6 +557,10 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     </ScrollView>
   );
 
+  // ─── Language Switcher styles (dark-theme drawer: rgba(5,46,22,0.97)) ───────
+  // Pill container uses a dark translucent background; active pill uses the
+  // existing brand green (#4ADE80) to stay consistent with the drawer accent.
+
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose}>
       <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' }}>
@@ -717,14 +734,50 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
               </View>
             )}
 
-            {/* Logout */}
+            {/* Language Switcher + Logout */}
             <View
               style={{
                 padding: 16,
                 borderTopWidth: 1,
                 borderTopColor: 'rgba(255,255,255,0.08)',
+                gap: 12,
               }}
             >
+              {/* Language Switcher */}
+              <View style={langStyles.languageRow}>
+                <Text style={langStyles.languageLabel}>Language</Text>
+                <View style={langStyles.pillContainer}>
+                  <TouchableOpacity
+                    style={[langStyles.pill, currentLang === 'en' && langStyles.pillActive]}
+                    onPress={() => toggleLanguage('en')}
+                    activeOpacity={0.8}
+                  >
+                    <Text
+                      style={[
+                        langStyles.pillText,
+                        currentLang === 'en' && langStyles.pillTextActive,
+                      ]}
+                    >
+                      EN
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[langStyles.pill, currentLang === 'bg' && langStyles.pillActive]}
+                    onPress={() => toggleLanguage('bg')}
+                    activeOpacity={0.8}
+                  >
+                    <Text
+                      style={[
+                        langStyles.pillText,
+                        currentLang === 'bg' && langStyles.pillTextActive,
+                      ]}
+                    >
+                      BG
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
               <GlassButton
                 label="Logout"
                 onPress={handleLogout}
@@ -739,3 +792,39 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     </Modal>
   );
 };
+
+const langStyles = StyleSheet.create({
+  languageLabel: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  languageRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  pill: {
+    borderRadius: 17,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+  },
+  pillActive: {
+    backgroundColor: '#4ADE80',
+  },
+  pillContainer: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 20,
+    flexDirection: 'row',
+    padding: 3,
+  },
+  pillText: {
+    color: COLORS.textMuted,
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  pillTextActive: {
+    color: '#052E16',
+  },
+});

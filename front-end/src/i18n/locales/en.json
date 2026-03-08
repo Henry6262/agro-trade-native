@@ -1,0 +1,69 @@
+{
+  "auth": {
+    "welcome": {
+      "title": "AgroTrade",
+      "tagline": "Connect. Trade. Grow.",
+      "chooseMethod": "How would you like to sign in?",
+      "phoneMethod": "Phone",
+      "phoneSubtitle": "No crypto needed",
+      "walletMethod": "Wallet",
+      "walletSubtitle": "Privy wallet"
+    },
+    "phone": {
+      "title": "Phone Sign In",
+      "subtitle": "We'll send a verification code to your number",
+      "phonePlaceholder": "Phone number",
+      "sendCode": "Send Code",
+      "otpTitle": "Enter Code",
+      "otpSubtitle": "Enter the 6-digit code sent to {{phone}}",
+      "changeNumber": "← Change number",
+      "verify": "Verify",
+      "resend": "Resend code",
+      "resendIn": "Resend in {{seconds}}s",
+      "sending": "Sending...",
+      "verifying": "Verifying...",
+      "errors": {
+        "invalidPhone": "Please enter a valid phone number",
+        "incompleteOtp": "Please enter the complete 6-digit code",
+        "sendFailed": "Failed to send code. Please try again.",
+        "verifyFailed": "Invalid code. Please try again."
+      }
+    }
+  },
+  "phases": {
+    "PENDING": "Pending",
+    "CONFIRMED": "Confirmed",
+    "IN_TRANSIT": "In Transit",
+    "QUALITY_CHECK": "Quality Check",
+    "DELIVERED": "Delivered",
+    "CANCELLED": "Cancelled",
+    "DISPUTED": "Disputed",
+    "COMPLETED": "Completed",
+    "PAYMENT_PENDING": "Payment Pending",
+    "PAYMENT_RELEASED": "Payment Released",
+    "AWAITING_DEPOSIT": "Awaiting Deposit",
+    "DEPOSIT_HELD": "Deposit Held",
+    "INSPECTION_REQUESTED": "Inspection Requested",
+    "INSPECTION_IN_PROGRESS": "Inspection In Progress",
+    "INSPECTION_COMPLETED": "Inspection Completed",
+    "ARBITRATION": "Arbitration",
+    "INITIATION": "Initiated",
+    "SELLER_NEGOTIATION": "Negotiating",
+    "INSPECTION_PENDING": "Inspection Pending",
+    "TRANSPORT_PENDING": "Transport Pending",
+    "TRANSPORT_MATCHING": "Finding Transport",
+    "TRANSPORT_BIDDING": "Transport Bidding",
+    "DELIVERY_CONFIRMATION": "Confirming",
+    "PAYMENT_PROCESSING": "Payment",
+    "PAYMENT": "Payment",
+    "UNKNOWN": "Unknown"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try Again",
+    "cancel": "Cancel",
+    "save": "Save",
+    "back": "Back"
+  }
+}
