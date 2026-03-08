@@ -60,13 +60,24 @@ interface Negotiation {
   };
 }
 
+interface BuyListingRef {
+  product?: { name?: string };
+  quantity?: number;
+  maxPricePerUnit?: number;
+}
+
+interface SellerRef {
+  id: string;
+  isVerified?: boolean;
+}
+
 interface TradeOperation {
   id: string;
   operationNumber: string;
   status: string;
   phase: string;
-  buyListing?: any;
-  sellers?: any[];
+  buyListing?: BuyListingRef;
+  sellers?: SellerRef[];
   profitMargin?: number;
   estimatedProfit?: number;
   createdAt: string;
@@ -140,9 +151,10 @@ export const ActiveOperationsTab: React.FC<Props> = ({
               negotiations: negotiations.negotiations,
               negotiationSummary: negotiations.summary,
             };
-          } catch (error: any) {
+          } catch (error: unknown) {
             // 404 = operation has no negotiations yet — normal for new ops, not an error
-            if (error?.response?.status !== 404) {
+            const status = (error as { response?: { status?: number } })?.response?.status;
+            if (status !== 404) {
               console.error(`Failed to load negotiations for ${op.id}:`, error);
             }
             return {
@@ -162,7 +174,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
         })
       );
 
-      setOperations(opsWithNegotiations as any);
+      setOperations(opsWithNegotiations as TradeOperation[]);
     } catch (error) {
       console.error('Failed to load operations:', error);
       Alert.alert('Error', 'Failed to load active operations');
@@ -295,7 +307,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
         key={operation.id}
         tier="medium"
         animate={false}
-        style={[styles.opCard, styles.darkCard]}
+        style={StyleSheet.flatten([styles.opCard, styles.darkCard])}
       >
         {/* Header row */}
         <TouchableOpacity onPress={() => toggleExpanded(operation.id)} activeOpacity={0.8}>
@@ -406,7 +418,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
                   )}
                 </View>
                 {operation.sellers && operation.sellers.length > 0 && (
-                  <View style={[styles.verifiedRow, { marginTop: 5 }]}>
+                  <View style={styles.verifiedRowSpaced}>
                     <CheckCircle size={13} color={COLORS.accentGreen} />
                     <Text style={styles.verifiedText}>
                       {' '}
@@ -669,6 +681,6 @@ const styles = StyleSheet.create({
   summaryChipText: { color: COLORS.textMuted, fontSize: 12 },
   summaryRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 10 },
   urgentBadge: {},
-  verifiedRow: { alignItems: 'center', flexDirection: 'row', marginTop: 2 },
+  verifiedRowSpaced: { alignItems: 'center', flexDirection: 'row', marginTop: 5 },
   verifiedText: { color: COLORS.textMuted, fontSize: 12 },
 });

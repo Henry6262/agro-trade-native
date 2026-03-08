@@ -20,6 +20,7 @@ import Animated, {
 import { ChevronDown, ChevronUp, TrendingDown, TrendingUp } from 'lucide-react-native';
 import { AlertPill, NewsCard } from '../intelligence/components';
 import { GlassCard, GlassButton, GlassInput } from '../../../../design-system';
+import { formatTimeAgo } from '../../../../utils/formatTimeAgo';
 import { COLORS, GLASS } from '../../../../design-system/tokens';
 import { useMarketStore, PriceAlert } from '../../../../stores/market.store';
 import { CommoditySymbol } from '../../../../services';
@@ -31,18 +32,6 @@ interface IntelligenceScreenProps {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function formatTimeAgo(isoString: string): string {
-  if (!isoString) return 'unknown';
-  const ms = Date.now() - new Date(isoString).getTime();
-  if (isNaN(ms)) return 'unknown';
-  const mins = Math.floor(ms / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
-}
 
 function formatLastUpdated(timestamp: number): string {
   if (!timestamp) return 'never';
