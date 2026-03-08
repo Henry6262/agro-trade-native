@@ -1,12 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  RefreshControl,
-  Alert,
-  StyleSheet,
-} from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, Text, ScrollView, RefreshControl, Alert, StyleSheet } from 'react-native';
 import {
   Truck,
   MapPin,
@@ -37,6 +30,14 @@ const STATUS_VARIANT: Record<string, BadgeVariant> = {
   COMPLETED: 'success',
 };
 
+const STATUS_LABEL: Record<string, string> = {
+  ASSIGNED: 'Assigned',
+  IN_TRANSIT: 'In Transit',
+  DELIVERING: 'Delivering',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+};
+
 export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> = ({
   testID,
   accessibilityLabel,
@@ -51,24 +52,26 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
     loadActiveJobs();
   }, []);
 
-  const loadActiveJobs = async () => {
+  const loadActiveJobs = async ({ silent = false } = {}) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const jobs = await transportService.getMyJobs();
       setActiveJobs(jobs);
-    } catch (error) {
-      console.error('Failed to load active jobs:', error);
+    } catch (_error) {
       Alert.alert('Error', 'Failed to load active jobs');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadActiveJobs();
-    setRefreshing(false);
-  };
+    try {
+      await loadActiveJobs({ silent: true });
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
   const handleStartJob = async (jobId: string) => {
     try {
@@ -77,9 +80,8 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
         actualPickupTime: new Date().toISOString(),
       });
       Alert.alert('Success', 'Transport job started');
-      await loadActiveJobs();
-    } catch (error) {
-      console.error('Failed to start job:', error);
+      await loadActiveJobs({ silent: true });
+    } catch (_error) {
       Alert.alert('Error', 'Failed to start job');
     } finally {
       setUpdatingJob(null);
@@ -90,15 +92,12 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
     try {
       setUpdatingJob(jobId);
       const pickupData = {
-        pickupNotes: 'Pickup completed successfully',
-        actualWeight: 100,
-        pickupPhotos: [],
+        pickupPhotos: [] as string[],
       };
       await transportService.completePickup(jobId, pickupData);
       Alert.alert('Success', 'Pickup completed');
-      await loadActiveJobs();
-    } catch (error) {
-      console.error('Failed to complete pickup:', error);
+      await loadActiveJobs({ silent: true });
+    } catch (_error) {
       Alert.alert('Error', 'Failed to complete pickup');
     } finally {
       setUpdatingJob(null);
@@ -109,53 +108,60 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
     try {
       setUpdatingJob(jobId);
       const deliveryData = {
-        deliveryNotes: 'Delivery completed successfully',
-        deliveryPhotos: [],
-        recipientSignature: 'Signed digitally',
+        deliveryPhotos: [] as string[],
       };
       await transportService.completeDelivery(jobId, deliveryData);
       Alert.alert('Success', 'Delivery completed');
-      await loadActiveJobs();
-    } catch (error) {
-      console.error('Failed to complete delivery:', error);
+      await loadActiveJobs({ silent: true });
+    } catch (_error) {
       Alert.alert('Error', 'Failed to complete delivery');
     } finally {
       setUpdatingJob(null);
     }
   };
 
-  const handleUpdateLocation = async (jobId: string) => {
+  const handleUpdateLocation = useCallback(async (jobId: string) => {
     try {
       setUpdatingLocation(jobId);
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'Location permission is required to update your position.');
+        Alert.alert(
+          'Permission Denied',
+          'Location permission is required to update your position.'
+        );
         return;
       }
       const loc = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
-      await transportService.updateJobLocation(
-        jobId,
-        loc.coords.latitude,
-        loc.coords.longitude
-      );
+      await transportService.updateJobLocation(jobId, loc.coords.latitude, loc.coords.longitude);
       Alert.alert('Location Updated', 'Your GPS position has been sent.');
-    } catch (err) {
-      console.error('Location update failed:', err);
+    } catch (_err) {
       Alert.alert('Error', 'Failed to update location. Please try again.');
     } finally {
       setUpdatingLocation(null);
     }
-  };
+  }, []);
 
-  const activeCount = activeJobs.filter((j) => j.status !== 'COMPLETED').length;
-  const inTransitCount = activeJobs.filter((j) => j.status === 'IN_TRANSIT').length;
-  const completedToday = activeJobs.filter(
-    (j) =>
-      j.status === 'COMPLETED' &&
-      new Date(j.estimatedArrival || '').toDateString() === new Date().toDateString()
-  ).length;
+  const { activeCount, inTransitCount, completedToday } = useMemo(() => {
+    let active = 0;
+    let inTransit = 0;
+    let today = 0;
+    const todayStr = new Date().toDateString();
+    for (const j of activeJobs) {
+      if (j.status !== 'COMPLETED') active++;
+      if (j.status === 'IN_TRANSIT') inTransit++;
+      // completedAt is the correct field; falls back gracefully if undefined
+      if (
+        j.status === 'COMPLETED' &&
+        j.completedAt != null &&
+        new Date(j.completedAt).toDateString() === todayStr
+      ) {
+        today++;
+      }
+    }
+    return { activeCount: active, inTransitCount: inTransit, completedToday: today };
+  }, [activeJobs]);
 
   return (
     <ScrollView
@@ -210,7 +216,7 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
         )}
 
         {activeJobs.map((job) => {
-          const badgeVariant: BadgeVariant = STATUS_VARIANT[job.status?.toUpperCase()] ?? 'muted';
+          const badgeVariant: BadgeVariant = STATUS_VARIANT[job.status.toUpperCase()] ?? 'muted';
           const pickupsCompleted = job.pickupsCompleted ?? [];
           const pickupPointsTotal = job.transportRequest?.pickupPoints?.length ?? 1;
           const totalWeight = job.transportRequest?.totalWeight ?? 'N/A';
@@ -235,7 +241,7 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
                     )}
                   </View>
                 </View>
-                <GlassBadge label={job.status} variant={badgeVariant} />
+                <GlassBadge label={STATUS_LABEL[job.status] ?? job.status} variant={badgeVariant} />
               </View>
 
               {/* Separator */}
