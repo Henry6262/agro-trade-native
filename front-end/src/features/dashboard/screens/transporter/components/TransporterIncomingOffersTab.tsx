@@ -1,5 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Alert, StyleSheet } from 'react-native';
+import { EmptyState } from '../../../../../shared/components/EmptyState';
+import { SkeletonCard } from '../../../../../shared/components/SkeletonCard';
 import {
   Package,
   DollarSign,
@@ -215,17 +217,18 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
             <Text style={styles.sectionTitle}>TRANSPORT REQUESTS</Text>
           </View>
 
-          {loading ? (
-            <View style={styles.loadingWrap}>
-              <ActivityIndicator size="large" color="#60A5FA" />
-              <Text style={styles.loadingText}>Loading transport requests...</Text>
-            </View>
-          ) : availableRequests.length === 0 ? (
-            <GlassCard tier="subtle" style={styles.emptyCard}>
-              <Truck size={44} color="rgba(255,255,255,0.25)" style={styles.emptyIcon} />
-              <Text style={styles.emptyTitle}>No transport requests available</Text>
-              <Text style={styles.emptySubtitle}>Check back later for new opportunities</Text>
-            </GlassCard>
+          {loading && transportRequests.length === 0 ? (
+            <>
+              <SkeletonCard lines={3} height={90} />
+              <SkeletonCard lines={3} height={90} />
+              <SkeletonCard lines={3} height={90} />
+            </>
+          ) : !loading && availableRequests.length === 0 ? (
+            <EmptyState
+              icon={<Truck size={32} color="rgba(167,139,250,0.5)" />}
+              title="No transport jobs available"
+              subtitle="Check back soon — new jobs appear when trades enter transport phase"
+            />
           ) : (
             availableRequests.map((request) => {
               const alreadyBid = hasBidOnRequest(request.id);
@@ -385,24 +388,6 @@ const styles = StyleSheet.create({
     gap: 14,
     padding: 16,
   },
-  emptyCard: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  emptyIcon: {
-    marginBottom: 12,
-  },
-  emptySubtitle: {
-    color: 'rgba(255,255,255,0.35)',
-    fontSize: 13,
-    marginTop: 6,
-    textAlign: 'center',
-  },
-  emptyTitle: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 15,
-    textAlign: 'center',
-  },
   financeCard: {
     flex: 1,
     gap: 3,
@@ -421,15 +406,6 @@ const styles = StyleSheet.create({
   financeValue: {
     fontSize: 15,
     fontWeight: '800',
-  },
-  loadingText: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 13,
-  },
-  loadingWrap: {
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 40,
   },
   pricePerKm: {
     color: 'rgba(252,211,77,0.6)',

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Alert, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, Text, ScrollView, RefreshControl, Alert, StyleSheet } from 'react-native';
 import {
   Truck,
   MapPin,
@@ -9,8 +9,11 @@ import {
   Navigation,
   Camera,
 } from 'lucide-react-native';
+import * as Location from 'expo-location';
 import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
 import { BaseComponentProps } from '@shared/types';
+import { EmptyState } from '@shared/components/EmptyState';
+import { SkeletonCard } from '@shared/components/SkeletonCard';
 import transportService, { TransportJob } from '@services/transportService';
 import { format } from 'date-fns';
 
@@ -27,6 +30,14 @@ const STATUS_VARIANT: Record<string, BadgeVariant> = {
   COMPLETED: 'success',
 };
 
+const STATUS_LABEL: Record<string, string> = {
+  ASSIGNED: 'Assigned',
+  IN_TRANSIT: 'In Transit',
+  DELIVERING: 'Delivering',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
+};
+
 export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> = ({
   testID,
   accessibilityLabel,
@@ -35,29 +46,32 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [updatingJob, setUpdatingJob] = useState<string | null>(null);
+  const [updatingLocation, setUpdatingLocation] = useState<string | null>(null);
 
   useEffect(() => {
     loadActiveJobs();
   }, []);
 
-  const loadActiveJobs = async () => {
+  const loadActiveJobs = async ({ silent = false } = {}) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const jobs = await transportService.getMyJobs();
       setActiveJobs(jobs);
-    } catch (error) {
-      console.error('Failed to load active jobs:', error);
+    } catch (_error) {
       Alert.alert('Error', 'Failed to load active jobs');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadActiveJobs();
-    setRefreshing(false);
-  };
+    try {
+      await loadActiveJobs({ silent: true });
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
   const handleStartJob = async (jobId: string) => {
     try {
@@ -66,9 +80,8 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
         actualPickupTime: new Date().toISOString(),
       });
       Alert.alert('Success', 'Transport job started');
-      await loadActiveJobs();
-    } catch (error) {
-      console.error('Failed to start job:', error);
+      await loadActiveJobs({ silent: true });
+    } catch (_error) {
       Alert.alert('Error', 'Failed to start job');
     } finally {
       setUpdatingJob(null);
@@ -79,15 +92,12 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
     try {
       setUpdatingJob(jobId);
       const pickupData = {
-        pickupNotes: 'Pickup completed successfully',
-        actualWeight: 100,
-        pickupPhotos: [],
+        pickupPhotos: [] as string[],
       };
       await transportService.completePickup(jobId, pickupData);
       Alert.alert('Success', 'Pickup completed');
-      await loadActiveJobs();
-    } catch (error) {
-      console.error('Failed to complete pickup:', error);
+      await loadActiveJobs({ silent: true });
+    } catch (_error) {
       Alert.alert('Error', 'Failed to complete pickup');
     } finally {
       setUpdatingJob(null);
@@ -98,28 +108,60 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
     try {
       setUpdatingJob(jobId);
       const deliveryData = {
-        deliveryNotes: 'Delivery completed successfully',
-        deliveryPhotos: [],
-        recipientSignature: 'Signed digitally',
+        deliveryPhotos: [] as string[],
       };
       await transportService.completeDelivery(jobId, deliveryData);
       Alert.alert('Success', 'Delivery completed');
-      await loadActiveJobs();
-    } catch (error) {
-      console.error('Failed to complete delivery:', error);
+      await loadActiveJobs({ silent: true });
+    } catch (_error) {
       Alert.alert('Error', 'Failed to complete delivery');
     } finally {
       setUpdatingJob(null);
     }
   };
 
-  const activeCount = activeJobs.filter((j) => j.status !== 'COMPLETED').length;
-  const inTransitCount = activeJobs.filter((j) => j.status === 'IN_TRANSIT').length;
-  const completedToday = activeJobs.filter(
-    (j) =>
-      j.status === 'COMPLETED' &&
-      new Date(j.estimatedArrival || '').toDateString() === new Date().toDateString()
-  ).length;
+  const handleUpdateLocation = useCallback(async (jobId: string) => {
+    try {
+      setUpdatingLocation(jobId);
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission Denied',
+          'Location permission is required to update your position.'
+        );
+        return;
+      }
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      await transportService.updateJobLocation(jobId, loc.coords.latitude, loc.coords.longitude);
+      Alert.alert('Location Updated', 'Your GPS position has been sent.');
+    } catch (_err) {
+      Alert.alert('Error', 'Failed to update location. Please try again.');
+    } finally {
+      setUpdatingLocation(null);
+    }
+  }, []);
+
+  const { activeCount, inTransitCount, completedToday } = useMemo(() => {
+    let active = 0;
+    let inTransit = 0;
+    let today = 0;
+    const todayStr = new Date().toDateString();
+    for (const j of activeJobs) {
+      if (j.status !== 'COMPLETED') active++;
+      if (j.status === 'IN_TRANSIT') inTransit++;
+      // completedAt is the correct field; falls back gracefully if undefined
+      if (
+        j.status === 'COMPLETED' &&
+        j.completedAt != null &&
+        new Date(j.completedAt).toDateString() === todayStr
+      ) {
+        today++;
+      }
+    }
+    return { activeCount: active, inTransitCount: inTransit, completedToday: today };
+  }, [activeJobs]);
 
   return (
     <ScrollView
@@ -127,19 +169,11 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
       showsVerticalScrollIndicator={false}
       testID={testID}
       accessibilityLabel={accessibilityLabel}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor="#60A5FA" />
+      }
     >
       <View style={styles.content}>
-        {/* Refresh Button */}
-        <GlassButton
-          label={refreshing ? 'Refreshing...' : 'Refresh Jobs'}
-          onPress={handleRefresh}
-          variant="secondary"
-          size="sm"
-          fullWidth
-          loading={refreshing}
-          leftIcon={<Navigation size={16} color="#60A5FA" />}
-        />
-
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
           <GlassCard tier="subtle" style={styles.statCard}>
@@ -165,137 +199,154 @@ export const TransporterActiveJobsTab: React.FC<TransporterActiveJobsTabProps> =
           <Text style={styles.sectionTitle}>ACTIVE TRANSPORT JOBS</Text>
         </View>
 
-        {loading ? (
-          <View style={styles.loadingWrap}>
-            <ActivityIndicator size="large" color="#60A5FA" />
-            <Text style={styles.loadingText}>Loading active jobs...</Text>
-          </View>
-        ) : activeJobs.length === 0 ? (
-          <GlassCard tier="subtle" style={styles.emptyCard}>
-            <Package size={44} color="rgba(255,255,255,0.25)" style={styles.emptyIcon} />
-            <Text style={styles.emptyTitle}>No active transport jobs</Text>
-            <Text style={styles.emptySubtitle}>Submit bids to get transport jobs</Text>
-          </GlassCard>
-        ) : (
-          activeJobs.map((job) => {
-            const badgeVariant: BadgeVariant = STATUS_VARIANT[job.status?.toUpperCase()] ?? 'muted';
-            const pickupsCompleted = job.pickupsCompleted ?? [];
-            const pickupPointsTotal = job.transportRequest?.pickupPoints?.length ?? 1;
-            const totalWeight = job.transportRequest?.totalWeight ?? 'N/A';
+        {loading && activeJobs.length === 0 && (
+          <>
+            <SkeletonCard lines={3} height={120} />
+            <SkeletonCard lines={3} height={120} />
+            <SkeletonCard lines={3} height={120} />
+          </>
+        )}
 
-            return (
-              <GlassCard key={job.id} tier="medium" style={styles.jobCard}>
-                {/* Header */}
-                <View style={styles.jobHeader}>
-                  <View style={styles.jobHeaderLeft}>
-                    <Text style={styles.jobNumber}>Job #{job.jobNumber}</Text>
-                    <View style={styles.jobMeta}>
-                      <Package size={14} color="rgba(255,255,255,0.4)" />
-                      <Text style={styles.jobMetaText}>{totalWeight} tons</Text>
-                      {job.estimatedArrival && (
-                        <>
-                          <Clock size={14} color="rgba(255,255,255,0.4)" />
-                          <Text style={styles.jobMetaText}>
-                            ETA: {format(new Date(job.estimatedArrival), 'MMM dd, HH:mm')}
-                          </Text>
-                        </>
-                      )}
-                    </View>
+        {!loading && activeJobs.length === 0 && (
+          <EmptyState
+            icon={<Package size={32} color="rgba(96,165,250,0.5)" />}
+            title="No active transport jobs"
+            subtitle="Submit bids to get transport jobs"
+          />
+        )}
+
+        {activeJobs.map((job) => {
+          const badgeVariant: BadgeVariant = STATUS_VARIANT[job.status.toUpperCase()] ?? 'muted';
+          const pickupsCompleted = job.pickupsCompleted ?? [];
+          const pickupPointsTotal = job.transportRequest?.pickupPoints?.length ?? 1;
+          const totalWeight = job.transportRequest?.totalWeight ?? 'N/A';
+          const isInTransit = job.status === 'IN_TRANSIT';
+
+          return (
+            <GlassCard key={job.id} tier="medium" style={styles.jobCard}>
+              {/* Header */}
+              <View style={styles.jobHeader}>
+                <View style={styles.jobHeaderLeft}>
+                  <Text style={styles.jobNumber}>Job #{job.jobNumber}</Text>
+                  <View style={styles.jobMeta}>
+                    <Package size={14} color="rgba(255,255,255,0.4)" />
+                    <Text style={styles.jobMetaText}>{totalWeight} tons</Text>
+                    {job.estimatedArrival && (
+                      <>
+                        <Clock size={14} color="rgba(255,255,255,0.4)" />
+                        <Text style={styles.jobMetaText}>
+                          ETA: {format(new Date(job.estimatedArrival), 'MMM dd, HH:mm')}
+                        </Text>
+                      </>
+                    )}
                   </View>
-                  <GlassBadge label={job.status} variant={badgeVariant} />
                 </View>
+                <GlassBadge label={STATUS_LABEL[job.status] ?? job.status} variant={badgeVariant} />
+              </View>
 
-                {/* Separator */}
-                <View style={styles.separator} />
+              {/* Separator */}
+              <View style={styles.separator} />
 
-                {/* Progress Info */}
-                <GlassCard tier="subtle" style={styles.progressCard} animate={false}>
-                  <View style={styles.progressRow}>
-                    <Text style={styles.progressLabel}>Pickups Completed</Text>
-                    <Text style={styles.progressValue}>
-                      {pickupsCompleted.length} / {pickupPointsTotal}
+              {/* Progress Info */}
+              <GlassCard tier="subtle" style={styles.progressCard} animate={false}>
+                <View style={styles.progressRow}>
+                  <Text style={styles.progressLabel}>Pickups Completed</Text>
+                  <Text style={styles.progressValue}>
+                    {pickupsCompleted.length} / {pickupPointsTotal}
+                  </Text>
+                </View>
+                {/* Progress bar */}
+                <View style={styles.progressBarBg}>
+                  <View
+                    style={[
+                      styles.progressBarFill,
+                      {
+                        width: `${
+                          pickupPointsTotal > 0
+                            ? (pickupsCompleted.length / pickupPointsTotal) * 100
+                            : 0
+                        }%`,
+                      },
+                    ]}
+                  />
+                </View>
+                {job.currentLocation && (
+                  <View style={styles.locationRow}>
+                    <MapPin size={13} color="#60A5FA" />
+                    <Text style={styles.locationText}>
+                      {job.currentLocation.address || 'Location updating...'}
                     </Text>
                   </View>
-                  {/* Progress bar */}
-                  <View style={styles.progressBarBg}>
-                    <View
-                      style={[
-                        styles.progressBarFill,
-                        {
-                          width: `${
-                            pickupPointsTotal > 0
-                              ? (pickupsCompleted.length / pickupPointsTotal) * 100
-                              : 0
-                          }%`,
-                        },
-                      ]}
-                    />
-                  </View>
-                  {job.currentLocation && (
-                    <View style={styles.locationRow}>
-                      <MapPin size={13} color="#60A5FA" />
-                      <Text style={styles.locationText}>
-                        {job.currentLocation.address || 'Location updating...'}
-                      </Text>
-                    </View>
-                  )}
-                </GlassCard>
-
-                {/* Action Buttons */}
-                <View style={styles.actionRow}>
-                  {job.status === 'ASSIGNED' && (
-                    <GlassButton
-                      label="START JOB"
-                      onPress={() => handleStartJob(job.id)}
-                      variant="primary"
-                      size="sm"
-                      fullWidth
-                      loading={updatingJob === job.id}
-                      leftIcon={<Truck size={14} color="#FFFFFF" />}
-                    />
-                  )}
-
-                  {job.status === 'IN_TRANSIT' && !job.allPickupsComplete && (
-                    <GlassButton
-                      label="COMPLETE PICKUP"
-                      onPress={() => handleCompletePickup(job.id)}
-                      variant="secondary"
-                      size="sm"
-                      fullWidth
-                      loading={updatingJob === job.id}
-                      leftIcon={<Camera size={14} color="#FCD34D" />}
-                    />
-                  )}
-
-                  {job.status === 'IN_TRANSIT' && job.allPickupsComplete && (
-                    <GlassButton
-                      label="COMPLETE DELIVERY"
-                      onPress={() => handleCompleteDelivery(job.id)}
-                      variant="primary"
-                      size="sm"
-                      fullWidth
-                      loading={updatingJob === job.id}
-                      leftIcon={<CheckCircle size={14} color="#FFFFFF" />}
-                    />
-                  )}
-
-                  {job.status === 'COMPLETED' && (
-                    <View style={styles.completedBadge}>
-                      <Text style={styles.completedText}>Job Completed</Text>
-                    </View>
-                  )}
-                </View>
+                )}
               </GlassCard>
-            );
-          })
-        )}
+
+              {/* Action Buttons */}
+              <View style={styles.actionCol}>
+                {job.status === 'ASSIGNED' && (
+                  <GlassButton
+                    label="START JOB"
+                    onPress={() => handleStartJob(job.id)}
+                    variant="primary"
+                    size="sm"
+                    fullWidth
+                    loading={updatingJob === job.id}
+                    leftIcon={<Truck size={14} color="#FFFFFF" />}
+                  />
+                )}
+
+                {isInTransit && !job.allPickupsComplete && (
+                  <GlassButton
+                    label="COMPLETE PICKUP"
+                    onPress={() => handleCompletePickup(job.id)}
+                    variant="secondary"
+                    size="sm"
+                    fullWidth
+                    loading={updatingJob === job.id}
+                    leftIcon={<Camera size={14} color="#FCD34D" />}
+                  />
+                )}
+
+                {isInTransit && job.allPickupsComplete && (
+                  <GlassButton
+                    label="COMPLETE DELIVERY"
+                    onPress={() => handleCompleteDelivery(job.id)}
+                    variant="primary"
+                    size="sm"
+                    fullWidth
+                    loading={updatingJob === job.id}
+                    leftIcon={<CheckCircle size={14} color="#FFFFFF" />}
+                  />
+                )}
+
+                {isInTransit && (
+                  <GlassButton
+                    label="UPDATE LOCATION"
+                    onPress={() => handleUpdateLocation(job.id)}
+                    variant="secondary"
+                    size="sm"
+                    fullWidth
+                    loading={updatingLocation === job.id}
+                    leftIcon={<MapPin size={14} color="#60A5FA" />}
+                  />
+                )}
+
+                {job.status === 'COMPLETED' && (
+                  <View style={styles.completedBadge}>
+                    <Text style={styles.completedText}>Job Completed</Text>
+                  </View>
+                )}
+              </View>
+            </GlassCard>
+          );
+        })}
       </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  actionRow: {
+  actionCol: {
+    gap: 10,
     marginTop: 4,
   },
   completedBadge: {
@@ -314,24 +365,6 @@ const styles = StyleSheet.create({
   content: {
     gap: 14,
     padding: 16,
-  },
-  emptyCard: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  emptyIcon: {
-    marginBottom: 12,
-  },
-  emptySubtitle: {
-    color: 'rgba(255,255,255,0.35)',
-    fontSize: 13,
-    marginTop: 6,
-    textAlign: 'center',
-  },
-  emptyTitle: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 15,
-    textAlign: 'center',
   },
   jobCard: {
     gap: 12,
@@ -360,15 +393,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
-  },
-  loadingText: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 13,
-  },
-  loadingWrap: {
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 40,
   },
   locationRow: {
     alignItems: 'center',

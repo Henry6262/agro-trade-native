@@ -159,7 +159,7 @@ export interface TransportFleetTruck {
   licensePlate: string;
   model: string;
   capacityTons: number;
-  status: 'available' | 'assigned';
+  status: 'available' | 'assigned' | 'maintenance';
   location: string;
   verified: boolean;
   driver?: string;
