@@ -21,9 +21,12 @@ import {
   MapPin,
   Calendar,
   Navigation,
+  Receipt,
 } from 'lucide-react-native';
 import { GlassCard, GlassButton, GlassInput } from '../../../../../design-system';
 import { BaseComponentProps } from '@shared/types';
+import { EmptyState } from '@shared/components/EmptyState';
+import { SkeletonCard } from '@shared/components/SkeletonCard';
 import { MapDrawer } from '../maps/components/MapDrawer';
 import { MapOffer } from '../maps/types';
 import { useAuthStore } from '@stores/auth.store';
@@ -34,6 +37,12 @@ import transportService, {
   TransportRequest,
   TransporterPerformance,
 } from '@services/transportService';
+
+const BID_STATUS_COLORS: Record<string, string> = {
+  PENDING: '#FBBF24',
+  ACCEPTED: '#4ADE80',
+  REJECTED: '#F87171',
+};
 
 interface TransporterBiddingTabProps extends BaseComponentProps {
   id?: string;
@@ -280,6 +289,61 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
             </GlassCard>
           </View>
 
+          {/* My Bids Section */}
+          <View style={styles.sectionHeader}>
+            <Receipt size={18} color="#FBBF24" />
+            <Text style={styles.sectionTitleAmber}>MY BIDS</Text>
+          </View>
+
+          {loading && myBids.length === 0 && (
+            <>
+              <SkeletonCard lines={3} height={80} />
+              <SkeletonCard lines={3} height={80} />
+              <SkeletonCard lines={3} height={80} />
+            </>
+          )}
+
+          {!loading && myBids.length === 0 && (
+            <EmptyState
+              icon={<Receipt size={32} color="rgba(74,222,128,0.5)" />}
+              title="No bids submitted yet"
+              subtitle="Browse available jobs and submit your first bid to get started"
+            />
+          )}
+
+          {myBids.map((bid) => {
+            const statusColor = BID_STATUS_COLORS[bid.status] ?? '#6B7280';
+            const requestLabel = bid.transportRequest?.requestNumber ?? bid.transportRequestId;
+            return (
+              <GlassCard key={bid.id} tier="subtle" style={styles.bidCard}>
+                <View style={styles.bidCardHeader}>
+                  <Text style={styles.bidCardTitle} numberOfLines={1}>
+                    {requestLabel}
+                  </Text>
+                  <View
+                    style={[
+                      styles.statusPill,
+                      { backgroundColor: `${statusColor}20` },
+                    ]}
+                  >
+                    <Text style={[styles.statusText, { color: statusColor }]}>
+                      {bid.status}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.bidCardMeta}>
+                  <DollarSign size={13} color="rgba(255,255,255,0.4)" />
+                  <Text style={styles.bidCardAmount}>
+                    {currencyFormatter.format(bid.bidAmount ?? 0)}
+                  </Text>
+                  {bid.vehicleType ? (
+                    <Text style={styles.bidCardVehicle}>{bid.vehicleType}</Text>
+                  ) : null}
+                </View>
+              </GlassCard>
+            );
+          })}
+
           {/* Verification Banner */}
           {!isVerified && (
             <GlassCard tier="medium" style={styles.verifyBanner}>
@@ -493,6 +557,46 @@ const styles = StyleSheet.create({
   actionsCol: {
     gap: 10,
   },
+  bidCard: {
+    gap: 8,
+  },
+  bidCardAmount: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  bidCardHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  bidCardMeta: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 6,
+  },
+  bidCardTitle: {
+    color: 'rgba(255,255,255,0.8)',
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  bidCardVehicle: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    marginLeft: 4,
+  },
+  statusPill: {
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+  },
   auctionCard: {
     gap: 12,
   },
@@ -680,6 +784,12 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: '#4ADE80',
+    fontSize: 15,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  sectionTitleAmber: {
+    color: '#FBBF24',
     fontSize: 15,
     fontWeight: '700',
     letterSpacing: 0.5,
