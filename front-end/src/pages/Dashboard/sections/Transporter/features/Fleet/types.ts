@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react-native';
 
-export type FleetTruckStatus = 'available' | 'assigned';
+export type FleetTruckStatus = 'available' | 'assigned' | 'maintenance';
 export type FleetDriverStatus = 'available' | 'assigned';
 
 export interface FleetTruck {

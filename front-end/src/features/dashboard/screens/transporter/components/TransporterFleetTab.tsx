@@ -154,7 +154,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
     [drivers, driverTab]
   );
 
-  const hasAnyData = trucks.length > 0 || drivers.length > 0;
+  const hasAnyData = useMemo(() => trucks.length > 0 || drivers.length > 0, [trucks, drivers]);
 
   return (
     <ScrollView
@@ -182,9 +182,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
             <GlassCard style={styles.summaryCard}>
               <View style={styles.summaryRow}>
                 <View style={styles.statPill}>
-                  <Text style={styles.statValue}>
-                    {summary?.totalTrucks ?? trucks.length + drivers.length}
-                  </Text>
+                  <Text style={styles.statValue}>{summary?.totalTrucks ?? trucks.length}</Text>
                   <Text style={styles.statLabel}>TOTAL</Text>
                 </View>
                 <View style={styles.divider} />
@@ -242,7 +240,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
 
             {filteredTrucks.length > 0 ? (
               filteredTrucks.map((truck) => {
-                const statusKey = truck.status as string;
+                const statusKey = truck.status;
                 const statusVariant: BadgeVariant = TRUCK_STATUS_VARIANT[statusKey] ?? 'muted';
                 const statusLabel = TRUCK_STATUS_LABEL[statusKey] ?? statusKey.toUpperCase();
                 return (
@@ -302,7 +300,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
             )}
 
             {/* Drivers Section */}
-            <View style={styles.sectionHeaderDrivers}>
+            <View style={[styles.sectionHeader, styles.sectionHeaderDrivers]}>
               <User size={18} color="#60A5FA" />
               <Text style={styles.sectionTitleBlue}>DRIVERS</Text>
             </View>
@@ -325,7 +323,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
 
             {filteredDrivers.length > 0 ? (
               filteredDrivers.map((driver) => {
-                const statusKey = driver.status as string;
+                const statusKey = driver.status;
                 const statusVariant: BadgeVariant = DRIVER_STATUS_VARIANT[statusKey] ?? 'muted';
                 const statusLabel = DRIVER_STATUS_LABEL[statusKey] ?? statusKey.toUpperCase();
                 return (
@@ -370,9 +368,9 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
         onClose={() => setShowFleetCreation(false)}
         onSuccess={() => {
           setShowFleetCreation(false);
-          loadFleet();
+          void loadFleet();
         }}
-        onError={(_error: unknown) => {
+        onError={(_error) => {
           Alert.alert('Error', 'Fleet creation failed. Please try again.');
         }}
       />
@@ -455,9 +453,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   sectionHeaderDrivers: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 8,
     marginTop: 12,
   },
   sectionTitle: {
