@@ -20,11 +20,12 @@ RUN npx prisma generate
 # Copy remaining source and build
 COPY . .
 RUN npm run build
-# Compile standalone scripts (not in NestJS module graph, so nest build skips them)
-RUN npx tsc --project tsconfig.scripts.json
+# Compile standalone scripts (not in NestJS module graph, so nest build skips them).
+# --incremental false forces full emit even if a stale .tsbuildinfo exists.
+RUN npx tsc --project tsconfig.scripts.json --incremental false
 
 EXPOSE 3000
 
 # Start: run migrations, seed product catalog (skips if already seeded), then launch the app.
 # Uses exec so Node.js is PID 1 and Railway can send SIGTERM directly.
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/scripts/seed-product-catalog.js && exec node dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && (node dist/scripts/seed-product-catalog.js || echo '⚠️  Seed script failed or missing - continuing anyway') && exec node dist/main.js"]
