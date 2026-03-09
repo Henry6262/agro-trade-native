@@ -20,6 +20,8 @@ RUN npx prisma generate
 # Copy remaining source and build
 COPY . .
 RUN npm run build
+# Compile standalone scripts (not in NestJS module graph, so nest build skips them)
+RUN npx tsc --project tsconfig.scripts.json
 
 EXPOSE 3000
 
