@@ -23,6 +23,6 @@ RUN npm run build
 
 EXPOSE 3000
 
-# Start: run migrations, then launch the app.
+# Start: run migrations, seed product catalog (skips if already seeded), then launch the app.
 # Uses exec so Node.js is PID 1 and Railway can send SIGTERM directly.
-CMD ["sh", "-c", "npx prisma migrate deploy && exec node dist/main.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/scripts/seed-product-catalog.js && exec node dist/main.js"]
