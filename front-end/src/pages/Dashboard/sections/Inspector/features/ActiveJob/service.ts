@@ -31,9 +31,28 @@ const toInspectorLocation = (request: InspectionRequest): InspectorLocationCoord
     undefined,
 });
 
-const toInspectorJob = (request: InspectionRequest): InspectorVerificationJob => {
+type LatLng = { latitude: number; longitude: number };
+
+const haversineKm = (from: LatLng, to: LatLng): number => {
+  const R = 6371;
+  const dLat = ((to.latitude - from.latitude) * Math.PI) / 180;
+  const dLon = ((to.longitude - from.longitude) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((from.latitude * Math.PI) / 180) *
+      Math.cos((to.latitude * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
+  return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 10) / 10;
+};
+
+const toInspectorJob = (
+  request: InspectionRequest,
+  inspectorLocation?: LatLng
+): InspectorVerificationJob => {
   const saleListing = request.saleListing as any;
   const product = request.saleListing?.product as any;
+  const jobLat = request.latitude;
+  const jobLon = request.longitude;
   return {
     id: request.id,
     jobNumber: request.tradeOperation?.id ?? request.id,
@@ -49,7 +68,9 @@ const toInspectorJob = (request: InspectionRequest): InspectorVerificationJob =>
     },
     estimatedDuration: 45,
     distance:
-      request.latitude && request.longitude ? Math.round(Math.random() * 50) + 10 : undefined,
+      jobLat && jobLon && inspectorLocation
+        ? haversineKm(inspectorLocation, { latitude: jobLat, longitude: jobLon })
+        : undefined,
   };
 };
 
@@ -76,10 +97,13 @@ const toSubmitPayload = (
 });
 
 export const inspectorActiveJobService = {
-  async fetchActiveJob(inspectorId: string): Promise<InspectorVerificationJob | null> {
+  async fetchActiveJob(
+    inspectorId: string,
+    inspectorLocation?: LatLng
+  ): Promise<InspectorVerificationJob | null> {
     const activeMission = await inspectionService.getInspectorActiveMission(inspectorId);
     if (activeMission) {
-      return toInspectorJob(activeMission);
+      return toInspectorJob(activeMission, inspectorLocation);
     }
 
     // Fallback to legacy missions query if backend returns null
@@ -88,7 +112,7 @@ export const inspectorActiveJobService = {
       inspectionService.getInspectorMissions(inspectorId, 'SCHEDULED'),
     ]);
     const job = inProgress[0] ?? scheduled[0] ?? null;
-    return job ? toInspectorJob(job) : null;
+    return job ? toInspectorJob(job, inspectorLocation) : null;
   },
 
   async submitVerification(jobId: string, values: InspectorVerificationFormValues) {

@@ -25,7 +25,7 @@ export const useInspectorActiveJob = (): InspectorActiveJobHookResult => {
   const loadJob = useCallback(async () => {
     try {
       setIsLoading(true);
-      const nextJob = await inspectorActiveJobService.fetchActiveJob(inspectorId);
+      const nextJob = await inspectorActiveJobService.fetchActiveJob(inspectorId, DEFAULT_LOCATION);
       setJob(nextJob);
       setError(null);
     } catch (err) {
