@@ -274,14 +274,11 @@ async function main() {
   console.log('🎉 Product catalog seed complete.');
 }
 
+// Use .then/.catch with immediate process.exit — avoids Prisma's $disconnect()
+// hanging and blocking the Dockerfile CMD chain (&&) from reaching dist/main.js.
 main()
+  .then(() => process.exit(0))
   .catch((e) => {
     console.error('❌ Product catalog seed failed:', e);
     process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-    // Prisma keeps event-loop references alive after $disconnect(); force-exit so
-    // the Dockerfile CMD chain (&&) can continue to `exec node dist/main.js`.
-    process.exit(0);
   });
