@@ -26,8 +26,5 @@ RUN npx tsc --project tsconfig.scripts.json --incremental false
 
 EXPOSE 3000
 
-# Start: run migrations then launch the app.
-# Seeding happens inside NestJS (SeedService.onApplicationBootstrap).
-# exec 2>&1 redirects stderr → stdout for the entire shell so NestJS crash
-# output always appears in Railway log streams (which capture stdout only).
-CMD ["sh", "-c", "exec 2>&1; npx prisma migrate deploy && exec node dist/main.js"]
+# Diagnostic CMD: emit markers so logs reveal exactly where startup stalls.
+CMD ["sh", "-c", "echo '=== [1] RUNNING MIGRATIONS ===' && npx prisma migrate deploy 2>&1 && echo '=== [2] MIGRATIONS DONE ===' && ls -la /app/dist/main.js 2>&1 && echo '=== [3] STARTING NODE ===' && exec node dist/main.js 2>&1"]
