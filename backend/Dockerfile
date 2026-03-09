@@ -26,7 +26,5 @@ RUN npx tsc --project tsconfig.scripts.json --incremental false
 
 EXPOSE 3000
 
-# Start: run migrations, seed product catalog (skips if already seeded), then launch the app.
-# Uses exec so Node.js is PID 1 and Railway can send SIGTERM directly.
-# Diagnostic echoes pinpoint where startup stalls (will remove once stable).
-CMD ["sh", "-c", "echo '[1] migrate' && npx prisma migrate deploy 2>&1 && echo '[2] seed' && (timeout 60 node dist/scripts/seed-product-catalog.js 2>&1; echo \"[3] seed-exit:$?\") && echo '[4] launch' && ls dist/main.js 2>&1 && exec node dist/main.js"]
+# DIAGNOSTIC: start app only (no migrations / no seed) to verify NestJS boots.
+CMD ["node", "dist/main.js"]
