@@ -26,5 +26,5 @@ RUN npx tsc --project tsconfig.scripts.json --incremental false
 
 EXPOSE 3000
 
-# Diagnostic CMD: emit markers so logs reveal exactly where startup stalls.
-CMD ["sh", "-c", "echo '=== [1] RUNNING MIGRATIONS ===' && npx prisma migrate deploy 2>&1 && echo '=== [2] MIGRATIONS DONE ===' && ls -la /app/dist/main.js 2>&1 && echo '=== [3] STARTING NODE ===' && exec node dist/main.js 2>&1"]
+# Run migrations then start app. Railway startCommand overrides this.
+CMD ["node", "--unhandled-rejections=strict", "/app/dist/main.js"]
