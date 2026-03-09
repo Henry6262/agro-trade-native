@@ -28,4 +28,5 @@ EXPOSE 3000
 
 # Start: run migrations, seed product catalog (skips if already seeded), then launch the app.
 # Uses exec so Node.js is PID 1 and Railway can send SIGTERM directly.
-CMD ["sh", "-c", "npx prisma migrate deploy && (node dist/scripts/seed-product-catalog.js || echo '⚠️  Seed script failed or missing - continuing anyway') && exec node dist/main.js"]
+# timeout 60: seed script must exit within 60 s (Prisma hangs without explicit process.exit).
+CMD ["sh", "-c", "npx prisma migrate deploy && (timeout 60 node dist/scripts/seed-product-catalog.js || echo '⚠️  Seed script failed or timed out - continuing anyway') && exec node dist/main.js"]

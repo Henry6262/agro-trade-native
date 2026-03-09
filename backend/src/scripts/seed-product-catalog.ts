@@ -281,4 +281,7 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
+    // Prisma keeps event-loop references alive after $disconnect(); force-exit so
+    // the Dockerfile CMD chain (&&) can continue to `exec node dist/main.js`.
+    process.exit(0);
   });
