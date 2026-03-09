@@ -1,6 +1,5 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import * as Localization from 'expo-localization';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import en from './locales/en.json';
@@ -11,7 +10,17 @@ export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 export const LANGUAGE_STORAGE_KEY = '@agrotrade_language';
 
-const deviceLocale = Localization.getLocales()[0]?.languageCode ?? 'en';
+// Use Intl (available on Hermes/RN 0.70+) instead of expo-localization native module.
+// expo-localization requires a native bridge compiled into the dev build binary;
+// Intl works in pure JS so it survives any dev-client build without native linking.
+const getDeviceLanguage = (): string => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().locale.split('-')[0] ?? 'en';
+  } catch {
+    return 'en';
+  }
+};
+const deviceLocale = getDeviceLanguage();
 const defaultLanguage: SupportedLanguage = SUPPORTED_LANGUAGES.includes(
   deviceLocale as SupportedLanguage
 )
