@@ -26,5 +26,7 @@ RUN npx tsc --project tsconfig.scripts.json --incremental false
 
 EXPOSE 3000
 
-# DIAGNOSTIC: start app only (no migrations / no seed) to verify NestJS boots.
-CMD ["node", "dist/main.js"]
+# Start: run migrations then launch the app.
+# Seeding happens inside NestJS (SeedService.onApplicationBootstrap) — no
+# standalone seed script that can hang and block this CMD chain.
+CMD ["sh", "-c", "npx prisma migrate deploy && exec node dist/main.js"]

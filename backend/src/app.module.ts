@@ -20,6 +20,7 @@ import { OrdersModule } from "./orders/orders.module";
 import { LocationModule } from "./location/location.module";
 import { CacheModule } from "./cache/cache.module";
 import { ResponseTimeMiddleware } from "./common/middleware/response-time.middleware";
+import { SeedModule } from "./seed/seed.module";
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ResponseTimeMiddleware } from "./common/middleware/response-time.middle
     ScheduleModule.forRoot(),
     CacheModule, // Add cache module for performance
     PrismaModule,
+    SeedModule,
     AuthModule,
     OnboardingModule,
     ProductsModule,
