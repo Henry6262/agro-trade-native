@@ -479,6 +479,7 @@ export class TradeOperationService {
     // Validate the trade operation exists
     const existingTrade = await this.prisma.tradeOperation.findUnique({
       where: { id: tradeOperationId },
+      include: { buyListing: { select: { buyerId: true } } },
     });
 
     if (!existingTrade) {
@@ -506,7 +507,11 @@ export class TradeOperationService {
       `Trade operation ${tradeOperationId} phase updated from ${existingTrade.phase} to ${newPhase}`,
     );
 
-    this.realtimeService.emit('trade:updated', updatedTrade);
+    this.realtimeService.emitToUser(
+      existingTrade.buyListing.buyerId,
+      'trade:updated',
+      updatedTrade,
+    );
     return updatedTrade;
   }
 
@@ -1371,7 +1376,7 @@ export class TradeOperationService {
       `Trade operation ${tradeOperationId} confirmed as delivered by buyer ${buyerId}`,
     );
 
-    this.realtimeService.emit('trade:updated', updated);
+    this.realtimeService.emitToUser(buyerId, 'trade:updated', updated);
     return updated;
   }
 

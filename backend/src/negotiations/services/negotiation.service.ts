@@ -203,7 +203,11 @@ export class NegotiationService {
     );
 
     const result = this.formatNegotiationWithDetails(negotiation, profitImpact);
-    this.realtimeService.emit('offer:new', result);
+    this.realtimeService.emitToUser(
+      negotiation.tradeSeller.sellerId,
+      'offer:new',
+      result,
+    );
     return result;
   }
 
@@ -761,7 +765,11 @@ export class NegotiationService {
       };
     }
 
-    this.realtimeService.emit('offer:updated', result);
+    this.realtimeService.emitToUser(
+      result.tradeSeller.seller.id,
+      'offer:updated',
+      result,
+    );
     return result;
   }
 
@@ -856,7 +864,11 @@ export class NegotiationService {
       };
     }
 
-    this.realtimeService.emit('offer:expired', { id: negotiationId });
+    this.realtimeService.emitToUser(
+      negotiation.tradeSeller.sellerId,
+      'offer:expired',
+      { id: negotiationId },
+    );
     return result;
   }
 
