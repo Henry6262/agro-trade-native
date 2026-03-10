@@ -35,10 +35,7 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({ lines = 3, height = 
   return (
     <Animated.View style={[cardStyle, animStyle]}>
       {Array.from({ length: lines }).map((_, i) => (
-        <View
-          key={i}
-          style={[styles.line, i === lines - 1 && styles.lineShort]}
-        />
+        <View key={i} style={[styles.line, i === lines - 1 && styles.lineShort]} />
       ))}
     </Animated.View>
   );

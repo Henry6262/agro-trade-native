@@ -16,7 +16,6 @@ export { WebLayoutFix } from './WebLayoutFix';
 export { AuthGuard } from './AuthGuard';
 export { PermissionGuard } from './PermissionGuard';
 export { Container, PageContainer, ContentContainer } from './Container';
-
 export { OfflineBanner } from './OfflineBanner';
 
 // Export new offers system components
@@ -25,6 +24,3 @@ export { SpecificationComparison } from './SpecificationComparison';
 export { NegotiationDrawer } from './NegotiationDrawer';
 export { AcceptOfferModal } from './AcceptOfferModal';
 export { RejectOfferModal } from './RejectOfferModal';
-export { SkeletonCard } from './SkeletonCard';
-export { PhaseBadge } from './PhaseBadge';
-export { ErrorBoundary } from './ErrorBoundary';
