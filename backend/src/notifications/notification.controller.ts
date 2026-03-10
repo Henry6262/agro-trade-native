@@ -4,6 +4,7 @@ import {
   Post,
   Body,
   Query,
+  HttpCode,
   HttpStatus,
   Request,
   UseGuards,
@@ -40,6 +41,22 @@ export class NotificationController {
       tradeOperationId,
       limit: limit ? parseInt(limit.toString()) : undefined,
     });
+  }
+
+  @Post("register-device")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Register device push token" })
+  @ApiResponse({ status: HttpStatus.OK, description: "Push token registered" })
+  async registerDevice(
+    @Body("pushToken") pushToken: string,
+    @Request() req: any,
+  ) {
+    const userId = req?.user?.id;
+    if (!userId || !pushToken) {
+      return { success: false, message: "Missing userId or pushToken" };
+    }
+    await this.notificationService.registerPushToken(userId, pushToken);
+    return { success: true };
   }
 
   @Post("mark-read")

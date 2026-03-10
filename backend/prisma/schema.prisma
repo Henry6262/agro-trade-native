@@ -19,6 +19,7 @@ model User {
   password            String?
   name                String?
   phoneNumber         String?   @unique @map("phone_number")
+  pushToken           String?   @map("push_token")
   role                UserRole  @default(BUYER)
   isActive            Boolean   @default(true) @map("is_active")
   isEmailVerified     Boolean   @default(false) @map("is_email_verified")

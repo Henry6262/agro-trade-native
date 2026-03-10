@@ -1,6 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { UserRole } from "@prisma/client";
+import Expo, { ExpoPushMessage } from "expo-server-sdk";
 
 export enum NotificationType {
   INSPECTION_FAILED = "INSPECTION_FAILED",
@@ -34,6 +35,7 @@ export interface NotificationPayload {
 @Injectable()
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
+  private readonly expo = new Expo();
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -134,6 +136,52 @@ export class NotificationService {
   }
 
   /**
+   * Register or update the Expo push token for a user
+   */
+  async registerPushToken(userId: string, pushToken: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { pushToken },
+    });
+    this.logger.log(`Push token registered for user ${userId}`);
+  }
+
+  /**
+   * Send a push notification to a specific user via Expo
+   */
+  private async sendPushToUser(
+    userId: string,
+    title: string,
+    body: string,
+    data?: Record<string, unknown>,
+  ): Promise<void> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { pushToken: true },
+      });
+      const token = user?.pushToken;
+      if (!token || !Expo.isExpoPushToken(token)) return;
+
+      const message: ExpoPushMessage = {
+        to: token,
+        sound: "default",
+        title,
+        body,
+        data: data ?? {},
+      };
+
+      const chunks = this.expo.chunkPushNotifications([message]);
+      for (const chunk of chunks) {
+        await this.expo.sendPushNotificationsAsync(chunk);
+      }
+      this.logger.log(`Push sent to user ${userId}`);
+    } catch (err) {
+      this.logger.error("Failed to send push notification", err);
+    }
+  }
+
+  /**
    * Core notification sender
    */
   private async sendNotification(notification: NotificationPayload) {
@@ -149,11 +197,18 @@ export class NotificationService {
       // Store in database for persistence
       await this.storeNotification(notification);
 
-      // In production, you would also:
-      // - Send push notifications (Firebase, OneSignal, etc.)
-      // - Send emails for urgent notifications
-      // - Send SMS for critical failures
-      // - Update dashboard notification bell/counter
+      // Send push if we have a specific recipient
+      if (notification.recipientId) {
+        await this.sendPushToUser(
+          notification.recipientId,
+          notification.title,
+          notification.message,
+          {
+            actionUrl: notification.actionUrl,
+            tradeOperationId: notification.tradeOperationId,
+          },
+        );
+      }
     } catch (error) {
       this.logger.error("Failed to send notification:", error);
     }

@@ -1,5 +1,6 @@
 import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { RealtimeModule } from "./realtime/realtime.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule } from "./auth/auth.module";
@@ -24,6 +25,7 @@ import { SeedModule } from "./seed/seed.module";
 
 @Module({
   imports: [
+    RealtimeModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ".env",

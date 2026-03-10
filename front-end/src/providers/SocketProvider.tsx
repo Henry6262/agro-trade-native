@@ -1,9 +1,41 @@
 import React, { useEffect, useRef } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
+import { AppState, AppStateStatus, Platform } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@stores/auth.store';
 import { socketService } from '@services/socketService';
 import { useNotificationStore } from '@stores/notification.store';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
+
+async function registerForPushNotifications(token: string, apiUrl: string): Promise<void> {
+  if (Platform.OS === 'web') return;
+  try {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== 'granted') return;
+    const projectId =
+      Constants.expoConfig?.extra?.eas?.projectId ?? (Constants as any).easConfig?.projectId;
+    if (!projectId) return;
+    const expoPushToken = await Notifications.getExpoPushTokenAsync({ projectId });
+    await fetch(`${apiUrl}/notifications/register-device`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ pushToken: expoPushToken.data }),
+    });
+  } catch (err) {
+    console.warn('Push registration failed:', err);
+  }
+}
 
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const queryClient = useQueryClient();
@@ -14,6 +46,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     if (isAuthenticated && token) {
       socketService.connect();
+
+      // Register for push notifications
+      const API_URL =
+        process.env.EXPO_PUBLIC_API_URL ??
+        'https://agro-trade-native-production.up.railway.app/api';
+      registerForPushNotifications(token, API_URL).catch(console.warn);
 
       const invalidateOffers = () => {
         queryClient.invalidateQueries({ queryKey: ['seller-offers'] });

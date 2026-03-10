@@ -10,6 +10,7 @@ import {
 import { PrismaService } from "../../prisma/prisma.service";
 import { ProfitCalculationService } from "../../trade-operations/services/profit-calculation.service";
 import { InspectionService } from "../../inspections/inspection.service";
+import { RealtimeService } from "../../realtime/realtime.service";
 import {
   NegotiationStatus,
   TradeStatus,
@@ -99,6 +100,7 @@ export class NegotiationService {
     private readonly profitCalculationService: ProfitCalculationService,
     @Inject(forwardRef(() => InspectionService))
     private readonly inspectionService: InspectionService,
+    private readonly realtimeService: RealtimeService,
   ) {}
 
   /**
@@ -200,7 +202,9 @@ export class NegotiationService {
       dto.quantity,
     );
 
-    return this.formatNegotiationWithDetails(negotiation, profitImpact);
+    const result = this.formatNegotiationWithDetails(negotiation, profitImpact);
+    this.realtimeService.emit('offer:new', result);
+    return result;
   }
 
   /**
@@ -757,6 +761,7 @@ export class NegotiationService {
       };
     }
 
+    this.realtimeService.emit('offer:updated', result);
     return result;
   }
 
@@ -851,6 +856,7 @@ export class NegotiationService {
       };
     }
 
+    this.realtimeService.emit('offer:expired', { id: negotiationId });
     return result;
   }
 

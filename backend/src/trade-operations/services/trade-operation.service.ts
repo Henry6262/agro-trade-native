@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
+import { RealtimeService } from "../../realtime/realtime.service";
 import { ProfitCalculationService } from "./profit-calculation.service";
 import { PriceScenarioService } from "./price-scenario.service";
 import { TransportCostService } from "../../transport/services/transport-cost.service";
@@ -165,6 +166,7 @@ export class TradeOperationService {
     private readonly priceScenarioService: PriceScenarioService,
     private readonly transportCostService: TransportCostService,
     private readonly routeOptimizationService: RouteOptimizationService,
+    private readonly realtimeService: RealtimeService,
   ) {}
 
   /**
@@ -504,6 +506,7 @@ export class TradeOperationService {
       `Trade operation ${tradeOperationId} phase updated from ${existingTrade.phase} to ${newPhase}`,
     );
 
+    this.realtimeService.emit('trade:updated', updatedTrade);
     return updatedTrade;
   }
 
@@ -1368,6 +1371,7 @@ export class TradeOperationService {
       `Trade operation ${tradeOperationId} confirmed as delivered by buyer ${buyerId}`,
     );
 
+    this.realtimeService.emit('trade:updated', updated);
     return updated;
   }
 
