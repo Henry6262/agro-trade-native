@@ -12,6 +12,7 @@ import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { AppModule } from "./app.module";
 import { NestExpressApplication } from "@nestjs/platform-express";
+import { IoAdapter } from "@nestjs/platform-socket.io";
 import { setupSwagger } from "./swagger";
 
 async function createApp() {
@@ -73,6 +74,9 @@ async function createApp() {
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     exposedHeaders: ["Content-Range", "X-Content-Range"],
   });
+
+  // Use Socket.IO adapter (required for @WebSocketGateway with socket.io-client)
+  app.useWebSocketAdapter(new IoAdapter(app));
 
   // Global validation pipe
   app.useGlobalPipes(
