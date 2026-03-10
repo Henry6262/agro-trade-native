@@ -126,3 +126,4 @@ export default async (req: any, res: any) => {
   const expressApp = cachedApp.getHttpAdapter().getInstance();
   return expressApp(req, res);
 };
+// diagnostic: d68834d
