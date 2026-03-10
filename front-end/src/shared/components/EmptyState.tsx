@@ -38,7 +38,13 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       <Text style={styles.title}>{title}</Text>
       {subtitleText && <Text style={styles.subtitle}>{subtitleText}</Text>}
       {ctaLabel && ctaPress && (
-        <GlassButton label={ctaLabel} onPress={ctaPress} variant="secondary" size="sm" style={styles.btn} />
+        <GlassButton
+          label={ctaLabel}
+          onPress={ctaPress}
+          variant="secondary"
+          size="sm"
+          style={styles.btn}
+        />
       )}
     </View>
   );
