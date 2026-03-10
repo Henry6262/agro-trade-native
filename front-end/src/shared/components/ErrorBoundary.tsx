@@ -23,7 +23,14 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[ErrorBoundary]', error, info);
+    // Structured logging makes it easy to grep/filter in production log aggregators.
+    // TODO: forward to Sentry with `captureException(error, { extra: logPayload })`
+    console.error('[ErrorBoundary] Uncaught render error:', {
+      message: error.message,
+      stack: error.stack?.slice(0, 600),
+      componentStack: info.componentStack?.slice(0, 800),
+      timestamp: new Date().toISOString(),
+    });
   }
 
   handleRetry = () => {

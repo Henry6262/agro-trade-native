@@ -82,12 +82,26 @@ export class SellerController {
     @Request() req?: AuthRequest,
     @Query("buyListingId") buyListingId?: string,
     @Query("tradeOperationId") tradeOperationId?: string,
+    @Query("page") page = "1",
+    @Query("limit") limit = "50",
   ) {
-    const listings = await this.sellerService.getAllSellerListings(
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+    const result = await this.sellerService.getAllSellerListings(
       buyListingId,
       tradeOperationId,
+      pageNum,
+      limitNum,
     );
-    return listings.map((listing) => this.serializeListing(listing));
+    return {
+      data: result.data.map((listing) => this.serializeListing(listing)),
+      meta: {
+        page: pageNum,
+        limit: limitNum,
+        total: result.total,
+        hasMore: pageNum * limitNum < result.total,
+      },
+    };
   }
 
   @Get("listings/:id")

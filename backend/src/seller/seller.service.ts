@@ -185,7 +185,7 @@ export class SellerService {
     }
   }
 
-  async getAllSellerListings(buyListingId?: string, tradeOperationId?: string) {
+  async getAllSellerListings(buyListingId?: string, tradeOperationId?: string, page = 1, limit = 50) {
     const tradeOperation = tradeOperationId
       ? await this.prisma.tradeOperation.findUnique({
           where: { id: tradeOperationId },
@@ -233,8 +233,10 @@ export class SellerService {
       }
     }
 
-    const listings = await this.prisma.saleListing.findMany({
-      where: Object.keys(where).length > 0 ? where : undefined,
+    const whereClause = Object.keys(where).length > 0 ? where : undefined;
+    const [listings, total] = await Promise.all([
+      this.prisma.saleListing.findMany({
+      where: whereClause,
       include: {
         product: {
           select: {
@@ -301,7 +303,11 @@ export class SellerService {
       orderBy: {
         createdAt: "desc",
       },
-    });
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+      this.prisma.saleListing.count({ where: whereClause }),
+    ]);
 
     const tradeSellerMap = new Map<
       string,
@@ -320,7 +326,7 @@ export class SellerService {
       });
     }
 
-    return listings.map((listing) => {
+    const data = listings.map((listing) => {
       const tradeContext = tradeSellerMap.get(listing.id);
       if (!tradeContext) {
         return listing;
@@ -332,6 +338,8 @@ export class SellerService {
         negotiationStatus: tradeContext.negotiationStatus,
       };
     });
+
+    return { data, total };
   }
 
   async getSellerListings(userId: string) {

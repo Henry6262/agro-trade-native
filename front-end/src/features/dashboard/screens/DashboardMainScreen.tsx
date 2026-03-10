@@ -13,6 +13,8 @@ import {
   Truck,
   User,
   LayoutGrid,
+  QrCode,
+  Globe,
 } from 'lucide-react-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
@@ -23,6 +25,8 @@ import CommandCenterScreen from './admin/CommandCenterScreen';
 import AgentNetworkScreen from './admin/AgentNetworkScreen';
 import OperationsScreen from './admin/OperationsScreenRefactored';
 import IntelligenceScreen from './shared/IntelligenceScreen';
+import ImpactScreen from './shared/ImpactScreen';
+import TraceabilityScreen from './shared/TraceabilityScreen';
 import SellerDashboardSection from '../../../pages/Dashboard/sections/Seller';
 import BuyerDashboardSection from '../../../pages/Dashboard/sections/Buyer';
 import TransporterDashboardScreen from './transporter/TransporterDashboardScreen';
@@ -201,6 +205,8 @@ export default function DashboardMainScreen() {
       { id: 'agents', icon: Users, label: 'NETWORK' },
       { id: 'operations', icon: Package, label: 'TRADE OPS' },
       { id: 'intelligence', icon: TrendingUp, label: 'MARKET' },
+      { id: 'impact', icon: Globe, label: 'IMPACT' },
+      { id: 'traceability', icon: QrCode, label: 'TRACE' },
     ];
   };
 
@@ -309,6 +315,14 @@ export default function DashboardMainScreen() {
           </View>
           <View style={activeSection === 'pricing' ? styles.sectionVisible : styles.sectionHidden}>
             <AdminPricingZonesScreen />
+          </View>
+          <View style={activeSection === 'impact' ? styles.sectionVisible : styles.sectionHidden}>
+            <ImpactScreen />
+          </View>
+          <View
+            style={activeSection === 'traceability' ? styles.sectionVisible : styles.sectionHidden}
+          >
+            <TraceabilityScreen />
           </View>
         </>
       </ErrorBoundary>

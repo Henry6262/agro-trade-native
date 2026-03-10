@@ -320,15 +320,8 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                   <Text style={styles.bidCardTitle} numberOfLines={1}>
                     {requestLabel}
                   </Text>
-                  <View
-                    style={[
-                      styles.statusPill,
-                      { backgroundColor: `${statusColor}20` },
-                    ]}
-                  >
-                    <Text style={[styles.statusText, { color: statusColor }]}>
-                      {bid.status}
-                    </Text>
+                  <View style={[styles.statusPill, { backgroundColor: `${statusColor}20` }]}>
+                    <Text style={[styles.statusText, { color: statusColor }]}>{bid.status}</Text>
                   </View>
                 </View>
                 <View style={styles.bidCardMeta}>
@@ -557,46 +550,6 @@ const styles = StyleSheet.create({
   actionsCol: {
     gap: 10,
   },
-  bidCard: {
-    gap: 8,
-  },
-  bidCardAmount: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  bidCardHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  bidCardMeta: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 6,
-  },
-  bidCardTitle: {
-    color: 'rgba(255,255,255,0.8)',
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '600',
-    marginRight: 8,
-  },
-  bidCardVehicle: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 12,
-    marginLeft: 4,
-  },
-  statusPill: {
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  statusText: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.4,
-  },
   auctionCard: {
     gap: 12,
   },
@@ -638,6 +591,36 @@ const styles = StyleSheet.create({
   auctionTitleWrap: {
     flex: 1,
     gap: 5,
+  },
+  bidCard: {
+    gap: 8,
+  },
+  bidCardAmount: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  bidCardHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  bidCardMeta: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 6,
+  },
+  bidCardTitle: {
+    color: 'rgba(255,255,255,0.8)',
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  bidCardVehicle: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    marginLeft: 4,
   },
   bidInfoRow: {
     alignItems: 'center',
@@ -818,6 +801,16 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: 'row',
     gap: 8,
+  },
+  statusPill: {
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  statusText: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.4,
   },
   verifyBanner: {
     gap: 12,

@@ -22,6 +22,10 @@ import { LocationModule } from "./location/location.module";
 import { CacheModule } from "./cache/cache.module";
 import { ResponseTimeMiddleware } from "./common/middleware/response-time.middleware";
 import { SeedModule } from "./seed/seed.module";
+import { TradeEventsModule } from "./trade-events/trade-events.module";
+import { AnalyticsModule } from "./analytics/analytics.module";
+import { TraceabilityModule } from "./traceability/traceability.module";
+import { EscrowModule } from "./escrow/escrow.module";
 
 @Module({
   imports: [
@@ -50,6 +54,10 @@ import { SeedModule } from "./seed/seed.module";
     RegionsModule,
     OrdersModule,
     LocationModule,
+    TradeEventsModule,
+    AnalyticsModule,
+    TraceabilityModule,
+    EscrowModule,
   ],
 })
 export class AppModule implements NestModule {

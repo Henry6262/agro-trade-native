@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Region, LatLng } from 'react-native-maps';
 import { Truck, MapPin, Package, Navigation, Clock, DollarSign, Route } from 'lucide-react-native';
+import { COLORS } from '../../../../../design-system';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -158,16 +159,17 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
             anchor={{ x: 0.5, y: 1 }}
             onPress={() => handleMarkerPress(route.origin, 'origin')}
           >
-            <View className="items-center">
+            <View style={styles.markerWrapper}>
               <View
-                className={`p-3 rounded-full shadow-lg ${
-                  selectedMarker === 'origin' ? 'bg-blue-600' : 'bg-gray-700'
-                }`}
+                style={[
+                  styles.markerCircle,
+                  selectedMarker === 'origin' ? styles.markerOriginActive : styles.markerOrigin,
+                ]}
               >
                 <Package size={24} color="white" />
               </View>
-              <View className="bg-white px-2 py-1 rounded mt-1">
-                <Text className="text-xs font-semibold">Warehouse</Text>
+              <View style={styles.markerLabel}>
+                <Text style={styles.markerLabelText}>Warehouse</Text>
               </View>
             </View>
           </Marker>
@@ -180,18 +182,19 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
               anchor={{ x: 0.5, y: 1 }}
               onPress={() => handleMarkerPress(pickup, `pickup-${pickup.sellerId}`)}
             >
-              <View className="items-center">
+              <View style={styles.markerWrapper}>
                 <View
-                  className={`p-2 rounded-full shadow-lg ${
+                  style={[
+                    styles.markerCircleSmall,
                     selectedMarker === `pickup-${pickup.sellerId}`
-                      ? 'bg-orange-600'
-                      : 'bg-orange-500'
-                  }`}
+                      ? styles.markerPickupActive
+                      : styles.markerPickup,
+                  ]}
                 >
-                  <Text className="text-white font-bold">{index + 1}</Text>
+                  <Text style={styles.markerPickupText}>{index + 1}</Text>
                 </View>
-                <View className="bg-white px-2 py-1 rounded mt-1">
-                  <Text className="text-xs font-semibold" numberOfLines={1}>
+                <View style={styles.markerLabel}>
+                  <Text style={styles.markerLabelText} numberOfLines={1}>
                     {pickup.sellerName}
                   </Text>
                 </View>
@@ -205,16 +208,17 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
             anchor={{ x: 0.5, y: 1 }}
             onPress={() => handleMarkerPress(route.destination, 'destination')}
           >
-            <View className="items-center">
+            <View style={styles.markerWrapper}>
               <View
-                className={`p-3 rounded-full shadow-lg ${
-                  selectedMarker === 'destination' ? 'bg-green-600' : 'bg-green-500'
-                }`}
+                style={[
+                  styles.markerCircle,
+                  selectedMarker === 'destination' ? styles.markerDestActive : styles.markerDest,
+                ]}
               >
                 <MapPin size={24} color="white" />
               </View>
-              <View className="bg-white px-2 py-1 rounded mt-1">
-                <Text className="text-xs font-semibold">Delivery</Text>
+              <View style={styles.markerLabel}>
+                <Text style={styles.markerLabelText}>Delivery</Text>
               </View>
             </View>
           </Marker>
@@ -223,39 +227,37 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
         {/* Map Loading */}
         {!mapReady && (
           <View style={styles.loadingOverlay}>
-            <ActivityIndicator size="large" color="#3B82F6" />
-            <Text className="text-gray-600 mt-2">Loading map...</Text>
+            <ActivityIndicator size="large" color={COLORS.accentGreen} />
+            <Text style={styles.loadingText}>Loading map...</Text>
           </View>
         )}
 
         {/* Route Info Overlay */}
         {showDetails && route.totalDistance && (
           <View style={styles.infoOverlay}>
-            <View className="bg-white rounded-lg p-3 shadow-lg">
-              <View className="flex-row items-center mb-2">
-                <Truck size={16} color="#3B82F6" />
-                <Text className="text-gray-800 font-semibold ml-2">Transport Route</Text>
+            <View style={styles.infoCard}>
+              <View style={styles.infoTitleRow}>
+                <Truck size={16} color={COLORS.info} />
+                <Text style={styles.infoTitle}>Transport Route</Text>
               </View>
 
-              <View className="flex-row justify-between">
-                <View className="flex-row items-center">
-                  <Route size={14} color="#6B7280" />
-                  <Text className="text-gray-600 text-sm ml-1">{route.totalDistance} km</Text>
+              <View style={styles.infoMetricsRow}>
+                <View style={styles.infoMetric}>
+                  <Route size={14} color={COLORS.textMuted} />
+                  <Text style={styles.infoMetricText}>{route.totalDistance} km</Text>
                 </View>
 
-                <View className="flex-row items-center ml-3">
-                  <Clock size={14} color="#6B7280" />
-                  <Text className="text-gray-600 text-sm ml-1">
+                <View style={styles.infoMetric}>
+                  <Clock size={14} color={COLORS.textMuted} />
+                  <Text style={styles.infoMetricText}>
                     {Math.round((route.estimatedDuration || 0) / 60)} hrs
                   </Text>
                 </View>
 
                 {route.estimatedCost && (
-                  <View className="flex-row items-center ml-3">
-                    <DollarSign size={14} color="#6B7280" />
-                    <Text className="text-gray-600 text-sm ml-1">
-                      ${route.estimatedCost.toFixed(2)}
-                    </Text>
+                  <View style={styles.infoMetric}>
+                    <DollarSign size={14} color={COLORS.textMuted} />
+                    <Text style={styles.infoMetricText}>${route.estimatedCost.toFixed(2)}</Text>
                   </View>
                 )}
               </View>
@@ -275,36 +277,34 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
               });
             }
           }}
-          className="bg-white rounded-full p-3 shadow-lg"
         >
-          <Navigation size={20} color="#374151" />
+          <Navigation size={20} color={COLORS.textPrimary} />
         </TouchableOpacity>
       </View>
 
       {/* Pickup Details List */}
       {showDetails && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="bg-gray-50 border-t border-gray-200"
-        >
-          <View className="flex-row p-3">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.cardStrip}>
+          <View style={styles.cardStripInner}>
             {/* Origin Card */}
             <TouchableOpacity
               onPress={() => handleMarkerPress(route.origin, 'origin')}
-              className={`bg-white rounded-lg p-3 mr-2 border-2 ${
-                selectedMarker === 'origin' ? 'border-blue-500' : 'border-gray-200'
-              }`}
-              style={{ width: screenWidth * 0.7 }}
+              style={[
+                styles.locationCard,
+                selectedMarker === 'origin'
+                  ? styles.locationCardOriginActive
+                  : styles.locationCardDefault,
+                { width: screenWidth * 0.7 },
+              ]}
             >
-              <View className="flex-row items-center mb-2">
-                <Package size={16} color="#4B5563" />
-                <Text className="font-semibold text-gray-800 ml-2">Warehouse</Text>
+              <View style={styles.locationCardHeader}>
+                <Package size={16} color={COLORS.textMuted} />
+                <Text style={styles.locationCardTitle}>Warehouse</Text>
               </View>
-              <Text className="text-gray-600 text-sm" numberOfLines={2}>
+              <Text style={styles.locationCardAddress} numberOfLines={2}>
                 {route.origin.address}
               </Text>
-              <Text className="text-blue-600 text-xs mt-1">Starting Point</Text>
+              <Text style={styles.locationCardTag}>Starting Point</Text>
             </TouchableOpacity>
 
             {/* Pickup Cards */}
@@ -312,29 +312,28 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
               <TouchableOpacity
                 key={`card-${pickup.sellerId}`}
                 onPress={() => handleMarkerPress(pickup, `pickup-${pickup.sellerId}`)}
-                className={`bg-white rounded-lg p-3 mr-2 border-2 ${
+                style={[
+                  styles.locationCard,
                   selectedMarker === `pickup-${pickup.sellerId}`
-                    ? 'border-orange-500'
-                    : 'border-gray-200'
-                }`}
-                style={{ width: screenWidth * 0.7 }}
+                    ? styles.locationCardPickupActive
+                    : styles.locationCardDefault,
+                  { width: screenWidth * 0.7 },
+                ]}
               >
-                <View className="flex-row items-center justify-between mb-2">
-                  <View className="flex-row items-center">
-                    <View className="bg-orange-500 rounded-full px-2 py-1">
-                      <Text className="text-white text-xs font-bold">{index + 1}</Text>
+                <View style={styles.locationCardHeaderRow}>
+                  <View style={styles.locationCardHeaderLeft}>
+                    <View style={styles.pickupIndexBadge}>
+                      <Text style={styles.pickupIndexText}>{index + 1}</Text>
                     </View>
-                    <Text className="font-semibold text-gray-800 ml-2">{pickup.sellerName}</Text>
+                    <Text style={styles.locationCardTitle}>{pickup.sellerName}</Text>
                   </View>
                 </View>
-                <Text className="text-gray-600 text-sm" numberOfLines={2}>
+                <Text style={styles.locationCardAddress} numberOfLines={2}>
                   {pickup.address}
                 </Text>
-                <View className="flex-row justify-between mt-2">
-                  <Text className="text-gray-500 text-xs">{pickup.product}</Text>
-                  <Text className="text-orange-600 text-xs font-semibold">
-                    {pickup.quantity} units
-                  </Text>
+                <View style={styles.locationCardFooter}>
+                  <Text style={styles.locationCardProductText}>{pickup.product}</Text>
+                  <Text style={styles.locationCardQuantityText}>{pickup.quantity} units</Text>
                 </View>
               </TouchableOpacity>
             ))}
@@ -342,19 +341,22 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
             {/* Destination Card */}
             <TouchableOpacity
               onPress={() => handleMarkerPress(route.destination, 'destination')}
-              className={`bg-white rounded-lg p-3 border-2 ${
-                selectedMarker === 'destination' ? 'border-green-500' : 'border-gray-200'
-              }`}
-              style={{ width: screenWidth * 0.7 }}
+              style={[
+                styles.locationCard,
+                selectedMarker === 'destination'
+                  ? styles.locationCardDestActive
+                  : styles.locationCardDefault,
+                { width: screenWidth * 0.7 },
+              ]}
             >
-              <View className="flex-row items-center mb-2">
-                <MapPin size={16} color="#10B981" />
-                <Text className="font-semibold text-gray-800 ml-2">Delivery Point</Text>
+              <View style={styles.locationCardHeader}>
+                <MapPin size={16} color={COLORS.accentGreen} />
+                <Text style={styles.locationCardTitle}>Delivery Point</Text>
               </View>
-              <Text className="text-gray-600 text-sm" numberOfLines={2}>
+              <Text style={styles.locationCardAddress} numberOfLines={2}>
                 {route.destination.address}
               </Text>
-              <Text className="text-green-600 text-xs mt-1">Final Destination</Text>
+              <Text style={styles.locationCardTagGreen}>Final Destination</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -364,15 +366,49 @@ export const TransportMapView: React.FC<TransportMapViewProps> = ({
 };
 
 const styles = StyleSheet.create({
+  cardStrip: {
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    borderTopWidth: 1,
+  },
+  cardStripInner: {
+    flexDirection: 'row',
+    padding: 12,
+  },
   centerButton: {
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderColor: 'rgba(255,255,255,0.20)',
+    borderRadius: 24,
+    borderWidth: 1,
     bottom: 20,
     elevation: 3,
+    padding: 12,
     position: 'absolute',
     right: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+  },
+  infoCard: {
+    backgroundColor: 'rgba(2,18,7,0.90)',
+    borderColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 12,
+  },
+  infoMetric: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 4,
+  },
+  infoMetricText: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+  },
+  infoMetricsRow: {
+    flexDirection: 'row',
+    gap: 12,
   },
   infoOverlay: {
     left: 10,
@@ -380,14 +416,179 @@ const styles = StyleSheet.create({
     right: 10,
     top: 10,
   },
+  infoTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 13,
+    fontWeight: '600',
+    marginLeft: 6,
+  },
+  infoTitleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 6,
+  },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(2,18,7,0.85)',
     justifyContent: 'center',
+  },
+  loadingText: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    marginTop: 8,
+  },
+  locationCard: {
+    borderRadius: 12,
+    borderWidth: 2,
+    marginRight: 10,
+    padding: 12,
+  },
+  locationCardAddress: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    marginTop: 4,
+  },
+  locationCardDefault: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.12)',
+  },
+  locationCardDestActive: {
+    backgroundColor: 'rgba(74,222,128,0.10)',
+    borderColor: COLORS.accentGreen,
+  },
+  locationCardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  locationCardHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 4,
+  },
+  locationCardHeaderLeft: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  locationCardHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  locationCardOriginActive: {
+    backgroundColor: 'rgba(96,165,250,0.10)',
+    borderColor: COLORS.info,
+  },
+  locationCardPickupActive: {
+    backgroundColor: 'rgba(251,146,60,0.10)',
+    borderColor: '#FB923C',
+  },
+  locationCardProductText: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+  },
+  locationCardQuantityText: {
+    color: '#FB923C',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  locationCardTag: {
+    color: COLORS.info,
+    fontSize: 11,
+    marginTop: 4,
+  },
+  locationCardTagGreen: {
+    color: COLORS.accentGreen,
+    fontSize: 11,
+    marginTop: 4,
+  },
+  locationCardTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 13,
+    fontWeight: '600',
   },
   mapContainer: {
     flex: 1,
     position: 'relative',
+  },
+  markerCircle: {
+    alignItems: 'center',
+    borderRadius: 24,
+    elevation: 4,
+    justifyContent: 'center',
+    padding: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  markerCircleSmall: {
+    alignItems: 'center',
+    borderRadius: 20,
+    elevation: 4,
+    justifyContent: 'center',
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  markerDest: {
+    backgroundColor: '#16A34A',
+  },
+  markerDestActive: {
+    backgroundColor: '#15803D',
+  },
+  markerLabel: {
+    backgroundColor: 'rgba(2,18,7,0.85)',
+    borderColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 6,
+    borderWidth: 1,
+    marginTop: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  markerLabelText: {
+    color: COLORS.textPrimary,
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  markerOrigin: {
+    backgroundColor: '#374151',
+  },
+  markerOriginActive: {
+    backgroundColor: '#2563EB',
+  },
+  markerPickup: {
+    backgroundColor: '#EA580C',
+  },
+  markerPickupActive: {
+    backgroundColor: '#C2410C',
+  },
+  markerPickupText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  markerWrapper: {
+    alignItems: 'center',
+  },
+  pickupIndexBadge: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(251,146,60,0.20)',
+    borderColor: 'rgba(251,146,60,0.40)',
+    borderRadius: 12,
+    borderWidth: 1,
+    height: 24,
+    justifyContent: 'center',
+    width: 24,
+  },
+  pickupIndexText: {
+    color: '#FB923C',
+    fontSize: 11,
+    fontWeight: '700',
   },
 });

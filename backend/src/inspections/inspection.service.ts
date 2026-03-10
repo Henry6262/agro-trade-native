@@ -8,6 +8,8 @@ import { PrismaService } from "../prisma/prisma.service";
 import { InspectionStatus, InspectionPriority, UserRole } from "@prisma/client";
 import { NotificationService } from "../notifications/notification.service";
 import { TransportBiddingService } from "../transport/services/transport-bidding.service";
+import { TradeEventsService } from "../trade-events/trade-events.service";
+import { RealtimeService } from "../realtime/realtime.service";
 
 @Injectable()
 export class InspectionService {
@@ -17,6 +19,8 @@ export class InspectionService {
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
     private readonly transportBiddingService: TransportBiddingService,
+    private readonly tradeEventsService: TradeEventsService,
+    private readonly realtimeService: RealtimeService,
   ) {}
 
   /**
@@ -75,6 +79,14 @@ export class InspectionService {
     this.logger.log(
       `Created inspection request ${inspection.id} for sale listing ${data.saleListingId}`,
     );
+
+    await this.tradeEventsService.record({
+      tradeOperationId: data.tradeOperationId,
+      eventType: "INSPECTION_SCHEDULED",
+      actorRole: "ADMIN",
+      locationLat: latitude,
+      locationLng: longitude,
+    }).catch(() => {});
 
     return inspection;
   }
@@ -372,6 +384,25 @@ export class InspectionService {
         photos: data.photos || [],
       },
     });
+
+    if (inspection.tradeOperationId) {
+      await this.tradeEventsService.record({
+        tradeOperationId: inspection.tradeOperationId,
+        eventType: "INSPECTION_COMPLETED",
+        actorRole: "INSPECTOR",
+        actorId: inspectorId !== "default-inspector" ? inspectorId : undefined,
+      }).catch(() => {});
+
+      const buyerId = inspection.tradeOperation?.buyListing?.buyerId;
+      if (buyerId) {
+        this.realtimeService.emitToUser(buyerId, "inspection:completed", {
+          tradeOperationId: inspection.tradeOperationId,
+          inspectionId,
+          passed: data.qualityScore >= MINIMUM_QUALITY_SCORE,
+          qualityScore: data.qualityScore,
+        });
+      }
+    }
 
     // Check if inspection passed or failed
     const inspectionPassed = data.qualityScore >= MINIMUM_QUALITY_SCORE;

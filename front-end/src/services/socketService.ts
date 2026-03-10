@@ -2,6 +2,23 @@ import { io, Socket } from 'socket.io-client';
 import { WS_URL } from '../config/api';
 import { useAuthStore } from '@stores/auth.store';
 
+export interface SocketEventPayloads {
+  'trade:updated': { tradeOperationId: string; phase: string; status: string };
+  'trade:seller-added': { tradeOperationId: string; sellerCount: number; phase: string };
+  'inspection:completed': {
+    tradeOperationId: string;
+    inspectionId: string;
+    passed: boolean;
+    qualityScore: number;
+  };
+  'offer:received': {
+    tradeOperationId: string;
+    negotiationId: string;
+    offer: Record<string, unknown>;
+  };
+}
+export type SocketEventName = keyof SocketEventPayloads;
+
 class SocketService {
   private socket: Socket | null = null;
   private listeners: Map<string, Set<(...args: any[]) => void>> = new Map();
@@ -21,7 +38,13 @@ class SocketService {
       reconnectionDelayMax: 10000,
     });
 
-    this.socket.on('connect', () => {});
+    this.socket.on('connect', () => {
+      // Join the user-specific room so emitToUser() events are received
+      const userId = useAuthStore.getState().user?.id;
+      if (userId) {
+        this.socket?.emit('join', { userId });
+      }
+    });
 
     this.socket.on('disconnect', (_reason) => {});
 

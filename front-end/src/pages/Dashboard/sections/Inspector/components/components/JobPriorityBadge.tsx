@@ -1,92 +1,58 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { JobPriorityBadgeProps } from '@features/dashboard/screens/inspector/types';
+
+const PRIORITY_COLORS: Record<string, { bg: string; text: string }> = {
+  HIGH: { bg: '#ef4444', text: '#ffffff' },
+  MEDIUM: { bg: '#eab308', text: '#000000' },
+  LOW: { bg: 'rgba(255,255,255,0.15)', text: 'rgba(255,255,255,0.8)' },
+};
+
+const DEFAULT_COLORS = { bg: 'rgba(255,255,255,0.1)', text: 'rgba(255,255,255,0.6)' };
 
 export const JobPriorityBadge: React.FC<JobPriorityBadgeProps> = ({
   priority,
   size = 'medium',
-  className = '',
 }) => {
-  const getBackgroundColor = () => {
-    switch (priority) {
-      case 'HIGH':
-        return '#ef4444'; // red
-      case 'MEDIUM':
-        return '#eab308'; // yellow
-      case 'LOW':
-        return '#ffffff'; // white
-      default:
-        return '#9ca3af'; // gray
-    }
-  };
+  const colors = PRIORITY_COLORS[priority] ?? DEFAULT_COLORS;
 
-  const getTextColor = () => {
-    switch (priority) {
-      case 'HIGH':
-        return '#ffffff'; // white text on red
-      case 'MEDIUM':
-        return '#000000'; // black text on yellow
-      case 'LOW':
-        return '#000000'; // black text on white
-      default:
-        return '#ffffff';
-    }
-  };
+  const sizeStyle =
+    size === 'small' ? styles.small : size === 'large' ? styles.large : styles.medium;
 
-  const getSizeStyles = () => {
-    switch (size) {
-      case 'small':
-        return {
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-          fontSize: 11,
-        };
-      case 'large':
-        return {
-          paddingHorizontal: 16,
-          paddingVertical: 8,
-          fontSize: 14,
-        };
-      default: // medium
-        return {
-          paddingHorizontal: 12,
-          paddingVertical: 6,
-          fontSize: 12,
-        };
-    }
-  };
+  const fontSize = size === 'small' ? 11 : size === 'large' ? 14 : 12;
 
-  const sizeStyles = getSizeStyles();
-  const backgroundColor = getBackgroundColor();
-  const textColor = getTextColor();
-
-  const getAccessibilityLabel = () => {
-    const level = priority.toLowerCase();
-    return `${level.charAt(0).toUpperCase() + level.slice(1)} priority job`;
-  };
+  const accessibilityText = `${priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase()} priority job`;
 
   return (
     <View
       testID="priority-badge"
-      className={`rounded-full ${priority === 'LOW' ? 'border border-gray-300' : ''} ${className}`}
-      style={{
-        backgroundColor,
-        paddingHorizontal: sizeStyles.paddingHorizontal,
-        paddingVertical: sizeStyles.paddingVertical,
-      }}
-      accessibilityLabel={getAccessibilityLabel()}
+      style={[styles.badge, sizeStyle, { backgroundColor: colors.bg }]}
+      accessibilityLabel={accessibilityText}
       accessibilityRole="text"
     >
-      <Text
-        style={{
-          color: textColor,
-          fontSize: sizeStyles.fontSize,
-          fontWeight: '600',
-          textAlign: 'center',
-        }}
-      >
-        {priority}
-      </Text>
+      <Text style={[styles.text, { color: colors.text, fontSize }]}>{priority}</Text>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  badge: {
+    borderRadius: 999,
+  },
+  large: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  medium: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  small: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  text: {
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+});

@@ -10,7 +10,9 @@
       "mcp__7c816216-b7df-41ad-a3b9-ee081f38958d__list_teams",
       "mcp__7c816216-b7df-41ad-a3b9-ee081f38958d__get_deployment",
       "mcp__7c816216-b7df-41ad-a3b9-ee081f38958d__get_deployment_build_logs",
-      "mcp__7c816216-b7df-41ad-a3b9-ee081f38958d__list_projects"
+      "mcp__7c816216-b7df-41ad-a3b9-ee081f38958d__list_projects",
+      "Skill(commit-commands:commit-push-pr)",
+      "Skill(commit-commands:commit-push-pr:*)"
     ],
     "deny": [],
     "ask": []
