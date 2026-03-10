@@ -1,7 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { UserRole } from "@prisma/client";
-import Expo, { ExpoPushMessage } from "expo-server-sdk";
 
 export enum NotificationType {
   INSPECTION_FAILED = "INSPECTION_FAILED",
@@ -32,10 +31,13 @@ export interface NotificationPayload {
   actionUrl?: string;
 }
 
+// Expo push token format: ExponentPushToken[...] or ExpoPushToken[...]
+const EXPO_PUSH_TOKEN_RE = /^Expo(nent)?PushToken\[.+\]$/;
+const EXPO_PUSH_API = "https://exp.host/--/api/v2/push/send";
+
 @Injectable()
 export class NotificationService {
   private readonly logger = new Logger(NotificationService.name);
-  private readonly expo = new Expo();
 
   constructor(private readonly prisma: PrismaService) {}
 
@@ -147,7 +149,8 @@ export class NotificationService {
   }
 
   /**
-   * Send a push notification to a specific user via Expo
+   * Send a push notification to a specific user via Expo REST API.
+   * Uses Node 20 built-in fetch — no external SDK dependency needed.
    */
   private async sendPushToUser(
     userId: string,
@@ -161,21 +164,24 @@ export class NotificationService {
         select: { pushToken: true },
       });
       const token = user?.pushToken;
-      if (!token || !Expo.isExpoPushToken(token)) return;
+      if (!token || !EXPO_PUSH_TOKEN_RE.test(token)) return;
 
-      const message: ExpoPushMessage = {
-        to: token,
-        sound: "default",
-        title,
-        body,
-        data: data ?? {},
-      };
+      const response = await fetch(EXPO_PUSH_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify([
+          { to: token, sound: "default", title, body, data: data ?? {} },
+        ]),
+      });
 
-      const chunks = this.expo.chunkPushNotifications([message]);
-      for (const chunk of chunks) {
-        await this.expo.sendPushNotificationsAsync(chunk);
+      if (!response.ok) {
+        this.logger.warn(`Expo push responded ${response.status} for user ${userId}`);
+      } else {
+        this.logger.log(`Push sent to user ${userId}`);
       }
-      this.logger.log(`Push sent to user ${userId}`);
     } catch (err) {
       this.logger.error("Failed to send push notification", err);
     }
