@@ -37,7 +37,6 @@ interface MarketplaceState {
     buyer: unknown[];
     seller: unknown[];
   };
-  fetchListings: (role: 'buyer' | 'seller' | 'both') => Promise<void>;
 
   // Actions
   setProducts: (products: Product[]) => void;
@@ -53,13 +52,8 @@ interface MarketplaceState {
   setError: (error: string | null) => void;
   updatePagination: (pagination: Partial<MarketplaceState['pagination']>) => void;
   resetPagination: () => void;
-
-  // Listings
-  listings: {
-    buyer: unknown[];
-    seller: unknown[];
-  };
   fetchListings: (role: 'buyer' | 'seller' | 'both') => Promise<void>;
+  fetchNextPage: (role: 'buyer' | 'seller' | 'both') => Promise<void>;
 }
 
 const initialFilters = {
@@ -77,15 +71,12 @@ const initialPagination = {
 };
 
 export const useMarketplaceStore = create<MarketplaceState>()(
-  immer((set, _get) => ({
+  immer((set, get) => ({
     // Initial state
     products: [],
     featuredProducts: [],
     categories: [],
-    listings: {
-      buyer: [],
-      seller: [],
-    },
+    listings: { buyer: [], seller: [] },
     searchQuery: '',
     selectedCategory: null,
     filters: initialFilters,
@@ -93,7 +84,6 @@ export const useMarketplaceStore = create<MarketplaceState>()(
     isRefreshing: false,
     error: null,
     pagination: initialPagination,
-    listings: { buyer: [], seller: [] },
 
     // Actions
     setProducts: (products: Product[]) => {
@@ -176,6 +166,39 @@ export const useMarketplaceStore = create<MarketplaceState>()(
       });
     },
 
+    fetchNextPage: async (role) => {
+      const { pagination } = get();
+      if (!pagination.hasMore) return;
+      const nextPage = pagination.page + 1;
+      set((state) => {
+        state.isLoading = true;
+      });
+      try {
+        if (role === 'seller' || role === 'both') {
+          const res = await apiClient.get(
+            `/seller/listings?page=${nextPage}&limit=${pagination.limit}`
+          );
+          set((state) => {
+            const payload = res.data;
+            const newItems: unknown[] = payload?.data ?? payload ?? [];
+            state.listings.seller = [...state.listings.seller, ...newItems];
+            if (payload?.meta) {
+              state.pagination = { ...state.pagination, ...payload.meta };
+            }
+          });
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Failed to load more listings';
+        set((state) => {
+          state.error = msg;
+        });
+      } finally {
+        set((state) => {
+          state.isLoading = false;
+        });
+      }
+    },
+
     fetchListings: async (role) => {
       set((state) => {
         state.isLoading = true;
@@ -189,9 +212,13 @@ export const useMarketplaceStore = create<MarketplaceState>()(
           });
         }
         if (role === 'seller' || role === 'both') {
-          const res = await apiClient.get('/seller/listings');
+          const res = await apiClient.get('/seller/listings?page=1&limit=50');
           set((state) => {
-            state.listings.seller = res.data ?? [];
+            const payload = res.data;
+            state.listings.seller = payload?.data ?? payload ?? [];
+            if (payload?.meta) {
+              state.pagination = { ...state.pagination, ...payload.meta };
+            }
           });
         }
       } catch (err: unknown) {

@@ -3,6 +3,7 @@ import { PrismaModule } from "../prisma/prisma.module";
 import { AuthModule } from "../auth/auth.module";
 import { TransportModule } from "../transport/transport.module";
 import { NegotiationsModule } from "../negotiations/negotiations.module";
+import { TradeEventsModule } from "../trade-events/trade-events.module";
 
 // Services
 import { TradeOperationService } from "./services/trade-operation.service";
@@ -21,6 +22,7 @@ import { TestController } from "./controllers/test.controller";
     AuthModule,
     TransportModule,
     forwardRef(() => NegotiationsModule),
+    TradeEventsModule,
   ],
   providers: [
     TradeOperationService,

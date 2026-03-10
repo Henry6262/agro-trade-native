@@ -685,6 +685,7 @@ model TradeOperation {
   notes                     TradeNote[]
   transportCostCalculations TransportCostCalculation[]
   profitEstimations         ProfitEstimation[]
+  tradeEvents               TradeEvent[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -1081,6 +1082,46 @@ model TradeNote {
   @@index([tradeOperationId])
   @@index([authorId])
   @@map("trade_notes")
+}
+
+// ==================== TRADE EVENTS (Audit Log for EU Grant Traceability) ====================
+
+enum TradeEventType {
+  LISTING_CREATED
+  BID_SUBMITTED
+  BID_ACCEPTED
+  INSPECTION_SCHEDULED
+  INSPECTION_COMPLETED
+  TRANSPORT_PICKUP
+  TRANSPORT_DELIVERED
+  PAYMENT_ESCROWED
+  PAYMENT_RELEASED
+  DISPUTE_RAISED
+}
+
+model TradeEvent {
+  id               String         @id @default(cuid())
+  tradeOperationId String         @map("trade_operation_id")
+  tradeOperation   TradeOperation @relation(fields: [tradeOperationId], references: [id], onDelete: Cascade)
+  eventType        TradeEventType @map("event_type")
+  actorRole        String         @map("actor_role") // FARMER | BUYER | TRANSPORTER | INSPECTOR | ADMIN
+  actorId          String?        @map("actor_id")
+  commodityCode    String?        @map("commodity_code") // GS1/CN code e.g. "1001" for wheat
+  quantityKg       Float?         @map("quantity_kg")
+  pricePerKg       Float?         @map("price_per_kg")
+  locationLat      Float?         @map("location_lat")
+  locationLng      Float?         @map("location_lng")
+  regionCode       String?        @map("region_code")
+  inspectionGrade  String?        @map("inspection_grade") // A/B/C/D
+  blockchainTxHash String?        @map("blockchain_tx_hash")
+  metadata         Json?
+  timestamp        DateTime       @default(now())
+
+  @@index([tradeOperationId])
+  @@index([eventType])
+  @@index([regionCode])
+  @@index([timestamp])
+  @@map("trade_events")
 }
 
 // ==================== PROFIT CALCULATION MODELS ====================

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Linking, Platform, View, Text, TouchableOpacity } from 'react-native';
+import { Linking, Platform, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MapPin, Clock, ChevronRight } from 'lucide-react-native';
 import { JobCardProps } from '@features/dashboard/screens/inspector/types';
 import { JobPriorityBadge } from './JobPriorityBadge';
@@ -18,13 +18,12 @@ const openMapNavigation = (latitude: number, longitude: number, label?: string):
   });
 };
 
-export const JobCard: React.FC<JobCardProps> = ({
+export const JobCard = React.memo<JobCardProps>(function JobCard({
   job,
   onPress,
   onAccept,
   showAcceptButton = false,
-  className = '',
-}) => {
+}) {
   const handlePress = () => {
     onPress?.(job);
   };
@@ -36,24 +35,21 @@ export const JobCard: React.FC<JobCardProps> = ({
   };
 
   const formatSpecs = () => {
-    const specs = Object.entries(job.productDetails.claimedSpecs)
+    return Object.entries(job.productDetails.claimedSpecs)
       .slice(0, 2)
       .map(([key, value]) => `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`)
       .join(' • ');
-    return specs;
   };
 
+  const specs = formatSpecs();
+
   return (
-    <TouchableOpacity
-      testID="job-card"
-      onPress={handlePress}
-      className={`bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden ${className}`}
-    >
+    <TouchableOpacity testID="job-card" onPress={handlePress} style={styles.card}>
       {/* Header */}
-      <View className="flex-row items-center justify-between px-4 py-3 bg-gray-50">
-        <View className="flex-1">
-          <Text className="text-lg font-semibold text-gray-800">{job.productDetails.name}</Text>
-          <Text className="text-sm text-gray-600">
+      <View style={styles.header}>
+        <View style={styles.headerText}>
+          <Text style={styles.productName}>{job.productDetails.name}</Text>
+          <Text style={styles.productType}>
             {job.productDetails.type} • {job.productDetails.quantity} {job.productDetails.unit}
           </Text>
         </View>
@@ -63,10 +59,10 @@ export const JobCard: React.FC<JobCardProps> = ({
       </View>
 
       {/* Body */}
-      <View className="px-4 py-3">
+      <View style={styles.body}>
         {/* Location — tap to open turn-by-turn navigation */}
         <TouchableOpacity
-          className="flex-row items-start mb-2"
+          style={styles.locationRow}
           onPress={() =>
             openMapNavigation(
               job.location.latitude,
@@ -77,44 +73,137 @@ export const JobCard: React.FC<JobCardProps> = ({
           accessibilityLabel="Open navigation to job location"
           accessibilityRole="button"
         >
-          <MapPin size={16} color="#16a34a" />
-          <View className="ml-2 flex-1">
-            <Text className="text-sm font-medium text-gray-700 underline">
-              {job.location.address}
-            </Text>
-            <Text className="text-xs text-gray-500">
+          <MapPin size={16} color="#4ADE80" />
+          <View style={styles.locationText}>
+            <Text style={styles.address}>{job.location.address}</Text>
+            <Text style={styles.cityRegion}>
               {job.location.city}, {job.location.region}
             </Text>
           </View>
-          <View className="bg-green-100 px-2 py-1 rounded">
-            <Text className="text-green-700 text-sm font-medium">{job.distance} km</Text>
+          <View style={styles.distanceBadge}>
+            <Text style={styles.distanceText}>{job.distance} km</Text>
           </View>
         </TouchableOpacity>
 
         {/* Specifications Preview */}
-        <View className="mb-2">
-          <Text className="text-xs text-gray-500">{formatSpecs()}</Text>
-        </View>
+        {specs ? <Text style={styles.specs}>{specs}</Text> : null}
 
         {/* Duration */}
-        <View className="flex-row items-center">
-          <Clock size={14} color="#6b7280" />
-          <Text className="text-xs text-gray-600 ml-1">Est. {job.estimatedDuration} min</Text>
+        <View style={styles.durationRow}>
+          <Clock size={14} color="rgba(255,255,255,0.4)" />
+          <Text style={styles.durationText}>Est. {job.estimatedDuration} min</Text>
         </View>
       </View>
 
-      {/* Footer */}
+      {/* Footer: Accept button */}
       {showAcceptButton && (
-        <View className="border-t border-gray-200 px-4 py-3">
-          <TouchableOpacity
-            onPress={handleAccept}
-            className="bg-green-600 py-2 rounded-lg flex-row items-center justify-center"
-          >
-            <Text className="text-white font-medium mr-1">Accept Job</Text>
-            <ChevronRight size={16} color="white" />
+        <View style={styles.footer}>
+          <TouchableOpacity onPress={handleAccept} style={styles.acceptBtn}>
+            <Text style={styles.acceptText}>Accept Job</Text>
+            <ChevronRight size={16} color="#000" />
           </TouchableOpacity>
         </View>
       )}
     </TouchableOpacity>
   );
-};
+});
+
+const styles = StyleSheet.create({
+  acceptBtn: {
+    alignItems: 'center',
+    backgroundColor: '#4ADE80',
+    borderRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
+  acceptText: {
+    color: '#000',
+    fontWeight: '700',
+    marginRight: 4,
+  },
+  address: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 13,
+    fontWeight: '500',
+    textDecorationLine: 'underline',
+  },
+  body: {
+    padding: 12,
+  },
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 16,
+    borderWidth: 1,
+    marginBottom: 12,
+    overflow: 'hidden',
+  },
+  cityRegion: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 12,
+    marginTop: 1,
+  },
+  distanceBadge: {
+    backgroundColor: 'rgba(74,222,128,0.15)',
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  distanceText: {
+    color: '#4ADE80',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  durationRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginTop: 8,
+  },
+  durationText: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 12,
+    marginLeft: 6,
+  },
+  footer: {
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    borderTopWidth: 1,
+    padding: 12,
+  },
+  header: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.08)',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  headerText: {
+    flex: 1,
+    marginRight: 12,
+  },
+  locationRow: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  locationText: {
+    flex: 1,
+    marginLeft: 8,
+  },
+  productName: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  productType: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+    marginTop: 2,
+  },
+  specs: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    marginBottom: 6,
+  },
+});

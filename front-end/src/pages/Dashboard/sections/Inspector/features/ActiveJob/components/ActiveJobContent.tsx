@@ -46,30 +46,28 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <View className="flex-1 justify-center items-center p-8 bg-white">
-        <ActivityIndicator size="large" color="#16a34a" />
-        <Text className="text-gray-500 mt-4">Loading active job…</Text>
+      <View style={styles.centeredWrap}>
+        <ActivityIndicator size="large" color="#4ADE80" />
+        <Text style={styles.loadingText}>Loading active job…</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View className="flex-1 justify-center items-center p-8">
-        <Text className="text-lg font-semibold text-red-500">{error}</Text>
-        <Text className="text-gray-500 mt-2 text-center">Please pull to refresh.</Text>
+      <View style={styles.centeredWrap}>
+        <Text style={styles.errorText}>{error}</Text>
+        <Text style={styles.errorSub}>Please pull to refresh.</Text>
       </View>
     );
   }
 
   if (!job) {
     return (
-      <View className="flex-1 justify-center items-center p-8">
-        <Package size={64} color="#9ca3af" />
-        <Text className="text-xl font-semibold text-gray-700 mt-4">No Active Job</Text>
-        <Text className="text-gray-500 text-center mt-2">
-          Accept a job from the Available Jobs tab
-        </Text>
+      <View style={styles.centeredWrap}>
+        <Package size={64} color="rgba(255,255,255,0.2)" />
+        <Text style={styles.emptyTitle}>No Active Job</Text>
+        <Text style={styles.emptySub}>Accept a job from the Available Jobs tab</Text>
       </View>
     );
   }
@@ -81,20 +79,20 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
   };
 
   return (
-    <ScrollView className="flex-1 bg-white" testID={testID} accessibilityLabel={accessibilityLabel}>
-      <View className="bg-green-50 px-4 py-3 border-b border-green-200">
-        <View className="flex-row items-center justify-between">
-          <View>
-            <Text className="text-lg font-semibold text-gray-800">{job.productDetails.name}</Text>
-            <Text className="text-sm text-gray-600">{job.location.address}</Text>
-          </View>
-          <View className="bg-green-600 px-3 py-1 rounded-full">
-            <Text className="text-white text-xs font-medium">{job.status.replace('_', ' ')}</Text>
-          </View>
+    <ScrollView style={styles.root} testID={testID} accessibilityLabel={accessibilityLabel}>
+      {/* Job header banner */}
+      <View style={styles.jobHeader}>
+        <View style={styles.jobHeaderLeft}>
+          <Text style={styles.jobProductName}>{job.productDetails.name}</Text>
+          <Text style={styles.jobAddress}>{job.location.address}</Text>
+        </View>
+        <View style={styles.statusBadge}>
+          <Text style={styles.statusText}>{job.status.replace('_', ' ')}</Text>
         </View>
       </View>
 
-      <View style={{ height: 256 }}>
+      {/* Map */}
+      <View style={styles.mapContainer}>
         <MapView
           provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
           style={StyleSheet.absoluteFillObject}
@@ -114,7 +112,7 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
             }}
             title="Your Location"
           >
-            <View className="bg-blue-500 p-2 rounded-full">
+            <View style={styles.markerBlue}>
               <Navigation size={20} color="white" />
             </View>
           </Marker>
@@ -122,7 +120,7 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
             coordinate={{ latitude: job.location.latitude, longitude: job.location.longitude }}
             title="Job Location"
           >
-            <View className="bg-red-500 p-2 rounded-full">
+            <View style={styles.markerRed}>
               <MapPin size={20} color="white" />
             </View>
           </Marker>
@@ -131,75 +129,75 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
               { latitude: inspectorLocation.latitude, longitude: inspectorLocation.longitude },
               { latitude: job.location.latitude, longitude: job.location.longitude },
             ]}
-            strokeColor="#22c55e"
+            strokeColor="#4ADE80"
             strokeWidth={3}
           />
         </MapView>
-        <View className="absolute bottom-4 left-4 bg-white px-3 py-2 rounded-lg shadow">
-          <Text className="text-sm font-medium">{job.distance ?? 12.3} km remaining</Text>
+        <View style={styles.distanceOverlay}>
+          <Text style={styles.distanceOverlayText}>{job.distance ?? '–'} km remaining</Text>
         </View>
       </View>
 
-      <View className="p-4 space-y-4">
-        <View>
-          <Text className="text-sm font-semibold text-gray-700 mb-2">Product Details</Text>
-          <View className="bg-gray-50 p-3 rounded-lg">
-            <Text className="font-medium">{job.productDetails.type}</Text>
-            <Text className="text-gray-600">
+      {/* Details */}
+      <View style={styles.detailsSection}>
+        {/* Product Details */}
+        <View style={styles.detailBlock}>
+          <Text style={styles.detailLabel}>Product Details</Text>
+          <View style={styles.detailBox}>
+            <Text style={styles.detailBoxPrimary}>{job.productDetails.type}</Text>
+            <Text style={styles.detailBoxSecondary}>
               Quantity: {job.productDetails.quantity} {job.productDetails.unit}
             </Text>
           </View>
         </View>
 
-        <View>
-          <Text className="text-sm font-semibold text-gray-700 mb-2">Claimed Specifications</Text>
-          <View className="bg-gray-50 p-3 rounded-lg">
+        {/* Claimed Specifications */}
+        <View style={styles.detailBlock}>
+          <Text style={styles.detailLabel}>Claimed Specifications</Text>
+          <View style={styles.detailBox}>
             {Object.entries(job.productDetails.claimedSpecs).map(([key, value]) => (
-              <Text key={key} className="text-gray-600">
+              <Text key={key} style={styles.specRow}>
                 {key.charAt(0).toUpperCase() + key.slice(1)}: {value}
               </Text>
             ))}
           </View>
         </View>
 
-        <View>
-          <Text className="text-sm font-semibold text-gray-700 mb-2">Location</Text>
-          <View className="bg-gray-50 p-3 rounded-lg">
-            <Text className="font-medium">{job.location.address}</Text>
-            <Text className="text-gray-600">
+        {/* Location */}
+        <View style={styles.detailBlock}>
+          <Text style={styles.detailLabel}>Location</Text>
+          <View style={styles.detailBox}>
+            <Text style={styles.detailBoxPrimary}>{job.location.address}</Text>
+            <Text style={styles.detailBoxSecondary}>
               {job.location.city ?? 'Unknown'}, {job.location.region ?? ''}
             </Text>
           </View>
         </View>
 
-        <View className="flex-row items-center">
-          <Clock size={16} color="#6b7280" />
-          <Text className="text-gray-600 ml-2">
+        {/* Duration */}
+        <View style={styles.durationRow}>
+          <Clock size={16} color="rgba(255,255,255,0.4)" />
+          <Text style={styles.durationText}>
             Estimated duration: {job.estimatedDuration ?? 45} minutes
           </Text>
         </View>
 
+        {/* Action buttons */}
         {!showVerificationForm && (
-          <View>
-            <TouchableOpacity
-              onPress={onStartVerification}
-              className="bg-green-600 py-3 rounded-lg"
-            >
-              <Text className="text-white text-center font-semibold">Start Verification</Text>
+          <View style={styles.actionsWrap}>
+            <TouchableOpacity onPress={onStartVerification} style={styles.primaryBtn}>
+              <Text style={styles.primaryBtnText}>Start Verification</Text>
             </TouchableOpacity>
             {onExecuteInspection && (
-              <TouchableOpacity
-                onPress={onExecuteInspection}
-                className="mt-3 bg-green-700 py-3 rounded-lg"
-              >
-                <Text className="text-white text-center font-semibold">Execute Inspection</Text>
+              <TouchableOpacity onPress={onExecuteInspection} style={styles.secondaryBtn}>
+                <Text style={styles.secondaryBtnText}>Execute Inspection</Text>
               </TouchableOpacity>
             )}
           </View>
         )}
 
         {showVerificationForm && (
-          <View className="mt-4">
+          <View style={styles.formWrap}>
             <VerificationForm
               job={job}
               onSubmit={onSubmitVerification}
@@ -211,3 +209,186 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  actionsWrap: {
+    gap: 12,
+    marginTop: 4,
+  },
+  centeredWrap: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    padding: 32,
+  },
+  detailBlock: {
+    marginBottom: 16,
+  },
+  detailBox: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 12,
+  },
+  detailBoxPrimary: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  detailBoxSecondary: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+    marginTop: 2,
+  },
+  detailLabel: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  detailsSection: {
+    padding: 16,
+  },
+  distanceOverlay: {
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    borderRadius: 8,
+    bottom: 12,
+    left: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    position: 'absolute',
+  },
+  distanceOverlayText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  durationRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  durationText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+    marginLeft: 8,
+  },
+  emptySub: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  emptyTitle: {
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 20,
+    fontWeight: '700',
+    marginTop: 16,
+  },
+  errorSub: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  errorText: {
+    color: '#F87171',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  formWrap: {
+    marginTop: 16,
+  },
+  jobAddress: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+    marginTop: 2,
+  },
+  jobHeader: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.08)',
+    borderBottomColor: 'rgba(74,222,128,0.15)',
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  jobHeaderLeft: {
+    flex: 1,
+    marginRight: 12,
+  },
+  jobProductName: {
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  loadingText: {
+    color: 'rgba(255,255,255,0.5)',
+    marginTop: 16,
+  },
+  mapContainer: {
+    height: 240,
+  },
+  markerBlue: {
+    alignItems: 'center',
+    backgroundColor: '#3B82F6',
+    borderRadius: 20,
+    justifyContent: 'center',
+    padding: 8,
+  },
+  markerRed: {
+    alignItems: 'center',
+    backgroundColor: '#EF4444',
+    borderRadius: 20,
+    justifyContent: 'center',
+    padding: 8,
+  },
+  primaryBtn: {
+    alignItems: 'center',
+    backgroundColor: '#4ADE80',
+    borderRadius: 12,
+    paddingVertical: 14,
+  },
+  primaryBtnText: {
+    color: '#000',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  root: {
+    flex: 1,
+  },
+  secondaryBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.12)',
+    borderColor: 'rgba(74,222,128,0.3)',
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingVertical: 14,
+  },
+  secondaryBtnText: {
+    color: '#4ADE80',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  specRow: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 13,
+    marginTop: 2,
+  },
+  statusBadge: {
+    backgroundColor: 'rgba(74,222,128,0.2)',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  statusText: {
+    color: '#4ADE80',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+});

@@ -8,6 +8,8 @@ import CommandCenterScreen from '../features/dashboard/screens/admin/CommandCent
 import AgentNetworkScreen from '../features/dashboard/screens/admin/AgentNetworkScreen';
 import OperationsScreen from '../features/dashboard/screens/admin/OperationsScreen';
 import IntelligenceScreen from '../features/dashboard/screens/shared/IntelligenceScreen';
+import ImpactScreen from '../features/dashboard/screens/shared/ImpactScreen';
+import TraceabilityScreen from '../features/dashboard/screens/shared/TraceabilityScreen';
 import SellerDashboardScreen from '../features/dashboard/screens/seller/SellerDashboardScreen';
 import BuyerDashboardScreen from '../features/dashboard/screens/buyer/BuyerDashboardScreen';
 import TransporterDashboardScreen from '../features/dashboard/screens/transporter/TransporterDashboardScreen';
@@ -28,6 +30,8 @@ export default function DashboardStack() {
         <Stack.Screen name="AgentNetwork" component={AgentNetworkScreen} />
         <Stack.Screen name="Operations" component={OperationsScreen} />
         <Stack.Screen name="Intelligence" component={IntelligenceScreen} />
+        <Stack.Screen name="Impact" component={ImpactScreen} />
+        <Stack.Screen name="Traceability" component={TraceabilityScreen} />
         <Stack.Screen name="SellerDashboard" component={SellerDashboardScreen} />
         <Stack.Screen name="BuyerDashboard" component={BuyerDashboardScreen} />
         <Stack.Screen name="TransporterDashboard" component={TransporterDashboardScreen} />

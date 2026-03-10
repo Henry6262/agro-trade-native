@@ -11,6 +11,7 @@ import { PriceScenarioService } from "./price-scenario.service";
 import { TransportCostService } from "../../transport/services/transport-cost.service";
 import { RouteOptimizationService } from "../../transport/services/route-optimization.service";
 import { CreateTradeOperationDto } from "../dto/create-trade-operation.dto";
+import { TradeEventsService } from "../../trade-events/trade-events.service";
 import {
   TradeOperation,
   TradePhase,
@@ -167,6 +168,7 @@ export class TradeOperationService {
     private readonly transportCostService: TransportCostService,
     private readonly routeOptimizationService: RouteOptimizationService,
     private readonly realtimeService: RealtimeService,
+    private readonly tradeEventsService: TradeEventsService,
   ) {}
 
   /**
@@ -220,6 +222,13 @@ export class TradeOperationService {
     this.logger.log(
       `Created trade operation ${tradeOperation.id} for buy listing ${buyListing.id}`,
     );
+
+    await this.tradeEventsService.record({
+      tradeOperationId: tradeOperation.id,
+      eventType: "LISTING_CREATED",
+      actorRole: "ADMIN",
+      actorId: adminId,
+    }).catch(() => {});
 
     return tradeOperation;
   }
@@ -446,6 +455,12 @@ export class TradeOperationService {
 
     // Recalculate profit with new sellers
     await this.updateProfitCalculation(tradeOperationId);
+
+    this.realtimeService.emitToUser(trade.buyListing.buyerId, "trade:seller-added", {
+      tradeOperationId,
+      sellerCount: tradeSellers.length,
+      phase: totalQuantity >= buyerRequirement * 0.8 ? "SELLER_NEGOTIATION" : "MATCHING",
+    });
 
     return tradeSellers;
   }
@@ -1354,6 +1369,12 @@ export class TradeOperationService {
         }),
       },
     });
+
+    await this.tradeEventsService.record({
+      tradeOperationId,
+      eventType: "PAYMENT_RELEASED",
+      actorRole: "ADMIN",
+    }).catch(() => {});
 
     // Log state change for audit trail
     await this.prisma.tradeStateHistory.create({

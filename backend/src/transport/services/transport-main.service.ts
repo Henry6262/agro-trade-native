@@ -13,12 +13,16 @@ import {
   TruckType,
 } from "@prisma/client";
 import { TransporterAnalyticsMetricsDto } from "../dto/transporter-analytics.dto";
+import { TradeEventsService } from "../../trade-events/trade-events.service";
 
 @Injectable()
 export class TransportService {
   private readonly logger = new Logger(TransportService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tradeEventsService: TradeEventsService,
+  ) {}
 
   // ========== REQUEST MANAGEMENT ==========
 
@@ -574,6 +578,15 @@ export class TransportService {
       },
     });
 
+    if (job.tradeOperationId) {
+      await this.tradeEventsService.record({
+        tradeOperationId: job.tradeOperationId,
+        eventType: "TRANSPORT_PICKUP",
+        actorRole: "TRANSPORTER",
+        actorId: transporterId,
+      }).catch(() => {});
+    }
+
     this.logger.log(`Pickup confirmed for job ${jobId}`);
     return job;
   }
@@ -597,6 +610,15 @@ export class TransportService {
       where: { id: job.transportRequestId },
       data: { status: TransportRequestStatus.COMPLETED },
     });
+
+    if (job.tradeOperationId) {
+      await this.tradeEventsService.record({
+        tradeOperationId: job.tradeOperationId,
+        eventType: "TRANSPORT_DELIVERED",
+        actorRole: "TRANSPORTER",
+        actorId: transporterId,
+      }).catch(() => {});
+    }
 
     this.logger.log(`Delivery confirmed for job ${jobId}`);
     return job;

@@ -58,6 +58,8 @@ export type DashboardStackParamList = {
   AgentNetwork: undefined;
   Operations: undefined;
   Intelligence: undefined;
+  Impact: undefined;
+  Traceability: { tradeId?: string } | undefined;
   SellerDashboard: { activeTab?: string };
   BuyerDashboard: { activeTab?: string };
   TransporterDashboard: { activeTab?: string };
