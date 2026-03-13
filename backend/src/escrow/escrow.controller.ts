@@ -4,7 +4,7 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { EscrowService } from "./escrow.service";
-import { CreateEscrowDto } from "./dto/escrow.dto";
+import { CreateEscrowDto, ResolveDisputeDto } from "./dto/escrow.dto";
 
 @ApiTags("escrow")
 @Controller("escrow")
@@ -36,6 +36,16 @@ export class EscrowController {
   @ApiOperation({ summary: "Raise a payment dispute" })
   async raiseDispute(@Param("tradeOperationId") tradeOperationId: string) {
     return this.escrowService.raiseDispute(tradeOperationId);
+  }
+
+  @Post(":tradeOperationId/resolve")
+  @Roles("ADMIN")
+  @ApiOperation({ summary: "Resolve a disputed escrow — release to seller or refund buyer" })
+  async resolveDispute(
+    @Param("tradeOperationId") tradeOperationId: string,
+    @Body() dto: ResolveDisputeDto,
+  ) {
+    return this.escrowService.resolveDispute(tradeOperationId, dto.releaseToBuyer);
   }
 
   @Get(":tradeOperationId/status")

@@ -3,13 +3,20 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../prisma/prisma.service";
 
 const ESCROW_ABI = [
-  "function createEscrow(bytes32 key, address seller, string tradeId) external payable",
+  "function createEscrow(bytes32 key, address payable seller, string calldata tradeId) external payable",
   "function releaseFunds(bytes32 key) external",
   "function raiseDispute(bytes32 key) external",
-  "function escrows(bytes32) external view returns (address buyer, address seller, uint256 amount, uint8 state, string tradeId)",
+  "function resolveDispute(bytes32 key, bool releaseToBuyer) external",
+  "function refund(bytes32 key) external",
+  "function getEscrow(bytes32 key) external view returns (address buyer, address seller, uint256 amount, uint8 state, string tradeId)",
+  "function nominateAdmin(address newAdmin) external",
+  "function acceptAdmin() external",
+  "function admin() external view returns (address)",
   "event EscrowCreated(bytes32 indexed key, string tradeId, uint256 amount)",
   "event PaymentReleased(bytes32 indexed key)",
   "event DisputeRaised(bytes32 indexed key)",
+  "event DisputeResolved(bytes32 indexed key, address recipient, uint256 amount)",
+  "event Refunded(bytes32 indexed key)",
 ];
 
 @Injectable()
@@ -105,21 +112,48 @@ export class EscrowService {
     return { txHash: tx.hash };
   }
 
+  async resolveDispute(tradeOperationId: string, releaseToBuyer: boolean) {
+    const ethers = await import("ethers");
+    const contract = await this.getContract();
+    const key = ethers.id(tradeOperationId);
+    const tx = await contract.resolveDispute(key, releaseToBuyer);
+    await tx.wait();
+    this.logger.log(
+      `Dispute resolved for trade ${tradeOperationId}: ${tx.hash} (buyerRefund: ${releaseToBuyer})`,
+    );
+
+    await this.prisma.tradeEvent.create({
+      data: {
+        tradeOperationId,
+        eventType: "PAYMENT_RELEASED",
+        actorRole: "ADMIN",
+        blockchainTxHash: tx.hash,
+        metadata: { resolvedToBuyer: releaseToBuyer },
+      },
+    });
+
+    return { txHash: tx.hash };
+  }
+
   async getStatus(tradeOperationId: string) {
     const ethers = await import("ethers");
     const contract = await this.getContract();
     const key = ethers.id(tradeOperationId);
-    const escrow = await contract.escrows(key);
+    const result = await contract.getEscrow(key);
 
     const states = ["AWAITING_PAYMENT", "AWAITING_DELIVERY", "COMPLETE", "DISPUTED", "REFUNDED"];
 
     return {
       tradeOperationId,
-      buyer: escrow.buyer,
-      seller: escrow.seller,
-      amountWei: escrow.amount.toString(),
-      state: states[Number(escrow.state)] ?? "UNKNOWN",
-      tradeId: escrow.tradeId,
+      buyer: result[0],
+      seller: result[1],
+      amountWei: result[2].toString(),
+      state: states[Number(result[3])] ?? "UNKNOWN",
+      tradeId: result[4],
     };
+  }
+
+  isConfigured(): boolean {
+    return !!(this.contractAddress && this.rpcUrl && this.privateKey);
   }
 }

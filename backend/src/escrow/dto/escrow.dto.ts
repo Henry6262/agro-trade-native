@@ -9,3 +9,7 @@ export class EscrowActionDto {
   tradeOperationId: string;
   escrowKey: string;
 }
+
+export class ResolveDisputeDto {
+  releaseToBuyer: boolean;
+}
