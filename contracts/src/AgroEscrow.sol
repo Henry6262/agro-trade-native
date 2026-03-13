@@ -4,9 +4,11 @@ pragma solidity ^0.8.20;
 /**
  * @title AgroEscrow
  * @notice Trustless escrow for agricultural trade payments
- * @dev Deployed on Polygon Amoy testnet for EU grant demonstration
+ * @dev Deployed on Celo Alfajores testnet (chainId 44787). Uses native CELO for escrow.
  */
 contract AgroEscrow {
+    // AWAITING_PAYMENT is the zero-value default for uninitialized escrows (no escrow created yet)
+    // Once createEscrow() is called, state transitions to AWAITING_DELIVERY
     enum State {
         AWAITING_PAYMENT,
         AWAITING_DELIVERY,
@@ -25,6 +27,7 @@ contract AgroEscrow {
 
     mapping(bytes32 => Escrow) public escrows;
     address public admin;
+    address public pendingAdmin;
 
     event EscrowCreated(bytes32 indexed key, string tradeId, uint256 amount);
     event PaymentReleased(bytes32 indexed key);
@@ -42,7 +45,24 @@ contract AgroEscrow {
     }
 
     /**
-     * @notice Create escrow for a trade. Buyer sends ETH/MATIC which is held until delivery.
+     * @notice Nominate a new admin — must be accepted by the nominee to take effect
+     */
+    function nominateAdmin(address newAdmin) external onlyAdmin {
+        require(newAdmin != address(0), "Zero address");
+        pendingAdmin = newAdmin;
+    }
+
+    /**
+     * @notice Nominee accepts admin role
+     */
+    function acceptAdmin() external {
+        require(msg.sender == pendingAdmin, "Not pending admin");
+        admin = pendingAdmin;
+        pendingAdmin = address(0);
+    }
+
+    /**
+     * @notice Create escrow for a trade. Buyer sends CELO which is held until delivery.
      * @param key keccak256 hash of the trade operation ID
      * @param seller Seller's wallet address
      * @param tradeId Off-chain AgroAI trade operation ID for reference
@@ -75,8 +95,13 @@ contract AgroEscrow {
         require(msg.sender == e.buyer || msg.sender == admin, "Not authorized");
         require(e.state == State.AWAITING_DELIVERY, "Invalid state");
 
+        address payable recipient = e.seller;
+        uint256 amount = e.amount;
         e.state = State.COMPLETE;
-        e.seller.transfer(e.amount);
+        e.amount = 0;
+
+        (bool ok, ) = recipient.call{value: amount}("");
+        require(ok, "Transfer failed");
 
         emit PaymentReleased(key);
     }
@@ -100,11 +125,33 @@ contract AgroEscrow {
         Escrow storage e = escrows[key];
         require(e.state == State.DISPUTED, "Not disputed");
 
-        e.state = State.COMPLETE;
         address payable recipient = releaseToBuyer ? e.buyer : e.seller;
-        recipient.transfer(e.amount);
+        uint256 amount = e.amount;
+        e.state = State.COMPLETE;
+        e.amount = 0;
 
-        emit DisputeResolved(key, recipient, e.amount);
+        (bool ok, ) = recipient.call{value: amount}("");
+        require(ok, "Transfer failed");
+
+        emit DisputeResolved(key, recipient, amount);
+    }
+
+    /**
+     * @notice Admin refunds buyer — shortcut for resolveDispute(key, true)
+     */
+    function refund(bytes32 key) external onlyAdmin {
+        Escrow storage e = escrows[key];
+        require(e.state == State.DISPUTED, "Not disputed");
+
+        address payable buyer = e.buyer;
+        uint256 amount = e.amount;
+        e.state = State.REFUNDED;
+        e.amount = 0;
+
+        (bool ok, ) = buyer.call{value: amount}("");
+        require(ok, "Refund failed");
+
+        emit Refunded(key);
     }
 
     /**
