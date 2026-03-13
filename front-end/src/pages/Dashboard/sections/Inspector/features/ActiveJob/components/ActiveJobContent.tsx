@@ -16,6 +16,7 @@ import type {
   InspectorLocationCoordinates,
 } from '../types';
 import { VerificationForm } from './VerificationForm';
+import { EscrowStatusCard } from '../../../../../../../features/dashboard/screens/admin/components/EscrowStatusCard';
 
 interface ActiveJobContentProps {
   job: InspectorVerificationJob | null;
@@ -182,6 +183,17 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
           </Text>
         </View>
 
+        {/* Escrow controls — inspector can release payment or raise a dispute after
+            on-site verification. tradeOperationId should ideally be a dedicated
+            field on InspectorVerificationJob returned by the API; using
+            sellerListingId as the closest available identifier until the backend
+            surfaces a tradeOperationId on inspection job responses. */}
+        {job.sellerListingId && (
+          <View style={styles.escrowWrap}>
+            <EscrowStatusCard tradeOperationId={job.sellerListingId} isAdmin={true} />
+          </View>
+        )}
+
         {/* Action buttons */}
         {!showVerificationForm && (
           <View style={styles.actionsWrap}>
@@ -299,6 +311,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
+  },
+  escrowWrap: {
+    marginBottom: 20,
   },
   formWrap: {
     marginTop: 16,
