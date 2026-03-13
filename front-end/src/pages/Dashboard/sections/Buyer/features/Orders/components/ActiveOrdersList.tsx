@@ -6,7 +6,10 @@ import { Card, CardContent } from '@shared/components/Card';
 import { Badge } from '@shared/components/Badge';
 import { PhaseBadge } from '@shared/components';
 import { OrderStageIndicator } from '@pages/Dashboard/sections/Buyer/features/Orders/components/OrderStageIndicator';
+import EscrowStatusCard from '../../../../../../../features/dashboard/screens/admin/components/EscrowStatusCard';
 import type { BuyerOrder, MatchedSeller } from '../types';
+
+const ESCROW_PHASES = new Set(['IN_TRANSIT', 'DELIVERED', 'COMPLETED']);
 
 const SELLER_STATUS_COLORS: Record<string, string> = {
   ACCEPTED: 'text-green-400',
@@ -142,6 +145,10 @@ export const ActiveOrdersList = React.memo<ActiveOrdersListProps>(function Activ
                   </>
                 )}
               </TouchableOpacity>
+            )}
+
+            {ESCROW_PHASES.has(order.phase) && (
+              <EscrowStatusCard tradeOperationId={order.id} isAdmin={false} />
             )}
 
             {expandedOrderId === order.id && (

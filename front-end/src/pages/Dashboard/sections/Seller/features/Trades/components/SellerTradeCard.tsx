@@ -6,6 +6,9 @@ import { PhaseBadge } from '@shared/components/PhaseBadge';
 import type { SellerTrade, TradeStage } from '../types';
 import { getTradeStages } from '../utils';
 import { TradeStageTimeline } from './TradeStageTimeline';
+import EscrowStatusCard from '../../../../../../../features/dashboard/screens/admin/components/EscrowStatusCard';
+
+const ESCROW_STATUSES = new Set(['IN_TRANSIT', 'DELIVERED', 'COMPLETED', 'Traveling', 'Completed']);
 
 function getStatusBadgeVariant(
   status: string
@@ -92,6 +95,11 @@ export const SellerTradeCard: React.FC<SellerTradeCardProps> = React.memo(functi
           size="sm"
         />
       </View>
+
+      {/* Escrow status */}
+      {ESCROW_STATUSES.has(trade.status) && (
+        <EscrowStatusCard tradeOperationId={trade.id} isAdmin={false} />
+      )}
 
       {/* Expanded details */}
       {expanded && (
