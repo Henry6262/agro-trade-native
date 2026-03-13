@@ -4,7 +4,9 @@ import {
   BadRequestException,
   NotFoundException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
+import { EscrowService } from "../../escrow/escrow.service";
 import { RealtimeService } from "../../realtime/realtime.service";
 import { ProfitCalculationService } from "./profit-calculation.service";
 import { PriceScenarioService } from "./price-scenario.service";
@@ -169,6 +171,8 @@ export class TradeOperationService {
     private readonly routeOptimizationService: RouteOptimizationService,
     private readonly realtimeService: RealtimeService,
     private readonly tradeEventsService: TradeEventsService,
+    private readonly escrowService: EscrowService,
+    private readonly configService: ConfigService,
   ) {}
 
   /**
@@ -527,7 +531,48 @@ export class TradeOperationService {
       'trade:updated',
       updatedTrade,
     );
+
+    // Fire-and-forget blockchain action (non-blocking)
+    this.triggerEscrowForPhase(tradeOperationId, newPhase, updatedTrade).catch((err: Error) => {
+      this.logger.error(
+        `Escrow action failed for trade ${tradeOperationId} → ${newPhase}: ${err.message}`,
+      );
+    });
+
     return updatedTrade;
+  }
+
+  private async triggerEscrowForPhase(
+    tradeOperationId: string,
+    newPhase: TradePhase,
+    trade: { sellingPrice?: unknown },
+  ): Promise<void> {
+    if (!this.escrowService.isConfigured()) {
+      return; // Silently skip — escrow not configured in this environment
+    }
+
+    if (newPhase === TradePhase.IN_TRANSIT) {
+      const priceRaw = trade.sellingPrice;
+      if (!priceRaw) {
+        this.logger.warn(
+          `Trade ${tradeOperationId} has no selling price — skipping escrow creation`,
+        );
+        return;
+      }
+      const amountCelo = priceRaw.toString();
+      const adminWallet = this.configService.get<string>('ADMIN_WALLET_ADDRESS') ?? '';
+      if (!adminWallet) {
+        this.logger.warn('ADMIN_WALLET_ADDRESS not set — skipping escrow creation');
+        return;
+      }
+      await this.escrowService.createEscrow(tradeOperationId, adminWallet, amountCelo);
+      this.logger.log(`Escrow created for trade ${tradeOperationId}: ${amountCelo} CELO locked`);
+    }
+
+    if (newPhase === TradePhase.DELIVERED) {
+      await this.escrowService.releaseFunds(tradeOperationId);
+      this.logger.log(`Escrow released for trade ${tradeOperationId}`);
+    }
   }
 
   /**
