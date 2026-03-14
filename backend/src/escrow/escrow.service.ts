@@ -3,15 +3,16 @@ import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../prisma/prisma.service";
 
 const ESCROW_ABI = [
-  "function createEscrow(bytes32 key, address payable seller, string calldata tradeId) external payable",
+  // cUSD ERC-20 token (used to approve before createEscrow)
+  "function approve(address spender, uint256 amount) external returns (bool)",
+  // Escrow contract
+  "function createEscrow(bytes32 key, address seller, string calldata tradeId, uint256 amount) external",
   "function releaseFunds(bytes32 key) external",
   "function raiseDispute(bytes32 key) external",
   "function resolveDispute(bytes32 key, bool releaseToBuyer) external",
   "function refund(bytes32 key) external",
   "function getEscrow(bytes32 key) external view returns (address buyer, address seller, uint256 amount, uint8 state, string tradeId)",
-  "function nominateAdmin(address newAdmin) external",
-  "function acceptAdmin() external",
-  "function admin() external view returns (address)",
+  "function cusdToken() external view returns (address)",
   "event EscrowCreated(bytes32 indexed key, string tradeId, uint256 amount)",
   "event PaymentReleased(bytes32 indexed key)",
   "event DisputeRaised(bytes32 indexed key)",
@@ -26,6 +27,7 @@ export class EscrowService {
   private contractAddress: string;
   private rpcUrl: string;
   private privateKey: string;
+  private cusdAddress: string;
 
   constructor(
     private readonly configService: ConfigService,
@@ -34,6 +36,17 @@ export class EscrowService {
     this.contractAddress = this.configService.get<string>("ESCROW_CONTRACT_ADDRESS") ?? "";
     this.rpcUrl = this.configService.get<string>("BLOCKCHAIN_RPC_URL") ?? "";
     this.privateKey = this.configService.get<string>("ADMIN_WALLET_PRIVATE_KEY") ?? "";
+    this.cusdAddress = this.configService.get<string>("CUSD_TOKEN_ADDRESS") ?? "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"; // Celo Sepolia default
+  }
+
+  private async getCusdContract() {
+    if (!this.ethers) {
+      this.ethers = await import("ethers");
+    }
+    const provider = new this.ethers.JsonRpcProvider(this.rpcUrl);
+    const wallet = new this.ethers.Wallet(this.privateKey, provider);
+    const cusdAbi = ["function approve(address spender, uint256 amount) external returns (bool)"];
+    return new this.ethers.Contract(this.cusdAddress, cusdAbi, wallet);
   }
 
   private async getContract() {
@@ -50,15 +63,23 @@ export class EscrowService {
     return new this.ethers.Contract(this.contractAddress, ESCROW_ABI, wallet);
   }
 
-  async createEscrow(tradeOperationId: string, sellerAddress: string, amountEth: string) {
+  async createEscrow(tradeOperationId: string, sellerAddress: string, amountCusd: string) {
     const ethers = await import("ethers");
-    const contract = await this.getContract();
+    const escrowContract = await this.getContract();
+    const cusdContract = await this.getCusdContract();
     const key = ethers.id(tradeOperationId);
-    const tx = await contract.createEscrow(key, sellerAddress, tradeOperationId, {
-      value: ethers.parseEther(amountEth),
-    });
+    // cUSD has 18 decimals like ETH
+    const amountWei = ethers.parseUnits(amountCusd, 18);
+
+    // Step 1: approve escrow contract to spend cUSD
+    const approveTx = await cusdContract.approve(this.contractAddress, amountWei);
+    await approveTx.wait();
+    this.logger.log(`cUSD approved for trade ${tradeOperationId}: ${amountCusd} cUSD`);
+
+    // Step 2: create escrow (pulls cUSD via transferFrom)
+    const tx = await escrowContract.createEscrow(key, sellerAddress, tradeOperationId, amountWei);
     await tx.wait();
-    this.logger.log(`Escrow created for trade ${tradeOperationId}: ${tx.hash}`);
+    this.logger.log(`Escrow created for trade ${tradeOperationId}: ${amountCusd} cUSD locked`);
 
     await this.prisma.tradeEvent.create({
       data: {
@@ -66,7 +87,7 @@ export class EscrowService {
         eventType: "PAYMENT_ESCROWED",
         actorRole: "ADMIN",
         blockchainTxHash: tx.hash,
-        metadata: { amountEth },
+        metadata: { amountCusd },
       },
     });
 
