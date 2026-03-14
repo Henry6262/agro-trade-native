@@ -1,10 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+interface IERC20 {
+    function transfer(address to, uint256 amount) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+}
+
 /**
  * @title AgroEscrow
- * @notice Trustless escrow for agricultural trade payments
- * @dev Deployed on Celo Alfajores testnet (chainId 44787). Uses native CELO for escrow.
+ * @notice Trustless escrow for agricultural trade payments using cUSD stablecoin
+ * @dev Deployed on Celo Sepolia testnet (chainId 11142220). Uses cUSD ERC-20 for escrow.
+ *      Platform uses a custodial model — the admin wallet holds cUSD and calls all contract
+ *      functions on behalf of users. Admin must approve this contract to spend cUSD before
+ *      calling createEscrow.
+ *      cUSD Celo Sepolia: 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1
+ *      cUSD Celo Mainnet: 0x765DE816845861e75A25fCA122bb6898B8B1282a
  */
 contract AgroEscrow {
     // AWAITING_PAYMENT is the zero-value default for uninitialized escrows (no escrow created yet)
@@ -18,8 +28,8 @@ contract AgroEscrow {
     }
 
     struct Escrow {
-        address payable buyer;
-        address payable seller;
+        address buyer;
+        address seller;
         uint256 amount;
         State state;
         string tradeId; // Off-chain AgroAI trade operation ID
@@ -28,6 +38,7 @@ contract AgroEscrow {
     mapping(bytes32 => Escrow) public escrows;
     address public admin;
     address public pendingAdmin;
+    address public cusdToken;
 
     event EscrowCreated(bytes32 indexed key, string tradeId, uint256 amount);
     event PaymentReleased(bytes32 indexed key);
@@ -40,8 +51,9 @@ contract AgroEscrow {
         _;
     }
 
-    constructor() {
+    constructor(address _cusdToken) {
         admin = msg.sender;
+        cusdToken = _cusdToken;
     }
 
     /**
@@ -62,29 +74,35 @@ contract AgroEscrow {
     }
 
     /**
-     * @notice Create escrow for a trade. Buyer sends CELO which is held until delivery.
+     * @notice Create escrow for a trade. Caller's cUSD is pulled via transferFrom and held until delivery.
+     * @dev Caller must approve this contract to spend at least `amount` cUSD before calling.
      * @param key keccak256 hash of the trade operation ID
      * @param seller Seller's wallet address
      * @param tradeId Off-chain AgroAI trade operation ID for reference
+     * @param amount Amount of cUSD (18 decimals) to lock in escrow
      */
     function createEscrow(
         bytes32 key,
-        address payable seller,
-        string calldata tradeId
-    ) external payable {
-        require(msg.value > 0, "Must send funds");
+        address seller,
+        string calldata tradeId,
+        uint256 amount
+    ) external {
+        require(amount > 0, "Amount must be > 0");
         require(escrows[key].buyer == address(0), "Escrow already exists");
         require(seller != address(0), "Invalid seller address");
 
+        bool ok = IERC20(cusdToken).transferFrom(msg.sender, address(this), amount);
+        require(ok, "Transfer failed");
+
         escrows[key] = Escrow({
-            buyer: payable(msg.sender),
+            buyer: msg.sender,
             seller: seller,
-            amount: msg.value,
+            amount: amount,
             state: State.AWAITING_DELIVERY,
             tradeId: tradeId
         });
 
-        emit EscrowCreated(key, tradeId, msg.value);
+        emit EscrowCreated(key, tradeId, amount);
     }
 
     /**
@@ -95,12 +113,12 @@ contract AgroEscrow {
         require(msg.sender == e.buyer || msg.sender == admin, "Not authorized");
         require(e.state == State.AWAITING_DELIVERY, "Invalid state");
 
-        address payable recipient = e.seller;
+        address recipient = e.seller;
         uint256 amount = e.amount;
         e.state = State.COMPLETE;
         e.amount = 0;
 
-        (bool ok, ) = recipient.call{value: amount}("");
+        bool ok = IERC20(cusdToken).transfer(recipient, amount);
         require(ok, "Transfer failed");
 
         emit PaymentReleased(key);
@@ -119,18 +137,18 @@ contract AgroEscrow {
     }
 
     /**
-     * @notice Admin resolves a dispute by sending funds to winner
+     * @notice Admin resolves a dispute by sending cUSD to the winner
      */
     function resolveDispute(bytes32 key, bool releaseToBuyer) external onlyAdmin {
         Escrow storage e = escrows[key];
         require(e.state == State.DISPUTED, "Not disputed");
 
-        address payable recipient = releaseToBuyer ? e.buyer : e.seller;
+        address recipient = releaseToBuyer ? e.buyer : e.seller;
         uint256 amount = e.amount;
         e.state = State.COMPLETE;
         e.amount = 0;
 
-        (bool ok, ) = recipient.call{value: amount}("");
+        bool ok = IERC20(cusdToken).transfer(recipient, amount);
         require(ok, "Transfer failed");
 
         emit DisputeResolved(key, recipient, amount);
@@ -143,12 +161,12 @@ contract AgroEscrow {
         Escrow storage e = escrows[key];
         require(e.state == State.DISPUTED, "Not disputed");
 
-        address payable buyer = e.buyer;
+        address buyer = e.buyer;
         uint256 amount = e.amount;
         e.state = State.REFUNDED;
         e.amount = 0;
 
-        (bool ok, ) = buyer.call{value: amount}("");
+        bool ok = IERC20(cusdToken).transfer(buyer, amount);
         require(ok, "Refund failed");
 
         emit Refunded(key);

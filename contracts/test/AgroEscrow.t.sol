@@ -4,8 +4,39 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import "../src/AgroEscrow.sol";
 
+contract MockCUSD {
+    mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
+
+    function mint(address to, uint256 amount) external {
+        balanceOf[to] += amount;
+    }
+
+    function approve(address spender, uint256 amount) external returns (bool) {
+        allowance[msg.sender][spender] = amount;
+        return true;
+    }
+
+    function transfer(address to, uint256 amount) external returns (bool) {
+        require(balanceOf[msg.sender] >= amount, "Insufficient");
+        balanceOf[msg.sender] -= amount;
+        balanceOf[to] += amount;
+        return true;
+    }
+
+    function transferFrom(address from, address to, uint256 amount) external returns (bool) {
+        require(balanceOf[from] >= amount, "Insufficient balance");
+        require(allowance[from][msg.sender] >= amount, "Insufficient allowance");
+        allowance[from][msg.sender] -= amount;
+        balanceOf[from] -= amount;
+        balanceOf[to] += amount;
+        return true;
+    }
+}
+
 contract AgroEscrowTest is Test {
     AgroEscrow public escrow;
+    MockCUSD public cusd;
 
     address public adminAddr;
     address payable public buyer;
@@ -15,21 +46,27 @@ contract AgroEscrowTest is Test {
     bytes32 public constant KEY = keccak256("trade-001");
     bytes32 public constant KEY2 = keccak256("trade-002");
     string public constant TRADE_ID = "trade-001";
-    uint256 public constant AMOUNT = 1 ether;
+    uint256 public constant AMOUNT = 1 ether; // 1e18 — same magnitude as before
 
     function setUp() public {
         // The test contract itself is the deployer → becomes admin
-        escrow = new AgroEscrow();
+        cusd = new MockCUSD();
+        escrow = new AgroEscrow(address(cusd));
         adminAddr = address(this);
 
         buyer = payable(makeAddr("buyer"));
         seller = payable(makeAddr("seller"));
         stranger = payable(makeAddr("stranger"));
 
-        vm.deal(buyer, 10 ether);
-        vm.deal(seller, 1 ether);
-        vm.deal(stranger, 1 ether);
-        vm.deal(adminAddr, 10 ether);
+        // Mint cUSD to participants
+        cusd.mint(buyer, 1000 ether);
+        cusd.mint(address(this), 1000 ether); // admin needs cUSD too
+
+        // Pre-approve escrow contract to spend cUSD on behalf of buyer and admin
+        vm.prank(buyer);
+        cusd.approve(address(escrow), type(uint256).max);
+
+        cusd.approve(address(escrow), type(uint256).max);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -38,7 +75,7 @@ contract AgroEscrowTest is Test {
 
     function _createEscrow(bytes32 key, uint256 amount) internal {
         vm.prank(buyer);
-        escrow.createEscrow{value: amount}(key, seller, TRADE_ID);
+        escrow.createEscrow(key, seller, TRADE_ID, amount);
     }
 
     function _raiseDispute(bytes32 key) internal {
@@ -51,11 +88,11 @@ contract AgroEscrowTest is Test {
     // ─────────────────────────────────────────────────────────────────────────
 
     function test_createEscrow_locksValueAndSetsState() public {
-        uint256 contractBalanceBefore = address(escrow).balance;
+        uint256 contractBalanceBefore = cusd.balanceOf(address(escrow));
 
         _createEscrow(KEY, AMOUNT);
 
-        assertEq(address(escrow).balance, contractBalanceBefore + AMOUNT);
+        assertEq(cusd.balanceOf(address(escrow)), contractBalanceBefore + AMOUNT);
 
         (
             address eBuyer,
@@ -74,8 +111,8 @@ contract AgroEscrowTest is Test {
 
     function test_createEscrow_revertsIfZeroValue() public {
         vm.prank(buyer);
-        vm.expectRevert("Must send funds");
-        escrow.createEscrow{value: 0}(KEY, seller, TRADE_ID);
+        vm.expectRevert("Amount must be > 0");
+        escrow.createEscrow(KEY, seller, TRADE_ID, 0);
     }
 
     function test_createEscrow_revertsIfDuplicateKey() public {
@@ -83,13 +120,13 @@ contract AgroEscrowTest is Test {
 
         vm.prank(buyer);
         vm.expectRevert("Escrow already exists");
-        escrow.createEscrow{value: AMOUNT}(KEY, seller, TRADE_ID);
+        escrow.createEscrow(KEY, seller, TRADE_ID, AMOUNT);
     }
 
     function test_createEscrow_revertsIfSellerIsZeroAddress() public {
         vm.prank(buyer);
         vm.expectRevert("Invalid seller address");
-        escrow.createEscrow{value: AMOUNT}(KEY, payable(address(0)), TRADE_ID);
+        escrow.createEscrow(KEY, address(0), TRADE_ID, AMOUNT);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -99,12 +136,12 @@ contract AgroEscrowTest is Test {
     function test_releaseFunds_buyerCanRelease() public {
         _createEscrow(KEY, AMOUNT);
 
-        uint256 sellerBalanceBefore = seller.balance;
+        uint256 sellerBalanceBefore = cusd.balanceOf(seller);
 
         vm.prank(buyer);
         escrow.releaseFunds(KEY);
 
-        assertEq(seller.balance, sellerBalanceBefore + AMOUNT);
+        assertEq(cusd.balanceOf(seller), sellerBalanceBefore + AMOUNT);
 
         (, , uint256 eAmount, AgroEscrow.State eState, ) = escrow.getEscrow(KEY);
         assertEq(uint256(eState), uint256(AgroEscrow.State.COMPLETE));
@@ -114,12 +151,12 @@ contract AgroEscrowTest is Test {
     function test_releaseFunds_adminCanRelease() public {
         _createEscrow(KEY, AMOUNT);
 
-        uint256 sellerBalanceBefore = seller.balance;
+        uint256 sellerBalanceBefore = cusd.balanceOf(seller);
 
         // adminAddr == address(this), no prank needed
         escrow.releaseFunds(KEY);
 
-        assertEq(seller.balance, sellerBalanceBefore + AMOUNT);
+        assertEq(cusd.balanceOf(seller), sellerBalanceBefore + AMOUNT);
 
         (, , , AgroEscrow.State eState, ) = escrow.getEscrow(KEY);
         assertEq(uint256(eState), uint256(AgroEscrow.State.COMPLETE));
@@ -231,12 +268,12 @@ contract AgroEscrowTest is Test {
         _createEscrow(KEY, AMOUNT);
         _raiseDispute(KEY);
 
-        uint256 sellerBalanceBefore = seller.balance;
+        uint256 sellerBalanceBefore = cusd.balanceOf(seller);
 
         // admin calls (address(this))
         escrow.resolveDispute(KEY, false);
 
-        assertEq(seller.balance, sellerBalanceBefore + AMOUNT);
+        assertEq(cusd.balanceOf(seller), sellerBalanceBefore + AMOUNT);
 
         (, , uint256 eAmount, AgroEscrow.State eState, ) = escrow.getEscrow(KEY);
         assertEq(uint256(eState), uint256(AgroEscrow.State.COMPLETE));
@@ -247,12 +284,12 @@ contract AgroEscrowTest is Test {
         _createEscrow(KEY, AMOUNT);
         _raiseDispute(KEY);
 
-        uint256 buyerBalanceBefore = buyer.balance;
+        uint256 buyerBalanceBefore = cusd.balanceOf(buyer);
 
         // admin calls (address(this))
         escrow.resolveDispute(KEY, true);
 
-        assertEq(buyer.balance, buyerBalanceBefore + AMOUNT);
+        assertEq(cusd.balanceOf(buyer), buyerBalanceBefore + AMOUNT);
 
         (, , uint256 eAmount, AgroEscrow.State eState, ) = escrow.getEscrow(KEY);
         assertEq(uint256(eState), uint256(AgroEscrow.State.COMPLETE));
@@ -292,12 +329,12 @@ contract AgroEscrowTest is Test {
         _createEscrow(KEY, AMOUNT);
         _raiseDispute(KEY);
 
-        uint256 buyerBalanceBefore = buyer.balance;
+        uint256 buyerBalanceBefore = cusd.balanceOf(buyer);
 
         // admin calls (address(this))
         escrow.refund(KEY);
 
-        assertEq(buyer.balance, buyerBalanceBefore + AMOUNT);
+        assertEq(cusd.balanceOf(buyer), buyerBalanceBefore + AMOUNT);
 
         (, , uint256 eAmount, AgroEscrow.State eState, ) = escrow.getEscrow(KEY);
         assertEq(uint256(eState), uint256(AgroEscrow.State.REFUNDED));
@@ -392,12 +429,12 @@ contract AgroEscrowTest is Test {
         _createEscrow(KEY, AMOUNT);
         _raiseDispute(KEY);
 
-        uint256 sellerBalanceBefore = seller.balance;
+        uint256 sellerBalanceBefore = cusd.balanceOf(seller);
 
         vm.prank(stranger);
         escrow.resolveDispute(KEY, false);
 
-        assertEq(seller.balance, sellerBalanceBefore + AMOUNT);
+        assertEq(cusd.balanceOf(seller), sellerBalanceBefore + AMOUNT);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -469,19 +506,19 @@ contract AgroEscrowTest is Test {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // receive() guard — contract should hold ETH/CELO
+    // cUSD balance tracking — contract holds tokens during escrow
     // ─────────────────────────────────────────────────────────────────────────
 
-    function test_contractHoldsEtherDuringEscrow() public {
+    function test_contractHoldsCusdDuringEscrow() public {
         _createEscrow(KEY, AMOUNT);
-        assertEq(address(escrow).balance, AMOUNT);
+        assertEq(cusd.balanceOf(address(escrow)), AMOUNT);
 
         _createEscrow(KEY2, 2 ether);
-        assertEq(address(escrow).balance, AMOUNT + 2 ether);
+        assertEq(cusd.balanceOf(address(escrow)), AMOUNT + 2 ether);
 
         vm.prank(buyer);
         escrow.releaseFunds(KEY);
 
-        assertEq(address(escrow).balance, 2 ether);
+        assertEq(cusd.balanceOf(address(escrow)), 2 ether);
     }
 }
