@@ -76,6 +76,11 @@ class SocketService {
     }
   }
 
+  on<K extends SocketEventName>(
+    event: K,
+    callback: (payload: SocketEventPayloads[K]) => void
+  ): void;
+  on(event: string, callback: (...args: unknown[]) => void): void;
   on(event: string, callback: (...args: any[]) => void): void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
@@ -84,6 +89,11 @@ class SocketService {
     this.socket?.on(event, callback);
   }
 
+  off<K extends SocketEventName>(
+    event: K,
+    callback: (payload: SocketEventPayloads[K]) => void
+  ): void;
+  off(event: string, callback: (...args: unknown[]) => void): void;
   off(event: string, callback: (...args: any[]) => void): void {
     this.listeners.get(event)?.delete(callback);
     this.socket?.off(event, callback);

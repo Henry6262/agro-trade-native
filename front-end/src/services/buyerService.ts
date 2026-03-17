@@ -114,6 +114,37 @@ class BuyerService {
     }
   }
 
+  // Paginated trade operations (cursor-based)
+  async getMyTradeOperationsPaginated(
+    limit = 20,
+    cursor?: string
+  ): Promise<{ items: TradeOperation[]; nextCursor: string | null }> {
+    const headers = await this.getHeaders();
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (cursor) {
+      params.append('cursor', cursor);
+    }
+
+    const response = await fetch(`${API_URL}/buyer/trades?${params.toString()}`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch trade operations');
+    }
+
+    const data = await response.json();
+    // Normalise: backend may return a plain array or a paginated envelope
+    if (Array.isArray(data)) {
+      return { items: data, nextCursor: null };
+    }
+    if (Array.isArray(data.data)) {
+      return { items: data.data, nextCursor: data.nextCursor ?? null };
+    }
+    return { items: data.items ?? [], nextCursor: data.nextCursor ?? null };
+  }
+
   // Get specific trade operation details
   async getTradeOperationDetails(operationId: string): Promise<TradeOperation> {
     try {

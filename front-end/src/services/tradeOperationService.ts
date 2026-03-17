@@ -196,11 +196,21 @@ export const tradeOperationService = {
     }
   },
 
-  // Get active sell listings
-  async getActiveSellListings(): Promise<SaleListing[]> {
+  // Get active sell listings (paginated)
+  async getActiveSellListings(
+    page = 1,
+    limit = 50
+  ): Promise<{
+    data: SaleListing[];
+    meta: { page: number; limit: number; total: number; hasMore: boolean };
+  }> {
     try {
-      const response = await apiClient.get<SaleListing[]>('/seller/listings');
-      return response.data.filter((listing) => listing.status === 'ACTIVE');
+      const response = await apiClient.get(`/seller/listings?page=${page}&limit=${limit}`);
+      // Backend returns { data: [], meta: { page, limit, total, hasMore } }
+      const payload = response.data;
+      const items: SaleListing[] = Array.isArray(payload) ? payload : (payload?.data ?? []);
+      const meta = payload?.meta ?? { page, limit, total: items.length, hasMore: false };
+      return { data: items.filter((l: SaleListing) => l.status === 'ACTIVE'), meta };
     } catch (error) {
       console.error('Error fetching sell listings:', error);
       throw error;

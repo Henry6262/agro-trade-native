@@ -15,6 +15,7 @@ interface UseTradeOperationsReturn {
   // Data
   buyListings: BuyListing[];
   sellListings: SaleListing[];
+  sellListingsHasMore: boolean;
   tradeOperations: TradeOperation[];
   currentTradeOperation: TradeOperation | null;
   matchingSellers: MatchingSeller[];
@@ -34,6 +35,8 @@ interface UseTradeOperationsReturn {
   // Actions
   loadBuyListings: () => Promise<void>;
   loadSellListings: () => Promise<void>;
+  loadMoreSellListings: () => Promise<void>;
+  isLoadingMoreSellListings: boolean;
   createTradeOperation: (
     buyListingId: string,
     targetProfitMargin: number
@@ -91,6 +94,9 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
   // Data state
   const [buyListings, setBuyListings] = useState<BuyListing[]>([]);
   const [sellListings, setSellListings] = useState<SaleListing[]>([]);
+  const [sellListingsPage, setSellListingsPage] = useState(1);
+  const [sellListingsHasMore, setSellListingsHasMore] = useState(false);
+  const [isLoadingMoreSellListings, setIsLoadingMoreSellListings] = useState(false);
   const [tradeOperations, setTradeOperations] = useState<TradeOperation[]>([]);
   const [currentTradeOperation, setCurrentTradeOperation] = useState<TradeOperation | null>(null);
   const [matchingSellers, setMatchingSellers] = useState<MatchingSeller[]>([]);
@@ -136,19 +142,38 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
     }
   }, [handleError, clearError]);
 
-  // Load sell listings
+  // Load sell listings (page 1 reset)
   const loadSellListings = useCallback(async () => {
     try {
       setIsLoadingSellListings(true);
       clearError();
-      const listings = await tradeOperationService.getActiveSellListings();
-      setSellListings(listings);
+      const { data, meta } = await tradeOperationService.getActiveSellListings(1);
+      setSellListings(data);
+      setSellListingsPage(1);
+      setSellListingsHasMore(meta.hasMore);
     } catch (err) {
       handleError(err, 'load sell listings');
     } finally {
       setIsLoadingSellListings(false);
     }
   }, [handleError, clearError]);
+
+  // Load next page of sell listings
+  const loadMoreSellListings = useCallback(async () => {
+    if (!sellListingsHasMore || isLoadingMoreSellListings) return;
+    try {
+      setIsLoadingMoreSellListings(true);
+      const nextPage = sellListingsPage + 1;
+      const { data, meta } = await tradeOperationService.getActiveSellListings(nextPage);
+      setSellListings((prev) => [...prev, ...data]);
+      setSellListingsPage(nextPage);
+      setSellListingsHasMore(meta.hasMore);
+    } catch (err) {
+      handleError(err, 'load more sell listings');
+    } finally {
+      setIsLoadingMoreSellListings(false);
+    }
+  }, [sellListingsHasMore, isLoadingMoreSellListings, sellListingsPage, handleError]);
 
   // Load all trade operations
   const loadTradeOperations = useCallback(async () => {
@@ -418,6 +443,7 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
     // Data
     buyListings,
     sellListings,
+    sellListingsHasMore,
     tradeOperations,
     currentTradeOperation,
     matchingSellers,
@@ -428,6 +454,7 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
     // Loading states
     isLoadingBuyListings,
     isLoadingSellListings,
+    isLoadingMoreSellListings,
     isLoadingMatchingSellers,
     isCreatingTrade,
     isCalculatingProfit,
@@ -437,6 +464,7 @@ export const useTradeOperations = (): UseTradeOperationsReturn => {
     // Actions
     loadBuyListings,
     loadSellListings,
+    loadMoreSellListings,
     createTradeOperation,
     findMatchingSellers,
     selectSellers,

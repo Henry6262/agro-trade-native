@@ -56,6 +56,7 @@ const toInspectorJob = (
   return {
     id: request.id,
     jobNumber: request.tradeOperation?.id ?? request.id,
+    tradeOperationId: request.tradeOperationId ?? request.tradeOperation?.id,
     priority: request.priority,
     status: request.status as InspectorVerificationJob['status'],
     location: toInspectorLocation(request),

@@ -183,14 +183,11 @@ export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({
           </Text>
         </View>
 
-        {/* Escrow controls — inspector can release payment or raise a dispute after
-            on-site verification. tradeOperationId should ideally be a dedicated
-            field on InspectorVerificationJob returned by the API; using
-            sellerListingId as the closest available identifier until the backend
-            surfaces a tradeOperationId on inspection job responses. */}
-        {job.sellerListingId && (
+        {/* Escrow controls — inspector can see escrow state and raise disputes
+            after on-site verification. Uses tradeOperationId from the API response. */}
+        {job.tradeOperationId && (
           <View style={styles.escrowWrap}>
-            <EscrowStatusCard tradeOperationId={job.sellerListingId} isAdmin={true} />
+            <EscrowStatusCard tradeOperationId={job.tradeOperationId} isAdmin={true} />
           </View>
         )}
 

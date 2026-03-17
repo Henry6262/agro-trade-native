@@ -42,3 +42,4 @@ android/**/*.aab
 android/**/*.aar
 android/**/output.json
 /ios
+.vercel

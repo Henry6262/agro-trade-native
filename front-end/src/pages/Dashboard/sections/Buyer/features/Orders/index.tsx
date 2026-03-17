@@ -2,16 +2,20 @@ import React, { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  FlatList,
   RefreshControl,
-  ScrollView,
+  StyleSheet,
   Text,
   View,
-  StyleSheet,
 } from 'react-native';
 import { COLORS } from '../../../../../../design-system';
 import { useBuyerOrders, useBuyerTimeline } from './hooks';
-import { OrdersStatsGrid, ActiveOrdersList, IncomingOffersList, BuyerTimeline } from './components';
+import { ActiveOrdersList, OrdersStatsGrid, IncomingOffersList, BuyerTimeline } from './components';
+import type { BuyerOrder } from './types';
 import buyerService from '@services/buyerService';
+
+// Module-level key extractor — stable reference
+const keyExtractor = (item: BuyerOrder) => item.id;
 
 export default function BuyerOrdersTab() {
   const {
@@ -21,9 +25,12 @@ export default function BuyerOrdersTab() {
     expandedOrderId,
     isLoading,
     isRefreshing,
+    isFetchingMore,
     toggleOrderExpand,
     refresh: refreshOrders,
+    fetchMore,
   } = useBuyerOrders();
+
   const {
     events: timelineEvents,
     isLoading: isTimelineLoading,
@@ -69,77 +76,125 @@ export default function BuyerOrdersTab() {
     [handleRefresh]
   );
 
-  if (isLoading && !isRefreshing) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color={COLORS.info} />
-        <Text style={styles.loadingText}>Loading your orders...</Text>
+  // Render a single order card as a FlatList item
+  const renderOrderItem = useCallback(
+    ({ item }: { item: BuyerOrder }) => (
+      <ActiveOrdersList
+        orders={[item]}
+        expandedOrderId={expandedOrderId}
+        onToggle={toggleOrderExpand}
+        onConfirmDelivery={handleConfirmDelivery}
+        confirmingDeliveryId={confirmingDeliveryId}
+      />
+    ),
+    [expandedOrderId, toggleOrderExpand, handleConfirmDelivery, confirmingDeliveryId]
+  );
+
+  const ListHeader = (
+    <View style={styles.headerContent}>
+      <View style={styles.pageHeader}>
+        <Text style={styles.pageTitle}>My Orders</Text>
+        <Text style={styles.pageSubtitle}>Track your orders and purchase performance</Text>
       </View>
-    );
-  }
+
+      <OrdersStatsGrid stats={stats} />
+
+      <Text style={styles.sectionTitle}>Active Orders</Text>
+
+      {isLoading && orders.length === 0 && (
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator size="large" color={COLORS.info} />
+          <Text style={styles.loadingText}>Loading your orders...</Text>
+        </View>
+      )}
+
+      {!isLoading && orders.length === 0 && (
+        <Text style={styles.emptyText}>No orders yet. Accepted deals will appear here.</Text>
+      )}
+    </View>
+  );
+
+  const ListFooter = (
+    <View style={styles.footerContent}>
+      {isFetchingMore && (
+        <View style={styles.fetchMoreWrap}>
+          <ActivityIndicator color={COLORS.info} />
+        </View>
+      )}
+
+      <Text style={styles.sectionTitle}>Incoming Offers</Text>
+      <IncomingOffersList offers={incomingOffers} />
+
+      <BuyerTimeline
+        events={timelineEvents}
+        isLoading={isTimelineLoading}
+        onRefresh={refreshTimeline}
+      />
+
+      <View style={styles.listEnd} />
+    </View>
+  );
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      showsVerticalScrollIndicator={false}
-      contentInsetAdjustmentBehavior="automatic"
-      refreshControl={
-        <RefreshControl
-          refreshing={isRefreshing}
-          onRefresh={handleRefresh}
-          tintColor={COLORS.info}
-        />
-      }
-    >
-      <View style={styles.content}>
-        <View style={styles.pageHeader}>
-          <Text style={styles.pageTitle}>My Orders</Text>
-          <Text style={styles.pageSubtitle}>Track your orders and purchase performance</Text>
-        </View>
-
-        <OrdersStatsGrid stats={stats} />
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Active Orders</Text>
-          <ActiveOrdersList
-            orders={orders}
-            expandedOrderId={expandedOrderId}
-            onToggle={toggleOrderExpand}
-            onConfirmDelivery={handleConfirmDelivery}
-            confirmingDeliveryId={confirmingDeliveryId}
+    <View style={styles.root}>
+      <FlatList
+        data={orders}
+        keyExtractor={keyExtractor}
+        renderItem={renderOrderItem}
+        ListHeaderComponent={ListHeader}
+        ListFooterComponent={ListFooter}
+        onEndReached={fetchMore}
+        onEndReachedThreshold={0.3}
+        showsVerticalScrollIndicator={false}
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handleRefresh}
+            tintColor={COLORS.info}
+            colors={[COLORS.info]}
           />
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Incoming Offers</Text>
-          <IncomingOffersList offers={incomingOffers} />
-        </View>
-
-        <BuyerTimeline
-          events={timelineEvents}
-          isLoading={isTimelineLoading}
-          onRefresh={refreshTimeline}
-        />
-      </View>
-    </ScrollView>
+        }
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  centered: {
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    flex: 1,
-    justifyContent: 'center',
+  emptyText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    paddingVertical: 24,
+    textAlign: 'center',
   },
-  content: {
+  fetchMoreWrap: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  footerContent: {
+    gap: 16,
+    paddingTop: 8,
+  },
+  headerContent: {
     gap: 20,
-    padding: 16,
+    paddingTop: 16,
+  },
+  listContent: {
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+  },
+  listEnd: {
+    height: 40,
   },
   loadingText: {
     color: COLORS.textSecondary,
     fontSize: 15,
     marginTop: 12,
+  },
+  loadingWrap: {
+    alignItems: 'center',
+    paddingVertical: 40,
   },
   pageHeader: {},
   pageSubtitle: {
@@ -153,12 +208,9 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 0.3,
   },
-  scroll: {
+  root: {
     backgroundColor: 'transparent',
     flex: 1,
-  },
-  section: {
-    gap: 8,
   },
   sectionTitle: {
     color: COLORS.textPrimary,

@@ -420,6 +420,7 @@ export class InspectionController {
         latitude: Number(entity.latitude),
         longitude: Number(entity.longitude),
         address: entity.address,
+        tradeOperationId: entity.tradeOperationId ?? null,
         saleListing,
         inspector,
         tradeOperation,

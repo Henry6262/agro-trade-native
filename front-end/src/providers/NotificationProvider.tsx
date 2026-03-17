@@ -7,6 +7,7 @@ import {
   registerForPushNotifications,
   sendPushTokenToBackend,
 } from '@services/notificationService';
+import { queueNavigate } from '../navigation/navigationRef';
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -35,14 +36,28 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       });
     });
 
-    // Listen for notification taps — log for future navigation wiring
+    // Listen for notification taps — navigate to the relevant screen
     responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
       const content = response.notification.request.content;
-      console.warn('[Notifications] User tapped notification:', {
-        title: content.title,
-        type: content.data?.type,
-        data: content.data,
-      });
+      const type = content.data?.type as string | undefined;
+      const data = content.data as Record<string, unknown> | undefined;
+
+      if (type === 'order' || type === 'trade:updated' || type === 'trade:seller-added') {
+        if (data?.tradeOperationId) {
+          const orderId = data.tradeOperationId as string;
+          console.warn('[Notifications] Navigating to OrderDetail', { orderId });
+          queueNavigate('OrderDetail', { orderId });
+        } else {
+          console.warn('[Notifications] Navigating to Main (no tradeOperationId)', { type });
+          queueNavigate('Main');
+        }
+      } else if (type === 'inspection:completed') {
+        console.warn('[Notifications] Navigating to Main (inspection:completed)');
+        queueNavigate('Main');
+      } else {
+        console.warn('[Notifications] Navigating to Main (default)', { type, data });
+        queueNavigate('Main');
+      }
     });
 
     return () => {

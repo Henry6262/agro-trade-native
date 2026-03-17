@@ -36,6 +36,7 @@ export interface InspectorProductDetails {
 export interface InspectorVerificationJob {
   id: string;
   jobNumber: string;
+  tradeOperationId?: string;
   sellerListingId?: string;
   priority: InspectorJobPriority;
   status: InspectorJobStatus;

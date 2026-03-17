@@ -56,8 +56,11 @@ export interface BuyerOrdersHookResult {
   expandedOrderId: string | null;
   isLoading: boolean;
   isRefreshing: boolean;
+  isFetchingMore: boolean;
+  hasMore: boolean;
   toggleOrderExpand: (orderId: string) => void;
   refresh: () => Promise<void>;
+  fetchMore: () => Promise<void>;
 }
 
 export interface BuyerTimelineEvent {

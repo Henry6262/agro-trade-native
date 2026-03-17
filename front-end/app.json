@@ -54,6 +54,22 @@
     },
     "scheme": "agrotrade",
     "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0",
+            "kotlinVersion": "1.9.25",
+            "newArchEnabled": true,
+            "extraProguardRules": "-keep class com.facebook.react.** { *; }"
+          },
+          "ios": {
+            "newArchEnabled": true
+          }
+        }
+      ],
       "expo-web-browser",
       [
         "@sentry/react-native/expo",
@@ -88,17 +104,6 @@
       "eas": {
         "projectId": "9a2f3b44-4a6b-49e4-a05a-83c3f0a864db"
       }
-    },
-    "hooks": {
-      "postPublish": [
-        {
-          "file": "sentry-expo/upload-sourcemaps",
-          "config": {
-            "organization": "agrotrade",
-            "project": "react-native"
-          }
-        }
-      ]
     }
   }
 }

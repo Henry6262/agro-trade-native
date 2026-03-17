@@ -4,6 +4,7 @@ import { CharacterTourOverlay } from '../features/onboarding/components/Characte
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
 import { linking } from './linking';
+import { navigationRef, flushPendingNavigation } from './navigationRef';
 
 // Import stack navigators
 import AuthStack from './AuthStack';
@@ -39,7 +40,7 @@ export default function RootNavigator({ appState }: RootNavigatorProps) {
 
   return (
     <>
-      <NavigationContainer linking={linking}>
+      <NavigationContainer ref={navigationRef} linking={linking} onReady={flushPendingNavigation}>
         <Stack.Navigator
           initialRouteName={initialRouteName}
           screenOptions={{

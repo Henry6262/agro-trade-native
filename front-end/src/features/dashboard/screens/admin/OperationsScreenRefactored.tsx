@@ -27,6 +27,7 @@ export default function OperationsScreenRefactored() {
     // Data
     buyListings = [],
     sellListings = [],
+    sellListingsHasMore = false,
     tradeOperations = [],
     currentTradeOperation,
     matchingSellers,
@@ -36,6 +37,7 @@ export default function OperationsScreenRefactored() {
     // Loading states
     isLoadingBuyListings,
     isLoadingSellListings,
+    isLoadingMoreSellListings = false,
     isLoadingMatchingSellers,
     isCalculatingProfit,
     isEstimatingTransport,
@@ -44,6 +46,7 @@ export default function OperationsScreenRefactored() {
     // Actions
     loadBuyListings,
     loadSellListings,
+    loadMoreSellListings,
     loadTradeOperations,
     createTradeOperation,
     findMatchingSellers,
@@ -163,97 +166,112 @@ export default function OperationsScreenRefactored() {
             <Text style={styles.stateText}>No seller listings available right now</Text>
           </View>
         ) : (
-          sellListings.map((listing) => (
-            <GlassCard
-              key={listing.id}
-              tier="medium"
-              animate={false}
-              style={StyleSheet.flatten([styles.listingCard, styles.darkCard])}
-            >
-              {/* Product emoji header */}
-              <View style={styles.productEmojiRow}>
-                <View style={styles.emojiCircle}>
-                  <Text style={styles.emojiText}>{getProductEmoji(listing.product)}</Text>
-                </View>
-                <View style={styles.listingHeaderLeft}>
-                  <Text style={styles.listingTitle}>
-                    {listing.product?.name || 'Unknown Product'}
-                  </Text>
-                  <Text style={styles.listingSubtitle}>
-                    {listing.seller?.name || 'Unknown Seller'}
-                  </Text>
-                </View>
-                <View
-                  style={[
-                    styles.qualityBadge,
-                    listing.quality === 'premium'
-                      ? styles.qualityPremium
-                      : listing.quality === 'standard'
-                        ? styles.qualityStandard
-                        : styles.qualityDefault,
-                  ]}
-                >
-                  <Text
+          <>
+            {sellListings.map((listing) => (
+              <GlassCard
+                key={listing.id}
+                tier="medium"
+                animate={false}
+                style={StyleSheet.flatten([styles.listingCard, styles.darkCard])}
+              >
+                {/* Product emoji header */}
+                <View style={styles.productEmojiRow}>
+                  <View style={styles.emojiCircle}>
+                    <Text style={styles.emojiText}>{getProductEmoji(listing.product)}</Text>
+                  </View>
+                  <View style={styles.listingHeaderLeft}>
+                    <Text style={styles.listingTitle}>
+                      {listing.product?.name || 'Unknown Product'}
+                    </Text>
+                    <Text style={styles.listingSubtitle}>
+                      {listing.seller?.name || 'Unknown Seller'}
+                    </Text>
+                  </View>
+                  <View
                     style={[
-                      styles.qualityText,
+                      styles.qualityBadge,
                       listing.quality === 'premium'
-                        ? styles.qualityTextPremium
+                        ? styles.qualityPremium
                         : listing.quality === 'standard'
-                          ? styles.qualityTextStandard
-                          : styles.qualityTextDefault,
+                          ? styles.qualityStandard
+                          : styles.qualityDefault,
                     ]}
                   >
-                    {listing.quality || 'Standard'}
-                  </Text>
+                    <Text
+                      style={[
+                        styles.qualityText,
+                        listing.quality === 'premium'
+                          ? styles.qualityTextPremium
+                          : listing.quality === 'standard'
+                            ? styles.qualityTextStandard
+                            : styles.qualityTextDefault,
+                      ]}
+                    >
+                      {listing.quality || 'Standard'}
+                    </Text>
+                  </View>
                 </View>
-              </View>
 
-              {/* Categories */}
-              {listing.categories && listing.categories.length > 0 && (
-                <View style={styles.tagsRow}>
-                  {listing.categories.slice(0, 3).map((cat: string, idx: number) => (
-                    <View key={idx} style={styles.tag}>
-                      <Text style={styles.tagText}>{cat}</Text>
+                {/* Categories */}
+                {listing.categories && listing.categories.length > 0 && (
+                  <View style={styles.tagsRow}>
+                    {listing.categories.slice(0, 3).map((cat: string, idx: number) => (
+                      <View key={idx} style={styles.tag}>
+                        <Text style={styles.tagText}>{cat}</Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
+
+                {/* Details */}
+                <View style={styles.detailsColumn}>
+                  <View style={styles.detailRow}>
+                    <View style={styles.detailItem}>
+                      <Package size={15} color={COLORS.textMuted} />
+                      <Text style={styles.detailText}>
+                        {listing.quantity} {listing.unit} available
+                      </Text>
                     </View>
-                  ))}
+                    <View style={styles.detailItem}>
+                      <DollarSign size={15} color={COLORS.accentGreen} />
+                      <Text style={styles.priceText}>
+                        ${listing.askingPrice}/{listing.unit}
+                      </Text>
+                    </View>
+                  </View>
+                  {listing.harvestDate && (
+                    <View style={styles.detailItem}>
+                      <Calendar size={15} color={COLORS.textMuted} />
+                      <Text style={styles.detailText}>
+                        Harvest: {new Date(listing.harvestDate).toLocaleDateString()}
+                      </Text>
+                    </View>
+                  )}
+                  {listing.location && (
+                    <View style={styles.detailItem}>
+                      <Truck size={15} color={COLORS.textMuted} />
+                      <Text style={styles.detailText}>
+                        {listing.location?.city || 'N/A'}, {listing.location?.country || 'N/A'}
+                      </Text>
+                    </View>
+                  )}
                 </View>
-              )}
-
-              {/* Details */}
-              <View style={styles.detailsColumn}>
-                <View style={styles.detailRow}>
-                  <View style={styles.detailItem}>
-                    <Package size={15} color={COLORS.textMuted} />
-                    <Text style={styles.detailText}>
-                      {listing.quantity} {listing.unit} available
-                    </Text>
-                  </View>
-                  <View style={styles.detailItem}>
-                    <DollarSign size={15} color={COLORS.accentGreen} />
-                    <Text style={styles.priceText}>
-                      ${listing.askingPrice}/{listing.unit}
-                    </Text>
-                  </View>
-                </View>
-                {listing.harvestDate && (
-                  <View style={styles.detailItem}>
-                    <Calendar size={15} color={COLORS.textMuted} />
-                    <Text style={styles.detailText}>
-                      Harvest: {new Date(listing.harvestDate).toLocaleDateString()}
-                    </Text>
-                  </View>
+              </GlassCard>
+            ))}
+            {sellListingsHasMore && (
+              <TouchableOpacity
+                onPress={loadMoreSellListings}
+                disabled={isLoadingMoreSellListings}
+                style={styles.loadMoreBtn}
+              >
+                {isLoadingMoreSellListings ? (
+                  <ActivityIndicator size="small" color={COLORS.accentGreen} />
+                ) : (
+                  <Text style={styles.loadMoreText}>Load More</Text>
                 )}
-                {listing.location && (
-                  <View style={styles.detailItem}>
-                    <Truck size={15} color={COLORS.textMuted} />
-                    <Text style={styles.detailText}>
-                      {listing.location?.city || 'N/A'}, {listing.location?.country || 'N/A'}
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </GlassCard>
-          ))
+              </TouchableOpacity>
+            )}
+          </>
         )}
       </View>
     </ScrollView>
@@ -657,6 +675,20 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontSize: 16,
     fontWeight: '700',
+  },
+  loadMoreBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74,222,128,0.08)',
+    borderColor: 'rgba(74,222,128,0.2)',
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 8,
+    paddingVertical: 14,
+  },
+  loadMoreText: {
+    color: COLORS.accentGreen,
+    fontSize: 14,
+    fontWeight: '600',
   },
   priceText: {
     color: COLORS.accentGreen,
