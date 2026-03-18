@@ -88,6 +88,15 @@ export class InspectionService {
       locationLng: longitude,
     }).catch(() => {});
 
+    // Emit socket event to notify on inspection creation
+    this.realtimeService.emit("inspection:created", {
+      inspectionId: inspection.id,
+      tradeOperationId: data.tradeOperationId,
+      priority: inspection.priority,
+      productName: inspection.saleListing.product.name,
+      sellerName: inspection.saleListing.seller.name,
+    });
+
     return inspection;
   }
 
@@ -125,6 +134,16 @@ export class InspectionService {
     this.logger.log(
       `Assigned inspector ${inspectorId} to inspection ${inspectionId}`,
     );
+
+    // Emit socket event to notify inspector of assignment
+    this.realtimeService.emitToUser(inspectorId, "inspection:assigned", {
+      inspectionId,
+      tradeOperationId: inspection.tradeOperationId,
+      productName: inspection.saleListing.product.name,
+      sellerName: inspection.saleListing.seller.name,
+      priority: inspection.priority,
+      requestedDate: inspection.requestedDate,
+    });
 
     return inspection;
   }

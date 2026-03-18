@@ -413,6 +413,7 @@ export class TradeOperationService {
     for (const seller of sellers) {
       const saleListing = await this.prisma.saleListing.findUnique({
         where: { id: seller.saleListingId },
+        include: { seller: true, product: true },
       });
 
       if (!saleListing) {
@@ -436,6 +437,15 @@ export class TradeOperationService {
       this.logger.log(
         `Added seller ${seller.sellerId}: Requesting ${seller.requestedQuantity} of ${saleListing.quantity.toNumber()} available`,
       );
+
+      // Emit socket event to notify seller they've been added to a trade
+      this.realtimeService.emitToUser(seller.sellerId, "trade:seller-added", {
+        tradeOperationId,
+        tradeSellerId: tradeSeller.id,
+        productName: saleListing.product.name,
+        requestedQuantity: seller.requestedQuantity,
+        buyerName: trade.buyListing.buyerId ? "Buyer" : "Unknown",
+      });
 
       tradeSellers.push(tradeSeller);
     }

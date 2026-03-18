@@ -15,7 +15,10 @@
       "Skill(commit-commands:commit-push-pr:*)",
       "Skill(gsd:progress)",
       "Skill(gsd:progress:*)",
-      "mcp__plugin_playwright_playwright__browser_take_screenshot"
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__shadcn__search_items_in_registries",
+      "mcp__shadcn__list_items_in_registries",
+      "mcp__Desktop_Commander__list_directory"
     ],
     "deny": [],
     "ask": []
