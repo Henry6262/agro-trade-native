@@ -2,13 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 
-interface Country {
-  id: string;
-  name: string;
-  code: string;
-  flag: string;
-}
-
 interface GeocodeResult {
   lat: number;
   lng: number;
