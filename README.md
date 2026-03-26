@@ -104,3 +104,14 @@ See `docs/TEST_SCENARIOS.md` for complete step-by-step scenarios.
 ## Swagger
 
 API docs available at `http://localhost:4000/api/docs/` when backend is running.
+
+
+---
+
+## Latest Progress Report
+
+> **16 of 22 NI tasks completed** | Updated: 2026-03-26
+
+See [PROGRESS_REPORT.md](./PROGRESS_REPORT.md) for detailed status of all tasks.
+
+Tracking: [Issue #57](https://github.com/Henry6262/agro-trade-native/issues/57)
