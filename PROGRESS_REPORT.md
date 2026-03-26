@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-26_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `05a8d69` 2026-03-26 — ci: remove --auto from atctl check to skip e2e tests in lint job
+- `244f326` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `d932d95` 2026-03-26 — fix: add missing closing brace for if-block in finalizeTrade $transaction
 - `98492a0` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `bf166b4` 2026-03-26 — fix: remove unused Country interface from location.service.ts
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-26_
 - `a91803f` 2026-03-26 — ci: add Dependabot config for backend, admin-dashboard, mobile, and GH Actions
 - `9ab9f64` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `d9c0cfc` 2026-03-26 — ci: add auto-gen progress report workflow with issue/commit tracking
-- `1e390dc` 2026-03-26 — feat: add TS error report generator script for CI diagnostics
-- `2cb94bc` 2026-03-26 — ci: add E2E with Postgres/Redis services, TS diagnostics, artifact upload
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
