@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-26_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `bf166b4` 2026-03-26 — fix: remove unused Country interface from location.service.ts
+- `f42b4ab` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `46462ed` 2026-03-26 — fix: add missing <button opening tag in TransportManagement.tsx
 - `99f44af` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `29f84ca` 2026-03-26 — fix: remove extra closing brace in finalizeTrade causing class scope leak
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-26_
 - `2cb94bc` 2026-03-26 — ci: add E2E with Postgres/Redis services, TS diagnostics, artifact upload
 - `14117d0` 2026-03-26 — ci: add Prisma generate step before atctl check
 - `98f75a6` 2026-03-26 — feat: integrate env validation into ConfigModule
-- `ea04311` 2026-03-26 — feat: add OrdersService with order querying and stats
-- `0372b52` 2026-03-26 — feat: add LocationService with geocoding methods
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
