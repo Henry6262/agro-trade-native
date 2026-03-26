@@ -9,6 +9,8 @@ import { TransportModule } from "../transport/transport.module";
 import { InspectionModule } from "../inspections/inspection.module";
 import { TradeOperationsModule } from "../trade-operations/trade-operations.module";
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 @Module({
   imports: [
     PrismaModule,
@@ -19,8 +21,9 @@ import { TradeOperationsModule } from "../trade-operations/trade-operations.modu
     InspectionModule,
     TradeOperationsModule,
   ],
-  controllers: [SimulationController],
-  providers: [SimulationService],
-  exports: [SimulationService],
+  // Only register simulation routes in development/test environments
+  controllers: isProduction ? [] : [SimulationController],
+  providers: isProduction ? [] : [SimulationService],
+  exports: isProduction ? [] : [SimulationService],
 })
 export class SimulationModule {}
