@@ -379,6 +379,15 @@ export class TradeOperationService {
       throw new NotFoundException("Trade operation not found");
     }
 
+        // NI-5 Fix: Prevent duplicate sellers
+    const existingSellerIds = trade.sellers.map(s => s.sellerId);
+    const duplicates = sellers.filter(s => existingSellerIds.includes(s.sellerId));
+    if (duplicates.length > 0) {
+      throw new BadRequestException(
+        `Sellers already added to this trade: ${duplicates.map(d => d.sellerId).join(', ')}`,
+      );
+    }
+
     // Validate total quantity
     const currentQuantity = trade.sellers.reduce(
       (sum, s) => sum + (s.requestedQuantity?.toNumber() || 0),
@@ -737,6 +746,13 @@ export class TradeOperationService {
 
     if (!trade) {
       throw new NotFoundException("Trade operation not found");
+    }
+
+        // NI-1 Fix: Validate trade is in DELIVERED phase before finalizing
+    if (trade.phase !== TradePhase.DELIVERED) {
+      throw new BadRequestException(
+        `Trade must be in DELIVERED phase to finalize. Current: ${trade.phase}`,
+      );
     }
 
     // Validate all sellers have agreed
@@ -1428,7 +1444,7 @@ export class TradeOperationService {
     await this.tradeEventsService.record({
       tradeOperationId,
       eventType: "PAYMENT_RELEASED",
-      actorRole: "ADMIN",
+      actorRole: "BUYER",
     }).catch(() => {});
 
     // Log state change for audit trail
