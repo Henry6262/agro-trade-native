@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-26_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `5d69824` 2026-03-26 — Create wait-for-db.sh
+- `e67ba55` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `a91803f` 2026-03-26 — ci: add Dependabot config for backend, admin-dashboard, mobile, and GH Actions
 - `9ab9f64` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `d9c0cfc` 2026-03-26 — ci: add auto-gen progress report workflow with issue/commit tracking
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-26_
 - `7f3788c` 2026-03-26 — fix: replace 'any' types with proper GeoJSON/Leaflet types in BulgariaMap
 - `4398ace` 2026-03-26 — feat: add environment validation with class-validator
 - `6642f22` 2026-03-26 — docs: add Latest Progress Report section to README.md
-- `16a7e96` 2026-03-26 — docs: add PROGRESS_REPORT.md with full NI task tracking
-- `0bdb0c6` 2026-03-26 — fix(NI-3): add retry with exponential backoff for push notifications
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
