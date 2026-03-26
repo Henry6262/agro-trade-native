@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Loader2, Truck } from 'lucide-react';
+import { Loader2, Truck, Plus } from 'lucide-react';
 import type { TransportRequestListItem, TransportRequestSummary } from '../../../../types';
 
 type TransportRequestStatus = 'OPEN' | 'ASSIGNED' | 'IN_PROGRESS' | 'IN_TRANSIT' | 'COMPLETED' | 'CANCELLED';
@@ -9,6 +9,7 @@ import { transportAdminService } from '../../../../services/api';
 import { BidReviewModal } from './BidReviewModal';
 import { RouteMapModal } from './RouteMapModal';
 import TransportOverviewMap from './TransportOverviewMap';
+import { CreateTransportModal } from './CreateTransportModal';
 
 interface TransportManagementProps {
   tradeOperation?: TradeOperation;
@@ -25,6 +26,7 @@ export const TransportManagement: React.FC<TransportManagementProps> = ({ tradeO
   const [filterStatus, setFilterStatus] = useState<TransportRequestStatus | 'ALL'>('ALL');
   const [showBidModal, setShowBidModal] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     fetchTransportRequests();
@@ -151,12 +153,13 @@ export const TransportManagement: React.FC<TransportManagementProps> = ({ tradeO
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Transport Management</h1>
-
-        {error && (
+<div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">Transport Management</h1>
+          <button onClick={() => setShowCreateModal(true)} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"><Plus className="w-5 h-5" /> Create Transport Request</button>
+        </div>
+                    {error && (
           <div className="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">
-            {error}
-            <button
+                    {error}            
               onClick={fetchTransportRequests}
               className="ml-4 underline"
             >
@@ -326,6 +329,13 @@ export const TransportManagement: React.FC<TransportManagementProps> = ({ tradeO
             setSelectedRequest(null);
             setRequestDetail(null);
           }}
+        />
+      )}
+            {/* NI-14: Create Transport Request Modal */}
+      {showCreateModal && (
+        <CreateTransportModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={fetchTransportRequests}
         />
       )}
     </div>
