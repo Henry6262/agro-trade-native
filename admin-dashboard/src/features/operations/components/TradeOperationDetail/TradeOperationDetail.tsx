@@ -14,6 +14,7 @@ import { TradeFinalizationPanel } from '../TradeFinalizationPanel';
 import { QuantityTrackingPanel } from '../QuantityTrackingPanel';
 import { ReplacementSellerFinder } from '../ReplacementSellerFinder';
 import { TransportManagementPanel } from '../TransportManagementPanel';
+import { PhaseTransitionPanel } from './PhaseTransitionPanel';
 import { useToast } from '@/hooks/use-toast';
 import { getPhaseColorClasses, getStatusColorClasses } from '../../../../utils/workflowValidation';
 
@@ -221,6 +222,12 @@ export const TradeOperationDetail: React.FC = () => {
       </div>
 
       <div className="p-6 max-w-7xl mx-auto space-y-6">
+                  {/* NI-15: Phase Transition Controls */}
+          <PhaseTransitionPanel
+            operationId={id!}
+            currentPhase={operation.phase}
+            onPhaseChanged={async () => setRefetchTrigger(p => p + 1)}
+          />
         {/* Buyer Information */}
         <Card>
           <CardHeader className="bg-gradient-to-br from-blue-50 to-blue-100 border-b-2 border-blue-300">
