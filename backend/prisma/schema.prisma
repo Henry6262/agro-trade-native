@@ -694,6 +694,10 @@ model TradeOperation {
   @@index([buyListingId])
   @@index([phase])
   @@index([status])
+    // NI-21: Composite indexes for common query patterns
+  @@index([adminId, status])
+  @@index([status, phase])
+  @@index([createdAt])
   @@map("trade_operations")
 }
 
