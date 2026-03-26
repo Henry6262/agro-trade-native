@@ -1,0 +1,78 @@
+name: progress-report
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1' # Every Monday at 06:00 UTC
+
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  generate-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Generate Progress Report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const { owner, repo } = context.repo;
+
+            // Fetch open issues
+            const issues = await github.rest.issues.listForRepo({
+              owner, repo, state: 'open', per_page: 100,
+            });
+
+            // Categorize
+            const bugs = issues.data.filter(i => i.labels.some(l => l.name === 'bug'));
+            const features = issues.data.filter(i => i.labels.some(l => l.name === 'enhancement'));
+            const unlabeled = issues.data.filter(i => i.labels.length === 0);
+
+            // Recent commits
+            const commits = await github.rest.repos.listCommits({
+              owner, repo, per_page: 15,
+            });
+
+            const now = new Date().toISOString().slice(0, 10);
+            let md = `# Progress Report\n`;
+            md += `_Auto-generated: ${now}_\n\n`;
+            md += `## Issue Summary\n`;
+            md += `| Category | Count |\n|----------|-------|\n`;
+            md += `| Total Open | ${issues.data.length} |\n`;
+            md += `| Bugs | ${bugs.length} |\n`;
+            md += `| Features | ${features.length} |\n`;
+            md += `| Unlabeled | ${unlabeled.length} |\n\n`;
+
+            md += `## Recent Commits (last 15)\n`;
+            for (const c of commits.data) {
+              const date = c.commit.author.date.slice(0, 10);
+              const msg = c.commit.message.split('\n')[0].slice(0, 80);
+              const sha = c.sha.slice(0, 7);
+              md += `- \`${sha}\` ${date} — ${msg}\n`;
+            }
+
+            md += `\n## Open Issues\n`;
+            for (const issue of issues.data.slice(0, 20)) {
+              const labels = issue.labels.map(l => l.name).join(', ') || 'none';
+              md += `- #${issue.number} ${issue.title} [${labels}]\n`;
+            }
+            if (issues.data.length > 20) {
+              md += `\n_...and ${issues.data.length - 20} more_\n`;
+            }
+
+            fs.writeFileSync('PROGRESS_REPORT.md', md);
+            console.log('Report generated');
+      - name: Commit report
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add PROGRESS_REPORT.md
+          git diff --cached --quiet || git commit -m "docs: auto-update progress report [skip ci]"
+          git push
