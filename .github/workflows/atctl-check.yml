@@ -18,5 +18,7 @@ jobs:
           npm install --prefix backend
           npm install --prefix admin-dashboard
           npm install --prefix front-end
+      - name: Generate Prisma Client
+        run: cd backend && npx prisma generate
       - name: Run atctl check
         run: node scripts/atctl.mjs check --auto
