@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-26_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `46462ed` 2026-03-26 — fix: add missing <button opening tag in TransportManagement.tsx
+- `99f44af` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `29f84ca` 2026-03-26 — fix: remove extra closing brace in finalizeTrade causing class scope leak
 - `7e32e96` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `5d69824` 2026-03-26 — Create wait-for-db.sh
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-26_
 - `98f75a6` 2026-03-26 — feat: integrate env validation into ConfigModule
 - `ea04311` 2026-03-26 — feat: add OrdersService with order querying and stats
 - `0372b52` 2026-03-26 — feat: add LocationService with geocoding methods
-- `f28cdf7` 2026-03-26 — fix: remove explicit 'any' type annotations from catch blocks in InspectorPortal
-- `7f3788c` 2026-03-26 — fix: replace 'any' types with proper GeoJSON/Leaflet types in BulgariaMap
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
