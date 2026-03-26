@@ -37,7 +37,7 @@ export const InspectorPortal: React.FC<InspectorPortalProps> = ({ className = ''
       });
 
       setInspections(response.data);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching inspections:', err);
       setError(err.response?.data?.message || 'Failed to load inspections');
     } finally {
