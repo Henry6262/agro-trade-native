@@ -598,7 +598,7 @@ export class SimulationService {
     await this.prisma.tradeOperation.update({
       where: { id: tradeOperationId },
       data: {
-        phase: "DELIVERED",
+        phase: "COMPLETED",
         status: "COMPLETED",
       },
     });
@@ -934,6 +934,11 @@ export class SimulationService {
       await this.prisma.inspectionRequest.deleteMany({
         where: { inspectorId: { in: userIds } },
       });
+
+          // NI-8 Fix: Delete OfferNegotiation records before TradeSeller (FK constraint)
+    await this.prisma.offerNegotiation.deleteMany({
+      where: { tradeSeller: { sellerId: { in: userIds } } },
+    });
 
       await this.prisma.tradeSeller.deleteMany({
         where: { sellerId: { in: userIds } },
