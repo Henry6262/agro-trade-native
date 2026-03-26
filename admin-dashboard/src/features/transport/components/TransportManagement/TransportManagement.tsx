@@ -160,6 +160,7 @@ export const TransportManagement: React.FC<TransportManagementProps> = ({ tradeO
                     {error && (
           <div className="mb-4 p-4 bg-red-100 text-red-800 rounded-lg">
                     {error}            
+            <button
               onClick={fetchTransportRequests}
               className="ml-4 underline"
             >
