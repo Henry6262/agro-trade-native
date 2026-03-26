@@ -42,7 +42,7 @@ jobs:
             lint-admin.txt
             build_report.md
       - name: Run atctl check
-        run: node scripts/atctl.mjs check --auto
+        run: node scripts/atctl.mjs check
 
   e2e-tests:
     runs-on: ubuntu-latest
