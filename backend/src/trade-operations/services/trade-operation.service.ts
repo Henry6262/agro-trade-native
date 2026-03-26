@@ -775,8 +775,10 @@ export class TradeOperationService {
       };
     }
 
+    // NI-20: Wrap all finalization DB updates in a transaction
+    await this.prisma.$transaction(async (tx) => {
     // Update trade status to COMPLETED
-    await this.prisma.tradeOperation.update({
+    await tx.tradeOperation.update({
       where: { id: tradeOperationId },
       data: {
         phase: "COMPLETED",
@@ -788,7 +790,7 @@ export class TradeOperationService {
     });
 
     // Update buy listing status
-    await this.prisma.buyListing.update({
+    await tx.buyListing.update({
       where: { id: trade.buyListingId },
       data: { status: "FULFILLED" },
     });
@@ -796,7 +798,7 @@ export class TradeOperationService {
     // Update sale listings
     for (const seller of trade.sellers) {
       if (seller.saleListingId) {
-        await this.prisma.saleListing.update({
+        await tx.saleListing.update({
           where: { id: seller.saleListingId },
           data: {
             quantity: {
@@ -805,6 +807,7 @@ export class TradeOperationService {
           },
         });
       }
+          }); // end $transaction
     }
 
     this.logger.log(
