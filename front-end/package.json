@@ -43,7 +43,7 @@
     "eventemitter3": "^5.0.1",
     "expo": "~53.0.27",
     "expo-apple-authentication": "~7.2.4",
-    "expo-application": "~6.1.5",
+    "expo-application": "~55.0.10",
     "expo-blur": "~14.1.5",
     "expo-build-properties": "~0.14.8",
     "expo-camera": "~16.1.11",
