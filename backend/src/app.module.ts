@@ -4,6 +4,7 @@ import { RealtimeModule } from "./realtime/realtime.module";
 import { ScheduleModule } from "@nestjs/schedule";
 import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule } from "./auth/auth.module";
+import { validate } from "./common/config/env.validation";
 import { OnboardingModule } from "./onboarding/onboarding.module";
 import { ProductsModule } from "./products/products.module";
 import { SellerModule } from "./seller/seller.module";
@@ -32,11 +33,11 @@ import { EscrowModule } from "./escrow/escrow.module";
     RealtimeModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ".env",
+      envFilePath: ".env",       validate,
     }),
     ScheduleModule.forRoot(),
-    CacheModule, // Add cache module for performance
-    PrismaModule,
+    CacheModule, // Add cache module for performa
+          PrismaModule,
     SeedModule,
     AuthModule,
     OnboardingModule,
