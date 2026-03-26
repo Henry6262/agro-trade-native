@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-26_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `29f84ca` 2026-03-26 — fix: remove extra closing brace in finalizeTrade causing class scope leak
+- `7e32e96` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `5d69824` 2026-03-26 — Create wait-for-db.sh
 - `e67ba55` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `a91803f` 2026-03-26 — ci: add Dependabot config for backend, admin-dashboard, mobile, and GH Actions
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-26_
 - `0372b52` 2026-03-26 — feat: add LocationService with geocoding methods
 - `f28cdf7` 2026-03-26 — fix: remove explicit 'any' type annotations from catch blocks in InspectorPortal
 - `7f3788c` 2026-03-26 — fix: replace 'any' types with proper GeoJSON/Leaflet types in BulgariaMap
-- `4398ace` 2026-03-26 — feat: add environment validation with class-validator
-- `6642f22` 2026-03-26 — docs: add Latest Progress Report section to README.md
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
