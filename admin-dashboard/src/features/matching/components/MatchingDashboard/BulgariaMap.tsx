@@ -115,7 +115,7 @@ export const BulgariaMap: React.FC<BulgariaMapProps> = ({
   highlightRegion,
 }) => {
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
-  const [geoJSONData, setGeoJSONData] = useState<any>(null);
+  const [geoJSONData, setGeoJSONData] = useState<GeoJSON.FeatureCollection | null>(null);
 
   // Load GeoJSON data on mount
   useEffect(() => {
@@ -123,7 +123,7 @@ export const BulgariaMap: React.FC<BulgariaMapProps> = ({
   }, []);
 
   // Style for GeoJSON regions - Enhanced for Bulgaria-only view
-  const regionStyle = (feature: any) => {
+  const regionStyle = (feature: GeoJSON.Feature) => {
     const nutsProps = feature.properties;
     const isHighlighted = nutsProps.NUTS_ID === highlightRegion;
     const isHovered = nutsProps.NUTS_ID === hoveredRegion;
@@ -137,7 +137,7 @@ export const BulgariaMap: React.FC<BulgariaMapProps> = ({
   };
 
   // Handle region interactions with enhanced tooltips
-  const onEachRegion = (feature: any, layer: any) => {
+  const onEachRegion = (feature: GeoJSON.Feature, layer: L.Layer) => {
     const nutsProps = feature.properties;
 
     layer.on({
@@ -284,7 +284,7 @@ export const BulgariaMap: React.FC<BulgariaMapProps> = ({
         <div>
           <p className="text-xs font-semibold text-slate-600 mb-2">Regions (NUTS-2)</p>
           <div className="space-y-1">
-            {geoJSONData?.features.map((feature: any) => (
+            {geoJSONData?.features.map((feature: GeoJSON.Feature) => (
               <div key={feature.properties.NUTS_ID} className="flex items-center gap-2 text-xs">
                 <div
                   className="w-3 h-3 rounded shadow-sm border border-white"
