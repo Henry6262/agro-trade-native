@@ -7,6 +7,7 @@ import {
   IsEnum,
   IsArray,
   ValidateNested,
+    IsNotEmpty,
 } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
@@ -18,6 +19,7 @@ export class CreateTradeOperationDto {
     example: "cmfk0hzzh0004bfffxe82z2jz",
   })
   @IsString()
+    @IsNotEmpty()
   buyListingId: string;
 
   @ApiPropertyOptional({
