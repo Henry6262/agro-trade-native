@@ -808,7 +808,6 @@ export class TradeOperationService {
         });
       }
           }); // end $transaction
-    }
 
     this.logger.log(
       `Finalized trade ${tradeOperationId} with profit margin ${profitCalc.profit.profitMargin.toFixed(2)}%`,
