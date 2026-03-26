@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-26_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `a91803f` 2026-03-26 — ci: add Dependabot config for backend, admin-dashboard, mobile, and GH Actions
+- `9ab9f64` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `d9c0cfc` 2026-03-26 — ci: add auto-gen progress report workflow with issue/commit tracking
 - `1e390dc` 2026-03-26 — feat: add TS error report generator script for CI diagnostics
 - `2cb94bc` 2026-03-26 — ci: add E2E with Postgres/Redis services, TS diagnostics, artifact upload
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-26_
 - `6642f22` 2026-03-26 — docs: add Latest Progress Report section to README.md
 - `16a7e96` 2026-03-26 — docs: add PROGRESS_REPORT.md with full NI task tracking
 - `0bdb0c6` 2026-03-26 — fix(NI-3): add retry with exponential backoff for push notifications
-- `a98c866` 2026-03-26 — fix(NI-21): add composite database indexes for TradeOperation
-- `fd3d297` 2026-03-26 — fix(NI-2): add JWT authentication to WebSocket gateway
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
