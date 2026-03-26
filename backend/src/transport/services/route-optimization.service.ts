@@ -77,6 +77,15 @@ export class RouteOptimizationService {
       optimizationLevel: string;
     };
   }> {
+        // NI-9: Input validation
+    if (!pickups || pickups.length === 0) {
+      throw new Error('At least one pickup location is required for route optimization');
+    }
+    if (!warehouseLocation || !deliveryLocation) {
+      throw new Error('Warehouse and delivery locations are required');
+    }
+
+    try {
     const startTime = Date.now();
 
     // Check cache
@@ -189,6 +198,10 @@ export class RouteOptimizationService {
         optimizationLevel: algorithm,
       },
     };
+        } catch (error) {
+      this.logger.error(`Route optimization failed: ${error.message}`, error.stack);
+      throw new Error(`Route optimization failed: ${error.message}`);
+    }
   }
 
   /**
