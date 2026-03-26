@@ -1,46 +1,51 @@
-# Progress Report - NI Task Analysis
+# Progress Report
+_Auto-generated: 2026-03-26_
 
-> Last updated: 2026-03-26 | [Tracking Issue #57](https://github.com/Henry6262/agro-trade-native/issues/57)
+## Issue Summary
+| Category | Count |
+|----------|-------|
+| Total Open | 51 |
+| Bugs | 0 |
+| Features | 0 |
+| Unlabeled | 51 |
 
-## Completed Fixes (16/22)
+## Recent Commits (last 15)
+- `d9c0cfc` 2026-03-26 — ci: add auto-gen progress report workflow with issue/commit tracking
+- `1e390dc` 2026-03-26 — feat: add TS error report generator script for CI diagnostics
+- `2cb94bc` 2026-03-26 — ci: add E2E with Postgres/Redis services, TS diagnostics, artifact upload
+- `14117d0` 2026-03-26 — ci: add Prisma generate step before atctl check
+- `98f75a6` 2026-03-26 — feat: integrate env validation into ConfigModule
+- `ea04311` 2026-03-26 — feat: add OrdersService with order querying and stats
+- `0372b52` 2026-03-26 — feat: add LocationService with geocoding methods
+- `f28cdf7` 2026-03-26 — fix: remove explicit 'any' type annotations from catch blocks in InspectorPortal
+- `7f3788c` 2026-03-26 — fix: replace 'any' types with proper GeoJSON/Leaflet types in BulgariaMap
+- `4398ace` 2026-03-26 — feat: add environment validation with class-validator
+- `6642f22` 2026-03-26 — docs: add Latest Progress Report section to README.md
+- `16a7e96` 2026-03-26 — docs: add PROGRESS_REPORT.md with full NI task tracking
+- `0bdb0c6` 2026-03-26 — fix(NI-3): add retry with exponential backoff for push notifications
+- `a98c866` 2026-03-26 — fix(NI-21): add composite database indexes for TradeOperation
+- `fd3d297` 2026-03-26 — fix(NI-2): add JWT authentication to WebSocket gateway
 
-### Session 1
-| ID | Description | Status |
-|----|-------------|--------|
-| NI-1 | DELIVERED status validation in confirmDelivery | Done |
-| NI-4 | actorRole mapping fix | Done |
-| NI-5 | Duplicate seller prevention | Done |
-| NI-6 | Transport cost audit logging | Done |
-| NI-8 | Rate limiting | Done |
-| NI-14 | Sensitive data exposure fix | Done |
-| NI-15 | Contract module hardcoded values | Done |
-| NI-19 | Logging improvements | Done |
+## Open Issues
+- #57 [Tracking] System Analysis - Remaining Issues [none]
+- #56 [NI-12] Add environment variable validation at startup [none]
+- #55 [NI-11] Add unit tests for critical business logic [none]
+- #54 [NI-10] Add pagination to list endpoints [none]
+- #53 [P2] Remaining improvements from SYSTEM_ANALYSIS (NI-2,3,7,9,10,11,12,13,16,17,18,22) [none]
+- #52 [NI-20] P1: Wrap finalizeTrade() in Prisma $transaction for data integrity [none]
+- #51 [P2][Contracts/Backend] NI-17, NI-18, NI-21: Deployment scripts, multi-sig, N+1 query [none]
+- #50 [P2][Mobile] NI-11, NI-13: Lint errors cleanup + push notification integration [none]
+- #49 [P2][Backend] NI-7, NI-9, NI-10: Console.log cleanup, escrow refund, missing phase transition [none]
+- #48 [P2][Backend] NI-2, NI-3: transportOptimized field missing + summary hardcodes [none]
+- #47 [P1][Backend] NI-22: No unit tests for core business logic services [none]
+- #46 [P1][Backend] NI-20: finalizeTrade() needs $transaction wrapping [none]
+- #45 [P1][Dashboard] NI-16: Profit endpoint not called for pre-validation [none]
+- #44 [P1][Mobile] NI-12: No offline mode / network error handling [none]
+- #43 [P1][Backend] NI-8: cleanupTestData() misses OfferNegotiation records [none]
+- #42 [P1][Backend] NI-6: completeTradeOperation() inconsistent phase/status [none]
+- #41 [P1][Backend] NI-5: No duplicate seller prevention in addSellersToTrade() [none]
+- #40 [P1][Backend] NI-4: buyerConfirmDelivery() records ADMIN role instead of BUYER [none]
+- #39 [P1][Backend] NI-1: finalizeTrade() skips DELIVERED phase validation [none]
+- #38 [P0][Dashboard] NI-15: Add manual phase transition controls to operation detail page [none]
 
-### Session 2
-| ID | Description | Status |
-|----|-------------|--------|
-| NI-2 | JWT authentication in WebSocket gateway | Done |
-| NI-3 | Retry logic with exponential backoff for push notifications | Done |
-| NI-7 | @IsNotEmpty() validation for buyListingId DTO | Done |
-| NI-9 | Route optimization error handling + input validation | Done |
-| NI-13 | WebSocket gateway auth guard (merged with NI-2) | Done |
-| NI-20 | $transaction wrapper for finalizeTrade | Done |
-| NI-21 | Composite database indexes for TradeOperation | Done |
-
-## Remaining Issues (7/22)
-
-| ID | Description | Priority | Issue |
-|----|-------------|----------|-------|
-| NI-10 | Add pagination to list endpoints | Medium | [#54](https://github.com/Henry6262/agro-trade-native/issues/54) |
-| NI-11 | Unit tests for critical business logic | High | [#55](https://github.com/Henry6262/agro-trade-native/issues/55) |
-| NI-12 | Environment variable validation at startup | High | [#56](https://github.com/Henry6262/agro-trade-native/issues/56) |
-| NI-16 | Frontend error boundary components | Medium | - |
-| NI-17 | Mobile app offline support | Low | - |
-| NI-18 | Swagger API documentation | Medium | - |
-| NI-22 | CI/CD pipeline setup | High | - |
-
----
-
-## Archive
-
-_No previous reports._
+_...and 31 more_
