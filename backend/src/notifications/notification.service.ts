@@ -166,6 +166,11 @@ export class NotificationService {
       const token = user?.pushToken;
       if (!token || !EXPO_PUSH_TOKEN_RE.test(token)) return;
 
+            // NI-3: Retry with exponential backoff for push delivery
+      const MAX_RETRIES = 3;
+      let lastError: Error | null = null;
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+                try {
       const response = await fetch(EXPO_PUSH_API, {
         method: "POST",
         headers: {
@@ -177,11 +182,25 @@ export class NotificationService {
         ]),
       });
 
-      if (!response.ok) {
-        this.logger.warn(`Expo push responded ${response.status} for user ${userId}`);
-      } else {
-        this.logger.log(`Push sent to user ${userId}`);
+                if (!response.ok) {
+            throw new Error(`Expo push responded ${response.status} for user ${userId}`);
+          }
+          this.logger.log(`Push sent to user ${userId}`);
+          return; // success, exit retry loop
+        } catch (retryErr) {
+          lastError = retryErr as Error;
+          if (attempt < MAX_RETRIES) {
+            const delay = 1000 * Math.pow(2, attempt - 1);
+            this.logger.warn(`Push retry ${attempt}/${MAX_RETRIES} for user ${userId}, waiting ${delay}ms`);
+            await new Promise((r) => setTimeout(r, delay));
+          }
+        }
       }
+      // All retries exhausted
+      if (lastError) {
+        this.logger.error(`Push notification failed after ${MAX_RETRIES} retries for user ${userId}`, lastError);
+      }
+
     } catch (err) {
       this.logger.error("Failed to send push notification", err);
     }
