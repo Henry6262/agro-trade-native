@@ -15,6 +15,9 @@ import { styles, GREEN } from './FleetInformation.styles';
 
 type TruckInfo = VehicleType;
 
+const MAX_CAPACITY_TONS = 100;
+const MAX_BATCH_COUNT = 50;
+
 const truckTypes = [
   'Standard',
   'Refrigerated',
@@ -28,97 +31,40 @@ const truckTypes = [
 
 const PRESET_CAPACITIES = [5, 10, 15, 20, 25];
 
+function computeFleetTotals(fleet: TruckInfo[]) {
+  const totalCapacity = fleet.reduce((sum, t) => {
+    const truckCount = t.count || 1;
+    return sum + t.capacity * truckCount;
+  }, 0);
+  const totalVehicleCount = fleet.reduce((sum, truck) => sum + (truck.count || 1), 0);
+  return { totalCapacity, totalVehicleCount };
+}
+
 export function FleetInformation() {
   const { transportData, setFleetInfo } = useOnboardingStore();
+
   const [newTruck, setNewTruck] = useState({
     capacity: '',
     unit: 'tons' as 'tons' | 'kg',
     type: 'Standard',
   });
-  const [batchMode] = useState(true);
   const [batchCount, setBatchCount] = useState('1');
   const [showTruckTypeModal, setShowTruckTypeModal] = useState(false);
   const [showCustomCapacity, setShowCustomCapacity] = useState(false);
 
   const currentFleet = transportData?.fleetInfo?.vehicleTypes || [];
   const totalCapacity = transportData?.fleetInfo?.capacity?.total || 0;
+  const existingBaseLocation = transportData?.fleetInfo?.baseLocation;
 
-  const handleAddTruck = () => {
-    if (newTruck.capacity && Number.parseFloat(newTruck.capacity) > 0) {
-      const count = batchMode && batchCount ? Math.max(1, Number.parseInt(batchCount)) : 1;
-
-      const existingTruckIndex = currentFleet.findIndex(
-        (truck) =>
-          truck.capacity === Number.parseFloat(newTruck.capacity) &&
-          truck.unit === newTruck.unit &&
-          truck.type === newTruck.type
-      );
-
-      let updatedFleet: TruckInfo[];
-
-      if (existingTruckIndex !== -1 && batchMode) {
-        updatedFleet = [...currentFleet];
-        const existingCount = updatedFleet[existingTruckIndex].count || 1;
-        updatedFleet[existingTruckIndex] = {
-          ...updatedFleet[existingTruckIndex],
-          count: existingCount + count,
-        };
-      } else {
-        const newTruckInfo: TruckInfo = {
-          id: `truck-${Date.now()}`,
-          name: newTruck.type,
-          capacity: Number.parseFloat(newTruck.capacity),
-          suitable_for: [],
-          unit: newTruck.unit,
-          type: newTruck.type,
-          count: count > 1 ? count : undefined,
-        };
-        updatedFleet = [...currentFleet, newTruckInfo];
-      }
-
-      const newTotalCapacity = updatedFleet.reduce((sum, t) => {
-        const truckCount = t.count || 1;
-        return sum + t.capacity * truckCount;
-      }, 0);
-
-      const totalVehicleCount = updatedFleet.reduce((sum, truck) => sum + (truck.count || 1), 0);
-
-      setFleetInfo({
-        ...transportData?.fleetInfo,
-        vehicleCount: totalVehicleCount,
-        vehicleTypes: updatedFleet,
-        capacity: { total: newTotalCapacity, unit: 'tons' },
-        baseLocation: transportData?.fleetInfo?.baseLocation || {
-          id: '',
-          address: '',
-          city: '',
-          state: '',
-          country: '',
-          zipCode: '',
-        },
-      });
-
-      setNewTruck({ capacity: '', unit: 'tons', type: 'Standard' });
-      setBatchCount('1');
-      setShowCustomCapacity(false);
-    }
-  };
-
-  const handleRemoveTruck = (truckId: string) => {
-    const updatedFleet = currentFleet.filter((truck) => truck.id !== truckId);
-    const newTotalCapacity = updatedFleet.reduce((sum, t) => {
-      const truckCount = t.count || 1;
-      return sum + t.capacity * truckCount;
-    }, 0);
-
-    const totalVehicleCount = updatedFleet.reduce((sum, truck) => sum + (truck.count || 1), 0);
+  const updateFleet = (updatedFleet: TruckInfo[]) => {
+    const { totalCapacity: newTotalCapacity, totalVehicleCount } = computeFleetTotals(updatedFleet);
 
     setFleetInfo({
       ...transportData?.fleetInfo,
       vehicleCount: totalVehicleCount,
       vehicleTypes: updatedFleet,
       capacity: { total: newTotalCapacity, unit: 'tons' },
-      baseLocation: transportData?.fleetInfo?.baseLocation || {
+      baseLocation: existingBaseLocation ?? {
         id: '',
         address: '',
         city: '',
@@ -129,8 +75,54 @@ export function FleetInformation() {
     });
   };
 
+  const handleAddTruck = () => {
+    const parsedCapacity = Number.parseFloat(newTruck.capacity);
+    if (!parsedCapacity || parsedCapacity <= 0 || parsedCapacity > MAX_CAPACITY_TONS) return;
+
+    const count = Math.min(Math.max(1, Number.parseInt(batchCount) || 1), MAX_BATCH_COUNT);
+
+    const existingTruckIndex = currentFleet.findIndex(
+      (truck) =>
+        truck.capacity === parsedCapacity &&
+        truck.unit === newTruck.unit &&
+        truck.type === newTruck.type
+    );
+
+    let updatedFleet: TruckInfo[];
+
+    if (existingTruckIndex !== -1) {
+      updatedFleet = [...currentFleet];
+      const existingCount = updatedFleet[existingTruckIndex].count || 1;
+      updatedFleet[existingTruckIndex] = {
+        ...updatedFleet[existingTruckIndex],
+        count: existingCount + count,
+      };
+    } else {
+      const newTruckInfo: TruckInfo = {
+        id: `truck-${Date.now()}`,
+        name: newTruck.type,
+        capacity: parsedCapacity,
+        suitable_for: [],
+        unit: newTruck.unit,
+        type: newTruck.type,
+        count: count > 1 ? count : undefined,
+      };
+      updatedFleet = [...currentFleet, newTruckInfo];
+    }
+
+    updateFleet(updatedFleet);
+    setNewTruck({ capacity: '', unit: 'tons', type: 'Standard' });
+    setBatchCount('1');
+    setShowCustomCapacity(false);
+  };
+
+  const handleRemoveTruck = (truckId: string) => {
+    const updatedFleet = currentFleet.filter((truck) => truck.id !== truckId);
+    updateFleet(updatedFleet);
+  };
+
   const selectedCapacityNum = Number.parseFloat(newTruck.capacity) || 0;
-  const batchNum = Number.parseInt(batchCount) || 1;
+  const batchNum = Math.min(Number.parseInt(batchCount) || 1, MAX_BATCH_COUNT);
   const totalTruckCount = currentFleet.reduce((sum, truck) => sum + (truck.count || 1), 0);
 
   return (
@@ -169,7 +161,6 @@ export function FleetInformation() {
 
         {/* Capacity */}
         <Text style={styles.fieldLabel}>Capacity (tons)</Text>
-
         {!showCustomCapacity ? (
           <View>
             <View style={styles.capacityGrid}>
@@ -195,7 +186,6 @@ export function FleetInformation() {
                 );
               })}
             </View>
-
             <TouchableOpacity
               style={styles.customBtn}
               onPress={() => {
@@ -211,7 +201,7 @@ export function FleetInformation() {
           <View style={styles.customInputWrap}>
             <TextInput
               keyboardType="numeric"
-              placeholder="Enter capacity in tons"
+              placeholder={`Enter capacity (max ${MAX_CAPACITY_TONS} tons)`}
               value={newTruck.capacity}
               onChangeText={(text) => setNewTruck({ ...newTruck, capacity: text })}
               style={styles.textInput}
@@ -244,11 +234,14 @@ export function FleetInformation() {
           </TouchableOpacity>
           <Text style={styles.counterValue}>{batchCount || '1'}</Text>
           <TouchableOpacity
-            onPress={() => setBatchCount((batchNum + 1).toString())}
-            style={styles.counterBtn}
+            onPress={() => {
+              if (batchNum < MAX_BATCH_COUNT) setBatchCount((batchNum + 1).toString());
+            }}
+            disabled={batchNum >= MAX_BATCH_COUNT}
+            style={[styles.counterBtn, batchNum >= MAX_BATCH_COUNT && styles.counterBtnDisabled]}
             activeOpacity={0.75}
           >
-            <Plus size={18} color={GREEN} />
+            <Plus size={18} color={batchNum >= MAX_BATCH_COUNT ? 'rgba(255,255,255,0.2)' : GREEN} />
           </TouchableOpacity>
         </View>
 
@@ -266,17 +259,17 @@ export function FleetInformation() {
         {/* Add Button */}
         <TouchableOpacity
           onPress={handleAddTruck}
-          disabled={!newTruck.capacity || selectedCapacityNum <= 0}
+          disabled={!newTruck.capacity || selectedCapacityNum <= 0 || selectedCapacityNum > MAX_CAPACITY_TONS}
           style={[
             styles.addBtn,
-            (!newTruck.capacity || selectedCapacityNum <= 0) && styles.addBtnDisabled,
+            (!newTruck.capacity || selectedCapacityNum <= 0 || selectedCapacityNum > MAX_CAPACITY_TONS) && styles.addBtnDisabled,
           ]}
           activeOpacity={0.8}
         >
           <Text
             style={[
               styles.addBtnText,
-              (!newTruck.capacity || selectedCapacityNum <= 0) && styles.addBtnTextDisabled,
+              (!newTruck.capacity || selectedCapacityNum <= 0 || selectedCapacityNum > MAX_CAPACITY_TONS) && styles.addBtnTextDisabled,
             ]}
           >
             {batchNum > 1 ? `Add ${batchNum} Trucks` : 'Add Truck'}
@@ -302,14 +295,14 @@ export function FleetInformation() {
                       <Text style={styles.truckType}>{truck.type}</Text>
                       {truckCount > 1 && (
                         <View style={styles.countBadge}>
-                          <Text style={styles.countBadgeText}>×{truckCount}</Text>
+                          <Text style={styles.countBadgeText}>{'\u00D7'}{truckCount}</Text>
                         </View>
                       )}
                     </View>
                     <Text style={styles.truckCapacity}>
                       {truckCount === 1
                         ? `${truck.capacity} ${truck.unit}`
-                        : `${truck.capacity} ${truck.unit} each · ${truckTotalCap}t total`}
+                        : `${truck.capacity} ${truck.unit} each \u00B7 ${truckTotalCap}t total`}
                     </Text>
                   </View>
                   <TouchableOpacity
