@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `9fa857d` 2026-03-27 — test(a11y): NotificationBanner & OfflineBanner accessibility regression suite
+- `c6952e1` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `9ea7f94` 2026-03-27 — a11y fix(OfflineBanner): alert role, assertive live region, explicit label
 - `3fa3765` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `821a70a` 2026-03-27 — a11y fix(NotificationBanner): alert role, assertive live region, label, dismiss 
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `21de8c0` 2026-03-27 — Create FleetInformation.test.tsx
 - `9ff4af9` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `1de2b8a` 2026-03-27 — test(GlassButton): regression suite — a11y, leftIcon, style, gradient, sizes
-- `df1397c` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `08db576` 2026-03-27 — fix(FleetInformation): extract helper, fix baseLocation, add validation bounds
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
