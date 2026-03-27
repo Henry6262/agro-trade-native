@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `fe7e69f` 2026-03-27 — Update FleetInformation.tsx
+- `caff0b5` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `ea4961a` 2026-03-27 — refactor: extract BuyerMarketRequest styles to separate file
 - `81c936d` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `ae6e10d` 2026-03-27 — refactor: extract FleetInformation styles to separate file
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `dfedfbe` 2026-03-27 — refactor: condense Buyer/Orders/utils.ts to fit 150-line limit
 - `421ebb4` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `e5771ad` 2026-03-27 — fix: trim useBuyerRequestCreation hook to fit 200-line limit
-- `da9c0c0` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `d183312` 2026-03-27 — scaffold: add hooks/ for Onboarding/shared/ProductSelection
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
