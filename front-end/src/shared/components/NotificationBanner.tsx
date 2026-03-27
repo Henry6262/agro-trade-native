@@ -47,6 +47,12 @@ export const NotificationBanner: React.FC = () => {
     <Animated.View
       style={{ transform: [{ translateY: slideAnim }] }}
       className="absolute top-12 left-4 right-4 z-50 bg-gray-50 rounded-xl p-4 border border-green-500/30 shadow-lg"
+      // a11y fix: alert role so screen readers announce immediately
+      accessibilityRole="alert"
+      // a11y fix: assertive live region for dynamic toast content
+      accessibilityLiveRegion="assertive"
+      // a11y fix: composite label with title + body for screen readers
+      accessibilityLabel={`${visible.title}: ${visible.body}`}
     >
       <View className="flex-row items-start">
         <View className="w-8 h-8 bg-green-500/20 rounded-full items-center justify-center mr-3">
@@ -58,7 +64,14 @@ export const NotificationBanner: React.FC = () => {
             {visible.body}
           </Text>
         </View>
-        <TouchableOpacity onPress={() => dismiss(visible.id)} className="p-1 -m-1">
+        {/* a11y fix: dismiss button with role and label */}
+        <TouchableOpacity
+          onPress={() => dismiss(visible.id)}
+          className="p-1 -m-1"
+          accessibilityRole="button"
+          accessibilityLabel="Dismiss notification"
+          accessibilityHint="Closes this notification banner"
+        >
           <X size={16} color="#6B7280" />
         </TouchableOpacity>
       </View>
