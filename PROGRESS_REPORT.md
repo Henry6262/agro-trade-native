@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-03-26_
+_Auto-generated: 2026-03-27_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-26_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `b72e757` 2026-03-27 — scaffold: add missing components/ dir for Buyer/RequestCreation
+- `782461a` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `05a8d69` 2026-03-26 — ci: remove --auto from atctl check to skip e2e tests in lint job
 - `244f326` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `d932d95` 2026-03-26 — fix: add missing closing brace for if-block in finalizeTrade $transaction
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-26_
 - `5d69824` 2026-03-26 — Create wait-for-db.sh
 - `e67ba55` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `a91803f` 2026-03-26 — ci: add Dependabot config for backend, admin-dashboard, mobile, and GH Actions
-- `9ab9f64` 2026-03-26 — docs: auto-update progress report [skip ci]
-- `d9c0cfc` 2026-03-26 — ci: add auto-gen progress report workflow with issue/commit tracking
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
