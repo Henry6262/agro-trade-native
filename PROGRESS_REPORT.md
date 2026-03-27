@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `c579751` 2026-03-27 — fix(GlassButton): deduplicate variants, fix style/leftIcon/a11y bugs
+- `29845c5` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `3116883` 2026-03-27 — test(SellerOfferCard): full regression suite — ghost guards, counterOffer, expir
 - `4d2435d` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `0bfb7e8` 2026-03-27 — fix(SellerOfferCard): memo, conditional adminNote/buyerFlag/quality, counterOffe
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `ea4961a` 2026-03-27 — refactor: extract BuyerMarketRequest styles to separate file
 - `81c936d` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `ae6e10d` 2026-03-27 — refactor: extract FleetInformation styles to separate file
-- `bb56bdc` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `04bbce7` 2026-03-27 — refactor: extract styles from SellOptionsDrawer to separate file
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
