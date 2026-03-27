@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `0ae0e19` 2026-03-27 — fix(IncomingOffersList): memo, empty state, deadline display, visibility fix, co
+- `70815db` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `fe7e69f` 2026-03-27 — Update FleetInformation.tsx
 - `caff0b5` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `ea4961a` 2026-03-27 — refactor: extract BuyerMarketRequest styles to separate file
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `16b619b` 2026-03-27 — refactor: condense Seller/Products/utils.ts to fit 150-line limit
 - `2e7d7d3` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `dfedfbe` 2026-03-27 — refactor: condense Buyer/Orders/utils.ts to fit 150-line limit
-- `421ebb4` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `e5771ad` 2026-03-27 — fix: trim useBuyerRequestCreation hook to fit 200-line limit
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
