@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Modal, Animated, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, Animated, ScrollView, Platform } from 'react-native';
 import {
   Check,
   X,
@@ -12,7 +12,6 @@ import {
   Shield,
   Info,
 } from 'lucide-react-native';
-
 import { Offer } from '../types';
 
 interface AcceptOfferModalProps {
@@ -73,7 +72,7 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
     if (buyerRequest?.maxPricePerUnit && offer.pricePerUnit > buyerRequest.maxPricePerUnit) {
       risks.push({
         type: 'price',
-        message: `Price exceeds your maximum by €${(offer.pricePerUnit - buyerRequest.maxPricePerUnit).toFixed(2)}`,
+        message: `Price exceeds your maximum by \u20AC${(offer.pricePerUnit - buyerRequest.maxPricePerUnit).toFixed(2)}`,
         severity: 'high',
       });
     }
@@ -115,7 +114,6 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
     } else if (step === 'confirm') {
       onConfirm(offer.id, notes.trim() || undefined);
       setStep('success');
-
       // Auto-close after success animation
       setTimeout(() => {
         onClose();
@@ -134,6 +132,13 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
   const totalValue = calculateTotalValue();
   const { risks, warnings } = getRiskAssessment();
 
+  // a11y fix: step-aware labels for screen readers
+  const stepLabels = {
+    review: 'Accept Offer - Review details',
+    confirm: 'Accept Offer - Confirm acceptance',
+    success: 'Offer accepted successfully',
+  };
+
   return (
     <Modal
       visible={visible}
@@ -142,6 +147,8 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
       onRequestClose={handleClose}
       statusBarTranslucent={true}
       presentationStyle="overFullScreen"
+      // a11y fix: trap screen-reader focus inside modal
+      accessibilityViewIsModal={true}
     >
       <View
         style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)' }}
@@ -152,14 +159,30 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
             transform: [{ scale: scaleAnim }],
           }}
           className="bg-white rounded-2xl w-full max-w-md border border-gray-200"
+          // a11y fix: dialog role and dynamic label per step
+          accessibilityRole="summary"
+          accessibilityLabel={stepLabels[step]}
+          accessible={true}
         >
           {step === 'review' && (
             <>
               {/* Header */}
               <View className="p-6 border-b border-gray-200">
                 <View className="flex-row justify-between items-center">
-                  <Text className="text-xl font-bold text-gray-900">Accept Offer</Text>
-                  <TouchableOpacity onPress={handleClose}>
+                  {/* a11y fix: header role for title */}
+                  <Text
+                    className="text-xl font-bold text-gray-900"
+                    accessibilityRole="header"
+                  >
+                    Accept Offer
+                  </Text>
+                  {/* a11y fix: close button with role and label */}
+                  <TouchableOpacity
+                    onPress={handleClose}
+                    accessibilityRole="button"
+                    accessibilityLabel="Close accept offer dialog"
+                    accessibilityHint="Returns to the offers list"
+                  >
                     <X color="#9CA3AF" size={24} />
                   </TouchableOpacity>
                 </View>
@@ -177,12 +200,15 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                         {offer.seller?.businessName || offer.seller?.name || 'Seller'}
                       </Text>
                       {offer.seller?.verified && (
-                        <View className="bg-green-500/20 p-1 rounded-full">
+                        <View
+                          className="bg-green-500/20 p-1 rounded-full"
+                          // a11y fix: announce verification status
+                          accessibilityLabel="Verified seller"
+                        >
                           <Shield size={16} color="#10B981" />
                         </View>
                       )}
                     </View>
-
                     <View className="space-y-2">
                       {offer.seller?.location && (
                         <View className="flex-row items-center">
@@ -192,7 +218,6 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                           </Text>
                         </View>
                       )}
-
                       {offer.seller?.rating && (
                         <View className="flex-row items-center">
                           <Star size={14} color="#FBBF24" fill="#FBBF24" />
@@ -212,7 +237,6 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                   {/* Offer Summary */}
                   <View className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 rounded-lg p-4 mb-4 border border-green-500/30">
                     <Text className="text-green-400 font-semibold mb-3">Offer Summary</Text>
-
                     <View className="space-y-3">
                       <View className="flex-row justify-between items-center">
                         <View className="flex-row items-center">
@@ -220,7 +244,7 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                           <Text className="text-gray-600 ml-2">Price per unit</Text>
                         </View>
                         <Text className="text-gray-900 font-semibold">
-                          €{offer.pricePerUnit.toFixed(2)}
+                          \u20AC{offer.pricePerUnit.toFixed(2)}
                         </Text>
                       </View>
 
@@ -249,14 +273,13 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                       <View className="border-t border-green-500/20 pt-3">
                         <View className="flex-row justify-between items-center">
                           <Text className="text-green-300 font-semibold">Total Value</Text>
-                          <Text className="text-green-400 font-bold text-lg">€{totalValue}</Text>
+                          <Text className="text-green-400 font-bold text-lg">\u20AC{totalValue}</Text>
                         </View>
-
                         {savings && (
                           <View className="flex-row justify-between items-center mt-1">
                             <Text className="text-green-300 text-sm">You save</Text>
                             <Text className="text-green-400 font-semibold">
-                              €{savings.toLocaleString()}
+                              \u20AC{savings.toLocaleString()}
                             </Text>
                           </View>
                         )}
@@ -264,13 +287,14 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                     </View>
                   </View>
 
-                  {/* Risk Assessment */}
+                  {/* Risk Assessment — a11y fix: alert role for risks/warnings */}
                   {(risks.length > 0 || warnings.length > 0) && (
                     <View className="mb-4">
                       {risks.map((risk, index) => (
                         <View
                           key={index}
                           className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 mb-2"
+                          accessibilityRole="alert"
                         >
                           <View className="flex-row items-start">
                             <AlertTriangle size={16} color="#EF4444" />
@@ -278,11 +302,11 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                           </View>
                         </View>
                       ))}
-
                       {warnings.map((warning, index) => (
                         <View
                           key={index}
                           className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-2"
+                          accessibilityRole="alert"
                         >
                           <View className="flex-row items-start">
                             <Info size={16} color="#FBBF24" />
@@ -300,8 +324,8 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                     <View className="flex-row items-start">
                       <Info size={16} color="#3B82F6" />
                       <Text className="text-blue-300 text-xs ml-2 flex-1">
-                        By accepting this offer, you agree to the seller&apos;s terms and
-                        conditions. Payment will be processed according to the platform&apos;s
+                        By accepting this offer, you agree to the seller's terms and
+                        conditions. Payment will be processed according to the platform's
                         payment policy.
                       </Text>
                     </View>
@@ -315,10 +339,12 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                   <TouchableOpacity
                     onPress={handleClose}
                     className="flex-1 bg-gray-100 rounded-lg py-3 items-center justify-center"
+                    // a11y fix: button role and label
+                    accessibilityRole="button"
+                    accessibilityLabel="Cancel"
                   >
                     <Text className="text-gray-900 font-semibold">Cancel</Text>
                   </TouchableOpacity>
-
                   <TouchableOpacity
                     onPress={handleConfirm}
                     className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg py-3 items-center justify-center"
@@ -329,6 +355,9 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                       shadowRadius: 4,
                       elevation: 4,
                     }}
+                    // a11y fix: button role and label
+                    accessibilityRole="button"
+                    accessibilityLabel="Continue to confirmation"
                   >
                     <Text className="text-gray-900 font-bold">Continue</Text>
                   </TouchableOpacity>
@@ -342,8 +371,19 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
               {/* Confirmation Header */}
               <View className="p-6 border-b border-gray-200">
                 <View className="flex-row justify-between items-center">
-                  <Text className="text-xl font-bold text-gray-900">Confirm Acceptance</Text>
-                  <TouchableOpacity onPress={handleClose}>
+                  {/* a11y fix: header role */}
+                  <Text
+                    className="text-xl font-bold text-gray-900"
+                    accessibilityRole="header"
+                  >
+                    Confirm Acceptance
+                  </Text>
+                  {/* a11y fix: close button label */}
+                  <TouchableOpacity
+                    onPress={handleClose}
+                    accessibilityRole="button"
+                    accessibilityLabel="Close confirmation dialog"
+                  >
                     <X color="#9CA3AF" size={24} />
                   </TouchableOpacity>
                 </View>
@@ -356,23 +396,23 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                   <View className="w-16 h-16 bg-green-500/20 rounded-full items-center justify-center mb-4">
                     <Check size={32} color="#10B981" />
                   </View>
-
                   <Text className="text-white font-bold text-lg text-center mb-2">
                     Accept Offer from {offer.seller?.name}
                   </Text>
-
                   <Text className="text-green-400 font-bold text-2xl text-center">
-                    €{totalValue}
+                    \u20AC{totalValue}
                   </Text>
-
                   <Text className="text-gray-600 text-center mt-2">
-                    {offer.quantity} {offer.unit} at €{offer.pricePerUnit.toFixed(2)} per{' '}
+                    {offer.quantity} {offer.unit} at \u20AC{offer.pricePerUnit.toFixed(2)} per{' '}
                     {offer.unit.toLowerCase()}
                   </Text>
                 </View>
 
-                {/* Important Notice */}
-                <View className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-6">
+                {/* Important Notice — a11y fix: alert role */}
+                <View
+                  className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-6"
+                  accessibilityRole="alert"
+                >
                   <View className="flex-row items-start">
                     <AlertTriangle size={20} color="#FBBF24" />
                     <View className="ml-3 flex-1">
@@ -392,10 +432,11 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                   <TouchableOpacity
                     onPress={() => setStep('review')}
                     className="flex-1 bg-gray-100 rounded-lg py-3 items-center justify-center"
+                    accessibilityRole="button"
+                    accessibilityLabel="Go back to review"
                   >
                     <Text className="text-gray-900 font-semibold">Back</Text>
                   </TouchableOpacity>
-
                   <TouchableOpacity
                     onPress={handleConfirm}
                     disabled={isLoading}
@@ -407,6 +448,10 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                       shadowRadius: 4,
                       elevation: 4,
                     }}
+                    // a11y fix: button role, label, and disabled state
+                    accessibilityRole="button"
+                    accessibilityLabel={isLoading ? 'Confirming offer' : 'Confirm and accept offer'}
+                    accessibilityState={{ disabled: isLoading, busy: isLoading }}
                   >
                     <View className="flex-row items-center">
                       <Check size={18} color="#FFFFFF" />
@@ -421,7 +466,12 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
           )}
 
           {step === 'success' && (
-            <View className="p-8 items-center">
+            <View
+              className="p-8 items-center"
+              // a11y fix: announce success with live region
+              accessibilityLiveRegion="polite"
+              accessibilityRole="alert"
+            >
               <Animated.View
                 style={{
                   transform: [
@@ -437,15 +487,12 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
               >
                 <Check size={40} color="#10B981" />
               </Animated.View>
-
               <Text className="text-white font-bold text-xl text-center mb-2">Offer Accepted!</Text>
-
               <Text className="text-green-400 text-center mb-4">
                 Your acceptance has been sent to the seller
               </Text>
-
               <Text className="text-gray-500 text-sm text-center">
-                You&apos;ll receive a confirmation email and the seller will be notified. Check your
+                You'll receive a confirmation email and the seller will be notified. Check your
                 dashboard for updates.
               </Text>
             </View>
