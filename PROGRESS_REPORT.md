@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `1de2b8a` 2026-03-27 — test(GlassButton): regression suite — a11y, leftIcon, style, gradient, sizes
+- `df1397c` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `08db576` 2026-03-27 — fix(FleetInformation): extract helper, fix baseLocation, add validation bounds
 - `92f723a` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `c579751` 2026-03-27 — fix(GlassButton): deduplicate variants, fix style/leftIcon/a11y bugs
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `0ae0e19` 2026-03-27 — fix(IncomingOffersList): memo, empty state, deadline display, visibility fix, co
 - `70815db` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `fe7e69f` 2026-03-27 — Update FleetInformation.tsx
-- `caff0b5` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `ea4961a` 2026-03-27 — refactor: extract BuyerMarketRequest styles to separate file
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
