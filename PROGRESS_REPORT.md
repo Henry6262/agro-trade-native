@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `2d9d39d` 2026-03-27 — scaffold: add missing components/ for InspectionExecution
+- `d78837d` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `2851c3a` 2026-03-27 — scaffold: add missing components/ for Inspector/AvailableJobs
 - `938b686` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `b72e757` 2026-03-27 — scaffold: add missing components/ dir for Buyer/RequestCreation
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `46462ed` 2026-03-26 — fix: add missing <button opening tag in TransportManagement.tsx
 - `99f44af` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `29f84ca` 2026-03-26 — fix: remove extra closing brace in finalizeTrade causing class scope leak
-- `7e32e96` 2026-03-26 — docs: auto-update progress report [skip ci]
-- `5d69824` 2026-03-26 — Create wait-for-db.sh
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
