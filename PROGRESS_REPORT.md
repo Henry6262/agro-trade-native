@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `9ea7f94` 2026-03-27 — a11y fix(OfflineBanner): alert role, assertive live region, explicit label
+- `3fa3765` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `821a70a` 2026-03-27 — a11y fix(NotificationBanner): alert role, assertive live region, label, dismiss 
 - `1693930` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `1abf6ba` 2026-03-27 — test(a11y): Modal & AcceptOfferModal accessibility regression suite
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `1de2b8a` 2026-03-27 — test(GlassButton): regression suite — a11y, leftIcon, style, gradient, sizes
 - `df1397c` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `08db576` 2026-03-27 — fix(FleetInformation): extract helper, fix baseLocation, add validation bounds
-- `92f723a` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `c579751` 2026-03-27 — fix(GlassButton): deduplicate variants, fix style/leftIcon/a11y bugs
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
