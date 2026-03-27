@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `7906222` 2026-03-27 — scaffold: add types.ts for InspectionExecution
+- `f281c90` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `8bf0099` 2026-03-27 — scaffold: add service.ts for InspectionExecution
 - `0812681` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `f5f7cc9` 2026-03-27 — scaffold: add missing hooks/ for InspectionExecution
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `05a8d69` 2026-03-26 — ci: remove --auto from atctl check to skip e2e tests in lint job
 - `244f326` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `d932d95` 2026-03-26 — fix: add missing closing brace for if-block in finalizeTrade $transaction
-- `98492a0` 2026-03-26 — docs: auto-update progress report [skip ci]
-- `bf166b4` 2026-03-26 — fix: remove unused Country interface from location.service.ts
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
