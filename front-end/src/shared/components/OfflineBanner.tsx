@@ -44,8 +44,16 @@ export const OfflineBanner: React.FC = () => {
   if (!isOffline) return null;
 
   return (
-    <Animated.View style={[styles.banner, animStyle]}>
-      <Text style={styles.text}>{"⚠️  You're offline — changes will sync when reconnected"}</Text>
+    <Animated.View
+      style={[styles.banner, animStyle]}
+      // a11y fix: alert role for critical connectivity status
+      accessibilityRole="alert"
+      // a11y fix: assertive so screen readers announce immediately
+      accessibilityLiveRegion="assertive"
+      // a11y fix: explicit label for screen readers
+      accessibilityLabel="You are offline. Changes will sync when reconnected."
+    >
+      <Text style={styles.text}>{"\u26A0\uFE0F You're offline \u2014 changes will sync when reconnected"}</Text>
     </Animated.View>
   );
 };
