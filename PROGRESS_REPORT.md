@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `f5f7cc9` 2026-03-27 — scaffold: add missing hooks/ for InspectionExecution
+- `cea74b3` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `2d9d39d` 2026-03-27 — scaffold: add missing components/ for InspectionExecution
 - `d78837d` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `2851c3a` 2026-03-27 — scaffold: add missing components/ for Inspector/AvailableJobs
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `bf166b4` 2026-03-26 — fix: remove unused Country interface from location.service.ts
 - `f42b4ab` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `46462ed` 2026-03-26 — fix: add missing <button opening tag in TransportManagement.tsx
-- `99f44af` 2026-03-26 — docs: auto-update progress report [skip ci]
-- `29f84ca` 2026-03-26 — fix: remove extra closing brace in finalizeTrade causing class scope leak
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
