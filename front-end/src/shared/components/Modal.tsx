@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Dimensions,
+  Platform,
 } from 'react-native';
 import { X } from 'lucide-react-native';
 import { BaseComponentProps } from '../../shared/types';
@@ -71,6 +72,9 @@ export const Modal: React.FC<ModalProps> = ({
     e.stopPropagation();
   };
 
+  // a11y fix: derive a meaningful label from title or explicit prop
+  const resolvedLabel = accessibilityLabel || (title ? `${title} dialog` : 'Dialog');
+
   return (
     <RNModal
       visible={visible}
@@ -79,7 +83,8 @@ export const Modal: React.FC<ModalProps> = ({
       statusBarTranslucent
       onRequestClose={onClose}
       testID={testID}
-      accessibilityLabel={accessibilityLabel}
+      // a11y fix: accessibilityViewIsModal traps screen-reader focus inside modal
+      accessibilityViewIsModal={true}
     >
       <TouchableWithoutFeedback onPress={handleOverlayPress}>
         <View className="flex-1 bg-white/50 justify-center items-center px-4">
@@ -87,18 +92,32 @@ export const Modal: React.FC<ModalProps> = ({
             <View
               className="bg-white border border-gray-200 rounded-xl overflow-hidden"
               style={sizeStyles}
+              // a11y fix: mark content container as dialog with label
+              accessibilityRole="summary"
+              accessibilityLabel={resolvedLabel}
+              accessible={true}
             >
               {/* Header */}
               {(title || closable) && (
                 <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
                   {title && (
-                    <Text className="text-lg font-semibold text-gray-900 flex-1 mr-4">{title}</Text>
+                    // a11y fix: title announced as header for screen readers
+                    <Text
+                      className="text-lg font-semibold text-gray-900 flex-1 mr-4"
+                      accessibilityRole="header"
+                    >
+                      {title}
+                    </Text>
                   )}
                   {closable && (
                     <TouchableOpacity
                       onPress={onClose}
                       className="w-8 h-8 rounded-full bg-gray-50 items-center justify-center"
                       hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      // a11y fix: close button has role and label
+                      accessibilityRole="button"
+                      accessibilityLabel="Close dialog"
+                      accessibilityHint="Closes this dialog"
                     >
                       <X size={18} color="#9CA3AF" />
                     </TouchableOpacity>
