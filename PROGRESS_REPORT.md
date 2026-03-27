@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `1abf6ba` 2026-03-27 — test(a11y): Modal & AcceptOfferModal accessibility regression suite
+- `5fcdfaa` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `5af97a4` 2026-03-27 — a11y fix(AcceptOfferModal): dialog role, focus trap, button labels, alert roles,
 - `5f86867` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `7a337f8` 2026-03-27 — a11y fix(Modal): add accessibilityViewIsModal, dialog role, header role, close b
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `c579751` 2026-03-27 — fix(GlassButton): deduplicate variants, fix style/leftIcon/a11y bugs
 - `29845c5` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `3116883` 2026-03-27 — test(SellerOfferCard): full regression suite — ghost guards, counterOffer, expir
-- `4d2435d` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `0bfb7e8` 2026-03-27 — fix(SellerOfferCard): memo, conditional adminNote/buyerFlag/quality, counterOffe
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
