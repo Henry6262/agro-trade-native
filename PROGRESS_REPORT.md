@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `16b619b` 2026-03-27 — refactor: condense Seller/Products/utils.ts to fit 150-line limit
+- `2e7d7d3` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `dfedfbe` 2026-03-27 — refactor: condense Buyer/Orders/utils.ts to fit 150-line limit
 - `421ebb4` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `e5771ad` 2026-03-27 — fix: trim useBuyerRequestCreation hook to fit 200-line limit
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `7906222` 2026-03-27 — scaffold: add types.ts for InspectionExecution
 - `f281c90` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `8bf0099` 2026-03-27 — scaffold: add service.ts for InspectionExecution
-- `0812681` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `f5f7cc9` 2026-03-27 — scaffold: add missing hooks/ for InspectionExecution
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
