@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `d183312` 2026-03-27 — scaffold: add hooks/ for Onboarding/shared/ProductSelection
+- `25e1e4a` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `ada54d6` 2026-03-27 — scaffold: add components/ for Onboarding/shared/ProductSelection
 - `5423daa` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `65484ec` 2026-03-27 — scaffold: add index.tsx for Buyer/RequestCreation
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `2d9d39d` 2026-03-27 — scaffold: add missing components/ for InspectionExecution
 - `d78837d` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `2851c3a` 2026-03-27 — scaffold: add missing components/ for Inspector/AvailableJobs
-- `938b686` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `b72e757` 2026-03-27 — scaffold: add missing components/ dir for Buyer/RequestCreation
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
