@@ -12,7 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
 import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
-import { GLASS, COLORS, ANIM } from './tokens';
+import { GLASS, COLORS, ANIM, GRADIENT } from './tokens';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -30,6 +30,13 @@ interface GlassButtonProps {
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const VARIANT_GRADIENTS: Record<string, readonly [string, string]> = {
+  primary: GRADIENT.green,
+  danger: ['#DC2626', '#F87171'] as const,
+};
+
+const DISABLED_GRADIENT: readonly [string, string] = ['#6B7280', '#9CA3AF'] as const;
 
 export const GlassButton: React.FC<GlassButtonProps> = ({
   label,
@@ -66,53 +73,42 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
 
   const sizeStyle = SIZE_STYLES[size];
   const isFullWidth = fullWidth ? { alignSelf: 'stretch' as const } : {};
+  const usesGradient = variant === 'primary' || variant === 'danger';
 
-  if (variant === 'primary') {
+  const content = (
+    <>
+      {leftIcon && <View style={styles.iconWrap}>{leftIcon}</View>}
+      {loading ? (
+        <ActivityIndicator color="#FFFFFF" size="small" />
+      ) : (
+        <Text style={[styles.label, sizeStyle.label, VARIANT_TEXT[variant]]}>{label}</Text>
+      )}
+    </>
+  );
+
+  if (usesGradient) {
+    const gradientColors = disabled
+      ? DISABLED_GRADIENT
+      : VARIANT_GRADIENTS[variant] ?? GRADIENT.green;
+
     return (
       <AnimatedPressable
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         onPress={handlePress}
         disabled={disabled || loading}
-        style={[animStyle, isFullWidth, { borderRadius: 12, overflow: 'hidden' }]}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityState={{ disabled: disabled || loading }}
+        style={[animStyle, isFullWidth, { borderRadius: 12, overflow: 'hidden' }, style]}
       >
         <LinearGradient
-          colors={disabled ? ['#6B7280', '#9CA3AF'] : ['#16A34A', '#4ADE80']}
+          colors={gradientColors as [string, string]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={[styles.gradient, sizeStyle.inner]}
         >
-          {leftIcon && <View style={styles.iconWrap}>{leftIcon}</View>}
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <Text style={[styles.label, sizeStyle.label, { color: '#FFFFFF' }]}>{label}</Text>
-          )}
-        </LinearGradient>
-      </AnimatedPressable>
-    );
-  }
-
-  if (variant === 'danger') {
-    return (
-      <AnimatedPressable
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        onPress={handlePress}
-        disabled={disabled || loading}
-        style={[animStyle, isFullWidth, { borderRadius: 12, overflow: 'hidden' }]}
-      >
-        <LinearGradient
-          colors={['#DC2626', '#F87171']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={[styles.gradient, sizeStyle.inner]}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
-          ) : (
-            <Text style={[styles.label, sizeStyle.label, { color: '#FFFFFF' }]}>{label}</Text>
-          )}
+          {content}
         </LinearGradient>
       </AnimatedPressable>
     );
@@ -124,6 +120,9 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       onPressOut={handlePressOut}
       onPress={handlePress}
       disabled={disabled || loading}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: disabled || loading }}
       style={[
         animStyle,
         isFullWidth,
@@ -138,12 +137,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       ]}
     >
       <View style={[styles.inner, sizeStyle.inner]}>
-        {leftIcon && <View style={styles.iconWrap}>{leftIcon}</View>}
-        {loading ? (
-          <ActivityIndicator color="#FFFFFF" size="small" />
-        ) : (
-          <Text style={[styles.label, sizeStyle.label, VARIANT_TEXT[variant]]}>{label}</Text>
-        )}
+        {content}
       </View>
     </AnimatedPressable>
   );
