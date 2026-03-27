@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `0bfb7e8` 2026-03-27 — fix(SellerOfferCard): memo, conditional adminNote/buyerFlag/quality, counterOffe
+- `66b84db` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `bef9367` 2026-03-27 — test(IncomingOffersList): regression suite — empty state, deadline, adminNote, s
 - `8761725` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `0ae0e19` 2026-03-27 — fix(IncomingOffersList): memo, empty state, deadline display, visibility fix, co
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `04bbce7` 2026-03-27 — refactor: extract styles from SellOptionsDrawer to separate file
 - `32b71a3` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `12a2192` 2026-03-27 — refactor: extract SellOptionsDrawer styles to separate file
-- `445303b` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `16b619b` 2026-03-27 — refactor: condense Seller/Products/utils.ts to fit 150-line limit
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
