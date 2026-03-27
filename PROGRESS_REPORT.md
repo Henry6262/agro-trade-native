@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `04bbce7` 2026-03-27 — refactor: extract styles from SellOptionsDrawer to separate file
+- `32b71a3` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `12a2192` 2026-03-27 — refactor: extract SellOptionsDrawer styles to separate file
 - `445303b` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `16b619b` 2026-03-27 — refactor: condense Seller/Products/utils.ts to fit 150-line limit
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `ada54d6` 2026-03-27 — scaffold: add components/ for Onboarding/shared/ProductSelection
 - `5423daa` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `65484ec` 2026-03-27 — scaffold: add index.tsx for Buyer/RequestCreation
-- `dce812c` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `7906222` 2026-03-27 — scaffold: add types.ts for InspectionExecution
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
