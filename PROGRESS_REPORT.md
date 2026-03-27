@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `ada54d6` 2026-03-27 — scaffold: add components/ for Onboarding/shared/ProductSelection
+- `5423daa` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `65484ec` 2026-03-27 — scaffold: add index.tsx for Buyer/RequestCreation
 - `dce812c` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `7906222` 2026-03-27 — scaffold: add types.ts for InspectionExecution
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `2851c3a` 2026-03-27 — scaffold: add missing components/ for Inspector/AvailableJobs
 - `938b686` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `b72e757` 2026-03-27 — scaffold: add missing components/ dir for Buyer/RequestCreation
-- `782461a` 2026-03-26 — docs: auto-update progress report [skip ci]
-- `05a8d69` 2026-03-26 — ci: remove --auto from atctl check to skip e2e tests in lint job
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
