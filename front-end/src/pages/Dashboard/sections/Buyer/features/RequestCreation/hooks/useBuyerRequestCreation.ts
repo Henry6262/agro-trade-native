@@ -13,13 +13,11 @@ import type {
 import { buyerRequestCreationReducer, initialState, isStepComplete } from '../state';
 import { buyerRequestCreationService } from '../service';
 import { resolveProductImage } from '../utils';
-
 export const useBuyerRequestCreation = () => {
   const [state, dispatch] = useReducer(buyerRequestCreationReducer, initialState);
   const productMetadata = useProductStore((store) => store.products) || [];
   const fetchProductMetadata = useProductStore((store) => store.fetchAllData);
   const onboardingStore = useOnboardingStore();
-
   const ensureMetadataLoaded = useCallback(async () => {
     if (!productMetadata.length) {
       try {
