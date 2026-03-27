@@ -29,7 +29,7 @@ function getStatusBadgeVariant(
   }
 }
 
-export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
+const SellerOfferCardInner: React.FC<SellerOfferCardProps> = ({
   offer,
   onAccept,
   onReject,
@@ -61,17 +61,19 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
         <View style={styles.locationRow}>
           <MapPin color={COLORS.textMuted} size={12} />
           <Text style={styles.locationText}>
-            {offer.buyerFlag} {offer.buyerLocation}
+            {offer.buyerFlag ? `${offer.buyerFlag} ` : ''}{offer.buyerLocation}
           </Text>
         </View>
       </View>
     </View>
 
-    {/* Buyer notes */}
-    <View style={styles.notesSection}>
-      <Text style={styles.notesLabel}>Buyer Notes</Text>
-      <Text style={styles.notesText}>{offer.adminNote}</Text>
-    </View>
+    {/* Buyer notes (conditional) */}
+    {!!offer.adminNote && (
+      <View style={styles.notesSection}>
+        <Text style={styles.notesLabel}>Buyer Notes</Text>
+        <Text style={styles.notesText}>{offer.adminNote}</Text>
+      </View>
+    )}
 
     {/* Meta chips */}
     <View style={styles.metaRow}>
@@ -83,10 +85,12 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
         <Clock color={COLORS.accentGold} size={12} />
         <Text style={styles.metaText}>{offer.responseTime}</Text>
       </View>
-      {offer.isExpiringSoon && (
+      {offer.isExpiringSoon && offer.status !== 'expired' && (
         <View style={styles.expiringChip}>
           <AlertTriangle color={COLORS.danger} size={12} />
-          <Text style={styles.expiringText}>Expiring soon</Text>
+          <Text style={styles.expiringText}>
+            {offer.hoursUntilExpiry}h left
+          </Text>
         </View>
       )}
     </View>
@@ -97,15 +101,17 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
       <Text style={styles.profitValue}>+${offer.estimatedProfit.toLocaleString()}</Text>
     </View>
 
-    {/* Quality requirements */}
-    <GlassCard tier="subtle" style={styles.qualityCard}>
-      <Text style={styles.qualityLabel}>Quality Requirements</Text>
-      <View style={styles.qualityTags}>
-        {offer.qualityRequirements.map((req) => (
-          <GlassBadge key={req} label={req} variant="muted" size="sm" />
-        ))}
-      </View>
-    </GlassCard>
+    {/* Quality requirements (conditional) */}
+    {offer.qualityRequirements.length > 0 && (
+      <GlassCard tier="subtle" style={styles.qualityCard}>
+        <Text style={styles.qualityLabel}>Quality Requirements</Text>
+        <View style={styles.qualityTags}>
+          {offer.qualityRequirements.map((req) => (
+            <GlassBadge key={req} label={req} variant="muted" size="sm" />
+          ))}
+        </View>
+      </GlassCard>
+    )}
 
     {/* Actions */}
     {offer.status === 'pending' ? (
@@ -141,7 +147,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
       <View style={styles.statusCard}>
         <GlassBadge label="Offer Accepted" variant="success" />
         <Text style={styles.statusNote}>
-          You&apos;ve accepted this offer. The buyer has been notified.
+          You've accepted this offer. The buyer has been notified.
         </Text>
       </View>
     )}
@@ -150,7 +156,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
       <View style={styles.statusCard}>
         <GlassBadge label="Offer Rejected" variant="danger" />
         <Text style={styles.statusNote}>
-          You&apos;ve rejected this offer. The negotiation has ended.
+          You've rejected this offer. The negotiation has ended.
         </Text>
       </View>
     )}
@@ -158,8 +164,23 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
     {offer.status === 'countered' && (
       <View style={styles.statusCard}>
         <GlassBadge label="Counter Offer Sent" variant="info" />
+        {offer.counterOffer && (
+          <View style={styles.counterOfferDetails}>
+            <Text style={styles.counterDetailText}>
+              Counter price: ${offer.counterOffer.price}/ton
+            </Text>
+            <Text style={styles.counterDetailText}>
+              Quantity: {offer.counterOffer.quantity} tons
+            </Text>
+            {!!offer.counterOffer.terms && (
+              <Text style={styles.counterTermsText}>
+                Terms: {offer.counterOffer.terms}
+              </Text>
+            )}
+          </View>
+        )}
         <Text style={styles.statusNote}>
-          Waiting for buyer&apos;s response to your counter offer.
+          Waiting for buyer's response to your counter offer.
         </Text>
       </View>
     )}
@@ -172,6 +193,9 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
     )}
   </GlassCard>
 );
+
+export const SellerOfferCard = React.memo(SellerOfferCardInner);
+SellerOfferCard.displayName = 'SellerOfferCard';
 
 const styles = StyleSheet.create({
   acceptBtn: {
@@ -204,6 +228,24 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 6,
+  },
+  counterDetailText: {
+    color: COLORS.textPrimary,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  counterOfferDetails: {
+    backgroundColor: 'rgba(96,165,250,0.1)',
+    borderRadius: 8,
+    gap: 4,
+    marginTop: 4,
+    padding: 10,
+  },
+  counterTermsText: {
+    color: COLORS.textSecondary,
+    fontSize: 11,
+    fontStyle: 'italic',
+    marginTop: 2,
   },
   expiringChip: {
     alignItems: 'center',
