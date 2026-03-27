@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `af9eab0` 2026-03-27 — test: add escrow.service regression suite (22 specs)
+- `740fa8c` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `d365220` 2026-03-27 — ci: add backend unit test workflow (NI-22 CI/CD)
 - `7eed8b9` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `96cb98e` 2026-03-27 — test: add NI-22 unit tests for trade-operation.service (20 specs)
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `1abf6ba` 2026-03-27 — test(a11y): Modal & AcceptOfferModal accessibility regression suite
 - `5fcdfaa` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `5af97a4` 2026-03-27 — a11y fix(AcceptOfferModal): dialog role, focus trap, button labels, alert roles,
-- `5f86867` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `7a337f8` 2026-03-27 — a11y fix(Modal): add accessibilityViewIsModal, dialog role, header role, close b
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
