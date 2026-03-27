@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-27_
 | Unlabeled | 51 |
 
 ## Recent Commits (last 15)
+- `2851c3a` 2026-03-27 — scaffold: add missing components/ for Inspector/AvailableJobs
+- `938b686` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `b72e757` 2026-03-27 — scaffold: add missing components/ dir for Buyer/RequestCreation
 - `782461a` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `05a8d69` 2026-03-26 — ci: remove --auto from atctl check to skip e2e tests in lint job
@@ -23,8 +25,6 @@ _Auto-generated: 2026-03-27_
 - `29f84ca` 2026-03-26 — fix: remove extra closing brace in finalizeTrade causing class scope leak
 - `7e32e96` 2026-03-26 — docs: auto-update progress report [skip ci]
 - `5d69824` 2026-03-26 — Create wait-for-db.sh
-- `e67ba55` 2026-03-26 — docs: auto-update progress report [skip ci]
-- `a91803f` 2026-03-26 — ci: add Dependabot config for backend, admin-dashboard, mobile, and GH Actions
 
 ## Open Issues
 - #57 [Tracking] System Analysis - Remaining Issues [none]
