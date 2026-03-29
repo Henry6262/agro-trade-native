@@ -9,7 +9,8 @@ process.on("unhandledRejection", (reason) => {
 });
 
 // ── Env var validation ────────────────────────────────────────────────────────
-const REQUIRED_ENV_VARS = ["DATABASE_URL", "PRIVY_APP_ID", "PRIVY_APP_SECRET"];
+// PRIVY_APP_SECRET intentionally excluded — auth uses JWKS (only APP_ID needed to build JWKS URL)
+const REQUIRED_ENV_VARS = ["DATABASE_URL", "PRIVY_APP_ID"];
 const missing = REQUIRED_ENV_VARS.filter((k) => !process.env[k]);
 if (missing.length > 0) {
   console.error(`FATAL: Missing required environment variables: ${missing.join(", ")}`);
