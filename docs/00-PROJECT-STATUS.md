@@ -1,6 +1,6 @@
 # 00 — Project Status
 
-> **Last updated:** 2026-03-23
+> **Last updated:** 2026-03-29
 > **Overall status:** ✅ Code-complete. Blocked on 3 human-action items before release.
 
 ---
@@ -9,9 +9,9 @@
 
 | Project | Status | Notes |
 |---------|--------|-------|
-| `backend/` | ✅ Build clean, deployed on Railway | All modules wired, escrow hooks live |
+| `backend/` | ✅ Build clean, deployed on Railway | All modules wired, escrow hooks live, NestJS Logger throughout |
 | `front-end/` | ✅ Feature-complete | iOS works; Android EAS build has Gradle error |
-| `landing/` | ✅ Build clean (25 pages) | Server runs via `npm start`; dev via `npm run dev` |
+| `landing/` | ✅ Build clean (25 pages) | Phase controls + profit validation on admin ops page |
 | `contracts/` | ✅ 37 Foundry tests passing | Awaiting Celo Sepolia deployment |
 | `admin-dashboard/` | 🟡 Supplementary | Replaced by `landing/` web dashboard |
 
@@ -25,6 +25,10 @@
 - [x] Prisma binary targets for Railway Linux (`debian-openssl-3.0.x`, `linux-musl-openssl-3.0.x`)
 - [x] `AgroEscrow` service — `approve + transferFrom` pattern for cUSD
 - [x] Escrow auto-triggered on `IN_TRANSIT` (locks funds) and `DELIVERED` (releases funds)
+- [x] `POST /escrow/:tradeOperationId/refund` — admin-only refund endpoint, calls `contract.refund(key)`, emits `PAYMENT_REFUNDED` TradeEvent
+- [x] `PAYMENT_REFUNDED` added to `TradeEventType` enum — migration `20260310200000_add_payment_refunded_event`
+- [x] Startup env var validation in `main.ts` — fast-fail if `DATABASE_URL`, `PRIVY_APP_ID`, or `PRIVY_APP_SECRET` missing
+- [x] NestJS `Logger` replaces all `console.log/warn/error` in backend (auth, buyer, pricing, seller, simulation, escrow)
 - [x] `RealtimeService.emitToUser()` wired into trade operations + inspections
 - [x] `emitToUser` called in `addSellersToTrade` (commit `770277b`)
 - [x] Socket.IO events emitted on every trade phase change
@@ -41,15 +45,23 @@
 - [x] `React.memo` on `MatchedSellersSection` + `ActiveOrdersList`
 - [x] `expo-build-properties ~0.14.8` (fixed version conflict)
 - [x] Inspector `tradeOperationId` surfaced correctly via `toInspectorJob` mapper
+- [x] `useNetworkStatus` hook (NetInfo-based) — exported from `shared/hooks/index.ts`
+- [x] API interceptor — network error detection with `isNetworkError` flag + user-facing timeout/offline messages
+- [x] `OfflineBanner` — animated slide-in banner mounted in `DashboardMainScreen`
 
 ### Landing / Web Portal (`landing/`)
 - [x] Full landing page: Hero, Problem, HowItWorks, Ecosystem, Roles, AppShowcase, GlobalReach, CTA
 - [x] Web dashboard: Buyer, Seller, Inspector, Transporter, Admin views
-- [x] Admin escrow management — `EscrowStatusCard` with Release/Dispute actions
+- [x] Admin escrow management — `EscrowStatusCard` with Release/Dispute/Refund actions
 - [x] Green brand color scheme applied end-to-end
 - [x] Build passes — 23 static + 2 dynamic routes, zero errors
 - [x] Dev server fixed — `turbopack.root` set to suppress false monorepo detection
 - [x] Waitlist API route (`/api/waitlist`)
+- [x] `TradePhase` type corrected to real backend values (`INITIATION`, `SELLER_MATCHING`, `SELLER_NEGOTIATION`, `INSPECTION_PENDING`, `TRANSPORT_MATCHING`, `TRANSPORT_BIDDING`, `IN_TRANSIT`, `DELIVERED`, `COMPLETED`, `CANCELLED`)
+- [x] `OrderTimeline` rewritten with correct phase ordering; `CANCELLED` treated as terminal (not a step)
+- [x] Admin operations page — phase transition buttons per trade card (matches backend `getValidPhaseTransitions()`)
+- [x] Admin operations page — profit pre-validation panel (toggle shows margin %, warnings, recommendations)
+- [x] Buyer order detail default phase fallback fixed (`"INITIATION"` not stale `"INITIATED"`)
 
 ### Smart Contracts (`contracts/`)
 - [x] `AgroEscrow.sol` — full state machine (AWAITING_PAYMENT → AWAITING_DELIVERY → COMPLETE/DISPUTED/REFUNDED)
@@ -106,16 +118,53 @@ The `expo-build-properties` config is correct. `--clear-cache` resolves most sta
 
 ---
 
+## Open GitHub Issues (By Priority)
+
+### P0 — Blocks MVP
+| Issue | Title |
+|-------|-------|
+| #37 | Admin: Transport Request Creation UI |
+
+### P1 — Core Functionality
+| Issue | Title |
+|-------|-------|
+| #39 | NI-1: finalizeTrade() skips DELIVERED phase validation |
+| #40 | NI-4: buyerConfirmDelivery() records ADMIN role instead of BUYER |
+| #41 | NI-5: No duplicate seller prevention in addSellersToTrade() |
+| #42 | NI-6: completeTradeOperation() inconsistent phase/status |
+| #43 | NI-8: cleanupTestData() misses OfferNegotiation records |
+| #46 | NI-20: finalizeTrade() needs $transaction wrapping |
+| #47 | NI-22: No unit tests for core business logic services |
+
+### P2 — Quality / Non-blocking
+| Issue | Title |
+|-------|-------|
+| #48 | NI-2, NI-3: transportOptimized field + summary hardcodes |
+| #51 | NI-17, NI-18, NI-21: Deploy scripts, multi-sig, N+1 queries |
+| #54 | NI-10: Pagination on remaining list endpoints |
+| #55 | NI-11: Unit tests for critical business logic |
+
+### ✅ Recently Closed
+| Issue | Title | Date |
+|-------|-------|------|
+| #38 | NI-15: Admin phase transition controls | 2026-03-29 |
+| #45 | NI-16: Profit endpoint pre-validation | 2026-03-29 |
+| #44 | NI-12: Mobile offline/network error handling | 2026-03-29 |
+| #56 | NI-12: Startup env var validation | 2026-03-29 |
+| #49 | NI-7 + NI-9: Logger cleanup + escrow refund | 2026-03-29 |
+
+---
+
 ## Recent Git History
 
 ```
+945cea1 feat: phase transitions, escrow refund, logging, offline handling, web dashboard
+9966c56 docs: auto-update progress report [skip ci]
+af9eab0 test: add escrow.service regression suite (22 specs)
+d365220 ci: add backend unit test workflow (NI-22 CI/CD)
 770277b feat: wire RealtimeService events, add socket notifications for trades and inspections
 2b247c3 fix: expo-build-properties version, push handlers, socket types, admin UI polish
 d75cccb feat: add landing/ — full Next.js web app with dashboard, auth, and escrow admin
-505803d feat: update escrow service for cUSD ERC-20 — approve+transferFrom pattern
-c35c73a feat: switch AgroEscrow from native CELO to cUSD ERC-20 stablecoin
-7b3b216 chore: add Claude Code tool permissions + gitignore docx and env files
-dc51192 fix: update Foundry RPC endpoints — Celo Alfajores deprecated, use Celo Sepolia
 ```
 
 ---
