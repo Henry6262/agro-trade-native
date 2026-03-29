@@ -1,6 +1,8 @@
 # AgroTrade
 
-B2B agricultural commodity trading platform for the Bulgarian market. Connects farmers, buyers, transporters, and quality inspectors in one system.
+> **StableHacks 2026** — Track: RWA-Backed Stablecoin & Commodity Vaults
+
+Institutional-grade stablecoin infrastructure for agricultural commodity trading. Dual-chain escrow (Celo + Solana) with full compliance architecture (KYC/KYT/AML/Travel Rule). Connects farmers, buyers, transporters, and quality inspectors in one system — starting with the Bulgarian market, scaling cross-border.
 
 ## Quick Start
 
@@ -30,10 +32,14 @@ cd front-end && npm install && npx expo start
 
 | Layer | Tech |
 |-------|------|
-| Backend | NestJS + TypeScript + Prisma + PostgreSQL |
-| Admin | React 19 + Vite 7 + shadcn/ui |
+| Backend | NestJS + TypeScript + Prisma + PostgreSQL (Railway) |
 | Mobile | React Native + Expo 52 + NativeWind |
-| Auth | JWT + Google OAuth + Privy |
+| Web Portal | Next.js + shadcn/ui (25 pages) |
+| Smart Contracts (Celo) | Solidity 0.8.20 + Foundry (37 tests) |
+| Smart Contracts (Solana) | Anchor + Rust + SPL Token (USDC) |
+| Auth | Privy JWT + Google OAuth |
+| Payments | cUSD (Celo) + USDC (Solana) — dual-chain escrow |
+| Real-time | Socket.IO + Expo Push Notifications |
 
 ## Trade Lifecycle (9 Phases)
 
@@ -63,18 +69,33 @@ Any phase can → CANCELLED (except COMPLETED).
 | [`docs/TEST_SCENARIOS.md`](docs/TEST_SCENARIOS.md) | 10 simulation scenarios with exact API call sequences |
 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Product overview — user journeys, features, data model |
 
+## Compliance Architecture
+
+AgroTrade is built compliance-first for institutional adoption:
+
+- **KYC:** Privy-powered identity verification, Google OAuth, admin account freeze
+- **KYT:** Every transaction logged as `TradeEvent` with blockchain tx hash, actor role, and full metadata
+- **AML:** Custodial model — all stablecoin movements require admin authorization. No direct user-to-user transfers.
+- **Travel Rule:** Every escrow operation captures originator, beneficiary, amount, purpose, and blockchain proof
+
+See [`docs/COMPLIANCE_ARCHITECTURE.md`](docs/COMPLIANCE_ARCHITECTURE.md) for full details.
+
 ## Project Structure
 
 ```
 agro-trade-native/
-├── backend/                # NestJS API (port 4000)
+├── backend/                # NestJS API (port 4000) — 23 modules, Railway deployed
 │   ├── prisma/             # Schema (33 models) + migrations + seed scripts
-│   └── src/                # auth, buyer, seller, trade-operations, negotiations,
-│                           # inspections, transport, simulation, scenarios
-├── admin-dashboard/        # React/Vite operations console (port 5173)
+│   └── src/                # auth, buyer, seller, trade-operations, escrow,
+│                           # inspections, transport, simulation, realtime
+├── contracts/              # Celo smart contracts (Foundry, 37 tests)
+│   └── src/AgroEscrow.sol  # cUSD escrow — custodial model
+├── contracts-solana/       # Solana smart contracts (Anchor)
+│   └── programs/agro-escrow/  # USDC escrow — SPL token with PDAs
 ├── front-end/              # React Native/Expo mobile app
-├── docs/                   # API reference, state machines, test scenarios
-└── rules/                  # Enforced coding standards (backend + frontend)
+├── landing/                # Next.js web portal (25 pages)
+├── docs/                   # API reference, compliance, architecture
+└── rules/                  # Enforced coding standards
 ```
 
 ## Simulation Endpoints
