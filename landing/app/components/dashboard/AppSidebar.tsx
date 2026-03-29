@@ -17,7 +17,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
-  Wheat,
+  Leaf,
   ShoppingCart,
   Store,
   Package,
@@ -75,11 +75,11 @@ const ROLE_LABELS: Record<UserRole, string> = {
 };
 
 const ROLE_COLORS: Record<UserRole, string> = {
-  buyer: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-  seller: "bg-green-500/20 text-green-400 border-green-500/30",
-  inspector: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-  transport: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-  admin: "bg-brand-wheat/20 text-brand-wheat border-brand-wheat/30",
+  buyer: "bg-emerald-600/20 text-emerald-400 border-emerald-600/30",
+  seller: "bg-green-600/20 text-green-400 border-green-600/30",
+  inspector: "bg-teal-600/20 text-teal-400 border-teal-600/30",
+  transport: "bg-lime-600/20 text-lime-400 border-lime-600/30",
+  admin: "bg-green-500/20 text-green-400 border-green-500/30",
 };
 
 export function AppSidebar() {
@@ -96,8 +96,8 @@ export function AppSidebar() {
       {/* Header — Logo */}
       <SidebarHeader className="px-4 py-4 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-brand-wheat/10 border border-brand-wheat/20">
-            <Wheat className="w-5 h-5 text-brand-wheat" />
+          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-green-600/20 border border-green-600/40">
+            <Leaf className="w-5 h-5 text-green-400" />
           </div>
           <span className="text-lg font-bold text-brand-cream">AgroTrade</span>
         </Link>
@@ -166,8 +166,8 @@ export function AppSidebar() {
       {/* Footer — User info + Logout */}
       <SidebarFooter className="border-t border-sidebar-border p-4">
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 border border-brand-wheat/20">
-            <AvatarFallback className="bg-brand-wheat/10 text-brand-wheat text-xs font-bold">
+          <Avatar className="h-8 w-8 border border-green-600/40">
+            <AvatarFallback className="bg-green-600/20 text-green-400 text-xs font-bold">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -179,7 +179,7 @@ export function AppSidebar() {
           </div>
           <button
             onClick={logout}
-            className="p-1.5 rounded-md hover:bg-brand-wheat/10 transition-colors"
+            className="p-1.5 rounded-md hover:bg-green-600/20 transition-colors"
             title="Sign out"
           >
             <LogOut className="w-4 h-4 text-text-muted" />

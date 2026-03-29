@@ -53,17 +53,17 @@ export default function InspectorDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-brand-cream">Inspector Dashboard</h1>
-        <p className="text-text-muted text-sm mt-1">View inspection jobs and submit quality reports.</p>
+        <p className="text-green-400/70 text-sm mt-1">View inspection jobs and submit quality reports.</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="bg-card border-brand-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-text-muted">Pending</CardTitle>
-            <ClipboardCheck className="h-4 w-4 text-brand-wheat" />
+            <ClipboardCheck className="h-4 w-4 text-green-400" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-16 bg-brand-wheat/10" /> : (
+            {isLoading ? <Skeleton className="h-8 w-16 bg-green-600/20" /> : (
               <div className="text-2xl font-bold text-brand-cream">{pendingJobs.length}</div>
             )}
           </CardContent>
@@ -71,10 +71,10 @@ export default function InspectorDashboard() {
         <Card className="bg-card border-brand-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-text-muted">In Progress</CardTitle>
-            <Clock className="h-4 w-4 text-brand-amber" />
+            <Clock className="h-4 w-4 text-teal-400" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-16 bg-brand-wheat/10" /> : (
+            {isLoading ? <Skeleton className="h-8 w-16 bg-green-600/20" /> : (
               <div className="text-2xl font-bold text-brand-cream">{inProgressJobs.length}</div>
             )}
           </CardContent>
@@ -82,10 +82,10 @@ export default function InspectorDashboard() {
         <Card className="bg-card border-brand-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-text-muted">Completed</CardTitle>
-            <CheckCircle className="h-4 w-4 text-brand-green" />
+            <CheckCircle className="h-4 w-4 text-emerald-400" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-16 bg-brand-wheat/10" /> : (
+            {isLoading ? <Skeleton className="h-8 w-16 bg-green-600/20" /> : (
               <div className="text-2xl font-bold text-brand-cream">{completedJobs.length}</div>
             )}
           </CardContent>
@@ -94,7 +94,7 @@ export default function InspectorDashboard() {
 
       {isLoading ? (
         <div className="space-y-3">
-          {[1, 2].map((i) => <Skeleton key={i} className="h-24 bg-brand-wheat/5 rounded-xl" />)}
+          {[1, 2].map((i) => <Skeleton key={i} className="h-24 bg-green-600/10 rounded-xl" />)}
         </div>
       ) : jobs.length === 0 ? (
         <Card className="bg-card border-brand-border">
@@ -110,7 +110,7 @@ export default function InspectorDashboard() {
         <>
           {activeJobs.length > 0 && (
             <div className="space-y-3">
-              <h2 className="text-sm font-medium text-brand-wheat flex items-center gap-2">
+              <h2 className="text-sm font-medium text-green-400 flex items-center gap-2">
                 <Clock className="h-4 w-4" /> Active Jobs ({activeJobs.length})
               </h2>
               {activeJobs.map((job) => <JobCard key={job.id} job={job} />)}
@@ -133,7 +133,7 @@ function JobCard({ job }: { job: InspectionJob }) {
   const cfg = STATUS_STYLES[job.status] || STATUS_STYLES.pending;
 
   return (
-    <Card className="bg-card border-brand-border hover:border-brand-wheat/20 transition-colors">
+    <Card className="bg-card border-brand-border hover:border-green-600/30 transition-colors">
       <CardContent className="p-4 flex items-start justify-between">
         <div className="space-y-1.5">
           <p className="font-medium text-brand-cream">{name}</p>

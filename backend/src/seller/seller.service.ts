@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import {
@@ -16,6 +17,8 @@ import {
 
 @Injectable()
 export class SellerService {
+  private readonly logger = new Logger(SellerService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async createListing(createListingDto: CreateListingDto, userId: string) {
@@ -172,7 +175,7 @@ export class SellerService {
         data: listing,
       };
     } catch (error) {
-      console.error("Error creating listing:", error);
+      this.logger.error("Error creating listing:" + error);
       if (
         error instanceof NotFoundException ||
         error instanceof BadRequestException
@@ -600,7 +603,7 @@ export class SellerService {
         },
       };
     } catch (error) {
-      console.error("Error fetching seller offers:", error);
+      this.logger.error("Error fetching seller offers:" + error);
       throw new BadRequestException(
         "Failed to fetch offers. Please try again.",
       );
@@ -987,7 +990,7 @@ export class SellerService {
     try {
       // For now, just log the notification
       // In production, this would integrate with a notification service
-      console.log("Custom offer notification:", {
+      this.logger.log("Custom offer notification:" + JSON.stringify({
         type: "CUSTOM_OFFER_REVIEW",
         title: "New Custom Offer Request",
         message: `A seller has submitted a custom offer request for review.`,
@@ -996,9 +999,9 @@ export class SellerService {
           sellerId,
         },
         recipientRole: "ADMIN",
-      });
+      }));
     } catch (error) {
-      console.error("Failed to create notification:", error);
+      this.logger.error("Failed to create notification:" + error);
       // Don't throw error as this is not critical for listing creation
     }
   }

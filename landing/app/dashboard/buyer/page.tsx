@@ -60,7 +60,7 @@ export default function BuyerDashboard() {
             <CardTitle className="text-sm font-medium text-text-muted">
               Active Orders
             </CardTitle>
-            <ShoppingCart className="h-4 w-4 text-brand-wheat" />
+            <ShoppingCart className="h-4 w-4 text-green-400" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -78,7 +78,7 @@ export default function BuyerDashboard() {
             <CardTitle className="text-sm font-medium text-text-muted">
               Completed
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-brand-green" />
+            <TrendingUp className="h-4 w-4 text-emerald-400" />
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -96,7 +96,7 @@ export default function BuyerDashboard() {
             <CardTitle className="text-sm font-medium text-text-muted">
               My Listings
             </CardTitle>
-            <FileText className="h-4 w-4 text-blue-400" />
+            <FileText className="h-4 w-4 text-lime-400" />
           </CardHeader>
           <CardContent>
             {statsLoading ? (
@@ -114,7 +114,7 @@ export default function BuyerDashboard() {
             <CardTitle className="text-sm font-medium text-text-muted">
               Pending Offers
             </CardTitle>
-            <Store className="h-4 w-4 text-brand-amber" />
+            <Store className="h-4 w-4 text-teal-400" />
           </CardHeader>
           <CardContent>
             {statsLoading ? (
@@ -131,35 +131,35 @@ export default function BuyerDashboard() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Link href="/dashboard/buyer/marketplace">
-          <Card className="bg-card border-brand-border hover:border-brand-wheat/30 transition-colors cursor-pointer group">
+          <Card className="bg-card border-brand-border hover:border-green-600/30 transition-colors cursor-pointer group">
             <CardContent className="flex items-center justify-between p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-brand-wheat/10">
-                  <Store className="h-6 w-6 text-brand-wheat" />
+                <div className="p-3 rounded-xl bg-green-600/20">
+                  <Store className="h-6 w-6 text-green-400" />
                 </div>
                 <div>
                   <p className="font-semibold text-brand-cream">Browse Marketplace</p>
                   <p className="text-sm text-text-muted">Find products from verified sellers</p>
                 </div>
               </div>
-              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-brand-wheat transition-colors" />
+              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-green-400 transition-colors" />
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/dashboard/buyer/orders">
-          <Card className="bg-card border-brand-border hover:border-brand-wheat/30 transition-colors cursor-pointer group">
+          <Card className="bg-card border-brand-border hover:border-green-600/30 transition-colors cursor-pointer group">
             <CardContent className="flex items-center justify-between p-6">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-brand-green/20">
-                  <ShoppingCart className="h-6 w-6 text-green-400" />
+                <div className="p-3 rounded-xl bg-green-600/20">
+                  <ShoppingCart className="h-6 w-6 text-emerald-400" />
                 </div>
                 <div>
                   <p className="font-semibold text-brand-cream">View Orders</p>
                   <p className="text-sm text-text-muted">Track your active trades</p>
                 </div>
               </div>
-              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-brand-wheat transition-colors" />
+              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-green-400 transition-colors" />
             </CardContent>
           </Card>
         </Link>
@@ -176,10 +176,10 @@ export default function BuyerDashboard() {
               <Link
                 key={trade.id}
                 href={`/dashboard/buyer/orders/${trade.id}`}
-                className="flex items-center justify-between p-3 rounded-lg bg-brand-bg2/50 border border-brand-border hover:border-brand-wheat/20 transition-colors group"
+                className="flex items-center justify-between p-3 rounded-lg bg-brand-bg2/50 border border-brand-border hover:border-green-600/20 transition-colors group"
               >
                 <div>
-                  <p className="text-sm font-medium text-brand-cream group-hover:text-brand-wheat transition-colors">
+                  <p className="text-sm font-medium text-brand-cream group-hover:text-green-400 transition-colors">
                     Trade #{trade.id.slice(0, 8)}
                   </p>
                   <p className="text-xs text-text-muted">
@@ -188,7 +188,7 @@ export default function BuyerDashboard() {
                 </div>
                 <Badge
                   variant="outline"
-                  className="text-xs border-brand-wheat/30 text-brand-wheat"
+                  className="text-xs border-green-600/30 text-green-400"
                 >
                   {trade.phase.replace(/_/g, " ")}
                 </Badge>

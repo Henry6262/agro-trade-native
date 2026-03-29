@@ -172,7 +172,7 @@ export default function OrderDetailPage() {
   };
 
   // Determine display values from either source
-  const phase: TradePhase = tradeDetail?.phase || "INITIATED";
+  const phase: TradePhase = tradeDetail?.phase || "INITIATION";
   const escrowStatus: EscrowStatus = tradeDetail?.escrowStatus || "NONE";
   const productName =
     trade?.saleListing?.product?.name ||

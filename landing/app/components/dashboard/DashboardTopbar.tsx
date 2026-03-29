@@ -18,9 +18,9 @@ const TYPE_ICON: Record<string, React.ElementType> = {
 };
 
 const TYPE_COLOR: Record<string, string> = {
-  trade: "text-blue-400",
-  inspection: "text-purple-400",
-  offer: "text-yellow-400",
+  trade: "text-emerald-400",
+  inspection: "text-green-400",
+  offer: "text-lime-400",
   system: "text-text-muted",
 };
 
@@ -79,7 +79,7 @@ export function DashboardTopbar() {
         <div className="relative" ref={panelRef}>
           <button
             onClick={() => setOpen(!open)}
-            className="relative p-2 rounded-lg hover:bg-brand-wheat/10 transition-colors"
+            className="relative p-2 rounded-lg hover:bg-green-600/10 transition-colors"
           >
             <Bell className="w-5 h-5 text-text-muted" />
             {unreadCount > 0 && (
@@ -142,8 +142,8 @@ export function DashboardTopbar() {
                         <button
                           key={n.id}
                           onClick={() => handleNotificationClick(n)}
-                          className={`w-full text-left px-4 py-3 hover:bg-brand-wheat/5 transition-colors ${
-                            !n.read ? "bg-brand-wheat/[0.03]" : ""
+                          className={`w-full text-left px-4 py-3 hover:bg-green-600/5 transition-colors ${
+                            !n.read ? "bg-green-600/[0.03]" : ""
                           }`}
                         >
                           <div className="flex items-start gap-3">
@@ -160,7 +160,7 @@ export function DashboardTopbar() {
                                   {n.title}
                                 </p>
                                 {!n.read && (
-                                  <span className="w-1.5 h-1.5 rounded-full bg-brand-wheat flex-shrink-0" />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
                                 )}
                               </div>
                               <p className="text-xs text-text-muted mt-0.5 line-clamp-1">

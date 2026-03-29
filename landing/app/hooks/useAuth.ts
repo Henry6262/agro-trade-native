@@ -17,26 +17,16 @@ import type { User } from "@/app/types";
  *  5. We store user + token in Zustand (persisted to localStorage)
  */
 export function useAuth() {
-  let privyReady = false;
-  let privyAuthenticated = false;
-  let privyUser = null;
-  let privyLogin = () => {};
-  let privyLogout = async () => {};
-  let privyGetAccessToken = async (): Promise<string | null> => null;
+  // Always call usePrivy at the top level (Rules of Hooks)
+  // PrivyProvider is mounted after hydration in layout, so this is safe for client components
+  const privy = usePrivy();
 
-  // usePrivy will throw during SSG if no PrivyProvider, which is fine
-  // because dashboard pages are client-only. But we guard with try/catch.
-  try {
-    const privy = usePrivy();
-    privyReady = privy.ready;
-    privyAuthenticated = privy.authenticated;
-    privyUser = privy.user;
-    privyLogin = privy.login;
-    privyLogout = privy.logout;
-    privyGetAccessToken = privy.getAccessToken;
-  } catch {
-    // No PrivyProvider (build-time SSG) — fallback to store-only auth
-  }
+  const privyReady = privy.ready;
+  const privyAuthenticated = privy.authenticated;
+  const privyUser = privy.user;
+  const privyLogin = privy.login;
+  const privyLogout = privy.logout;
+  const privyGetAccessToken = privy.getAccessToken;
 
   const { user, token, isAuthenticated, isLoading, error, login, logout, setLoading, setError } = useAuthStore();
   const hasVerified = useRef(false);

@@ -52,7 +52,7 @@ const fixes = [
 
 export function ProblemSection() {
   return (
-    <section id="problem" className="relative py-28 px-4 overflow-hidden">
+    <section id="problem" className="relative py-28 px-6 lg:px-32 overflow-hidden">
       {/* ── Background: cracked dry earth + parallax ── */}
       <ParallaxBg
         src="https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=2070&q=80"
@@ -79,7 +79,7 @@ export function ProblemSection() {
               The Problem
             </span>
             <h2 className="mt-4 leading-tight" style={{
-              fontSize: "clamp(2.2rem, 5.5vw, 4.5rem)",
+              fontSize: "clamp(1.6rem, 4vw, 3rem)",
               fontWeight: 900,
               letterSpacing: "-0.02em",
             }}>
@@ -94,7 +94,7 @@ export function ProblemSection() {
                 &ldquo;Zero payment guarantees.&rdquo;
               </span>
             </h2>
-            <p className="mt-5 text-lg max-w-2xl leading-relaxed" style={{ color: B.muted }}>
+            <p className="mt-5 text-base max-w-2xl leading-relaxed" style={{ color: B.muted }}>
               Every year, Balkan and Middle Eastern grain traders lose everything to disappeared middlemen,
               disputed quality claims, and deals built on nothing but a handshake.
             </p>

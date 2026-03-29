@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import {
   LocationPricingResponseDto,
@@ -13,6 +13,8 @@ export interface MarketData {
 
 @Injectable()
 export class PricingService {
+  private readonly logger = new Logger(PricingService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async getLocationBasedPricing(
@@ -74,7 +76,7 @@ export class PricingService {
         };
       }
     } catch (error) {
-      console.error("Cache lookup failed:", error);
+      this.logger.error("Cache lookup failed:" + error);
     }
 
     return null;
@@ -98,7 +100,7 @@ export class PricingService {
         DO UPDATE SET price_range = ${JSON.stringify(pricing)}, expires_at = ${expiresAt}
       `;
     } catch (error) {
-      console.error("Cache storage failed:", error);
+      this.logger.error("Cache storage failed:" + error);
     }
   }
 

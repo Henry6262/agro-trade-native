@@ -1,10 +1,12 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { UserRole, TransportRequestStatus } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
 
 @Injectable()
 export class SimulationService {
+  private readonly logger = new Logger(SimulationService.name);
+
   constructor(private prisma: PrismaService) {}
 
   /**
@@ -209,14 +211,14 @@ export class SimulationService {
     },
   ) {
     try {
-      console.log("[createFarmerSaleListing] Input:", { farmerId, data });
+      this.logger.log("[createFarmerSaleListing] Input:" + JSON.stringify({ farmerId, data }));
 
       // Get or create product
       let product = await this.prisma.product.findFirst({
         where: { category: data.productCategory as any },
       });
 
-      console.log("[createFarmerSaleListing] Found product:", product);
+      this.logger.log("[createFarmerSaleListing] Found product:" + JSON.stringify(product));
 
       if (!product) {
         // Create a basic product if it doesn't exist
@@ -227,7 +229,7 @@ export class SimulationService {
             displayName: data.productCategory,
           },
         });
-        console.log("[createFarmerSaleListing] Created product:", product);
+        this.logger.log("[createFarmerSaleListing] Created product:" + JSON.stringify(product));
       }
 
       // Create sale listing
@@ -241,22 +243,20 @@ export class SimulationService {
         status: "ACTIVE" as any,
       };
 
-      console.log(
-        "[createFarmerSaleListing] Creating sale listing with data:",
-        saleListingData,
+      this.logger.log(
+        "[createFarmerSaleListing] Creating sale listing with data:" + JSON.stringify(saleListingData),
       );
 
       const saleListing = await this.prisma.saleListing.create({
         data: saleListingData,
       });
 
-      console.log(
-        "[createFarmerSaleListing] Created sale listing:",
-        saleListing,
+      this.logger.log(
+        "[createFarmerSaleListing] Created sale listing:" + JSON.stringify(saleListing),
       );
       return saleListing;
     } catch (error) {
-      console.error("[createFarmerSaleListing] ERROR:", error);
+      this.logger.error("[createFarmerSaleListing] ERROR:" + error);
       throw error;
     }
   }
@@ -971,7 +971,7 @@ export class SimulationService {
         emails: testUsers.map((u) => u.email),
       };
     } catch (error) {
-      console.error("Cleanup test data error:", error);
+      this.logger.error("Cleanup test data error:" + error);
       throw new Error(`Failed to cleanup test data: ${error.message}`);
     }
   }

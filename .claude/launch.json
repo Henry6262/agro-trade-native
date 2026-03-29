@@ -10,9 +10,9 @@
     },
     {
       "name": "landing",
-      "runtimeExecutable": "/usr/local/bin/node",
-      "runtimeArgs": ["/usr/local/bin/npm", "run", "dev", "--", "-p", "3001"],
-      "port": 3001,
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start"],
+      "autoPort": true,
       "cwd": "landing"
     }
   ]

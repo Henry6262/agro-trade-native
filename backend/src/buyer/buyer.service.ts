@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateBuyListingDto } from "./dto/create-buy-listing.dto";
@@ -13,13 +14,15 @@ import {
 
 @Injectable()
 export class BuyerService {
+  private readonly logger = new Logger(BuyerService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async createBuyListing(dto: CreateBuyListingDto, userId: string) {
     try {
       // WORKAROUND: Allow any authenticated user to create buyer listings
-      console.log("Creating buyer listing for user:", userId);
-      console.log("DTO received:", JSON.stringify(dto, null, 2));
+      this.logger.log("Creating buyer listing for user:" + userId);
+      this.logger.log("DTO received:" + JSON.stringify(dto, null, 2));
 
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
@@ -31,7 +34,7 @@ export class BuyerService {
       }
 
       // Skip role check - allow any authenticated user to create buyer listings
-      console.log("User role:", user.role, "- allowing buyer listing creation");
+      this.logger.log("User role:" + user.role + " - allowing buyer listing creation");
 
       // Create or find delivery address
       let deliveryAddressId = null;
@@ -87,7 +90,7 @@ export class BuyerService {
 
       // Add specifications if provided
       if (dto.specifications && Object.keys(dto.specifications).length > 0) {
-        console.log("Processing specifications:", dto.specifications);
+        this.logger.log("Processing specifications:" + JSON.stringify(dto.specifications));
 
         // Fields that are NOT specifications (they're core BuyListing fields)
         const coreFields = [
@@ -116,7 +119,7 @@ export class BuyerService {
 
           // Skip if the value looks like an ID (cuid pattern)
           if (typeof value === "string" && value.match(/^c[a-z0-9]{24,}$/)) {
-            console.log(`Skipping ${key} with ID-like value: ${value}`);
+            this.logger.log(`Skipping ${key} with ID-like value: ${value}`);
             continue;
           }
 
@@ -162,13 +165,13 @@ export class BuyerService {
 
         // Create all specifications
         if (specEntries.length > 0) {
-          console.log("Creating specification entries:", specEntries);
+          this.logger.log("Creating specification entries:" + JSON.stringify(specEntries));
           await this.prisma.listingSpec.createMany({
             data: specEntries,
           });
-          console.log("Specifications created successfully");
+          this.logger.log("Specifications created successfully");
         } else {
-          console.log("No specification entries to create");
+          this.logger.log("No specification entries to create");
         }
 
         // Fetch the listing again with specifications
@@ -196,7 +199,7 @@ export class BuyerService {
 
       return buyListing;
     } catch (error) {
-      console.error("Error creating buy listing:", error);
+      this.logger.error("Error creating buy listing:" + error);
       throw error;
     }
   }

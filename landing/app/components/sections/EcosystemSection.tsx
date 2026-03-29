@@ -89,7 +89,7 @@ const stats = [
 export function EcosystemSection() {
   return (
     <section
-      className="py-24 px-4 relative overflow-hidden"
+      className="py-24 px-6 lg:px-32 relative overflow-hidden"
       style={{ backgroundColor: B.bg }}
     >
       {/* Ambient radial glow */}
@@ -112,7 +112,7 @@ export function EcosystemSection() {
               Platform Ecosystem
             </span>
             <h2
-              className="text-4xl sm:text-5xl font-extrabold mt-3"
+              className="text-3xl sm:text-4xl font-extrabold mt-3"
               style={{ color: B.cream }}
             >
               Every role. One smart contract.

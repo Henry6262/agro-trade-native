@@ -10,6 +10,7 @@ import {
   Delete,
   ForbiddenException,
   NotFoundException,
+  Logger,
 } from "@nestjs/common";
 import {
   ApiTags,
@@ -38,6 +39,8 @@ import { successResponse } from "../common/utils/response.util";
 @Roles(UserRole.ADMIN)
 @Controller("simulation")
 export class SimulationController {
+  private readonly logger = new Logger(SimulationController.name);
+
   constructor(
     private simulationService: SimulationService,
     private prisma: PrismaService,
@@ -519,18 +522,18 @@ export class SimulationController {
     },
   ) {
     try {
-      console.log("[Controller] createFarmerSaleListing called with:", {
+      this.logger.log("[Controller] createFarmerSaleListing called with:" + JSON.stringify({
         farmerId,
         dto,
-      });
+      }));
       const result = await this.simulationService.createFarmerSaleListing(
         farmerId,
         dto,
       );
-      console.log("[Controller] createFarmerSaleListing success:", result);
+      this.logger.log("[Controller] createFarmerSaleListing success:" + JSON.stringify(result));
       return result;
     } catch (error) {
-      console.error("[Controller] createFarmerSaleListing ERROR:", error);
+      this.logger.error("[Controller] createFarmerSaleListing ERROR:" + error);
       throw error;
     }
   }

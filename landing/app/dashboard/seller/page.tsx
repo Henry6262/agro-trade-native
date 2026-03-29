@@ -49,7 +49,7 @@ export default function SellerDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-brand-cream">Seller Dashboard</h1>
-        <p className="text-text-muted text-sm mt-1">
+        <p className="text-green-400/70 text-sm mt-1">
           Manage your listings and handle incoming trades.
         </p>
       </div>
@@ -59,10 +59,10 @@ export default function SellerDashboard() {
         <Card className="bg-card border-brand-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-text-muted">Active Listings</CardTitle>
-            <Package className="h-4 w-4 text-brand-wheat" />
+            <Package className="h-4 w-4 text-green-400" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-16 bg-brand-wheat/10" /> : (
+            {isLoading ? <Skeleton className="h-8 w-16 bg-green-600/20" /> : (
               <div className="text-2xl font-bold text-brand-cream">
                 {stats?.activeListings ?? myListings.filter(l => l.isActive).length}
               </div>
@@ -85,10 +85,10 @@ export default function SellerDashboard() {
         <Card className="bg-card border-brand-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-text-muted">Pending Offers</CardTitle>
-            <Inbox className="h-4 w-4 text-yellow-400" />
+            <Inbox className="h-4 w-4 text-teal-400" />
           </CardHeader>
           <CardContent>
-            {statsLoading ? <Skeleton className="h-8 w-16 bg-brand-wheat/10" /> : (
+            {statsLoading ? <Skeleton className="h-8 w-16 bg-green-600/20" /> : (
               <div className="text-2xl font-bold text-brand-cream">
                 {stats?.pendingOffers ?? 0}
               </div>
@@ -99,10 +99,10 @@ export default function SellerDashboard() {
         <Card className="bg-card border-brand-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-text-muted">Total Trades</CardTitle>
-            <TrendingUp className="h-4 w-4 text-brand-amber" />
+            <TrendingUp className="h-4 w-4 text-lime-400" />
           </CardHeader>
           <CardContent>
-            {isLoading ? <Skeleton className="h-8 w-16 bg-brand-wheat/10" /> : (
+            {isLoading ? <Skeleton className="h-8 w-16 bg-green-600/20" /> : (
               <div className="text-2xl font-bold text-brand-cream">{sellerTrades.length}</div>
             )}
           </CardContent>
@@ -112,40 +112,40 @@ export default function SellerDashboard() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Link href="/dashboard/seller/listings/new">
-          <Card className="bg-card border-brand-border hover:border-brand-wheat/30 transition-colors cursor-pointer group">
+          <Card className="bg-card border-brand-border hover:border-green-600/30 transition-colors cursor-pointer group">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 rounded-xl bg-brand-wheat/10">
-                <Plus className="h-6 w-6 text-brand-wheat" />
+              <div className="p-3 rounded-xl bg-green-600/20">
+                <Plus className="h-6 w-6 text-green-400" />
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-brand-cream">New Listing</p>
                 <p className="text-sm text-text-muted">Add a product</p>
               </div>
-              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-brand-wheat transition-colors" />
+              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-green-400 transition-colors" />
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/dashboard/seller/listings">
-          <Card className="bg-card border-brand-border hover:border-brand-wheat/30 transition-colors cursor-pointer group">
+          <Card className="bg-card border-brand-border hover:border-green-600/30 transition-colors cursor-pointer group">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 rounded-xl bg-brand-green/20">
+              <div className="p-3 rounded-xl bg-green-600/20">
                 <Package className="h-6 w-6 text-green-400" />
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-brand-cream">My Listings</p>
                 <p className="text-sm text-text-muted">Manage products</p>
               </div>
-              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-brand-wheat transition-colors" />
+              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-green-400 transition-colors" />
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/dashboard/seller/offers">
-          <Card className="bg-card border-brand-border hover:border-yellow-500/30 transition-colors cursor-pointer group">
+          <Card className="bg-card border-brand-border hover:border-teal-600/30 transition-colors cursor-pointer group">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 rounded-xl bg-yellow-500/20">
-                <Inbox className="h-6 w-6 text-yellow-400" />
+              <div className="p-3 rounded-xl bg-teal-600/20">
+                <Inbox className="h-6 w-6 text-teal-400" />
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-brand-cream">Offers</p>
@@ -153,22 +153,22 @@ export default function SellerDashboard() {
                   {stats?.pendingOffers ? `${stats.pendingOffers} pending` : "View offers"}
                 </p>
               </div>
-              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-brand-wheat transition-colors" />
+              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-teal-400 transition-colors" />
             </CardContent>
           </Card>
         </Link>
 
         <Link href="/dashboard/seller/trades">
-          <Card className="bg-card border-brand-border hover:border-brand-wheat/30 transition-colors cursor-pointer group">
+          <Card className="bg-card border-brand-border hover:border-lime-600/30 transition-colors cursor-pointer group">
             <CardContent className="flex items-center gap-4 p-6">
-              <div className="p-3 rounded-xl bg-blue-500/20">
-                <List className="h-6 w-6 text-blue-400" />
+              <div className="p-3 rounded-xl bg-lime-600/20">
+                <List className="h-6 w-6 text-lime-400" />
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-brand-cream">View Trades</p>
                 <p className="text-sm text-text-muted">Track orders</p>
               </div>
-              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-brand-wheat transition-colors" />
+              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-lime-400 transition-colors" />
             </CardContent>
           </Card>
         </Link>

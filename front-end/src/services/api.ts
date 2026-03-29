@@ -43,6 +43,15 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
+    // Network error (no response) — device is offline or server unreachable
+    if (!error.response) {
+      const networkError = new Error(
+        error.code === 'ECONNABORTED' ? 'Request timed out. Check your connection.' : 'No internet connection.'
+      );
+      (networkError as any).isNetworkError = true;
+      return Promise.reject(networkError);
+    }
+
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {

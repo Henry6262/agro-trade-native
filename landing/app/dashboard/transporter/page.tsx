@@ -8,7 +8,7 @@ export default function TransporterDashboard() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-brand-cream">Transporter Dashboard</h1>
-        <p className="text-text-muted text-sm mt-1">
+        <p className="text-green-400/70 text-sm mt-1">
           Available deliveries and active transport jobs.
         </p>
       </div>
@@ -17,7 +17,7 @@ export default function TransporterDashboard() {
         <Card className="bg-card border-brand-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-text-muted">Available</CardTitle>
-            <Truck className="h-4 w-4 text-brand-wheat" />
+            <Truck className="h-4 w-4 text-green-400" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-brand-cream">0</div>
@@ -27,7 +27,7 @@ export default function TransporterDashboard() {
         <Card className="bg-card border-brand-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-text-muted">In Transit</CardTitle>
-            <Clock className="h-4 w-4 text-brand-amber" />
+            <Clock className="h-4 w-4 text-teal-400" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-brand-cream">0</div>
@@ -37,7 +37,7 @@ export default function TransporterDashboard() {
         <Card className="bg-card border-brand-border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-text-muted">Delivered</CardTitle>
-            <CheckCircle className="h-4 w-4 text-brand-green" />
+            <CheckCircle className="h-4 w-4 text-emerald-400" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-brand-cream">0</div>

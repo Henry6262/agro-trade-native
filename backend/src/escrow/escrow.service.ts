@@ -156,6 +156,27 @@ export class EscrowService {
     return { txHash: tx.hash };
   }
 
+  async refund(tradeOperationId: string) {
+    const ethers = await import("ethers");
+    const contract = await this.getContract();
+    const key = ethers.id(tradeOperationId);
+    const tx = await contract.refund(key);
+    await tx.wait();
+    this.logger.log(`Refund executed for trade ${tradeOperationId}: ${tx.hash}`);
+
+    await this.prisma.tradeEvent.create({
+      data: {
+        tradeOperationId,
+        eventType: "PAYMENT_REFUNDED",
+        actorRole: "ADMIN",
+        blockchainTxHash: tx.hash,
+        metadata: {},
+      },
+    });
+
+    return { txHash: tx.hash };
+  }
+
   async getStatus(tradeOperationId: string) {
     const ethers = await import("ethers");
     const contract = await this.getContract();

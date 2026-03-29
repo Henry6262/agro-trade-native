@@ -22,9 +22,9 @@ const roles = [
       "Inspector verifies grade before release",
       "Dispute protection built-in",
     ],
-    // wheat gold — the producer
-    accent: "#E8C870",
-    accentRgb: "232,200,112",
+    // green — the producer
+    accent: "#059669",
+    accentRgb: "5,150,105",
     bgImage: null,
   },
   {
@@ -42,9 +42,9 @@ const roles = [
       "Funds never leave escrow early",
       "Full refund if specs not met",
     ],
-    // blue — trust, water, finance
-    accent: "#60A5FA",
-    accentRgb: "96,165,250",
+    // green — trust, transparency
+    accent: "#34d399",
+    accentRgb: "52,211,153",
     bgImage: null,
   },
   {
@@ -62,9 +62,9 @@ const roles = [
       "Flexible — bid on any job",
       "Paid immediately on submission",
     ],
-    // purple — precision, authority
-    accent: "#A78BFA",
-    accentRgb: "167,139,250",
+    // green — precision, verification
+    accent: "#10b981",
+    accentRgb: "16,185,129",
     bgImage: null,
   },
   {
@@ -82,16 +82,16 @@ const roles = [
       "Live shipment tracking",
       "Payment locked in escrow at booking",
     ],
-    // orange — movement, energy
-    accent: "#FB923C",
-    accentRgb: "251,146,60",
+    // green — movement, logistics
+    accent: "#6ee7b7",
+    accentRgb: "110,231,183",
     bgImage: null,
   },
 ];
 
 export function RolesSection() {
   return (
-    <section id="roles" className="relative py-28 px-6 lg:px-16 overflow-hidden">
+    <section id="roles" className="relative py-28 px-6 lg:px-32 overflow-hidden">
       {/* ── Background: outdoor market + parallax ── */}
       <ParallaxBg
         src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=2070&q=80"
@@ -102,19 +102,19 @@ export function RolesSection() {
         fadeBottom="#040608"
         fadeSize={240}
       />
-      {/* Gold atmosphere */}
+      {/* Green atmosphere */}
       <div className="pointer-events-none absolute inset-0 z-0" style={{
-        background: "radial-gradient(ellipse 80% 55% at 50% 100%, rgba(232,200,112,0.07) 0%, transparent 60%)",
+        background: "radial-gradient(ellipse 80% 55% at 50% 100%, rgba(16,185,129,0.07) 0%, transparent 60%)",
       }} />
 
       <div className="max-w-7xl mx-auto relative z-10">
         <FadeInUp>
           <div className="mb-16">
-            <span className="text-label" style={{ color: B.wheat }}>
+            <span className="text-label" style={{ color: B.green }}>
               Who It&apos;s For
             </span>
             <h2 className="mt-4" style={{
-              fontSize: "clamp(2.2rem, 5.5vw, 4.5rem)",
+              fontSize: "clamp(1.6rem, 4vw, 3rem)",
               fontWeight: 900,
               letterSpacing: "-0.018em",
               lineHeight: 1.06,
@@ -123,7 +123,7 @@ export function RolesSection() {
               Everyone in the chain.
               <br />
               <span style={{
-                background: "linear-gradient(135deg, #E8C870, #FFD770, #C4831A)",
+                background: "linear-gradient(135deg, #059669, #10b981, #34d399)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -131,7 +131,7 @@ export function RolesSection() {
                 Finally protected.
               </span>
             </h2>
-            <p className="mt-5 text-lg max-w-xl" style={{ color: B.muted }}>
+            <p className="mt-5 text-base max-w-xl" style={{ color: B.muted }}>
               Whether you grow it, buy it, inspect it, or move it —
               AgroTrade gives every participant in the supply chain a fair, guaranteed deal.
             </p>
@@ -172,27 +172,27 @@ export function RolesSection() {
                     {/* Icon + stat */}
                     <div className="flex items-start justify-between">
                       <div
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                        className="w-11 h-11 rounded-xl flex items-center justify-center"
                         style={{
                           background: `rgba(${role.accentRgb},0.12)`,
                           border: `1px solid rgba(${role.accentRgb},0.22)`,
                           boxShadow: `0 0 24px rgba(${role.accentRgb},0.20)`,
                         }}
                       >
-                        <Icon size={24} style={{ color: role.accent }} />
+                        <Icon size={18} style={{ color: role.accent }} />
                       </div>
                       <div className="text-right">
-                        <p className="text-xl font-extrabold leading-none" style={{ color: role.accent }}>
+                        <p className="text-lg font-extrabold leading-none" style={{ color: role.accent }}>
                           {role.stat.value}
                         </p>
-                        <p className="text-[10px] mt-0.5" style={{ color: B.muted }}>{role.stat.label}</p>
+                        <p className="text-[9px] mt-0.5" style={{ color: B.muted }}>{role.stat.label}</p>
                       </div>
                     </div>
 
                     {/* Title + location */}
                     <div>
-                      <h3 className="text-base font-extrabold" style={{ color: B.cream }}>{role.title}</h3>
-                      <p className="text-[10px] mt-1 leading-relaxed" style={{ color: B.muted }}>{role.country}</p>
+                      <h3 className="text-sm font-extrabold" style={{ color: B.cream }}>{role.title}</h3>
+                      <p className="text-[9px] mt-1 leading-relaxed" style={{ color: B.muted }}>{role.country}</p>
                     </div>
 
                     {/* Highlight badge */}
@@ -205,7 +205,7 @@ export function RolesSection() {
                       {role.highlight}
                     </span>
 
-                    <p className="text-sm leading-relaxed flex-1" style={{ color: B.muted }}>{role.desc}</p>
+                    <p className="text-xs leading-relaxed flex-1" style={{ color: B.muted }}>{role.desc}</p>
 
                     <ul className="space-y-2">
                       {role.features.map((f) => (

@@ -169,7 +169,7 @@ const vaultFeatures = [
 
 export function VaultSection() {
   return (
-    <section id="vault" className="relative py-28 px-4 overflow-hidden">
+    <section id="vault" className="relative py-28 px-6 lg:px-32 overflow-hidden">
       {/* Pure dark background with heavy gold center glow */}
       <div className="absolute inset-0 z-0" style={{ backgroundColor: "#040608" }} />
       <div className="pointer-events-none absolute inset-0 z-0" style={{
@@ -187,7 +187,7 @@ export function VaultSection() {
           <div className="text-center mb-16">
             <span className="text-label" style={{ color: B.wheat }}>Blockchain Escrow</span>
             <h2 className="mt-4" style={{
-              fontSize: "clamp(2rem, 5vw, 4rem)",
+              fontSize: "clamp(1.5rem, 3.5vw, 3rem)",
               fontWeight: 900,
               letterSpacing: "-0.018em",
               lineHeight: 1.06,

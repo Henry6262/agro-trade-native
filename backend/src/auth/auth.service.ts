@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  Logger,
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
@@ -37,6 +38,8 @@ export interface PrivyTokenPayload {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -234,7 +237,7 @@ export class AuthService {
 
       return verifiedToken;
     } catch (error: any) {
-      console.error("Privy token verification failed:", error);
+      this.logger.error("Privy token verification failed:" + error);
       if (error instanceof BadRequestException || error instanceof UnauthorizedException) {
         throw error;
       }

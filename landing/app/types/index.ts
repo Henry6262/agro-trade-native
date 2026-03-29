@@ -83,15 +83,15 @@ export interface ProductQuality {
 // ── Trade Operations ────────────────────────────────────────────────────────
 
 export type TradePhase =
-  | "INITIATED"
-  | "NEGOTIATION"
-  | "AGREED"
+  | "INITIATION"
+  | "SELLER_MATCHING"
+  | "SELLER_NEGOTIATION"
   | "INSPECTION_PENDING"
-  | "INSPECTION_COMPLETE"
+  | "TRANSPORT_MATCHING"
+  | "TRANSPORT_BIDDING"
   | "IN_TRANSIT"
   | "DELIVERED"
   | "COMPLETED"
-  | "DISPUTED"
   | "CANCELLED";
 
 export interface TradeOperation {

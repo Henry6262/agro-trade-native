@@ -8,6 +8,14 @@ process.on("unhandledRejection", (reason) => {
   process.exit(1);
 });
 
+// ── Env var validation ────────────────────────────────────────────────────────
+const REQUIRED_ENV_VARS = ["DATABASE_URL", "PRIVY_APP_ID", "PRIVY_APP_SECRET"];
+const missing = REQUIRED_ENV_VARS.filter((k) => !process.env[k]);
+if (missing.length > 0) {
+  console.error(`FATAL: Missing required environment variables: ${missing.join(", ")}`);
+  process.exit(1);
+}
+
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { AppModule } from "./app.module";

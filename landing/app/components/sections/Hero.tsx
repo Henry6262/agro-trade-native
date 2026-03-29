@@ -19,7 +19,7 @@ function AnimatedPhone() {
   }, []);
   const { Component } = SCREENS[index];
   return (
-    <Device scale={0.62} autoAnimate parallaxStrength={12} rotateStrength={2.5}>
+    <Device scale={0.48} autoAnimate parallaxStrength={12} rotateStrength={2.5}>
       <AnimatePresence mode="wait">
         <motion.div key={SCREENS[index].id} className="w-full h-full"
           initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }}
@@ -88,7 +88,7 @@ function ScreenDots() {
           animate={{ width: i === index ? 16 : 6, opacity: i === index ? 1 : 0.3 }}
           transition={{ duration: 0.3 }}
           className="h-1.5 rounded-full"
-          style={{ background: B.wheat }} />
+          style={{ background: B.green }} />
       ))}
     </div>
   );
@@ -147,45 +147,60 @@ export function Hero() {
           </FadeInUp>
 
           <FadeInUp delay={0.08}>
-            <h1 className="mb-6" style={{ lineHeight: 1.02, letterSpacing: "-0.02em" }}>
-              <span className="block" style={{
-                fontSize: "clamp(2.6rem, 7vw, 5.8rem)",
-                fontWeight: 900,
-                color: "rgba(240,229,204,0.45)",
-              }}>
+            <motion.h1 className="mb-6" style={{ lineHeight: 1.02, letterSpacing: "-0.02em" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6 }}>
+              <motion.span className="block" style={{
+                fontSize: "clamp(1.8rem, 5vw, 3.8rem)",
+                fontWeight: 950,
+                color: "rgba(240,229,204,0.5)",
+              }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.05 }}>
                 Agricultural trade
-              </span>
-              <span className="block" style={{
-                fontSize: "clamp(2.6rem, 7vw, 5.8rem)",
-                fontWeight: 900,
+              </motion.span>
+              <motion.span className="block" style={{
+                fontSize: "clamp(1.8rem, 5vw, 3.8rem)",
+                fontWeight: 950,
                 color: B.cream,
-              }}>
+              }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}>
                 has always been built
-              </span>
-              <span className="block italic" style={{
-                fontSize: "clamp(2.6rem, 7vw, 5.8rem)",
-                fontWeight: 900,
-                background: "linear-gradient(135deg, #E8C870 0%, #FFD770 50%, #C4831A 100%)",
+              </motion.span>
+              <motion.span className="block italic" style={{
+                fontSize: "clamp(1.8rem, 5vw, 3.8rem)",
+                fontWeight: 950,
+                background: `linear-gradient(135deg, ${B.green} 0%, #4a9d6f 50%, #2d5f45 100%)`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
                 textShadow: "none",
-                filter: "drop-shadow(0 0 40px rgba(232,200,112,0.35))",
-              }}>
+                filter: "drop-shadow(0 0 40px rgba(61,122,80,0.35))",
+              }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15 }}>
                 on blind trust.
-              </span>
-              <span className="block mt-1" style={{
-                fontSize: "clamp(1.8rem, 4.5vw, 3.8rem)",
-                fontWeight: 800,
+              </motion.span>
+              <motion.span className="block mt-1" style={{
+                fontSize: "clamp(1.2rem, 3vw, 2.4rem)",
+                fontWeight: 950,
                 color: B.cream,
-              }}>
+              }}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}>
                 We replaced trust with math.
-              </span>
-            </h1>
+              </motion.span>
+            </motion.h1>
           </FadeInUp>
 
           <FadeInUp delay={0.18}>
-            <p className="text-base sm:text-lg leading-relaxed mb-7 max-w-xl" style={{ color: B.muted }}>
+            <p className="text-sm sm:text-base leading-relaxed mb-7 max-w-xl" style={{ color: B.muted }}>
               AgroTrade locks every payment in smart-contract escrow on Celo.
               Funds only release when the inspector confirms delivery —
               automatically.{" "}
@@ -264,70 +279,70 @@ export function Hero() {
             }} />
 
             {/* Floating: Payment Locked */}
-            <FloatCard delay={0} yRange={9} style={{ top: "7%", left: "-8%" }}>
-              <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-sm font-semibold whitespace-nowrap"
+            <FloatCard delay={0} yRange={9} style={{ top: "7%", left: "-8%", transform: "scale(0.75)" }}>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap"
                 style={{
                   background: "rgba(12,9,4,0.85)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
                   border: "1px solid rgba(232,200,112,0.28)",
                   boxShadow: "0 0 30px rgba(232,200,112,0.18), 0 8px 32px rgba(0,0,0,0.7)", color: B.cream,
                 }}>
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(232,200,112,0.18)" }}>
-                  <Lock size={13} color={B.wheat} />
+                <div className="w-5 h-5 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(232,200,112,0.18)" }}>
+                  <Lock size={10} color={B.wheat} />
                 </div>
                 <div>
-                  <p style={{ color: B.wheat, fontSize: "11px", fontWeight: 700 }}>Payment Locked</p>
-                  <p style={{ color: B.muted, fontSize: "10px" }}>$2,400 cUSD in escrow</p>
+                  <p style={{ color: B.wheat, fontSize: "9px", fontWeight: 700 }}>Payment Locked</p>
+                  <p style={{ color: B.muted, fontSize: "8px" }}>$2,400 cUSD in escrow</p>
                 </div>
               </div>
             </FloatCard>
 
             {/* Floating: Inspector */}
-            <FloatCard delay={1.2} yRange={7} style={{ top: "30%", right: "-5%" }}>
-              <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl whitespace-nowrap"
+            <FloatCard delay={1.2} yRange={7} style={{ top: "30%", right: "-5%", transform: "scale(0.75)" }}>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl whitespace-nowrap"
                 style={{
                   background: "rgba(12,9,4,0.85)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
                   border: "1px solid rgba(61,122,80,0.35)",
                   boxShadow: "0 0 25px rgba(61,122,80,0.20), 0 8px 32px rgba(0,0,0,0.7)",
                 }}>
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(61,122,80,0.18)" }}>
-                  <MapPin size={13} color="#4ADE80" />
+                <div className="w-5 h-5 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(61,122,80,0.18)" }}>
+                  <MapPin size={10} color="#4ADE80" />
                 </div>
                 <div>
-                  <p style={{ color: "#4ADE80", fontSize: "11px", fontWeight: 700 }}>Inspector En Route</p>
-                  <p style={{ color: B.muted, fontSize: "10px" }}>Grade verification pending</p>
+                  <p style={{ color: "#4ADE80", fontSize: "9px", fontWeight: 700 }}>Inspector En Route</p>
+                  <p style={{ color: B.muted, fontSize: "8px" }}>Grade verification pending</p>
                 </div>
               </div>
             </FloatCard>
 
             {/* Floating: Trade Confirmed */}
-            <FloatCard delay={0.6} yRange={11} style={{ bottom: "14%", left: "-10%" }}>
-              <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl whitespace-nowrap"
+            <FloatCard delay={0.6} yRange={11} style={{ bottom: "14%", left: "-10%", transform: "scale(0.75)" }}>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-xl whitespace-nowrap"
                 style={{
                   background: "rgba(12,9,4,0.85)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
                   border: "1px solid rgba(74,222,128,0.28)",
                   boxShadow: "0 0 25px rgba(74,222,128,0.15), 0 8px 32px rgba(0,0,0,0.7)",
                 }}>
-                <div className="w-7 h-7 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(74,222,128,0.12)" }}>
-                  <CheckCircle size={13} color="#4ADE80" />
+                <div className="w-5 h-5 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(74,222,128,0.12)" }}>
+                  <CheckCircle size={10} color="#4ADE80" />
                 </div>
                 <div>
-                  <p style={{ color: "#4ADE80", fontSize: "11px", fontWeight: 700 }}>Trade Confirmed ✓</p>
-                  <p style={{ color: B.muted, fontSize: "10px" }}>Sofia → Istanbul · Delivered</p>
+                  <p style={{ color: "#4ADE80", fontSize: "9px", fontWeight: 700 }}>Trade Confirmed ✓</p>
+                  <p style={{ color: B.muted, fontSize: "8px" }}>Sofia → Istanbul · Delivered</p>
                 </div>
               </div>
             </FloatCard>
 
             {/* Floating: Celo chip */}
-            <FloatCard delay={1.8} yRange={6} style={{ bottom: "29%", right: "-2%" }}>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold"
+            <FloatCard delay={1.8} yRange={6} style={{ bottom: "29%", right: "-2%", transform: "scale(0.75)" }}>
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-bold"
                 style={{
                   background: "rgba(12,9,4,0.85)", backdropFilter: "blur(16px)",
                   border: `1px solid rgba(232,200,112,0.22)`,
                   boxShadow: "0 0 20px rgba(232,200,112,0.15)",
                   color: B.wheat,
                 }}>
-                <ShieldCheck size={11} color={B.wheat} />
-                Celo blockchain
+                <ShieldCheck size={9} color={B.wheat} />
+                Celo
               </div>
             </FloatCard>
 

@@ -47,11 +47,11 @@ export default function DashboardIndex() {
   // Loading state while redirecting
   return (
     <div className="space-y-6">
-      <Skeleton className="h-8 w-64 bg-brand-wheat/10" />
+      <Skeleton className="h-8 w-64 bg-green-600/20" />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Skeleton className="h-32 bg-brand-wheat/5 rounded-xl" />
-        <Skeleton className="h-32 bg-brand-wheat/5 rounded-xl" />
-        <Skeleton className="h-32 bg-brand-wheat/5 rounded-xl" />
+        <Skeleton className="h-32 bg-green-600/10 rounded-xl" />
+        <Skeleton className="h-32 bg-green-600/10 rounded-xl" />
+        <Skeleton className="h-32 bg-green-600/10 rounded-xl" />
       </div>
     </div>
   );

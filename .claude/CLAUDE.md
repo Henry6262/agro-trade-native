@@ -7,6 +7,33 @@ AgroTrade — agricultural commodity trading platform. Connects buyers, sellers,
 
 ---
 
+## 📚 Documentation Hub (START HERE)
+
+All project documentation lives in `docs/`. **Read the relevant doc before starting work on any sub-project.**
+
+```
+docs/
+├── README.md               ← Master index — start here for any work
+├── 00-PROJECT-STATUS.md    ← Current state, what's done, release blockers
+├── 01-ARCHITECTURE.md      ← How all 5 sub-projects connect, data flows
+├── 02-BACKEND.md           ← NestJS modules, all API endpoints, patterns
+├── 03-FRONTEND.md          ← React Native app — structure, stores, navigation
+├── 04-LANDING.md           ← Next.js web portal — routes, components, dev tips
+├── 05-CONTRACTS.md         ← AgroEscrow.sol — state machine, deploy commands
+├── 06-DATABASE.md          ← Prisma schema — all 35 models documented
+└── 07-DEPLOYMENT.md        ← Railway, EAS, Vercel, Celo — exact release steps
+```
+
+**Quick navigation:**
+- Starting work on backend? → Read `docs/02-BACKEND.md`
+- Starting work on mobile app? → Read `docs/03-FRONTEND.md`
+- Starting work on landing page? → Read `docs/04-LANDING.md`
+- Working on smart contracts? → Read `docs/05-CONTRACTS.md`
+- Need to deploy or release? → Read `docs/07-DEPLOYMENT.md`
+- Just need current status? → Read `docs/00-PROJECT-STATUS.md`
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
@@ -27,27 +54,42 @@ AgroTrade — agricultural commodity trading platform. Connects buyers, sellers,
 
 ```
 agro-trade-native/
-├── front-end/          # React Native / Expo app
+├── docs/               # 📚 ALL documentation (read before working)
+│   ├── README.md           # Master navigation index
+│   ├── 00-PROJECT-STATUS.md
+│   ├── 01-ARCHITECTURE.md
+│   ├── 02-BACKEND.md
+│   ├── 03-FRONTEND.md
+│   ├── 04-LANDING.md
+│   ├── 05-CONTRACTS.md
+│   ├── 06-DATABASE.md
+│   └── 07-DEPLOYMENT.md
+├── front-end/          # React Native / Expo app (iOS + Android)
 │   └── src/
 │       ├── pages/Dashboard/sections/   # Buyer / Seller / Inspector / Admin views
-│       ├── features/dashboard/screens/admin/   # EscrowStatusCard lives here
-│       ├── providers/NotificationProvider.tsx
-│       ├── services/socketService.ts
-│       └── stores/
-├── backend/            # NestJS API
+│       ├── providers/NotificationProvider.tsx  # push + tap handlers
+│       ├── services/socketService.ts           # typed WS events
+│       └── stores/                             # Zustand state
+├── backend/            # NestJS API — 23 modules
 │   └── src/
-│       ├── auth/           # Privy JWT (ES256)
-│       ├── escrow/         # EscrowService — on-chain calls
-│       ├── trade-operations/services/  # Phase lifecycle + escrow hooks
-│       ├── inspections/    # InspectionService
-│       ├── realtime/       # RealtimeService (emitToUser)
-│       └── seller/         # SellerService / listings
+│       ├── auth/               # Privy JWT (ES256)
+│       ├── escrow/             # EscrowService — on-chain calls
+│       ├── trade-operations/   # Phase lifecycle + escrow triggers
+│       ├── inspections/        # InspectionService
+│       ├── realtime/           # RealtimeService (emitToUser)
+│       └── seller/             # SellerService / paginated listings
 ├── contracts/          # Foundry project
-│   ├── src/AgroEscrow.sol
-│   ├── test/AgroEscrow.t.sol   # 37 tests, all passing
-│   ├── script/Deploy.s.sol
+│   ├── src/AgroEscrow.sol          # cUSD escrow state machine
+│   ├── test/AgroEscrow.t.sol       # 37 tests, all passing
+│   ├── script/Deploy.s.sol         # deploy to Celo
 │   └── foundry.toml
-└── landing/            # Next.js 16 landing page scaffold
+├── landing/            # Next.js 16 web portal (landing + dashboard)
+│   ├── app/                        # App Router pages (25 routes)
+│   ├── app/components/dashboard/   # Sidebar, topbar, EscrowStatusCard
+│   └── app/components/sections/    # Landing page sections
+├── admin-dashboard/    # Legacy standalone admin UI (superseded by landing/)
+├── rules/              # Coding standards for Claude agents
+└── .claude/            # Claude config, launch.json, agent identities
 ```
 
 ---

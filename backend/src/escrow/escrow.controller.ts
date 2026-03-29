@@ -48,6 +48,13 @@ export class EscrowController {
     return this.escrowService.resolveDispute(tradeOperationId, dto.releaseToBuyer);
   }
 
+  @Post(":tradeOperationId/refund")
+  @Roles("ADMIN")
+  @ApiOperation({ summary: "Refund escrowed funds to buyer (admin only)" })
+  async refund(@Param("tradeOperationId") tradeOperationId: string) {
+    return this.escrowService.refund(tradeOperationId);
+  }
+
   @Get(":tradeOperationId/status")
   @Roles("ADMIN")
   @ApiOperation({ summary: "Get on-chain escrow status" })

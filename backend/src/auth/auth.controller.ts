@@ -12,6 +12,7 @@ import {
   BadRequestException,
   ConflictException,
   NotFoundException,
+  Logger,
 } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { ConfigService } from "@nestjs/config";
@@ -58,6 +59,8 @@ import { plainToInstance } from "class-transformer";
 @ApiTags("Auth")
 @Controller("auth")
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private authService: AuthService,
     private permissionsService: PermissionsService,
@@ -71,7 +74,7 @@ export class AuthController {
   async googleAuth(@Req() req: any) {
     // Initiates Google OAuth flow
     // The request origin will help determine the correct callback URL
-    console.log("Google OAuth initiated from:", req.headers.host);
+    this.logger.log("Google OAuth initiated from:" + req.headers.host);
   }
 
   @Public()
@@ -82,12 +85,12 @@ export class AuthController {
     const result = await this.authService.login(req.user);
 
     // Log the user information we got from Google
-    console.log("Google OAuth User Info:", {
+    this.logger.log("Google OAuth User Info:" + JSON.stringify({
       id: result.user.id,
       email: result.user.email,
       name: result.user.name,
       hasProfile: result.user.hasProfile,
-    });
+    }));
 
     // Redirect to frontend with tokens and user info
     // Determine the frontend URL based on the request origin
@@ -95,7 +98,7 @@ export class AuthController {
 
     // Check if the request came from an IP address (mobile emulator)
     const host = req.headers.host;
-    console.log("OAuth callback - Request host:", host);
+    this.logger.log("OAuth callback - Request host:" + host);
 
     if (host && host.includes("192.168.")) {
       // Request came from IP address, redirect to IP-based frontend
@@ -115,11 +118,8 @@ export class AuthController {
       frontendUrl = "http://localhost:8081";
     }
 
-    console.log(
-      "Redirecting to frontend URL:",
-      frontendUrl,
-      "Environment:",
-      process.env.NODE_ENV,
+    this.logger.log(
+      "Redirecting to frontend URL:" + frontendUrl + " Environment:" + process.env.NODE_ENV,
     );
 
     const params = new URLSearchParams({
@@ -149,11 +149,11 @@ export class AuthController {
       const { code, redirectUri, role } = body;
 
       // Log the mobile auth attempt
-      console.log("Mobile Google auth attempt:", {
+      this.logger.log("Mobile Google auth attempt:" + JSON.stringify({
         code: code.substring(0, 10) + "...",
         redirectUri,
         role,
-      });
+      }));
 
       // Verify the ID token with Google's tokeninfo endpoint
       // Note: for mobile auth code flow, the 'code' field is expected to be a Google ID token
@@ -204,7 +204,7 @@ export class AuthController {
 
       return this.serializeAuthResult(result);
     } catch (error: any) {
-      console.error("Mobile Google auth error:", error);
+      this.logger.error("Mobile Google auth error:" + error);
       throw new BadRequestException(
         error?.message || "Failed to authenticate with Google",
       );
@@ -221,10 +221,10 @@ export class AuthController {
       const { idToken, role } = body;
 
       // Log the native auth attempt
-      console.log("Native Google auth attempt:", {
+      this.logger.log("Native Google auth attempt:" + JSON.stringify({
         hasIdToken: !!idToken,
         role,
-      });
+      }));
 
       if (!idToken) {
         throw new BadRequestException("Google ID token is required");
@@ -283,7 +283,7 @@ export class AuthController {
 
       return this.serializeAuthResult(result);
     } catch (error: any) {
-      console.error("Native Google auth error:", error);
+      this.logger.error("Native Google auth error:" + error);
       throw new BadRequestException(
         error?.message || "Failed to authenticate with Google",
       );
@@ -300,19 +300,19 @@ export class AuthController {
       const { privyToken, role, email, name } = body;
 
       // Log the Privy auth attempt
-      console.log("Privy auth attempt:", {
+      this.logger.log("Privy auth attempt:" + JSON.stringify({
         email,
         role,
         hasToken: !!privyToken,
-      });
+      }));
 
       // Verify the Privy token and extract user information
       const verifiedToken = await this.authService.verifyPrivyToken(privyToken);
 
-      console.log("Privy token verified:", {
+      this.logger.log("Privy token verified:" + JSON.stringify({
         sub: verifiedToken.sub,
         iss: verifiedToken.iss,
-      });
+      }));
 
       // Validate or create user in database
       const user = await this.authService.validatePrivyUser(
@@ -325,15 +325,15 @@ export class AuthController {
       // Generate our app's tokens
       const result = await this.authService.login(user);
 
-      console.log("Privy login successful:", {
+      this.logger.log("Privy login successful:" + JSON.stringify({
         userId: user.id,
         email: user.email,
         role: user.role,
-      });
+      }));
 
       return this.serializeAuthResult(result, "Privy authentication successful");
     } catch (error: any) {
-      console.error("Privy auth error:", error);
+      this.logger.error("Privy auth error:" + error);
       throw new BadRequestException(
         error?.message || "Failed to authenticate with Privy",
       );
