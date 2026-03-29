@@ -18,8 +18,6 @@ pub fn handler(ctx: Context<ReleaseFunds>) -> Result<()> {
     );
 
     let amount = escrow.amount;
-    let escrow_key = escrow.key();
-    let seeds: &[&[u8]] = &[b"vault", escrow_key.as_ref(), &[escrow.vault_bump]];
 
     // Transfer from vault to seller using PDA signer seeds
     token::transfer(
