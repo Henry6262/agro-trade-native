@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-29_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `453382f` 2026-03-29 — fix: polish Solana escrow instruction modules
+- `8f45ba5` 2026-03-29 — docs: auto-update progress report [skip ci]
 - `c871d7b` 2026-03-29 — feat: add Solana Anchor escrow program + StableHacks submission docs
 - `15dfab4` 2026-03-29 — docs: auto-update progress report [skip ci]
 - `2af824e` 2026-03-29 — fix: remove PRIVY_APP_SECRET from required vars, deploy MockCUSD + AgroEscrow to
@@ -23,7 +25,5 @@ _Auto-generated: 2026-03-29_
 - `af9eab0` 2026-03-27 — test: add escrow.service regression suite (22 specs)
 - `740fa8c` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `d365220` 2026-03-27 — ci: add backend unit test workflow (NI-22 CI/CD)
-- `7eed8b9` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `96cb98e` 2026-03-27 — test: add NI-22 unit tests for trade-operation.service (20 specs)
 
 ## Open Issues
