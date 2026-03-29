@@ -63,6 +63,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { title: "Operations", href: "/dashboard/admin/operations", icon: List },
     { title: "Users", href: "/dashboard/admin/users", icon: Users },
     { title: "Escrow", href: "/dashboard/admin/escrow", icon: Shield },
+    { title: "Transport", href: "/dashboard/admin/transport", icon: Truck },
   ],
 };
 

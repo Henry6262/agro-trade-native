@@ -419,9 +419,19 @@ export class TransportAnalyticsResponseDto {
   comparison: TransportBidComparisonDto;
 }
 
+export class TransportRequestListMetaDto {
+  @ApiProperty() page: number;
+  @ApiProperty() limit: number;
+  @ApiProperty() total: number;
+  @ApiProperty() hasMore: boolean;
+}
+
 export class TransportRequestListResponseDto {
   @ApiProperty({ type: [TransportRequestDto] })
   data: TransportRequestDto[];
+
+  @ApiPropertyOptional({ type: TransportRequestListMetaDto })
+  meta?: TransportRequestListMetaDto;
 
   @ApiPropertyOptional({ type: TransportErrorDto })
   error?: TransportErrorDto;

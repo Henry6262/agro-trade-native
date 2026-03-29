@@ -222,37 +222,56 @@ export class TransportService {
   async getAllRequests(filters: {
     status?: TransportRequestStatus;
     tradeOperationId?: string;
+    page?: number;
+    limit?: number;
   }) {
-    return this.prisma.transportRequest.findMany({
-      where: {
-        ...(filters.status && { status: filters.status }),
-        ...(filters.tradeOperationId && {
-          tradeOperationId: filters.tradeOperationId,
-        }),
-      },
-      include: {
-        tradeOperation: {
-          include: {
-            buyListing: {
-              include: {
-                product: true,
+    const page = Math.max(1, filters.page ?? 1);
+    const limit = Math.min(Math.max(1, filters.limit ?? 20), 100);
+    const skip = (page - 1) * limit;
+
+    const where = {
+      ...(filters.status && { status: filters.status }),
+      ...(filters.tradeOperationId && {
+        tradeOperationId: filters.tradeOperationId,
+      }),
+    };
+
+    // NI-10: Paginate transport requests list
+    const [data, total] = await Promise.all([
+      this.prisma.transportRequest.findMany({
+        where,
+        include: {
+          tradeOperation: {
+            include: {
+              buyListing: {
+                include: {
+                  product: true,
+                },
               },
             },
           },
-        },
-        bids: {
-          include: {
-            transporter: true,
+          bids: {
+            include: {
+              transporter: true,
+            },
+          },
+          transportJob: {
+            include: {
+              transporter: true,
+            },
           },
         },
-        transportJob: {
-          include: {
-            transporter: true,
-          },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      this.prisma.transportRequest.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: { page, limit, total, hasMore: skip + data.length < total },
+    };
   }
 
   // ========== BID MANAGEMENT ==========

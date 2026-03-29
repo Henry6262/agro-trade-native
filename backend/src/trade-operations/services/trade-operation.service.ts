@@ -795,20 +795,22 @@ export class TradeOperationService {
       data: { status: "FULFILLED" },
     });
 
-    // Update sale listings
-    for (const seller of trade.sellers) {
-      if (seller.saleListingId) {
-        await tx.saleListing.update({
-          where: { id: seller.saleListingId },
-          data: {
-            quantity: {
-              decrement: seller.agreedQuantity || seller.requestedQuantity || 0,
+    // NI-21: Batch sale listing updates in parallel (each may decrement by different amount)
+    await Promise.all(
+      trade.sellers
+        .filter((seller) => !!seller.saleListingId)
+        .map((seller) =>
+          tx.saleListing.update({
+            where: { id: seller.saleListingId! },
+            data: {
+              quantity: {
+                decrement: seller.agreedQuantity || seller.requestedQuantity || 0,
+              },
             },
-          },
-        });
-              }
-      }
-          }); // end $transaction
+          }),
+        ),
+    );
+    }); // end $transaction
 
     this.logger.log(
       `Finalized trade ${tradeOperationId} with profit margin ${profitCalc.profit.profitMargin.toFixed(2)}%`,
@@ -955,13 +957,18 @@ export class TradeOperationService {
       transport: {
         estimatedCost: profitCalc.costs.transport.estimatedCost,
         distance: trade.totalDistanceKm || 0,
-        optimized: false, // transportOptimized field doesn't exist
+        // NI-2: derive optimized from whether route optimization has been run (totalDistanceKm set)
+        optimized: (trade.totalDistanceKm ?? 0) > 0,
         request: transportRequest,
       },
       timeline: {
         created: trade.createdAt,
         lastUpdated: trade.updatedAt,
-        expectedCompletion: undefined, // expectedDeliveryDate doesn't exist
+        // NI-3: derive expectedCompletion from transport job estimated arrival or request delivery deadline
+        expectedCompletion:
+          (trade as any).transportRequest?.transportJob?.estimatedArrival ??
+          (trade as any).transportRequest?.requiredDeliveryDate ??
+          undefined,
       },
     };
   }

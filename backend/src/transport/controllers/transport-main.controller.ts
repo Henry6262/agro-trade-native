@@ -278,12 +278,13 @@ export class TransportController {
       throw new ForbiddenException("Only admins can view all requests");
     }
 
-    const requests = await this.transportService.getAllRequests({
+    const result = await this.transportService.getAllRequests({
       status,
       tradeOperationId,
     });
     return {
-      data: requests.map((request) => this.mapTransportRequest(request)),
+      data: result.data.map((request) => this.mapTransportRequest(request)),
+      meta: result.meta,
     };
   }
 

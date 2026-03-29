@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { TradeStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 interface OrderFilters {
@@ -25,9 +26,10 @@ export class OrdersService {
     const { userId, page = 1, limit = 20, status } = filters;
     const skip = (page - 1) * limit;
 
+    // TradeOperation is linked to buyer through buyListing.buyerId
     const where = {
-      buyerId: userId,
-      ...(status && { status }),
+      buyListing: { buyerId: userId },
+      ...(status && { status: status as TradeStatus }),
     };
 
     const [orders, total] = await Promise.all([
@@ -37,8 +39,8 @@ export class OrdersService {
         take: limit,
         orderBy: { createdAt: 'desc' as const },
         include: {
-          offer: { include: { product: true } },
-          seller: true,
+          buyListing: { include: { product: true, buyer: true } },
+          sellers: { include: { saleListing: true } },
         },
       }),
       this.prisma.tradeOperation.count({ where }),
@@ -56,11 +58,13 @@ export class OrdersService {
   }
 
   async getOrderStats(userId: string): Promise<OrderStats> {
+    // TradeOperation is linked to buyer through buyListing.buyerId
+    const buyerWhere = { buyListing: { buyerId: userId } };
     const [total, pending, completed, cancelled] = await Promise.all([
-      this.prisma.tradeOperation.count({ where: { buyerId: userId } }),
-      this.prisma.tradeOperation.count({ where: { buyerId: userId, status: 'PENDING' } }),
-      this.prisma.tradeOperation.count({ where: { buyerId: userId, status: 'COMPLETED' } }),
-      this.prisma.tradeOperation.count({ where: { buyerId: userId, status: 'CANCELLED' } }),
+      this.prisma.tradeOperation.count({ where: buyerWhere }),
+      this.prisma.tradeOperation.count({ where: { ...buyerWhere, status: 'ACTIVE' } }),
+      this.prisma.tradeOperation.count({ where: { ...buyerWhere, status: 'COMPLETED' } }),
+      this.prisma.tradeOperation.count({ where: { ...buyerWhere, status: 'CANCELLED' } }),
     ]);
 
     return { total, pending, completed, cancelled };
