@@ -10,7 +10,10 @@ _Auto-generated: 2026-03-30_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `78f1d9f` 2026-03-30 — Merge pull request #79 from Henry6262/fix/remove-any-types-shared-types
+- `09d7833` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `48ada43` 2026-03-30 — ci: add FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 for future-proof Node 24 compat
+- `67ef307` 2026-03-30 — fix: replace `any` types with explicit types in shared/types/index.ts
 - `bd1bd8d` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `3142bb0` 2026-03-30 — feat: add /health endpoint for CI smoke test
 - `0a10957` 2026-03-30 — docs: auto-update progress report [skip ci]
@@ -22,8 +25,5 @@ _Auto-generated: 2026-03-30_
 - `453382f` 2026-03-29 — fix: polish Solana escrow instruction modules
 - `8f45ba5` 2026-03-29 — docs: auto-update progress report [skip ci]
 - `c871d7b` 2026-03-29 — feat: add Solana Anchor escrow program + StableHacks submission docs
-- `15dfab4` 2026-03-29 — docs: auto-update progress report [skip ci]
-- `2af824e` 2026-03-29 — fix: remove PRIVY_APP_SECRET from required vars, deploy MockCUSD + AgroEscrow to
-- `70195ef` 2026-03-29 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
