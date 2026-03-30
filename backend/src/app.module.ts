@@ -27,17 +27,19 @@ import { TradeEventsModule } from "./trade-events/trade-events.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 import { TraceabilityModule } from "./traceability/traceability.module";
 import { EscrowModule } from "./escrow/escrow.module";
+import { HealthModule } from "./health/health.module";
 
 @Module({
   imports: [
     RealtimeModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ".env",       validate,
+      envFilePath: ".env",
+      validate,
     }),
     ScheduleModule.forRoot(),
-    CacheModule, // Add cache module for performa
-          PrismaModule,
+    CacheModule,
+    PrismaModule,
     SeedModule,
     AuthModule,
     OnboardingModule,
@@ -59,11 +61,11 @@ import { EscrowModule } from "./escrow/escrow.module";
     AnalyticsModule,
     TraceabilityModule,
     EscrowModule,
+    HealthModule,
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    // Apply response time logging to all routes
     consumer.apply(ResponseTimeMiddleware).forRoutes("*");
   }
 }
