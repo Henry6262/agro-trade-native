@@ -12,7 +12,46 @@ on:
 
 jobs:
   test:
-    name: Run Backend Tests
+    name: Run Backend Tests (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 22]
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run unit & regression tests
+        run: npm test -- --ci --coverage --forceExit
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-node${{ matrix.node-version }}
+          path: backend/coverage/
+          retention-days: 14
+
+  smoke:
+    name: Smoke Test (Server starts & /health responds)
+    needs: test
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -35,13 +74,17 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
-      - name: Run unit & regression tests
-        run: npm test -- --ci --coverage --forceExit
+      - name: Start server in background
+        run: |
+          npm run start &
+          echo $! > /tmp/server.pid
+          sleep 4
 
-      - name: Upload coverage report
+      - name: Check /health endpoint
+        run: |
+          curl --retry 5 --retry-delay 2 --fail http://localhost:3000/health
+          echo "✅ Smoke test passed"
+
+      - name: Stop server
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: backend/coverage/
-          retention-days: 14
+        run: kill $(cat /tmp/server.pid) || true
