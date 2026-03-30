@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-03-29_
+_Auto-generated: 2026-03-30_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-03-29_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `32756e3` 2026-03-29 — docs: auto-update progress report [skip ci]
 - `453382f` 2026-03-29 — fix: polish Solana escrow instruction modules
 - `8f45ba5` 2026-03-29 — docs: auto-update progress report [skip ci]
 - `c871d7b` 2026-03-29 — feat: add Solana Anchor escrow program + StableHacks submission docs
@@ -24,6 +25,5 @@ _Auto-generated: 2026-03-29_
 - `9966c56` 2026-03-27 — docs: auto-update progress report [skip ci]
 - `af9eab0` 2026-03-27 — test: add escrow.service regression suite (22 specs)
 - `740fa8c` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `d365220` 2026-03-27 — ci: add backend unit test workflow (NI-22 CI/CD)
 
 ## Open Issues
