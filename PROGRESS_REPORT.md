@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-30_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `608662b` 2026-03-30 — ci: upgrade Node.js from 18 (EOL) to 20 (LTS) in backend-test workflow
+- `e3b55bb` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `32756e3` 2026-03-29 — docs: auto-update progress report [skip ci]
 - `453382f` 2026-03-29 — fix: polish Solana escrow instruction modules
 - `8f45ba5` 2026-03-29 — docs: auto-update progress report [skip ci]
@@ -23,7 +25,5 @@ _Auto-generated: 2026-03-30_
 - `ed7cf0f` 2026-03-29 — docs: auto-update progress report [skip ci]
 - `945cea1` 2026-03-29 — feat: phase transitions, escrow refund, logging, offline handling, web dashboard
 - `9966c56` 2026-03-27 — docs: auto-update progress report [skip ci]
-- `af9eab0` 2026-03-27 — test: add escrow.service regression suite (22 specs)
-- `740fa8c` 2026-03-27 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
