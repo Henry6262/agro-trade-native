@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-30_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `051ad11` 2026-03-30 — ci: add matrix build (Node 20+22) and smoke test job
+- `906d0be` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `608662b` 2026-03-30 — ci: upgrade Node.js from 18 (EOL) to 20 (LTS) in backend-test workflow
 - `e3b55bb` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `32756e3` 2026-03-29 — docs: auto-update progress report [skip ci]
@@ -23,7 +25,5 @@ _Auto-generated: 2026-03-30_
 - `29bb3c1` 2026-03-29 — docs: auto-update progress report [skip ci]
 - `9354087` 2026-03-29 — docs: update project status — reflect 2026-03-29 session work and closed issues
 - `ed7cf0f` 2026-03-29 — docs: auto-update progress report [skip ci]
-- `945cea1` 2026-03-29 — feat: phase transitions, escrow refund, logging, offline handling, web dashboard
-- `9966c56` 2026-03-27 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
