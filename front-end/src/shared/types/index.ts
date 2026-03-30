@@ -173,16 +173,16 @@ export interface SellerOnboardingData {
   selectedProducts: ProductSelection[];
   marketInsights?: MarketInsights;
   businessInfo?: SellerBusinessInfo;
-  bases?: any[];
-  distributions?: any[];
+  bases?: Location[];
+  distributions?: Location[];
 }
 
 export interface BuyerOnboardingData {
   requiredProducts: ProductRequirement[];
   deliveryPreferences?: DeliveryPreferences;
   purchasingPower?: PurchasingPower;
-  bases?: any[];
-  distributions?: any[];
+  bases?: Location[];
+  distributions?: Location[];
 }
 
 export interface TransportOnboardingData {
@@ -530,7 +530,7 @@ export type CounterOfferStatus = 'pending' | 'accepted' | 'rejected' | 'expired'
 export interface OfferAction {
   type: OfferActionType;
   offerId: string;
-  data?: any;
+  data?: NegotiationOffer | CounterOffer | Partial<DeliveryTerms> | Record<string, string | number>;
   reason?: string;
   message?: string;
 }
