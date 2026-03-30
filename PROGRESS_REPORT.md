@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-30_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `c82b72a` 2026-03-30 — chore: add branded ID types, strict WeeklyAvailability, and PR type-safety templ
+- `5e064a1` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `78f1d9f` 2026-03-30 — Merge pull request #79 from Henry6262/fix/remove-any-types-shared-types
 - `09d7833` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `48ada43` 2026-03-30 — ci: add FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 for future-proof Node 24 compat
@@ -23,7 +25,5 @@ _Auto-generated: 2026-03-30_
 - `e3b55bb` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `32756e3` 2026-03-29 — docs: auto-update progress report [skip ci]
 - `453382f` 2026-03-29 — fix: polish Solana escrow instruction modules
-- `8f45ba5` 2026-03-29 — docs: auto-update progress report [skip ci]
-- `c871d7b` 2026-03-29 — feat: add Solana Anchor escrow program + StableHacks submission docs
 
 ## Open Issues
