@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-30_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `48ada43` 2026-03-30 — ci: add FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 for future-proof Node 24 compat
+- `bd1bd8d` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `3142bb0` 2026-03-30 — feat: add /health endpoint for CI smoke test
 - `0a10957` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `051ad11` 2026-03-30 — ci: add matrix build (Node 20+22) and smoke test job
@@ -23,7 +25,5 @@ _Auto-generated: 2026-03-30_
 - `15dfab4` 2026-03-29 — docs: auto-update progress report [skip ci]
 - `2af824e` 2026-03-29 — fix: remove PRIVY_APP_SECRET from required vars, deploy MockCUSD + AgroEscrow to
 - `70195ef` 2026-03-29 — docs: auto-update progress report [skip ci]
-- `fb7cab1` 2026-03-29 — fix: NI-2/3/21, pagination, orders service, transport list meta
-- `29bb3c1` 2026-03-29 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
