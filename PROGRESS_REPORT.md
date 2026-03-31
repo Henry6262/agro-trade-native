@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-31_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `bf316ec` 2026-03-31 — fix(ci): add env vars to backend test job (DATABASE_URL + JWT_SECRET)
+- `2dae222` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `939b5b2` 2026-03-31 — chore: remove Stripe env vars, document Celo-only payment model
 - `263467e` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `c82b72a` 2026-03-30 — chore: add branded ID types, strict WeeklyAvailability, and PR type-safety templ
@@ -23,7 +25,5 @@ _Auto-generated: 2026-03-31_
 - `0a10957` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `051ad11` 2026-03-30 — ci: add matrix build (Node 20+22) and smoke test job
 - `906d0be` 2026-03-30 — docs: auto-update progress report [skip ci]
-- `608662b` 2026-03-30 — ci: upgrade Node.js from 18 (EOL) to 20 (LTS) in backend-test workflow
-- `e3b55bb` 2026-03-30 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
