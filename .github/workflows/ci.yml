@@ -23,17 +23,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
-          cache-dependency-path: front-end/yarn.lock
+          cache: npm
+          cache-dependency-path: front-end/package-lock.json
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Lint
-        run: yarn lint
+        run: npm run lint
 
       - name: TypeScript strict check
-        run: yarn tsc --noEmit
+        run: npm run tsc -- --noEmit
 
   # ─────────────────────────────────────────
   # 2. Backend: lint + TypeScript strict check
@@ -51,17 +51,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
-          cache-dependency-path: backend/yarn.lock
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Lint
-        run: yarn lint
+        run: npm run lint
 
       - name: TypeScript strict check
-        run: yarn tsc --noEmit
+        run: npm run tsc -- --noEmit
 
   # ─────────────────────────────────────────
   # 3. EVM contracts: Hardhat compile + TypeChain
@@ -79,14 +79,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
-          cache-dependency-path: contracts/yarn.lock
+          cache: npm
+          cache-dependency-path: contracts/package-lock.json
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Hardhat compile (+ TypeChain codegen)
-        run: yarn hardhat compile
+        run: npm run hardhat compile
 
   # ─────────────────────────────────────────
   # 4. Solana contracts: Anchor build
@@ -125,11 +125,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
-          cache-dependency-path: contracts-solana/yarn.lock
+          cache: npm
+          cache-dependency-path: contracts-solana/package-lock.json
 
       - name: Install JS dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Anchor build
         run: anchor build
