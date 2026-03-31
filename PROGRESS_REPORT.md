@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-03-30_
+_Auto-generated: 2026-03-31_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-30_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `939b5b2` 2026-03-31 — chore: remove Stripe env vars, document Celo-only payment model
+- `263467e` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `c82b72a` 2026-03-30 — chore: add branded ID types, strict WeeklyAvailability, and PR type-safety templ
 - `5e064a1` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `78f1d9f` 2026-03-30 — Merge pull request #79 from Henry6262/fix/remove-any-types-shared-types
@@ -23,7 +25,5 @@ _Auto-generated: 2026-03-30_
 - `906d0be` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `608662b` 2026-03-30 — ci: upgrade Node.js from 18 (EOL) to 20 (LTS) in backend-test workflow
 - `e3b55bb` 2026-03-30 — docs: auto-update progress report [skip ci]
-- `32756e3` 2026-03-29 — docs: auto-update progress report [skip ci]
-- `453382f` 2026-03-29 — fix: polish Solana escrow instruction modules
 
 ## Open Issues
