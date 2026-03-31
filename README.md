@@ -38,7 +38,7 @@ cd front-end && npm install && npx expo start
 | Smart Contracts (Celo) | Solidity 0.8.20 + Foundry (37 tests) |
 | Smart Contracts (Solana) | Anchor + Rust + SPL Token (USDC) |
 | Auth | Privy JWT + Google OAuth |
-| Payments | cUSD (Celo) + USDC (Solana) — dual-chain escrow |
+| Payments | cUSD (Celo) + USDC (Solana) — dual-chain escrow only. **Stripe is NOT used.** |
 | Real-time | Socket.IO + Expo Push Notifications |
 
 ## Trade Lifecycle (9 Phases)
