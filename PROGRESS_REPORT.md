@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-31_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `086928d` 2026-03-31 — security: strengthen .gitignore to block all .env.* variants and backend env fil
+- `9c32321` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `4826a96` 2026-03-31 — security: replace production DATABASE_URL in .env.test with dummy CI value
 - `bbf58c5` 2026-03-31 — fix(ci): add env block to smoke job Start server step
 - `23776cc` 2026-03-31 — docs: auto-update progress report [skip ci]
@@ -23,7 +25,5 @@ _Auto-generated: 2026-03-31_
 - `09d7833` 2026-03-30 — docs: auto-update progress report [skip ci]
 - `48ada43` 2026-03-30 — ci: add FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 for future-proof Node 24 compat
 - `67ef307` 2026-03-30 — fix: replace `any` types with explicit types in shared/types/index.ts
-- `bd1bd8d` 2026-03-30 — docs: auto-update progress report [skip ci]
-- `3142bb0` 2026-03-30 — feat: add /health endpoint for CI smoke test
 
 ## Open Issues
