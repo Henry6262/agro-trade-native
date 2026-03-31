@@ -40,6 +40,10 @@ jobs:
 
       - name: Run unit & regression tests
         run: npm test -- --ci --coverage --forceExit
+        env:
+          DATABASE_URL: "postgresql://test:test@localhost:5432/test"
+          JWT_SECRET: "ci-test-secret-key"
+          NODE_ENV: "test"
 
       - name: Upload coverage report
         if: always()
