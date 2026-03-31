@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-31_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `416b50f` 2026-03-31 — feat(test): add Jest coverage gating + DTO snapshot test suite
+- `96bd262` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `a59e46b` 2026-03-31 — test(transport): production-quality unit spec for TransportBiddingService
 - `a3a2333` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `147a3ae` 2026-03-31 — fix(tests): refactor ProfitController spec to isolated TestingModule (no DB/env 
@@ -23,7 +25,5 @@ _Auto-generated: 2026-03-31_
 - `2dae222` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `939b5b2` 2026-03-31 — chore: remove Stripe env vars, document Celo-only payment model
 - `263467e` 2026-03-30 — docs: auto-update progress report [skip ci]
-- `c82b72a` 2026-03-30 — chore: add branded ID types, strict WeeklyAvailability, and PR type-safety templ
-- `5e064a1` 2026-03-30 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
