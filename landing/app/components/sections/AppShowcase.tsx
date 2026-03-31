@@ -203,6 +203,9 @@ export function AppShowcase() {
       className="relative py-24 lg:py-32 px-6 lg:px-16 overflow-hidden"
       style={{ backgroundColor: B.bg2 }}
     >
+      {/* Top edge separator */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px"
+        style={{ background: "linear-gradient(90deg, transparent, rgba(232,200,112,0.18) 40%, rgba(232,200,112,0.18) 60%, transparent)" }} />
       {/* Background aurora */}
       <div className="pointer-events-none absolute inset-0" style={{
         background: "radial-gradient(ellipse 70% 90% at 70% 50%, rgba(232,200,112,0.07) 0%, transparent 60%)",
@@ -260,7 +263,7 @@ export function AppShowcase() {
             </a>
             <a href="#cta"
               className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-full font-bold text-sm transition-all"
-              style={{ background: B.glass, backdropFilter: "blur(12px)", border: `1px solid ${B.glassBorder}`, color: B.cream }}>
+              style={{ background: "rgba(232,200,112,0.07)", backdropFilter: "blur(12px)", border: "1px solid rgba(232,200,112,0.22)", color: B.cream }}>
               ▶ Google Play
             </a>
           </div>
@@ -377,9 +380,9 @@ export function AppShowcase() {
               <div
                 className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold"
                 style={{
-                  background: B.glass,
+                  background: "rgba(232,200,112,0.08)",
                   backdropFilter: "blur(16px)",
-                  border: `1px solid ${B.glassBorder}`,
+                  border: "1px solid rgba(232,200,112,0.22)",
                   color: B.wheat,
                 }}
               >

@@ -279,6 +279,18 @@ body::after {
   100% { transform: scale(1.8); opacity: 0; }
 }
 
+/* ─── Marquee (React Bits infinite scroll) ───────────────────────────────────── */
+
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
 /* ─── Particles (CSS-based ambient dots) ─────────────────────────────────────── */
 
 .particle {

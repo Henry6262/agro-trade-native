@@ -3,9 +3,9 @@
 import { B } from "../brand";
 import { FadeInUp, StaggerChildren, StaggerItem } from "../animations";
 import { ArrowRight, Wheat, ShoppingCart, ClipboardCheck, Truck } from "lucide-react";
-import { ParallaxBg } from "../ParallaxBg";
+import { SpotlightCard } from "../reactbits/SpotlightCard";
+import { Marquee } from "../reactbits/Marquee";
 
-// ── Per-role accent system — mirrors the LiveDealFlow stage colors ─────────────
 const roles = [
   {
     icon: Wheat,
@@ -22,10 +22,8 @@ const roles = [
       "Inspector verifies grade before release",
       "Dispute protection built-in",
     ],
-    // green — the producer
-    accent: "#059669",
-    accentRgb: "5,150,105",
-    bgImage: null,
+    accent: "#E8C870",
+    accentRgb: "232,200,112",
   },
   {
     icon: ShoppingCart,
@@ -42,10 +40,8 @@ const roles = [
       "Funds never leave escrow early",
       "Full refund if specs not met",
     ],
-    // green — trust, transparency
-    accent: "#34d399",
-    accentRgb: "52,211,153",
-    bgImage: null,
+    accent: "#E8C870",
+    accentRgb: "232,200,112",
   },
   {
     icon: ClipboardCheck,
@@ -62,10 +58,8 @@ const roles = [
       "Flexible — bid on any job",
       "Paid immediately on submission",
     ],
-    // green — precision, verification
-    accent: "#10b981",
-    accentRgb: "16,185,129",
-    bgImage: null,
+    accent: "#E8C870",
+    accentRgb: "232,200,112",
   },
   {
     icon: Truck,
@@ -82,37 +76,37 @@ const roles = [
       "Live shipment tracking",
       "Payment locked in escrow at booking",
     ],
-    // green — movement, logistics
-    accent: "#6ee7b7",
-    accentRgb: "110,231,183",
-    bgImage: null,
+    accent: "#E8C870",
+    accentRgb: "232,200,112",
   },
+];
+
+const commodities = [
+  { emoji: "🌾", name: "Wheat",      volume: "$18B/yr" },
+  { emoji: "🌽", name: "Corn",       volume: "$12B/yr" },
+  { emoji: "🌻", name: "Sunflower",  volume: "$6B/yr"  },
+  { emoji: "🫘", name: "Soybeans",   volume: "$9B/yr"  },
+  { emoji: "🌴", name: "Palm Oil",   volume: "$5B/yr"  },
+  { emoji: "🍚", name: "Rice",       volume: "$7B/yr"  },
+  { emoji: "🫙", name: "Lentils",    volume: "$4B/yr"  },
+  { emoji: "🧅", name: "Onion",      volume: "$3B/yr"  },
 ];
 
 export function RolesSection() {
   return (
     <section id="roles" className="relative py-28 px-6 lg:px-32 overflow-hidden">
-      {/* ── Background: outdoor market + parallax ── */}
-      <ParallaxBg
-        src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=2070&q=80"
-        overlay="linear-gradient(180deg, rgba(12,9,4,0.97) 0%, rgba(17,13,7,0.94) 50%, rgba(12,9,4,0.97) 100%)"
-        position="center 30%"
-        strength={50}
-        fadeTop="#0C0904"
-        fadeBottom="#040608"
-        fadeSize={240}
-      />
-      {/* Green atmosphere */}
+      {/* Background */}
+      <div className="absolute inset-0 z-0" style={{ backgroundColor: "#0C0904" }} />
       <div className="pointer-events-none absolute inset-0 z-0" style={{
-        background: "radial-gradient(ellipse 80% 55% at 50% 100%, rgba(16,185,129,0.07) 0%, transparent 60%)",
+        background: "radial-gradient(ellipse 80% 55% at 50% 100%, rgba(232,200,112,0.07) 0%, transparent 60%)",
       }} />
 
       <div className="max-w-7xl mx-auto relative z-10">
+
+        {/* ── Header ── */}
         <FadeInUp>
           <div className="mb-16">
-            <span className="text-label" style={{ color: B.green }}>
-              Who It&apos;s For
-            </span>
+            <span className="text-label" style={{ color: B.wheat }}>Who It&apos;s For</span>
             <h2 className="mt-4" style={{
               fontSize: "clamp(1.6rem, 4vw, 3rem)",
               fontWeight: 900,
@@ -123,7 +117,7 @@ export function RolesSection() {
               Everyone in the chain.
               <br />
               <span style={{
-                background: "linear-gradient(135deg, #059669, #10b981, #34d399)",
+                background: "linear-gradient(135deg, #E8C870, #FFD770, #C4831A)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -138,34 +132,35 @@ export function RolesSection() {
           </div>
         </FadeInUp>
 
+        {/* ── Role cards ── */}
         <StaggerChildren className="grid sm:grid-cols-2 xl:grid-cols-4 gap-5" stagger={0.1}>
           {roles.map((role) => {
             const Icon = role.icon;
             return (
               <StaggerItem key={role.title}>
-                <div
-                  className="group flex flex-col h-full rounded-2xl overflow-hidden transition-all duration-300 cursor-default"
+                <SpotlightCard
+                  className="h-full rounded-2xl overflow-hidden cursor-default"
+                  spotlightColor={`rgba(${role.accentRgb},0.20)`}
                   style={{
-                    background: `rgba(${role.accentRgb},0.04)`,
+                    background: `rgba(${role.accentRgb},0.09)`,
                     backdropFilter: "blur(20px)",
                     WebkitBackdropFilter: "blur(20px)",
-                    border: `1px solid rgba(${role.accentRgb},0.18)`,
+                    border: `1px solid rgba(${role.accentRgb},0.24)`,
                     boxShadow: `0 4px 32px rgba(0,0,0,0.6)`,
+                    transition: "border-color 0.3s, box-shadow 0.3s, transform 0.3s",
                   }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.background = `rgba(${role.accentRgb},0.08)`;
-                    (e.currentTarget as HTMLDivElement).style.borderColor = `rgba(${role.accentRgb},0.38)`;
+                  onMouseEnter={(e: React.MouseEvent<HTMLDivElement>) => {
+                    (e.currentTarget as HTMLDivElement).style.borderColor = `rgba(${role.accentRgb},0.42)`;
                     (e.currentTarget as HTMLDivElement).style.boxShadow = `0 0 50px rgba(${role.accentRgb},0.18), 0 4px 32px rgba(0,0,0,0.6)`;
                     (e.currentTarget as HTMLDivElement).style.transform = "translateY(-3px)";
                   }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLDivElement).style.background = `rgba(${role.accentRgb},0.04)`;
-                    (e.currentTarget as HTMLDivElement).style.borderColor = `rgba(${role.accentRgb},0.18)`;
+                  onMouseLeave={(e: React.MouseEvent<HTMLDivElement>) => {
+                    (e.currentTarget as HTMLDivElement).style.borderColor = `rgba(${role.accentRgb},0.24)`;
                     (e.currentTarget as HTMLDivElement).style.boxShadow = `0 4px 32px rgba(0,0,0,0.6)`;
                     (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
                   }}
                 >
-                  {/* Color accent top bar */}
+                  {/* Colour accent top bar */}
                   <div style={{ height: 3, background: `linear-gradient(90deg, ${role.accent}00, ${role.accent}, ${role.accent}00)` }} />
 
                   <div className="p-6 flex-1 flex flex-col gap-4">
@@ -174,9 +169,9 @@ export function RolesSection() {
                       <div
                         className="w-11 h-11 rounded-xl flex items-center justify-center"
                         style={{
-                          background: `rgba(${role.accentRgb},0.12)`,
-                          border: `1px solid rgba(${role.accentRgb},0.22)`,
-                          boxShadow: `0 0 24px rgba(${role.accentRgb},0.20)`,
+                          background: `rgba(${role.accentRgb},0.15)`,
+                          border: `1px solid rgba(${role.accentRgb},0.28)`,
+                          boxShadow: `0 0 24px rgba(${role.accentRgb},0.22)`,
                         }}
                       >
                         <Icon size={18} style={{ color: role.accent }} />
@@ -198,9 +193,9 @@ export function RolesSection() {
                     {/* Highlight badge */}
                     <span className="self-start text-xs px-2.5 py-1 rounded-full font-semibold"
                       style={{
-                        background: `rgba(${role.accentRgb},0.10)`,
+                        background: `rgba(${role.accentRgb},0.12)`,
                         color: role.accent,
-                        border: `1px solid rgba(${role.accentRgb},0.22)`,
+                        border: `1px solid rgba(${role.accentRgb},0.26)`,
                       }}>
                       {role.highlight}
                     </span>
@@ -219,7 +214,7 @@ export function RolesSection() {
 
                   {/* Footer */}
                   <div className="px-6 py-4 flex items-center justify-between"
-                    style={{ borderTop: `1px solid rgba(${role.accentRgb},0.12)` }}>
+                    style={{ borderTop: `1px solid rgba(${role.accentRgb},0.15)` }}>
                     <div>
                       <span className="text-lg font-extrabold" style={{ color: role.accent }}>{role.benefit}</span>
                       <span className="text-xs ml-1.5" style={{ color: B.muted }}>{role.benefitLabel}</span>
@@ -231,31 +226,24 @@ export function RolesSection() {
                       Join <ArrowRight size={12} />
                     </a>
                   </div>
-                </div>
+                </SpotlightCard>
               </StaggerItem>
             );
           })}
         </StaggerChildren>
 
-        {/* Commodities strip */}
+        {/* ── Commodities Marquee ── */}
         <FadeInUp delay={0.4}>
           <div className="mt-14 pt-8" style={{ borderTop: `1px solid rgba(232,200,112,0.10)` }}>
-            <p className="text-label text-center mb-5" style={{ color: B.muted }}>Supported commodities</p>
-            <div className="flex flex-wrap justify-center gap-3">
-              {[
-                { emoji: "🌾", name: "Wheat", volume: "$18B/yr" },
-                { emoji: "🌽", name: "Corn", volume: "$12B/yr" },
-                { emoji: "🌻", name: "Sunflower", volume: "$6B/yr" },
-                { emoji: "🫘", name: "Soybeans", volume: "$9B/yr" },
-                { emoji: "🌴", name: "Palm Oil", volume: "$5B/yr" },
-                { emoji: "🍚", name: "Rice", volume: "$7B/yr" },
-              ].map((c) => (
+            <p className="text-label text-center mb-6" style={{ color: B.muted }}>Supported commodities</p>
+            <Marquee duration={28} gap={12} pauseOnHover>
+              {commodities.map((c) => (
                 <div
                   key={c.name}
-                  className="flex items-center gap-2.5 px-4 py-2.5 rounded-full transition-colors"
+                  className="flex items-center gap-2.5 px-4 py-2.5 rounded-full shrink-0"
                   style={{
-                    background: "rgba(232,200,112,0.04)",
-                    border: `1px solid rgba(232,200,112,0.12)`,
+                    background: "rgba(232,200,112,0.07)",
+                    border: "1px solid rgba(232,200,112,0.16)",
                   }}
                 >
                   <span style={{ fontSize: 18 }}>{c.emoji}</span>
@@ -265,9 +253,10 @@ export function RolesSection() {
                   </div>
                 </div>
               ))}
-            </div>
+            </Marquee>
           </div>
         </FadeInUp>
+
       </div>
     </section>
   );
