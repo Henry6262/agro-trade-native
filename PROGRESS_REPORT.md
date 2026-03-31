@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-31_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `ba811aa` 2026-03-31 — ci: add per-package Codecov + SonarCloud quality gating scaffold
+- `fad5366` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `d166be4` 2026-03-31 — ci(security): add CodeQL SAST + Copilot Autofix
 - `94ef52e` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `83af617` 2026-03-31 — ci: add parallel path-filtered monorepo pipeline
@@ -23,7 +25,5 @@ _Auto-generated: 2026-03-31_
 - `1595615` 2026-03-31 — test(escrow): apply production-ready spec discipline — full mock, .each state ma
 - `b3bf4b0` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `85fc163` 2026-03-31 — test(negotiations): add production-grade spec scaffold for NegotiationService
-- `6e12f03` 2026-03-31 — docs: auto-update progress report [skip ci]
-- `d40e75e` 2026-03-31 — test(infra): add mockPrismaService, test-factories & orders unit spec
 
 ## Open Issues
