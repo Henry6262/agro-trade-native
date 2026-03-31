@@ -7,12 +7,19 @@ dist/
 build/
 *.build
 
-# Environment files
+# Environment files — block all .env variants except .example templates
 .env
+.env.*
+!.env.example
+!.env.test.example
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Backend env files — explicit block
+backend/.env
+backend/.env.*
 
 # Logs
 logs/
