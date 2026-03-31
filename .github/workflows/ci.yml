@@ -1,10 +1,18 @@
 name: CI – Multi-Surface Lint, TypeCheck & Contract Build
 
+# ── Trigger guards ──────────────────────────────────────────────────────────
+# Push only on main/develop to avoid double-runs on every feature branch push.
+# PRs still run on all branches for full coverage.
 on:
   push:
-    branches: ['**']
+    branches: [main, develop]
   pull_request:
-    branches: ['**']
+
+# ── Concurrency guard ───────────────────────────────────────────────────────
+# Cancel any previous run for the same workflow+ref so stale runs don't pile up.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # ─────────────────────────────────────────
@@ -13,6 +21,7 @@ jobs:
   lint-typecheck-frontend:
     name: Lint & TypeCheck – Front-end
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: front-end
@@ -29,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Guard – lint script exists
+        run: npm run | grep -q 'lint' || (echo "::error::No lint script found in front-end/package.json" && exit 1)
+
       - name: Lint
         run: npm run lint
 
@@ -41,6 +53,7 @@ jobs:
   lint-typecheck-backend:
     name: Lint & TypeCheck – Backend
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: backend
@@ -57,11 +70,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Guard – lint script exists
+        run: npm run | grep -q 'lint' || (echo "::error::No lint script found in backend/package.json" && exit 1)
+
       - name: Lint
         run: npm run lint
 
       - name: TypeScript strict check
-        run: npm run tsc -- --noEmit
+        run: npm run tsc
 
   # ─────────────────────────────────────────
   # 3. EVM contracts: Foundry build + tests
@@ -69,6 +85,7 @@ jobs:
   typecheck-evm-contracts:
     name: Build – EVM Contracts (Foundry)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: contracts
@@ -81,6 +98,14 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: stable
+
+      - name: Cache Foundry build
+        uses: actions/cache@v4
+        with:
+          path: contracts/cache
+          key: ${{ runner.os }}-foundry-${{ hashFiles('contracts/**/*.sol') }}
+          restore-keys: |
+            ${{ runner.os }}-foundry-
 
       - name: Verify forge
         run: forge --version
@@ -97,6 +122,7 @@ jobs:
   typecheck-solana-contracts:
     name: TypeCheck – Solana Contracts (Anchor)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
         working-directory: contracts-solana
@@ -119,10 +145,19 @@ jobs:
             ${{ runner.os }}-cargo-anchor-v0.30.1-
             ${{ runner.os }}-cargo-
 
-      - name: Install Solana CLI
-        run: |
-          sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
-          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+      - name: Cache Solana CLI
+        id: cache-solana
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/solana/install/active_release
+          key: ${{ runner.os }}-solana-stable
+
+      - name: Install Solana CLI (skip if cached)
+        if: steps.cache-solana.outputs.cache-hit != 'true'
+        run: sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+
+      - name: Add Solana to PATH
+        run: echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
 
       - name: Install Anchor CLI (skip if cached)
         run: |
@@ -144,3 +179,6 @@ jobs:
 
       - name: Anchor build
         run: anchor build
+
+      - name: Anchor test
+        run: anchor test --skip-local-validator
