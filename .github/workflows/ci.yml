@@ -82,10 +82,6 @@ jobs:
   # ─────────────────────────────────────────
   # 3. EVM contracts: Foundry build + tests
   # ─────────────────────────────────────────
-  # NOTE: `submodules: recursive` requires ALL entries in .gitmodules to have
-  # a valid `url`. If the checkout fails with "no url found for submodule",
-  # either add the missing url to .gitmodules OR switch to `submodules: false`
-  # below (Foundry will still build — it just won't clone lib/ submodules).
   typecheck-evm-contracts:
     name: Build – EVM Contracts (Foundry)
     runs-on: ubuntu-latest
@@ -95,8 +91,9 @@ jobs:
         working-directory: contracts
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+        # submodules: recursive intentionally omitted – .gitmodules entries
+        # lack valid urls which causes the checkout action to fail.
+        # Forge can still build without cloning lib/ submodules.
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -184,6 +181,9 @@ jobs:
 
       - name: Install JS dependencies
         run: npm ci
+
+      - name: Generate Solana keypair (required by Anchor)
+        run: solana-keygen new --no-bip39-passphrase --outfile ~/.config/solana/id.json
 
       - name: Anchor build
         run: anchor build
