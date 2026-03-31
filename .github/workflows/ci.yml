@@ -1,0 +1,135 @@
+name: CI – Multi-Surface Lint, TypeCheck & Contract Build
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  # ─────────────────────────────────────────
+  # 1. Front-end: lint + TypeScript strict check
+  # ─────────────────────────────────────────
+  lint-typecheck-frontend:
+    name: Lint & TypeCheck – Front-end
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front-end
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: front-end/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+      - name: TypeScript strict check
+        run: yarn tsc --noEmit
+
+  # ─────────────────────────────────────────
+  # 2. Backend: lint + TypeScript strict check
+  # ─────────────────────────────────────────
+  lint-typecheck-backend:
+    name: Lint & TypeCheck – Backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: backend/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn lint
+
+      - name: TypeScript strict check
+        run: yarn tsc --noEmit
+
+  # ─────────────────────────────────────────
+  # 3. EVM contracts: Hardhat compile + TypeChain
+  # ─────────────────────────────────────────
+  typecheck-evm-contracts:
+    name: TypeCheck – EVM Contracts (Hardhat)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: contracts/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Hardhat compile (+ TypeChain codegen)
+        run: yarn hardhat compile
+
+  # ─────────────────────────────────────────
+  # 4. Solana contracts: Anchor build
+  # ─────────────────────────────────────────
+  typecheck-solana-contracts:
+    name: TypeCheck – Solana Contracts (Anchor)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts-solana
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust / Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.rustup
+          key: ${{ runner.os }}-cargo-${{ hashFiles('contracts-solana/**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+
+      - name: Install Anchor CLI
+        run: cargo install --git https://github.com/coral-xyz/anchor --tag v0.30.1 anchor-cli --locked
+
+      - name: Set up Node.js (for Anchor JS deps)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: contracts-solana/yarn.lock
+
+      - name: Install JS dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Anchor build
+        run: anchor build
