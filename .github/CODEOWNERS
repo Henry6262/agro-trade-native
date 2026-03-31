@@ -1,0 +1,16 @@
+# Global fallback — all changes require at least one review
+* @Henry6262
+
+# CI / security infrastructure — extra sensitivity
+.github/ @Henry6262
+SECURITY.md @Henry6262
+tsconfig.base.json @Henry6262
+
+# Smart contracts — any change must be explicitly approved
+contracts/ @Henry6262
+contracts-solana/ @Henry6262
+
+# Backend — API surface and Prisma schema
+backend/prisma/ @Henry6262
+backend/src/routes/ @Henry6262
+backend/src/middleware/ @Henry6262
