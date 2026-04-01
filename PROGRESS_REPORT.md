@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-03-31_
+_Auto-generated: 2026-04-01_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,8 @@ _Auto-generated: 2026-03-31_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `8b4f591` 2026-03-31 — fix(landing): unify brand palette and fix hydration errors
+- `600d3c0` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `ba811aa` 2026-03-31 — ci: add per-package Codecov + SonarCloud quality gating scaffold
 - `fad5366` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `d166be4` 2026-03-31 — ci(security): add CodeQL SAST + Copilot Autofix
@@ -23,7 +25,5 @@ _Auto-generated: 2026-03-31_
 - `8fe4571` 2026-03-31 — test(escrow): bulletproof coverage — approve-order, resolveDispute .each, amount
 - `da45be7` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `1595615` 2026-03-31 — test(escrow): apply production-ready spec discipline — full mock, .each state ma
-- `b3bf4b0` 2026-03-31 — docs: auto-update progress report [skip ci]
-- `85fc163` 2026-03-31 — test(negotiations): add production-grade spec scaffold for NegotiationService
 
 ## Open Issues
