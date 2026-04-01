@@ -10,6 +10,9 @@ _Auto-generated: 2026-04-01_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `4f46ce3` 2026-04-01 — Merge pull request #82 from Henry6262/feat/ci-upgrade-mono
+- `48cce62` 2026-04-01 — Merge branch 'main' into feat/ci-upgrade-mono
+- `f51a704` 2026-04-01 — docs: auto-update progress report [skip ci]
 - `6fc822c` 2026-04-01 — Merge pull request #81 from Henry6262/feat/ci-multi-surface-checks
 - `90bf1ce` 2026-04-01 — Merge branch 'main' into feat/ci-multi-surface-checks
 - `7278092` 2026-04-01 — docs: auto-update progress report [skip ci]
@@ -22,8 +25,5 @@ _Auto-generated: 2026-04-01_
 - `83af617` 2026-03-31 — ci: add parallel path-filtered monorepo pipeline
 - `9daba07` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `4ed963a` 2026-03-31 — chore(git-hooks): add Husky v9 + lint-staged pre-commit gate
-- `17cbc2c` 2026-03-31 — docs: auto-update progress report [skip ci]
-- `e04d689` 2026-03-31 — chore(ts): add strict tsconfig base + per-package extends
-- `bed9f4e` 2026-03-31 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
