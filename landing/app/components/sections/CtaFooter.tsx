@@ -5,7 +5,6 @@ import Image from "next/image";
 import { ArrowRight, CheckCircle, Loader2, Shield, Link, Globe } from "lucide-react";
 import { B } from "../brand";
 import { FadeInUp } from "../animations";
-import { ParallaxBg } from "../ParallaxBg";
 
 const ROLES = ["Buyer", "Seller / Farmer", "Inspector", "Transporter"] as const;
 type Role = (typeof ROLES)[number];
@@ -135,15 +134,18 @@ function WaitlistForm() {
 export function CtaFooter() {
   return (
     <section id="cta" className="relative overflow-hidden">
-      {/* ── Background: sunset wheat field + parallax ── */}
-      <ParallaxBg
-        src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2070&q=80"
-        overlay="linear-gradient(180deg, rgba(12,9,4,0.98) 0%, rgba(12,9,4,0.88) 35%, rgba(12,9,4,0.91) 65%, rgba(12,9,4,0.98) 100%)"
-        position="center 60%"
-        strength={60}
-        fadeTop="#040608"
-        fadeSize={260}
-      />
+      {/* ── Background: golden grain field ── */}
+      <div className="absolute inset-0 overflow-hidden" style={{ zIndex: 0 }}>
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2560&q=85')",
+          backgroundSize: "cover",
+          backgroundPosition: "center 65%",
+        }} />
+        <div className="absolute inset-0" style={{
+          background: "linear-gradient(180deg, rgba(12,9,4,0.98) 0%, rgba(12,9,4,0.84) 40%, rgba(12,9,4,0.90) 70%, rgba(12,9,4,0.98) 100%)",
+        }} />
+      </div>
       {/* Gold top aurora */}
       <div className="pointer-events-none absolute inset-0 z-0" style={{
         background: "radial-gradient(ellipse 100% 50% at 50% 0%, rgba(232,200,112,0.12) 0%, transparent 55%)",

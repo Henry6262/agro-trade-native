@@ -367,15 +367,10 @@ export const Globe: React.FC<GlobeProps> = ({
           : width;
       const containerHeight = height === "auto" ? containerWidth : height;
 
-      const landMapImage = new Image();
-      landMapImage.crossOrigin = "anonymous";
-      landMapImage.src = landMapUrl;
-
-      landMapImage.onload = () => {
-        const dots = processLandMap(landMapImage);
-        dotsRef.current = dots;
-
+      // Shared mount function — called after land-map loads (or fails gracefully)
+      const mountGlobe = (dots: LandDot[]) => {
         if (!window.Globe) return;
+        dotsRef.current = dots;
 
         const createColorTexture = (color: string) => {
           const canvas = document.createElement("canvas");
@@ -557,10 +552,16 @@ export const Globe: React.FC<GlobeProps> = ({
         onReady?.();
       };
 
-      landMapImage.onerror = () => {
-        setError("Failed to load land map image");
-        isInitializingRef.current = false;
-      };
+      const landMapImage = new Image();
+      landMapImage.crossOrigin = "anonymous";
+      landMapImage.src = landMapUrl;
+
+      // Success: parse land dots from the B&W mask image
+      landMapImage.onload = () => mountGlobe(processLandMap(landMapImage));
+
+      // Failure (CORS / 404 / CDN down): still mount the globe without land
+      // dots — the sphere + animated trade arcs still look great.
+      landMapImage.onerror = () => mountGlobe([]);
     };
 
     if ("requestIdleCallback" in window) {

@@ -1,0 +1,12 @@
+{
+  "extends": ["@commitlint/config-conventional"],
+  "rules": {
+    "scope-enum": [
+      2,
+      "always",
+      ["backend", "front-end", "contracts", "contracts-solana",
+       "admin-dashboard", "landing", "ci", "ts", "git-hooks", "deps", "release"]
+    ],
+    "body-max-line-length": [1, "always", 200]
+  }
+}

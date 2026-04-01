@@ -3,7 +3,6 @@
 import { AlertTriangle, Scale, FileX, ShieldCheck, UserCheck, Database } from "lucide-react";
 import { B } from "../brand";
 import { FadeInUp, StaggerChildren, StaggerItem } from "../animations";
-import { ParallaxBg } from "../ParallaxBg";
 
 const problems = [
   {
@@ -18,14 +17,14 @@ const problems = [
     icon: Scale,
     title: "Quality Disputes",
     desc: "No independent verification. Buyers claim wrong specs, refuse payment. No mediator. No resolution.",
-    accent: "#F97316",
+    accent: "#EF4444",
   },
   {
     n: "03",
     icon: FileX,
     title: "No Paper Trail",
     desc: "Verbal agreements, no contracts. Zero legal recourse when deals go wrong. The system fails farmers.",
-    accent: "#FBBF24",
+    accent: "#EF4444",
   },
 ];
 
@@ -40,28 +39,21 @@ const fixes = [
     icon: UserCheck,
     title: "Independent Inspector",
     desc: "A verified inspector confirms quality on-site before shipment. Grade disputes end at pickup — on the record, on-chain.",
-    accent: "#34D399",
+    accent: "#4ADE80",
   },
   {
     icon: Database,
     title: "Immutable Audit Trail",
     desc: "Every deal, inspection and payment is recorded forever on Celo. Your proof of trade lives on-chain — permanently.",
-    accent: "#6EE7B7",
+    accent: "#4ADE80",
   },
 ];
 
 export function ProblemSection() {
   return (
     <section id="problem" className="relative py-28 px-6 lg:px-32 overflow-hidden">
-      {/* ── Background: cracked dry earth + parallax ── */}
-      <ParallaxBg
-        src="https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?auto=format&fit=crop&w=2070&q=80"
-        overlay="linear-gradient(135deg, rgba(12,9,4,0.97) 0%, rgba(17,13,7,0.94) 50%, rgba(12,9,4,0.97) 100%)"
-        strength={45}
-        fadeTop="#0C0904"
-        fadeBottom="#08070A"
-        fadeSize={240}
-      />
+      {/* ── Background: pure dark ── */}
+      <div className="absolute inset-0 z-0" style={{ backgroundColor: "#0C0904" }} />
       {/* Red atmospheric glow — left (problem side) */}
       <div className="pointer-events-none absolute inset-0 z-0" style={{
         background: "radial-gradient(ellipse 55% 60% at 10% 50%, rgba(196,101,74,0.10) 0%, transparent 60%)",
@@ -127,7 +119,7 @@ export function ProblemSection() {
                   <div
                     className="flex gap-5 p-6 rounded-2xl items-start relative overflow-hidden"
                     style={{
-                      background: `rgba(${p.accent === "#EF4444" ? "239,68,68" : p.accent === "#F97316" ? "249,115,22" : "251,191,36"},0.04)`,
+                      background: "rgba(239,68,68,0.04)",
                       backdropFilter: "blur(20px)",
                       WebkitBackdropFilter: "blur(20px)",
                       border: `1px solid ${p.accent}28`,

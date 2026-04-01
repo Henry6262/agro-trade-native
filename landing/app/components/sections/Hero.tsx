@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Check, Lock, CheckCircle, ShieldCheck, MapPin } from "lucide-react";
+import { ArrowRight, Lock, CheckCircle, ShieldCheck, MapPin } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { B } from "../brand";
 import { FadeInUp, CountUp } from "../animations";
-import { ParallaxBg } from "../ParallaxBg";
 import Device from "../Device";
 import { HERO_SCREENS } from "./HeroScreens";
+import { DecryptedText } from "../reactbits/DecryptedText";
 
 const SCREENS = HERO_SCREENS;
 
@@ -43,17 +43,21 @@ function FloatCard({ children, style, delay = 0, yRange = 9 }: {
   );
 }
 
-// CSS particles — no external lib needed
+// CSS particles — generated client-side only to avoid SSR/hydration mismatch
+type Particle = { id: number; left: string; bottom: string; size: number; duration: number; delay: number; opacity: number };
 function Particles() {
-  const particles = Array.from({ length: 22 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    bottom: `${Math.random() * 30}%`,
-    size: Math.random() * 3 + 1.5,
-    duration: Math.random() * 8 + 6,
-    delay: Math.random() * 8,
-    opacity: Math.random() * 0.5 + 0.2,
-  }));
+  const [particles, setParticles] = useState<Particle[]>([]);
+  useEffect(() => {
+    setParticles(Array.from({ length: 22 }, (_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      bottom: `${Math.random() * 30}%`,
+      size: Math.random() * 3 + 1.5,
+      duration: Math.random() * 8 + 6,
+      delay: Math.random() * 8,
+      opacity: Math.random() * 0.5 + 0.2,
+    })));
+  }, []);
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       {particles.map((p) => (
@@ -100,26 +104,31 @@ const stats = [
   { label: "Countries", value: 12 },
 ];
 
-const bullets = [
-  "Payment locks in escrow the moment the deal is signed",
-  "Inspector confirms delivery on-site — no dispute games",
-  "Funds release automatically. Or raise a dispute in-app",
-];
 
 export function Hero() {
   return (
     <section
-      className="relative min-h-screen flex items-center px-6 lg:px-16 pt-24 pb-16 overflow-hidden"
+      className="relative flex items-center px-6 lg:px-16 pt-24 pb-16 overflow-hidden"
+      style={{ minHeight: "75vh" }}
     >
-      {/* ── Background: golden wheat field photo + parallax ── */}
-      <ParallaxBg
-        src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=2070&q=80"
-        overlay="linear-gradient(135deg, rgba(12,9,4,0.97) 0%, rgba(12,9,4,0.90) 50%, rgba(12,9,4,0.96) 100%)"
-        position="center 40%"
-        strength={70}
-        fadeBottom="#0C0904"
-        fadeSize={280}
-      />
+      {/* ── Background: golden grain field + dark overlay ── */}
+      <div className="absolute inset-0 overflow-hidden" style={{ zIndex: 0 }}>
+        <div style={{
+          position: "absolute", inset: 0,
+          backgroundImage: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2560&q=85')",
+          backgroundSize: "cover",
+          backgroundPosition: "center 55%",
+        }} />
+        <div className="absolute inset-0" style={{
+          background: "linear-gradient(135deg, rgba(12,9,4,0.95) 0%, rgba(12,9,4,0.86) 50%, rgba(12,9,4,0.93) 100%)",
+        }} />
+        {/* Bottom fade */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0" style={{
+          height: 220,
+          background: "linear-gradient(to top, #0C0904 0%, transparent 100%)",
+          zIndex: 2,
+        }} />
+      </div>
       {/* Gold atmospheric glow — left side hero */}
       <div className="pointer-events-none absolute inset-0 z-0" style={{
         background: "radial-gradient(ellipse 65% 70% at 15% 50%, rgba(232,200,112,0.12) 0%, transparent 60%)",
@@ -147,7 +156,7 @@ export function Hero() {
           </FadeInUp>
 
           <FadeInUp delay={0.08}>
-            <motion.h1 className="mb-6" style={{ lineHeight: 1.02, letterSpacing: "-0.02em" }}
+            <motion.h1 className="mb-6" style={{ lineHeight: 1.05, letterSpacing: "-0.02em" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6 }}>
@@ -159,32 +168,22 @@ export function Hero() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.05 }}>
-                Agricultural trade
-              </motion.span>
-              <motion.span className="block" style={{
-                fontSize: "clamp(1.8rem, 5vw, 3.8rem)",
-                fontWeight: 950,
-                color: B.cream,
-              }}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}>
-                has always been built
+                Trade grain,
               </motion.span>
               <motion.span className="block italic" style={{
                 fontSize: "clamp(1.8rem, 5vw, 3.8rem)",
                 fontWeight: 950,
-                background: `linear-gradient(135deg, ${B.green} 0%, #4a9d6f 50%, #2d5f45 100%)`,
+                background: `linear-gradient(135deg, ${B.wheat} 0%, #FFD770 50%, ${B.wheat} 100%)`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
                 textShadow: "none",
-                filter: "drop-shadow(0 0 40px rgba(61,122,80,0.35))",
+                filter: "drop-shadow(0 0 40px rgba(232,200,112,0.35))",
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.15 }}>
-                on blind trust.
+              transition={{ duration: 0.6, delay: 0.1 }}>
+                not trust.
               </motion.span>
               <motion.span className="block mt-1" style={{
                 fontSize: "clamp(1.2rem, 3vw, 2.4rem)",
@@ -193,38 +192,27 @@ export function Hero() {
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}>
-                We replaced trust with math.
+              transition={{ duration: 0.6, delay: 0.15 }}>
+                <DecryptedText
+                  text="Escrow-protected. Inspector-verified."
+                  speed={55}
+                  animateOn="view"
+                  className="inline"
+                  encryptedClassName="opacity-40"
+                />
               </motion.span>
             </motion.h1>
           </FadeInUp>
 
           <FadeInUp delay={0.18}>
-            <p className="text-sm sm:text-base leading-relaxed mb-7 max-w-xl" style={{ color: B.muted }}>
-              AgroTrade locks every payment in smart-contract escrow on Celo.
-              Funds only release when the inspector confirms delivery —
-              automatically.{" "}
-              <span style={{ color: B.cream }} className="font-semibold">No trust required.</span>
+            <p className="text-sm sm:text-base leading-relaxed mb-10 max-w-xl" style={{ color: B.muted }}>
+              Every payment locks in smart-contract escrow on Celo.
+              Funds release only when an inspector confirms delivery on-site.{" "}
+              <span style={{ color: B.cream }} className="font-semibold">Automatic. Trustless.</span>
             </p>
           </FadeInUp>
 
           <FadeInUp delay={0.26}>
-            <ul className="space-y-2.5 mb-10">
-              {bullets.map((b) => (
-                <li key={b} className="flex items-start gap-3">
-                  <div
-                    className="mt-0.5 w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: "rgba(232,200,112,0.12)", border: `1px solid rgba(232,200,112,0.30)` }}
-                  >
-                    <Check size={11} color={B.wheat} strokeWidth={2.5} />
-                  </div>
-                  <span className="text-sm leading-relaxed" style={{ color: "rgba(240,229,204,0.75)" }}>{b}</span>
-                </li>
-              ))}
-            </ul>
-          </FadeInUp>
-
-          <FadeInUp delay={0.34}>
             <div className="flex flex-col sm:flex-row items-start gap-3 mb-12">
               <a href="#cta" className="btn-primary">
                 Get Early Access <ArrowRight size={16} />

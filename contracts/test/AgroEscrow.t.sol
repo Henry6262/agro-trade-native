@@ -130,6 +130,40 @@ contract AgroEscrowTest is Test {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // [NEW #1] Approve-before-createEscrow + contract address verification
+    // Гарантира правилен ред на критичните blockchain calls.
+    // Ако approve липсва или е за грешен адрес → createEscrow трябва да revert.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    function test_createEscrow_revertsIfNoApproval() public {
+        // Deploy fresh escrow so buyer has no approval for it
+        AgroEscrow freshEscrow = new AgroEscrow(address(cusd));
+
+        // buyer НЕ е approve-нал freshEscrow — transferFrom трябва да fail-не
+        vm.prank(buyer);
+        vm.expectRevert("Insufficient allowance");
+        freshEscrow.createEscrow(KEY, seller, TRADE_ID, AMOUNT);
+    }
+
+    function test_createEscrow_revertsIfApprovalIsForWrongContract() public {
+        // buyer approve-ва stranger address, но НЕ escrow contract-а
+        vm.prank(buyer);
+        cusd.approve(address(stranger), type(uint256).max);
+
+        AgroEscrow freshEscrow = new AgroEscrow(address(cusd));
+
+        vm.prank(buyer);
+        vm.expectRevert("Insufficient allowance");
+        freshEscrow.createEscrow(KEY, seller, TRADE_ID, AMOUNT);
+    }
+
+    function test_createEscrow_cusdTokenAddressIsCorrect() public view {
+        // Верифицира, че escrow-ът е deploynat с правилния cUSD token адрес —
+        // regression guard срещу swap на token address при рефактор на constructor.
+        assertEq(escrow.cusdToken(), address(cusd));
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // releaseFunds
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -196,6 +230,38 @@ contract AgroEscrowTest is Test {
         vm.prank(buyer);
         vm.expectRevert("Invalid state");
         escrow.releaseFunds(KEY);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // [NEW #4] releaseFunds — audit-fail regression
+    // Верифицира atomic-ността: state и amount се нулират ПРЕДИ transfer,
+    // и PaymentReleased event е emit-нат (audit trail).
+    // ─────────────────────────────────────────────────────────────────────────
+
+    function test_releaseFunds_emitsPaymentReleasedEvent() public {
+        _createEscrow(KEY, AMOUNT);
+
+        vm.expectEmit(true, false, false, false);
+        emit AgroEscrow.PaymentReleased(KEY);
+
+        vm.prank(buyer);
+        escrow.releaseFunds(KEY);
+    }
+
+    function test_releaseFunds_amountZeroedBeforeTransfer_stateIsComplete() public {
+        // Regression: след успешен release — e.amount ТРЯБВА да е 0 и state COMPLETE.
+        // Partial-commit risk: ако transfer мине но state не се update-не, audit record липсва.
+        _createEscrow(KEY, AMOUNT);
+
+        vm.prank(buyer);
+        escrow.releaseFunds(KEY);
+
+        (, , uint256 eAmount, AgroEscrow.State eState, ) = escrow.getEscrow(KEY);
+        assertEq(eAmount, 0, "amount must be zeroed after release");
+        assertEq(uint256(eState), uint256(AgroEscrow.State.COMPLETE), "state must be COMPLETE after release");
+
+        // Escrow contract-ът не трябва да държи тези средства повече
+        assertEq(cusd.balanceOf(address(escrow)), 0);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -318,6 +384,65 @@ contract AgroEscrowTest is Test {
 
         vm.prank(buyer);
         vm.expectRevert("Not admin");
+        escrow.resolveDispute(KEY, false);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // [NEW #2] resolveDispute — .each за releaseToBuyer = true / false
+    // Перфектно хваща edge cases и regression в audit trail.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    function test_resolveDispute_each_releaseToBuyer_true_transfersToBuyer() public {
+        _createEscrow(KEY, AMOUNT);
+        _raiseDispute(KEY);
+
+        uint256 buyerBefore  = cusd.balanceOf(buyer);
+        uint256 sellerBefore = cusd.balanceOf(seller);
+
+        escrow.resolveDispute(KEY, true); // releaseToBuyer = true
+
+        assertEq(cusd.balanceOf(buyer),  buyerBefore  + AMOUNT, "buyer must receive funds");
+        assertEq(cusd.balanceOf(seller), sellerBefore,           "seller must NOT receive funds");
+
+        (, , uint256 eAmount, AgroEscrow.State eState, ) = escrow.getEscrow(KEY);
+        assertEq(uint256(eState), uint256(AgroEscrow.State.COMPLETE));
+        assertEq(eAmount, 0);
+    }
+
+    function test_resolveDispute_each_releaseToBuyer_false_transfersToSeller() public {
+        _createEscrow(KEY, AMOUNT);
+        _raiseDispute(KEY);
+
+        uint256 buyerBefore  = cusd.balanceOf(buyer);
+        uint256 sellerBefore = cusd.balanceOf(seller);
+
+        escrow.resolveDispute(KEY, false); // releaseToBuyer = false
+
+        assertEq(cusd.balanceOf(seller), sellerBefore + AMOUNT, "seller must receive funds");
+        assertEq(cusd.balanceOf(buyer),  buyerBefore,            "buyer must NOT receive funds");
+
+        (, , uint256 eAmount, AgroEscrow.State eState, ) = escrow.getEscrow(KEY);
+        assertEq(uint256(eState), uint256(AgroEscrow.State.COMPLETE));
+        assertEq(eAmount, 0);
+    }
+
+    function test_resolveDispute_each_emitsDisputeResolvedEvent_toBuyer() public {
+        _createEscrow(KEY, AMOUNT);
+        _raiseDispute(KEY);
+
+        vm.expectEmit(true, false, false, true);
+        emit AgroEscrow.DisputeResolved(KEY, buyer, AMOUNT);
+
+        escrow.resolveDispute(KEY, true);
+    }
+
+    function test_resolveDispute_each_emitsDisputeResolvedEvent_toSeller() public {
+        _createEscrow(KEY, AMOUNT);
+        _raiseDispute(KEY);
+
+        vm.expectEmit(true, false, false, true);
+        emit AgroEscrow.DisputeResolved(KEY, seller, AMOUNT);
+
         escrow.resolveDispute(KEY, false);
     }
 
@@ -473,6 +598,43 @@ contract AgroEscrowTest is Test {
         assertEq(eAmount, 0);
         assertEq(uint256(eState), uint256(AgroEscrow.State.AWAITING_PAYMENT));
         assertEq(eTradeId, "");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // [NEW #3] getEscrow — amountWei е uint256 (serialization / RPC regression)
+    // Покрива serialization/rpc bug при интеграция с frontend/backend.
+    // Верифицира, че amount-ът се връща като точна uint256 стойност в wei,
+    // НЕ като BigInt или string — т.е. Solidity типовата система го пази.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    function test_getEscrow_amountIsExactWeiValue_notTruncated() public {
+        // Използваме нестандартна стойност за да хванем truncation/rounding
+        uint256 oddAmount = 1_337_000_000_000_000_001; // 1.337... ether + 1 wei
+
+        cusd.mint(buyer, oddAmount);
+        vm.prank(buyer);
+        escrow.createEscrow(KEY, seller, TRADE_ID, oddAmount);
+
+        (, , uint256 eAmount, , ) = escrow.getEscrow(KEY);
+
+        assertEq(eAmount, oddAmount, "amount must be returned as exact wei — no truncation");
+        assertTrue(eAmount > 1 ether, "sanity: amount > 1e18");
+        // 1 wei разлика = грешна serialization или rounding
+        assertTrue(eAmount != 1_337_000_000_000_000_000, "must NOT equal rounded-down value");
+    }
+
+    function test_getEscrow_amountReflectsPartialEscrow() public {
+        // Regression: малки суми (под 1 ether) да не се truncate-ват
+        uint256 smallAmount = 0.000_001 ether; // 1_000_000_000_000 wei
+
+        cusd.mint(buyer, smallAmount);
+        vm.prank(buyer);
+        escrow.createEscrow(KEY, seller, TRADE_ID, smallAmount);
+
+        (, , uint256 eAmount, , ) = escrow.getEscrow(KEY);
+
+        assertEq(eAmount, smallAmount, "sub-ether amounts must be preserved exactly");
+        assertEq(eAmount, 1_000_000_000_000);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

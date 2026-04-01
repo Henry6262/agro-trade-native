@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, Lock, Truck, Search, ShoppingCart, Zap } from "lucide-react";
 import { B } from "../brand";
 import { FadeInUp } from "../animations";
-import { ParallaxBg } from "../ParallaxBg";
 
 const STAGES = [
   {
@@ -13,16 +12,16 @@ const STAGES = [
     icon: ShoppingCart,
     label: "Buyer posts order",
     duration: 2200,
-    color: "#60A5FA",
-    feed: { title: "Buy Order Created", detail: "50t Grade A Wheat · $48/t · Sofia → Istanbul", badge: "POSTED", badgeColor: "#60A5FA", meta: "Ahmed K. · 0x3f2a...b91c" },
+    color: "#E8C870",
+    feed: { title: "Buy Order Created", detail: "50t Grade A Wheat · $48/t · Sofia → Istanbul", badge: "POSTED", badgeColor: "#E8C870", meta: "Ahmed K. · 0x3f2a...b91c" },
   },
   {
     id: "matched",
     icon: Zap,
     label: "Sellers auto-matched",
     duration: 2400,
-    color: "#A78BFA",
-    feed: { title: "2 Sellers Matched", detail: "Marko V. (Serbia) 30t · Ivan R. (Romania) 20t", badge: "NEGOTIATING", badgeColor: "#A78BFA", meta: "Platform auto-matched · < 4 min" },
+    color: "#C4831A",
+    feed: { title: "2 Sellers Matched", detail: "Marko V. (Serbia) 30t · Ivan R. (Romania) 20t", badge: "NEGOTIATING", badgeColor: "#C4831A", meta: "Platform auto-matched · < 4 min" },
   },
   {
     id: "escrow",
@@ -37,24 +36,24 @@ const STAGES = [
     icon: Search,
     label: "Quality inspection passed",
     duration: 2600,
-    color: "#34D399",
-    feed: { title: "Quality Verified ✓", detail: "Score 89/100 · Moisture 12.4% · Grade A confirmed", badge: "PASSED", badgeColor: "#34D399", meta: "Inspector: Nikolaj B. · Certified on-chain" },
+    color: "#C4831A",
+    feed: { title: "Quality Verified ✓", detail: "Score 89/100 · Moisture 12.4% · Grade A confirmed", badge: "PASSED", badgeColor: "#C4831A", meta: "Inspector: Nikolaj B. · Certified on-chain" },
   },
   {
     id: "transit",
     icon: Truck,
     label: "Shipment in transit",
     duration: 2200,
-    color: "#FB923C",
-    feed: { title: "Truck Dispatched", detail: "TK-4821 departed Sofia depot · Live GPS active", badge: "IN TRANSIT", badgeColor: "#FB923C", meta: "ETA Istanbul: 18 hrs" },
+    color: "#E8C870",
+    feed: { title: "Truck Dispatched", detail: "TK-4821 departed Sofia depot · Live GPS active", badge: "IN TRANSIT", badgeColor: "#E8C870", meta: "ETA Istanbul: 18 hrs" },
   },
   {
     id: "released",
     icon: CheckCircle2,
     label: "Escrow released automatically",
     duration: 0,
-    color: "#E8C870",
-    feed: { title: "Payment Released 🎉", detail: "$2,400 cUSD sent to Marko V. & Ivan R.", badge: "COMPLETE", badgeColor: "#E8C870", meta: "Smart contract auto-executed · 0 fees" },
+    color: "#C4831A",
+    feed: { title: "Payment Released", detail: "$2,400 cUSD sent to Marko V. & Ivan R.", badge: "COMPLETE", badgeColor: "#C4831A", meta: "Smart contract auto-executed · 0 fees" },
   },
 ];
 
@@ -101,15 +100,8 @@ export function LiveDealFlow() {
 
   return (
     <section className="relative py-28 px-4 overflow-hidden">
-      {/* ── Background: grain elevator + parallax ── */}
-      <ParallaxBg
-        src="https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=2070&q=80"
-        overlay="linear-gradient(135deg, rgba(12,9,4,0.98) 0%, rgba(12,9,4,0.93) 50%, rgba(12,9,4,0.98) 100%)"
-        strength={45}
-        fadeTop="#08070A"
-        fadeBottom="#0C0904"
-        fadeSize={240}
-      />
+      {/* ── Background: pure dark ── */}
+      <div className="absolute inset-0 z-0" style={{ backgroundColor: "#0C0904" }} />
       <div className="pointer-events-none absolute inset-0 z-0" style={{
         background: "radial-gradient(ellipse 70% 50% at 50% 50%, rgba(232,200,112,0.06) 0%, transparent 65%)",
       }} />
@@ -138,7 +130,7 @@ export function LiveDealFlow() {
           <div>
             <div className="h-0.5 rounded-full mb-6 overflow-hidden" style={{ background: "rgba(232,200,112,0.10)" }}>
               <motion.div className="h-full rounded-full"
-                style={{ background: `linear-gradient(90deg, ${B.wheat}, #fb923c)`, boxShadow: "0 0 10px rgba(232,200,112,0.40)" }}
+                style={{ background: `linear-gradient(90deg, ${B.wheat}, #C4831A)`, boxShadow: "0 0 10px rgba(232,200,112,0.40)" }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.5 }} />
             </div>
@@ -160,11 +152,11 @@ export function LiveDealFlow() {
                     <motion.div
                       className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
                       animate={{
-                        backgroundColor: isActive ? `${stage.color}20` : isDone ? "rgba(52,211,153,0.10)" : "rgba(255,255,255,0.04)",
+                        backgroundColor: isActive ? `${stage.color}20` : isDone ? "rgba(196,131,26,0.10)" : "rgba(255,255,255,0.04)",
                       }}
                       transition={{ duration: 0.3 }}>
                       {isDone && !isActive
-                        ? <CheckCircle2 size={16} style={{ color: "#34D399" }} />
+                        ? <CheckCircle2 size={16} style={{ color: "#C4831A" }} />
                         : <Icon size={16} style={{ color: isActive ? stage.color : `${B.muted}44` }} />}
                     </motion.div>
                     <motion.p className="flex-1 text-sm font-semibold"
@@ -179,7 +171,7 @@ export function LiveDealFlow() {
                         transition={{ repeat: Infinity, duration: 0.9 }} />
                     )}
                     {isDone && !isActive && (
-                      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: "#34D399" }} />
+                      <div className="w-2 h-2 rounded-full shrink-0" style={{ background: "#C4831A" }} />
                     )}
                   </motion.div>
                 );
@@ -200,7 +192,7 @@ export function LiveDealFlow() {
             <div className="flex items-center justify-between px-5 py-3"
               style={{ borderBottom: `1px solid rgba(232,200,112,0.10)` }}>
               <div className="flex items-center gap-2">
-                <motion.div className="w-2 h-2 rounded-full" style={{ background: "#34D399" }}
+                <motion.div className="w-2 h-2 rounded-full" style={{ background: B.wheat }}
                   animate={{ opacity: activeStage >= 0 ? [1, 0.3, 1] : [0.3, 0.3, 0.3] }}
                   transition={{ repeat: Infinity, duration: 1.4 }} />
                 <span className="text-xs font-bold tracking-widest uppercase" style={{ color: B.muted }}>
@@ -253,8 +245,8 @@ export function LiveDealFlow() {
                 {complete && (
                   <motion.div key="complete" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
                     className="rounded-xl p-4 text-center"
-                    style={{ background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.20)", boxShadow: "0 0 30px rgba(52,211,153,0.08)" }}>
-                    <p className="text-sm font-bold" style={{ color: "#34D399" }}>
+                    style={{ background: "rgba(232,200,112,0.06)", border: "1px solid rgba(232,200,112,0.20)", boxShadow: "0 0 30px rgba(232,200,112,0.08)" }}>
+                    <p className="text-sm font-bold" style={{ color: B.wheat }}>
                       Deal complete — $2,400 cUSD released in full
                     </p>
                     <p className="text-xs mt-1" style={{ color: `${B.muted}66` }}>Zero human intervention required</p>
