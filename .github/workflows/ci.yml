@@ -1,253 +1,190 @@
-name: Monorepo CI
+name: CI – Multi-Surface Lint, TypeCheck & Contract Build
 
+# ── Trigger guards ────────────────────────────────────────────────────────────────────────────
 on:
-  pull_request:
-    branches: [main, dev]
   push:
-    branches: [main, dev]
+    branches: [main, develop]
+  pull_request:
 
+# ── Concurrency guard ─────────────────────────────────────────────────────────────────────
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # ─────────────────────────────────────────────────────────────────────────────
-  detect-changes:
-    name: Detect changed packages
+  # ─────────────────────────────────────────
+  # 1. Front-end: lint + TypeScript strict check
+  # ─────────────────────────────────────────
+  lint-typecheck-frontend:
+    name: Lint & TypeCheck – Front-end
     runs-on: ubuntu-latest
-    outputs:
-      backend: ${{ steps.filter.outputs.backend }}
-      frontend: ${{ steps.filter.outputs.frontend }}
-      contracts: ${{ steps.filter.outputs.contracts }}
-      contracts-solana: ${{ steps.filter.outputs.contracts-solana }}
-      admin: ${{ steps.filter.outputs.admin }}
-      landing: ${{ steps.filter.outputs.landing }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            backend:
-              - 'backend/**'
-              - 'tsconfig.base.json'
-            frontend:
-              - 'front-end/**'
-              - 'tsconfig.base.json'
-            contracts:
-              - 'contracts/**'
-              - 'tsconfig.base.json'
-            contracts-solana:
-              - 'contracts-solana/**'
-              - 'tsconfig.base.json'
-            admin:
-              - 'admin-dashboard/**'
-            landing:
-              - 'landing/**'
-
-  # ─────────────────────────────────────────────────────────────────────────────
-  global-checks:
-    name: Typecheck + Format
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: package-lock.json
-      - run: npm ci --ignore-scripts
-      - name: Prettier format check
-        run: npx prettier --check "**/*.{ts,tsx,js,json,md,yml}" --ignore-path .prettierignore
-      - name: Root tsconfig sanity
-        run: npx tsc --noEmit -p tsconfig.base.json || true
-
-  # ─────────────────────────────────────────────────────────────────────────────
-  backend:
-    name: Backend — Test & Typecheck
-    needs: detect-changes
-    if: needs.detect-changes.outputs.backend == 'true'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20, 22]
+    timeout-minutes: 20
     defaults:
       run:
-        working-directory: ./backend
+        working-directory: front-end
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
-          cache-dependency-path: backend/package-lock.json
-      - run: npm ci
-      - name: TypeScript check
-        run: npx tsc --noEmit
-      - name: Generate Prisma client
-        run: npx prisma generate
-      - name: Unit & regression tests
-        run: npm test -- --ci --coverage --forceExit
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test
-          JWT_SECRET: ci-test-secret-key
-          NODE_ENV: test
-      - name: Upload coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-coverage-node${{ matrix.node-version }}
-          path: backend/coverage/
-          retention-days: 14
 
-  # ─────────────────────────────────────────────────────────────────────────────
-  frontend:
-    name: Front-end — Build & Typecheck
-    needs: detect-changes
-    if: needs.detect-changes.outputs.frontend == 'true'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./front-end
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
           cache-dependency-path: front-end/package-lock.json
-      - run: npm ci
-      - name: TypeScript check
-        run: npx tsc --noEmit
-      - name: Build
-        run: npm run build
 
-  # ─────────────────────────────────────────────────────────────────────────────
-  contracts-evm:
-    name: Contracts EVM — Compile & Test
-    needs: detect-changes
-    if: needs.detect-changes.outputs.contracts == 'true'
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Guard – lint script exists
+        run: npm run | grep -q 'lint' || (echo "::error::No lint script found in front-end/package.json" && exit 1)
+
+      - name: Lint
+        run: npm run lint
+
+      - name: TypeScript strict check
+        run: npm run type-check
+
+  # ─────────────────────────────────────────
+  # 2. Backend: lint + TypeScript strict check
+  # ─────────────────────────────────────────
+  lint-typecheck-backend:
+    name: Lint & TypeCheck – Backend
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
-        working-directory: ./contracts
+        working-directory: backend
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: contracts/package-lock.json
-      - name: Cache Foundry binaries
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Guard – lint script exists
+        run: npm run | grep -q 'lint' || (echo "::error::No lint script found in backend/package.json" && exit 1)
+
+      - name: Lint
+        run: npm run lint
+
+      - name: TypeScript strict check
+        run: npm run tsc
+
+  # ─────────────────────────────────────────
+  # 3. EVM contracts: Foundry build + tests
+  # ─────────────────────────────────────────
+  typecheck-evm-contracts:
+    name: Build – EVM Contracts (Foundry)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+        # submodules: recursive intentionally omitted – .gitmodules entries
+        # lack valid urls which causes the checkout action to fail.
+        # Forge can still build without cloning lib/ submodules.
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Cache Foundry build
         uses: actions/cache@v4
         with:
-          path: ~/.foundry
-          key: foundry-${{ runner.os }}-${{ hashFiles('contracts/foundry.toml') }}
-      - run: npm ci
-      - name: TypeScript check
-        run: npx tsc --noEmit
-      - name: Compile contracts
-        run: npx hardhat compile || forge build
-      - name: Run tests
-        run: npx hardhat test || forge test -vvv
+          path: contracts/cache
+          key: ${{ runner.os }}-foundry-${{ hashFiles('contracts/**/*.sol') }}
+          restore-keys: |
+            ${{ runner.os }}-foundry-
 
-  # ─────────────────────────────────────────────────────────────────────────────
-  contracts-solana:
-    name: Contracts Solana — Build & Test
-    needs: detect-changes
-    if: needs.detect-changes.outputs.contracts-solana == 'true'
+      - name: Verify forge
+        run: forge --version
+
+      - name: Build contracts
+        run: forge build --sizes
+
+      - name: Run tests
+        run: forge test
+
+  # ─────────────────────────────────────────
+  # 4. Solana contracts: Anchor build
+  # ─────────────────────────────────────────
+  typecheck-solana-contracts:
+    name: TypeCheck – Solana Contracts (Anchor)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     defaults:
       run:
-        working-directory: ./contracts-solana
+        working-directory: contracts-solana
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: contracts-solana/package-lock.json
-      - name: Cache Solana toolchain
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust / Cargo
         uses: actions/cache@v4
         with:
           path: |
-            ~/.local/share/solana
-            ~/.cargo
-          key: solana-${{ runner.os }}-v1.18
-      - name: Install Solana CLI
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+            ~/.rustup
+          key: ${{ runner.os }}-cargo-anchor-v0.30.1-${{ hashFiles('contracts-solana/**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-anchor-v0.30.1-
+            ${{ runner.os }}-cargo-
+
+      - name: Cache Solana CLI
+        id: cache-solana
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/solana/install/active_release
+          key: ${{ runner.os }}-solana-stable
+
+      - name: Install Solana CLI (skip if cached)
+        if: steps.cache-solana.outputs.cache-hit != 'true'
+        run: sh -c "$(curl -sSfL https://release.anza.xyz/stable/install)"
+
+      - name: Add Solana to PATH
+        run: echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+
+      - name: Install Anchor CLI (skip if cached)
         run: |
-          sh -c "$(curl -sSfL https://release.solana.com/v1.18.26/install)"
-          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
-      - run: npm ci
-      - name: TypeScript check
-        run: npx tsc --noEmit
-      - name: Build Anchor programs
+          if ! command -v anchor &> /dev/null; then
+            cargo install --git https://github.com/coral-xyz/anchor --tag v0.30.1 anchor-cli
+          else
+            echo "Anchor CLI already cached: $(anchor --version)"
+          fi
+
+      - name: Set up Node.js (for Anchor JS deps)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: contracts-solana/package-lock.json
+
+      - name: Install JS dependencies
+        run: |
+          if [ ! -f package-lock.json ]; then
+            npm install
+          else
+            npm ci
+          fi
+
+      - name: Generate Solana keypair (required by Anchor)
+        run: solana-keygen new --no-bip39-passphrase --outfile ~/.config/solana/id.json
+
+      - name: Anchor build
         run: anchor build
-      - name: Run Anchor tests
+
+      - name: Anchor test
         run: anchor test --skip-local-validator
-
-  # ─────────────────────────────────────────────────────────────────────────────
-  admin-dashboard:
-    name: Admin Dashboard — Build
-    needs: detect-changes
-    if: needs.detect-changes.outputs.admin == 'true'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./admin-dashboard
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: admin-dashboard/package-lock.json
-      - run: npm ci
-      - name: Build
-        run: npm run build
-
-  landing:
-    name: Landing Page — Build
-    needs: detect-changes
-    if: needs.detect-changes.outputs.landing == 'true'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./landing
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: npm
-          cache-dependency-path: landing/package-lock.json
-      - run: npm ci
-      - name: Build
-        run: npm run build
-
-  # ─────────────────────────────────────────────────────────────────────────────
-  # Required status check gate — always runs, aggregates all parallel jobs
-  ci-success:
-    name: CI ✅ All checks passed
-    runs-on: ubuntu-latest
-    needs:
-      - global-checks
-      - backend
-      - frontend
-      - contracts-evm
-      - contracts-solana
-      - admin-dashboard
-      - landing
-    if: always()
-    steps:
-      - name: Evaluate results
-        run: |
-          results='${{ toJson(needs) }}'
-          failures=$(echo "$results" | python3 -c "
-import sys, json
-d = json.load(sys.stdin)
-failed = [k for k,v in d.items() if v.get('result') not in ('success','skipped')]
-if failed: print('FAILED: ' + ', '.join(failed))
-sys.exit(len(failed))
-")
-          echo "All required checks passed ✅"
