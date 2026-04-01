@@ -12,6 +12,7 @@ import { AppBootstrap } from './src/navigation/AppBootstrap';
 import { SocketProvider } from './src/providers/SocketProvider';
 import { NotificationProvider } from './src/providers/NotificationProvider';
 import { NotificationBanner } from './src/shared/components/NotificationBanner';
+import { ErrorBoundary } from './src/shared/components/error/ErrorBoundary';
 import * as Sentry from '@sentry/react-native';
 
 // Initialize Sentry
@@ -68,22 +69,24 @@ const privyClientId = process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID || '';
 
 function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
-          <SocketProvider>
-            <NotificationProvider>
-              <PrivyProvider appId={privyAppId} clientId={privyClientId}>
-                <StatusBar style="auto" />
-                <AppBootstrap>{(appState) => <RootNavigator appState={appState} />}</AppBootstrap>
-                <PrivyElements />
-                <NotificationBanner />
-              </PrivyProvider>
-            </NotificationProvider>
-          </SocketProvider>
-        </QueryClientProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <QueryClientProvider client={queryClient}>
+            <SocketProvider>
+              <NotificationProvider>
+                <PrivyProvider appId={privyAppId} clientId={privyClientId}>
+                  <StatusBar style="auto" />
+                  <AppBootstrap>{(appState) => <RootNavigator appState={appState} />}</AppBootstrap>
+                  <PrivyElements />
+                  <NotificationBanner />
+                </PrivyProvider>
+              </NotificationProvider>
+            </SocketProvider>
+          </QueryClientProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
 
