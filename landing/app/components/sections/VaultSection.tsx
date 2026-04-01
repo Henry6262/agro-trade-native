@@ -17,17 +17,22 @@ const ESCROW_STATES = [
 
 function EscrowTerminal() {
   const [stateIndex, setStateIndex] = useState<EscrowState>(0);
+  // Empty string on server; live clock on client — avoids SSR/hydration mismatch (#418)
+  const [timeStr, setTimeStr] = useState("");
 
   useEffect(() => {
-    const id = setInterval(() => {
+    const tick = () => {
+      setTimeStr(new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+    };
+    tick();
+    const clockId = setInterval(tick, 1000);
+    const stateId = setInterval(() => {
       setStateIndex((prev) => ((prev + 1) % 3) as EscrowState);
     }, 2500);
-    return () => clearInterval(id);
+    return () => { clearInterval(clockId); clearInterval(stateId); };
   }, []);
 
   const current = ESCROW_STATES[stateIndex];
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 
   return (
     <div
@@ -149,19 +154,19 @@ const vaultFeatures = [
     icon: Lock,
     title: "Locked Until Delivery",
     desc: "Funds only release when the buyer confirms receipt. Sellers get paid. Every. Single. Time.",
-    accent: "#60A5FA",
+    accent: "#C4831A",
   },
   {
     icon: Scale,
     title: "Dispute Resolution",
     desc: "If something goes wrong, independent arbiters step in. Fair, transparent, recorded on-chain.",
-    accent: "#A78BFA",
+    accent: "#E8C870",
   },
   {
     icon: FileCheck,
     title: "On-Chain Audit Trail",
     desc: "Every payment, inspection and delivery is immutably recorded on the Celo blockchain.",
-    accent: "#4ADE80",
+    accent: "#C4831A",
   },
 ];
 

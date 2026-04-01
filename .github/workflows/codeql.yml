@@ -1,0 +1,67 @@
+name: CodeQL SAST + Copilot Autofix
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  schedule:
+    # Weekly deep scan every Monday at 03:00 UTC
+    - cron: '0 3 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+          - javascript-typescript
+        # Add 'python' here if any Python scripts are introduced
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # Copilot Autofix is enabled by default when GitHub Advanced Security
+          # or Copilot Enterprise is active on the organisation.
+          # Explicitly opt-in here for self-hosted / GHES environments:
+          # copilot-autofix: true
+          queries: security-extended,security-and-quality
+          config: |
+            paths:
+              - backend/src
+              - front-end/src
+              - contracts/scripts
+              - contracts/test
+              - contracts-solana/app
+              - contracts-solana/tests
+              - admin-dashboard
+              - landing
+            paths-ignore:
+              - '**/*.test.ts'
+              - '**/*.spec.ts'
+              - '**/node_modules/**'
+              - '**/dist/**'
+              - '**/coverage/**'
+              - 'typechain-types/**'
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+          # Upload SARIF so results appear in the Security tab
+          upload: true

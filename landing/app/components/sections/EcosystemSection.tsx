@@ -1,14 +1,14 @@
 "use client";
 
 import {
-  ShoppingCart,
+  User,
   Truck,
-  ClipboardCheck,
+  Search,
   Wheat,
   Zap,
-  Hexagon,
-  Coins,
-  BadgeCheck,
+  Globe,
+  DollarSign,
+  Award,
 } from "lucide-react";
 import { B } from "../brand";
 import { FadeInUp } from "../animations";
@@ -37,16 +37,20 @@ function NodeIcon({
   );
 }
 
+// ── Colour palette: wheat = human roles · green = blockchain/tech layer ─────
+const ROLE_COLOR = B.wheat;       // Buyer, Seller, Inspector, Logistics
+const TECH_COLOR = "#4ADE80";     // cUSD, Celo, Auto-exec, Grade A
+
 // ── 8 nodes representing every participant / layer in a trade ──────────────
 const nodeItems: NodeItem[] = [
-  { content: <NodeIcon Icon={ShoppingCart} label="Buyer" /> },
-  { content: <NodeIcon Icon={Wheat} label="Seller" /> },
-  { content: <NodeIcon Icon={ClipboardCheck} label="Inspector" /> },
-  { content: <NodeIcon Icon={Truck} label="Logistics" /> },
-  { content: <NodeIcon Icon={Coins} label="cUSD" color="#34D399" /> },
-  { content: <NodeIcon Icon={Hexagon} label="Celo" color="#60A5FA" /> },
-  { content: <NodeIcon Icon={Zap} label="Auto-exec" color="#A78BFA" /> },
-  { content: <NodeIcon Icon={BadgeCheck} label="Grade A" color="#FB923C" /> },
+  { content: <NodeIcon Icon={User}        label="Buyer"     color={ROLE_COLOR} /> },
+  { content: <NodeIcon Icon={Wheat}       label="Seller"    color={ROLE_COLOR} /> },
+  { content: <NodeIcon Icon={Search}      label="Inspector" color={ROLE_COLOR} /> },
+  { content: <NodeIcon Icon={Truck}       label="Logistics" color={ROLE_COLOR} /> },
+  { content: <NodeIcon Icon={DollarSign}  label="cUSD"      color={TECH_COLOR} /> },
+  { content: <NodeIcon Icon={Globe}       label="Celo"      color={TECH_COLOR} /> },
+  { content: <NodeIcon Icon={Zap}         label="Auto-exec" color={TECH_COLOR} /> },
+  { content: <NodeIcon Icon={Award}       label="Grade A"   color={TECH_COLOR} /> },
 ];
 
 // ── Centre hub ─────────────────────────────────────────────────────────────
@@ -134,11 +138,11 @@ export function EcosystemSection() {
             style={{
               height: "clamp(320px, 80vw, 520px)",
               maxWidth: "780px",
-              background: B.glass,
+              background: "rgba(232,200,112,0.05)",
               backdropFilter: "blur(16px)",
               WebkitBackdropFilter: "blur(16px)",
-              border: `1px solid ${B.glassBorder}`,
-              boxShadow: B.glassShadow,
+              border: "1px solid rgba(232,200,112,0.14)",
+              boxShadow: "0 4px 48px rgba(0,0,0,0.6), inset 0 1px 0 rgba(232,200,112,0.06)",
             }}
           >
             <CenterFlowBase
