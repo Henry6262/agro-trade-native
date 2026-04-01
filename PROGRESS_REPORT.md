@@ -10,6 +10,9 @@ _Auto-generated: 2026-04-01_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `6fc822c` 2026-04-01 — Merge pull request #81 from Henry6262/feat/ci-multi-surface-checks
+- `90bf1ce` 2026-04-01 — Merge branch 'main' into feat/ci-multi-surface-checks
+- `7278092` 2026-04-01 — docs: auto-update progress report [skip ci]
 - `8b4f591` 2026-03-31 — fix(landing): unify brand palette and fix hydration errors
 - `600d3c0` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `ba811aa` 2026-03-31 — ci: add per-package Codecov + SonarCloud quality gating scaffold
@@ -22,8 +25,5 @@ _Auto-generated: 2026-04-01_
 - `17cbc2c` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `e04d689` 2026-03-31 — chore(ts): add strict tsconfig base + per-package extends
 - `bed9f4e` 2026-03-31 — docs: auto-update progress report [skip ci]
-- `8fe4571` 2026-03-31 — test(escrow): bulletproof coverage — approve-order, resolveDispute .each, amount
-- `da45be7` 2026-03-31 — docs: auto-update progress report [skip ci]
-- `1595615` 2026-03-31 — test(escrow): apply production-ready spec discipline — full mock, .each state ma
 
 ## Open Issues
