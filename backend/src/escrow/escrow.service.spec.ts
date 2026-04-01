@@ -18,7 +18,10 @@ const makeContractMock = () => ({
   ]),
 });
 
-/** POINT 1: Full PrismaService mock — all tables used by EscrowService */
+// ─── $transaction mock ─────────────────────────────────────────────────────────
+// POINT 1: Full PrismaService mock — all tables used by EscrowService.
+// $transaction executes interactive callbacks inline so tradeEvent.create spies
+// are still interceptable inside a "transaction" context.
 const makePrismaMock = () => ({
   tradeEvent: {
     create: jest.fn().mockResolvedValue({ id: 'evt-1' }),
@@ -37,9 +40,12 @@ const makePrismaMock = () => ({
   inspection: {
     findFirst: jest.fn().mockResolvedValue({ id: 'insp-1', status: 'COMPLETED' }),
   },
-  $transaction: jest.fn().mockImplementation((fn: (tx: unknown) => unknown) =>
-    typeof fn === 'function' ? fn({}) : Promise.all(fn as Promise<unknown>[]),
-  ),
+  $transaction: jest.fn().mockImplementation((cb: (tx: unknown) => unknown) => {
+    // If cb is a function (interactive transaction), execute it with the mock itself.
+    // If it is an array (batch transaction), resolve immediately.
+    if (typeof cb === 'function') return cb(makePrismaMock());
+    return Promise.resolve(cb);
+  }),
 });
 
 const makeConfigMock = (configured = true) => ({
@@ -64,6 +70,37 @@ jest.mock('ethers', () => ({
   Wallet: jest.fn(),
   Contract: jest.fn().mockImplementation(() => makeContractMock()),
 }));
+
+// ─── Escrow scenario factory ──────────────────────────────────────────────────
+// Use stateIndex to pin getEscrow to any on-chain state.
+// Use revertOn to simulate on-chain reverts without phantom audit records.
+function makeEscrowScenario(opts: {
+  stateIndex?: number;
+  txHash?: string;
+  revertOn?: 'approve' | 'createEscrow' | 'releaseFunds' | 'refund' | 'raiseDispute' | 'resolveDispute';
+} = {}) {
+  const { stateIndex = 1, txHash = '0xabc123', revertOn } = opts;
+  const receipt = { hash: txHash, wait: jest.fn().mockResolvedValue({}) };
+  const base = makeContractMock();
+
+  // Override state returned by getEscrow
+  base.getEscrow = jest.fn().mockResolvedValue([
+    '0xBuyer', '0xSeller', BigInt(1_000_000_000_000_000_000), stateIndex, 'trade-scenario',
+  ]);
+
+  // Optionally simulate a revert on a specific call
+  if (revertOn) {
+    (base as Record<string, jest.Mock>)[revertOn] = jest
+      .fn()
+      .mockRejectedValue(new Error(`on-chain revert: ${revertOn}`));
+  } else {
+    // Wire all writable methods to the custom txHash receipt
+    (['approve', 'createEscrow', 'releaseFunds', 'refund', 'raiseDispute', 'resolveDispute'] as const)
+      .forEach((m) => { base[m] = jest.fn().mockResolvedValue(receipt); });
+  }
+
+  return base;
+}
 
 // ─── Build module helper ───────────────────────────────────────────────────────
 async function buildModule(configured = true) {
@@ -135,11 +172,35 @@ describe('EscrowService', () => {
       );
     });
 
-    /** POINT 4: config-missing path for every public method */
+    /** POINT 4: config-missing path */
     it('should throw when blockchain config is missing', async () => {
       const ctx = await buildModule(false);
       await expect(ctx.service.createEscrow('trade-1', '0xSeller', '100'))
         .rejects.toThrow(/config not set/i);
+    });
+
+    // ── Edge: on-chain revert must NOT produce an audit trail ─────────────
+    it('should NOT write audit event to Prisma when on-chain approve reverts', async () => {
+      const ethers = require('ethers');
+      ethers.Contract.mockImplementation(() =>
+        makeEscrowScenario({ revertOn: 'approve' }),
+      );
+      const ctx = await buildModule();
+      await expect(ctx.service.createEscrow('t-revert', '0xS', '50'))
+        .rejects.toThrow(/on-chain revert/);
+      // Prisma must not be called — no phantom audit record
+      expect(ctx.prisma.tradeEvent.create).not.toHaveBeenCalled();
+    });
+
+    it('should NOT write audit event when createEscrow tx reverts', async () => {
+      const ethers = require('ethers');
+      ethers.Contract.mockImplementation(() =>
+        makeEscrowScenario({ revertOn: 'createEscrow' }),
+      );
+      const ctx = await buildModule();
+      await expect(ctx.service.createEscrow('t-revert2', '0xS', '50'))
+        .rejects.toThrow(/on-chain revert/);
+      expect(ctx.prisma.tradeEvent.create).not.toHaveBeenCalled();
     });
   });
 
@@ -237,11 +298,16 @@ describe('EscrowService', () => {
       expect(result).toHaveProperty('txHash', '0xabc123');
     });
 
-    it('should log PAYMENT_REFUNDED audit event', async () => {
+    it('should log PAYMENT_REFUNDED audit event with correct fields', async () => {
       await service.refund('trade-1');
       expect(prisma.tradeEvent.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ eventType: 'PAYMENT_REFUNDED', actorRole: 'ADMIN' }),
+          data: expect.objectContaining({
+            tradeOperationId: 'trade-1',
+            eventType: 'PAYMENT_REFUNDED',
+            actorRole: 'ADMIN',
+            blockchainTxHash: '0xabc123',
+          }),
         }),
       );
     });
@@ -251,6 +317,29 @@ describe('EscrowService', () => {
       const ctx = await buildModule(false);
       await expect(ctx.service.refund('trade-99'))
         .rejects.toThrow(/config not set/i);
+    });
+
+    // ── Edge: on-chain revert during refund must NOT produce audit trail ───
+    it('should NOT write PAYMENT_REFUNDED event when refund() tx reverts on-chain', async () => {
+      const ethers = require('ethers');
+      ethers.Contract.mockImplementation(() =>
+        makeEscrowScenario({ revertOn: 'refund' }),
+      );
+      const ctx = await buildModule();
+      await expect(ctx.service.refund('t-refund-revert'))
+        .rejects.toThrow(/on-chain revert/);
+      // No phantom audit record — critical for financial integrity
+      expect(ctx.prisma.tradeEvent.create).not.toHaveBeenCalled();
+    });
+
+    it('should propagate blockchain error and not silently swallow it', async () => {
+      const ethers = require('ethers');
+      ethers.Contract.mockImplementation(() => ({
+        ...makeContractMock(),
+        refund: jest.fn().mockRejectedValue(new Error('escrow already refunded')),
+      }));
+      const ctx = await buildModule();
+      await expect(ctx.service.refund('t-1')).rejects.toThrow('escrow already refunded');
     });
   });
 
@@ -264,7 +353,7 @@ describe('EscrowService', () => {
       expect(result.state).toBe('AWAITING_DELIVERY');
     });
 
-    /** POINT 5: .each tabular test — exhaustive state machine branch coverage */
+    /** POINT 5 + scenario factory: exhaustive state machine branch coverage */
     it.each([
       [0, 'AWAITING_PAYMENT'],
       [1, 'AWAITING_DELIVERY'],
@@ -274,12 +363,9 @@ describe('EscrowService', () => {
       [99, 'UNKNOWN'],
     ])('should map blockchain state index %i → "%s"', async (stateIndex, expectedState) => {
       const ethers = require('ethers');
-      ethers.Contract.mockImplementation(() => ({
-        ...makeContractMock(),
-        getEscrow: jest.fn().mockResolvedValue([
-          '0xB', '0xS', BigInt(0), stateIndex, `trade-state-${stateIndex}`,
-        ]),
-      }));
+      ethers.Contract.mockImplementation(() =>
+        makeEscrowScenario({ stateIndex }),
+      );
       const ctx = await buildModule();
       const result = await ctx.service.getStatus(`trade-state-${stateIndex}`);
       expect(result.state).toBe(expectedState);
@@ -290,6 +376,19 @@ describe('EscrowService', () => {
       const ctx = await buildModule(false);
       await expect(ctx.service.getStatus('trade-99'))
         .rejects.toThrow(/config not set/i);
+    });
+  });
+
+  // ── $transaction mock sanity ──────────────────────────────────────────────
+  describe('$transaction mock', () => {
+    it('should expose $transaction on prismaMock', () => {
+      expect(typeof prisma.$transaction).toBe('function');
+    });
+
+    it('should execute interactive $transaction callback inline', async () => {
+      const spy = jest.fn().mockResolvedValue('ok');
+      await prisma.$transaction(spy);
+      expect(spy).toHaveBeenCalled();
     });
   });
 
