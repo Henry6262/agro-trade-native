@@ -1,104 +1,102 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
 import * as request from "supertest";
-import { AppModule } from "../../app.module";
-import { PrismaService } from "../../prisma/prisma.service";
+import { ProfitController } from "./profit.controller";
 import { ProfitCalculationService } from "../services/profit-calculation.service";
 
-describe("ProfitController (e2e)", () => {
+// ---------------------------------------------------------------------------
+// Isolated unit/integration spec — does NOT boot AppModule or need a real DB.
+// All external dependencies are replaced with jest mocks.
+// ---------------------------------------------------------------------------
+
+const mockProfitService = {
+  calculateProfit: jest.fn().mockResolvedValue({
+    profit: {
+      grossProfit: 2500,
+      netProfit: 2350,
+      profitMargin: 7.5,
+    },
+    revenue: {
+      totalRevenue: 38000,
+      sellingPrice: 380,
+      quantity: 100,
+    },
+    costs: {
+      purchases: {
+        totalCost: 35000,
+        avgPrice: 350,
+        breakdown: [
+          { sellerId: "seller-1", price: 350, quantity: 50 },
+          { sellerId: "seller-2", price: 350, quantity: 50 },
+        ],
+      },
+      transport: {
+        estimatedCost: 650,
+      },
+      totalCosts: 35650,
+    },
+  }),
+  calculateProfitImpact: jest.fn().mockResolvedValue({
+    estimatedProfit: 2200,
+    profitMargin: 6.5,
+    profitChange: -150,
+    viability: "VIABLE",
+  }),
+  optimizeProfitMargins: jest.fn().mockResolvedValue({
+    optimizedPrices: {
+      buyerPrice: 375,
+      sellerPrices: [{ sellerId: "seller-1", price: 345 }],
+    },
+    expectedProfit: 2800,
+    expectedMargin: 8.2,
+  }),
+  validateMargins: jest.fn().mockResolvedValue({
+    validations: [
+      {
+        tradeOperationId: "trade-op-1",
+        isViable: true,
+        profitMargin: 7.2,
+      },
+    ],
+    summary: {
+      totalViable: 1,
+    },
+  }),
+  getCumulativeProfit: jest.fn().mockResolvedValue({
+    totalRevenue: 120000,
+    totalCosts: 110000,
+    totalProfit: 10000,
+    averageMargin: 8.3,
+    operationCount: 5,
+    breakdown: {},
+  }),
+  forecastProfit: jest.fn().mockResolvedValue({
+    forecastedProfit: 15000,
+    forecastedMargin: 8.5,
+    confidence: 0.85,
+    breakdown: [],
+  }),
+  getBenchmarks: jest.fn().mockResolvedValue({
+    minimumMargin: 5,
+    targetMargin: 7,
+    optimalMargin: 10,
+    industryAverage: 7.5,
+    currentPerformance: 8.0,
+  }),
+};
+
+describe("ProfitController (isolated)", () => {
   let app: INestApplication;
-  let profitService: any;
-  const mockAdminToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTcwNDAwMDAwMH0.mock-signature";
-  const authToken = `Bearer ${mockAdminToken}`;
 
   beforeAll(async () => {
-    // Mock profit calculation service with correct structure
-    profitService = {
-      calculateProfit: jest.fn().mockResolvedValue({
-        profit: {
-          grossProfit: 2500,
-          netProfit: 2350,
-          profitMargin: 7.5,
-        },
-        revenue: {
-          totalRevenue: 38000,
-          sellingPrice: 380,
-          quantity: 100,
-        },
-        costs: {
-          purchases: {
-            totalCost: 35000,
-            avgPrice: 350,
-            breakdown: [
-              { sellerId: "seller-1", price: 350, quantity: 50 },
-              { sellerId: "seller-2", price: 350, quantity: 50 },
-            ],
-          },
-          transport: {
-            estimatedCost: 650,
-          },
-          totalCosts: 35650,
-        },
-      }),
-      calculateProfitImpact: jest.fn().mockResolvedValue({
-        estimatedProfit: 2200,
-        profitMargin: 6.5,
-        profitChange: -150,
-        viability: "VIABLE",
-      }),
-      optimizeProfitMargins: jest.fn().mockResolvedValue({
-        optimizedPrices: {
-          buyerPrice: 375,
-          sellerPrices: [{ sellerId: "seller-1", price: 345 }],
-        },
-        expectedProfit: 2800,
-        expectedMargin: 8.2,
-      }),
-      validateMargins: jest.fn().mockResolvedValue({
-        validations: [
-          {
-            tradeOperationId: "trade-op-1",
-            isViable: true,
-            profitMargin: 7.2,
-          },
-        ],
-        summary: {
-          totalViable: 1,
-        },
-      }),
-      getCumulativeProfit: jest.fn().mockResolvedValue({
-        totalRevenue: 120000,
-        totalCosts: 110000,
-        totalProfit: 10000,
-        averageMargin: 8.3,
-        operationCount: 5,
-        breakdown: {},
-      }),
-      forecastProfit: jest.fn().mockResolvedValue({
-        forecastedProfit: 15000,
-        forecastedMargin: 8.5,
-        confidence: 0.85,
-        breakdown: [],
-      }),
-      getBenchmarks: jest.fn().mockResolvedValue({
-        minimumMargin: 5,
-        targetMargin: 7,
-        optimalMargin: 10,
-        industryAverage: 7.5,
-        currentPerformance: 8.0,
-      }),
-    };
-
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    })
-      .overrideProvider(ProfitCalculationService)
-      .useValue(profitService)
-      .compile();
+      controllers: [ProfitController],
+      providers: [
+        { provide: ProfitCalculationService, useValue: mockProfitService },
+      ],
+    }).compile();
 
     app = moduleFixture.createNestApplication();
-    // Set global prefix to match main.ts configuration
     app.setGlobalPrefix("api");
     await app.init();
   });
@@ -107,13 +105,16 @@ describe("ProfitController (e2e)", () => {
     await app.close();
   });
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe("/api/profit/:tradeOperationId/calculate (GET)", () => {
     it("should calculate profit for trade operation", async () => {
       const tradeOpId = "trade-op-789";
 
       const response = await request(app.getHttpServer())
         .get(`/api/profit/${tradeOpId}/calculate`)
-        .set("Authorization", authToken)
         .expect(200);
 
       expect(response.body).toHaveProperty("profit");
@@ -124,16 +125,7 @@ describe("ProfitController (e2e)", () => {
       expect(response.body.breakdown).toHaveProperty("revenue");
       expect(response.body.breakdown).toHaveProperty("purchaseCosts");
       expect(response.body.breakdown).toHaveProperty("transportCosts");
-    });
-
-    it("should fail without authentication", async () => {
-      // Note: Authentication is temporarily disabled in controller for testing
-      // This test is skipped until auth is re-enabled
-      // TODO: Re-enable this test when @UseGuards(JwtAuthGuard) is uncommented
-
-      // Since auth is disabled, request will succeed (not 401)
-      // Commenting out the actual test for now
-      expect(true).toBe(true); // Placeholder
+      expect(mockProfitService.calculateProfit).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -148,7 +140,6 @@ describe("ProfitController (e2e)", () => {
 
       const response = await request(app.getHttpServer())
         .post(`/api/profit/${tradeOpId}/impact`)
-        .set("Authorization", authToken)
         .send(impactDto)
         .expect(201);
 
@@ -161,13 +152,12 @@ describe("ProfitController (e2e)", () => {
     it("should warn about low profit margins", async () => {
       const tradeOpId = "trade-op-789";
       const impactDto = {
-        newPrice: 390, // High price that reduces margin
+        newPrice: 390,
         quantity: 100,
         offerType: "BUYER",
       };
 
-      // Override mock for this specific test to return MARGINAL viability
-      profitService.calculateProfitImpact.mockResolvedValueOnce({
+      mockProfitService.calculateProfitImpact.mockResolvedValueOnce({
         estimatedProfit: 500,
         profitMargin: 2.5,
         profitChange: -1850,
@@ -177,7 +167,6 @@ describe("ProfitController (e2e)", () => {
 
       const response = await request(app.getHttpServer())
         .post(`/api/profit/${tradeOpId}/impact`)
-        .set("Authorization", authToken)
         .send(impactDto)
         .expect(201);
 
@@ -200,7 +189,6 @@ describe("ProfitController (e2e)", () => {
 
       const response = await request(app.getHttpServer())
         .post(`/api/profit/${tradeOpId}/optimize`)
-        .set("Authorization", authToken)
         .send(optimizeDto)
         .expect(201);
 
@@ -236,7 +224,6 @@ describe("ProfitController (e2e)", () => {
 
       const response = await request(app.getHttpServer())
         .post("/api/profit/validate-margins")
-        .set("Authorization", authToken)
         .send(validateDto)
         .expect(201);
 
@@ -254,7 +241,6 @@ describe("ProfitController (e2e)", () => {
     it("should get cumulative profit across operations", async () => {
       const response = await request(app.getHttpServer())
         .get("/api/profit/cumulative")
-        .set("Authorization", authToken)
         .query({
           startDate: "2024-01-01",
           endDate: "2024-01-31",
@@ -294,7 +280,6 @@ describe("ProfitController (e2e)", () => {
 
       const response = await request(app.getHttpServer())
         .post("/api/profit/forecast")
-        .set("Authorization", authToken)
         .send(forecastDto)
         .expect(201);
 
@@ -310,7 +295,6 @@ describe("ProfitController (e2e)", () => {
     it("should get profit benchmarks and targets", async () => {
       const response = await request(app.getHttpServer())
         .get("/api/profit/benchmarks")
-        .set("Authorization", authToken)
         .expect(200);
 
       expect(response.body).toHaveProperty("minimumMargin", 5);

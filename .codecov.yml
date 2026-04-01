@@ -1,0 +1,47 @@
+# .codecov.yml — per-flag coverage gating for agro-trade-native monorepo
+coverage:
+  precision: 2
+  round: down
+  range: "70...100"
+
+  status:
+    project: false          # disable global project gate
+    patch:
+      backend:
+        flags: [backend]
+        target: 80%
+        threshold: 2%
+        only_pulls: true
+      frontend:
+        flags: [frontend]
+        target: 75%
+        threshold: 2%
+        only_pulls: true
+
+flags:
+  backend:
+    paths:
+      - backend/
+    carryforward: true
+  frontend:
+    paths:
+      - front-end/
+    carryforward: true
+
+ignore:
+  - "**/*.test.ts"
+  - "**/*.spec.ts"
+  - "**/*.d.ts"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/node_modules/**"
+  - "**/coverage/**"
+  - "contracts/**"
+  - "contracts-solana/**"
+  - "landing/**"
+  - "admin-dashboard/**"
+
+comment:
+  layout: "reach,diff,flags,tree"
+  behavior: default
+  require_changes: true

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "Node10",
+    "lib": ["ES2020"],
+    "outDir": "typechain-types",
+    "verbatimModuleSyntax": false,
+    "resolveJsonModule": true
+  },
+  "include": ["scripts/**/*", "test/**/*", "typechain-types/**/*"],
+  "exclude": ["node_modules", "artifacts", "cache"]
+}
