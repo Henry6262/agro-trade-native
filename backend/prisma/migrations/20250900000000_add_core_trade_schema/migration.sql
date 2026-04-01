@@ -29,6 +29,14 @@ ALTER TYPE "ProductUnit" ADD VALUE IF NOT EXISTS 'PIECE';
 -- 2. Create new enums (idempotent via exception handling)
 -- ─────────────────────────────────────────────────────────────────────────────
 
+-- NegotiationStatus is created in 20250101000000_add_negotiation_enhancements
+-- which runs first. Ensure it exists here as a safety fallback.
+DO $$ BEGIN
+  CREATE TYPE "NegotiationStatus" AS ENUM (
+    'PENDING','ACCEPTED','REJECTED','COUNTERED','EXPIRED','WITHDRAWN'
+  );
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 DO $$ BEGIN
   CREATE TYPE "AddressType" AS ENUM (
     'BILLING','SHIPPING','FARM','WAREHOUSE','OFFICE','PICKUP','DELIVERY','OTHER'
