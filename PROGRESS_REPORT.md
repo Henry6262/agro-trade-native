@@ -10,6 +10,8 @@ _Auto-generated: 2026-04-03_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `3ce17f2` 2026-04-03 — fix(ci): add root package-lock.json + graceful husky in CI
+- `3671cc2` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `91b6673` 2026-04-03 — chore(deps): bump rimraf from 5.0.10 to 6.1.3 in /backend
 - `091f0ee` 2026-04-03 — chore(deps-dev): bump uuid from 11.1.0 to 13.0.0 in /backend
 - `9b3eeb3` 2026-04-03 — chore(deps-dev): bump jest and @types/jest in /backend
@@ -23,8 +25,6 @@ _Auto-generated: 2026-04-03_
 - `638723e` 2026-04-03 — chore(deps-dev): bump postcss from 8.5.6 to 8.5.8 in /admin-dashboard
 - `6ea7a3e` 2026-04-03 — chore(deps): bump react-i18next from 16.5.6 to 16.6.6 in /front-end
 - `eb5329e` 2026-04-03 — chore(deps-dev): bump babel-plugin-module-resolver from 5.0.2 to 5.0.3 in /front
-- `be1c1d0` 2026-04-03 — docs: auto-update progress report [skip ci]
-- `b6b7863` 2026-04-03 — chore(deps): bump actions/upload-artifact from 4 to 7
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
