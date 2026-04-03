@@ -10,6 +10,9 @@ _Auto-generated: 2026-04-03_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `b6b7863` 2026-04-03 — chore(deps): bump actions/upload-artifact from 4 to 7
+- `c172129` 2026-04-03 — chore(deps): bump actions/setup-node from 4 to 6
+- `21e9961` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `2884a58` 2026-04-03 — chore(deps): bump actions/github-script from 7 to 8
 - `1384f7c` 2026-04-01 — docs: auto-update progress report [skip ci]
 - `75bb1ea` 2026-04-01 — Merge pull request #83 from Henry6262/feat/escrow-test-quality
@@ -22,9 +25,6 @@ _Auto-generated: 2026-04-03_
 - `90bf1ce` 2026-04-01 — Merge branch 'main' into feat/ci-multi-surface-checks
 - `8ab149a` 2026-04-01 — test(escrow): hand-merge main + PR additions — resolve conflict
 - `7278092` 2026-04-01 — docs: auto-update progress report [skip ci]
-- `8b4f591` 2026-03-31 — fix(landing): unify brand palette and fix hydration errors
-- `600d3c0` 2026-03-31 — docs: auto-update progress report [skip ci]
-- `ba811aa` 2026-03-31 — ci: add per-package Codecov + SonarCloud quality gating scaffold
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
