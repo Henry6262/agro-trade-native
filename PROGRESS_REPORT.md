@@ -1,15 +1,17 @@
 # Progress Report
-_Auto-generated: 2026-04-01_
+_Auto-generated: 2026-04-03_
 
 ## Issue Summary
 | Category | Count |
 |----------|-------|
-| Total Open | 0 |
-| Bugs | 0 |
+| Total Open | 7 |
+| Bugs | 1 |
 | Features | 0 |
-| Unlabeled | 0 |
+| Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `2884a58` 2026-04-03 — chore(deps): bump actions/github-script from 7 to 8
+- `1384f7c` 2026-04-01 — docs: auto-update progress report [skip ci]
 - `75bb1ea` 2026-04-01 — Merge pull request #83 from Henry6262/feat/escrow-test-quality
 - `66b5d24` 2026-04-01 — Merge branch 'main' into feat/escrow-test-quality
 - `349fa7f` 2026-04-01 — docs: auto-update progress report [skip ci]
@@ -23,7 +25,12 @@ _Auto-generated: 2026-04-01_
 - `8b4f591` 2026-03-31 — fix(landing): unify brand palette and fix hydration errors
 - `600d3c0` 2026-03-31 — docs: auto-update progress report [skip ci]
 - `ba811aa` 2026-03-31 — ci: add per-package Codecov + SonarCloud quality gating scaffold
-- `fad5366` 2026-03-31 — docs: auto-update progress report [skip ci]
-- `d166be4` 2026-03-31 — ci(security): add CodeQL SAST + Copilot Autofix
 
 ## Open Issues
+- #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
+- #89 🟡 [IMPORTANT] Verify Mobile ↔ Backend integration & update INTEGRATION_STATUS.json [none]
+- #88 🟡 [IMPORTANT] Implement WebSocket real-time updates via NestJS Gateway [none]
+- #87 🟡 [IMPORTANT] Complete tradeOperationsModule workflow (75% → 100%) [none]
+- #86 🔴 [CRITICAL] Implement GET /seller/offers endpoint in negotiations.controller.ts [none]
+- #85 🔴 [CRITICAL] Fix TypeScript Prisma enum mismatches in simulation.controller.ts (lines 275, 314, 389) [none]
+- #84 test(escrow): Technical findings & follow-up action items from PR #83 review [bug, testing, technical-debt]
