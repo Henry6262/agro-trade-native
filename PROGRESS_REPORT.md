@@ -10,6 +10,13 @@ _Auto-generated: 2026-04-03_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `18d55c2` 2026-04-03 — chore(deps): bump @radix-ui/react-aspect-ratio from 1.1.7 to 1.1.8 in /admin-das
+- `cbd815d` 2026-04-03 — chore(deps): bump react-hook-form from 7.65.0 to 7.72.0 in /admin-dashboard
+- `08583a1` 2026-04-03 — chore(deps): bump @tanstack/react-query from 5.90.10 to 5.95.2 in /front-end
+- `638723e` 2026-04-03 — chore(deps-dev): bump postcss from 8.5.6 to 8.5.8 in /admin-dashboard
+- `6ea7a3e` 2026-04-03 — chore(deps): bump react-i18next from 16.5.6 to 16.6.6 in /front-end
+- `eb5329e` 2026-04-03 — chore(deps-dev): bump babel-plugin-module-resolver from 5.0.2 to 5.0.3 in /front
+- `be1c1d0` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `b6b7863` 2026-04-03 — chore(deps): bump actions/upload-artifact from 4 to 7
 - `c172129` 2026-04-03 — chore(deps): bump actions/setup-node from 4 to 6
 - `21e9961` 2026-04-03 — docs: auto-update progress report [skip ci]
@@ -18,13 +25,6 @@ _Auto-generated: 2026-04-03_
 - `75bb1ea` 2026-04-01 — Merge pull request #83 from Henry6262/feat/escrow-test-quality
 - `66b5d24` 2026-04-01 — Merge branch 'main' into feat/escrow-test-quality
 - `349fa7f` 2026-04-01 — docs: auto-update progress report [skip ci]
-- `4f46ce3` 2026-04-01 — Merge pull request #82 from Henry6262/feat/ci-upgrade-mono
-- `48cce62` 2026-04-01 — Merge branch 'main' into feat/ci-upgrade-mono
-- `f51a704` 2026-04-01 — docs: auto-update progress report [skip ci]
-- `6fc822c` 2026-04-01 — Merge pull request #81 from Henry6262/feat/ci-multi-surface-checks
-- `90bf1ce` 2026-04-01 — Merge branch 'main' into feat/ci-multi-surface-checks
-- `8ab149a` 2026-04-01 — test(escrow): hand-merge main + PR additions — resolve conflict
-- `7278092` 2026-04-01 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
