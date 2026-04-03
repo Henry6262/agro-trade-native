@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.21;
 
 import "forge-std/Test.sol";
 import "../src/AgroEscrow.sol";
@@ -617,7 +617,7 @@ contract AgroEscrowTest is Test {
 
         (, , uint256 eAmount, , ) = escrow.getEscrow(KEY);
 
-        assertEq(eAmount, oddAmount, "amount must be returned as exact wei — no truncation");
+        assertEq(eAmount, oddAmount, "amount must be returned as exact wei - no truncation");
         assertTrue(eAmount > 1 ether, "sanity: amount > 1e18");
         // 1 wei разлика = грешна serialization или rounding
         assertTrue(eAmount != 1_337_000_000_000_000_000, "must NOT equal rounded-down value");
