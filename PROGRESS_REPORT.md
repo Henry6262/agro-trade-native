@@ -10,6 +10,8 @@ _Auto-generated: 2026-04-03_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `07df874` 2026-04-03 — chore: trigger Vercel redeploy after bot commit displaced HEAD
+- `309c143` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `c127c93` 2026-04-03 — fix: pin react-dom to 19.0.0 to resolve react-native-web peer dep conflict
 - `9a2a853` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `8aa5b9b` 2026-04-03 — fix(ci): correct backend coverage script name + update setup-node to v6
@@ -23,8 +25,6 @@ _Auto-generated: 2026-04-03_
 - `9b3eeb3` 2026-04-03 — chore(deps-dev): bump jest and @types/jest in /backend
 - `9df4425` 2026-04-03 — chore(deps-dev): bump typescript-eslint from 8.44.0 to 8.57.2 in /admin-dashboar
 - `ea3a444` 2026-04-03 — chore(deps): bump twilio from 5.12.2 to 5.13.1 in /backend
-- `665f57f` 2026-04-03 — chore(deps): bump react-day-picker from 9.11.1 to 9.14.0 in /admin-dashboard
-- `28c3c87` 2026-04-03 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
