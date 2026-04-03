@@ -10,6 +10,8 @@ _Auto-generated: 2026-04-03_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `ba4a6eb` 2026-04-03 — fix(backend): revert jest to v29 for ts-jest compatibility + remove duplicate je
+- `16eadf8` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `8517992` 2026-04-03 — fix: add npm overrides to pin react/react-dom@19.0.0 across workspaces
 - `d7321fd` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `07df874` 2026-04-03 — chore: trigger Vercel redeploy after bot commit displaced HEAD
@@ -23,8 +25,6 @@ _Auto-generated: 2026-04-03_
 - `3ce17f2` 2026-04-03 — fix(ci): add root package-lock.json + graceful husky in CI
 - `3671cc2` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `91b6673` 2026-04-03 — chore(deps): bump rimraf from 5.0.10 to 6.1.3 in /backend
-- `091f0ee` 2026-04-03 — chore(deps-dev): bump uuid from 11.1.0 to 13.0.0 in /backend
-- `9b3eeb3` 2026-04-03 — chore(deps-dev): bump jest and @types/jest in /backend
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
