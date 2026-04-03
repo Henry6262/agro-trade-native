@@ -10,6 +10,8 @@ _Auto-generated: 2026-04-03_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `8aa5b9b` 2026-04-03 — fix(ci): correct backend coverage script name + update setup-node to v6
+- `e6e2727` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `7605f80` 2026-04-03 — fix(contracts): bump Solidity to 0.8.28 + fix Unicode in test strings
 - `76a7dfc` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `3ce17f2` 2026-04-03 — fix(ci): add root package-lock.json + graceful husky in CI
@@ -23,8 +25,6 @@ _Auto-generated: 2026-04-03_
 - `28c3c87` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `18d55c2` 2026-04-03 — chore(deps): bump @radix-ui/react-aspect-ratio from 1.1.7 to 1.1.8 in /admin-das
 - `cbd815d` 2026-04-03 — chore(deps): bump react-hook-form from 7.65.0 to 7.72.0 in /admin-dashboard
-- `08583a1` 2026-04-03 — chore(deps): bump @tanstack/react-query from 5.90.10 to 5.95.2 in /front-end
-- `638723e` 2026-04-03 — chore(deps-dev): bump postcss from 8.5.6 to 8.5.8 in /admin-dashboard
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
