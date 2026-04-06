@@ -1,6 +1,6 @@
 import { Navbar } from "./components/sections/Navbar";
 import { Hero } from "./components/sections/Hero";
-import { EcosystemSection } from "./components/sections/EcosystemSection";
+
 import { GlobalReach } from "./components/sections/GlobalReach";
 import { ProblemSection } from "./components/sections/ProblemSection";
 import { HowItWorks } from "./components/sections/HowItWorks";
@@ -17,8 +17,6 @@ export default function LandingPage() {
       <JsonLd />
       <Navbar />
       <Hero />
-      <SectionDivider />
-      <EcosystemSection />
       <SectionDivider />
       <GlobalReach />
       <SectionDivider />

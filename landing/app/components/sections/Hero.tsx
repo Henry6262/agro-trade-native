@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowRight, Lock, CheckCircle, ShieldCheck, MapPin } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { B } from "../brand";
 import { FadeInUp, CountUp } from "../animations";
@@ -19,7 +19,7 @@ function AnimatedPhone() {
   }, []);
   const { Component } = SCREENS[index];
   return (
-    <Device scale={0.48} autoAnimate parallaxStrength={12} rotateStrength={2.5}>
+    <Device scale={0.55} autoAnimate parallaxStrength={12} rotateStrength={2.5}>
       <AnimatePresence mode="wait">
         <motion.div key={SCREENS[index].id} className="w-full h-full"
           initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }}
@@ -265,74 +265,6 @@ export function Hero() {
               transform: "translate(-50%,-50%)",
               border: "1px solid rgba(232,200,112,0.06)",
             }} />
-
-            {/* Floating: Payment Locked */}
-            <FloatCard delay={0} yRange={9} style={{ top: "7%", left: "-8%", transform: "scale(0.75)" }}>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap"
-                style={{
-                  background: "rgba(12,9,4,0.85)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-                  border: "1px solid rgba(232,200,112,0.28)",
-                  boxShadow: "0 0 30px rgba(232,200,112,0.18), 0 8px 32px rgba(0,0,0,0.7)", color: B.cream,
-                }}>
-                <div className="w-5 h-5 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(232,200,112,0.18)" }}>
-                  <Lock size={10} color={B.wheat} />
-                </div>
-                <div>
-                  <p style={{ color: B.wheat, fontSize: "9px", fontWeight: 700 }}>Payment Locked</p>
-                  <p style={{ color: B.muted, fontSize: "8px" }}>$2,400 cUSD in escrow</p>
-                </div>
-              </div>
-            </FloatCard>
-
-            {/* Floating: Inspector */}
-            <FloatCard delay={1.2} yRange={7} style={{ top: "30%", right: "-5%", transform: "scale(0.75)" }}>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl whitespace-nowrap"
-                style={{
-                  background: "rgba(12,9,4,0.85)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-                  border: "1px solid rgba(61,122,80,0.35)",
-                  boxShadow: "0 0 25px rgba(61,122,80,0.20), 0 8px 32px rgba(0,0,0,0.7)",
-                }}>
-                <div className="w-5 h-5 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(61,122,80,0.18)" }}>
-                  <MapPin size={10} color="#4ADE80" />
-                </div>
-                <div>
-                  <p style={{ color: "#4ADE80", fontSize: "9px", fontWeight: 700 }}>Inspector En Route</p>
-                  <p style={{ color: B.muted, fontSize: "8px" }}>Grade verification pending</p>
-                </div>
-              </div>
-            </FloatCard>
-
-            {/* Floating: Trade Confirmed */}
-            <FloatCard delay={0.6} yRange={11} style={{ bottom: "14%", left: "-10%", transform: "scale(0.75)" }}>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl whitespace-nowrap"
-                style={{
-                  background: "rgba(12,9,4,0.85)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-                  border: "1px solid rgba(74,222,128,0.28)",
-                  boxShadow: "0 0 25px rgba(74,222,128,0.15), 0 8px 32px rgba(0,0,0,0.7)",
-                }}>
-                <div className="w-5 h-5 rounded-lg flex items-center justify-center" style={{ backgroundColor: "rgba(74,222,128,0.12)" }}>
-                  <CheckCircle size={10} color="#4ADE80" />
-                </div>
-                <div>
-                  <p style={{ color: "#4ADE80", fontSize: "9px", fontWeight: 700 }}>Trade Confirmed ✓</p>
-                  <p style={{ color: B.muted, fontSize: "8px" }}>Sofia → Istanbul · Delivered</p>
-                </div>
-              </div>
-            </FloatCard>
-
-            {/* Floating: Celo chip */}
-            <FloatCard delay={1.8} yRange={6} style={{ bottom: "29%", right: "-2%", transform: "scale(0.75)" }}>
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-bold"
-                style={{
-                  background: "rgba(12,9,4,0.85)", backdropFilter: "blur(16px)",
-                  border: `1px solid rgba(232,200,112,0.22)`,
-                  boxShadow: "0 0 20px rgba(232,200,112,0.15)",
-                  color: B.wheat,
-                }}>
-                <ShieldCheck size={9} color={B.wheat} />
-                Celo
-              </div>
-            </FloatCard>
 
             <ScreenDots />
             <AnimatedPhone />
