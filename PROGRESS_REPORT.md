@@ -10,6 +10,7 @@ _Auto-generated: 2026-04-06_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `0ec098f` 2026-04-06 — docs: auto-update progress report [skip ci]
 - `3678034` 2026-04-06 — fix(landing): enlarge phone content, remove floating cards & ecosystem section
 - `f8dd4b5` 2026-04-04 — docs: auto-update progress report [skip ci]
 - `b7c3c5b` 2026-04-04 — fix(landing): point turbopack.root to monorepo root for Vercel builds
@@ -24,7 +25,6 @@ _Auto-generated: 2026-04-06_
 - `9a2a853` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `8aa5b9b` 2026-04-03 — fix(ci): correct backend coverage script name + update setup-node to v6
 - `e6e2727` 2026-04-03 — docs: auto-update progress report [skip ci]
-- `7605f80` 2026-04-03 — fix(contracts): bump Solidity to 0.8.28 + fix Unicode in test strings
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
