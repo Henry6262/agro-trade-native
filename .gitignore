@@ -51,6 +51,7 @@ temp/
 
 # Expo
 .expo/
+.playwright-mcp/
 *.jks
 *.p8
 *.p12
@@ -65,6 +66,7 @@ web-build/
 # Backend specific
 backend/prisma/*.db
 backend/prisma/*.db-journal
+contracts-solana/target/
 
 # Frontend specific
 front-end/.expo/.worktrees/
