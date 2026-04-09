@@ -17,20 +17,22 @@ export default function LandingPage() {
       <JsonLd />
       <Navbar />
       <Hero />
-      <SectionDivider />
-      <GlobalReach />
-      <SectionDivider />
-      <ProblemSection />
-      <SectionDivider />
-      <HowItWorks />
-      <SectionDivider />
-      <LiveDealFlow />
-      <SectionDivider />
-      <RolesSection />
-      <SectionDivider />
-      <VaultSection />
-      <SectionDivider />
-      <CtaFooter />
+      <div style={{ paddingLeft: "7.5%", paddingRight: "7.5%" }}>
+        <SectionDivider />
+        <GlobalReach />
+        <SectionDivider />
+        <ProblemSection />
+        <SectionDivider />
+        <HowItWorks />
+        <SectionDivider />
+        <LiveDealFlow />
+        <SectionDivider />
+        <RolesSection />
+        <SectionDivider />
+        <VaultSection />
+        <SectionDivider />
+        <CtaFooter />
+      </div>
     </main>
   );
 }

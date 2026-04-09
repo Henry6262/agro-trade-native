@@ -34,7 +34,7 @@ const corridors = [
 
 export function GlobalReach() {
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-visible">
       {/* ── Background: pure dark ── */}
       <div className="absolute inset-0 z-0" style={{ backgroundColor: "#08080A" }} />
       {/* Aurora behind globe */}
