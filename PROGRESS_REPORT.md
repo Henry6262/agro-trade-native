@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-04-06_
+_Auto-generated: 2026-04-09_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,8 @@ _Auto-generated: 2026-04-06_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `55c2787` 2026-04-09 — feat: update landing and contract workspace config
+- `f10e8c4` 2026-04-06 — docs: auto-update progress report [skip ci]
 - `0ec098f` 2026-04-06 — docs: auto-update progress report [skip ci]
 - `3678034` 2026-04-06 — fix(landing): enlarge phone content, remove floating cards & ecosystem section
 - `f8dd4b5` 2026-04-04 — docs: auto-update progress report [skip ci]
@@ -23,8 +25,6 @@ _Auto-generated: 2026-04-06_
 - `309c143` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `c127c93` 2026-04-03 — fix: pin react-dom to 19.0.0 to resolve react-native-web peer dep conflict
 - `9a2a853` 2026-04-03 — docs: auto-update progress report [skip ci]
-- `8aa5b9b` 2026-04-03 — fix(ci): correct backend coverage script name + update setup-node to v6
-- `e6e2727` 2026-04-03 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
