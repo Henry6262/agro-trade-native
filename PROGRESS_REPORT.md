@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-04-09_
+_Auto-generated: 2026-04-13_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-04-09_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `7bab0d3` 2026-04-09 — docs: auto-update progress report [skip ci]
 - `200547f` 2026-04-09 — chore: ignore local workflow artifacts
 - `b9c13e2` 2026-04-09 — docs: auto-update progress report [skip ci]
 - `55c2787` 2026-04-09 — feat: update landing and contract workspace config
@@ -24,7 +25,6 @@ _Auto-generated: 2026-04-09_
 - `8517992` 2026-04-03 — fix: add npm overrides to pin react/react-dom@19.0.0 across workspaces
 - `d7321fd` 2026-04-03 — docs: auto-update progress report [skip ci]
 - `07df874` 2026-04-03 — chore: trigger Vercel redeploy after bot commit displaced HEAD
-- `309c143` 2026-04-03 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
