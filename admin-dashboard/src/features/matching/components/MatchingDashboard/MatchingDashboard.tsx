@@ -17,7 +17,7 @@ import {
   type AutoOfferPlanOffer,
   type AutoOfferSkip,
 } from '../../utils/autoOffer';
-import BulgariaMap from './BulgariaMap';
+import GlobalTradeMap from './GlobalTradeMap';
 import BuyerOrdersPanel from './BuyerOrdersPanel';
 import SellerCardsPanel from './SellerCardsPanel';
 import PricingModal from './PricingModal';
@@ -883,7 +883,7 @@ export const MatchingDashboard: React.FC = () => {
       <div className="flex border-b-4 border-gray-300" style={{ height: '50vh' }}>
         {/* Map - 25% width */}
         <div className="w-1/4 border-r-4 border-gray-300 p-4">
-          <BulgariaMap
+          <GlobalTradeMap
             buyers={buyerMarkers}
             sellers={sellerMarkers}
             selectedBuyerId={selectedOrder?.id}
@@ -901,10 +901,25 @@ export const MatchingDashboard: React.FC = () => {
         {/* Selection Preview - 75% width */}
         <div className="w-3/4 bg-gray-50 overflow-y-auto">
           {!selectedOrder ? (
-            <div className="h-full flex flex-col items-center justify-center text-text-secondary">
-              <span className="text-6xl opacity-30 mb-4">🎯</span>
-              <h3 className="text-xl font-bold text-text-primary mb-2">No Selection Yet</h3>
-              <p className="text-sm">Select a buyer order from the panel below to start building a trade operation</p>
+            <div className="h-full flex flex-col items-center justify-center text-slate-400 bg-slate-50/50">
+              <div className="relative mb-6">
+                <div className="absolute -inset-4 bg-blue-100 rounded-full animate-pulse opacity-50" />
+                <span className="text-7xl relative z-10">🌍</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-2">Global Trade Orchestration</h3>
+              <p className="text-slate-500 max-w-md text-center px-4">
+                Select an active demand node from the panel below to begin multi-seller matching and escrow-secured route optimization.
+              </p>
+              <div className="mt-8 flex gap-4">
+                <div className="px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    <span className="text-xs font-medium text-slate-600">Market Active</span>
+                </div>
+                <div className="px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500" />
+                    <span className="text-xs font-medium text-slate-600">Escrow Ready</span>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="p-6 space-y-4">

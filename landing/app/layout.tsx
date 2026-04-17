@@ -136,7 +136,7 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} antialiased`}
-        style={{ backgroundColor: "#021207", color: "#ffffff" }}
+        style={{ backgroundColor: "#0C0904", color: "#ffffff" }}
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <Providers>{children}</Providers>

@@ -4,6 +4,7 @@ import { Hero } from "./components/sections/Hero";
 import { GlobalReach } from "./components/sections/GlobalReach";
 import { ProblemSection } from "./components/sections/ProblemSection";
 import { HowItWorks } from "./components/sections/HowItWorks";
+import { AppShowcase } from "./components/sections/AppShowcase";
 import { LiveDealFlow } from "./components/sections/LiveDealFlow";
 import { RolesSection } from "./components/sections/RolesSection";
 import { VaultSection } from "./components/sections/VaultSection";
@@ -24,6 +25,8 @@ export default function LandingPage() {
         <ProblemSection />
         <SectionDivider />
         <HowItWorks />
+        <SectionDivider />
+        <AppShowcase />
         <SectionDivider />
         <LiveDealFlow />
         <SectionDivider />

@@ -899,87 +899,84 @@ export class SellerService {
     limit = 20,
     cursor?: string,
   ): Promise<SellerTimelineResponseDto> {
-    const take = Math.min(Math.max(limit, 1), 50);
+    const take = limit;
+    const events: any[] = [];
 
+    // 1. Get Trade Operations
     const trades = await this.prisma.tradeOperation.findMany({
       where: {
-        sellers: {
-          some: {
-            sellerId: userId,
-          },
-        },
+        sellers: { some: { sellerId: userId } },
       },
       orderBy: { updatedAt: "desc" },
-      take,
-      skip: cursor ? 1 : 0,
-      cursor: cursor ? { id: cursor } : undefined,
+      take: 10,
       include: {
-        buyListing: {
-          select: {
-            id: true,
-            product: {
-              select: {
-                id: true,
-                displayName: true,
-              },
-            },
-            buyer: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-        },
-        sellers: {
-          where: { sellerId: userId },
-          select: {
-            id: true,
-            status: true,
-            requestedQuantity: true,
-            agreedQuantity: true,
-          },
-        },
-        negotiations: {
-          where: {
-            tradeSeller: {
-              sellerId: userId,
-            },
-          },
-          orderBy: { startedAt: "desc" },
-          take: 1,
-          select: {
-            id: true,
-            status: true,
-            startedAt: true,
-          },
-        },
+        buyListing: { include: { product: true, buyer: true } },
       },
     });
 
-    const events: SellerTimelineEventDto[] = trades.map((trade) => {
-      const sellerEntry = trade.sellers[0];
-      const latestNegotiation = trade.negotiations[0];
+    for (const trade of trades) {
+      events.push({
+        id: `trade-${trade.id}`,
+        type: "TRADE",
+        title: `Trade ${trade.operationNumber}`,
+        status: trade.phase,
+        timestamp: trade.updatedAt,
+        description: `Trade for ${trade.buyListing.product.displayName} is in ${trade.phase.replace(/_/g, " ")} phase.`,
+        metadata: { buyerName: trade.buyListing.buyer.name },
+      });
+    }
 
-      return {
-        id: trade.id,
-        type: latestNegotiation ? "NEGOTIATION" : "TRADE",
-        title: trade.buyListing?.product?.displayName ?? "Buyer opportunity",
-        status: sellerEntry?.status ?? trade.status,
-        timestamp: latestNegotiation?.startedAt ?? trade.updatedAt,
-        description: trade.phase,
-        metadata: {
-          buyerName: trade.buyListing?.buyer?.name,
-          requestedQuantity: sellerEntry?.requestedQuantity ?? null,
-          agreedQuantity: sellerEntry?.agreedQuantity ?? null,
-          negotiationStatus: latestNegotiation?.status ?? null,
-        },
-      };
+    // 2. Get Negotiations
+    const negotiations = await this.prisma.offerNegotiation.findMany({
+      where: { tradeSeller: { sellerId: userId } },
+      orderBy: { updatedAt: "desc" },
+      take: 10,
+      include: { tradeSeller: { include: { saleListing: { include: { product: true } } } } },
     });
 
+    for (const neg of negotiations) {
+      events.push({
+        id: `neg-${neg.id}`,
+        type: "NEGOTIATION",
+        title: `Offer: ${neg.tradeSeller.saleListing.product.displayName}`,
+        status: neg.status,
+        timestamp: neg.updatedAt,
+        description: `Offer status updated to ${neg.status}.`,
+        metadata: { negotiationId: neg.id },
+      });
+    }
+
+    // 3. Get Transport Jobs
+    const transportJobs = await this.prisma.transportJob.findMany({
+      where: { tradeOperation: { sellers: { some: { sellerId: userId } } } },
+      orderBy: { updatedAt: "desc" },
+      take: 5,
+      include: { transporter: true },
+    });
+
+    for (const job of transportJobs) {
+      events.push({
+        id: `trans-${job.id}`,
+        type: "TRANSPORT",
+        title: `Transport: ${job.jobNumber}`,
+        status: job.status,
+        timestamp: job.updatedAt,
+        description: `Transporter ${job.transporter.name} status: ${job.status}.`,
+        metadata: { transporterName: job.transporter.name },
+      });
+    }
+
+    // Sort by timestamp desc and limit
+    const sortedEvents = events
+      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .slice(0, take);
+
     return {
-      events,
-      nextCursor: trades.length === take ? trades[trades.length - 1].id : null,
+      events: sortedEvents.map(e => ({
+        ...e,
+        timestamp: e.timestamp, // Will be serialized to string by class-transformer
+      })),
+      nextCursor: null,
     };
   }
 

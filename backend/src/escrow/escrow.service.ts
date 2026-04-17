@@ -23,7 +23,7 @@ const ESCROW_ABI = [
 @Injectable()
 export class EscrowService {
   private readonly logger = new Logger(EscrowService.name);
-  private ethers: typeof import("ethers") | null = null;
+  private ethers: any = null;
   private contractAddress: string;
   private rpcUrl: string;
   private privateKey: string;

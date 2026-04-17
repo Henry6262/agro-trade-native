@@ -4,39 +4,7 @@ import { motion } from "framer-motion";
 import Device from "../Device";
 import { B } from "../brand";
 import { FadeInUp } from "../animations";
-import { CheckCircle, Lock, TrendingUp, Bell, ShieldCheck, Truck } from "lucide-react";
-
-// ── Floating ambient cards around the phone ───────────────────────────────────
-
-function FloatCard({
-  children,
-  className,
-  delay = 0,
-  yRange = 10,
-  style,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-  yRange?: number;
-  style?: React.CSSProperties;
-}) {
-  return (
-    <motion.div
-      className={`absolute z-20 ${className ?? ""}`}
-      style={style}
-      animate={{ y: [0, -yRange, 0] }}
-      transition={{
-        duration: 3.5 + delay,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay,
-      }}
-    >
-      {children}
-    </motion.div>
-  );
-}
+import { CheckCircle, Lock, TrendingUp, Bell } from "lucide-react";
 
 // ── Simulated AgroTrade app UI ────────────────────────────────────────────────
 function AppScreen() {
@@ -270,7 +238,7 @@ export function AppShowcase() {
           <p className="mt-4 text-xs" style={{ color: B.muted }}>Coming soon — join the waitlist above</p>
         </FadeInUp>
 
-        {/* ── RIGHT: phone + floating cards ── */}
+        {/* ── RIGHT: phone ── */}
         <FadeInUp delay={0.15}>
           <div className="relative flex justify-center lg:justify-center items-center overflow-visible"
             style={{ perspective: "1000px", minHeight: 640 }}>
@@ -288,108 +256,6 @@ export function AppShowcase() {
                 filter: "blur(20px)",
               }}
             />
-
-            {/* ── Floating card: Payment Locked ── */}
-            <FloatCard
-              delay={0}
-              yRange={9}
-              style={{ top: "8%", left: "-2%" }}
-            >
-              <div
-                className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-sm font-semibold whitespace-nowrap"
-                style={{
-                  background: "rgba(232,200,112,0.08)",
-                  backdropFilter: "blur(20px)",
-                  WebkitBackdropFilter: "blur(20px)",
-                  border: `1px solid rgba(232,200,112,0.22)`,
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
-                  color: B.cream,
-                }}
-              >
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                  style={{ backgroundColor: "rgba(232,200,112,0.15)" }}>
-                  <Lock size={14} color={B.wheat} />
-                </div>
-                <div>
-                  <p style={{ color: B.wheat, fontSize: "11px", fontWeight: 700 }}>Payment Locked</p>
-                  <p style={{ color: B.muted, fontSize: "10px" }}>$2,400 cUSD in escrow</p>
-                </div>
-              </div>
-            </FloatCard>
-
-            {/* ── Floating card: Inspector En Route ── */}
-            <FloatCard
-              delay={1.2}
-              yRange={7}
-              style={{ top: "30%", right: "2%" }}
-            >
-              <div
-                className="flex items-center gap-2.5 px-4 py-3 rounded-2xl text-sm whitespace-nowrap"
-                style={{
-                  background: "rgba(61,122,80,0.12)",
-                  backdropFilter: "blur(20px)",
-                  WebkitBackdropFilter: "blur(20px)",
-                  border: "1px solid rgba(61,122,80,0.28)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
-                }}
-              >
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                  style={{ backgroundColor: "rgba(61,122,80,0.15)" }}>
-                  <Truck size={14} color="#4ADE80" />
-                </div>
-                <div>
-                  <p style={{ color: "#4ADE80", fontSize: "11px", fontWeight: 700 }}>Inspector En Route</p>
-                  <p style={{ color: B.muted, fontSize: "10px" }}>Grade verification pending</p>
-                </div>
-              </div>
-            </FloatCard>
-
-            {/* ── Floating card: Trade Confirmed ── */}
-            <FloatCard
-              delay={0.6}
-              yRange={11}
-              style={{ bottom: "12%", left: "-4%" }}
-            >
-              <div
-                className="flex items-center gap-2.5 px-4 py-3 rounded-2xl whitespace-nowrap"
-                style={{
-                  background: "rgba(74,222,128,0.08)",
-                  backdropFilter: "blur(20px)",
-                  WebkitBackdropFilter: "blur(20px)",
-                  border: "1px solid rgba(74,222,128,0.22)",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
-                }}
-              >
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                  style={{ backgroundColor: "rgba(74,222,128,0.12)" }}>
-                  <CheckCircle size={14} color="#4ADE80" />
-                </div>
-                <div>
-                  <p style={{ color: "#4ADE80", fontSize: "11px", fontWeight: 700 }}>Trade Confirmed ✓</p>
-                  <p style={{ color: B.muted, fontSize: "10px" }}>Sofia → Istanbul · Delivered</p>
-                </div>
-              </div>
-            </FloatCard>
-
-            {/* ── Floating chip: Celo ── */}
-            <FloatCard
-              delay={1.8}
-              yRange={6}
-              style={{ bottom: "28%", right: "1%" }}
-            >
-              <div
-                className="flex items-center gap-2 px-3 py-2 rounded-full text-xs font-bold"
-                style={{
-                  background: "rgba(232,200,112,0.08)",
-                  backdropFilter: "blur(16px)",
-                  border: "1px solid rgba(232,200,112,0.22)",
-                  color: B.wheat,
-                }}
-              >
-                <ShieldCheck size={11} color={B.wheat} />
-                Celo blockchain
-              </div>
-            </FloatCard>
 
             {/* The phone */}
             <Device

@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 // Catch fatal errors BEFORE any module loads (e.g. native module crashes)
 process.on("uncaughtException", (err) => {
   console.error("FATAL uncaughtException:", err);

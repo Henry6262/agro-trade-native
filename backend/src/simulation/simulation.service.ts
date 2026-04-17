@@ -1,6 +1,18 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { UserRole, TransportRequestStatus } from "@prisma/client";
+import {
+  UserRole,
+  TransportRequestStatus,
+  RequestStatus,
+  TradePhase,
+  TradeStatus,
+  SellerStatus,
+  NegotiationStatus,
+  InspectionStatus,
+  TransportJobStatus,
+  BidStatus,
+  ListingStatus,
+} from "@prisma/client";
 import * as bcrypt from "bcryptjs";
 
 @Injectable()
@@ -232,15 +244,21 @@ export class SimulationService {
         this.logger.log("[createFarmerSaleListing] Created product:" + JSON.stringify(product));
       }
 
+      // Get farmer's default address
+      const farmerAddress = await this.prisma.address.findFirst({
+        where: { userId: farmerId, isDefault: true },
+      });
+
       // Create sale listing
       const saleListingData = {
         sellerId: farmerId,
         productId: product.id,
+        addressId: farmerAddress?.id, // Link to farmer's address
         quantity: data.quantity,
         unit: "TON" as any,
         askingPrice: data.pricePerUnit,
         qualityGrade: "Premium",
-        status: "ACTIVE" as any,
+        status: ListingStatus.ACTIVE,
       };
 
       this.logger.log(
@@ -303,8 +321,8 @@ export class SimulationService {
         operationNumber,
         adminId: admin.id,
         buyListingId,
-        phase: "SELLER_MATCHING",
-        status: "ACTIVE",
+        phase: TradePhase.SELLER_MATCHING,
+        status: TradeStatus.ACTIVE,
         sellingPrice,
         totalRevenue,
         profitMargin: data.adminMargin,
@@ -339,7 +357,7 @@ export class SimulationService {
           requestedQuantity: offer.requestedQuantity,
           offeredQuantity: offer.requestedQuantity,
           unit: "TON",
-          status: "INVITED",
+          status: SellerStatus.INVITED,
         },
       });
 
@@ -348,7 +366,7 @@ export class SimulationService {
         data: {
           tradeSellerId: tradeSeller.id,
           tradeOperationId,
-          status: "PENDING",
+          status: NegotiationStatus.PENDING,
           currentOffer: {
             price: offer.offeredPrice,
             quantity: offer.requestedQuantity,
@@ -396,7 +414,7 @@ export class SimulationService {
     await this.prisma.offerNegotiation.update({
       where: { id: negotiationId },
       data: {
-        status: "ACCEPTED",
+        status: NegotiationStatus.ACCEPTED,
         respondedAt: new Date(),
       },
     });
@@ -405,7 +423,7 @@ export class SimulationService {
     await this.prisma.tradeSeller.update({
       where: { id: negotiation.tradeSellerId },
       data: {
-        status: "ACCEPTED",
+        status: SellerStatus.ACCEPTED,
         agreedQuantity:
           counterOffer?.quantity || negotiation.tradeSeller.requestedQuantity,
         agreedPrice: counterOffer?.price,
@@ -423,7 +441,7 @@ export class SimulationService {
     const tradeSellers = await this.prisma.tradeSeller.findMany({
       where: {
         tradeOperationId,
-        status: "ACCEPTED",
+        status: SellerStatus.ACCEPTED,
       },
       include: { saleListing: true },
     });
@@ -444,7 +462,7 @@ export class SimulationService {
           where: { id: existing.id },
           data: {
             inspectorId,
-            status: "SCHEDULED",
+            status: InspectionStatus.SCHEDULED,
             scheduledDate: new Date(),
           },
         });
@@ -454,7 +472,7 @@ export class SimulationService {
             saleListingId: ts.saleListingId,
             tradeOperationId,
             inspectorId,
-            status: "SCHEDULED",
+            status: InspectionStatus.SCHEDULED,
             scheduledDate: new Date(),
             latitude: 24.4539, // Default Abu Dhabi coordinates for simulation
             longitude: 54.3773,
@@ -469,7 +487,7 @@ export class SimulationService {
     // Update trade operation phase
     await this.prisma.tradeOperation.update({
       where: { id: tradeOperationId },
-      data: { phase: "INSPECTION_PENDING" },
+      data: { phase: TradePhase.INSPECTION_PENDING },
     });
 
     return inspections;
@@ -502,7 +520,7 @@ export class SimulationService {
       include: {
         buyListing: true,
         sellers: {
-          where: { status: "ACCEPTED" },
+          where: { status: SellerStatus.ACCEPTED },
         },
       },
     });
@@ -536,7 +554,7 @@ export class SimulationService {
           address: "Buyer Location",
         },
         estimatedDistance: distanceKm,
-        status: "OPEN",
+        status: TransportRequestStatus.OPEN,
         biddingDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000),
         deliveryDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
@@ -552,7 +570,7 @@ export class SimulationService {
         estimatedDuration: data.estimatedDuration,
         vehicleType: "FLATBED",
         vehicleCapacity: 30,
-        status: "ACCEPTED",
+        status: BidStatus.ACCEPTED,
         expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
         acceptedAt: new Date(),
         evaluatedAt: new Date(),
@@ -568,7 +586,7 @@ export class SimulationService {
         transportBidId: transportBid.id,
         transporterId: data.transporterId,
         tradeOperationId,
-        status: "ASSIGNED",
+        status: TransportJobStatus.ASSIGNED,
       },
     });
 
@@ -576,7 +594,7 @@ export class SimulationService {
     await this.prisma.transportRequest.update({
       where: { id: transportRequest.id },
       data: {
-        status: "ASSIGNED",
+        status: TransportRequestStatus.ASSIGNED,
         selectedBidId: transportBid.id,
       },
     });
@@ -584,7 +602,7 @@ export class SimulationService {
     // Update trade operation to IN_TRANSIT
     await this.prisma.tradeOperation.update({
       where: { id: tradeOperationId },
-      data: { phase: "IN_TRANSIT" },
+      data: { phase: TradePhase.IN_TRANSIT },
     });
 
     return { transportRequest, transportBid, transportJob, distanceKm };
@@ -598,8 +616,8 @@ export class SimulationService {
     await this.prisma.tradeOperation.update({
       where: { id: tradeOperationId },
       data: {
-        phase: "COMPLETED",
-        status: "COMPLETED",
+        phase: TradePhase.COMPLETED,
+        status: TradeStatus.COMPLETED,
       },
     });
 
@@ -631,7 +649,7 @@ export class SimulationService {
       where: { id: tradeOperationId },
       include: {
         sellers: {
-          where: { status: "ACCEPTED" },
+          where: { status: SellerStatus.ACCEPTED },
         },
       },
     });
@@ -664,7 +682,7 @@ export class SimulationService {
           address: "Buyer Location",
         },
         estimatedDistance: distanceKm,
-        status: "OPEN",
+        status: TransportRequestStatus.OPEN,
         biddingDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000),
         deliveryDeadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },
@@ -696,7 +714,7 @@ export class SimulationService {
         estimatedDuration: data.estimatedDuration,
         vehicleType: (data.vehicleType || "FLATBED") as any,
         vehicleCapacity: 30,
-        status: "PENDING",
+        status: BidStatus.PENDING,
         expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
       },
     });
@@ -725,7 +743,7 @@ export class SimulationService {
     await this.prisma.transportBid.update({
       where: { id: bidId },
       data: {
-        status: "ACCEPTED",
+        status: BidStatus.ACCEPTED,
         acceptedAt: new Date(),
         evaluatedAt: new Date(),
       },
@@ -736,10 +754,10 @@ export class SimulationService {
       where: {
         transportRequestId,
         id: { not: bidId },
-        status: "PENDING",
+        status: BidStatus.PENDING,
       },
       data: {
-        status: "REJECTED",
+        status: BidStatus.REJECTED,
         evaluatedAt: new Date(),
       },
     });
@@ -753,7 +771,7 @@ export class SimulationService {
         transportBidId: bidId,
         transporterId: winningBid.transporterId,
         tradeOperationId: winningBid.tradeOperationId,
-        status: "ASSIGNED",
+        status: TransportJobStatus.ASSIGNED,
       },
     });
 
@@ -761,7 +779,7 @@ export class SimulationService {
     await this.prisma.transportRequest.update({
       where: { id: transportRequestId },
       data: {
-        status: "ASSIGNED",
+        status: TransportRequestStatus.ASSIGNED,
         selectedBidId: bidId,
       },
     });
@@ -769,7 +787,7 @@ export class SimulationService {
     // Update trade operation phase
     await this.prisma.tradeOperation.update({
       where: { id: winningBid.tradeOperationId },
-      data: { phase: "IN_TRANSIT" },
+      data: { phase: TradePhase.IN_TRANSIT },
     });
 
     return {
@@ -849,6 +867,16 @@ export class SimulationService {
         isEmailVerified: true,
         onboardingCompleted: true,
         isActive: true,
+        addresses: {
+          create: {
+            addressType: "BUSINESS" as any,
+            label: "Main",
+            latitude: data?.data?.lat || data?.lat || 42.0,
+            longitude: data?.data?.lng || data?.lng || 23.0,
+            country: "Bulgaria",
+            isDefault: true,
+          },
+        },
       },
     });
 
@@ -923,6 +951,16 @@ export class SimulationService {
       // Note: Cascade deletes should handle most of this, but being explicit
 
       // Delete related data first
+      const testBuyListings = await this.prisma.buyListing.findMany({
+        where: { buyerId: { in: userIds } },
+        select: { id: true },
+      });
+      const buyListingIds = testBuyListings.map((bl) => bl.id);
+
+      await this.prisma.tradeOperation.deleteMany({
+        where: { buyListingId: { in: buyListingIds } },
+      });
+
       await this.prisma.transportBid.deleteMany({
         where: { transporterId: { in: userIds } },
       });

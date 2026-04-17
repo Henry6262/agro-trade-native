@@ -27,6 +27,11 @@ import {
   BidStatus,
   TransportJobStatus,
   InspectionStatus,
+  TradePhase,
+  TradeStatus,
+  SellerStatus,
+  NegotiationStatus,
+  RequestStatus,
 } from "@prisma/client";
 import { SimulationService } from "./simulation.service";
 import { PrismaService } from "../prisma/prisma.service";
@@ -92,17 +97,23 @@ export class SimulationController {
       throw new ForbiddenException("User is not a buyer");
     }
 
+    // Get buyer's default address
+    const buyerAddress = await this.prisma.address.findFirst({
+      where: { userId, isDefault: true },
+    });
+
     return this.prisma.buyListing.create({
       data: {
         buyerId: userId,
         productId: dto.productId,
+        addressId: buyerAddress?.id, // Link to buyer's address
         quantity: dto.quantity,
         unit: dto.unit || "TON",
         maxPricePerUnit: dto.maxPricePerUnit,
         neededBy: dto.neededBy
           ? new Date(dto.neededBy)
           : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-        status: "ACTIVE",
+        status: RequestStatus.ACTIVE,
       },
     });
   }
@@ -139,7 +150,7 @@ export class SimulationController {
     await this.prisma.offerNegotiation.update({
       where: { id: dto.negotiationId },
       data: {
-        status: "ACCEPTED",
+        status: NegotiationStatus.ACCEPTED,
         respondedAt: new Date(),
       },
     });
@@ -153,7 +164,7 @@ export class SimulationController {
     await this.prisma.tradeSeller.update({
       where: { id: negotiation.tradeSellerId },
       data: {
-        status: "ACCEPTED",
+        status: SellerStatus.ACCEPTED,
         agreedQuantity: quantity,
       },
     });
@@ -200,7 +211,7 @@ export class SimulationController {
     await this.prisma.offerNegotiation.update({
       where: { id: dto.negotiationId },
       data: {
-        status: "COUNTERED",
+        status: NegotiationStatus.COUNTERED,
         counterOffer: {
           price: dto.counterPrice,
           quantity: dto.counterQuantity || currentQuantity,
@@ -243,7 +254,7 @@ export class SimulationController {
     await this.prisma.offerNegotiation.update({
       where: { id: dto.negotiationId },
       data: {
-        status: "REJECTED",
+        status: NegotiationStatus.REJECTED,
         respondedAt: new Date(),
       },
     });
@@ -252,7 +263,7 @@ export class SimulationController {
     await this.prisma.tradeSeller.update({
       where: { id: negotiation.tradeSellerId },
       data: {
-        status: "REJECTED",
+        status: SellerStatus.REJECTED,
       },
     });
 
@@ -375,7 +386,7 @@ export class SimulationController {
     await this.prisma.transportJob.update({
       where: { id: dto.jobId },
       data: {
-        status: "COMPLETED",
+        status: TransportJobStatus.COMPLETED,
         completedAt: new Date(),
       },
     });
@@ -384,7 +395,7 @@ export class SimulationController {
     await this.prisma.tradeOperation.update({
       where: { id: job.tradeOperationId },
       data: {
-        phase: "DELIVERED",
+        phase: TradePhase.DELIVERED,
       },
     });
 
@@ -458,7 +469,7 @@ export class SimulationController {
         verificationResult: { result: dto.result },
         qualityScore: dto.qualityScore,
         notes: dto.notes,
-        status: "COMPLETED",
+        status: InspectionStatus.COMPLETED,
         completedDate: new Date(),
       },
     });
@@ -476,7 +487,7 @@ export class SimulationController {
         await this.prisma.tradeSeller.update({
           where: { id: tradeSeller.id },
           data: {
-            status: "FAILED_INSPECTION",
+            status: SellerStatus.FAILED_INSPECTION,
             isVerified: false,
           },
         });

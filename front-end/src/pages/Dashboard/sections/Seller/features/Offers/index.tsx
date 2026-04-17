@@ -95,7 +95,7 @@ export default function SellerOffersFeature() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={COLORS.accentGreen} />
-        <Text style={styles.loadingText}>Loading your offers...</Text>
+        <Text style={styles.loadingText}>Synchronizing Trade Network...</Text>
       </View>
     );
   }

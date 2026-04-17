@@ -40,8 +40,8 @@ export default function BuyerRequestsTab() {
   if (isLoading && !isRefreshing) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={COLORS.info} />
-        <Text style={styles.loadingText}>Loading buyer requests...</Text>
+        <ActivityIndicator size="large" color={COLORS.accentGreen} />
+        <Text style={styles.loadingText}>Calibrating Global Demand...</Text>
       </View>
     );
   }

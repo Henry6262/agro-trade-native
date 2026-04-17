@@ -14,7 +14,7 @@ import type { TransportCostResult } from '../../../../types';
 import { negotiationService, tradeOperationService } from '../../../../services/api';
 import api from '../../../../services/api';
 import { API_ENDPOINTS } from '../../../../config/api';
-import BulgariaMap from './BulgariaMap';
+import GlobalTradeMap from './GlobalTradeMap';
 
 interface SingleOfferModalProps {
   open: boolean;
@@ -234,7 +234,7 @@ const SingleOfferModal: React.FC<SingleOfferModalProps> = ({
 
         {/* Map Section */}
         <div className="w-full h-64 rounded-lg overflow-hidden border bg-muted">
-          <BulgariaMap
+          <GlobalTradeMap
             buyers={buyerMarkers}
             sellers={sellerMarkers}
             selectedBuyerId={buyerOrder.id}

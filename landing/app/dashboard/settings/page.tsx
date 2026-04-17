@@ -9,17 +9,50 @@ import { Badge } from "@/components/ui/badge";
 import { User, Mail, Phone, MapPin, Shield } from "lucide-react";
 import { useAuthStore } from "@/app/stores/auth.store";
 import { toast } from "sonner";
+import { apiClient } from "@/app/lib/api";
 
 export default function SettingsPage() {
   const user = useAuthStore((s) => s.user);
+  const setUser = useAuthStore((s) => s.setUser);
   const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    name: user?.name || "",
+    phone: user?.phone || user?.phoneNumber || "",
+    location: user?.location
+      ? `${user.location.city}, ${user.location.country}`
+      : "",
+  });
 
   const handleSave = async () => {
     setSaving(true);
-    // TODO: Wire to backend PUT /users/profile
-    await new Promise((r) => setTimeout(r, 500));
-    toast.success("Profile updated");
-    setSaving(false);
+    try {
+      const response = await apiClient.patch<{
+        success: boolean;
+        message: string;
+        user: any;
+      }>("/auth/me", {
+        name: formData.name,
+        phoneNumber: formData.phone,
+      });
+
+      if (response.success) {
+        // Map backend user to frontend user model
+        const updatedUser = {
+          ...user,
+          ...response.user,
+          phone: response.user.phoneNumber, // Map backend phoneNumber to frontend phone
+        };
+        setUser(updatedUser as any);
+        toast.success("Profile updated successfully");
+      } else {
+        toast.error(response.message || "Failed to update profile");
+      }
+    } catch (err: any) {
+      console.error("Update profile error:", err);
+      toast.error(err.response?.data?.message || "An error occurred while saving");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const ROLE_LABELS: Record<string, string> = {
@@ -50,9 +83,9 @@ export default function SettingsPage() {
             <div className="space-y-1.5">
               <Label className="text-brand-cream text-sm">Name</Label>
               <Input
-                defaultValue={user?.name || ""}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="bg-brand-bg border-brand-border text-brand-cream"
-                readOnly
               />
             </div>
             <div className="space-y-1.5">
@@ -71,7 +104,7 @@ export default function SettingsPage() {
             </Label>
             <Input
               defaultValue={user?.email || ""}
-              className="bg-brand-bg border-brand-border text-brand-cream"
+              className="bg-brand-bg border-brand-border text-brand-cream opacity-70 cursor-not-allowed"
               readOnly
             />
           </div>
@@ -81,7 +114,8 @@ export default function SettingsPage() {
               <Phone className="h-3.5 w-3.5" /> Phone
             </Label>
             <Input
-              defaultValue={user?.phone || ""}
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               placeholder="Not set"
               className="bg-brand-bg border-brand-border text-brand-cream placeholder:text-text-muted"
             />
@@ -92,11 +126,8 @@ export default function SettingsPage() {
               <MapPin className="h-3.5 w-3.5" /> Location
             </Label>
             <Input
-              defaultValue={
-                user?.location
-                  ? `${user.location.city}, ${user.location.country}`
-                  : ""
-              }
+              value={formData.location}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               placeholder="Not set"
               className="bg-brand-bg border-brand-border text-brand-cream placeholder:text-text-muted"
             />

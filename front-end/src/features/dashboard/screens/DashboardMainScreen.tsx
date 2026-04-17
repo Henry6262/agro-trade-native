@@ -29,7 +29,7 @@ import ImpactScreen from './shared/ImpactScreen';
 import TraceabilityScreen from './shared/TraceabilityScreen';
 import SellerDashboardSection from '../../../pages/Dashboard/sections/Seller';
 import BuyerDashboardSection from '../../../pages/Dashboard/sections/Buyer';
-import TransporterDashboardScreen from './transporter/TransporterDashboardScreen';
+import TransporterDashboardSection from '../../../pages/Dashboard/sections/Transporter';
 import type { TransporterDashboardSectionProps } from '../../../pages/Dashboard/sections/Transporter/types';
 import { InspectorDashboard } from './inspector/InspectorDashboard';
 import { ProfileDrawer } from '../components/ProfileDrawer';
