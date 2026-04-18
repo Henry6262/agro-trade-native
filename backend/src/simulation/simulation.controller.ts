@@ -106,7 +106,7 @@ export class SimulationController {
       data: {
         buyerId: userId,
         productId: dto.productId,
-        addressId: buyerAddress?.id, // Link to buyer's address
+        deliveryAddressId: buyerAddress?.id, // Link to buyer's address
         quantity: dto.quantity,
         unit: dto.unit || "TON",
         maxPricePerUnit: dto.maxPricePerUnit,

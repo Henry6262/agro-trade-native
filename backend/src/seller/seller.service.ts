@@ -929,7 +929,7 @@ export class SellerService {
     // 2. Get Negotiations
     const negotiations = await this.prisma.offerNegotiation.findMany({
       where: { tradeSeller: { sellerId: userId } },
-      orderBy: { updatedAt: "desc" },
+      orderBy: { startedAt: "desc" },
       take: 10,
       include: { tradeSeller: { include: { saleListing: { include: { product: true } } } } },
     });
@@ -940,7 +940,7 @@ export class SellerService {
         type: "NEGOTIATION",
         title: `Offer: ${neg.tradeSeller.saleListing.product.displayName}`,
         status: neg.status,
-        timestamp: neg.updatedAt,
+        timestamp: neg.respondedAt || neg.startedAt,
         description: `Offer status updated to ${neg.status}.`,
         metadata: { negotiationId: neg.id },
       });
