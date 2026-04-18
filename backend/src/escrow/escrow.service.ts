@@ -1,6 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../prisma/prisma.service";
+import * as ethers from "ethers";
 
 const ESCROW_ABI = [
   // cUSD ERC-20 token (used to approve before createEscrow)
@@ -23,7 +24,6 @@ const ESCROW_ABI = [
 @Injectable()
 export class EscrowService {
   private readonly logger = new Logger(EscrowService.name);
-  private ethers: any = null;
   private contractAddress: string;
   private rpcUrl: string;
   private privateKey: string;
@@ -40,31 +40,24 @@ export class EscrowService {
   }
 
   private async getCusdContract() {
-    if (!this.ethers) {
-      this.ethers = await import("ethers");
-    }
-    const provider = new this.ethers.JsonRpcProvider(this.rpcUrl);
-    const wallet = new this.ethers.Wallet(this.privateKey, provider);
+    const provider = new ethers.JsonRpcProvider(this.rpcUrl);
+    const wallet = new ethers.Wallet(this.privateKey, provider);
     const cusdAbi = ["function approve(address spender, uint256 amount) external returns (bool)"];
-    return new this.ethers.Contract(this.cusdAddress, cusdAbi, wallet);
+    return new ethers.Contract(this.cusdAddress, cusdAbi, wallet);
   }
 
   private async getContract() {
-    if (!this.ethers) {
-      this.ethers = await import("ethers");
-    }
     if (!this.contractAddress || !this.rpcUrl || !this.privateKey) {
       throw new Error(
         "Blockchain config not set. Set ESCROW_CONTRACT_ADDRESS, BLOCKCHAIN_RPC_URL, ADMIN_WALLET_PRIVATE_KEY.",
       );
     }
-    const provider = new this.ethers.JsonRpcProvider(this.rpcUrl);
-    const wallet = new this.ethers.Wallet(this.privateKey, provider);
-    return new this.ethers.Contract(this.contractAddress, ESCROW_ABI, wallet);
+    const provider = new ethers.JsonRpcProvider(this.rpcUrl);
+    const wallet = new ethers.Wallet(this.privateKey, provider);
+    return new ethers.Contract(this.contractAddress, ESCROW_ABI, wallet);
   }
 
   async createEscrow(tradeOperationId: string, sellerAddress: string, amountCusd: string) {
-    const ethers = await import("ethers");
     const escrowContract = await this.getContract();
     const cusdContract = await this.getCusdContract();
     const key = ethers.id(tradeOperationId);
@@ -95,7 +88,6 @@ export class EscrowService {
   }
 
   async releaseFunds(tradeOperationId: string) {
-    const ethers = await import("ethers");
     const contract = await this.getContract();
     const key = ethers.id(tradeOperationId);
     const tx = await contract.releaseFunds(key);
@@ -115,7 +107,6 @@ export class EscrowService {
   }
 
   async raiseDispute(tradeOperationId: string) {
-    const ethers = await import("ethers");
     const contract = await this.getContract();
     const key = ethers.id(tradeOperationId);
     const tx = await contract.raiseDispute(key);
@@ -157,7 +148,6 @@ export class EscrowService {
   }
 
   async refund(tradeOperationId: string) {
-    const ethers = await import("ethers");
     const contract = await this.getContract();
     const key = ethers.id(tradeOperationId);
     const tx = await contract.refund(key);
@@ -178,7 +168,6 @@ export class EscrowService {
   }
 
   async getStatus(tradeOperationId: string) {
-    const ethers = await import("ethers");
     const contract = await this.getContract();
     const key = ethers.id(tradeOperationId);
     const result = await contract.getEscrow(key);
