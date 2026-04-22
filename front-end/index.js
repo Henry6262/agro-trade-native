@@ -13,8 +13,11 @@ import EventEmitter from 'eventemitter3';
 import http from 'http-browserify';
 import https from 'https-browserify';
 
-// Now import the Expo app entry point
-import 'expo/AppEntry';
+import { registerRootComponent } from 'expo';
+import App from './App';
+
+// Now register the root component directly
+registerRootComponent(App);
 
 // Set up globals BEFORE importing the app
 global.Buffer = Buffer;
