@@ -62,7 +62,7 @@
     "@nestjs/swagger": "^7.1.0",
     "@nestjs/throttler": "^5.0.0",
     "@nestjs/websockets": "^10.0.0",
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "^7.7.0",
     "@solana/spl-token": "^0.4.14",
     "@solana/web3.js": "^1.98.4",
     "@types/qrcode": "^1.5.6",
