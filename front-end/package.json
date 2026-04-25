@@ -25,7 +25,7 @@
     "@expo/cli": "^0.24.20",
     "@expo/metro-runtime": "~5.0.5",
     "@hookform/resolvers": "^5.2.1",
-    "@privy-io/expo": "^0.58.3",
+    "@privy-io/expo": "^0.65.1",
     "@privy-io/expo-native-extensions": "^0.0.5",
     "@react-native-async-storage/async-storage": "2.1.2",
     "@react-native-community/netinfo": "11.4.1",
