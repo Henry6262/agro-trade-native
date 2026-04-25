@@ -20,7 +20,7 @@ import {
   Calendar,
   Navigation,
 } from 'lucide-react-native';
-import { GlassCard, GlassBadge } from '../../../../../design-system';
+import { GlassCard, GlassBadge } from '@design-system';
 import { TransferStageIndicator } from '../../components/TransferStageIndicator';
 import { MapDrawer } from '../maps/components/MapDrawer';
 import { MapOffer } from '../maps/types';

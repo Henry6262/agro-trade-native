@@ -1,10 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication } from "@nestjs/common";
+import { INestApplication, ValidationPipe } from "@nestjs/common";
 import request from "supertest";
 import { AppModule } from "../../src/app.module";
+import { JwtService } from "@nestjs/jwt";
+import { PrismaService } from "../../src/prisma/prisma.service";
 
 describe("Inspector Jobs API (e2e)", () => {
   let app: INestApplication;
+  let authToken: string;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -12,7 +15,37 @@ describe("Inspector Jobs API (e2e)", () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix("api");
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
     await app.init();
+
+    const prisma = moduleFixture.get<PrismaService>(PrismaService);
+    await prisma.user.upsert({
+      where: { email: "inspector@test.local" },
+      update: {},
+      create: {
+        id: "test-user-123",
+        email: "inspector@test.local",
+        name: "Inspector Test User",
+        role: "ADMIN",
+        isActive: true,
+        isEmailVerified: true,
+        onboardingCompleted: true,
+      },
+    });
+
+    const jwtService = moduleFixture.get<JwtService>(JwtService);
+    authToken = jwtService.sign({
+      sub: "test-user-123",
+      email: "inspector@test.local",
+      role: "ADMIN",
+    });
   });
 
   afterEach(async () => {
@@ -23,6 +56,7 @@ describe("Inspector Jobs API (e2e)", () => {
     it("should return list of available verification jobs", () => {
       return request(app.getHttpServer())
         .get("/api/inspector/jobs")
+        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body).toHaveProperty("success", true);
@@ -45,6 +79,7 @@ describe("Inspector Jobs API (e2e)", () => {
     it("should filter jobs by priority", () => {
       return request(app.getHttpServer())
         .get("/api/inspector/jobs?priority=HIGH")
+        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body.success).toBe(true);
@@ -59,6 +94,7 @@ describe("Inspector Jobs API (e2e)", () => {
     it("should filter jobs by status", () => {
       return request(app.getHttpServer())
         .get("/api/inspector/jobs?status=PENDING")
+        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body.success).toBe(true);
@@ -73,6 +109,7 @@ describe("Inspector Jobs API (e2e)", () => {
     it("should filter jobs by location and radius", () => {
       return request(app.getHttpServer())
         .get("/api/inspector/jobs?lat=42.6977&lng=23.3219&radius=50")
+        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body.success).toBe(true);
@@ -89,10 +126,11 @@ describe("Inspector Jobs API (e2e)", () => {
     it("should return proper error for invalid parameters", () => {
       return request(app.getHttpServer())
         .get("/api/inspector/jobs?priority=INVALID")
+        .set("Authorization", `Bearer ${authToken}`)
         .expect(400)
         .expect((res) => {
-          expect(res.body.success).toBe(false);
-          expect(res.body).toHaveProperty("error");
+          expect(res.body).toHaveProperty("statusCode", 400);
+          expect(res.body).toHaveProperty("message");
         });
     });
   });
@@ -102,6 +140,7 @@ describe("Inspector Jobs API (e2e)", () => {
       const jobId = "job-001";
       return request(app.getHttpServer())
         .get(`/api/inspector/jobs/${jobId}`)
+        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body.success).toBe(true);
@@ -118,10 +157,12 @@ describe("Inspector Jobs API (e2e)", () => {
     it("should return 404 for non-existent job", () => {
       return request(app.getHttpServer())
         .get("/api/inspector/jobs/non-existent")
+        .set("Authorization", `Bearer ${authToken}`)
         .expect(404)
         .expect((res) => {
-          expect(res.body.success).toBe(false);
-          expect(res.body).toHaveProperty("error", "Job not found");
+          expect(res.body).toHaveProperty("statusCode", 404);
+          expect(res.body).toHaveProperty("message", "Job not found");
+          expect(res.body).toHaveProperty("error", "Not Found");
         });
     });
   });
@@ -146,6 +187,7 @@ describe("Inspector Jobs API (e2e)", () => {
 
       return request(app.getHttpServer())
         .post("/api/inspector/location")
+        .set("Authorization", `Bearer ${authToken}`)
         .send(locationUpdate)
         .expect(200)
         .expect((res) => {
@@ -165,11 +207,12 @@ describe("Inspector Jobs API (e2e)", () => {
 
       return request(app.getHttpServer())
         .post("/api/inspector/location")
+        .set("Authorization", `Bearer ${authToken}`)
         .send(invalidLocation)
         .expect(400)
         .expect((res) => {
-          expect(res.body.success).toBe(false);
-          expect(res.body).toHaveProperty("error");
+          expect(res.body).toHaveProperty("statusCode", 400);
+          expect(res.body).toHaveProperty("message");
         });
     });
   });
@@ -178,7 +221,7 @@ describe("Inspector Jobs API (e2e)", () => {
     it("should return inspector profile", () => {
       return request(app.getHttpServer())
         .get("/api/inspector/profile")
-        .set("Authorization", "Bearer valid-token") // Mock auth
+        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body.success).toBe(true);
@@ -198,8 +241,8 @@ describe("Inspector Jobs API (e2e)", () => {
         .get("/api/inspector/profile")
         .expect(401)
         .expect((res) => {
-          expect(res.body.success).toBe(false);
-          expect(res.body).toHaveProperty("error", "Unauthorized");
+          expect(res.body).toHaveProperty("statusCode", 401);
+          expect(res.body).toHaveProperty("message", "Unauthorized");
         });
     });
   });

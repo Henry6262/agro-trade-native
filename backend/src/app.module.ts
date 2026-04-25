@@ -28,13 +28,18 @@ import { AnalyticsModule } from "./analytics/analytics.module";
 import { TraceabilityModule } from "./traceability/traceability.module";
 import { EscrowModule } from "./escrow/escrow.module";
 import { HealthModule } from "./health/health.module";
+import { CommodityRegistryModule } from "./commodity-registry/commodity-registry.module";
+import { InvestmentsModule } from "./investments/investments.module";
 
 @Module({
   imports: [
     RealtimeModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ".env",
+      envFilePath:
+        process.env.NODE_ENV === "test"
+          ? [".env.test", ".env"]
+          : ".env",
       validate,
     }),
     ScheduleModule.forRoot(),
@@ -61,6 +66,8 @@ import { HealthModule } from "./health/health.module";
     AnalyticsModule,
     TraceabilityModule,
     EscrowModule,
+    CommodityRegistryModule,
+    InvestmentsModule,
     HealthModule,
   ],
 })

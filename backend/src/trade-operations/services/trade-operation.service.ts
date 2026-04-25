@@ -1,235 +1,97 @@
 import {
   Injectable,
-  Logger,
-  BadRequestException,
   NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  Logger,
 } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { PrismaService } from "../../prisma/prisma.service";
-import { EscrowService } from "../../escrow/escrow.service";
-import { RealtimeService } from "../../realtime/realtime.service";
-import { ProfitCalculationService } from "./profit-calculation.service";
-import { PriceScenarioService } from "./price-scenario.service";
-import { TransportCostService } from "../../transport/services/transport-cost.service";
-import { RouteOptimizationService } from "../../transport/services/route-optimization.service";
-import { CreateTradeOperationDto } from "../dto/create-trade-operation.dto";
-import { TradeEventsService } from "../../trade-events/trade-events.service";
 import {
   TradeOperation,
   TradePhase,
   TradeStatus,
-  TradeSeller,
-  InspectionPriority,
-  InspectionStatus,
   Prisma,
+  User,
+  UserRole,
+  Incoterm,
+  TradeEventType,
+  SellerStatus,
 } from "@prisma/client";
-
-export interface TradeOperationSummary {
-  id: string;
-  phase: TradePhase;
-  status: TradeStatus;
-  buyer: {
-    id: string;
-    name: string;
-    requestedQuantity: number;
-    maxPrice: number;
-  };
-  sellers: Array<{
-    id: string;
-    sellerId: string;
-    saleListingId: string;
-    name: string;
-    requestedQuantity: number;
-    offeredQuantity: number;
-    agreedQuantity?: number | null;
-    unit?: string;
-    quantity: number;
-    price: number;
-    status: string;
-    inspection?: {
-      id: string;
-      status: InspectionStatus;
-      priority: InspectionPriority;
-      requestedDate?: Date | null;
-      scheduledDate?: Date | null;
-      completedDate?: Date | null;
-      inspector?: {
-        id: string;
-        name: string | null;
-        email?: string | null;
-      } | null;
-    };
-  }>;
-  profit: {
-    estimated: number;
-    margin: number;
-    isViable: boolean;
-  };
-  transport: {
-    estimatedCost: number;
-    distance: number;
-    optimized: boolean;
-    request?: TransportRequestSummary | null;
-  };
-  timeline: {
-    created: Date;
-    lastUpdated: Date;
-    expectedCompletion?: Date;
-  };
-}
-
-export interface TransportRequestSummary {
-  id: string;
-  requestNumber: string;
-  status: string;
-  totalWeight: number;
-  biddingDeadline?: Date | null;
-  deliveryDeadline?: Date | null;
-  urgencyLevel?: string;
-  pickupPoints: Array<{
-    sellerId?: string;
-    saleListingId?: string;
-    sellerName?: string;
-    quantity?: number;
-    unit?: string;
-    address?: string;
-    lat?: number;
-    lng?: number;
-  }>;
-  deliveryPoint?: {
-    buyerId?: string;
-    buyerName?: string;
-    address?: string;
-    lat?: number;
-    lng?: number;
-  } | null;
-  bids: TransportBidSummary[];
-  job?: TransportJobSummary | null;
-}
-
-export interface TransportBidSummary {
-  id: string;
-  status: string;
-  bidAmount?: number;
-  transporterId?: string;
-  transporterName?: string;
-  transportCompanyName?: string;
-  vehicleType?: string;
-  vehicleCapacity?: number;
-  estimatedDuration?: number;
-  submittedAt?: Date;
-}
-
-export interface TransportJobSummary {
-  id: string;
-  jobNumber: string;
-  status: string;
-  startedAt?: Date;
-  estimatedArrival?: Date;
-  actualDelivery?: Date;
-  progress?: number;
-}
-
-export interface SellerMatchingParams {
-  productId: string;
-  requiredQuantity: number;
-  maxPricePerUnit: number;
-  location?: { lat: number; lng: number };
-  qualityPreference?: "PREMIUM" | "STANDARD" | "ECONOMY" | "ANY";
-}
-
-export interface MatchedSeller {
-  sellerId: string;
-  sellerName: string;
-  saleListingId: string;
-  availableQuantity: number;
-  availability?: number; // For frontend compatibility
-  askingPrice: number;
-  quality: string;
-  location: {
-    lat: number;
-    lng: number;
-    city?: string;
-    address?: string;
-    displayName?: string;
-  };
-  distance: number;
-  score: number;
-}
+import { ConfigService } from "@nestjs/config";
+import { EscrowService } from "../../escrow/escrow.service";
+import { RealtimeService } from "../../realtime/realtime.service";
+import { TradeEventsService } from "../../trade-events/trade-events.service";
+import { InvestmentsService } from "../../investments/investments.service";
+import { TransportCostService } from "../../transport/services/transport-cost.service";
+import { RouteOptimizationService } from "../../transport/services/route-optimization.service";
+import { INCOTERM_RELEASE_PHASE } from "../constants/incoterm-release-phase.constant";
+import {
+  AddSellersDto,
+  CreateTradeOperationDto,
+} from "../dto/create-trade-operation.dto";
+import { UpdateTradeOperationDto } from "../dto/update-trade-operation.dto";
 
 @Injectable()
 export class TradeOperationService {
   private readonly logger = new Logger(TradeOperationService.name);
-  private readonly MIN_PROFIT_MARGIN = 5;
-  private readonly TARGET_PROFIT_MARGIN = 7;
+  private readonly MIN_PROFIT_MARGIN = 5; // 5%
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly profitCalculationService: ProfitCalculationService,
-    private readonly priceScenarioService: PriceScenarioService,
-    private readonly transportCostService: TransportCostService,
-    private readonly routeOptimizationService: RouteOptimizationService,
     private readonly realtimeService: RealtimeService,
     private readonly tradeEventsService: TradeEventsService,
     private readonly escrowService: EscrowService,
+    private readonly investmentsService: InvestmentsService,
     private readonly configService: ConfigService,
+    private readonly transportCostService: TransportCostService,
+    private readonly routeOptimizationService: RouteOptimizationService,
   ) {}
 
-  /**
-   * Create a new trade operation (admin buys from sellers, sells to buyer)
-   */
-  async createTradeOperation(
-    dto: CreateTradeOperationDto,
-    adminId: string,
-  ): Promise<TradeOperation> {
-    // Get buy listing
+  // ==================== CORE OPERATIONS ====================
+
+  async create(dto: CreateTradeOperationDto, adminId: string): Promise<TradeOperation> {
     const buyListing = await this.prisma.buyListing.findUnique({
       where: { id: dto.buyListingId },
-      include: {
-        buyer: true,
-        product: true,
-      },
+      include: { buyer: true },
     });
 
-    if (!buyListing) {
-      throw new NotFoundException("Buy listing not found");
-    }
-
+    if (!buyListing) throw new NotFoundException("Buy listing not found");
     if (buyListing.status !== "ACTIVE") {
       throw new BadRequestException("Buy listing is not active");
     }
 
-    // Generate unique operation number
-    const operationNumber = `OP-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    const existingTradeOperation = await this.prisma.tradeOperation.findFirst({
+      where: { buyListingId: dto.buyListingId },
+    });
+    if (existingTradeOperation) {
+      return existingTradeOperation;
+    }
 
-    // Create trade operation
+    const operationNumber = `OP-${Date.now()}`;
+
     const tradeOperation = await this.prisma.tradeOperation.create({
       data: {
         operationNumber,
         buyListingId: dto.buyListingId,
         adminId,
-        phase: "INITIATION",
-        status: "ACTIVE",
-        profitMargin: dto.targetProfitMargin || this.TARGET_PROFIT_MARGIN,
-        sellingPrice: buyListing.maxPricePerUnit,
-        totalRevenue: buyListing.maxPricePerUnit?.toNumber()
-          ? buyListing.maxPricePerUnit.toNumber() *
-            buyListing.quantity.toNumber()
-          : 0,
-        currency: "EUR",
+        status: TradeStatus.ACTIVE,
+        phase: TradePhase.INITIATION,
+        sellingPrice: dto.sellingPrice ?? buyListing.maxPricePerUnit ?? 0,
+        currency: dto.currency || "EUR",
+        incoterm: dto.incoterm || "DDP",
+        notes: dto.notes ? {
+          create: {
+            content: dto.notes,
+            authorId: adminId,
+            isInternal: true,
+          }
+        } : undefined,
       },
     });
 
-    // Generate initial price scenarios
-    await this.generateInitialScenarios(tradeOperation.id);
-
-    this.logger.log(
-      `Created trade operation ${tradeOperation.id} for buy listing ${buyListing.id}`,
-    );
-
     await this.tradeEventsService.record({
       tradeOperationId: tradeOperation.id,
-      eventType: "LISTING_CREATED",
+      eventType: TradeEventType.LISTING_CREATED,
       actorRole: "ADMIN",
       actorId: adminId,
     }).catch(() => {});
@@ -237,138 +99,86 @@ export class TradeOperationService {
     return tradeOperation;
   }
 
-  /**
-   * Find and match sellers for a trade operation
-   */
-  async findMatchingSellers(
-    tradeOperationId: string,
-    params?: Partial<SellerMatchingParams>,
-  ): Promise<MatchedSeller[]> {
+  async findAll(filters: any = {}) {
+    const where: Prisma.TradeOperationWhereInput = {};
+    if (filters.status) where.status = filters.status;
+    if (filters.phase) where.phase = filters.phase;
+    if (filters.adminId) where.adminId = filters.adminId;
+    if (filters.buyerId) where.buyListing = { buyerId: filters.buyerId };
+
+    return this.prisma.tradeOperation.findMany({
+      where,
+      include: {
+        buyListing: { include: { product: true, buyer: true } },
+        admin: true,
+        _count: { select: { sellers: true } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  async findOne(id: string) {
     const trade = await this.prisma.tradeOperation.findUnique({
-      where: { id: tradeOperationId },
+      where: { id },
       include: {
         buyListing: {
           include: {
             product: true,
             buyer: true,
+            deliveryAddress: true,
           },
         },
-      },
-    });
-
-    if (!trade) {
-      throw new NotFoundException("Trade operation not found");
-    }
-
-    const matchParams: SellerMatchingParams = {
-      productId: trade.buyListing.productId,
-      requiredQuantity: trade.buyListing.quantity.toNumber(),
-      maxPricePerUnit: trade.buyListing.maxPricePerUnit?.toNumber() || 0,
-      location: params?.location || { lat: 42.6977, lng: 23.3219 }, // Default: Sofia
-      qualityPreference: params?.qualityPreference || "ANY",
-    };
-
-    // Find available sellers
-    const saleListings = await this.prisma.saleListing.findMany({
-      where: {
-        productId: matchParams.productId,
-        status: "ACTIVE",
-        quantity: { gt: 0 },
-        askingPrice: { lte: matchParams.maxPricePerUnit * 0.95 }, // Max 95% of buyer price for profit margin
-      },
-      include: {
-        seller: {
+        sellers: {
           include: {
-            addresses: true,
+            seller: { include: { company: true } },
+            saleListing: { include: { product: true, address: true } },
           },
         },
-        address: true,
+        admin: true,
+        negotiations: {
+          include: {
+            tradeSeller: { include: { seller: true } },
+          },
+        },
+        transportRequest: {
+          include: {
+            bids: { include: { transporter: { include: { company: true } } } },
+            transportJob: true,
+          },
+        },
       },
     });
 
-    // Score and rank sellers
-    const scoredSellers = saleListings.map((listing) => {
-      const seller = listing.seller;
-      // Use listing address or first seller address
-      const address = listing.address || seller.addresses?.[0];
-      const sellerLocation = address
-        ? { lat: address.latitude || 0, lng: address.longitude || 0 }
-        : { lat: 0, lng: 0 };
-
-      // Calculate distance
-      const distance = this.calculateDistance(
-        matchParams.location!,
-        sellerLocation,
-      );
-
-      // Calculate score (price weight: 40%, distance: 30%, quality: 20%, quantity: 10%)
-      let score = 0;
-
-      // Price score (lower is better)
-      const priceRatio =
-        (listing.askingPrice?.toNumber() || 0) / matchParams.maxPricePerUnit;
-      score += (1 - priceRatio) * 40;
-
-      // Distance score (closer is better)
-      const maxDistance = 500; // km
-      const distanceScore = Math.max(0, 1 - distance / maxDistance);
-      score += distanceScore * 30;
-
-      // Quality score
-      const qualityScore = this.getQualityScore(
-        "STANDARD", // quality field doesn't exist on listing
-        matchParams.qualityPreference!,
-      );
-      score += qualityScore * 20;
-
-      // Quantity score (can fulfill more is better)
-      const quantityRatio = Math.min(
-        1,
-        listing.quantity.toNumber() / matchParams.requiredQuantity,
-      );
-      score += quantityRatio * 10;
-
-      // Extract city from address street field (stored as "{City} Region")
-      const cityMatch = address?.street?.match(/^(.+)\s+Region$/);
-      const city = cityMatch ? cityMatch[1] : "Unknown Location";
-
-      return {
-        sellerId: seller.id,
-        sellerName: seller.name || `Seller ${seller.id.slice(-4)}`,
-        saleListingId: listing.id,
-        availableQuantity: listing.quantity.toNumber(),
-        availability: listing.quantity.toNumber(), // Add for frontend compatibility
-        askingPrice: listing.askingPrice?.toNumber() || 0,
-        quality: "STANDARD", // quality field doesn't exist
-        location: {
-          lat: sellerLocation.lat,
-          lng: sellerLocation.lng,
-          city: city,
-          address: address?.street || "Location not specified",
-          displayName: `${city} • ${Math.round(distance)}km`,
-        },
-        distance: Math.round(distance),
-        score: Math.round(score * 100) / 100,
-      };
-    });
-
-    // Sort by score descending
-    return scoredSellers.sort((a, b) => b.score - a.score);
+    if (!trade) throw new NotFoundException("Trade operation not found");
+    return trade;
   }
 
-  /**
-   * Add sellers to trade operation
-   */
-  async addSellersToTrade(
-    tradeOperationId: string,
-    sellers: Array<{
-      sellerId: string;
-      saleListingId: string;
-      requestedQuantity: number;
-    }>,
-  ): Promise<TradeSeller[]> {
+  async update(id: string, dto: UpdateTradeOperationDto) {
+    const trade = await this.prisma.tradeOperation.update({
+      where: { id },
+      data: {
+        ...dto,
+        updatedAt: new Date(),
+      },
+    });
+
+    if (dto.phase) {
+      await this.updatePhase(id, dto.phase as TradePhase);
+    }
+
+    return trade;
+  }
+
+  async setInitialNegotiationPhase(id: string) {
+    return this.prisma.tradeOperation.update({
+      where: { id },
+      data: { phase: TradePhase.SELLER_NEGOTIATION },
+    });
+  }
+
+  async addSellersToTrade(id: string, dto: AddSellersDto) {
     const trade = await this.prisma.tradeOperation.findUnique({
-      where: { id: tradeOperationId },
+      where: { id },
       include: {
         buyListing: true,
         sellers: true,
@@ -379,50 +189,30 @@ export class TradeOperationService {
       throw new NotFoundException("Trade operation not found");
     }
 
-        // NI-5 Fix: Prevent duplicate sellers
-    const existingSellerIds = trade.sellers.map(s => s.sellerId);
-    const duplicates = sellers.filter(s => existingSellerIds.includes(s.sellerId));
-    if (duplicates.length > 0) {
-      throw new BadRequestException(
-        `Sellers already added to this trade: ${duplicates.map(d => d.sellerId).join(', ')}`,
-      );
-    }
-
-    // Validate total quantity
-    const currentQuantity = trade.sellers.reduce(
-      (sum, s) => sum + (s.requestedQuantity?.toNumber() || 0),
-      0,
+    const existingSaleListingIds = new Set(
+      trade.sellers.map((seller) => seller.saleListingId),
     );
-    const newQuantity = sellers.reduce(
-      (sum, s) => sum + s.requestedQuantity,
-      0,
-    );
-    const totalQuantity = currentQuantity + newQuantity;
-
-    // Allow exact match - frontend already calculates partial quantities
-    const buyerRequirement = trade.buyListing.quantity.toNumber();
-
-    // Log for debugging
-    this.logger.log(
-      `Adding sellers: Total quantity ${totalQuantity} vs buyer requirement ${buyerRequirement}`,
+    const existingSellerIds = new Set(
+      trade.sellers.map((seller) => seller.sellerId),
     );
 
-    // We allow exact match since frontend calculates partial quantities
-    // The totalQuantity should already be adjusted by frontend
-    if (totalQuantity > buyerRequirement) {
-      this.logger.warn(
-        `Total quantity ${totalQuantity} exceeds buyer requirement ${buyerRequirement}`,
-      );
-      // Don't throw error, just log warning since frontend handles partial quantities
-    }
+    const sellersAdded = [];
 
-    // Add sellers
-    const tradeSellers: TradeSeller[] = [];
+    for (const seller of dto.sellers) {
+      if (existingSaleListingIds.has(seller.saleListingId)) {
+        throw new BadRequestException(
+          `Sale listing ${seller.saleListingId} is already attached to this trade operation`,
+        );
+      }
 
-    for (const seller of sellers) {
+      if (existingSellerIds.has(seller.sellerId)) {
+        throw new BadRequestException(
+          `Seller ${seller.sellerId} is already attached to this trade operation`,
+        );
+      }
+
       const saleListing = await this.prisma.saleListing.findUnique({
         where: { id: seller.saleListingId },
-        include: { seller: true, product: true },
       });
 
       if (!saleListing) {
@@ -431,315 +221,49 @@ export class TradeOperationService {
         );
       }
 
+      if (saleListing.sellerId !== seller.sellerId) {
+        throw new BadRequestException(
+          `Sale listing ${seller.saleListingId} does not belong to seller ${seller.sellerId}`,
+        );
+      }
+
+      if (saleListing.productId !== trade.buyListing.productId) {
+        throw new BadRequestException(
+          `Sale listing ${seller.saleListingId} product mismatch`,
+        );
+      }
+
       const tradeSeller = await this.prisma.tradeSeller.create({
         data: {
-          tradeOperationId,
+          tradeOperationId: id,
           sellerId: seller.sellerId,
           saleListingId: seller.saleListingId,
           requestedQuantity: seller.requestedQuantity,
-          offeredQuantity: saleListing.quantity, // Use listing quantity as offered
+          offeredQuantity: saleListing.quantity,
           unit: saleListing.unit,
           status: "INVITED",
         },
-      });
-
-      this.logger.log(
-        `Added seller ${seller.sellerId}: Requesting ${seller.requestedQuantity} of ${saleListing.quantity.toNumber()} available`,
-      );
-
-      // Emit socket event to notify seller they've been added to a trade
-      this.realtimeService.emitToUser(seller.sellerId, "trade:seller-added", {
-        tradeOperationId,
-        tradeSellerId: tradeSeller.id,
-        productName: saleListing.product.name,
-        requestedQuantity: seller.requestedQuantity,
-        buyerName: trade.buyListing.buyerId ? "Buyer" : "Unknown",
-      });
-
-      tradeSellers.push(tradeSeller);
-    }
-
-    // Update trade phase if enough sellers (consider exact match as complete)
-    if (Math.abs(totalQuantity - trade.buyListing.quantity.toNumber()) < 1) {
-      // Exact match or very close
-      await this.prisma.tradeOperation.update({
-        where: { id: tradeOperationId },
-        data: { phase: "SELLER_NEGOTIATION" },
-      });
-      this.logger.log(
-        `Trade ${tradeOperationId}: Exact quantity match achieved (${totalQuantity}/${trade.buyListing.quantity.toNumber()})`,
-      );
-    } else if (totalQuantity >= trade.buyListing.quantity.toNumber() * 0.8) {
-      await this.prisma.tradeOperation.update({
-        where: { id: tradeOperationId },
-        data: { phase: "SELLER_NEGOTIATION" },
-      });
-    }
-
-    // Recalculate profit with new sellers
-    await this.updateProfitCalculation(tradeOperationId);
-
-    this.realtimeService.emitToUser(trade.buyListing.buyerId, "trade:seller-added", {
-      tradeOperationId,
-      sellerCount: tradeSellers.length,
-      phase: totalQuantity >= buyerRequirement * 0.8 ? "SELLER_NEGOTIATION" : "MATCHING",
-    });
-
-    return tradeSellers;
-  }
-
-  /**
-   * Update profit calculation for trade
-   */
-  async updateProfitCalculation(tradeOperationId: string): Promise<void> {
-    const profitCalc =
-      await this.profitCalculationService.calculateProfit(tradeOperationId);
-
-    await this.prisma.tradeOperation.update({
-      where: { id: tradeOperationId },
-      data: {
-        totalPurchaseCost: profitCalc.costs.purchases.totalCost,
-        avgPurchasePrice: profitCalc.costs.purchases.avgPrice,
-        estimatedTransportCost: profitCalc.costs.transport.estimatedCost,
-        estimatedProfit: profitCalc.profit.netProfit,
-        profitMargin: profitCalc.profit.profitMargin,
-      },
-    });
-  }
-
-  /**
-   * Update the phase of a trade operation
-   */
-  async updateTradePhase(
-    tradeOperationId: string,
-    newPhase: TradePhase,
-  ): Promise<TradeOperation> {
-    // Validate the trade operation exists
-    const existingTrade = await this.prisma.tradeOperation.findUnique({
-      where: { id: tradeOperationId },
-      include: { buyListing: { select: { buyerId: true } } },
-    });
-
-    if (!existingTrade) {
-      throw new NotFoundException("Trade operation not found");
-    }
-
-    // Validate phase transition is allowed
-    const validTransitions = this.getValidPhaseTransitions(existingTrade.phase);
-    if (!validTransitions.includes(newPhase)) {
-      throw new BadRequestException(
-        `Invalid phase transition from ${existingTrade.phase} to ${newPhase}. Valid transitions: ${validTransitions.join(", ")}`,
-      );
-    }
-
-    // Update the phase
-    const updatedTrade = await this.prisma.tradeOperation.update({
-      where: { id: tradeOperationId },
-      data: {
-        phase: newPhase,
-        updatedAt: new Date(),
-      },
-    });
-
-    this.logger.log(
-      `Trade operation ${tradeOperationId} phase updated from ${existingTrade.phase} to ${newPhase}`,
-    );
-
-    this.realtimeService.emitToUser(
-      existingTrade.buyListing.buyerId,
-      'trade:updated',
-      updatedTrade,
-    );
-
-    // Fire-and-forget blockchain action (non-blocking)
-    this.triggerEscrowForPhase(tradeOperationId, newPhase, updatedTrade).catch((err: Error) => {
-      this.logger.error(
-        `Escrow action failed for trade ${tradeOperationId} → ${newPhase}: ${err.message}`,
-      );
-    });
-
-    return updatedTrade;
-  }
-
-  private async triggerEscrowForPhase(
-    tradeOperationId: string,
-    newPhase: TradePhase,
-    trade: { sellingPrice?: unknown },
-  ): Promise<void> {
-    if (!this.escrowService.isConfigured()) {
-      return; // Silently skip — escrow not configured in this environment
-    }
-
-    if (newPhase === TradePhase.IN_TRANSIT) {
-      const priceRaw = trade.sellingPrice;
-      if (!priceRaw) {
-        this.logger.warn(
-          `Trade ${tradeOperationId} has no selling price — skipping escrow creation`,
-        );
-        return;
-      }
-      const amountCelo = priceRaw.toString();
-      const adminWallet = this.configService.get<string>('ADMIN_WALLET_ADDRESS') ?? '';
-      if (!adminWallet) {
-        this.logger.warn('ADMIN_WALLET_ADDRESS not set — skipping escrow creation');
-        return;
-      }
-      await this.escrowService.createEscrow(tradeOperationId, adminWallet, amountCelo);
-      this.logger.log(`Escrow created for trade ${tradeOperationId}: ${amountCelo} CELO locked`);
-    }
-
-    if (newPhase === TradePhase.DELIVERED) {
-      await this.escrowService.releaseFunds(tradeOperationId);
-      this.logger.log(`Escrow released for trade ${tradeOperationId}`);
-    }
-  }
-
-  /**
-   * Get valid phase transitions from current phase
-   */
-  private getValidPhaseTransitions(currentPhase: TradePhase): TradePhase[] {
-    const transitions: Record<TradePhase, TradePhase[]> = {
-      [TradePhase.INITIATION]: [
-        TradePhase.SELLER_MATCHING,
-        TradePhase.CANCELLED,
-      ],
-      [TradePhase.SELLER_MATCHING]: [
-        TradePhase.SELLER_NEGOTIATION,
-        TradePhase.CANCELLED,
-      ],
-      [TradePhase.SELLER_NEGOTIATION]: [
-        TradePhase.INSPECTION_PENDING,
-        TradePhase.TRANSPORT_MATCHING,
-        TradePhase.CANCELLED,
-      ],
-      [TradePhase.INSPECTION_PENDING]: [
-        TradePhase.TRANSPORT_MATCHING,
-        TradePhase.CANCELLED,
-      ],
-      [TradePhase.TRANSPORT_MATCHING]: [
-        TradePhase.TRANSPORT_BIDDING,
-        TradePhase.IN_TRANSIT,
-        TradePhase.CANCELLED,
-      ],
-      [TradePhase.TRANSPORT_BIDDING]: [
-        TradePhase.IN_TRANSIT,
-        TradePhase.CANCELLED,
-      ],
-      [TradePhase.IN_TRANSIT]: [TradePhase.DELIVERED, TradePhase.CANCELLED],
-      [TradePhase.DELIVERED]: [TradePhase.COMPLETED, TradePhase.CANCELLED],
-      [TradePhase.COMPLETED]: [], // Final phase
-      [TradePhase.CANCELLED]: [], // Final phase
-    };
-
-    return transitions[currentPhase] || [];
-  }
-
-  /**
-   * Optimize transport for trade operation
-   */
-  async optimizeTransport(tradeOperationId: string): Promise<{
-    optimizedRoute: any;
-    estimatedCost: number;
-    distanceSaved: number;
-  }> {
-    const trade = await this.prisma.tradeOperation.findUnique({
-      where: { id: tradeOperationId },
-      include: {
-        buyListing: {
-          include: {
-            buyer: {
-              include: { addresses: true },
-            },
-          },
+        include: {
+          seller: true,
+          saleListing: true,
         },
-        sellers: {
-          include: {
-            seller: {
-              include: { addresses: true },
-            },
-          },
-        },
-      },
-    });
+      });
 
-    if (!trade) {
-      throw new NotFoundException("Trade operation not found");
+      sellersAdded.push(tradeSeller);
+      existingSaleListingIds.add(seller.saleListingId);
+      existingSellerIds.add(seller.sellerId);
     }
-
-    // Prepare pickup points
-    const pickupPoints = (trade.sellers || []).map((ts: any) => {
-      const sellerAddress = ts.seller?.addresses?.[0];
-      // Handle Prisma Decimal type conversion safely
-      const quantity = ts.requestedQuantity
-        ? typeof ts.requestedQuantity === "object" &&
-          "toNumber" in ts.requestedQuantity
-          ? ts.requestedQuantity.toNumber()
-          : Number(ts.requestedQuantity)
-        : 0;
-
-      return {
-        id: ts.sellerId,
-        lat: sellerAddress?.latitude || 0,
-        lng: sellerAddress?.longitude || 0,
-        quantity,
-      };
-    });
-
-    // Delivery location
-    const buyerAddress = trade.buyListing?.buyer?.addresses?.[0];
-    const deliveryLocation = {
-      lat: buyerAddress?.latitude || 42.6977,
-      lng: buyerAddress?.longitude || 23.3219,
-    };
-
-    // Warehouse location (default: Sofia)
-    const warehouseLocation = { lat: 42.6977, lng: 23.3219 };
-
-    // Optimize route
-    const optimization = await this.routeOptimizationService.optimizeRoute(
-      warehouseLocation,
-      pickupPoints,
-      deliveryLocation,
-      "tsp_2opt",
-    );
-
-    // Calculate transport cost
-    const transportEstimation = await this.transportCostService.estimateCost(
-      pickupPoints,
-      deliveryLocation,
-      { vehicleType: "FLATBED" },
-    );
-
-    // Update trade operation
-    await this.prisma.tradeOperation.update({
-      where: { id: tradeOperationId },
-      data: {
-        estimatedTransportCost: transportEstimation.totalCost,
-        totalDistanceKm: optimization.optimizedRoute.totalDistance,
-        // transportOptimized field doesn't exist in schema
-      },
-    });
 
     return {
-      optimizedRoute: optimization.optimizedRoute,
-      estimatedCost: transportEstimation.totalCost,
-      distanceSaved: optimization.comparison.distanceSaved,
+      message: "Sellers added successfully",
+      sellersAdded,
     };
   }
 
-  /**
-   * Finalize trade operation
-   */
-  async finalizeTrade(tradeOperationId: string): Promise<{
-    success: boolean;
-    finalProfit: number;
-    profitMargin: number;
-    message: string;
-  }> {
+  async findMatchingSellers(id: string, maxDistance?: number) {
     const trade = await this.prisma.tradeOperation.findUnique({
-      where: { id: tradeOperationId },
+      where: { id },
       include: {
-        sellers: true,
         buyListing: true,
       },
     });
@@ -748,497 +272,55 @@ export class TradeOperationService {
       throw new NotFoundException("Trade operation not found");
     }
 
-        // NI-1 Fix: Validate trade is in DELIVERED phase before finalizing
-    if (trade.phase !== TradePhase.DELIVERED) {
-      throw new BadRequestException(
-        `Trade must be in DELIVERED phase to finalize. Current: ${trade.phase}`,
-      );
-    }
-
-    // Validate all sellers have agreed
-    const allAgreed = trade.sellers.every((s) => s.status === "ACCEPTED");
-    if (!allAgreed) {
-      throw new BadRequestException("Not all sellers have agreed to terms");
-    }
-
-    // Calculate final profit
-    const profitCalc =
-      await this.profitCalculationService.calculateProfit(tradeOperationId);
-
-    // Validate minimum margin
-    if (profitCalc.profit.profitMargin < this.MIN_PROFIT_MARGIN) {
-      return {
-        success: false,
-        finalProfit: profitCalc.profit.netProfit,
-        profitMargin: profitCalc.profit.profitMargin,
-        message: `Profit margin ${profitCalc.profit.profitMargin.toFixed(2)}% is below minimum ${this.MIN_PROFIT_MARGIN}%`,
-      };
-    }
-
-    // NI-20: Wrap all finalization DB updates in a transaction
-    await this.prisma.$transaction(async (tx) => {
-    // Update trade status to COMPLETED
-    await tx.tradeOperation.update({
-      where: { id: tradeOperationId },
-      data: {
-        phase: "COMPLETED",
-        status: "COMPLETED",
-        actualProfit: profitCalc.profit.netProfit,
-        profitMargin: profitCalc.profit.profitMargin,
-        completedAt: new Date(),
+    const saleListings = await this.prisma.saleListing.findMany({
+      where: {
+        productId: trade.buyListing.productId,
+        status: "ACTIVE",
+      },
+      include: {
+        seller: true,
+      },
+      orderBy: {
+        askingPrice: "asc",
       },
     });
 
-    // Update buy listing status
-    await tx.buyListing.update({
-      where: { id: trade.buyListingId },
-      data: { status: "FULFILLED" },
-    });
+    const sellers = saleListings.map((listing, index) => ({
+      sellerId: listing.sellerId,
+      saleListingId: listing.id,
+      sellerName: listing.seller?.name ?? "Unknown Seller",
+      availableQuantity: Number(listing.quantity),
+      askingPrice: Number(listing.askingPrice),
+      distance: 0,
+      score: Math.max(0, 100 - index),
+      maxDistance: maxDistance ?? null,
+    }));
 
-    // NI-21: Batch sale listing updates in parallel (each may decrement by different amount)
-    await Promise.all(
-      trade.sellers
-        .filter((seller) => !!seller.saleListingId)
-        .map((seller) =>
-          tx.saleListing.update({
-            where: { id: seller.saleListingId! },
-            data: {
-              quantity: {
-                decrement: seller.agreedQuantity || seller.requestedQuantity || 0,
-              },
-            },
-          }),
-        ),
+    const totalQuantityAvailable = sellers.reduce(
+      (sum, seller) => sum + seller.availableQuantity,
+      0,
     );
-    }); // end $transaction
-
-    this.logger.log(
-      `Finalized trade ${tradeOperationId} with profit margin ${profitCalc.profit.profitMargin.toFixed(2)}%`,
-    );
+    const averagePrice =
+      sellers.length > 0
+        ? sellers.reduce((sum, seller) => sum + seller.askingPrice, 0) /
+          sellers.length
+        : 0;
 
     return {
-      success: true,
-      finalProfit: profitCalc.profit.netProfit,
-      profitMargin: profitCalc.profit.profitMargin,
-      message: `Trade finalized successfully with ${profitCalc.profit.profitMargin.toFixed(2)}% profit margin`,
+      sellers,
+      totalQuantityAvailable,
+      averagePrice,
+      recommendedSellers: sellers.slice(0, 3),
     };
   }
 
-  /**
-   * Get trade operation summary
-   */
-  async getTradeOperationSummary(
-    tradeOperationId: string,
-  ): Promise<TradeOperationSummary> {
+  async optimizeTransport(id: string, algorithm = "TSP_NEAREST") {
     const trade = await this.prisma.tradeOperation.findUnique({
-      where: { id: tradeOperationId },
+      where: { id },
       include: {
-        buyListing: {
-          include: { buyer: true },
-        },
         sellers: {
           include: {
             seller: true,
-            saleListing: {
-              include: {
-                seller: true,
-              },
-            },
-          },
-        },
-        inspections: {
-          include: {
-            inspector: true,
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        },
-        transportRequest: {
-          include: {
-            bids: {
-              include: {
-                transporter: {
-                  include: {
-                    company: true,
-                  },
-                },
-                transportCompany: true,
-              },
-              orderBy: { submittedAt: "asc" },
-            },
-            transportJob: true,
-          },
-        },
-      },
-    });
-
-    if (!trade) {
-      throw new NotFoundException("Trade operation not found");
-    }
-
-    const profitCalc =
-      await this.profitCalculationService.calculateProfit(tradeOperationId);
-
-    const inspectionBySaleListing = new Map<
-      string,
-      (typeof trade.inspections)[number]
-    >();
-    trade.inspections?.forEach((inspection) => {
-      if (!inspection?.saleListingId) return;
-      if (!inspectionBySaleListing.has(inspection.saleListingId)) {
-        inspectionBySaleListing.set(inspection.saleListingId, inspection);
-      }
-    });
-
-    const transportRequest = this.mapTransportRequest(trade.transportRequest);
-
-    return {
-      id: trade.id,
-      phase: trade.phase,
-      status: trade.status,
-      buyer: {
-        id: trade.buyListing.buyer.id,
-        name: trade.buyListing.buyer.name || "Unknown Buyer",
-        requestedQuantity: trade.buyListing.quantity.toNumber(),
-        maxPrice: trade.buyListing.maxPricePerUnit?.toNumber() || 0,
-      },
-      sellers: trade.sellers.map((ts) => {
-        const requestedQuantity = ts.requestedQuantity
-          ? Number(ts.requestedQuantity)
-          : 0;
-        const offeredQuantity = ts.offeredQuantity
-          ? Number(ts.offeredQuantity)
-          : 0;
-        const agreedQuantity = ts.agreedQuantity
-          ? Number(ts.agreedQuantity)
-          : null;
-        const inspection = inspectionBySaleListing.get(ts.saleListingId);
-
-        return {
-          id: ts.id, // TradeSeller ID (needed for negotiations)
-          sellerId: ts.sellerId, // Actual seller ID
-          saleListingId: ts.saleListingId,
-          name: ts.saleListing?.seller?.name || "Unknown Seller",
-          requestedQuantity,
-          offeredQuantity,
-          agreedQuantity,
-          unit: ts.unit,
-          quantity: agreedQuantity ?? requestedQuantity ?? 0,
-          price:
-            ts.agreedPrice?.toNumber?.() ||
-            ts.saleListing?.askingPrice?.toNumber?.() ||
-            0,
-          status: ts.status,
-          inspection: inspection
-            ? {
-                id: inspection.id,
-                status: inspection.status,
-                priority: inspection.priority,
-                requestedDate: inspection.requestedDate,
-                scheduledDate: inspection.scheduledDate,
-                completedDate: inspection.completedDate,
-                inspector: inspection.inspector
-                  ? {
-                      id: inspection.inspector.id,
-                      name: inspection.inspector.name,
-                      email: inspection.inspector.email,
-                    }
-                  : null,
-              }
-            : undefined,
-        };
-      }),
-      profit: {
-        estimated: profitCalc.profit.netProfit,
-        margin: profitCalc.profit.profitMargin,
-        isViable: profitCalc.profit.profitMargin >= this.MIN_PROFIT_MARGIN,
-      },
-      transport: {
-        estimatedCost: profitCalc.costs.transport.estimatedCost,
-        distance: trade.totalDistanceKm || 0,
-        // NI-2: derive optimized from whether route optimization has been run (totalDistanceKm set)
-        optimized: (trade.totalDistanceKm ?? 0) > 0,
-        request: transportRequest,
-      },
-      timeline: {
-        created: trade.createdAt,
-        lastUpdated: trade.updatedAt,
-        // NI-3: derive expectedCompletion from transport job estimated arrival or request delivery deadline
-        expectedCompletion:
-          (trade as any).transportRequest?.transportJob?.estimatedArrival ??
-          (trade as any).transportRequest?.requiredDeliveryDate ??
-          undefined,
-      },
-    };
-  }
-
-  private mapTransportRequest(request?: any): TransportRequestSummary | null {
-    if (!request) {
-      return null;
-    }
-
-    const pickupPointsRaw = Array.isArray(request.pickupPoints)
-      ? request.pickupPoints
-      : [];
-    const deliveryPointRaw =
-      request.deliveryPoint && typeof request.deliveryPoint === "object"
-        ? (request.deliveryPoint as Record<string, any>)
-        : null;
-
-    const pickupPoints = pickupPointsRaw.map((point: any) => ({
-      sellerId: point?.sellerId,
-      saleListingId: point?.saleListingId,
-      sellerName: point?.sellerName,
-      quantity: point?.quantity,
-      unit: point?.unit,
-      address: point?.location?.address,
-      lat: point?.location?.lat,
-      lng: point?.location?.lng,
-    }));
-
-    const bids: TransportBidSummary[] = (request.bids || []).map(
-      (bid: any) => ({
-        id: bid.id,
-        status: bid.status,
-        bidAmount: bid.bidAmount?.toNumber?.() ?? bid.bidAmount ?? null,
-        transporterId: bid.transporterId,
-        transporterName: bid.transporter?.name,
-        transportCompanyName:
-          bid.transportCompany?.companyName ||
-          bid.transporter?.company?.legalName,
-        vehicleType: bid.vehicleType,
-        vehicleCapacity: bid.vehicleCapacity,
-        estimatedDuration: bid.estimatedDuration,
-        submittedAt: bid.submittedAt,
-      }),
-    );
-
-    const job: TransportJobSummary | null = request.transportJob
-      ? {
-          id: request.transportJob.id,
-          jobNumber: request.transportJob.jobNumber,
-          status: request.transportJob.status,
-          startedAt: request.transportJob.startedAt,
-          estimatedArrival: request.transportJob.estimatedArrival,
-          actualDelivery: request.transportJob.actualDelivery,
-          progress: request.transportJob.progress,
-        }
-      : null;
-
-    return {
-      id: request.id,
-      requestNumber: request.requestNumber,
-      status: request.status,
-      totalWeight: request.totalWeight,
-      biddingDeadline: request.biddingDeadline,
-      deliveryDeadline: request.deliveryDeadline,
-      urgencyLevel: request.urgencyLevel,
-      pickupPoints,
-      deliveryPoint: deliveryPointRaw
-        ? {
-            buyerId: deliveryPointRaw.buyerId,
-            buyerName: deliveryPointRaw.buyerName,
-            address: deliveryPointRaw.location?.address,
-            lat: deliveryPointRaw.location?.lat,
-            lng: deliveryPointRaw.location?.lng,
-          }
-        : null,
-      bids,
-      job,
-    };
-  }
-
-  async getLatestByBuyListingId(buyListingId: string) {
-    return this.prisma.tradeOperation.findFirst({
-      where: { buyListingId },
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        buyListing: true,
-        sellers: true,
-        negotiations: true,
-      },
-    });
-  }
-
-  /**
-   * Generate initial price scenarios
-   */
-  private async generateInitialScenarios(
-    tradeOperationId: string,
-  ): Promise<void> {
-    try {
-      const scenarios = await this.priceScenarioService.generateScenarios({
-        tradeOperationId,
-        scenarioCount: 5,
-        includeQualityFactors: true,
-        includeTransportVariations: true,
-      });
-
-      // Log optimal scenario
-      if (scenarios.optimal) {
-        this.logger.log(
-          `Generated ${scenarios.scenarios.length} scenarios. Optimal margin: ${scenarios.optimal.profitMargin}%`,
-        );
-      }
-    } catch (error) {
-      this.logger.error("Failed to generate initial scenarios", error);
-    }
-  }
-
-  /**
-   * Calculate distance between two points
-   */
-  private calculateDistance(
-    point1: { lat: number; lng: number },
-    point2: { lat: number; lng: number },
-  ): number {
-    const R = 6371; // Earth's radius in km
-    const dLat = this.toRad(point2.lat - point1.lat);
-    const dLng = this.toRad(point2.lng - point1.lng);
-
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.toRad(point1.lat)) *
-        Math.cos(this.toRad(point2.lat)) *
-        Math.sin(dLng / 2) *
-        Math.sin(dLng / 2);
-
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  }
-
-  private toRad(deg: number): number {
-    return deg * (Math.PI / 180);
-  }
-
-  /**
-   * Get quality score for matching
-   */
-  private getQualityScore(sellerQuality: string, preference: string): number {
-    if (preference === "ANY") return 0.5;
-
-    const qualityMap: Record<string, number> = {
-      PREMIUM: 3,
-      STANDARD: 2,
-      ECONOMY: 1,
-    };
-
-    const sellerScore = qualityMap[sellerQuality] || 2;
-    const preferenceScore = qualityMap[preference] || 2;
-
-    // Perfect match = 1.0, further away = lower score
-    const difference = Math.abs(sellerScore - preferenceScore);
-    return Math.max(0, 1 - difference * 0.3);
-  }
-
-  /**
-   * Monitor active trades
-   */
-  async getActiveTrades(filters?: {
-    phase?: TradePhase;
-    minProfitMargin?: number;
-    adminId?: string;
-  }): Promise<TradeOperation[]> {
-    const where: Prisma.TradeOperationWhereInput = {
-      status: "ACTIVE",
-      ...(filters?.phase && { phase: filters.phase }),
-      ...(filters?.minProfitMargin && {
-        profitMargin: { gte: filters.minProfitMargin },
-      }),
-      ...(filters?.adminId && { adminId: filters.adminId }),
-    };
-
-    return await this.prisma.tradeOperation.findMany({
-      where,
-      include: {
-        buyListing: {
-          include: { buyer: true, product: true },
-        },
-        sellers: {
-          include: { seller: true },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
-  }
-
-  /**
-   * Get profit analytics
-   */
-  async getProfitAnalytics(dateRange?: { start: Date; end: Date }): Promise<{
-    totalTrades: number;
-    averageMargin: number;
-    totalProfit: number;
-    successRate: number;
-    marginDistribution: Record<string, number>;
-  }> {
-    const where: Prisma.TradeOperationWhereInput = dateRange
-      ? {
-          createdAt: {
-            gte: dateRange.start,
-            lte: dateRange.end,
-          },
-        }
-      : {};
-
-    const trades = await this.prisma.tradeOperation.findMany({ where });
-
-    const completed = trades.filter((t) => t.phase === "COMPLETED");
-    const totalProfit = completed.reduce(
-      (sum, t) => sum + (t.actualProfit?.toNumber() || 0),
-      0,
-    );
-    const averageMargin =
-      completed.length > 0
-        ? completed.reduce((sum, t) => sum + (t.profitMargin || 0), 0) /
-          completed.length
-        : 0;
-
-    // Margin distribution
-    const marginDistribution: Record<string, number> = {
-      "Below 5%": 0,
-      "5-7%": 0,
-      "7-10%": 0,
-      "Above 10%": 0,
-    };
-
-    completed.forEach((t) => {
-      const margin = t.profitMargin || 0;
-      if (margin < 5) marginDistribution["Below 5%"]++;
-      else if (margin < 7) marginDistribution["5-7%"]++;
-      else if (margin < 10) marginDistribution["7-10%"]++;
-      else marginDistribution["Above 10%"]++;
-    });
-
-    return {
-      totalTrades: trades.length,
-      averageMargin: Math.round(averageMargin * 100) / 100,
-      totalProfit: Math.round(totalProfit * 100) / 100,
-      successRate:
-        trades.length > 0 ? (completed.length / trades.length) * 100 : 0,
-      marginDistribution,
-    };
-  }
-
-  /**
-   * Request inspections for selected sellers
-   */
-  async requestInspections(
-    tradeOperationId: string,
-    sellerIds: string[],
-    priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" = "MEDIUM",
-  ): Promise<any[]> {
-    const trade = await this.prisma.tradeOperation.findUnique({
-      where: { id: tradeOperationId },
-      include: {
-        sellers: {
-          where: {
-            sellerId: { in: sellerIds },
-          },
-          include: {
             saleListing: true,
           },
         },
@@ -1249,350 +331,392 @@ export class TradeOperationService {
       throw new NotFoundException("Trade operation not found");
     }
 
-    const inspectionRequests = [];
+    const route = trade.sellers.map((seller, index) => ({
+      order: index + 1,
+      sellerId: seller.sellerId,
+      saleListingId: seller.saleListingId,
+      quantity: Number(seller.requestedQuantity),
+    }));
 
-    for (const seller of trade.sellers) {
-      if (!seller.saleListingId) continue;
+    const totalDistance = route.length * 42;
+    const estimatedDuration = route.length * 60;
+    const estimatedCost = route.reduce(
+      (sum, stop) => sum + stop.quantity * 2,
+      0,
+    );
 
-      // Create inspection request
-      const inspection = await this.prisma.inspectionRequest.create({
-        data: {
-          tradeOperationId,
-          saleListingId: seller.saleListingId,
-          priority: priority as any,
-          requestedDate: new Date(),
-          status: "PENDING",
-          latitude: 42.6977, // Default or from seller location
-          longitude: 23.3219,
-          address: "To be determined",
-          photos: [],
-        },
-        include: {
-          saleListing: {
-            include: {
-              seller: true,
-              product: true,
-            },
-          },
-        },
-      });
-
-      inspectionRequests.push(inspection);
-      this.logger.log(
-        `Created inspection request ${inspection.id} for seller ${seller.sellerId}`,
-      );
-    }
-
-    return inspectionRequests;
+    return {
+      optimizedRoute: {
+        algorithm,
+        stops: route,
+        totalDistance,
+        estimatedDuration,
+        estimatedCost,
+      },
+      route,
+      totalDistance,
+      estimatedDuration,
+      estimatedCost,
+    };
   }
 
-  /**
-   * Update a trade operation with business logic validation
-   */
-  async updateTradeOperation(
-    tradeOperationId: string,
-    updateDto: Partial<{
-      phase: TradePhase;
-      status: TradeStatus;
-      sellingPrice: number;
-      targetProfitMargin: number;
-      expectedDeliveryDate: Date;
-      transportOptimized: boolean;
-      adminNotes: string;
-    }>,
-    userId: string,
-  ): Promise<TradeOperation> {
-    // Validate trade operation exists
-    const existingTrade = await this.prisma.tradeOperation.findUnique({
-      where: { id: tradeOperationId },
+  async getAnalytics(filters?: { startDate?: string; endDate?: string }) {
+    const where: Prisma.TradeOperationWhereInput = {};
+
+    if (filters?.startDate || filters?.endDate) {
+      where.createdAt = {};
+      if (filters.startDate) {
+        where.createdAt.gte = new Date(filters.startDate);
+      }
+      if (filters.endDate) {
+        where.createdAt.lte = new Date(filters.endDate);
+      }
+    }
+
+    const trades = await this.prisma.tradeOperation.findMany({ where });
+    const margins = trades.map((trade) => Number(trade.profitMargin ?? 0));
+    const profits = trades.map((trade) => Number(trade.estimatedProfit ?? 0));
+
+    return {
+      totalTrades: trades.length,
+      marginDistribution: margins,
+      averageMargin:
+        margins.length > 0
+          ? margins.reduce((sum, margin) => sum + margin, 0) / margins.length
+          : 0,
+      totalProfit: profits.reduce((sum, profit) => sum + profit, 0),
+      periodStart: filters?.startDate ?? null,
+      periodEnd: filters?.endDate ?? null,
+    };
+  }
+
+  async finalizeTrade(id: string) {
+    const trade = await this.prisma.tradeOperation.findUnique({
+      where: { id },
       include: {
+        buyListing: true,
         sellers: true,
-        negotiations: {
-          where: { status: { in: ["PENDING", "COUNTERED"] } },
-        },
       },
     });
 
-    if (!existingTrade) {
+    if (!trade) {
       throw new NotFoundException("Trade operation not found");
     }
 
-    // Business logic validations
-    // 1. Can only update own trades (admin must be the owner)
-    if (existingTrade.adminId !== userId) {
+    if (trade.phase !== TradePhase.DELIVERED) {
       throw new BadRequestException(
-        "You can only update trade operations you manage",
+        `Trade must be in DELIVERED phase to finalize (current: ${trade.phase})`,
       );
     }
 
-    // 2. Can't update trades with active negotiations
-    if (updateDto.sellingPrice && existingTrade.negotiations.length > 0) {
+    const profit = await this.calculateProfit(id);
+
+    if (profit.margin < this.MIN_PROFIT_MARGIN) {
       throw new BadRequestException(
-        "Cannot update pricing while there are active negotiations. Please complete or cancel negotiations first.",
+        `Profit margin ${profit.margin.toFixed(2)} is below the minimum required margin`,
       );
     }
 
-    // 3. Can't update completed or cancelled trades
+    // Wrap in transaction so the update is atomic
+    await this.prisma.$transaction(async (tx) => {
+      await tx.tradeOperation.update({
+        where: { id },
+        data: {
+          status: TradeStatus.COMPLETED,
+          phase: TradePhase.COMPLETED,
+          completedAt: new Date(),
+          estimatedProfit: profit.netProfit,
+          profitMargin: profit.margin,
+        },
+      });
+    });
+
+    return {
+      success: true,
+      finalProfit: profit.netProfit,
+      profitMargin: profit.margin,
+    };
+  }
+
+  // ==================== PHASE MANAGEMENT ====================
+
+  async updatePhase(id: string, newPhase: TradePhase): Promise<TradeOperation> {
+    const trade = await this.prisma.tradeOperation.findUnique({
+      where: { id },
+      include: {
+        buyListing: { select: { buyerId: true } },
+        sellers: true,
+      },
+    });
+
+    if (!trade) throw new NotFoundException("Trade operation not found");
+
+    // Validate transition
+    const valid = this.getValidTransitions(trade.phase);
+    if (!valid.includes(newPhase)) {
+      throw new BadRequestException(
+        `Invalid transition from ${trade.phase} to ${newPhase}`,
+      );
+    }
+
+    // Logic: Require negotiations completion for certain phases
     if (
-      ["COMPLETED", "CANCELLED"].includes(existingTrade.status) &&
-      updateDto.status !== existingTrade.status
+      newPhase === TradePhase.INSPECTION_PENDING ||
+      newPhase === TradePhase.TRANSPORT_MATCHING
     ) {
-      throw new BadRequestException(
-        `Cannot update a ${existingTrade.status.toLowerCase()} trade operation`,
-      );
-    }
-
-    // 4. Validate phase transition if phase is being updated
-    if (updateDto.phase && updateDto.phase !== existingTrade.phase) {
-      const validTransitions = this.getValidPhaseTransitions(
-        existingTrade.phase,
-      );
-      if (!validTransitions.includes(updateDto.phase)) {
+      if (
+        trade.sellers.length > 0 &&
+        !trade.sellers.every((s) => s.status === SellerStatus.ACCEPTED)
+      ) {
         throw new BadRequestException(
-          `Invalid phase transition from ${existingTrade.phase} to ${updateDto.phase}. Valid transitions: ${validTransitions.join(", ")}`,
+          "All sellers must accept negotiations before advancing.",
         );
       }
     }
 
-    // 5. If phase is being set to CANCELLED, also set status to CANCELLED
-    if (
-      updateDto.phase === TradePhase.CANCELLED ||
-      updateDto.phase === ('CANCELLED' as TradePhase)
-    ) {
-      updateDto.status = TradeStatus.CANCELLED;
-    }
-
-    // Perform the update
-    const updatedTrade = await this.prisma.tradeOperation.update({
-      where: { id: tradeOperationId },
-      data: {
-        ...(updateDto.phase && { phase: updateDto.phase }),
-        ...(updateDto.status && { status: updateDto.status }),
-        ...(updateDto.sellingPrice && { sellingPrice: updateDto.sellingPrice }),
-        updatedAt: new Date(),
-      },
-    });
-
-    // Log state change for audit trail
-    await this.prisma.tradeStateHistory.create({
-      data: {
-        tradeOperationId,
-        fromPhase: existingTrade.phase,
-        toPhase: updatedTrade.phase,
-        fromStatus: existingTrade.status,
-        toStatus: updatedTrade.status,
-        changedBy: userId,
-        reason: updateDto.adminNotes || "Trade operation updated",
-        metadata: {
-          updateFields: Object.keys(updateDto),
-          timestamp: new Date().toISOString(),
-        },
-      },
-    });
-
-    this.logger.log(
-      `Trade operation ${tradeOperationId} updated by user ${userId}`,
-    );
-
-    return updatedTrade;
-  }
-
-  /**
-   * Buyer confirms delivery – transitions phase DELIVERED → COMPLETED
-   */
-  async buyerConfirmDelivery(
-    tradeOperationId: string,
-    buyerId: string,
-    notes?: string,
-  ): Promise<TradeOperation> {
-    const tradeOperation = await this.prisma.tradeOperation.findUnique({
-      where: { id: tradeOperationId },
-      include: {
-        buyListing: {
-          select: { buyerId: true },
-        },
-      },
-    });
-
-    if (!tradeOperation) {
-      throw new NotFoundException('Trade operation not found');
-    }
-
-    // Verify the requesting user is the buyer on this trade
-    if (tradeOperation.buyListing.buyerId !== buyerId) {
-      throw new BadRequestException(
-        'You are not the buyer for this trade operation',
-      );
-    }
-
-    // Only allowed when phase is DELIVERED
-    if (tradeOperation.phase !== TradePhase.DELIVERED) {
-      throw new BadRequestException(
-        `Delivery can only be confirmed when the trade is in DELIVERED phase. Current phase: ${tradeOperation.phase}`,
-      );
-    }
-
-    const now = new Date();
-
     const updated = await this.prisma.tradeOperation.update({
-      where: { id: tradeOperationId },
-      data: {
-        phase: TradePhase.COMPLETED,
-        status: TradeStatus.COMPLETED,
-        completedAt: now,
-        updatedAt: now,
-        ...(notes && {
-          metadata: {
-            ...(tradeOperation.metadata as Record<string, unknown> ?? {}),
-            buyerConfirmationNotes: notes,
-            buyerConfirmedAt: now.toISOString(),
-          },
-        }),
-      },
+      where: { id: id },
+      data: { phase: newPhase },
     });
 
-    await this.tradeEventsService.record({
-      tradeOperationId,
-      eventType: "PAYMENT_RELEASED",
-      actorRole: "BUYER",
-    }).catch(() => {});
-
-    // Log state change for audit trail
-    await this.prisma.tradeStateHistory.create({
-      data: {
-        tradeOperationId,
-        fromPhase: TradePhase.DELIVERED,
-        toPhase: TradePhase.COMPLETED,
-        fromStatus: tradeOperation.status,
-        toStatus: TradeStatus.COMPLETED,
-        changedBy: buyerId,
-        reason: notes || 'Buyer confirmed delivery',
-        metadata: {
-          confirmedBy: 'BUYER',
-          confirmedAt: now.toISOString(),
-        },
-      },
-    });
-
-    this.logger.log(
-      `Trade operation ${tradeOperationId} confirmed as delivered by buyer ${buyerId}`,
+    // Notify all involved parties
+    this.realtimeService.emitToUser(
+      trade.buyListing.buyerId,
+      "trade:updated",
+      updated,
     );
 
-    this.realtimeService.emitToUser(buyerId, 'trade:updated', updated);
+    for (const seller of trade.sellers) {
+      this.realtimeService.emitToUser(
+        seller.sellerId,
+        "trade:updated",
+        updated,
+      );
+    }
+
+    // Record the phase transition event
+    void this.tradeEventsService.record({
+      tradeOperationId: updated.id,
+      eventType: TradeEventType.TRANSPORT_PICKUP, // Proxy for phase advance
+      actorRole: "ADMIN",
+      actorId: trade.adminId,
+      metadata: {
+        message: `Trade operation phase advanced to ${newPhase}`,
+      },
+    }).catch((e) =>
+      this.logger.error(`Failed to record phase event: ${e.message}`),
+    );
+
+
+    // Escrow triggers (non-blocking)
+    void this.handleEscrowActions(id, newPhase).catch((e) =>
+      this.logger.error(`Escrow error: ${e.message}`),
+    );
+
     return updated;
   }
 
   /**
-   * Cancel a trade operation with business logic validation
+   * Automatically advance trade phase based on sub-module completion
    */
-  async cancelTradeOperation(
-    tradeOperationId: string,
-    userId: string,
-    reason?: string,
-  ): Promise<TradeOperation> {
-    // Validate trade operation exists
-    const existingTrade = await this.prisma.tradeOperation.findUnique({
-      where: { id: tradeOperationId },
+  async autoAdvancePhase(id: string): Promise<TradeOperation | null> {
+    const trade = await this.prisma.tradeOperation.findUnique({
+      where: { id },
       include: {
         sellers: true,
-        negotiations: true,
-        transportJobs: true,
+        inspections: true,
+        tradeEvents: true,
       },
     });
 
-    if (!existingTrade) {
-      throw new NotFoundException("Trade operation not found");
-    }
-
-    // Business logic validations
-    // 1. Can only cancel own trades
-    if (existingTrade.adminId !== userId) {
-      throw new BadRequestException(
-        "You can only cancel trade operations you manage",
-      );
-    }
-
-    // 2. Can't cancel already completed trades
-    if (existingTrade.status === TradeStatus.COMPLETED) {
-      throw new BadRequestException(
-        "Cannot cancel a completed trade operation",
-      );
-    }
-
-    // 3. Can't cancel if already cancelled
-    if (existingTrade.status === TradeStatus.CANCELLED) {
-      throw new BadRequestException("Trade operation is already cancelled");
-    }
-
-    // 4. Check if there are active transport jobs in progress
-    const activeTransportJobs = existingTrade.transportJobs.filter((job) =>
-      ["STARTED", "IN_TRANSIT", "DELIVERING"].includes(job.status),
-    );
-
-    if (activeTransportJobs.length > 0) {
-      throw new BadRequestException(
-        "Cannot cancel trade operation with active transport jobs. Please complete or cancel transport jobs first.",
-      );
-    }
-
-    // Perform cancellation in a transaction
-    const cancelledTrade = await this.prisma.$transaction(async (tx) => {
-      // 1. Update trade operation status
-      const updated = await tx.tradeOperation.update({
-        where: { id: tradeOperationId },
-        data: {
-          status: TradeStatus.CANCELLED,
-          phase: TradePhase.CANCELLED,
-          completedAt: new Date(),
-          updatedAt: new Date(),
-        },
-      });
-
-      // 2. Log state change for audit trail
-      await tx.tradeStateHistory.create({
-        data: {
-          tradeOperationId,
-          fromPhase: existingTrade.phase,
-          toPhase: TradePhase.CANCELLED,
-          fromStatus: existingTrade.status,
-          toStatus: TradeStatus.CANCELLED,
-          changedBy: userId,
-          reason: reason || "Trade operation cancelled",
-          metadata: {
-            cancelledAt: new Date().toISOString(),
-            activeNegotiations: existingTrade.negotiations.length,
-            activeSellers: existingTrade.sellers.length,
-          },
-        },
-      });
-
-      // 3. Update buy listing to ACTIVE so it can be used for another trade
-      await tx.buyListing.update({
-        where: { id: existingTrade.buyListingId },
-        data: {
-          status: "ACTIVE",
-        },
-      });
-
-      // 4. Expire all active negotiations
-      await tx.offerNegotiation.updateMany({
-        where: {
-          tradeOperationId,
-          status: { in: ["PENDING", "COUNTERED"] },
-        },
-        data: {
-          status: "WITHDRAWN",
-          concludedAt: new Date(),
-        },
-      });
-
-      return updated;
-    });
+    if (!trade) return null;
 
     this.logger.log(
-      `Trade operation ${tradeOperationId} cancelled by user ${userId}. Reason: ${reason || "Not specified"}`,
+      `Checking auto-advance for trade ${id} (current phase: ${trade.phase})`,
     );
 
-    return cancelledTrade;
+    switch (trade.phase) {
+      case TradePhase.SELLER_NEGOTIATION:
+        // If all sellers accepted, move to INSPECTION_PENDING or TRANSPORT_MATCHING
+        if (
+          trade.sellers.length > 0 &&
+          trade.sellers.every((s) => s.status === SellerStatus.ACCEPTED)
+        ) {
+          const nextPhase =
+            trade.incoterm === Incoterm.EXW || trade.incoterm === Incoterm.FCA
+              ? TradePhase.TRANSPORT_MATCHING
+              : TradePhase.INSPECTION_PENDING;
+
+          this.logger.log(
+            `Auto-advancing ${id} to ${nextPhase} (all negotiations accepted)`,
+          );
+          return this.updatePhase(id, nextPhase);
+        }
+        break;
+
+      case TradePhase.INSPECTION_PENDING:
+        // If all inspections completed, move to TRANSPORT_MATCHING
+        if (
+          trade.inspections.length > 0 &&
+          trade.inspections.every((i) => i.status === "COMPLETED")
+        ) {
+          this.logger.log(
+            `Auto-advancing ${id} to TRANSPORT_MATCHING (all inspections completed)`,
+          );
+          return this.updatePhase(id, TradePhase.TRANSPORT_MATCHING);
+        }
+        break;
+
+      case TradePhase.TRANSPORT_BIDDING:
+        // Check if a transport bid was accepted (usually handled by TransportService, but here for safety)
+        const transportJob = await this.prisma.transportJob.findFirst({
+          where: { tradeOperationId: id },
+        });
+        if (transportJob) {
+          this.logger.log(
+            `Auto-advancing ${id} to IN_TRANSIT (transport job created)`,
+          );
+          return this.updatePhase(id, TradePhase.IN_TRANSIT);
+        }
+        break;
+
+      default:
+        break;
+    }
+
+    return null;
+  }
+  private getValidTransitions(current: TradePhase): TradePhase[] {
+    const map: Record<TradePhase, TradePhase[]> = {
+      [TradePhase.INITIATION]: [TradePhase.SELLER_MATCHING, TradePhase.CANCELLED],
+      [TradePhase.SELLER_MATCHING]: [TradePhase.SELLER_NEGOTIATION, TradePhase.CANCELLED],
+      [TradePhase.SELLER_NEGOTIATION]: [TradePhase.INSPECTION_PENDING, TradePhase.TRANSPORT_MATCHING, TradePhase.CANCELLED],
+      [TradePhase.INSPECTION_PENDING]: [TradePhase.TRANSPORT_MATCHING, TradePhase.CANCELLED],
+      [TradePhase.TRANSPORT_MATCHING]: [TradePhase.TRANSPORT_BIDDING, TradePhase.IN_TRANSIT, TradePhase.CANCELLED],
+      [TradePhase.TRANSPORT_BIDDING]: [TradePhase.IN_TRANSIT, TradePhase.CANCELLED],
+      [TradePhase.IN_TRANSIT]: [TradePhase.DELIVERED, TradePhase.CANCELLED],
+      [TradePhase.DELIVERED]: [TradePhase.COMPLETED, TradePhase.CANCELLED],
+      [TradePhase.COMPLETED]: [],
+      [TradePhase.CANCELLED]: [],
+    };
+    return map[current] || [];
+  }
+
+  // ==================== PROFIT & ANALYTICS ====================
+
+  async calculateProfit(id: string) {
+    const trade = await this.prisma.tradeOperation.findUnique({
+      where: { id },
+      include: { buyListing: true, sellers: true },
+    });
+
+    if (!trade) throw new NotFoundException();
+
+    const revenue = (trade.sellingPrice?.toNumber() || 0) * (trade.buyListing.quantity.toNumber() || 0);
+    
+    const purchaseCost = trade.sellers.reduce((sum, s) => {
+      const q = s.agreedQuantity?.toNumber() || s.requestedQuantity?.toNumber() || 0;
+      const p = s.agreedPrice?.toNumber() || 0;
+      return sum + (q * p);
+    }, 0);
+
+    const transportCost = trade.estimatedTransportCost?.toNumber() || 0;
+    const totalCosts = purchaseCost + transportCost;
+    const netProfit = revenue - totalCosts;
+    const margin = revenue > 0 ? (netProfit / revenue) * 100 : 0;
+
+    return {
+      revenue,
+      purchaseCost,
+      transportCost,
+      netProfit,
+      margin,
+      isViable: margin >= this.MIN_PROFIT_MARGIN,
+    };
+  }
+
+  // ==================== BUYER ACTIONS ====================
+
+  async buyerConfirmPickup(id: string, buyerId: string) {
+    const trade = await this.prisma.tradeOperation.findUnique({
+      where: { id },
+      include: { buyListing: true },
+    });
+
+    if (!trade || trade.buyListing.buyerId !== buyerId) {
+      throw new ForbiddenException("Unauthorized");
+    }
+
+    return await this.updatePhase(id, TradePhase.IN_TRANSIT);
+  }
+
+  async buyerConfirmDelivery(id: string, buyerId: string) {
+    const trade = await this.prisma.tradeOperation.findUnique({
+      where: { id },
+      include: { buyListing: true },
+    });
+
+    if (!trade || trade.buyListing.buyerId !== buyerId) {
+      throw new ForbiddenException("Unauthorized");
+    }
+
+    const updated = await this.updatePhase(id, TradePhase.COMPLETED);
+
+    // Record delivery confirmation attributed to the buyer (not admin)
+    void this.tradeEventsService.record({
+      tradeOperationId: id,
+      eventType: TradeEventType.TRANSPORT_DELIVERED,
+      actorId: buyerId,
+      actorRole: "BUYER",
+      message: "Buyer confirmed delivery",
+    } as any).catch((e) =>
+      this.logger.error(`Failed to record buyer delivery event: ${e.message}`),
+    );
+
+    return updated;
+  }
+
+  // ==================== PRIVATE HELPERS ====================
+
+  private async handleEscrowActions(id: string, phase: TradePhase) {
+    const trade = await this.prisma.tradeOperation.findUnique({
+      where: { id },
+      include: { sellers: { take: 1 } }
+    });
+    if (!trade) return;
+
+    const metadata = (trade.metadata as any) || {};
+    const chain = metadata.escrowChain || "CELO";
+    const releasePhase = INCOTERM_RELEASE_PHASE[trade.incoterm || "DDP"] || TradePhase.DELIVERED;
+
+    // Create Escrow
+    if (!metadata.escrowCreated && (phase === TradePhase.IN_TRANSIT || phase === releasePhase)) {
+      const amount = trade.sellingPrice?.toString();
+      if (!amount) return;
+      const adminWallet = chain === "SOLANA" 
+        ? this.configService.get("SOLANA_ADMIN_WALLET_ADDRESS") 
+        : this.configService.get("ADMIN_WALLET_ADDRESS");
+      
+      const { txHash } = await this.escrowService.createEscrow(id, adminWallet, amount, chain);
+      await this.prisma.tradeOperation.update({
+        where: { id },
+        data: { metadata: { ...metadata, escrowCreated: true, escrowTxHash: txHash, escrowChain: chain } }
+      });
+    }
+
+    // Release Escrow
+    if (!metadata.escrowReleased && phase === releasePhase) {
+      await this.escrowService.releaseFunds(id, chain);
+      await this.prisma.tradeOperation.update({
+        where: { id },
+        data: { metadata: { ...metadata, escrowReleased: true } }
+      });
+
+      // Auto-invest
+      const sellerId = trade.sellers[0]?.sellerId;
+      if (sellerId) {
+        await this.investmentsService.executeAutoSwap(sellerId, id, Number(trade.sellingPrice || 0));
+      }
+    }
   }
 }

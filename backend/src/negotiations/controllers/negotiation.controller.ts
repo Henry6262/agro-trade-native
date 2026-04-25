@@ -7,13 +7,18 @@ import {
   Query,
   HttpStatus,
   HttpCode,
+  UseGuards,
   Request,
   ParseIntPipe,
   DefaultValuePipe,
   ValidationPipe,
+  NotFoundException,
 } from "@nestjs/common";
 import { NegotiationService } from "../services/negotiation.service";
-import { NegotiationStatus } from "@prisma/client";
+import { NegotiationStatus, UserRole } from "@prisma/client";
+import { Roles } from "../../auth/decorators/roles.decorator";
+import { RolesGuard } from "../../auth/guards/roles.guard";
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
 import {
   CreateOfferDto,
   BatchOfferDto,
@@ -79,6 +84,7 @@ import {
   OfferSnapshotDto,
   ProfitImpactDto,
 )
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller("negotiations")
 export class NegotiationController {
   constructor(private readonly negotiationService: NegotiationService) {}
@@ -159,6 +165,9 @@ export class NegotiationController {
         data: negotiation as any,
       };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       return {
         success: false,
         error: {
@@ -201,6 +210,9 @@ export class NegotiationController {
         },
       };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       return {
         success: false,
         error: {
@@ -284,6 +296,9 @@ export class NegotiationController {
         data: summary as any,
       };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       return {
         success: false,
         error: {
@@ -294,6 +309,41 @@ export class NegotiationController {
     }
   }
 
+
+  /**
+   * Get all negotiations/offers for the authenticated seller
+   */
+  @Get("seller/offers")
+  @Roles(UserRole.FARMER)
+  @ApiOperation({ summary: "Get all negotiations for the current seller" })
+  @ApiQuery({ name: "status", required: false, enum: NegotiationStatus })
+  @ApiQuery({
+    name: "limit",
+    required: false,
+    example: 50,
+    type: Number,
+  })
+  @ApiQuery({
+    name: "offset",
+    required: false,
+    example: 0,
+    type: Number,
+  })
+  @ApiResponse({ status: HttpStatus.OK })
+  async getSellerOffers(
+    @Request() req: any,
+    @Query("status") status?: NegotiationStatus | NegotiationStatus[],
+    @Query("limit", new DefaultValuePipe(50), ParseIntPipe) limit: number = 50,
+    @Query("offset", new DefaultValuePipe(0), ParseIntPipe) offset: number = 0,
+  ) {
+    const userId = req.user.id;
+    return this.negotiationService.getNegotiationsBySeller(
+      userId,
+      status,
+      limit,
+      offset,
+    );
+  }
 
   /**
    * Get analytics/overview for negotiations (stub - must come before :negotiationId route)
@@ -387,6 +437,9 @@ export class NegotiationController {
         data: negotiation as any,
       };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       const code = error.message.includes("expired")
         ? "NEGOTIATION_EXPIRED"
         : "COUNTER_FAILED";
@@ -451,6 +504,9 @@ export class NegotiationController {
         data: negotiation as any,
       };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       return {
         success: false,
         error: {
@@ -465,6 +521,7 @@ export class NegotiationController {
    * Withdraw an offer (admin only)
    */
   @Post(":negotiationId/withdraw")
+  @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Withdraw an offer" })
   @ApiParam({ name: "negotiationId", description: "Negotiation ID" })
@@ -485,6 +542,9 @@ export class NegotiationController {
         data: negotiation as any,
       };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       return {
         success: false,
         error: {
@@ -499,6 +559,7 @@ export class NegotiationController {
    * Extend negotiation expiry
    */
   @Post(":negotiationId/extend")
+  @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Extend negotiation expiry" })
   @ApiParam({ name: "negotiationId", description: "Negotiation ID" })
@@ -524,6 +585,9 @@ export class NegotiationController {
         },
       };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       const code = error.message.includes("Maximum extensions")
         ? "MAX_EXTENSIONS_REACHED"
         : "EXTEND_FAILED";
@@ -594,6 +658,9 @@ export class NegotiationController {
         },
       };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       return {
         success: false,
         error: {
@@ -665,6 +732,9 @@ export class NegotiationController {
         },
       };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       return {
         success: false,
         error: {

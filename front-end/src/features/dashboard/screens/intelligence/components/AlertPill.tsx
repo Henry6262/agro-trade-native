@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { X, ChevronUp, ChevronDown } from 'lucide-react-native';
-import { COLORS } from '../../../../../design-system';
+import { COLORS } from '@design-system';
 import { PriceAlert } from '../../../../../stores/market.store';
 
 interface AlertPillProps {

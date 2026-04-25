@@ -18,7 +18,7 @@ import {
   GlassInput,
   GlassBadge,
   COLORS,
-} from '../../../../design-system';
+} from '@design-system';
 import { traceabilityService, ProvenanceEvent } from '../../../../services/traceabilityService';
 
 // ─── Event metadata ────────────────────────────────────────────────────────────

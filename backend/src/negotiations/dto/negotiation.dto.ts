@@ -46,6 +46,14 @@ export class CreateOfferDto {
   @IsString()
   @IsOptional()
   terms?: string;
+
+  @ApiPropertyOptional({
+    description: "Who is sending the offer",
+    enum: ["BUYER", "SELLER", "PLATFORM"],
+  })
+  @IsString()
+  @IsOptional()
+  offeredBy?: string;
 }
 
 export class BatchOfferDto {

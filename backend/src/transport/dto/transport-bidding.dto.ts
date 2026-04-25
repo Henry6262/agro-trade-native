@@ -30,6 +30,20 @@ export class CreateTransportRequestDto {
   @Min(0.1)
   totalWeight: number;
 
+  @ApiPropertyOptional({ description: "Cargo description" })
+  @IsOptional()
+  @IsString()
+  cargoDescription?: string;
+
+  @ApiPropertyOptional({ description: "Manual pickup points" })
+  @IsOptional()
+  @IsArray()
+  pickupPoints?: any[];
+
+  @ApiPropertyOptional({ description: "Manual delivery point" })
+  @IsOptional()
+  deliveryPoint?: any;
+
   @ApiPropertyOptional({
     enum: TruckType,
     description: "Required vehicle type",
@@ -467,6 +481,11 @@ export class GetTransportRequestsQueryDto {
   @IsOptional()
   @IsEnum(UrgencyLevel)
   urgencyLevel?: UrgencyLevel;
+
+  @ApiPropertyOptional({ description: "Filter by trade operation ID" })
+  @IsOptional()
+  @IsString()
+  tradeOperationId?: string;
 
   @ApiPropertyOptional({
     description: "Filter by transporter ID (for available requests)",

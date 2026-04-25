@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { LucideIcon } from 'lucide-react-native';
-import { GlassCard, COLORS } from '../../../../design-system';
+import { GlassCard, COLORS } from '@design-system';
 
 interface MetricCardProps {
   title: string;

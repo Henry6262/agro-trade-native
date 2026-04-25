@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MapPin, Clock, ChevronRight } from 'lucide-react-native';
-import { GlassCard, GlassButton } from '../../../../../design-system';
+import { GlassCard, GlassButton } from '@design-system';
 import { JobCardProps } from '../types';
 import { JobPriorityBadge } from './JobPriorityBadge';
 

@@ -65,93 +65,142 @@ export class TestEnvironment {
     const tablesToClean = [
       "offerRound",
       "offerNegotiation",
+      "tradeNote",
+      "tradeEvent",
+      "tradeStateHistory",
+      "investmentPosition",
+      "userInvestmentPreference",
+      "inspectionRequest",
+      "transportJob",
+      "transportBid",
+      "transportRequest",
       "tradeSeller",
-      "transportCostCalculation",
+      "tradeTransporter",
       "profitEstimation",
-      "priceScenario",
+      "transportCostCalculation",
       "tradeOperation",
-      "transportCostSettings",
-      "buyListing",
+      "offer",
+      "listingSpec",
       "saleListing",
+      "buyListing",
+      "truck",
+      "driverDocument",
+      "driver",
+      "companyDocument",
+      "companyAdmin",
+      "transportCompany",
+      "company",
+      "phoneOtp",
+      "user",
+      "address",
+      "city",
+      "region",
+      "productSpecTemplate",
+      "specificationType",
+      "product",
+      "transportCostSettings",
     ];
 
     for (const table of tablesToClean) {
       try {
-        await (this.prisma as any)[table].deleteMany({});
+        if ((this.prisma as any)[table]) {
+          await (this.prisma as any)[table].deleteMany({});
+        }
       } catch (error) {
-        // Table might not exist or have no data
+        // console.error(`Failed to clean table ${table}:`, error.message);
       }
     }
   }
 
   async seedTestData() {
-    // Create test user
-    const testUser = await this.prisma.user.upsert({
-      where: { email: "test@agrotrade.com" },
-      update: {},
-      create: {
-        id: "test-user-123",
-        email: "test@agrotrade.com",
-        name: "Test User",
-        role: "ADMIN",
-        isActive: true,
-        isEmailVerified: true,
-        onboardingCompleted: true,
-      },
+    const upsertUserByEmail = async ({
+      id,
+      email,
+      name,
+      role,
+    }: {
+      id: string;
+      email: string;
+      name: string;
+      role: "ADMIN" | "BUYER" | "FARMER" | "TRANSPORTER";
+    }) => {
+      const existingById = await this.prisma.user.findUnique({ where: { id } });
+      const existingByEmail = await this.prisma.user.findUnique({
+        where: { email },
+      });
+      const existing = existingById ?? existingByEmail;
+
+      if (existing) {
+        return this.prisma.user.update({
+          where: { id: existing.id },
+          data: {
+            id,
+            email,
+            name,
+            role,
+            isActive: true,
+            isEmailVerified: true,
+            onboardingCompleted: true,
+          },
+        });
+      }
+
+      return this.prisma.user.create({
+        data: {
+          id,
+          email,
+          name,
+          role,
+          isActive: true,
+          isEmailVerified: true,
+          onboardingCompleted: true,
+        },
+      });
+    };
+
+    const testUser = await upsertUserByEmail({
+      id: "test-user-123",
+      email: "test@agrotrade.com",
+      name: "Test User",
+      role: "ADMIN",
     });
 
-    // Create test buyer
-    const testBuyer = await this.prisma.user.upsert({
-      where: { email: "buyer@agrotrade.com" },
-      update: {},
-      create: {
-        id: "test-buyer-456",
-        email: "buyer@agrotrade.com",
-        name: "Test Buyer",
-        role: "BUYER",
-        isActive: true,
-        isEmailVerified: true,
-        onboardingCompleted: true,
-      },
+    const testBuyer = await upsertUserByEmail({
+      id: "test-buyer-456",
+      email: "buyer@agrotrade.com",
+      name: "Test Buyer",
+      role: "BUYER",
     });
 
-    // Create test sellers
-    const testSeller1 = await this.prisma.user.upsert({
-      where: { email: "seller1@agrotrade.com" },
-      update: {},
-      create: {
-        id: "test-seller-001",
-        email: "seller1@agrotrade.com",
-        name: "Test Seller 1",
-        role: "FARMER",
-        isActive: true,
-        isEmailVerified: true,
-        onboardingCompleted: true,
-      },
+    const testSeller1 = await upsertUserByEmail({
+      id: "test-seller-001",
+      email: "seller1@agrotrade.com",
+      name: "Test Seller 1",
+      role: "FARMER",
     });
 
-    const testSeller2 = await this.prisma.user.upsert({
-      where: { email: "seller2@agrotrade.com" },
-      update: {},
-      create: {
-        id: "test-seller-002",
-        email: "seller2@agrotrade.com",
-        name: "Test Seller 2",
-        role: "FARMER",
-        isActive: true,
-        isEmailVerified: true,
-        onboardingCompleted: true,
-      },
+    const testSeller2 = await upsertUserByEmail({
+      id: "test-seller-002",
+      email: "seller2@agrotrade.com",
+      name: "Test Seller 2",
+      role: "FARMER",
+    });
+
+    const testTransporter = await upsertUserByEmail({
+      id: "test-transporter-789",
+      email: "transporter@agrotrade.com",
+      name: "Test Transporter",
+      role: "TRANSPORTER",
     });
 
     // Create test product
     const testProduct = await this.prisma.product.upsert({
-      where: { id: "test-product-wheat" },
+      where: { category: "SOFT_WHEAT" as any },
       update: {},
       create: {
         id: "test-product-wheat",
         name: "Wheat",
-        category: "SOFT_WHEAT",
+        category: "SOFT_WHEAT" as any,
         displayName: "Soft Wheat",
         defaultUnit: "TON",
         description: "High quality wheat",
@@ -159,8 +208,10 @@ export class TestEnvironment {
     });
 
     // Create test buy listing
-    const buyListing = await this.prisma.buyListing.create({
-      data: {
+    const buyListing = await this.prisma.buyListing.upsert({
+      where: { id: "test-buy-listing-001" },
+      update: {},
+      create: {
         id: "test-buy-listing-001",
         buyerId: testBuyer.id,
         productId: testProduct.id,
@@ -173,8 +224,10 @@ export class TestEnvironment {
     });
 
     // Create test sale listings
-    const saleListing1 = await this.prisma.saleListing.create({
-      data: {
+    const saleListing1 = await this.prisma.saleListing.upsert({
+      where: { id: "test-sale-listing-001" },
+      update: {},
+      create: {
         id: "test-sale-listing-001",
         sellerId: testSeller1.id,
         productId: testProduct.id,
@@ -186,8 +239,10 @@ export class TestEnvironment {
       },
     });
 
-    const saleListing2 = await this.prisma.saleListing.create({
-      data: {
+    const saleListing2 = await this.prisma.saleListing.upsert({
+      where: { id: "test-sale-listing-002" },
+      update: {},
+      create: {
         id: "test-sale-listing-002",
         sellerId: testSeller2.id,
         productId: testProduct.id,
@@ -200,8 +255,10 @@ export class TestEnvironment {
     });
 
     // Create transport settings
-    const transportSettings = await this.prisma.transportCostSettings.create({
-      data: {
+    const transportSettings = await this.prisma.transportCostSettings.upsert({
+      where: { id: "test-transport-settings" },
+      update: {},
+      create: {
         id: "test-transport-settings",
         baseRatePerKm: 2.0,
         flatbedMultiplier: 1.0,
@@ -225,6 +282,7 @@ export class TestEnvironment {
         buyer: testBuyer,
         seller1: testSeller1,
         seller2: testSeller2,
+        transporter: testTransporter,
       },
       product: testProduct,
       buyListing,

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ImageIcon } from 'lucide-react-native';
-import { GlassCard, GlassBadge, COLORS } from '../../../../../design-system';
+import { GlassCard, GlassBadge, COLORS } from '@design-system';
 import { formatTimeAgo } from '../../../../../utils/formatTimeAgo';
 
 interface NewsArticle {

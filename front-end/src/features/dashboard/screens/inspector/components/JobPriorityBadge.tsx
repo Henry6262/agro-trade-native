@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { GlassBadge } from '../../../../../design-system';
+import { GlassBadge } from '@design-system';
 import { JobPriorityBadgeProps } from '../types';
 
 type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'muted' | 'gold';

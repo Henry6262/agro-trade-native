@@ -20,7 +20,7 @@ import { AnimatedRoleCard } from '../components/AnimatedRoleCard';
 import { AuthGuard } from '@shared/components/AuthGuard';
 import { useLoginWithOAuth, usePrivy, OAuthProviderType } from '@privy-io/expo';
 import { apiClient } from '@services/api';
-import { GradientBackground, GlassButton } from '../../../design-system';
+import { GradientBackground, GlassButton } from '@design-system';
 
 const ROLE_IMAGES = {
   buyer: require('../../../../assets/UserTypes/Buyer.png'),

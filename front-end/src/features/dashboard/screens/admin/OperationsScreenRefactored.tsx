@@ -17,8 +17,8 @@ import { ActiveOperationsTab } from './components/ActiveOperationsTab';
 import { OfferModal } from './components/OfferModal';
 import { NegotiationManagementScreen } from './components/NegotiationManagementScreen';
 import { CounterOfferModal } from './components/CounterOfferModal';
-import { GlassCard } from '../../../../design-system';
-import { COLORS } from '../../../../design-system';
+import { GlassCard } from '@design-system';
+import { COLORS } from '@design-system';
 import type { BuyListing, TradeOperation } from '@services/tradeOperationService';
 import { getProductEmoji } from '../../../../shared/utils/productEmoji';
 

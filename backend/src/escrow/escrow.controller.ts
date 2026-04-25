@@ -21,6 +21,7 @@ export class EscrowController {
       dto.tradeOperationId,
       dto.sellerAddress,
       dto.amountEth,
+      dto.chain,
     );
   }
 

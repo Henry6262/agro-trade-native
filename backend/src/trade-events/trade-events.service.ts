@@ -10,7 +10,22 @@ export class TradeEventsService {
 
   async record(data: CreateTradeEventDto): Promise<void> {
     try {
-      await this.prisma.tradeEvent.create({ data: data as any });
+      const raw = data as CreateTradeEventDto & { message?: string };
+      const { metadata, message, ...rest } = raw;
+      const nextMetadata =
+        message !== undefined
+          ? {
+              ...(metadata ?? {}),
+              message,
+            }
+          : metadata;
+
+      await this.prisma.tradeEvent.create({
+        data: {
+          ...rest,
+          metadata: nextMetadata,
+        } as any,
+      });
     } catch (error) {
       // Never throw - event recording should not break main flows
       this.logger.error(`Failed to record trade event: ${error.message}`, error);

@@ -2,7 +2,8 @@ import {
   IsNumber,
   IsOptional,
   IsBoolean,
-  IsUUID,
+  IsString,
+  IsNotEmpty,
   Min,
   Max,
 } from "class-validator";
@@ -11,9 +12,10 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 export class ScenarioGenerationRequestDto {
   @ApiProperty({
     description: "Trade operation ID",
-    example: "123e4567-e89b-12d3-a456-426614174000",
+    example: "cmf896m430000md43fpxv05x8",
   })
-  @IsUUID()
+  @IsString()
+  @IsNotEmpty()
   tradeOperationId: string;
 
   @ApiPropertyOptional({
@@ -174,9 +176,10 @@ export class ScenarioAnalysisResponseDto {
 export class SensitivityAnalysisRequestDto {
   @ApiProperty({
     description: "Trade operation ID",
-    example: "123e4567-e89b-12d3-a456-426614174000",
+    example: "cmf896m430000md43fpxv05x8",
   })
-  @IsUUID()
+  @IsString()
+  @IsNotEmpty()
   tradeOperationId: string;
 
   @ApiProperty({
@@ -276,9 +279,10 @@ export class SensitivityAnalysisResponseDto {
 export class StrategyComparisonRequestDto {
   @ApiProperty({
     description: "Trade operation ID",
-    example: "123e4567-e89b-12d3-a456-426614174000",
+    example: "cmf896m430000md43fpxv05x8",
   })
-  @IsUUID()
+  @IsString()
+  @IsNotEmpty()
   tradeOperationId: string;
 
   @ApiProperty({
@@ -337,9 +341,10 @@ export class StrategyComparisonResponseDto {
 export class QuickEstimateDto {
   @ApiProperty({
     description: "Product ID",
-    example: "123e4567-e89b-12d3-a456-426614174000",
+    example: "cmf896m430000md43fpxv05x8",
   })
-  @IsUUID()
+  @IsString()
+  @IsNotEmpty()
   productId: string;
 
   @ApiProperty({

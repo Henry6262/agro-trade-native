@@ -205,12 +205,18 @@ export class BuyerService {
   }
 
   // Get ALL buy listings (for admin trade operations)
-  async getAllBuyListings(includeTradeOps = false) {
+  async getAllBuyListings(includeTradeOps = false, buyerId?: string) {
     // First get all active buy listings
+    const where: any = {
+      status: RequestStatus.ACTIVE,
+    };
+
+    if (buyerId) {
+      where.buyerId = buyerId;
+    }
+
     const buyListings = await this.prisma.buyListing.findMany({
-      where: {
-        status: RequestStatus.ACTIVE,
-      },
+      where,
       include: {
         product: {
           select: {

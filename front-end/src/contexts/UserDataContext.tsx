@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuthStore } from '@stores/auth.store';
 import { apiClient } from '@services/api';
+import { UserRole } from '../shared/types';
 
 // Types for different user data
 export interface SellerProduct {
@@ -336,41 +337,30 @@ export const UserDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Initial data fetch based on user role
   useEffect(() => {
     if (isAuthenticated && user) {
-      const userRole = user.role?.toLowerCase();
+      const role = user.role as string;
+      const normalized = role.toUpperCase();
 
       // FARMER and SELLER both map to the seller dashboard
-      if (userRole === 'farmer' || userRole === 'seller') {
+      if (normalized === UserRole.FARMER || normalized === 'SELLER') {
         fetchSellerProducts();
         fetchSellerOffers();
         fetchSellerTrades();
         fetchSellerStats();
       }
-      // Buyer pre-fetch: listings and offers (trade operations load lazily via React Query)
-      if (userRole === 'buyer') {
-        apiClient.get('/buyer/listings').catch(() => {
-          /* silent – React Query owns error UI */
-        });
-        apiClient.get('/buyer/offers').catch(() => {
-          /* silent */
-        });
+      // Buyer pre-fetch: listings and offers
+      if (normalized === UserRole.BUYER) {
+        apiClient.get('/buyer/listings').catch(() => {});
+        apiClient.get('/buyer/offers').catch(() => {});
       }
       // Transporter pre-fetch
-      if (userRole === 'transporter') {
-        apiClient.get('/transport/requests/available').catch(() => {
-          /* silent */
-        });
-        apiClient.get('/transport/jobs').catch(() => {
-          /* silent */
-        });
+      if (normalized === UserRole.TRANSPORTER || normalized === 'TRANSPORT') {
+        apiClient.get('/transport/requests/available').catch(() => {});
+        apiClient.get('/transport/jobs').catch(() => {});
       }
       // Inspector pre-fetch
-      if (userRole === 'inspector') {
-        apiClient.get('/inspector/jobs/active').catch(() => {
-          /* silent */
-        });
-        apiClient.get('/inspector/jobs/available').catch(() => {
-          /* silent */
-        });
+      if (normalized === UserRole.INSPECTOR) {
+        apiClient.get('/inspector/jobs/active').catch(() => {});
+        apiClient.get('/inspector/jobs/available').catch(() => {});
       }
     }
   }, [

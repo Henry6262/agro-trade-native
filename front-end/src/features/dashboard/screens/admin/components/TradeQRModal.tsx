@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { Modal, View, Text, StyleSheet, Image, TouchableOpacity, Share } from 'react-native';
 import { X, Share2 } from 'lucide-react-native';
-import { GlassCard, GlassButton, COLORS } from '../../../../../design-system';
+import { GlassCard, GlassButton, COLORS } from '@design-system';
 import { traceabilityService } from '../../../../../services/traceabilityService';
 
 interface TradeQRModalProps {

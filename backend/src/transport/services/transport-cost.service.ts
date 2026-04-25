@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { TransportCostSettings, TruckType, Prisma } from "@prisma/client";
 
@@ -79,6 +79,14 @@ export class TransportCostService {
     deliveryPoint: Location,
     options: TransportOptions = {},
   ): Promise<TransportEstimation> {
+    // Validate inputs
+    if (!pickupPoints || pickupPoints.length === 0) {
+      throw new BadRequestException("At least one pickup point is required");
+    }
+    if (!deliveryPoint || !deliveryPoint.lat || !deliveryPoint.lng) {
+      throw new BadRequestException("Valid delivery point is required");
+    }
+
     // Check cache
     const cacheKey = this.generateCacheKey(
       pickupPoints,
@@ -93,7 +101,7 @@ export class TransportCostService {
     // Get active transport settings
     const settings = await this.getActiveSettings();
 
-    // Calculate total distance (simplified - in production would use actual routing API)
+    // Calculate total distance
     const totalDistance = await this.calculateTotalDistance(
       pickupPoints,
       deliveryPoint,
@@ -105,11 +113,36 @@ export class TransportCostService {
       0,
     );
 
-    // Simple flat-rate calculation (0.15 EUR per km unless overridden in settings)
+    // Get rate based on distance tiers
+    let appliedRate = Number(settings.baseRatePerKm);
+    if (totalDistance <= settings.tier1MaxKm) {
+      appliedRate = Number(settings.tier1Rate);
+    } else if (totalDistance <= settings.tier2MaxKm) {
+      appliedRate = Number(settings.tier2Rate);
+    } else {
+      appliedRate = Number(settings.tier3Rate);
+    }
+
+    // Apply vehicle multiplier
     const vehicleType = options.vehicleType || "FLATBED";
-    const ratePerKm = Number(settings.baseRatePerKm) || 0.15;
-    const distanceCost = totalDistance * ratePerKm;
-    const totalCost = Math.round(distanceCost * 100) / 100;
+    let vehicleMultiplier = 1.0;
+    if (vehicleType === "REFRIGERATED") vehicleMultiplier = settings.refrigeratedMultiplier;
+    else if (vehicleType === "TANKER") vehicleMultiplier = settings.tankerMultiplier;
+    else if (vehicleType === "CONTAINER") vehicleMultiplier = settings.containerMultiplier;
+    else vehicleMultiplier = settings.flatbedMultiplier;
+
+    // Calculate costs
+    const distanceCost = totalDistance * appliedRate * vehicleMultiplier;
+    const loadingCosts = totalQuantity * Number(settings.loadingCostPerTon);
+    
+    // Apply urgency surcharge if applicable
+    let urgencySurcharge = 0;
+    if (options.urgency === "EXPRESS") {
+      urgencySurcharge = distanceCost * settings.urgencySurcharge;
+    }
+
+    const subtotal = distanceCost + loadingCosts + urgencySurcharge;
+    const totalCost = Math.round(subtotal * 100) / 100;
 
     const estimation: TransportEstimation = {
       totalDistance,
@@ -117,19 +150,20 @@ export class TransportCostService {
       currency: "EUR",
       breakdown: {
         distanceCost,
-        loadingCosts: 0,
-        vehicleMultiplier: 1,
-        appliedRate: ratePerKm,
+        loadingCosts,
+        vehicleMultiplier,
+        appliedRate,
+        urgencySurcharge: urgencySurcharge > 0 ? urgencySurcharge : undefined,
       },
       route: {
         pickupSequence: this.createPickupSequence(pickupPoints),
         deliveryPoint,
-        optimizationApplied: false, // Will be set by RouteOptimizationService
+        optimizationApplied: false,
       },
       vehicleInfo: {
         type: vehicleType,
         requiredCapacity: totalQuantity,
-        multiplier: 1,
+        multiplier: vehicleMultiplier,
       },
     };
 

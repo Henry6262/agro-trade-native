@@ -23,7 +23,7 @@ import {
   Navigation,
   Receipt,
 } from 'lucide-react-native';
-import { GlassCard, GlassButton, GlassInput } from '../../../../../design-system';
+import { GlassCard, GlassButton, GlassInput } from '@design-system';
 import { BaseComponentProps } from '@shared/types';
 import { EmptyState } from '@shared/components/EmptyState';
 import { SkeletonCard } from '@shared/components/SkeletonCard';

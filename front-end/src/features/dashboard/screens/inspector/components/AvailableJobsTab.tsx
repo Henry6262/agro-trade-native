@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { Map, List } from 'lucide-react-native';
-import { GlassBadge } from '../../../../../design-system';
+import { GlassBadge } from '@design-system';
 import { AvailableJobsTabProps } from '../types';
 import { JobListView } from './JobListView';
 import { JobMapView } from './JobMapView';

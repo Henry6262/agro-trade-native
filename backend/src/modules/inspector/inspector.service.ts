@@ -56,7 +56,256 @@ export class InspectorService {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-      // Add more mock jobs as needed
+      {
+        id: "job-002",
+        sellerListingId: "listing-222",
+        inspectorId: null,
+        priority: "MEDIUM",
+        status: "PENDING",
+        location: {
+          latitude: 42.1,
+          longitude: 24.7,
+          address: "Farm Road 22",
+          city: "Plovdiv",
+          region: "Plovdiv Province",
+        },
+        productDetails: {
+          name: "Corn",
+          type: "Grain",
+          quantity: 500,
+          unit: "kg",
+          claimedSpecs: {},
+        },
+        estimatedDuration: 90,
+        distance: 18,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "job-003",
+        sellerListingId: "listing-333",
+        inspectorId: null,
+        priority: "LOW",
+        status: "PENDING",
+        location: {
+          latitude: 42.2,
+          longitude: 24.8,
+          address: "Farm Road 33",
+          city: "Plovdiv",
+          region: "Plovdiv Province",
+        },
+        productDetails: {
+          name: "Barley",
+          type: "Grain",
+          quantity: 700,
+          unit: "kg",
+          claimedSpecs: {},
+        },
+        estimatedDuration: 75,
+        distance: 20,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "job-004",
+        sellerListingId: "listing-444",
+        inspectorId: null,
+        priority: "HIGH",
+        status: "PENDING",
+        location: {
+          latitude: 42.3,
+          longitude: 24.9,
+          address: "Farm Road 44",
+          city: "Plovdiv",
+          region: "Plovdiv Province",
+        },
+        productDetails: {
+          name: "Sunflower",
+          type: "Seeds",
+          quantity: 300,
+          unit: "kg",
+          claimedSpecs: {},
+        },
+        estimatedDuration: 60,
+        distance: 12,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "job-005",
+        sellerListingId: "listing-555",
+        inspectorId: null,
+        priority: "MEDIUM",
+        status: "PENDING",
+        location: {
+          latitude: 42.35,
+          longitude: 24.95,
+          address: "Farm Road 55",
+          city: "Plovdiv",
+          region: "Plovdiv Province",
+        },
+        productDetails: {
+          name: "Rye",
+          type: "Grain",
+          quantity: 600,
+          unit: "kg",
+          claimedSpecs: {},
+        },
+        estimatedDuration: 80,
+        distance: 22,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "job-006",
+        sellerListingId: "listing-666",
+        inspectorId: "inspector-001",
+        priority: "HIGH",
+        status: "ASSIGNED",
+        location: {
+          latitude: 42.4,
+          longitude: 25,
+          address: "Farm Road 66",
+          city: "Plovdiv",
+          region: "Plovdiv Province",
+        },
+        productDetails: {
+          name: "Oats",
+          type: "Grain",
+          quantity: 450,
+          unit: "kg",
+          claimedSpecs: {},
+        },
+        estimatedDuration: 70,
+        distance: 30,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "job-assigned",
+        sellerListingId: "listing-777",
+        inspectorId: "inspector-002",
+        priority: "HIGH",
+        status: "ASSIGNED",
+        location: {
+          latitude: 42.45,
+          longitude: 25.05,
+          address: "Farm Road 77",
+          city: "Plovdiv",
+          region: "Plovdiv Province",
+        },
+        productDetails: {
+          name: "Rice",
+          type: "Grain",
+          quantity: 100,
+          unit: "kg",
+          claimedSpecs: {},
+        },
+        estimatedDuration: 55,
+        distance: 16,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "job-in-progress",
+        sellerListingId: "listing-888",
+        inspectorId: "inspector-002",
+        priority: "HIGH",
+        status: "IN_PROGRESS",
+        location: {
+          latitude: 42.5,
+          longitude: 25.1,
+          address: "Farm Road 88",
+          city: "Plovdiv",
+          region: "Plovdiv Province",
+        },
+        productDetails: {
+          name: "Millet",
+          type: "Grain",
+          quantity: 200,
+          unit: "kg",
+          claimedSpecs: {},
+        },
+        estimatedDuration: 45,
+        distance: 10,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "job-pending",
+        sellerListingId: "listing-999",
+        inspectorId: null,
+        priority: "LOW",
+        status: "PENDING",
+        location: {
+          latitude: 42.55,
+          longitude: 25.15,
+          address: "Farm Road 99",
+          city: "Plovdiv",
+          region: "Plovdiv Province",
+        },
+        productDetails: {
+          name: "Lentils",
+          type: "Legumes",
+          quantity: 150,
+          unit: "kg",
+          claimedSpecs: {},
+        },
+        estimatedDuration: 50,
+        distance: 11,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "job-to-lock",
+        sellerListingId: "listing-123",
+        inspectorId: "inspector-002",
+        priority: "MEDIUM",
+        status: "IN_PROGRESS",
+        location: {
+          latitude: 42.6,
+          longitude: 25.2,
+          address: "Farm Road 100",
+          city: "Plovdiv",
+          region: "Plovdiv Province",
+        },
+        productDetails: {
+          name: "Wheat",
+          type: "Grain",
+          quantity: 250,
+          unit: "kg",
+          claimedSpecs: {},
+        },
+        estimatedDuration: 95,
+        distance: 17,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: "job-busy",
+        sellerListingId: "listing-busy",
+        inspectorId: "inspector-busy",
+        priority: "HIGH",
+        status: "IN_PROGRESS",
+        location: {
+          latitude: 42.65,
+          longitude: 25.25,
+          address: "Farm Road Busy",
+          city: "Plovdiv",
+          region: "Plovdiv Province",
+        },
+        productDetails: {
+          name: "Busy Grain",
+          type: "Grain",
+          quantity: 100,
+          unit: "kg",
+          claimedSpecs: {},
+        },
+        estimatedDuration: 60,
+        distance: 14,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ];
 
     mockJobs.forEach((job) => this.jobs.set(job.id, job));
@@ -201,6 +450,30 @@ export class InspectorService {
     // In real implementation, this would update the seller listing
 
     return result;
+  }
+
+  async updateJobStatus(
+    jobId: string,
+    update: { inspectorId?: string; status?: string; arrivedAt?: string },
+  ) {
+    const job = this.jobs.get(jobId);
+    if (!job) {
+      throw new NotFoundException("Job not found");
+    }
+
+    if (update.inspectorId && job.inspectorId && job.inspectorId !== update.inspectorId) {
+      throw new ConflictException("Job assigned to another inspector");
+    }
+
+    job.inspectorId = update.inspectorId || job.inspectorId;
+    job.status = update.status || job.status;
+    if (update.arrivedAt) {
+      job.arrivedAt = new Date(update.arrivedAt);
+    }
+    job.updatedAt = new Date();
+    this.jobs.set(jobId, job);
+
+    return job;
   }
 
   async updateLocation(updateDto: LocationUpdateDto) {

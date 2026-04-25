@@ -17,7 +17,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || "",
-    phone: user?.phone || user?.phoneNumber || "",
+    phone: user?.phone || "",
     location: user?.location
       ? `${user.location.city}, ${user.location.country}`
       : "",

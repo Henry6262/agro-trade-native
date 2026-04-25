@@ -20,7 +20,7 @@ import {
 } from 'lucide-react-native';
 import { TransportMapView } from './TransportMapView';
 import type { TradeOperation, TransportEstimate } from '@services/tradeOperationService';
-import { COLORS } from '../../../../../design-system';
+import { COLORS } from '@design-system';
 
 const { height: screenHeight } = Dimensions.get('window');
 

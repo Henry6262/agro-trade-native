@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { AlertCircle } from 'lucide-react-native';
 
-import { GlassButton, GlassBadge, COLORS } from '../../../../../../design-system';
+import { GlassButton, GlassBadge, COLORS } from '@design-system';
 
 import {
   OfferStatsGrid,

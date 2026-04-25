@@ -4,436 +4,428 @@ import {
   Post,
   Put,
   Body,
+  Param,
   Query,
   UseGuards,
   HttpStatus,
   BadRequestException,
+  ForbiddenException,
   Request,
+  HttpCode,
 } from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiExtraModels,
+  ApiParam,
   ApiQuery,
 } from "@nestjs/swagger";
-import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
-import { RolesGuard } from "../../auth/guards/roles.guard";
-import { Roles } from "../../auth/decorators/roles.decorator";
-import { UserRole, TruckType } from "@prisma/client";
+import { TransportService } from "../services/transport.service";
 import { TransportCostService } from "../services/transport-cost.service";
 import { RouteOptimizationService } from "../services/route-optimization.service";
 import { TransportCostSettingsService } from "../services/transport-settings.service";
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../../auth/guards/roles.guard";
+import { Roles } from "../../auth/decorators/roles.decorator";
+import { CurrentUser } from "../../auth/decorators/current-user.decorator";
+import {
+  User,
+  UserRole,
+  TransportRequestStatus,
+  BidStatus,
+  TruckType,
+} from "@prisma/client";
+import {
+  CreateTransportRequestDto,
+  CreateTransportBidDto,
+  UpdateTransportJobStatusDto,
+  CompletePickupDto,
+  CompleteDeliveryDto,
+  GetTransportRequestsQueryDto,
+  GetTransportBidsQueryDto,
+  GetTransportJobsQueryDto,
+  TransportRequestResponseDto as BiddingRequestResponseDto,
+} from "../dto/transport-bidding.dto";
 import {
   TransportEstimationRequestDto,
   RouteOptimizationRequestDto,
   TransportEstimationResponseDto,
   RouteOptimizationResponseDto,
 } from "../dto/transport-estimation.dto";
+import {
+  TransportRequestDto,
+  TransportRequestSummaryDto,
+  TransportBidDto,
+  TransportJobDto,
+  TransportRequestListResponseDto,
+  TransportRequestResponseDto,
+  TransportBidListResponseDto,
+  TransportBidResponseDto,
+  TransportJobListResponseDto,
+  TransportJobResponseDto,
+  TransportBidComparisonDto,
+  TransportBidComparisonResponseDto,
+  TransporterPerformanceDto,
+  TransporterPerformanceResponseDto,
+  TransportAnalyticsResponseDto,
+  TransportAnalyticsResponseWrapperDto,
+  TransportPickupPointDto,
+  TransportDeliveryPointDto,
+  TransportTradeOperationSummaryDto,
+  TransportBidTransporterSummaryDto,
+  TransportJobLocationDto,
+  TransportPickupRecordDto,
+} from "../dto/transport-responses.dto";
 
 @ApiTags("Transport")
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller("transport")
+@ApiExtraModels(
+  TransportRequestDto,
+  TransportBidDto,
+  TransportJobDto,
+  TransportRequestListResponseDto,
+  TransportRequestResponseDto,
+  TransportBidListResponseDto,
+  TransportBidResponseDto,
+  TransportJobListResponseDto,
+  TransportJobResponseDto,
+  TransportBidComparisonDto,
+  TransportBidComparisonResponseDto,
+  TransporterPerformanceDto,
+  TransporterPerformanceResponseDto,
+  TransportAnalyticsResponseDto,
+)
 export class TransportController {
   constructor(
+    private readonly transportService: TransportService,
     private readonly transportCostService: TransportCostService,
     private readonly routeOptimizationService: RouteOptimizationService,
     private readonly transportSettingsService: TransportCostSettingsService,
   ) {}
 
+  // ==================== TRANSPORT REQUESTS ====================
+
+  @Post("requests")
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: "Create a transport request" })
+  @ApiResponse({ status: HttpStatus.CREATED, type: TransportRequestResponseDto })
+  async createRequest(@Body() dto: CreateTransportRequestDto): Promise<TransportRequestResponseDto> {
+    const request = await this.transportService.createTransportRequest(dto);
+    return { data: this.mapTransportRequest(request) };
+  }
+
+  @Post("requests/auto")
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: "Auto-create transport request for trade" })
+  async autoCreateRequest(@Body("tradeOperationId") tradeOperationId: string) {
+    return await this.transportService.autoCreateTransportRequestForTrade(tradeOperationId);
+  }
+
+  @Get("requests")
+  @Roles(UserRole.ADMIN, UserRole.TRANSPORTER)
+  @ApiOperation({ summary: "Get transport requests" })
+  async getRequests(
+    @Query() query: GetTransportRequestsQueryDto,
+    @CurrentUser() user: User,
+  ): Promise<TransportRequestListResponseDto> {
+    if (user.role === UserRole.TRANSPORTER) {
+      query.transporterId = user.id;
+    }
+    const result = await this.transportService.getTransportRequests(query);
+    return {
+      data: result.data.map((req) => this.mapTransportRequest(req)),
+      meta: {
+        total: result.total,
+        page: result.page,
+        limit: result.limit,
+        hasMore: (result.page * result.limit) < result.total,
+      },
+    };
+  }
+
+  @Get("requests/available")
+  @Roles(UserRole.TRANSPORTER)
+  @ApiOperation({ summary: "Get available transport requests for bidding" })
+  async getAvailableRequests(
+    @CurrentUser() user: User,
+    @Query("radius") radius?: number,
+    @Query("minWeight") minWeight?: number,
+    @Query("maxWeight") maxWeight?: number,
+  ): Promise<TransportRequestListResponseDto> {
+    const requests = await this.transportService.getAvailableRequests({
+      transporterId: user.id,
+      radius,
+      minWeight,
+      maxWeight,
+    });
+    return { data: requests.map((req) => this.mapTransportRequest(req)) };
+  }
+
+  @Get("requests/:id")
+  @Roles(UserRole.ADMIN, UserRole.TRANSPORTER)
+  @ApiOperation({ summary: "Get transport request by ID" })
+  async getRequestById(@Param("id") id: string): Promise<TransportRequestResponseDto> {
+    const request = await this.transportService.getRequestById(id);
+    return { data: this.mapTransportRequest(request) };
+  }
+
+  // ==================== TRANSPORT BIDS ====================
+
+  @Post("bids")
+  @Roles(UserRole.TRANSPORTER)
+  @ApiOperation({ summary: "Submit a bid" })
+  async submitBid(
+    @CurrentUser() user: User,
+    @Body() dto: CreateTransportBidDto,
+  ): Promise<TransportBidResponseDto> {
+    const bid = await this.transportService.submitBid(user.id, dto);
+    return { data: this.mapTransportBid(bid) };
+  }
+
+  @Get("bids")
+  @Roles(UserRole.ADMIN, UserRole.TRANSPORTER)
+  @ApiOperation({ summary: "Get transport bids" })
+  async getBids(
+    @Query() query: GetTransportBidsQueryDto,
+    @CurrentUser() user: User,
+  ): Promise<TransportBidListResponseDto> {
+    if (user.role === UserRole.TRANSPORTER) {
+      query.transporterId = user.id;
+    }
+    const result = await this.transportService.getTransportBids(query);
+    return { data: result.data.map((bid) => this.mapTransportBid(bid)) };
+  }
+
+  @Post("bids/:id/accept")
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Accept a bid" })
+  async acceptBid(@Param("id") id: string): Promise<TransportJobResponseDto> {
+    const job = await this.transportService.acceptBid(id);
+    return { data: this.mapTransportJob(job) };
+  }
+
+  @Post("bids/:id/reject")
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Reject a bid" })
+  async rejectBid(@Param("id") id: string, @Body("reason") reason?: string) {
+    const bid = await this.transportService.rejectBid(id, reason);
+    return { data: this.mapTransportBid(bid) };
+  }
+
+  // ==================== TRANSPORT JOBS ====================
+
+  @Get("jobs")
+  @Roles(UserRole.ADMIN, UserRole.TRANSPORTER)
+  @ApiOperation({ summary: "Get transport jobs" })
+  async getJobs(
+    @Query() query: GetTransportJobsQueryDto,
+    @CurrentUser() user: User,
+  ): Promise<TransportJobListResponseDto> {
+    if (user.role === UserRole.TRANSPORTER) {
+      query.transporterId = user.id;
+    }
+    const result = await this.transportService.getTransportJobs(query);
+    return { data: result.data.map((job) => this.mapTransportJob(job)) };
+  }
+
+  @Post("jobs/:id/start")
+  @Roles(UserRole.TRANSPORTER)
+  @HttpCode(HttpStatus.OK)
+  async startJob(@Param("id") id: string, @CurrentUser() user: User, @Body() data: any) {
+    const job = await this.transportService.startJob(id, user.id, data);
+    return { data: this.mapTransportJob(job) };
+  }
+
+  @Post("jobs/:id/pickup")
+  @Roles(UserRole.TRANSPORTER)
+  @HttpCode(HttpStatus.OK)
+  async confirmPickup(@Param("id") id: string, @CurrentUser() user: User, @Body() data: any) {
+    const job = await this.transportService.confirmPickup(id, user.id, data);
+    return { data: this.mapTransportJob(job) };
+  }
+
+  @Post("jobs/:id/delivery")
+  @Roles(UserRole.TRANSPORTER)
+  @HttpCode(HttpStatus.OK)
+  async confirmDelivery(@Param("id") id: string, @CurrentUser() user: User, @Body() data: any) {
+    const job = await this.transportService.confirmDelivery(id, user.id, data);
+    return { data: this.mapTransportJob(job) };
+  }
+
+  @Put("jobs/:id/location")
+  @Roles(UserRole.TRANSPORTER)
+  async updateLocation(@Param("id") id: string, @CurrentUser() user: User, @Body() data: any) {
+    const job = await this.transportService.updateJobLocation(id, user.id, data);
+    return { data: this.mapTransportJob(job) };
+  }
+
+  // ==================== ESTIMATION & OPTIMIZATION ====================
+
   @Post("estimate")
   @Roles(UserRole.ADMIN, UserRole.TRANSPORTER)
-  @ApiOperation({ summary: "Estimate transport cost for a route" })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: "Transport cost estimation",
-    type: TransportEstimationResponseDto,
-  })
-  async estimateCost(
-    @Body() estimationDto: TransportEstimationRequestDto,
-  ): Promise<TransportEstimationResponseDto> {
-    const estimation = await this.transportCostService.estimateCost(
-      estimationDto.pickupPoints,
-      estimationDto.deliveryPoint,
-      {
-        vehicleType: estimationDto.vehicleType,
-        urgency: estimationDto.urgency,
-        includeAlternatives: estimationDto.includeAlternatives,
-      },
-    );
-
-    // Add alternatives if requested
-    if (estimationDto.includeAlternatives) {
-      const alternatives = await this.calculateAlternatives(
-        estimationDto,
-        estimation.totalCost,
-      );
-      return { ...estimation, alternatives };
-    }
-
-    return estimation;
+  async estimateCost(@Body() dto: TransportEstimationRequestDto) {
+    return await this.transportCostService.estimateCost(dto.pickupPoints, dto.deliveryPoint, dto);
   }
 
   @Post("optimize-route")
   @Roles(UserRole.ADMIN, UserRole.TRANSPORTER)
-  @ApiOperation({ summary: "Optimize transport route for multiple pickups" })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: "Optimized route details",
-    type: RouteOptimizationResponseDto,
-  })
-  async optimizeRoute(
-    @Body() optimizationDto: RouteOptimizationRequestDto,
-  ): Promise<RouteOptimizationResponseDto> {
-    // Map pickups to ensure they have IDs
-    const pickupsWithIds = optimizationDto.pickups.map((p, index) => ({
+  async optimizeRoute(@Body() dto: RouteOptimizationRequestDto) {
+    const pickupsWithIds = dto.pickups.map((p, index) => ({
       ...p,
       id: p.id || `pickup-${index}`,
     }));
 
-    const result = await this.routeOptimizationService.optimizeRoute(
-      optimizationDto.warehouseLocation,
+    return await this.routeOptimizationService.optimizeRoute(
+      dto.warehouseLocation,
       pickupsWithIds,
-      optimizationDto.deliveryLocation,
-      optimizationDto.algorithm || "tsp_2opt",
-      {
-        maxDistance: optimizationDto.maxDistance,
-        maxDuration: optimizationDto.maxDuration,
-        priorityPickupsFirst: optimizationDto.priorityPickupsFirst,
-        vehicleCapacity: optimizationDto.vehicleCapacity,
-      },
+      dto.deliveryLocation,
+      dto.algorithm || "tsp_2opt",
     );
-
-    // Check for multi-trip requirement
-    let multiTripSuggestion;
-    if (optimizationDto.vehicleCapacity) {
-      const suggestion =
-        this.routeOptimizationService.handleCapacityConstraints(
-          pickupsWithIds,
-          optimizationDto.vehicleCapacity,
-        );
-
-      if (suggestion) {
-        multiTripSuggestion = {
-          requiredTrips: suggestion.requiredTrips,
-          trips: suggestion.trips.map((t) => ({
-            tripNumber: t.tripNumber,
-            totalQuantity: t.totalQuantity,
-            distance: t.distance,
-          })),
-        };
-      }
-    }
-
-    return {
-      ...result,
-      multiTripSuggestion,
-    };
   }
 
-  @Get("settings")
+  // ==================== ANALYTICS ====================
+
+  @Get("analytics/bid-comparison/:requestId")
   @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: "Get current transport cost settings" })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: "Current transport cost settings",
-  })
-  async getSettings(): Promise<any> {
-    const settings = await this.transportSettingsService.getActiveSettings();
+  async compareBids(@Param("requestId") requestId: string): Promise<TransportBidComparisonResponseDto> {
+    const result = await this.transportService.compareBids(requestId);
+    return { data: this.mapBidComparison(result) };
+  }
 
+  @Get("me/analytics")
+  @Roles(UserRole.TRANSPORTER)
+  async getMyAnalytics(@CurrentUser() user: User): Promise<TransportAnalyticsResponseDto> {
+    const result = await this.transportService.getTransporterAnalyticsSummary(user.id);
     return {
-      id: settings.id,
-      baseRatePerKm: settings.baseRatePerKm?.toNumber(),
-      vehicleMultipliers: {
-        FLATBED: settings.flatbedMultiplier,
-        REFRIGERATED: settings.refrigeratedMultiplier,
-        TANKER: settings.tankerMultiplier,
-        CONTAINER: settings.containerMultiplier,
-        CURTAIN_SIDE: 1.05,
-        BOX_TRUCK: 1.0,
-        OTHER: 1.0,
-      },
-      distanceTiers: [
-        {
-          minKm: 0,
-          maxKm: settings.tier1MaxKm,
-          ratePerKm: settings.tier1Rate?.toNumber(),
-        },
-        {
-          minKm: settings.tier1MaxKm,
-          maxKm: settings.tier2MaxKm,
-          ratePerKm: settings.tier2Rate?.toNumber(),
-        },
-        {
-          minKm: settings.tier2MaxKm,
-          maxKm: null,
-          ratePerKm: settings.tier3Rate?.toNumber(),
-        },
-      ],
-      loadingCostPerTon: settings.loadingCostPerTon?.toNumber(),
-      urgencySurcharge: settings.urgencySurcharge,
-      bulkDiscountThreshold: 100, // default value
-      bulkDiscountRate: 0.1, // default value
-      isActive: settings.isActive,
-      effectiveFrom: settings.effectiveFrom,
+      metrics: result.metrics,
+      recentJobs: result.recentJobs.map((job) => this.mapTransportJob(job)),
     };
   }
 
-  @Put("settings")
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: "Update transport cost settings" })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: "Settings updated successfully",
-  })
-  async updateSettings(
-    @Body() settingsDto: any,
-    @Request() req: any,
-  ): Promise<any> {
-    const updatedSettings = await this.transportSettingsService.updateSettings(
-      settingsDto,
-      req.user.id,
-      settingsDto.changeReason || "Manual update",
-    );
+  // ==================== MAPPERS ====================
 
+  private mapTransportRequest(req: any): TransportRequestDto {
     return {
-      message: "Transport settings updated successfully",
-      settings: {
-        id: updatedSettings.id,
-        baseRatePerKm: updatedSettings.baseRatePerKm?.toNumber(),
-        effectiveFrom: updatedSettings.effectiveFrom,
-      },
+      id: req.id,
+      requestNumber: req.requestNumber,
+      status: req.status,
+      tradeOperationId: req.tradeOperationId,
+      totalWeight: Number(req.totalWeight),
+      cargoDescription: req.cargoDescription,
+      requiredVehicleType: req.requiredVehicleType,
+      pickupPoints: this.mapPickupPoints(req.pickupPoints),
+      deliveryPoint: this.mapDeliveryPoint(req.deliveryPoint),
+      estimatedDistance: req.estimatedDistance ? Number(req.estimatedDistance) : undefined,
+      urgencyLevel: req.urgencyLevel,
+      biddingDeadline: req.biddingDeadline.toISOString(),
+      maxBudget: req.maxBudget ? Number(req.maxBudget) : undefined,
+      createdAt: req.createdAt.toISOString(),
+      updatedAt: req.updatedAt.toISOString(),
+      bidsCount: req.bidsCount || req._count?.bids || 0,
+      lowestBid: req.lowestBid ? Number(req.lowestBid) : undefined,
+      tradeOperation: this.mapTradeOp(req.tradeOperation),
     };
   }
 
-  @Get("settings/history")
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: "Get transport settings history" })
-  @ApiQuery({ name: "limit", type: Number, required: false, example: 10 })
-  @ApiQuery({ name: "offset", type: Number, required: false, example: 0 })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: "Settings history",
-  })
-  async getSettingsHistory(
-    @Query("limit") limit = "10",
-    @Query("offset") offset = "0",
-  ): Promise<any> {
-    const history = await this.transportSettingsService.getSettingsHistory(
-      parseInt(limit),
-      parseInt(offset),
-    );
-
+  private mapTransportBid(bid: any): TransportBidDto {
     return {
-      data: history,
-      total: history.length,
+      id: bid.id,
+      transportRequestId: bid.transportRequestId,
+      tradeOperationId: bid.tradeOperationId,
+      transporterId: bid.transporterId,
+      bidAmount: Number(bid.bidAmount),
+      estimatedDuration: bid.estimatedDuration,
+      vehicleType: bid.vehicleType,
+      status: bid.status,
+      submittedAt: bid.submittedAt.toISOString(),
+      expiresAt: bid.expiresAt?.toISOString(),
+      transporter: this.mapTransporter(bid.transporter),
     };
   }
 
-  @Post("settings/compare")
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: "Compare impact of new transport settings" })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: "Settings comparison results",
-  })
-  async compareSettings(
-    @Body()
-    body: {
-      newSettings: any;
-      sampleRoutes: Array<{
-        distance: number;
-        quantity: number;
-        vehicleType: TruckType;
-        isUrgent: boolean;
-      }>;
-    },
-  ): Promise<any> {
-    const comparison =
-      await this.transportSettingsService.compareSettingsImpact(
-        body.newSettings,
-        body.sampleRoutes,
-      );
-
-    return comparison;
-  }
-
-  @Post("settings/optimize")
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: "Optimize transport settings for target margin" })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: "Optimized settings",
-  })
-  async optimizeSettings(
-    @Body()
-    body: {
-      targetMargin: number;
-      currentAverageMargin: number;
-      constraints?: {
-        maxBaseRate?: number;
-        minBulkDiscount?: number;
-        maxUrgencySurcharge?: number;
-      };
-    },
-  ): Promise<any> {
-    const optimized = await this.transportSettingsService.optimizeForMargin(
-      body.targetMargin,
-      body.currentAverageMargin,
-      body.constraints,
-    );
-
+  private mapTransportJob(job: any): TransportJobDto {
     return {
-      message: "Settings optimized for target margin",
-      optimizedSettings: optimized,
-      expectedImpact: {
-        targetMargin: body.targetMargin,
-        currentMargin: body.currentAverageMargin,
-        marginIncrease: body.targetMargin - body.currentAverageMargin,
-      },
+      id: job.id,
+      jobNumber: job.jobNumber,
+      transportRequestId: job.transportRequestId,
+      status: job.status,
+      transporterId: job.transporterId,
+      currentLocation: job.currentLocation,
+      startedAt: job.startedAt?.toISOString(),
+      completedAt: job.completedAt?.toISOString(),
+      createdAt: job.createdAt.toISOString(),
+      updatedAt: job.updatedAt.toISOString(),
     };
   }
 
-  @Get("cost-breakdown")
-  @Roles(UserRole.ADMIN, UserRole.TRANSPORTER)
-  @ApiOperation({ summary: "Get detailed cost breakdown for a route" })
-  @ApiQuery({ name: "distance", type: Number, required: true })
-  @ApiQuery({ name: "quantity", type: Number, required: true })
-  @ApiQuery({ name: "vehicleType", enum: TruckType, required: true })
-  @ApiQuery({ name: "isUrgent", type: Boolean, required: false })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: "Detailed cost breakdown",
-  })
-  async getCostBreakdown(
-    @Query("distance") distance: string,
-    @Query("quantity") quantity: string,
-    @Query("vehicleType") vehicleType: TruckType,
-    @Query("isUrgent") isUrgent?: string,
-  ): Promise<any> {
-    if (!distance || !quantity || !vehicleType) {
-      throw new BadRequestException(
-        "distance, quantity, and vehicleType are required",
-      );
-    }
+  private mapPickupPoints(points: any): TransportPickupPointDto[] {
+    const parsed = Array.isArray(points) ? points : JSON.parse(points || "[]");
+    return parsed.map((p: any) => ({
+      lat: p.location?.lat ?? p.lat ?? 0,
+      lng: p.location?.lng ?? p.lng ?? 0,
+      address: p.location?.address ?? p.address,
+      quantity: p.quantity,
+      sellerId: p.sellerId,
+      sellerName: p.sellerName,
+    }));
+  }
 
-    const breakdown =
-      await this.transportSettingsService.calculateCostBreakdown(
-        parseFloat(distance),
-        parseFloat(quantity),
-        vehicleType,
-        isUrgent === "true",
-      );
-
+  private mapDeliveryPoint(point: any): TransportDeliveryPointDto {
+    const p = typeof point === "string" ? JSON.parse(point) : point;
     return {
-      inputs: {
-        distance: parseFloat(distance),
-        quantity: parseFloat(quantity),
-        vehicleType,
-        isUrgent: isUrgent === "true",
-      },
-      breakdown,
-      summary: {
-        totalCost: breakdown.totalCost,
-        costPerKm: breakdown.totalCost / parseFloat(distance),
-        costPerTon: breakdown.totalCost / parseFloat(quantity),
-      },
+      lat: p?.location?.lat ?? p?.lat ?? 0,
+      lng: p?.location?.lng ?? p?.lng ?? 0,
+      address: p?.location?.address ?? p?.address,
     };
   }
 
-  @Get("settings/export")
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: "Export transport settings as JSON" })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: "Settings exported as JSON",
-  })
-  async exportSettings(): Promise<any> {
-    const json = await this.transportSettingsService.exportSettings();
+  private mapTradeOp(op: any): TransportTradeOperationSummaryDto | undefined {
+    if (!op) return undefined;
     return {
-      data: JSON.parse(json),
-      exportedAt: new Date().toISOString(),
+      id: op.id,
+      operationNumber: op.operationNumber,
+      status: op.status,
+      phase: op.phase,
+      buyListing: op.buyListing ? {
+        id: op.buyListing.id,
+        quantity: Number(op.buyListing.quantity),
+        unit: op.buyListing.unit,
+        product: op.buyListing.product ? {
+          id: op.buyListing.product.id,
+          name: op.buyListing.product.name,
+        } : undefined,
+        buyer: op.buyListing.buyer ? {
+          id: op.buyListing.buyer.id,
+          name: op.buyListing.buyer.name,
+        } : undefined,
+      } : undefined,
     };
   }
 
-  @Post("settings/import")
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: "Import transport settings from JSON" })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: "Settings imported successfully",
-  })
-  async importSettings(
-    @Body() jsonData: any,
-    @Request() req: any,
-  ): Promise<any> {
-    const imported = await this.transportSettingsService.importSettings(
-      JSON.stringify(jsonData),
-      req.user.id,
-    );
-
+  private mapTransporter(t: any): TransportBidTransporterSummaryDto | undefined {
+    if (!t) return undefined;
     return {
-      message: "Settings imported successfully",
-      settings: {
-        id: imported.id,
-        effectiveFrom: imported.effectiveFrom,
-      },
+      id: t.id,
+      name: t.name,
+      email: t.email,
+      company: t.company ? { id: t.company.id, legalName: t.company.legalName } : undefined,
     };
   }
 
-  @Post("clear-cache")
-  @Roles(UserRole.ADMIN)
-  @ApiOperation({ summary: "Clear transport cost cache" })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: "Cache cleared",
-  })
-  async clearCache(): Promise<any> {
-    this.transportCostService.clearCache();
+  private mapBidComparison(result: any): TransportBidComparisonDto {
     return {
-      message: "Transport cost cache cleared successfully",
-      timestamp: new Date().toISOString(),
+      request: result.request,
+      bids: result.bids.map((b: any) => ({
+        ...b,
+        transporter: b.transporter,
+      })),
+      statistics: result.statistics,
     };
-  }
-
-  /**
-   * Calculate alternative vehicle costs
-   */
-  private async calculateAlternatives(
-    estimationDto: TransportEstimationRequestDto,
-    baseCost: number,
-  ): Promise<any[]> {
-    const vehicleTypes: TruckType[] = [
-      "FLATBED",
-      "REFRIGERATED",
-      "TANKER",
-      "CONTAINER",
-      "CURTAIN_SIDE",
-      "BOX_TRUCK",
-    ];
-
-    const alternatives = [];
-
-    for (const type of vehicleTypes) {
-      if (type === estimationDto.vehicleType) continue;
-
-      const estimation = await this.transportCostService.estimateCost(
-        estimationDto.pickupPoints,
-        estimationDto.deliveryPoint,
-        {
-          vehicleType: type,
-          urgency: estimationDto.urgency,
-        },
-      );
-
-      alternatives.push({
-        vehicleType: type,
-        cost: estimation.totalCost,
-        difference: estimation.totalCost - baseCost,
-      });
-    }
-
-    return alternatives.sort((a, b) => a.cost - b.cost);
   }
 }

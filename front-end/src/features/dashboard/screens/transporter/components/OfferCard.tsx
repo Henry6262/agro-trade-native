@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
 import { MapPin } from 'lucide-react-native';
-import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
+import { GlassCard, GlassBadge, GlassButton } from '@design-system';
 import { MapOffer } from '../maps/types';
 
 interface OfferCardProps {

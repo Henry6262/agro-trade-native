@@ -1,6 +1,7 @@
 import { io, Socket } from 'socket.io-client';
 import { WS_URL } from '../config/api';
 import { useAuthStore } from '@stores/auth.store';
+import { Negotiation } from './negotiationService';
 
 export interface SocketEventPayloads {
   'trade:updated': { tradeOperationId: string; phase: string; status: string };
@@ -11,6 +12,11 @@ export interface SocketEventPayloads {
     passed: boolean;
     qualityScore: number;
   };
+  'offer:new': Negotiation;
+  'offer:countered': Negotiation;
+  'offer:accepted': Negotiation;
+  'offer:rejected': Negotiation;
+  'offer:updated': Negotiation;
   'offer:received': {
     tradeOperationId: string;
     negotiationId: string;

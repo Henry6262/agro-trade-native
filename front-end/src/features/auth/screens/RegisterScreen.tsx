@@ -16,7 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { ChevronLeft } from 'lucide-react-native';
 import { useAuth } from '../../../shared/hooks';
-import { GlassButton, GlassCard, GlassInput, GradientBackground } from '../../../design-system';
+import { GlassButton, GlassCard, GlassInput, GradientBackground } from '@design-system';
 
 const registerSchema = z
   .object({

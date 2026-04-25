@@ -10,7 +10,7 @@ import {
   Camera,
 } from 'lucide-react-native';
 import * as Location from 'expo-location';
-import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
+import { GlassCard, GlassBadge, GlassButton } from '@design-system';
 import { BaseComponentProps } from '@shared/types';
 import { EmptyState } from '@shared/components/EmptyState';
 import { SkeletonCard } from '@shared/components/SkeletonCard';

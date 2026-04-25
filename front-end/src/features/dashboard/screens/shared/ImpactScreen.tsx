@@ -15,7 +15,7 @@ import {
   GlassBadge,
   StatCard,
   COLORS,
-} from '../../../../design-system';
+} from '@design-system';
 import {
   impactService,
   PlatformImpact,

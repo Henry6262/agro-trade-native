@@ -23,6 +23,7 @@ import {
   Package,
   List,
   Inbox,
+  CandlestickChart,
   ClipboardCheck,
   Truck,
   LayoutDashboard,
@@ -51,6 +52,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { title: "My Listings", href: "/dashboard/seller/listings", icon: Package },
     { title: "Offers", href: "/dashboard/seller/offers", icon: Inbox },
     { title: "Trades", href: "/dashboard/seller/trades", icon: List },
+    { title: "Portfolio", href: "/dashboard/seller/portfolio", icon: CandlestickChart },
   ],
   inspector: [
     { title: "Dashboard", href: "/dashboard/inspector", icon: ClipboardCheck },

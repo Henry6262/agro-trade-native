@@ -4,7 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../../../navigation/types';
 import { BuyerOnboarding } from '@pages/Onboarding/sections/Buyer/components/BuyerOnboarding';
 import { useOnboardingStore } from '@stores/onboarding.store';
-import { GradientBackground } from '../../../../design-system';
+import { GradientBackground } from '@design-system';
 
 type BuyerOnboardingFlowScreenNavigationProp = NativeStackNavigationProp<
   OnboardingStackParamList,

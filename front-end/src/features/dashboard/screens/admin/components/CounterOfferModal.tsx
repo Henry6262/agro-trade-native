@@ -24,8 +24,8 @@ import {
   XCircle,
 } from 'lucide-react-native';
 import { negotiationService } from '@services/negotiationService';
-import { GlassCard, GlassButton, GlassInput } from '../../../../../design-system';
-import { COLORS } from '../../../../../design-system';
+import { GlassCard, GlassButton, GlassInput } from '@design-system';
+import { COLORS } from '@design-system';
 
 const _DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 10 };
 

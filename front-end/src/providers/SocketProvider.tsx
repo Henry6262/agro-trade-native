@@ -53,35 +53,74 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         'https://agro-trade-native-production.up.railway.app/api';
       registerForPushNotifications(token, API_URL).catch(console.warn);
 
-      const invalidateOffers = () => {
+      // Invalidate all trade-related queries for both roles
+      const invalidateTradeData = () => {
         queryClient.invalidateQueries({ queryKey: ['seller-offers'] });
+        queryClient.invalidateQueries({ queryKey: ['seller-trades'] });
+        queryClient.invalidateQueries({ queryKey: ['buyer', 'listings'] });
+        queryClient.invalidateQueries({ queryKey: ['buyer', 'offers'] });
+        queryClient.invalidateQueries({ queryKey: ['buyer', 'trades'] });
+        queryClient.invalidateQueries({ queryKey: ['trade-operations'] });
+        queryClient.invalidateQueries({ queryKey: ['negotiations'] });
       };
 
       const handleNewOffer = (data?: any) => {
-        invalidateOffers();
+        invalidateTradeData();
         useNotificationStore.getState().addNotification({
           title: 'New Offer Received',
-          body: data?.message || 'A buyer made an offer on your product.',
+          body: data?.tradeSeller?.saleListing?.product?.name 
+            ? `New offer for your ${data.tradeSeller.saleListing.product.name}`
+            : 'A buyer made an offer on your product.',
           type: 'offer',
           data,
         });
       };
 
       const handleOfferUpdated = (data?: any) => {
-        invalidateOffers();
+        invalidateTradeData();
         useNotificationStore.getState().addNotification({
           title: 'Offer Updated',
-          body: data?.message || 'An offer has been updated.',
+          body: 'An offer has been updated.',
+          type: 'offer',
+          data,
+        });
+      };
+
+      const handleOfferCountered = (data?: any) => {
+        invalidateTradeData();
+        useNotificationStore.getState().addNotification({
+          title: 'New Counter Offer',
+          body: `Counter offer received: ${data?.counterOffer?.price} ${data?.tradeOperation?.currency || ''}`,
+          type: 'offer',
+          data,
+        });
+      };
+
+      const handleOfferAccepted = (data?: any) => {
+        invalidateTradeData();
+        useNotificationStore.getState().addNotification({
+          title: 'Offer Accepted! 🎉',
+          body: `Negotiation closed at ${data?.finalPrice} per unit.`,
+          type: 'offer',
+          data,
+        });
+      };
+
+      const handleOfferRejected = (data?: any) => {
+        invalidateTradeData();
+        useNotificationStore.getState().addNotification({
+          title: 'Offer Rejected',
+          body: 'The negotiation has been closed without agreement.',
           type: 'offer',
           data,
         });
       };
 
       const handleOfferExpired = (data?: any) => {
-        invalidateOffers();
+        invalidateTradeData();
         useNotificationStore.getState().addNotification({
           title: 'Offer Expired',
-          body: data?.message || 'An offer has expired.',
+          body: 'An offer has expired.',
           type: 'offer',
           data,
         });
@@ -89,14 +128,20 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       socketService.on('offer:new', handleNewOffer);
       socketService.on('offer:updated', handleOfferUpdated);
+      socketService.on('offer:countered', handleOfferCountered);
+      socketService.on('offer:accepted', handleOfferAccepted);
+      socketService.on('offer:rejected', handleOfferRejected);
       socketService.on('offer:expired', handleOfferExpired);
-      socketService.on('trade:updated', invalidateOffers);
+      socketService.on('trade:updated', invalidateTradeData);
 
       return () => {
         socketService.off('offer:new', handleNewOffer);
         socketService.off('offer:updated', handleOfferUpdated);
+        socketService.off('offer:countered', handleOfferCountered);
+        socketService.off('offer:accepted', handleOfferAccepted);
+        socketService.off('offer:rejected', handleOfferRejected);
         socketService.off('offer:expired', handleOfferExpired);
-        socketService.off('trade:updated', invalidateOffers);
+        socketService.off('trade:updated', invalidateTradeData);
         socketService.disconnect();
       };
     } else {

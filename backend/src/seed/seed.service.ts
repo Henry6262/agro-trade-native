@@ -8,7 +8,9 @@
  */
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import {
+  CommodityParentCategory,
   DataType,
+  Incoterm,
   Importance,
   ProductCategory,
   ProductUnit,
@@ -23,6 +25,7 @@ export class SeedService implements OnApplicationBootstrap {
 
   async onApplicationBootstrap() {
     await this.seedProductCatalog();
+    await this.seedCommodityRegistry();
   }
 
   private async seedProductCatalog() {
@@ -60,12 +63,24 @@ export class SeedService implements OnApplicationBootstrap {
 
     const specTypes: Record<string, { id: string }> = {};
     for (const def of specDefs) {
-      const spec = await this.prisma.specificationType.upsert({
-        where: { code: def.code },
-        update: {},
-        create: def,
-      });
-      specTypes[def.code] = spec;
+      try {
+        const spec = await this.prisma.specificationType.upsert({
+          where: { code: def.code },
+          update: {},
+          create: def,
+        });
+        specTypes[def.code] = spec;
+      } catch (err) {
+        // If it fails due to concurrent create, try to fetch it
+        const existing = await this.prisma.specificationType.findUnique({
+          where: { code: def.code },
+        });
+        if (existing) {
+          specTypes[def.code] = existing;
+        } else {
+          throw err;
+        }
+      }
     }
     this.logger.log(`  ✓ ${specDefs.length} specification types`);
 
@@ -257,24 +272,90 @@ export class SeedService implements OnApplicationBootstrap {
 
     for (const def of productDefs) {
       const { specs, ...productData } = def;
-      await this.prisma.product.upsert({
-        where: { category: productData.category },
-        update: {},
-        create: {
-          ...productData,
-          isActive: true,
-          specTemplates: {
-            create: specs.map((s) => ({
-              specTypeId: specTypes[s.code].id,
-              importance: s.importance,
-              displayOrder: s.displayOrder,
-            })),
+      try {
+        await this.prisma.product.upsert({
+          where: { category: productData.category },
+          update: {},
+          create: {
+            ...productData,
+            isActive: true,
+            specTemplates: {
+              create: specs.map((s) => ({
+                specTypeId: specTypes[s.code].id,
+                importance: s.importance,
+                displayOrder: s.displayOrder,
+              })),
+            },
           },
-        },
-      });
+        });
+      } catch (err) {
+        // Log and continue if already exists
+        this.logger.debug(`Product ${productData.name} already seeded or concurrent creation.`);
+      }
     }
 
     this.logger.log(`  ✓ ${productDefs.length} products seeded`);
     this.logger.log('Product catalog seed complete.');
+  }
+
+  private async seedCommodityRegistry() {
+    const registryEntries = [
+      { name: 'Soft Wheat', hsCode: '1001.19', productCategoryRef: ProductCategory.SOFT_WHEAT, requiresPhytoCert: true },
+      { name: 'Durum Wheat', hsCode: '1001.11', productCategoryRef: ProductCategory.DURUM_WHEAT, requiresPhytoCert: true },
+      { name: 'Corn / Maize', hsCode: '1005.90', productCategoryRef: ProductCategory.CORN_MAIZE, requiresPhytoCert: true },
+      { name: 'Barley', hsCode: '1003.90', productCategoryRef: ProductCategory.BARLEY, requiresPhytoCert: true },
+      { name: 'Oats', hsCode: '1004.90', productCategoryRef: ProductCategory.OATS, requiresPhytoCert: true },
+      { name: 'Sunflower Seeds', hsCode: '1206.00', productCategoryRef: ProductCategory.SUNFLOWER, requiresPhytoCert: true },
+      { name: 'Rapeseed', hsCode: '1205.10', productCategoryRef: ProductCategory.RAPESEED, requiresPhytoCert: true },
+      { name: 'Peas', hsCode: '0713.10', productCategoryRef: ProductCategory.PEAS, requiresPhytoCert: true },
+      { name: 'Soybean Meal', hsCode: '2304.00', productCategoryRef: ProductCategory.SOYBEAN_MEAL },
+      { name: 'Wheat Bran', hsCode: '2302.30', productCategoryRef: ProductCategory.WHEAT_BRAN },
+      { name: 'Alfalfa', hsCode: '1214.10', productCategoryRef: ProductCategory.ALFALFA, requiresPhytoCert: true },
+      { name: 'Generic Agro', hsCode: '0100.00', productCategoryRef: ProductCategory.OTHER },
+    ];
+
+    const validIncoterms = [
+      Incoterm.FOB,
+      Incoterm.CFR,
+      Incoterm.CIF,
+      Incoterm.DAP,
+      Incoterm.DDP,
+    ];
+
+    let seededCount = 0;
+
+    for (const entry of registryEntries) {
+      try {
+        const registry = await this.prisma.commodityRegistry.upsert({
+          where: { name: entry.name },
+          update: {
+            hsCode: entry.hsCode,
+            parentCategory: CommodityParentCategory.AGRICULTURE,
+            productCategoryRef: entry.productCategoryRef,
+            requiresPhytoCert: entry.requiresPhytoCert ?? false,
+            validIncoterms,
+          },
+          create: {
+            name: entry.name,
+            hsCode: entry.hsCode,
+            parentCategory: CommodityParentCategory.AGRICULTURE,
+            productCategoryRef: entry.productCategoryRef,
+            requiresPhytoCert: entry.requiresPhytoCert ?? false,
+            validIncoterms,
+          },
+        });
+
+        await this.prisma.product.updateMany({
+          where: { category: entry.productCategoryRef },
+          data: { commodityRegistryId: registry.id },
+        });
+
+        seededCount += 1;
+      } catch (err) {
+        this.logger.debug(`Commodity ${entry.name} already seeded or concurrent creation.`);
+      }
+    }
+
+    this.logger.log(`Commodity registry seeded/verified (${seededCount} entries).`);
   }
 }

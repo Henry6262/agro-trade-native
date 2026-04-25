@@ -7,7 +7,7 @@ import {
 import { PrismaService } from "../prisma/prisma.service";
 import { InspectionStatus, InspectionPriority, UserRole } from "@prisma/client";
 import { NotificationService } from "../notifications/notification.service";
-import { TransportBiddingService } from "../transport/services/transport-bidding.service";
+import { TransportService } from "../transport/services/transport.service";
 import { TradeEventsService } from "../trade-events/trade-events.service";
 import { RealtimeService } from "../realtime/realtime.service";
 
@@ -18,7 +18,7 @@ export class InspectionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationService: NotificationService,
-    private readonly transportBiddingService: TransportBiddingService,
+    private readonly transportService: TransportService,
     private readonly tradeEventsService: TradeEventsService,
     private readonly realtimeService: RealtimeService,
   ) {}
@@ -731,10 +731,6 @@ export class InspectionService {
       updateData.qualityScore = data.qualityScore;
     }
 
-    if (data.qualityGrade !== undefined) {
-      updateData.qualityGrade = data.qualityGrade;
-    }
-
     if (data.notes !== undefined) {
       updateData.notes = data.notes;
     }
@@ -744,27 +740,9 @@ export class InspectionService {
     }
 
     // Update inspection
-    const updatedInspection = await this.prisma.inspectionRequest.update({
+    await this.prisma.inspectionRequest.update({
       where: { id: inspectionId },
       data: updateData,
-      include: {
-        saleListing: {
-          include: {
-            seller: true,
-            product: true,
-          },
-        },
-        inspector: true,
-        tradeOperation: {
-          include: {
-            buyListing: {
-              include: {
-                buyer: true,
-              },
-            },
-          },
-        },
-      },
     });
 
     // If status is COMPLETED, cascade quality data to SaleListing
@@ -802,7 +780,7 @@ export class InspectionService {
           });
         }
 
-        // Check if ALL sellers are now verified
+        // Check if all sellers for this trade operation are now verified
         const allSellers = await this.prisma.tradeSeller.findMany({
           where: {
             tradeOperationId: inspection.tradeOperationId,
@@ -814,11 +792,12 @@ export class InspectionService {
 
         if (allVerified && allSellers.length > 0) {
           // Update trade operation phase to TRANSPORT_MATCHING
-          await this.prisma.tradeOperation.update({
+          const updatedTrade = await this.prisma.tradeOperation.update({
             where: { id: inspection.tradeOperationId },
             data: {
               phase: "TRANSPORT_MATCHING",
             },
+            include: { buyListing: { select: { buyerId: true } } }
           });
 
           this.logger.log(
@@ -826,12 +805,44 @@ export class InspectionService {
               `Phase updated to TRANSPORT_MATCHING`,
           );
 
+          // Emit real-time update
+          if (updatedTrade.buyListing?.buyerId) {
+            this.realtimeService.emitToUser(updatedTrade.buyListing.buyerId, "trade:updated", {
+              tradeOperationId: updatedTrade.id,
+              phase: updatedTrade.phase,
+              status: updatedTrade.status,
+              message: "All items inspected. Ready for transport.",
+            });
+          }
+
           await this.ensureTransportRequest(inspection.tradeOperationId);
         }
       }
     }
 
-    return updatedInspection;
+    // Re-fetch to get cascaded data (especially for completed inspections)
+    return await this.prisma.inspectionRequest.findUnique({
+      where: { id: inspectionId },
+      include: {
+        saleListing: {
+          include: {
+            seller: true,
+            product: true,
+            address: true,
+          },
+        },
+        inspector: true,
+        tradeOperation: {
+          include: {
+            buyListing: {
+              include: {
+                buyer: true,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 
   /**
@@ -890,7 +901,7 @@ export class InspectionService {
       this.logger.log(
         `🔄 No transport request found for trade ${tradeOperationId}. Auto-creating one now.`,
       );
-      return await this.transportBiddingService.autoCreateTransportRequestForTrade(
+      return await this.transportService.autoCreateTransportRequestForTrade(
         tradeOperationId,
       );
     } catch (error) {

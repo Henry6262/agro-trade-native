@@ -22,8 +22,8 @@ import {
 } from 'lucide-react-native';
 import { tradeOperationService } from '@services/tradeOperationService';
 import { negotiationService } from '@services/negotiationService';
-import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
-import { COLORS } from '../../../../../design-system';
+import { GlassCard, GlassBadge, GlassButton } from '@design-system';
+import { COLORS } from '@design-system';
 import { PhaseBadge } from '../../../../../shared/components/PhaseBadge';
 import { getProductEmoji } from '../../../../../shared/utils/productEmoji';
 

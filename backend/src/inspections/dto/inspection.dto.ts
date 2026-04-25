@@ -10,6 +10,7 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
+  IsDateString,
 } from "class-validator";
 
 export class CreateInspectionRequestDto {
@@ -138,6 +139,12 @@ export class InspectionSaleListingSummaryDto {
   @ApiPropertyOptional({ type: Number })
   askingPrice?: number | null;
 
+  @ApiPropertyOptional({ type: Number })
+  qualityScore?: number | null;
+
+  @ApiPropertyOptional()
+  qualityGrade?: string | null;
+
   @ApiPropertyOptional({ type: () => InspectionProductSummaryDto })
   @Type(() => InspectionProductSummaryDto)
   product?: InspectionProductSummaryDto | null;
@@ -201,43 +208,67 @@ export class InspectionInspectorSummaryDto {
 
 export class InspectionVerificationProductSpecificationsDto {
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   variety?: string;
 
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   grade?: string;
 
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   origin?: string;
 
   @ApiPropertyOptional({ type: String, format: "date-time" })
+  @IsOptional()
+  @IsDateString()
   harvestDate?: string;
 }
 
 export class InspectionVerificationResultDto {
   @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @IsNumber()
   actualQuantity?: number;
 
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   actualQuality?: string;
 
   @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @IsNumber()
   moistureContent?: number;
 
   @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @IsNumber()
   foreignMatter?: number;
 
   @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @IsNumber()
   brokenGrains?: number;
 
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
   discoloration?: boolean;
 
   @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
   pestDamage?: boolean;
 
   @ApiPropertyOptional({
     type: () => InspectionVerificationProductSpecificationsDto,
   })
+  @IsOptional()
+  @ValidateNested()
   @Type(() => InspectionVerificationProductSpecificationsDto)
   productSpecifications?: InspectionVerificationProductSpecificationsDto;
 }
@@ -289,6 +320,9 @@ export class InspectionResponseDto {
 
   @ApiPropertyOptional({ type: Number })
   qualityScore?: number | null;
+
+  @ApiPropertyOptional()
+  qualityGrade?: string | null;
 
   @ApiPropertyOptional({ type: () => InspectionVerificationResultDto })
   @Type(() => InspectionVerificationResultDto)

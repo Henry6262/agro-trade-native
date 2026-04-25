@@ -100,14 +100,23 @@ export interface TradeOperation {
   buyer: User;
   sellerId?: string;
   seller?: User;
+  tradeOperationId?: string;
   sellerListingId: string;
   phase: TradePhase;
+  tradePhase?: TradePhase;
   quantity: number;
+  requestedQuantity?: number | null;
+  agreedQuantity?: number | null;
   unit: string;
   agreedPrice?: number;
+  tradeStatus?: string;
   currency: string;
   notes?: string;
   escrowStatus?: EscrowStatus;
+  metadata?: Record<string, unknown> | null;
+  product?: Product | null;
+  negotiationStatus?: string | null;
+  joinedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -119,6 +128,42 @@ export type EscrowStatus =
   | "COMPLETE"
   | "DISPUTED"
   | "REFUNDED";
+
+export type InvestmentAssetCategory = "STOCK" | "ETF" | "COMMODITY";
+
+export interface InvestmentAsset {
+  symbol: string;
+  name: string;
+  category: InvestmentAssetCategory;
+  outputMint: string;
+}
+
+export type InvestmentStatus = "PENDING" | "EXECUTED" | "FAILED" | "REFUNDED";
+
+export interface InvestmentPosition {
+  id: string;
+  userId: string;
+  tradeOperationId?: string | null;
+  assetSymbol: string;
+  amountUsdc: number | string;
+  tokenAmount: number | string;
+  inputMint: string;
+  outputMint: string;
+  txSignature?: string | null;
+  status: InvestmentStatus;
+  errorMessage?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserInvestmentPreference {
+  userId: string;
+  autoInvest: boolean;
+  assetSymbol: string;
+  percentage: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 // ── Seller Listings ─────────────────────────────────────────────────────────
 

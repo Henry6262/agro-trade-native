@@ -44,7 +44,7 @@ export const PhaseTransitionPanel: React.FC<PhaseTransitionPanelProps> = ({
   const handleTransition = async (targetPhase: string) => {
     try {
       setLoading(true);
-      await tradeOperationService.updatePhase(operationId, { phase: targetPhase });
+      await tradeOperationService.updatePhase(operationId, targetPhase);
       toast.success(`Phase advanced to ${targetPhase}`);
       setConfirmPhase(null);
       await onPhaseChanged();

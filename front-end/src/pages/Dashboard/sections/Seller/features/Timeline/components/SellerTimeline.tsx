@@ -11,7 +11,7 @@ import {
 } from 'lucide-react-native';
 import type { SellerTimelineEvent } from '../types';
 import { timeAgo } from '@shared/utils';
-import { COLORS } from '../../../../../../design-system';
+import { COLORS } from '@design-system';
 
 interface SellerTimelineProps {
   events: SellerTimelineEvent[];

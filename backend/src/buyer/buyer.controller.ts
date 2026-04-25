@@ -77,11 +77,12 @@ export class BuyerController {
     isArray: true,
   })
   async getMyBuyListings(
-    @Request() req?: AuthRequest,
+    @Request() req: AuthRequest,
     @Query("includeTradeOps") includeTradeOps?: string,
   ) {
     const listings = await this.buyerService.getAllBuyListings(
       includeTradeOps === "true",
+      req.user.id,
     );
     return listings.map((listing) => this.serializeBuyListing(listing));
   }

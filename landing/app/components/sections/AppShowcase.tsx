@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Device from "../Device";
 import { B } from "../brand";
 import { FadeInUp } from "../animations";
-import { CheckCircle, Lock, TrendingUp, Bell } from "lucide-react";
+import { Bell, CheckCircle, Lock, ShieldCheck, TrendingUp, Truck } from "lucide-react";
 
 // ── Simulated AgroTrade app UI ────────────────────────────────────────────────
 function AppScreen() {

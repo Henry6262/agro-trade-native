@@ -16,7 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft } from 'lucide-react-native';
 import { useAuth } from '../../../shared/hooks';
 import { loginSchema, type LoginFormData } from '../../../schemas';
-import { GlassButton, GlassCard, GlassInput, GradientBackground } from '../../../design-system';
+import { GlassButton, GlassCard, GlassInput, GradientBackground } from '@design-system';
 
 export default function LoginScreen() {
   const navigation = useNavigation();

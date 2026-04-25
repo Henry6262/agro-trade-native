@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Truck, Shield, Route, User, MapPin, Users } from 'lucide-react-native';
-import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
+import { GlassCard, GlassBadge, GlassButton } from '@design-system';
 import { EmptyState } from '@shared/components/EmptyState';
 import { SkeletonCard } from '@shared/components/SkeletonCard';
 import { BaseComponentProps } from '@shared/types';

@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { GlassButton, GlassInput } from '../../../../../../design-system';
+import { GlassButton, GlassInput } from '@design-system';
 
 // expo-camera is lazily imported to avoid crashing when native module isn't
 // linked in the current dev client build. It works correctly in production.

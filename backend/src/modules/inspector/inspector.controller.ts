@@ -27,51 +27,43 @@ export class InspectorController {
 
   @Get("jobs")
   async getJobs(@Query() filters: JobFilterDto) {
-    try {
-      const jobs = await this.inspectorService.getJobs(filters);
-      return {
-        success: true,
-        data: jobs,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+    const jobs = await this.inspectorService.getJobs(filters);
+    return {
+      success: true,
+      data: jobs,
+    };
   }
 
   @Get("jobs/:id")
   async getJobById(@Param("id") id: string) {
-    try {
-      const job = await this.inspectorService.getJobById(id);
-      return {
-        success: true,
-        data: job,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+    const job = await this.inspectorService.getJobById(id);
+    return {
+      success: true,
+      data: job,
+    };
   }
 
   @Post("jobs/:id/accept")
   @HttpCode(HttpStatus.OK)
   async acceptJob(@Param("id") id: string, @Body() acceptDto: AcceptJobDto) {
-    try {
-      const job = await this.inspectorService.acceptJob(id, acceptDto);
-      return {
-        success: true,
-        data: job,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+    const job = await this.inspectorService.acceptJob(id, acceptDto);
+    return {
+      success: true,
+      data: job,
+    };
+  }
+
+  @Post("jobs/:id/status")
+  @HttpCode(HttpStatus.OK)
+  async updateJobStatus(
+    @Param("id") id: string,
+    @Body() updateDto: { inspectorId?: string; status?: string; arrivedAt?: string },
+  ) {
+    const job = await this.inspectorService.updateJobStatus(id, updateDto);
+    return {
+      success: true,
+      data: job,
+    };
   }
 
   @Post("jobs/:id/complete")
@@ -80,51 +72,29 @@ export class InspectorController {
     @Param("id") id: string,
     @Body() resultDto: VerificationResultDto,
   ) {
-    try {
-      const result = await this.inspectorService.completeJob(id, resultDto);
-      return {
-        success: true,
-        data: result,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+    const result = await this.inspectorService.completeJob(id, resultDto);
+    return {
+      success: true,
+      data: result,
+    };
   }
 
   @Post("location")
   @HttpCode(HttpStatus.OK)
   async updateLocation(@Body() updateDto: LocationUpdateDto) {
-    try {
-      const result = await this.inspectorService.updateLocation(updateDto);
-      return result;
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
+    return this.inspectorService.updateLocation(updateDto);
   }
 
   @Get("profile")
   async getProfile(@Request() req: any) {
-    try {
-      if (!req.user?.id) {
-        throw new UnauthorizedException("Authentication required");
-      }
-      const userId = req.user.id;
-      const profile = await this.inspectorService.getInspectorProfile(userId);
-      return {
-        success: true,
-        data: profile,
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        error: error.message,
-      };
+    if (!req.user?.id) {
+      throw new UnauthorizedException("Authentication required");
     }
+    const userId = req.user.id;
+    const profile = await this.inspectorService.getInspectorProfile(userId);
+    return {
+      success: true,
+      data: profile,
+    };
   }
 }

@@ -143,6 +143,9 @@ class TransportRequestSummaryBaseDto {
   @ApiProperty({ example: 120 })
   totalWeight: number;
 
+  @ApiPropertyOptional({ example: "Potatoes in 25kg bags" })
+  cargoDescription?: string;
+
   @ApiPropertyOptional({ enum: TruckType, example: TruckType.FLATBED })
   requiredVehicleType?: TruckType;
 
@@ -415,8 +418,11 @@ export class TransporterPerformanceDto {
 }
 
 export class TransportAnalyticsResponseDto {
-  @ApiProperty({ type: TransportBidComparisonDto })
-  comparison: TransportBidComparisonDto;
+  @ApiProperty({ type: Object })
+  metrics: any;
+
+  @ApiProperty({ type: () => [TransportJobDto] })
+  recentJobs: TransportJobDto[];
 }
 
 export class TransportRequestListMetaDto {

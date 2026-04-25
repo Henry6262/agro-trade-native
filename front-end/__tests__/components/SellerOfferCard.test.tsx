@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { SellerOfferCard } from '../../../src/pages/Dashboard/sections/Seller/features/Offers/components/SellerOfferCard';
-import type { SellerOffer } from '../../../src/services/sellerOfferService';
+import { SellerOfferCard } from '../../src/pages/Dashboard/sections/Seller/features/Offers/components/SellerOfferCard';
+import type { SellerOffer } from '../../src/services/sellerOfferService';
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
-jest.mock('../../../src/design-system', () => {
+jest.mock('../../src/design-system', () => {
   const { View, Text, TouchableOpacity } = require('react-native');
   return {
     COLORS: {

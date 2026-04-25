@@ -5,7 +5,7 @@
  * Ensures all prerequisites are met before allowing phase transitions.
  */
 
-import type { TradeOperation, Offer } from '../types/listings';
+import type { TradeOperation, Offer } from '../types';
 
 export interface WorkflowValidationResult {
   canFinalize: boolean;

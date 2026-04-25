@@ -14,8 +14,8 @@ import { X, Send, AlertCircle, DollarSign, Package } from 'lucide-react-native';
 import { MatchingSeller, TradeOperation, TradeSeller } from '../../../../../types/trade-operations';
 import { negotiationService } from '@services/negotiationService';
 import { apiClient } from '@services/api';
-import { GlassCard, GlassButton, GlassInput } from '../../../../../design-system';
-import { COLORS } from '../../../../../design-system';
+import { GlassCard, GlassButton, GlassInput } from '@design-system';
+import { COLORS } from '@design-system';
 
 interface OfferModalProps {
   visible: boolean;

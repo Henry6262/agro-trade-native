@@ -11,7 +11,7 @@ import type { Address } from '../utils/locationHelpers';
 export interface Company {
   id: string;
   legalName: string;
-  registrationNumber: string;
+  registrationNumber?: string;
   phoneNumber?: string;
   email?: string;
 }

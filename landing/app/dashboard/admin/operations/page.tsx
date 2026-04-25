@@ -6,9 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, List, ChevronRight, Loader2, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Search, List, ChevronRight, Loader2, TrendingUp, AlertTriangle, CheckCircle2, Truck } from "lucide-react";
 import { apiClient } from "@/app/lib/api";
 import type { TradeOperation, TradePhase } from "@/app/types";
+import { useRouter } from "next/navigation";
+
+// ... existing interfaces ...
 
 interface ProfitValidation {
   isValid: boolean;
@@ -65,6 +68,7 @@ const PHASE_LABELS: Record<string, string> = {
 };
 
 export default function AdminOperationsPage() {
+  const router = useRouter();
   const [trades, setTrades] = useState<TradeOperation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -225,6 +229,17 @@ export default function AdminOperationsPage() {
                             </Button>
                           );
                         })}
+                        {trade.phase === "TRANSPORT_MATCHING" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => router.push(`/dashboard/admin/transport?tradeId=${trade.id}`)}
+                            className="h-7 text-xs px-2 border-blue-600/40 text-blue-400 hover:bg-blue-600/10"
+                          >
+                            <Truck className="h-3 w-3 mr-1" />
+                            Create Transport
+                          </Button>
+                        )}
                         <div className="flex-1" />
                       </>
                     )}

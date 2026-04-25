@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -105,6 +106,10 @@ function emptyForm(): CreateTransportRequestPayload {
 // ── Page component ───────────────────────────────────────────────────────────
 
 export default function AdminTransportPage() {
+  const searchParams = useSearchParams();
+  const preselectedTradeId = searchParams.get("tradeId");
+  const didAutoOpen = useRef(false);
+
   const [requests, setRequests] = useState<TransportRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -192,6 +197,23 @@ export default function AdminTransportPage() {
       totalWeight: trade.quantity ?? 0,
     }));
   };
+
+  // ── Auto-open + pre-populate when navigated from operations page ─────────────
+  // Runs once after tradeOps load so handleTradeSelect can find the trade object.
+
+  useEffect(() => {
+    if (!preselectedTradeId || didAutoOpen.current || tradeOps.length === 0) return;
+    didAutoOpen.current = true;
+    handleTradeSelect(preselectedTradeId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tradeOps, preselectedTradeId]);
+
+  useEffect(() => {
+    if (!preselectedTradeId || didAutoOpen.current || isLoading) return;
+    // Open the modal and trigger trade fetch; handleTradeSelect fires via the effect above
+    openModal();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preselectedTradeId, isLoading]);
 
   // ── Pickup point helpers ───────────────────────────────────────────────────
 

@@ -5,9 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService, RegisterWithCompanyDto, CompanyInfo } from '@services/authService';
 import { useAuthStore } from '@stores/auth.store';
 import type {
-  OnboardingState,
   UserRole,
-  TransportOnboardingData,
   ProductSelection,
   ProductRequirement,
   FleetInformation,
@@ -16,185 +14,38 @@ import type {
   MarketInsights,
   TransportOpportunities,
 } from '../shared/types';
-
-interface OnboardingStore extends OnboardingState {
-  // Loading and error states
-  isLoading: boolean;
-  isSubmitting: boolean;
-  error: string | null;
-
-  // Actions
-  setRole: (role: UserRole) => void;
-  nextStep: () => void;
-  previousStep: () => void;
-  setStep: (step: number) => void;
-
-  // Common product selection
-  selectedProducts: string[];
-  setSelectedProducts: (products: string[]) => void;
-  selectedProductsMetadata: any[];
-  setSelectedProductsMetadata: (metadata: any[]) => void;
-
-  // Additional store properties not in OnboardingState
-  transportData?: TransportOnboardingData;
-
-  // Error handling
-  setError: (error: string | null) => void;
-  clearError: () => void;
-  setLoading: (loading: boolean) => void;
-  setSubmitting: (submitting: boolean) => void;
-
-  // Seller actions
-  setSellerProducts: (products: ProductSelection[]) => void;
-  addSellerProduct: (product: ProductSelection) => void;
-  removeSellerProduct: (productId: string) => void;
-  updateSellerProduct: (productId: string, updates: Partial<ProductSelection>) => void;
-  setMarketInsights: (insights: MarketInsights) => void;
-  sellerSpecifications: Record<string, any>;
-  updateSellerSpecification: (productId: string, specs: any) => void;
-  setSellerBases: (bases: any[]) => void;
-  setSellerDistributions: (distributions: any[]) => void;
-
-  // Buyer actions
-  setBuyerRequirements: (requirements: ProductRequirement[]) => void;
-  addBuyerRequirement: (requirement: ProductRequirement) => void;
-  removeBuyerRequirement: (productId: string) => void;
-  updateBuyerRequirement: (productId: string, updates: Partial<ProductRequirement>) => void;
-  buyerSpecifications: Record<string, any>;
-  updateBuyerSpecification: (productId: string, specs: any) => void;
-  setBuyerBases: (bases: any[]) => void;
-  setBuyerDistributions: (distributions: any[]) => void;
-
-  // Transport actions
-  setFleetInfo: (fleetInfo: FleetInformation) => void;
-  setServiceArea: (serviceArea: ServiceArea) => void;
-  setJobPreferences: (preferences: JobPreferences) => void;
-  setTransportOpportunities: (opportunities: TransportOpportunities) => void;
-
-  // Location
-  setLocation: (location: {
-    latitude: number;
-    longitude: number;
-    address?: string;
-    city?: string;
-    region?: string;
-    country?: string;
-  }) => void;
-  location?: {
-    latitude: number;
-    longitude: number;
-    address?: string;
-    city?: string;
-    region?: string;
-    country?: string;
-  };
-
-  // General actions
-  completeOnboarding: () => void;
-  resetOnboarding: () => void;
-
-  // API integration methods
-  saveOnboardingData: () => Promise<void>;
-  loadOnboardingData: () => Promise<void>;
-  submitOnboarding: (
-    companyInfo?: CompanyInfo,
-    userInfo?: { name: string; email: string; phone?: string }
-  ) => Promise<void>;
-  authenticateWithGoogle: (googleToken: string) => Promise<void>;
-  setGoogleAuthData: (data: { name: string; email: string; isAuthenticated: boolean }) => void;
-  googleAuthData?: { name: string; email: string; isAuthenticated: boolean };
-
-  // Computed properties
-  getProgress: () => number;
-  getCurrentStepData: () => any;
-  isStepValid: (step?: number) => boolean;
-  getOnboardingPayload: () => RegisterWithCompanyDto | null;
-}
-
-const getInitialState = () => ({
-  currentStep: 0,
-  totalSteps: 0,
-  selectedRole: undefined,
-  sellerData: undefined,
-  buyerData: undefined,
-  transportData: undefined,
-  isComplete: false,
-  selectedProducts: [] as string[],
-  selectedProductsMetadata: [] as any[],
-  sellerSpecifications: {} as Record<string, any>,
-  buyerSpecifications: {} as Record<string, any>,
-  googleAuthData: undefined as
-    | { name: string; email: string; isAuthenticated: boolean }
-    | undefined,
-  location: undefined as
-    | {
-        latitude: number;
-        longitude: number;
-        address?: string;
-        city?: string;
-        region?: string;
-        country?: string;
-      }
-    | undefined,
-  isLoading: false,
-  isSubmitting: false,
-  error: null,
-});
+import { buildOnboardingPayload } from './onboarding-store/payload';
+import {
+  createDefaultTransportData,
+  getInitialState,
+  getRoleStepCount,
+} from './onboarding-store/initial-state';
+import type { OnboardingStore } from './onboarding-store/types';
+import {
+  getCurrentOnboardingStepData,
+  getOnboardingProgress,
+  isOnboardingStepValid,
+} from './onboarding-store/validation';
 
 export const useOnboardingStore = create<OnboardingStore>()(
   persist(
     immer((set, get) => ({
       ...getInitialState(),
 
-      // Transport data access
-      transportData: undefined as TransportOnboardingData | undefined,
-
-      // Error and loading states
-      isLoading: false,
-      isSubmitting: false,
-      error: null,
-
       setRole: (role: UserRole) =>
         set((state) => {
           state.selectedRole = role;
-          // Set total steps based on role
+          state.totalSteps = getRoleStepCount(role);
+
           switch (role) {
             case 'seller':
-              state.totalSteps = 4; // Products → Quantity/Pricing → Custom Offer → Account
               state.sellerData = { selectedProducts: [] };
               break;
             case 'buyer':
-              state.totalSteps = 6; // Role → Products → Requirements → Overview → Account → Complete
               state.buyerData = { requiredProducts: [] };
               break;
             case 'transport':
-              state.totalSteps = 7; // Role → Fleet → Preferences → Opportunities → Account → Complete
-              state.transportData = {
-                fleetInfo: {
-                  vehicleCount: 0,
-                  vehicleTypes: [],
-                  baseLocation: {
-                    id: '',
-                    address: '',
-                    city: '',
-                    state: '',
-                    country: '',
-                    zipCode: '',
-                  },
-                  capacity: { total: 0, unit: 'tons' },
-                },
-                serviceArea: {
-                  radius: 0,
-                  preferredRegions: [],
-                  coverage: 'local',
-                },
-                jobPreferences: {
-                  cargoTypes: [],
-                  maxDistance: 0,
-                  minDistance: 0,
-                  availability: {},
-                },
-              };
+              state.transportData = createDefaultTransportData();
               break;
           }
         }),
@@ -256,7 +107,10 @@ export const useOnboardingStore = create<OnboardingStore>()(
               (p) => p.productId === productId
             );
             if (productIndex !== -1) {
-              Object.assign(state.sellerData.selectedProducts[productIndex], updates);
+              const existingProduct = state.sellerData.selectedProducts[productIndex];
+              if (existingProduct) {
+                Object.assign(existingProduct, updates);
+              }
             }
           }
         }),
@@ -361,7 +215,10 @@ export const useOnboardingStore = create<OnboardingStore>()(
               (r) => r.productId === productId
             );
             if (requirementIndex !== -1) {
-              Object.assign(state.buyerData.requiredProducts[requirementIndex], updates);
+              const existingRequirement = state.buyerData.requiredProducts[requirementIndex];
+              if (existingRequirement) {
+                Object.assign(existingRequirement, updates);
+              }
             }
           }
         }),
@@ -396,14 +253,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
         }),
 
       // Location
-      setLocation: (location: {
-        latitude: number;
-        longitude: number;
-        address?: string;
-        city?: string;
-        region?: string;
-        country?: string;
-      }) =>
+      setLocation: (location) =>
         set((state) => {
           state.location = location;
         }),
@@ -480,197 +330,13 @@ export const useOnboardingStore = create<OnboardingStore>()(
         }
       },
 
-      setGoogleAuthData: (data: { name: string; email: string; isAuthenticated: boolean }) => {
+      setGoogleAuthData: (data) => {
         set((draft) => {
-          // Store Google auth data temporarily for use in the modal
-          // This will be used to pre-fill the auth form
           draft.googleAuthData = data;
         });
       },
 
-      getOnboardingPayload: (): RegisterWithCompanyDto | null => {
-        const state = get();
-        if (!state.selectedRole) return null;
-
-        // Map frontend roles to backend UserRole enum
-        const roleMapping = {
-          seller: 'FARMER',
-          buyer: 'BUYER',
-          transport: 'TRANSPORTER',
-          admin: 'ADMIN',
-        };
-
-        const backendRole = roleMapping[state.selectedRole] || state.selectedRole.toUpperCase();
-
-        const basePayload = {
-          role: backendRole as any, // Cast to any to match backend enum
-          email: '', // Will be filled during authentication
-          name: '', // Will be filled during authentication
-          phone: undefined as string | undefined,
-        };
-
-        // Add role-specific data as company info
-        let companyInfo: CompanyInfo | undefined;
-
-        // Structure the actual user-entered onboarding data properly
-        switch (state.selectedRole) {
-          case 'seller':
-            if (state.sellerData) {
-              companyInfo = {
-                companyName: '', // Will be filled from AuthModal form
-              };
-
-              // Structure seller onboarding data from user inputs
-              const sellerOnboardingData: any = {
-                // Products selected (just IDs from catalog)
-                selectedProductIds: state.selectedProducts,
-
-                // Product specifications entered by user
-                productSpecifications: Object.keys(state.sellerSpecifications).map((productId) => ({
-                  productId,
-                  quantity: state.sellerSpecifications[productId].quantity || 0,
-                  unit: state.sellerSpecifications[productId].unit || 'TON',
-                  pricePerKilo: state.sellerSpecifications[productId].pricePerKilo,
-                  varieties: state.sellerSpecifications[productId].varieties || [],
-                  qualitySpecs: state.sellerSpecifications[productId].qualitySpecs || [],
-                })),
-
-                // Bases/locations created by user
-                bases: (state.sellerData.bases || []).map((base) => ({
-                  name: base.name,
-                  type: base.type || 'WAREHOUSE',
-                  address: base.address,
-                  city: base.city,
-                  region: base.region,
-                  country: base.country || 'Bulgaria',
-                  postalCode: base.postalCode,
-                  latitude: base.latitude,
-                  longitude: base.longitude,
-                  storageCapacity: base.capacity,
-                  isPrimary: base.isPrimary || false,
-                })),
-
-                // Distribution data (how much product at each base)
-                distributions: (state.sellerData.distributions || []).map((dist) => ({
-                  productId: dist.productId,
-                  distributions:
-                    dist.distributions?.map((d: any) => ({
-                      baseId: d.baseId || d.baseName, // Use base identifier
-                      quantity: d.quantity,
-                      percentage: d.percentage,
-                    })) || [],
-                })),
-              };
-
-              (basePayload as any).onboardingData = sellerOnboardingData;
-            }
-            break;
-
-          case 'buyer':
-            if (state.buyerData) {
-              companyInfo = {
-                companyName: '', // Will be filled from AuthModal form
-              };
-
-              // Structure buyer onboarding data from user inputs
-              const buyerOnboardingData: any = {
-                // Products needed (just IDs from catalog)
-                requiredProductIds: state.selectedProducts,
-
-                // Product requirements entered by user
-                productRequirements: Object.keys(state.buyerSpecifications).map((productId) => ({
-                  productId,
-                  quantity: state.buyerSpecifications[productId].quantity || 0,
-                  unit: state.buyerSpecifications[productId].unit || 'TON',
-                  maxPricePerKilo: state.buyerSpecifications[productId].maxPrice,
-                  deliveryFrequency: state.buyerSpecifications[productId].deliveryFrequency,
-                  qualityRequirements:
-                    state.buyerSpecifications[productId].qualityRequirements || [],
-                })),
-
-                // Delivery locations/bases
-                bases: (state.buyerData.bases || []).map((base) => ({
-                  name: base.name,
-                  type: base.type || 'DEPOT',
-                  address: base.address,
-                  city: base.city,
-                  region: base.region,
-                  country: base.country || 'Bulgaria',
-                  postalCode: base.postalCode,
-                  latitude: base.latitude,
-                  longitude: base.longitude,
-                  storageCapacity: base.capacity,
-                  isPrimary: base.isPrimary || false,
-                })),
-
-                // Distribution requirements (how much needed at each base)
-                distributions: (state.buyerData.distributions || []).map((dist) => ({
-                  productId: dist.productId,
-                  distributions:
-                    dist.distributions?.map((d: any) => ({
-                      baseId: d.baseId || d.baseName,
-                      quantity: d.quantity,
-                      percentage: d.percentage,
-                    })) || [],
-                })),
-              };
-
-              (basePayload as any).onboardingData = buyerOnboardingData;
-            }
-            break;
-
-          case 'transport':
-            if (state.transportData) {
-              companyInfo = {
-                companyName: '', // Will be filled from AuthModal form
-              };
-
-              // Structure transporter onboarding data from user inputs
-              const transportOnboardingData: any = {
-                // Fleet information entered by user
-                fleetInfo: {
-                  vehicleCount: state.transportData.fleetInfo?.vehicleCount || 0,
-                  vehicleTypes: state.transportData.fleetInfo?.vehicleTypes || [],
-                  totalCapacity: state.transportData.fleetInfo?.capacity?.total || 0,
-                  capacityUnit: state.transportData.fleetInfo?.capacity?.unit || 'tons',
-                },
-
-                // Base location for fleet
-                baseLocation: state.transportData.fleetInfo?.baseLocation
-                  ? {
-                      address: state.transportData.fleetInfo.baseLocation.address,
-                      city: state.transportData.fleetInfo.baseLocation.city,
-                      state: state.transportData.fleetInfo.baseLocation.state,
-                      country: state.transportData.fleetInfo.baseLocation.country,
-                      zipCode: state.transportData.fleetInfo.baseLocation.zipCode,
-                    }
-                  : null,
-
-                // Service area preferences
-                serviceArea: {
-                  radius: state.transportData.serviceArea?.radius || 0,
-                  preferredRegions: state.transportData.serviceArea?.preferredRegions || [],
-                  coverage: state.transportData.serviceArea?.coverage || 'local',
-                },
-
-                // Job preferences
-                jobPreferences: {
-                  cargoTypes: state.transportData.jobPreferences?.cargoTypes || [],
-                  maxDistance: state.transportData.jobPreferences?.maxDistance || 0,
-                  minDistance: state.transportData.jobPreferences?.minDistance || 0,
-                },
-              };
-
-              (basePayload as any).onboardingData = transportOnboardingData;
-            }
-            break;
-        }
-
-        return {
-          ...basePayload,
-          companyInfo,
-        };
-      },
+      getOnboardingPayload: () => buildOnboardingPayload(get()),
 
       submitOnboarding: async (
         companyInfo?: CompanyInfo,
@@ -689,18 +355,21 @@ export const useOnboardingStore = create<OnboardingStore>()(
           }
 
           // Update payload with user info and company info
-          const finalPayload: RegisterWithCompanyDto = {
+          const finalPayload: RegisterWithCompanyDto & {
+            onboardingData?: Record<string, unknown>;
+          } = {
             ...payload,
             email: userInfo?.email || '',
             name: userInfo?.name || '',
-            phone: userInfo?.phone,
-            companyInfo: companyInfo || payload.companyInfo,
+            ...(userInfo?.phone ? { phone: userInfo.phone } : {}),
+            ...(companyInfo || payload.companyInfo
+              ? { companyInfo: companyInfo || payload.companyInfo }
+              : {}),
           };
 
-          // Include all the onboarding data in the payload
-          const onboardingData = (payload as any).onboardingData;
+          const onboardingData = payload.onboardingData;
           if (onboardingData) {
-            (finalPayload as any).onboardingData = onboardingData;
+            finalPayload.onboardingData = onboardingData;
           }
 
           const response = await authService.registerWithCompany(finalPayload);
@@ -775,56 +444,9 @@ export const useOnboardingStore = create<OnboardingStore>()(
         }),
 
       // Computed properties
-      getProgress: () => {
-        const state = get();
-        return state.totalSteps > 0 ? (state.currentStep + 1) / state.totalSteps : 0;
-      },
-
-      getCurrentStepData: () => {
-        const state = get();
-        switch (state.selectedRole) {
-          case 'seller':
-            return state.sellerData;
-          case 'buyer':
-            return state.buyerData;
-          case 'transport':
-            return state.transportData;
-          default:
-            return null;
-        }
-      },
-
-      isStepValid: (step?: number): boolean => {
-        const state = get();
-        const targetStep = step ?? state.currentStep;
-
-        switch (state.selectedRole) {
-          case 'seller':
-            if (targetStep === 1) return (state.sellerData?.selectedProducts?.length ?? 0) > 0;
-            if (targetStep === 2)
-              return (
-                state.sellerData?.selectedProducts?.every(
-                  (p) => p.varieties.length > 0 && p.quantity.amount > 0
-                ) ?? false
-              );
-            break;
-
-          case 'buyer':
-            if (targetStep === 1) return (state.buyerData?.requiredProducts?.length ?? 0) > 0;
-            if (targetStep === 2)
-              return (
-                state.buyerData?.requiredProducts?.every((r) => r.quantity.amount > 0) ?? false
-              );
-            break;
-
-          case 'transport':
-            if (targetStep === 1) return (state.transportData?.fleetInfo?.vehicleCount ?? 0) > 0;
-            if (targetStep === 2) return (state.transportData?.serviceArea?.radius ?? 0) > 0;
-            break;
-        }
-
-        return true;
-      },
+      getProgress: () => getOnboardingProgress(get()),
+      getCurrentStepData: () => getCurrentOnboardingStepData(get()),
+      isStepValid: (step?: number) => isOnboardingStepValid(get(), step),
     })),
     {
       name: 'onboarding-storage',

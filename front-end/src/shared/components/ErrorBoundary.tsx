@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { GlassButton } from '../../design-system';
+import { GlassButton } from '@design-system';
 
 interface Props {
   children: React.ReactNode;

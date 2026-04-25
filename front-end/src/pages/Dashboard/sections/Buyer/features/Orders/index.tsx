@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { COLORS } from '../../../../../../design-system';
+import { COLORS } from '@design-system';
 import { useBuyerOrders, useBuyerTimeline } from './hooks';
 import { ActiveOrdersList, OrdersStatsGrid, IncomingOffersList, BuyerTimeline } from './components';
 import type { BuyerOrder } from './types';

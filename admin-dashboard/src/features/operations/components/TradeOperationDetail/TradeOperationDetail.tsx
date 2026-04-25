@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../../../services/api';
 import { API_ENDPOINTS } from '../../../../config/api';
-import type { TradeOperation, Offer } from '../../../../types/listings';
+import type { TradeOperation, Offer } from '../../../../types';
 import { ErrorState, SkeletonCard, EnhancedTooltip } from '../../../../components/common';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { Truck, MapPin, Euro, ArrowRight, Package } from 'lucide-react-native';
 import type { TransportOffersRequest } from '../types';
-import { GlassCard, GlassButton, GlassBadge, COLORS } from '../../../../../../../../design-system';
+import { GlassCard, GlassButton, GlassBadge, COLORS } from '@design-system';
 
 interface OffersListProps {
   requests: TransportOffersRequest[];

@@ -14,6 +14,7 @@ import type { TransportCostResult } from '../../../../types';
 import { negotiationService, tradeOperationService } from '../../../../services/api';
 import api from '../../../../services/api';
 import { API_ENDPOINTS } from '../../../../config/api';
+import { formatLocationString } from '../../../../utils/locationHelpers';
 import GlobalTradeMap from './GlobalTradeMap';
 
 interface SingleOfferModalProps {
@@ -212,11 +213,6 @@ const SingleOfferModal: React.FC<SingleOfferModalProps> = ({
   }, [seller, quantity]);
 
   const disableSubmit = submitting || price <= 0 || quantity <= 0 || !tradeOperationId;
-
-  const formatLocationString = (address: { city?: string; region?: string } | null | undefined) => {
-    if (!address) return 'Unknown location';
-    return [address.city, address.region].filter(Boolean).join(', ');
-  };
 
   const sellerAskingPrice = getSellerUnitPrice(seller);
 

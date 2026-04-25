@@ -15,7 +15,14 @@ export interface User {
   updatedAt: string;
 }
 
-export type UserRole = 'buyer' | 'seller' | 'transport' | 'admin';
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  FARMER = 'FARMER',
+  BUYER = 'BUYER',
+  TRANSPORTER = 'TRANSPORTER',
+  COMPANY_ADMIN = 'COMPANY_ADMIN',
+  INSPECTOR = 'INSPECTOR',
+}
 
 export interface UserPreferences {
   products?: string[];

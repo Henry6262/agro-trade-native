@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Weight, DollarSign, MapPin, Calendar, Clock, AlertTriangle } from 'lucide-react-native';
-import { GlassCard, GlassBadge, GlassButton, COLORS } from '../../../../../../../design-system';
+import { GlassCard, GlassBadge, GlassButton, COLORS } from '@design-system';
 import type { SellerOffer } from '../types';
 
 interface SellerOfferCardProps {

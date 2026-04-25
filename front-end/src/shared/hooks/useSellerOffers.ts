@@ -11,6 +11,33 @@ import sellerService, {
   SellerOfferSummary,
 } from '@services/sellerService';
 import { useAuthStore } from '@stores/auth.store';
+import { UserRole } from '../types';
+
+const buildAcceptOfferRequest = (acceptanceNote?: string): AcceptOfferRequest | undefined => {
+  if (!acceptanceNote) {
+    return undefined;
+  }
+
+  return { acceptanceNote };
+};
+
+const buildRejectOfferRequest = (reason?: string): RejectOfferRequest | undefined => {
+  if (!reason) {
+    return undefined;
+  }
+
+  return { reason };
+};
+
+const buildCounterOfferRequest = (
+  counterPrice: number,
+  quantity?: number,
+  message?: string
+): CounterOfferRequest => ({
+  counterPrice,
+  ...(quantity != null ? { quantity } : {}),
+  ...(message ? { message } : {}),
+});
 
 export const useSellerOffers = () => {
   const queryClient = useQueryClient();
@@ -26,7 +53,7 @@ export const useSellerOffers = () => {
   } = useQuery<SellerOffersPayload>({
     queryKey: ['seller-offers', user?.id],
     queryFn: () => sellerService.getMyOffers(),
-    enabled: isAuthenticated && user?.role === 'FARMER',
+    enabled: isAuthenticated && user?.role === UserRole.FARMER,
     staleTime: 15 * 1000, // 15 seconds
     refetchInterval: 30 * 1000, // Refetch every 30 seconds
     refetchOnWindowFocus: true,
@@ -90,14 +117,14 @@ export const useSellerOffers = () => {
   const acceptOffer = (negotiationId: string, acceptanceNote?: string) => {
     acceptOfferMutation.mutate({
       negotiationId,
-      request: acceptanceNote ? { acceptanceNote } : {},
+      request: buildAcceptOfferRequest(acceptanceNote),
     });
   };
 
   const rejectOffer = (negotiationId: string, reason?: string) => {
     rejectOfferMutation.mutate({
       negotiationId,
-      request: reason ? { reason } : {},
+      request: buildRejectOfferRequest(reason),
     });
   };
 
@@ -109,11 +136,7 @@ export const useSellerOffers = () => {
   ) => {
     counterOfferMutation.mutate({
       negotiationId,
-      request: {
-        counterPrice,
-        quantity,
-        message,
-      },
+      request: buildCounterOfferRequest(counterPrice, quantity, message),
     });
   };
 

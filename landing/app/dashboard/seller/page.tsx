@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Package, List, Plus, ArrowRight, TrendingUp, Inbox } from "lucide-react";
+import { Package, List, Plus, ArrowRight, TrendingUp, Inbox, CandlestickChart } from "lucide-react";
 import { useMarketplaceStore } from "@/app/stores/marketplace.store";
 import { apiClient } from "@/app/lib/api";
 
@@ -169,6 +169,21 @@ export default function SellerDashboard() {
                 <p className="text-sm text-text-muted">Track orders</p>
               </div>
               <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-lime-400 transition-colors" />
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/seller/portfolio">
+          <Card className="bg-card border-brand-border hover:border-amber-600/30 transition-colors cursor-pointer group">
+            <CardContent className="flex items-center gap-4 p-6">
+              <div className="p-3 rounded-xl bg-amber-600/20">
+                <CandlestickChart className="h-6 w-6 text-amber-300" />
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-brand-cream">Portfolio</p>
+                <p className="text-sm text-text-muted">Invest settled proceeds</p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-text-muted group-hover:text-amber-300 transition-colors" />
             </CardContent>
           </Card>
         </Link>

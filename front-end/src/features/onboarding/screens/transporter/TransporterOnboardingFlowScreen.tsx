@@ -4,7 +4,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../../../navigation/types';
 import { TransporterOnboarding } from '@pages/Onboarding/sections/Transporter/components/TransporterOnboarding';
 import { useOnboardingStore } from '@stores/onboarding.store';
-import { GradientBackground } from '../../../../design-system';
+import { GradientBackground } from '@design-system';
 
 type NavigationProp = NativeStackNavigationProp<
   OnboardingStackParamList,

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Platform } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
 import { MapPin, Navigation, Clock, Package } from 'lucide-react-native';
-import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
+import { GlassCard, GlassBadge, GlassButton } from '@design-system';
 import { ActiveJobTabProps } from '../types';
 import { VerificationForm } from './VerificationForm';
 

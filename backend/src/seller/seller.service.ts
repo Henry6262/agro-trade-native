@@ -744,6 +744,7 @@ export class SellerService {
       buyer: ts.tradeOperation?.buyListing?.buyer || null,
       tradePhase: ts.tradeOperation?.phase,
       tradeStatus: ts.tradeOperation?.status,
+      metadata: ts.tradeOperation?.metadata ?? null,
       negotiationStatus: ts.negotiation?.status || null,
       joinedAt: ts.joinedAt,
     }));

@@ -1,5 +1,5 @@
 import React from 'react';
-import { GlassBottomNav } from '../../../design-system';
+import { GlassBottomNav } from '@design-system';
 
 interface NavigationItem {
   id: string;

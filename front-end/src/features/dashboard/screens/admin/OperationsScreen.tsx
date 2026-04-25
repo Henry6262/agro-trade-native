@@ -25,8 +25,8 @@ import {
 import { useTradeOperations } from './hooks/useTradeOperations';
 import { TransportMapModal } from './components/TransportMapModal';
 import type { BuyListing, MatchingSeller } from '@services/tradeOperationService';
-import { GlassCard, GlassBadge, GlassButton, GlassInput } from '../../../../design-system';
-import { COLORS } from '../../../../design-system';
+import { GlassCard, GlassBadge, GlassButton, GlassInput } from '@design-system';
+import { COLORS } from '@design-system';
 
 const DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 6 };
 

@@ -1,7 +1,9 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { TransportBiddingService } from "./transport-bidding.service";
+import { TransportService } from './transport.service';
+
 import { PrismaService } from "../../prisma/prisma.service";
 import { TransportCostService } from "./transport-cost.service";
+import { TradeEventsService } from "../../trade-events/trade-events.service";
 import {
   TransportRequestStatus,
   BidStatus,
@@ -125,22 +127,24 @@ const mockPrisma: any = {
 mockPrisma.$transaction = jest.fn((cb: any) => cb(mockPrisma));
 
 const mockTransportCostService = { estimateCost: jest.fn() };
+const mockTradeEventsService = { record: jest.fn().mockResolvedValue({}) };
 
 // ─── Suite ───────────────────────────────────────────────────────────────────
 
-describe("TransportBiddingService", () => {
-  let service: TransportBiddingService;
+describe("TransportService", () => {
+  let service: TransportService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        TransportBiddingService,
+        TransportService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: TransportCostService, useValue: mockTransportCostService },
+        { provide: TradeEventsService, useValue: mockTradeEventsService },
       ],
     }).compile();
 
-    service = module.get<TransportBiddingService>(TransportBiddingService);
+    service = module.get<TransportService>(TransportService);
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -390,7 +394,7 @@ describe("TransportBiddingService", () => {
       mockPrisma.transportBid.findFirst.mockResolvedValue(null);
       mockPrisma.transportBid.create.mockResolvedValue(makeBid({ proposedRoute: { truckCount: 3 } }));
 
-      await service.createTransportBid("transporter-1", bidDto);
+      await service.submitBid("transporter-1", bidDto);
 
       expect(mockPrisma.transportBid.create).toHaveBeenCalledWith(
         expect.objectContaining({

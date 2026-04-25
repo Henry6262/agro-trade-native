@@ -4,7 +4,7 @@ import { ChevronRight, LogOut, Menu, User } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ProfileDrawer } from './ProfileDrawer';
 import { useAuthStore } from '@stores/auth.store';
-import { GradientBackground } from '../../../design-system';
+import { GradientBackground } from '@design-system';
 
 export interface NavigationItem {
   id: string;

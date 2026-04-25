@@ -1,4 +1,5 @@
-import * as request from "supertest";
+import request from "supertest";
+import { JwtService } from "@nestjs/jwt";
 import { TestEnvironment } from "../setup/test-environment";
 import { TestDataFactory } from "../helpers/test-data-factory";
 
@@ -35,7 +36,6 @@ describe("Seller API Integration Tests", () => {
     testProduct = await factory.createTestProduct({ category: "SOFT_WHEAT" });
 
     // Generate seller token with correct user ID
-    const { JwtService } = await import("@nestjs/jwt");
     const jwtService = env.moduleRef.get<JwtService>(JwtService);
     sellerToken = jwtService.sign(
       {
@@ -161,11 +161,11 @@ describe("Seller API Integration Tests", () => {
           .set("Authorization", `Bearer ${sellerToken}`)
           .expect(200);
 
-        expect(Array.isArray(response.body)).toBe(true);
-        expect(response.body.length).toBeGreaterThan(0);
+        expect(Array.isArray(response.body.data)).toBe(true);
+        expect(response.body.data.length).toBeGreaterThan(0);
 
         // Verify listing structure
-        const listing = response.body[0];
+        const listing = response.body.data[0];
         expect(listing).toHaveProperty("id");
         expect(listing).toHaveProperty("quantity");
         expect(listing).toHaveProperty("product");
@@ -189,9 +189,9 @@ describe("Seller API Integration Tests", () => {
           .set("Authorization", `Bearer ${sellerToken}`)
           .expect(200);
 
-        expect(Array.isArray(response.body)).toBe(true);
+        expect(Array.isArray(response.body.data)).toBe(true);
         // Should only return listings matching the product and price criteria
-        response.body.forEach((listing: any) => {
+        response.body.data.forEach((listing: any) => {
           expect(listing.productId).toBe(testProduct.id);
         });
       });
@@ -317,7 +317,6 @@ describe("Seller API Integration Tests", () => {
           email: `new-seller-${Date.now()}@test.com`,
         });
 
-        const { JwtService } = await import("@nestjs/jwt");
         const jwtService = env.moduleRef.get<JwtService>(JwtService);
         const newSellerToken = jwtService.sign(
           {
@@ -460,7 +459,6 @@ describe("Seller API Integration Tests", () => {
     });
 
     it("should reject expired tokens", async () => {
-      const { JwtService } = await import("@nestjs/jwt");
       const jwtService = env.moduleRef.get<JwtService>(JwtService);
       const expiredToken = jwtService.sign(
         {
@@ -511,7 +509,6 @@ describe("Seller Offer Flow Integration", () => {
 
     // Generate admin token from the actual admin user created by the scenario
     // (env.tokens.admin uses sub:"test-user-123" which doesn't exist in this DB context)
-    const { JwtService } = await import("@nestjs/jwt");
     const jwtService = env.moduleRef.get<JwtService>(JwtService);
     adminToken = jwtService.sign(
       {
@@ -573,14 +570,13 @@ describe("Seller Offer Flow Integration", () => {
       // Response is wrapped: {success: true, data: {...}}
       expect(response.body).toHaveProperty("success", true);
       expect(response.body.data).toHaveProperty("id");
-      expect(response.body.data).toHaveProperty("offeredPrice", 330);
+      expect(response.body.data.currentOffer).toHaveProperty("price", 330);
 
       negotiationId = response.body.data.id;
     });
 
     it("seller should see the offer in their offers list", async () => {
       // Generate seller token
-      const { JwtService } = await import("@nestjs/jwt");
       const jwtService = env.moduleRef.get<JwtService>(JwtService);
       const sellerToken = jwtService.sign(
         {

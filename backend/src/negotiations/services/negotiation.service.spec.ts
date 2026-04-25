@@ -95,6 +95,7 @@ const mockPrisma = {
     update: jest.fn(),
     updateMany: jest.fn(),
     count: jest.fn(),
+    upsert: jest.fn(),
   },
   offerNegotiation: {
     findUnique: jest.fn(),
@@ -103,6 +104,7 @@ const mockPrisma = {
     count: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
+    upsert: jest.fn(),
   },
   saleListing: {
     findUnique: jest.fn(),
@@ -156,13 +158,13 @@ describe('NegotiationService', () => {
       mockPrisma.tradeOperation.findUnique.mockResolvedValue(trade);
       mockPrisma.offerNegotiation.findFirst.mockResolvedValue(null);
       const nego = makeNegotiation();
-      mockPrisma.offerNegotiation.create.mockResolvedValue(nego);
+      mockPrisma.offerNegotiation.upsert.mockResolvedValue(nego);
       mockPrisma.tradeSeller.update.mockResolvedValue({});
 
       const result = await service.sendOffer('trade-1', dto);
 
       expect(result.status).toBe(NegotiationStatus.PENDING);
-      expect(mockPrisma.offerNegotiation.create).toHaveBeenCalledTimes(1);
+      expect(mockPrisma.offerNegotiation.upsert).toHaveBeenCalledTimes(1);
       expect(mockPrisma.tradeSeller.update).toHaveBeenCalledWith(
         expect.objectContaining({ data: { status: SellerStatus.NEGOTIATING } }),
       );
@@ -212,13 +214,13 @@ describe('NegotiationService', () => {
     it('sets default terms when none provided', async () => {
       mockPrisma.tradeOperation.findUnique.mockResolvedValue(makeTrade());
       mockPrisma.offerNegotiation.findFirst.mockResolvedValue(null);
-      mockPrisma.offerNegotiation.create.mockResolvedValue(makeNegotiation());
+      mockPrisma.offerNegotiation.upsert.mockResolvedValue(makeNegotiation());
       mockPrisma.tradeSeller.update.mockResolvedValue({});
 
       await service.sendOffer('trade-1', { ...dto, terms: undefined });
 
-      const createCall = mockPrisma.offerNegotiation.create.mock.calls[0][0];
-      expect((createCall.data.currentOffer as any).terms).toBe('Standard terms');
+      const createCall = mockPrisma.offerNegotiation.upsert.mock.calls[0][0];
+      expect((createCall.create.currentOffer as any).terms).toBe('Standard terms');
     });
   });
 
@@ -237,7 +239,7 @@ describe('NegotiationService', () => {
       mockPrisma.offerNegotiation.findFirst
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null);
-      mockPrisma.offerNegotiation.create.mockResolvedValueOnce(makeNegotiation());
+      mockPrisma.offerNegotiation.upsert.mockResolvedValueOnce(makeNegotiation());
       mockPrisma.tradeSeller.update.mockResolvedValue({});
 
       // Second offer fails (seller not in trade)
@@ -496,7 +498,11 @@ describe('NegotiationService', () => {
     });
 
     it('includes quantityGap when finalQuantity < requestedQuantity', async () => {
-      const nego = makeNegotiation({ status: NegotiationStatus.PENDING, tradeSeller: makeTradeSeller({ requestedQuantity: 100 }) });
+      const nego = makeNegotiation({
+        status: NegotiationStatus.PENDING,
+        currentOffer: { price: 200, quantity: 40, terms: 'Standard terms', createdAt: new Date().toISOString() },
+        tradeSeller: makeTradeSeller({ requestedQuantity: 100 })
+      });
       const updated = makeNegotiation({
         status: NegotiationStatus.ACCEPTED,
         finalPrice: 200,

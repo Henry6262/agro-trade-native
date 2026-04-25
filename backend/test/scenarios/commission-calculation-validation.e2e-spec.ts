@@ -2,6 +2,8 @@ import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
+import { MockAuthService } from '../../src/auth/services/mock-auth.service';
 import { TestDataFactory } from '../helpers/test-data-factory';
 import { DatabaseCleaner } from '../helpers/database-cleaner';
 import { ApiClient } from '../helpers/api-client';
@@ -27,6 +29,7 @@ describe('SCENARIO: Commission Calculation Validation', () => {
   let dataFactory: TestDataFactory;
   let dbCleaner: DatabaseCleaner;
   let apiClient: ApiClient;
+  let mockAuth: MockAuthService;
   let testScenario: Awaited<ReturnType<TestDataFactory['createFullTradeScenario']>>;
 
   // Commission rates (as defined in business rules)
@@ -44,6 +47,7 @@ describe('SCENARIO: Commission Calculation Validation', () => {
     await app.init();
 
     prisma = moduleFixture.get<PrismaService>(PrismaService);
+    mockAuth = new MockAuthService(moduleFixture.get<JwtService>(JwtService));
     dataFactory = new TestDataFactory(prisma);
     dbCleaner = new DatabaseCleaner(prisma);
     apiClient = new ApiClient(app);
@@ -65,6 +69,27 @@ describe('SCENARIO: Commission Calculation Validation', () => {
       buyerPrice: 350,
       withAddresses: true,
     });
+    await prisma.user.upsert({
+      where: { id: "test-user-123" },
+      update: {
+        email: "test@agrotrade.com",
+        name: "Test Admin",
+        role: "ADMIN",
+        isActive: true,
+        isEmailVerified: true,
+        onboardingCompleted: true,
+      },
+      create: {
+        id: "test-user-123",
+        email: "test@agrotrade.com",
+        name: "Test Admin",
+        role: "ADMIN",
+        isActive: true,
+        isEmailVerified: true,
+        onboardingCompleted: true,
+      },
+    });
+    apiClient.setAuthToken(mockAuth.getMockTokens().admin);
   });
 
   describe('✅ Single-Seller Commission Calculations', () => {

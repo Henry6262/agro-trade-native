@@ -5,7 +5,7 @@ import { MapDrawer } from '../maps/components/MapDrawer';
 import { useTransporterOffers } from './hooks';
 import { OffersSummaryGrid, OffersList } from './components';
 import type { BaseComponentProps } from '@shared/types';
-import { COLORS, GlassBadge } from '../../../../../../design-system';
+import { COLORS, GlassBadge } from '@design-system';
 
 interface TransporterIncomingOffersTabProps extends BaseComponentProps {
   id?: string;

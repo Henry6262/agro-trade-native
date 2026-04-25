@@ -25,8 +25,8 @@ import {
 } from 'lucide-react-native';
 import { negotiationService } from '@services/negotiationService';
 import { tradeOperationService } from '@services/tradeOperationService';
-import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
-import { COLORS } from '../../../../../design-system';
+import { GlassCard, GlassBadge, GlassButton } from '@design-system';
+import { COLORS } from '@design-system';
 
 const DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 8 };
 

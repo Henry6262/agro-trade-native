@@ -1,7 +1,7 @@
 // src/shared/components/EmptyState.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { GlassButton } from '../../design-system';
+import { GlassButton } from '@design-system';
 import { BaseComponentProps } from '../types';
 
 interface EmptyStateProps extends BaseComponentProps {

@@ -5,6 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { handleApiError } from '../../../../utils/errorHandler';
 import type { TransportCostResult } from '../../../../types';
@@ -35,6 +42,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({
   onSubmit,
 }) => {
   const [offerPrices, setOfferPrices] = useState<Record<string, number>>({});
+  const [escrowChain, setEscrowChain] = useState<'CELO' | 'SOLANA'>('CELO');
   const [transportData, setTransportData] = useState<TransportCostResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSendingOffers, setIsSendingOffers] = useState(false);
@@ -142,6 +150,7 @@ export const PricingModal: React.FC<PricingModalProps> = ({
         buyListingId: buyerOrder.id,
         targetProfitMargin: 7, // Default 7% margin
         qualityPreference: 'ANY',
+        escrowChain,
         notes: `Created from matching dashboard. Total expected profit: €${profitMetrics.totalProfit.toFixed(2)}`,
       });
 
@@ -205,6 +214,28 @@ export const PricingModal: React.FC<PricingModalProps> = ({
                 </span>
               </DialogDescription>
             </DialogHeader>
+
+        <div className="grid gap-3 mb-4 md:grid-cols-[1fr_220px]">
+          <div className="rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm text-text-secondary">
+            Choose the escrow rail for this trade. SOLANA enables the post-settlement Jupiter investment path after release.
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="escrow-chain-select" className="text-sm font-medium text-text-primary">Escrow Chain</label>
+            <Select value={escrowChain} onValueChange={(value) => {
+              if (value === 'CELO' || value === 'SOLANA') {
+                setEscrowChain(value);
+              }
+            }}>
+              <SelectTrigger id="escrow-chain-select" className="w-full">
+                <SelectValue placeholder="Select chain" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="CELO">CELO</SelectItem>
+                <SelectItem value="SOLANA">SOLANA</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         {/* Table */}
         <div className="overflow-x-auto mb-4 border border-gray-300 rounded">

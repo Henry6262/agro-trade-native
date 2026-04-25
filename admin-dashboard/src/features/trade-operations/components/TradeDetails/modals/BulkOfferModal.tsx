@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import * as Types from '../../../../../types';
 
 interface BulkOfferModalProps {
-  sellers: { id: string; name?: string; sellerId?: string }[];
+  sellers: Types.TradeSeller[];
   onSubmit: (offers: Types.CreateNegotiationDto[]) => void;
   onClose: () => void;
 }
@@ -38,7 +38,7 @@ export const BulkOfferModal: React.FC<BulkOfferModalProps> = ({ sellers, onSubmi
             .filter((s) => s.status === 'INVITED')
             .map((seller) => (
               <div key={seller.id} className="p-3 border rounded-lg">
-                <h4 className="font-medium mb-2">{seller.seller?.name}</h4>
+                <h4 className="font-medium mb-2">{seller.seller?.name || 'Unknown Seller'}</h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-sm text-gray-600">Price per unit (€)</label>

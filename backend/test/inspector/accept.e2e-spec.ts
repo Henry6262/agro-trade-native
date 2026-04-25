@@ -1,10 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication } from "@nestjs/common";
+import { INestApplication, ValidationPipe } from "@nestjs/common";
 import request from "supertest";
 import { AppModule } from "../../src/app.module";
+import { JwtService } from "@nestjs/jwt";
+import { PrismaService } from "../../src/prisma/prisma.service";
 
 describe("Inspector Accept Job API (e2e)", () => {
   let app: INestApplication;
+  let authToken: string;
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -12,7 +15,37 @@ describe("Inspector Accept Job API (e2e)", () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix("api");
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
     await app.init();
+
+    const prisma = moduleFixture.get<PrismaService>(PrismaService);
+    await prisma.user.upsert({
+      where: { email: "inspector@test.local" },
+      update: {},
+      create: {
+        id: "test-user-123",
+        email: "inspector@test.local",
+        name: "Inspector Test User",
+        role: "ADMIN",
+        isActive: true,
+        isEmailVerified: true,
+        onboardingCompleted: true,
+      },
+    });
+
+    const jwtService = moduleFixture.get<JwtService>(JwtService);
+    authToken = jwtService.sign({
+      sub: "test-user-123",
+      email: "inspector@test.local",
+      role: "ADMIN",
+    });
   });
 
   afterEach(async () => {
@@ -29,6 +62,7 @@ describe("Inspector Accept Job API (e2e)", () => {
 
       return request(app.getHttpServer())
         .post(`/api/inspector/jobs/${jobId}/accept`)
+        .set("Authorization", `Bearer ${authToken}`)
         .send(acceptData)
         .expect(200)
         .expect((res) => {
@@ -49,11 +83,13 @@ describe("Inspector Accept Job API (e2e)", () => {
 
       return request(app.getHttpServer())
         .post(`/api/inspector/jobs/${jobId}/accept`)
+        .set("Authorization", `Bearer ${authToken}`)
         .send(acceptData)
         .expect(409)
         .expect((res) => {
-          expect(res.body.success).toBe(false);
-          expect(res.body).toHaveProperty("error", "Job already assigned");
+          expect(res.body).toHaveProperty("statusCode", 409);
+          expect(res.body).toHaveProperty("message", "Job already assigned");
+          expect(res.body).toHaveProperty("error", "Conflict");
         });
     });
 
@@ -66,12 +102,13 @@ describe("Inspector Accept Job API (e2e)", () => {
 
       return request(app.getHttpServer())
         .post(`/api/inspector/jobs/${jobId}/accept`)
+        .set("Authorization", `Bearer ${authToken}`)
         .send(acceptData)
         .expect(400)
         .expect((res) => {
-          expect(res.body.success).toBe(false);
+          expect(res.body).toHaveProperty("statusCode", 400);
           expect(res.body).toHaveProperty(
-            "error",
+            "message",
             "Inspector already has an active job",
           );
         });
@@ -85,11 +122,13 @@ describe("Inspector Accept Job API (e2e)", () => {
 
       return request(app.getHttpServer())
         .post("/api/inspector/jobs/non-existent/accept")
+        .set("Authorization", `Bearer ${authToken}`)
         .send(acceptData)
         .expect(404)
         .expect((res) => {
-          expect(res.body.success).toBe(false);
-          expect(res.body).toHaveProperty("error", "Job not found");
+          expect(res.body).toHaveProperty("statusCode", 404);
+          expect(res.body).toHaveProperty("message", "Job not found");
+          expect(res.body).toHaveProperty("error", "Not Found");
         });
     });
 
@@ -102,12 +141,12 @@ describe("Inspector Accept Job API (e2e)", () => {
 
       return request(app.getHttpServer())
         .post(`/api/inspector/jobs/${jobId}/accept`)
+        .set("Authorization", `Bearer ${authToken}`)
         .send(invalidData)
         .expect(400)
         .expect((res) => {
-          expect(res.body.success).toBe(false);
-          expect(res.body).toHaveProperty("error");
-          expect(res.body.error).toContain("inspectorId");
+          expect(res.body).toHaveProperty("statusCode", 400);
+          expect(JSON.stringify(res.body.message)).toContain("inspectorId");
         });
     });
 
@@ -120,11 +159,12 @@ describe("Inspector Accept Job API (e2e)", () => {
 
       return request(app.getHttpServer())
         .post(`/api/inspector/jobs/${jobId}/accept`)
+        .set("Authorization", `Bearer ${authToken}`)
         .send(acceptData)
         .expect(400)
         .expect((res) => {
-          expect(res.body.success).toBe(false);
-          expect(res.body).toHaveProperty("error");
+          expect(res.body).toHaveProperty("statusCode", 400);
+          expect(res.body).toHaveProperty("message");
         });
     });
 
@@ -137,12 +177,13 @@ describe("Inspector Accept Job API (e2e)", () => {
 
       return request(app.getHttpServer())
         .post(`/api/inspector/jobs/${jobId}/accept`)
+        .set("Authorization", `Bearer ${authToken}`)
         .send(acceptData)
         .expect(400)
         .expect((res) => {
-          expect(res.body.success).toBe(false);
+          expect(res.body).toHaveProperty("statusCode", 400);
           expect(res.body).toHaveProperty(
-            "error",
+            "message",
             "Estimated arrival must be in the future",
           );
         });
@@ -158,6 +199,7 @@ describe("Inspector Accept Job API (e2e)", () => {
 
       return request(app.getHttpServer())
         .post(`/api/inspector/jobs/${jobId}/status`)
+        .set("Authorization", `Bearer ${authToken}`)
         .send(updateData)
         .expect(200)
         .expect((res) => {

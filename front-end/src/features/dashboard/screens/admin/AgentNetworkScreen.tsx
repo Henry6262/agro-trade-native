@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Modal, StyleSheet } from 'react-native';
 import { Filter, MapPin, Search, ShoppingCart, Truck, Users, Wheat, X } from 'lucide-react-native';
-import { GlassBadge, GlassButton, GlassCard, GlassInput } from '../../../../design-system';
-import { COLORS } from '../../../../design-system';
+import { GlassBadge, GlassButton, GlassCard, GlassInput } from '@design-system';
+import { COLORS } from '@design-system';
 
 const DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 4 };
 

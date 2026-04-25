@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Plus } from 'lucide-react-native';
-import { GlassButton, COLORS } from '../../../../../../design-system';
+import { GlassButton, COLORS } from '@design-system';
 import { useProductStore } from '@stores/product.store';
 import { BuyerRequestCreationFlow } from '@pages/Dashboard/sections/Buyer/features/RequestCreation/BuyerRequestCreationFlow';
 import { UnifiedOffersDrawer } from '@shared/components/UnifiedOffersDrawer';

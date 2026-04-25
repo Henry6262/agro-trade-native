@@ -131,15 +131,19 @@ export class TestDataFactory {
       addressType?: "FARM" | "WAREHOUSE" | "DELIVERY" | "PICKUP" | "OTHER";
     },
   ) {
+    const cityConnect = data?.cityId
+      ? { city: { connect: { id: data.cityId } } }
+      : {};
+
     return await this.prisma.address.create({
       data: {
-        userId,
-        cityId: data?.cityId,
         street: data?.street || faker.location.streetAddress(),
         latitude: data?.latitude || Number(faker.location.latitude()),
         longitude: data?.longitude || Number(faker.location.longitude()),
         addressType: data?.addressType || "FARM",
         isDefault: true,
+        user: { connect: { id: userId } },
+        ...cityConnect,
       },
     });
   }
@@ -179,10 +183,13 @@ export class TestDataFactory {
       neededBy?: Date;
     },
   ) {
+    const bId = typeof buyerId === 'object' ? (buyerId as any).id : buyerId;
+    const pId = typeof data.productId === 'object' ? (data.productId as any).id : data.productId;
+
     return await this.prisma.buyListing.create({
       data: {
-        buyerId,
-        productId: data.productId,
+        buyerId: bId,
+        productId: pId,
         quantity: data.quantity,
         unit: "TON",
         maxPricePerUnit: data.maxPricePerUnit || 380,
@@ -208,10 +215,13 @@ export class TestDataFactory {
       qualityGrade?: string;
     },
   ) {
+    const sId = typeof sellerId === 'object' ? (sellerId as any).id : sellerId;
+    const pId = typeof data.productId === 'object' ? (data.productId as any).id : data.productId;
+
     return await this.prisma.saleListing.create({
       data: {
-        sellerId,
-        productId: data.productId,
+        sellerId: sId,
+        productId: pId,
         quantity: data.quantity,
         unit: "TON",
         askingPrice: data.askingPrice || 320,
@@ -220,6 +230,9 @@ export class TestDataFactory {
         qualityGrade: data.qualityGrade,
         harvestDate: new Date(),
         status: "ACTIVE",
+      },
+      include: {
+        address: true,
       },
     });
   }

@@ -1,8 +1,10 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
-import * as request from "supertest";
+import request from "supertest";
 import { ProfitController } from "./profit.controller";
 import { ProfitCalculationService } from "../services/profit-calculation.service";
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../../auth/guards/roles.guard";
 
 // ---------------------------------------------------------------------------
 // Isolated unit/integration spec — does NOT boot AppModule or need a real DB.
@@ -94,7 +96,12 @@ describe("ProfitController (isolated)", () => {
       providers: [
         { provide: ProfitCalculationService, useValue: mockProfitService },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix("api");

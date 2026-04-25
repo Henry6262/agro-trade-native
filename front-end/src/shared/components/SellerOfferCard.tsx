@@ -12,48 +12,11 @@ import {
   MessageSquare,
 } from 'lucide-react-native';
 
-interface BuyerOffer {
-  id: string;
-  buyer: {
-    id: string;
-    name: string;
-    company?: string;
-    location: {
-      city: string;
-      state?: string;
-      country: string;
-    };
-    rating: number;
-    reviewCount: number;
-    verified: boolean;
-    avatar?: string;
-  };
-  requestedQuantity: number;
-  offeredPrice: number;
-  unit: string;
-  currency: string;
-  deliveryRequirements: {
-    location: string;
-    timeframe: string;
-    method?: string;
-  };
-  specifications?: {
-    name: string;
-    requirement: string;
-    matches: boolean;
-  }[];
-  matchScore: number;
-  totalValue: number;
-  message?: string;
-  urgency: 'low' | 'medium' | 'high';
-  validUntil: string;
-  status: 'pending' | 'accepted' | 'rejected' | 'negotiating';
-  createdAt: string;
-}
+import type { SellerOffer, SellerProductSummary } from '@shared/types/seller-offers';
 
 interface SellerOfferCardProps {
-  offer: BuyerOffer;
-  sellerProduct: any; // Seller's product listing
+  offer: SellerOffer;
+  sellerProduct: SellerProductSummary | undefined;
   onAccept: (offerId: string) => void;
   onReject: (offerId: string) => void;
   onNegotiate: (offerId: string) => void;
@@ -73,7 +36,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
 
   // Calculate profit margin and price comparison
   const calculatePriceAnalysis = () => {
-    const marketPrice = sellerProduct?.priceRangeMin || 0;
+    const marketPrice = Number(sellerProduct?.priceRangeMin ?? 0);
     const offerPrice = offer.offeredPrice;
     const difference = offerPrice - marketPrice;
     const marginPercentage = marketPrice > 0 ? (difference / marketPrice) * 100 : 0;
@@ -245,7 +208,7 @@ export const SellerOfferCard: React.FC<SellerOfferCardProps> = ({
               </Text>
             </View>
 
-            {sellerProduct?.quantity && (
+            {sellerProduct?.quantity != null && (
               <View className="flex-row justify-between items-center mt-2 pt-2 border-t border-gray-200/30">
                 <Text className="text-gray-500 text-sm">Your Available</Text>
                 <Text

@@ -7,7 +7,7 @@ import { CheckCircle } from 'lucide-react-native';
 import { useAuthStore } from '@stores/auth.store';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useTourStore } from '@stores/tour.store';
-import { GradientBackground, GlassCard, GlassButton, GlassBadge } from '../../../design-system';
+import { GradientBackground, GlassCard, GlassButton, GlassBadge } from '@design-system';
 
 type OnboardingCompleteScreenNavigationProp = NativeStackNavigationProp<
   OnboardingStackParamList,

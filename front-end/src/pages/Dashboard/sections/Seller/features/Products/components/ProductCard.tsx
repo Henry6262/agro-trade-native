@@ -12,7 +12,7 @@ import {
   DollarSign,
 } from 'lucide-react-native';
 
-import { GlassCard, GlassBadge, COLORS } from '../../../../../../../design-system';
+import { GlassCard, GlassBadge, COLORS } from '@design-system';
 import type {
   OfferSummary,
   ProductMetadata,

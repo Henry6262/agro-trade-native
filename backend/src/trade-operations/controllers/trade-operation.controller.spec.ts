@@ -1,11 +1,13 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication } from "@nestjs/common";
-import * as request from "supertest";
+import request from "supertest";
 import { AppModule } from "../../app.module";
 import { PrismaService } from "../../prisma/prisma.service";
 import { NegotiationService } from "../../negotiations/services/negotiation.service";
 import { TradeOperationService } from "../services/trade-operation.service";
 import { UserRole } from "@prisma/client";
+import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../../auth/guards/roles.guard";
 
 describe("TradeOperationController (e2e)", () => {
   let app: INestApplication;
@@ -78,6 +80,16 @@ describe("TradeOperationController (e2e)", () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({
+        canActivate: (context: any) => {
+          const req = context.switchToHttp().getRequest();
+          req.user = { id: "user-123", role: UserRole.ADMIN };
+          return true;
+        },
+      })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: () => true })
       .overrideProvider(PrismaService)
       .useValue({
         // Mock Prisma methods with count
@@ -101,12 +113,21 @@ describe("TradeOperationController (e2e)", () => {
           create: jest.fn(),
           findMany: jest.fn(),
         },
+        product: {
+          count: jest.fn().mockResolvedValue(10),
+          upsert: jest.fn().mockResolvedValue({ id: 'p-1' }),
+        },
+        specificationType: {
+          upsert: jest.fn().mockResolvedValue({ id: 's-1' }),
+        },
         address: {
           findUnique: jest.fn(),
         },
         user: {
           findUnique: jest.fn(),
         },
+        $connect: jest.fn(),
+        $disconnect: jest.fn(),
       })
       .overrideProvider(NegotiationService)
       .useValue(negotiationService)
@@ -201,6 +222,9 @@ describe("TradeOperationController (e2e)", () => {
               seller: {
                 id: "seller-1",
                 name: "Test Seller",
+              },
+              saleListing: {
+                id: "sale-listing-1",
               },
             },
           },

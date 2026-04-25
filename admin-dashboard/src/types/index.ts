@@ -8,6 +8,8 @@ export enum TradePhase {
   TRANSPORT_BIDDING = 'TRANSPORT_BIDDING',
   IN_TRANSIT = 'IN_TRANSIT',
   DELIVERED = 'DELIVERED',
+  DELIVERY = 'DELIVERY',
+  PAYMENT = 'PAYMENT',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED'
 }
@@ -15,6 +17,7 @@ export enum TradePhase {
 export enum TradeStatus {
   ACTIVE = 'ACTIVE',
   ON_HOLD = 'ON_HOLD',
+  PAUSED = 'PAUSED',
   CANCELLED = 'CANCELLED',
   COMPLETED = 'COMPLETED',
   DISPUTED = 'DISPUTED'
@@ -30,6 +33,18 @@ export enum NegotiationStatus {
 }
 
 // Base types first
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+}
+
 export interface User {
   id: string;
   email: string;
@@ -38,6 +53,11 @@ export interface User {
   phoneNumber?: string;
   city?: string;
   region?: string;
+  company?: {
+    id: string;
+    legalName: string;
+    registrationNumber?: string;
+  };
   location?: {
     lat: number;
     lng: number;
@@ -69,6 +89,7 @@ export interface BuyListing {
   updatedAt: string;
   buyer?: User;
   product?: Product;
+  deliveryAddress?: Address;
   specifications?: Array<{
     id: string;
     valueNumber?: number | null;
@@ -125,7 +146,9 @@ export interface TradeSeller {
   saleListingId: string;
   status: 'INVITED' | 'NEGOTIATING' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN' | 'FAILED_INSPECTION';
   requestedQuantity: number;
+  offeredQuantity?: number;
   unit: string;
+  name?: string;
   finalPrice?: number;
   agreedPrice?: number;
   agreedQuantity?: number;
@@ -151,6 +174,20 @@ export interface SellerInspectionStatus {
   } | null;
 }
 
+export interface Offer {
+  id: string;
+  tradeOperationId: string;
+  saleListingId: string;
+  buyListingId: string;
+  quantity: number;
+  pricePerUnit: number;
+  totalPrice: number;
+  status: 'pending' | 'accepted' | 'rejected' | 'countered' | 'expired';
+  expiresAt?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface TradeOperation {
   id: string;
   operationNumber: string;
@@ -162,6 +199,8 @@ export interface TradeOperation {
   profitMargin?: number;
   totalPurchaseCost?: number;
   estimatedTransportCost?: number;
+  totalQuantity?: number;
+  totalCost?: number;
   finalRevenue?: number;
   sellingPrice?: number;
   expectedDeliveryDate?: string;
@@ -172,19 +211,7 @@ export interface TradeOperation {
   sellers?: TradeSeller[];
   admin?: User;
   transport?: TransportSummary;
-  offers?: Array<{
-    id: string;
-    tradeOperationId: string;
-    saleListingId: string;
-    buyListingId: string;
-    quantity: number;
-    pricePerUnit: number;
-    totalPrice: number;
-    status: 'pending' | 'accepted' | 'rejected' | 'countered' | 'expired';
-    expiresAt?: string;
-    createdAt: string;
-    updatedAt?: string;
-  }>;
+  offers?: Offer[];
 }
 
 export interface VerificationResult {
@@ -282,6 +309,7 @@ export interface TransportRequestSummary {
   requestNumber: string;
   status: string;
   totalWeight: number;
+  estimatedCost?: number;
   biddingDeadline?: string | null;
   deliveryDeadline?: string | null;
   urgencyLevel?: string;
@@ -348,6 +376,8 @@ export interface TransportJobSummary {
   estimatedArrival?: string;
   actualDelivery?: string;
   progress?: number;
+  proofOfDelivery?: string | null;
+  deliveryPhotos?: string[];
 }
 
 export interface TransportData {

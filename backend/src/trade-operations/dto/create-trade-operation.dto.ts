@@ -11,7 +11,8 @@ import {
 } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { TruckType } from "@prisma/client";
+import { Incoterm, TruckType } from "@prisma/client";
+import type { EscrowChain } from "../../escrow/escrow.service";
 
 export class CreateTradeOperationDto {
   @ApiProperty({
@@ -21,6 +22,28 @@ export class CreateTradeOperationDto {
   @IsString()
     @IsNotEmpty()
   buyListingId: string;
+
+  @ApiPropertyOptional({
+    description: "Optional admin ID override used by legacy tests and internal orchestration flows.",
+    example: "cmhhfgc1u0000g1rqjcd4y1lx",
+  })
+  @IsOptional()
+  @IsString()
+  adminId?: string;
+
+  @ApiPropertyOptional({
+    description: "Selling price per unit for the buyer. Defaults to the buy listing max price when omitted.",
+    example: 450,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  sellingPrice?: number;
+
+  @ApiPropertyOptional({ description: "Currency for the trade", example: "EUR" })
+  @IsOptional()
+  @IsString()
+  currency?: string;
 
   @ApiPropertyOptional({
     description: "Target profit margin percentage (default: 7%)",
@@ -68,6 +91,32 @@ export class CreateTradeOperationDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiPropertyOptional({
+    description: "ICC Incoterm for the trade. Defaults to DDP.",
+    enum: Incoterm,
+    example: Incoterm.DDP,
+  })
+  @IsOptional()
+  @IsEnum(Incoterm)
+  incoterm?: Incoterm;
+
+  @ApiPropertyOptional({
+    description: "Escrow settlement chain for the trade. Defaults to CELO.",
+    enum: ["CELO", "SOLANA"],
+    example: "SOLANA",
+  })
+  @IsOptional()
+  @IsEnum(["CELO", "SOLANA"])
+  escrowChain?: EscrowChain;
+
+  @ApiPropertyOptional({
+    description: "Optional legacy seller payload retained for backward compatibility during create.",
+    type: [Object],
+  })
+  @IsOptional()
+  @IsArray()
+  sellers?: unknown[];
 }
 
 export class SellerToAddDto {
@@ -153,4 +202,13 @@ export class CreateTradeOperationWithOffersDto {
   @ValidateNested({ each: true })
   @Type(() => SellerOfferDto)
   sellers: SellerOfferDto[];
+
+  @ApiPropertyOptional({
+    description: "Escrow settlement chain for the trade. Defaults to CELO.",
+    enum: ["CELO", "SOLANA"],
+    example: "SOLANA",
+  })
+  @IsOptional()
+  @IsEnum(["CELO", "SOLANA"])
+  escrowChain?: EscrowChain;
 }

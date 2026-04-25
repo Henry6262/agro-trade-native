@@ -38,6 +38,7 @@ import { CharacterTourOverlay } from '@features/onboarding/components';
 import { useAuthStore } from '@stores/auth.store';
 import { useTourStore } from '@stores/tour.store';
 import { useNotificationStore } from '@stores/notification.store';
+import { UserRole } from '../../../shared/types';
 import { AdminPricingZonesScreen } from '../../admin/screens/AdminPricingZonesScreen';
 import PendingListingService from '@services/pendingListingService';
 import { socketService } from '@services/socketService';
@@ -68,15 +69,16 @@ export default function DashboardMainScreen() {
 
   const [activeSection, setActiveSection] = useState('overview');
 
-  // Normalize user role to lowercase for consistency
-  // Note: Backend uses 'FARMER' instead of 'SELLER'
+  // Normalize user role for consistency
   const userRole = React.useMemo(() => {
-    const role = route.params?.userRole || user?.role || 'FARMER';
-    const normalizedRole = role.toLowerCase();
-    if (normalizedRole === 'farmer') {
-      return 'seller' as const;
-    }
-    return normalizedRole as 'admin' | 'seller' | 'buyer' | 'transporter' | 'inspector';
+    const role = (route.params?.userRole || user?.role || UserRole.FARMER) as string;
+    const normalized = role.toUpperCase();
+    
+    if (normalized === UserRole.FARMER || normalized === 'SELLER') return 'seller';
+    if (normalized === UserRole.BUYER) return 'buyer';
+    if (normalized === UserRole.TRANSPORTER || normalized === 'TRANSPORT') return 'transporter';
+    if (normalized === UserRole.INSPECTOR) return 'inspector';
+    return 'admin';
   }, [user?.role, route.params?.userRole]);
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
@@ -102,25 +104,6 @@ export default function DashboardMainScreen() {
       checkPendingListing();
     }
   }, [isAuthenticated, navigation, route.params]);
-
-  // WebSocket: connect on auth, subscribe to live events
-  React.useEffect(() => {
-    if (!isAuthenticated) return;
-    socketService.connect();
-    const addNotification = useNotificationStore.getState().addNotification;
-    const handleOffer = (payload: { productName?: string; buyerName?: string }) => {
-      addNotification({
-        type: 'offer',
-        title: 'New Offer Received',
-        body: `${payload.buyerName ?? 'A buyer'} made an offer on ${payload.productName ?? 'your listing'}`,
-      });
-    };
-    socketService.on('offer:received', handleOffer);
-    return () => {
-      socketService.off('offer:received', handleOffer);
-      socketService.disconnect();
-    };
-  }, [isAuthenticated]);
 
   // Push notifications: register token with backend
   React.useEffect(() => {

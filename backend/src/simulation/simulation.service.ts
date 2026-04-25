@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import {
   UserRole,
@@ -14,12 +14,16 @@ import {
   ListingStatus,
 } from "@prisma/client";
 import * as bcrypt from "bcryptjs";
+import { TradeOperationService } from "../trade-operations/services/trade-operation.service";
 
 @Injectable()
 export class SimulationService {
   private readonly logger = new Logger(SimulationService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private tradeOperationService: TradeOperationService,
+  ) {}
 
   /**
    * Get all users by role for simulation purposes
@@ -599,11 +603,8 @@ export class SimulationService {
       },
     });
 
-    // Update trade operation to IN_TRANSIT
-    await this.prisma.tradeOperation.update({
-      where: { id: tradeOperationId },
-      data: { phase: TradePhase.IN_TRANSIT },
-    });
+    // Update trade operation to IN_TRANSIT using service layer to trigger escrow hook
+    await this.tradeOperationService.updatePhase(tradeOperationId, TradePhase.IN_TRANSIT);
 
     return { transportRequest, transportBid, transportJob, distanceKm };
   }
@@ -612,14 +613,27 @@ export class SimulationService {
    * Complete trade operation (mark as delivered and completed)
    */
   async completeTradeOperation(tradeOperationId: string) {
-    // Update trade operation
-    await this.prisma.tradeOperation.update({
+    const trade = await this.prisma.tradeOperation.findUnique({
       where: { id: tradeOperationId },
-      data: {
-        phase: TradePhase.COMPLETED,
-        status: TradeStatus.COMPLETED,
-      },
+      select: { phase: true },
     });
+
+    if (!trade) {
+      throw new NotFoundException("Trade operation not found");
+    }
+
+    // Must pass through DELIVERED before COMPLETED (state machine constraint)
+    if (trade.phase === TradePhase.IN_TRANSIT) {
+      await this.tradeOperationService.updatePhase(tradeOperationId, TradePhase.DELIVERED);
+    }
+
+    if (trade.phase !== TradePhase.DELIVERED && trade.phase !== TradePhase.IN_TRANSIT) {
+      throw new BadRequestException(
+        `Cannot complete trade from phase ${trade.phase}`,
+      );
+    }
+
+    await this.tradeOperationService.updatePhase(tradeOperationId, TradePhase.COMPLETED);
 
     return { success: true, message: "Trade completed successfully" };
   }
@@ -927,9 +941,13 @@ export class SimulationService {
       // Find all test users
       const testUsers = await this.prisma.user.findMany({
         where: {
-          email: {
-            startsWith: "test-",
-          },
+          OR: [
+            { email: { startsWith: "test-" } },
+            { email: { startsWith: "admin-" } },
+            { email: { startsWith: "buyer-" } },
+            { email: { startsWith: "seller" } },
+            { email: { endsWith: "@test.com" } },
+          ],
         },
         select: {
           id: true,

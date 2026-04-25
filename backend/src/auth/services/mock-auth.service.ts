@@ -10,9 +10,23 @@ export class MockAuthService {
    * Generate a mock JWT token for testing
    */
   generateMockToken(role: UserRole = UserRole.ADMIN): string {
+    let sub = "test-user-123";
+    let email = "test@agrotrade.com";
+
+    if (role === UserRole.BUYER) {
+      sub = "test-buyer-456";
+      email = "buyer@agrotrade.com";
+    } else if (role === UserRole.FARMER) {
+      sub = "test-seller-001";
+      email = "seller1@agrotrade.com";
+    } else if (role === UserRole.TRANSPORTER) {
+      sub = "test-transporter-789";
+      email = "transporter@agrotrade.com";
+    }
+
     const payload = {
-      sub: "test-user-123",
-      email: "test@agrotrade.com",
+      sub,
+      email,
       role,
       name: "Test User",
       iat: Math.floor(Date.now() / 1000),
@@ -20,6 +34,21 @@ export class MockAuthService {
     };
 
     // Specify expiresIn option instead of including exp in payload
+    return this.jwtService.sign(payload, { expiresIn: "1h" });
+  }
+
+  /**
+   * Sign a specific user object
+   */
+  sign(user: any): string {
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      name: user.name || "Test User",
+      iat: Math.floor(Date.now() / 1000),
+    };
+
     return this.jwtService.sign(payload, { expiresIn: "1h" });
   }
 
@@ -39,9 +68,23 @@ export class MockAuthService {
    * Mock user for testing
    */
   getMockUser(role: UserRole = UserRole.ADMIN) {
+    let id = "test-user-123";
+    let email = "test@agrotrade.com";
+
+    if (role === UserRole.BUYER) {
+      id = "test-buyer-456";
+      email = "buyer@agrotrade.com";
+    } else if (role === UserRole.FARMER) {
+      id = "test-seller-001";
+      email = "seller1@agrotrade.com";
+    } else if (role === UserRole.TRANSPORTER) {
+      id = "test-transporter-789";
+      email = "transporter@agrotrade.com";
+    }
+
     return {
-      id: "test-user-123",
-      email: "test@agrotrade.com",
+      id,
+      email,
       name: "Test User",
       role,
       isActive: true,

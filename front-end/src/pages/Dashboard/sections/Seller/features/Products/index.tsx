@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Alert, StyleSheet } from 'react-native';
 import { Package, Plus, Building2 } from 'lucide-react-native';
 
-import { GlassButton, COLORS } from '../../../../../../design-system';
+import { GlassButton, COLORS } from '@design-system';
 import { LoadingSpinner } from '@shared/components/LoadingSpinner';
 import { ErrorState } from '@shared/components/ErrorState';
 import { ProductCreationFlow } from '@features/dashboard/screens/seller/product-creation/ProductCreationFlow';

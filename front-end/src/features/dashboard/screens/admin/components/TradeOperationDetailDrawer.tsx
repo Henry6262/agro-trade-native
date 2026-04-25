@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   RefreshControl,
   Alert,
-  StyleSheet,
 } from 'react-native';
 import {
   X,
@@ -23,15 +22,22 @@ import {
 import {
   TradeOperation,
   TradePhase,
-  TradeStatus,
   TradeSeller,
   TimelineEvent,
 } from '../../../../../types/trade-operations';
 import { tradeOperationService } from '@services/tradeOperationService';
 import { negotiationService, Negotiation } from '@services/negotiationService';
 import { inspectionService, InspectionRequest } from '@services/inspectionService';
-import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
-import { COLORS } from '../../../../../design-system';
+import { GlassCard, GlassBadge, GlassButton } from '@design-system';
+import { COLORS } from '@design-system';
+import {
+  getInspectionStatusVariant,
+  getNegotiationStatusVariant,
+  getPhaseColor,
+  getSellerStatusVariant,
+  getStatusBadgeVariant,
+} from './trade-operation-detail-drawer/helpers';
+import { styles } from './trade-operation-detail-drawer/styles';
 
 interface TradeOperationDetailDrawerProps {
   visible: boolean;
@@ -41,74 +47,6 @@ interface TradeOperationDetailDrawerProps {
 }
 
 type TabKey = 'overview' | 'sellers' | 'negotiations' | 'timeline';
-type StatusBadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'muted' | 'gold';
-
-const getStatusBadgeVariant = (status: TradeStatus): StatusBadgeVariant => {
-  switch (status) {
-    case TradeStatus.ACTIVE:
-      return 'success';
-    case TradeStatus.PAUSED:
-      return 'warning';
-    case TradeStatus.COMPLETED:
-      return 'info';
-    case TradeStatus.CANCELLED:
-    case TradeStatus.FAILED:
-      return 'danger';
-    default:
-      return 'muted';
-  }
-};
-
-const getSellerStatusVariant = (status: string): StatusBadgeVariant => {
-  switch (status) {
-    case 'ACCEPTED':
-      return 'success';
-    case 'REJECTED':
-      return 'danger';
-    default:
-      return 'warning';
-  }
-};
-
-const getInspectionStatusVariant = (status: string): StatusBadgeVariant => {
-  switch (status) {
-    case 'COMPLETED':
-      return 'success';
-    case 'IN_PROGRESS':
-      return 'info';
-    case 'SCHEDULED':
-      return 'gold';
-    default:
-      return 'warning';
-  }
-};
-
-const getNegotiationStatusVariant = (status: string): StatusBadgeVariant => {
-  switch (status) {
-    case 'ACCEPTED':
-      return 'success';
-    case 'REJECTED':
-      return 'danger';
-    case 'EXPIRED':
-      return 'muted';
-    default:
-      return 'warning';
-  }
-};
-
-const getPhaseColor = (phase: TradePhase): string => {
-  switch (phase) {
-    case TradePhase.COMPLETED:
-      return COLORS.accentGreen;
-    case TradePhase.CANCELLED:
-      return COLORS.danger;
-    case TradePhase.IN_PROGRESS:
-    case TradePhase.TRANSPORT_MATCHING:
-      return COLORS.info;
-    default:
-      return '#F97316';
-  }
-};
 
 export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProps> = ({
   visible,
@@ -661,131 +599,3 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  actionButtons: { gap: 10, marginBottom: 32 },
-
-  content: { flex: 1 },
-  divider: { backgroundColor: 'rgba(255,255,255,0.08)', height: 1, marginVertical: 8 },
-  dot: { borderRadius: 6, height: 12, width: 12 },
-  emptyTab: { alignItems: 'center', flex: 1, justifyContent: 'center', paddingVertical: 48 },
-  emptyTabText: { color: COLORS.textSecondary, fontSize: 14, marginTop: 12 },
-  fieldKey: { color: COLORS.textMuted, fontSize: 12 },
-  fieldPrimary: { color: COLORS.textPrimary, fontSize: 15, fontWeight: '700', marginBottom: 8 },
-
-  fieldRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  fieldVal: { color: COLORS.textSecondary, fontSize: 13, fontWeight: '600' },
-  headerActions: { flexDirection: 'row', gap: 8 },
-  headerCard: { borderRadius: 0 },
-  headerInner: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
-    paddingTop: 52,
-  },
-
-  headerSub: { color: COLORS.textSecondary, fontSize: 13, marginTop: 2 },
-  headerTextBlock: { flex: 1 },
-
-  headerTitle: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '800' },
-  iconBtn: { backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 20, padding: 8 },
-
-  inspectionBtn: { marginTop: 8 },
-  inspectionRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  inspectionSeller: { color: COLORS.textSecondary, fontSize: 13 },
-
-  loadingContainer: {
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  loadingText: { color: COLORS.textSecondary, fontSize: 14, marginTop: 12 },
-  negoActionBtn: { flex: 1 },
-  negoActions: { flexDirection: 'row', gap: 8, marginTop: 10 },
-  negoCard: { marginBottom: 10 },
-
-  negoHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  negoMessage: { color: COLORS.textMuted, fontSize: 12, fontStyle: 'italic', marginTop: 6 },
-  negoRound: { color: COLORS.textMuted, fontSize: 11, marginTop: 4 },
-  negoTitle: {
-    color: COLORS.textPrimary,
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '700',
-    marginRight: 8,
-  },
-  opDate: { color: COLORS.textMuted, fontSize: 12, marginTop: 2 },
-
-  opInfoHeader: {
-    alignItems: 'flex-start',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  opNumber: { color: COLORS.textPrimary, fontSize: 16, fontWeight: '800' },
-  phaseRow: { alignItems: 'center', flexDirection: 'row' },
-
-  phaseText: { fontSize: 13, fontWeight: '600' },
-
-  root: { backgroundColor: '#0A0F1E', flex: 1 },
-  sectionCard: { marginBottom: 12 },
-  sectionHeaderRow: { alignItems: 'center', flexDirection: 'row', marginBottom: 8 },
-  sectionLabel: {
-    color: COLORS.textSecondary,
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-  },
-  sellerActionBtn: { flex: 1 },
-  sellerActions: { flexDirection: 'row', gap: 8, marginTop: 10 },
-  sellerCard: { marginBottom: 10 },
-
-  sellerHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  sellerName: {
-    color: COLORS.textPrimary,
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '700',
-    marginRight: 8,
-  },
-  tab: { alignItems: 'center', flex: 1, paddingVertical: 12 },
-  tabActive: { borderBottomColor: COLORS.accentGreen, borderBottomWidth: 2 },
-  tabContent: { flex: 1, padding: 16 },
-  tabLabel: { color: COLORS.textMuted, fontSize: 13, fontWeight: '600' },
-  tabLabelActive: { color: COLORS.accentGreen },
-
-  tabs: { borderTopColor: 'rgba(255,255,255,0.08)', borderTopWidth: 1, flexDirection: 'row' },
-  timelineCard: { flex: 1, marginBottom: 0 },
-  timelineDesc: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '600', marginBottom: 4 },
-  timelineDot: { alignItems: 'center', marginRight: 12, paddingTop: 4 },
-  timelineItem: { flexDirection: 'row', marginBottom: 12 },
-  timelineLine: { backgroundColor: 'rgba(255,255,255,0.12)', flex: 1, marginTop: 4, width: 1 },
-  timelineMeta: { color: COLORS.textMuted, fontSize: 11 },
-
-  verifiedRow: { alignItems: 'center', flexDirection: 'row', marginTop: 4 },
-  verifiedText: { color: COLORS.accentGreen, fontSize: 12, fontWeight: '600' },
-});

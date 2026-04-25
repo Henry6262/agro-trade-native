@@ -253,7 +253,6 @@ export class InspectionController {
         },
       },
     );
-
     return this.serializeInspection(inspection);
   }
 
@@ -355,6 +354,8 @@ export class InspectionController {
           askingPrice: entity.saleListing.askingPrice
             ? Number(entity.saleListing.askingPrice)
             : null,
+          qualityScore: entity.saleListing.qualityScore,
+          qualityGrade: entity.saleListing.qualityGrade,
           product: entity.saleListing.product
             ? {
                 id: entity.saleListing.product.id,
@@ -413,7 +414,8 @@ export class InspectionController {
         requestedDate: entity.requestedDate?.toISOString(),
         scheduledDate: entity.scheduledDate?.toISOString?.() ?? null,
         completedDate: entity.completedDate?.toISOString?.() ?? null,
-        qualityScore: entity.qualityScore,
+        qualityScore: entity.qualityScore ?? entity.saleListing?.qualityScore,
+        qualityGrade: entity.qualityGrade ?? entity.saleListing?.qualityGrade,
         verificationResult: entity.verificationResult,
         notes: entity.notes,
         photos: entity.photos,

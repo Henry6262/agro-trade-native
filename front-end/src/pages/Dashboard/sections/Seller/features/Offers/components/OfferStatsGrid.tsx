@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { GlassCard, COLORS } from '../../../../../../../design-system';
+import { GlassCard, COLORS } from '@design-system';
 import type { OfferStatCard } from '../types';
 
 interface OfferStatsGridProps {

@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { List } from "lucide-react";
+import { ArrowRight, List } from "lucide-react";
 import { useMarketplaceStore } from "@/app/stores/marketplace.store";
 
 const PHASE_COLORS: Record<string, string> = {
@@ -16,6 +18,7 @@ const PHASE_COLORS: Record<string, string> = {
   COMPLETED: "border-green-500/30 text-green-400",
   DISPUTED: "border-red-500/30 text-red-400",
   CANCELLED: "border-red-500/30 text-red-400",
+  UNKNOWN: "border-gray-500/30 text-gray-400",
 };
 
 export default function SellerTradesPage() {
@@ -52,30 +55,60 @@ export default function SellerTradesPage() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {sellerTrades.map((trade) => (
+          {sellerTrades.map((trade) => {
+            const phase = trade.tradePhase ?? trade.phase ?? "UNKNOWN";
+            const quantity = trade.agreedQuantity ?? trade.requestedQuantity ?? trade.quantity;
+            const escrowChain = trade.metadata?.escrowChain;
+            const isSolanaEligible =
+              escrowChain === "SOLANA" &&
+              (phase === "DELIVERED" || phase === "COMPLETED");
+
+            return (
             <Card key={trade.id} className="bg-card border-brand-border hover:border-brand-wheat/20 transition-colors">
-              <CardContent className="flex items-center justify-between p-4">
-                <div className="space-y-1">
-                  <p className="font-medium text-brand-cream">
-                    Trade #{trade.id.slice(0, 8)}
-                  </p>
+              <CardContent className="flex items-center justify-between gap-4 p-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="font-medium text-brand-cream">
+                      Trade #{(trade.tradeOperationId || trade.id).slice(0, 8)}
+                    </p>
+                    {escrowChain === "SOLANA" && (
+                      <Badge variant="outline" className="text-[10px] border-cyan-500/30 text-cyan-300">
+                        Solana Escrow
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-sm text-text-muted">
-                    {trade.quantity} {trade.unit}
+                    {quantity} {trade.unit}
                     {trade.agreedPrice && ` · $${trade.agreedPrice}`}
                   </p>
                   <p className="text-xs text-text-muted">
                     Buyer: {trade.buyer?.name || "Unknown"}
                   </p>
                 </div>
-                <Badge
-                  variant="outline"
-                  className={`text-xs ${PHASE_COLORS[trade.phase] || "border-brand-border text-text-muted"}`}
-                >
-                  {trade.phase.replace(/_/g, " ")}
-                </Badge>
+
+                <div className="flex items-center gap-2 flex-wrap justify-end">
+                  {isSolanaEligible && (
+                    <Button
+                      render={<Link href="/dashboard/seller/portfolio" />}
+                      variant="outline"
+                      size="sm"
+                      className="border-amber-500/30 text-amber-200 hover:bg-amber-500/10"
+                    >
+                      Invest Proceeds
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </Button>
+                  )}
+                  <Badge
+                    variant="outline"
+                    className={`text-xs ${PHASE_COLORS[phase] || "border-brand-border text-text-muted"}`}
+                  >
+                    {phase.replace(/_/g, " ")}
+                  </Badge>
+                </div>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

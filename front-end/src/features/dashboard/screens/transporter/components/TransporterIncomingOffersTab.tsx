@@ -13,7 +13,7 @@ import {
   RefreshCw,
   Truck,
 } from 'lucide-react-native';
-import { GlassCard, GlassBadge, GlassButton } from '../../../../../design-system';
+import { GlassCard, GlassBadge, GlassButton } from '@design-system';
 import { BaseComponentProps } from '@shared/types';
 import { MapDrawer } from '../maps/components/MapDrawer';
 import { MapOffer } from '../maps/types';

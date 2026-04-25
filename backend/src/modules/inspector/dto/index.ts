@@ -1,36 +1,103 @@
-import { IsOptional, IsString, IsNumber, IsBoolean, IsIn } from "class-validator";
+import {
+  ArrayMinSize,
+  IsDateString,
+  IsBoolean,
+  IsDefined,
+  IsIn,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  ValidateNested,
+} from "class-validator";
 import { Type } from "class-transformer";
 
-export class AcceptJobDto {
+class CoordinatesDto {
+  @Type(() => Number)
+  @IsNumber()
+  latitude!: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  longitude!: number;
+
+  @Type(() => Number)
   @IsOptional()
+  @IsNumber()
+  accuracy?: number;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  heading?: number;
+
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  speed?: number;
+}
+
+class TestMethodDto {
   @IsString()
-  inspectorId?: string;
+  @IsNotEmpty()
+  parameter!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  method!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  equipment!: string;
 
   @IsOptional()
   @IsString()
-  estimatedArrival?: string;
+  standardUsed?: string;
+}
+
+class EvidenceDto {
+  @IsString()
+  @IsNotEmpty()
+  type!: "photo" | "document" | "video";
+
+  @IsUrl()
+  url!: string;
+
+  @IsOptional()
+  @IsString()
+  caption?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  timestamp!: string;
+}
+
+export class AcceptJobDto {
+  @IsString()
+  @IsNotEmpty()
+  inspectorId!: string;
+
+  @IsDateString()
+  estimatedArrival!: string;
 }
 
 export class LocationUpdateDto {
-  @IsOptional()
   @IsString()
-  inspectorId?: string;
+  @IsNotEmpty()
+  inspectorId!: string;
 
   @IsOptional()
   @IsString()
   jobId?: string;
 
-  @IsOptional()
-  coordinates?: {
-    latitude: number;
-    longitude: number;
-    accuracy: number;
-    heading?: number;
-    speed?: number;
-  };
+  @IsDefined()
+  @ValidateNested()
+  @Type(() => CoordinatesDto)
+  coordinates!: CoordinatesDto;
 
   @IsOptional()
-  @IsString()
+  @IsDateString()
   timestamp?: string;
 
   @IsOptional()
@@ -47,55 +114,49 @@ export class LocationUpdateDto {
 }
 
 export class VerificationResultDto {
-  @IsOptional()
   @IsString()
-  jobId?: string;
+  @IsNotEmpty()
+  jobId!: string;
 
-  @IsOptional()
   @IsString()
-  inspectorId?: string;
+  @IsNotEmpty()
+  inspectorId!: string;
 
   @IsOptional()
   @IsString()
   sellerListingId?: string;
 
-  @IsOptional()
-  originalSpecs?: Record<string, any>;
+  @IsDefined()
+  originalSpecs!: Record<string, any>;
+
+  @IsDefined()
+  verifiedSpecs!: Record<string, any>;
+
+  @IsDefined()
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => TestMethodDto)
+  testMethods!: TestMethodDto[];
 
   @IsOptional()
-  verifiedSpecs?: Record<string, any>;
+  @ValidateNested({ each: true })
+  @Type(() => EvidenceDto)
+  evidence?: EvidenceDto[];
 
-  @IsOptional()
-  testMethods?: Array<{
-    parameter: string;
-    method: string;
-    equipment: string;
-    standardUsed?: string;
-  }>;
-
-  @IsOptional()
-  evidence?: Array<{
-    type: "photo" | "document" | "video";
-    url: string;
-    caption?: string;
-    timestamp: string;
-  }>;
-
-  @IsOptional()
   @IsString()
-  notes?: string;
+  @IsNotEmpty()
+  notes!: string;
 
-  @IsOptional()
   @IsString()
-  verificationStatus?: "VERIFIED" | "PARTIALLY_VERIFIED" | "FAILED" | "PENDING_REVIEW";
+  @IsNotEmpty()
+  verificationStatus!: "VERIFIED" | "PARTIALLY_VERIFIED" | "FAILED" | "PENDING_REVIEW";
 
   @IsOptional()
   @IsString()
   signature?: string;
 
-  @IsOptional()
-  @IsString()
-  verifiedAt?: string;
+  @IsDateString()
+  verifiedAt!: string;
 }
 
 export class JobFilterDto {

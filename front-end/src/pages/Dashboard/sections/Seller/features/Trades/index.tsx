@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from 'react-native';
-import { COLORS } from '../../../../../../design-system';
+import { COLORS } from '@design-system';
 import { EarningsSummaryGrid, SellerTradeCard } from './components';
 import { useSellerTrades } from './hooks';
 import type { SellerTrade } from './types';

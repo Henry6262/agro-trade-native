@@ -10,8 +10,8 @@ import {
   Clock,
   ArrowRight,
 } from 'lucide-react-native';
-import { GlassCard, GlassBadge } from '../../../../design-system';
-import { COLORS } from '../../../../design-system';
+import { GlassCard, GlassBadge } from '@design-system';
+import { COLORS } from '@design-system';
 
 const DIVIDER = { height: 1, backgroundColor: 'rgba(255,255,255,0.08)', marginVertical: 6 };
 

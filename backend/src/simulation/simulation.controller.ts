@@ -49,7 +49,18 @@ export class SimulationController {
   constructor(
     private simulationService: SimulationService,
     private prisma: PrismaService,
-  ) {}
+  ) {
+    // SECURITY: Disable all simulation endpoints in production
+    if (process.env.NODE_ENV === "production") {
+      this.logger.error("!!! CRITICAL: Simulation Controller accessed in PRODUCTION environment. Disabling access.");
+    }
+  }
+
+  private ensureNotProduction() {
+    if (process.env.NODE_ENV === "production") {
+      throw new ForbiddenException("Simulation endpoints are disabled in production.");
+    }
+  }
 
   // ==================== STATE QUERIES ====================
 
@@ -57,6 +68,7 @@ export class SimulationController {
   @ApiOperation({ summary: "Get all users by role for simulation" })
   @ApiResponse({ status: 200, description: "List of users for the role" })
   async getUsersByRole(@Param("role") role: UserRole) {
+    this.ensureNotProduction();
     const users = await this.simulationService.getUsersByRole(role);
     return successResponse(users, `Found ${users.length} ${role} users`);
   }
@@ -65,6 +77,7 @@ export class SimulationController {
   @ApiOperation({ summary: "Get complete trade operation state" })
   @ApiResponse({ status: 200, description: "Full trade state with all actors" })
   async getFullTradeState(@Param("id") id: string) {
+    this.ensureNotProduction();
     return this.simulationService.getFullTradeState(id);
   }
 
@@ -72,6 +85,7 @@ export class SimulationController {
   @ApiOperation({ summary: "Create a test user for scenarios" })
   @HttpCode(HttpStatus.CREATED)
   async createTestUser(@Body() dto: CreateTestUserDto) {
+    this.ensureNotProduction();
     const data = dto.data || {};
     if (dto.name) {
       data.name = dto.name;
@@ -88,6 +102,7 @@ export class SimulationController {
     @Param("userId") userId: string,
     @Body() dto: any,
   ) {
+    this.ensureNotProduction();
     // Verify user is a buyer
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -286,6 +301,7 @@ export class SimulationController {
       vehicleCapacity?: number;
     },
   ) {
+    this.ensureNotProduction();
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -325,6 +341,7 @@ export class SimulationController {
     @Param("userId") userId: string,
     @Body() dto: { jobId: string },
   ) {
+    this.ensureNotProduction();
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -363,6 +380,7 @@ export class SimulationController {
     @Param("userId") userId: string,
     @Body() dto: { jobId: string; deliveryNotes?: string },
   ) {
+    this.ensureNotProduction();
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -411,6 +429,7 @@ export class SimulationController {
     @Param("userId") userId: string,
     @Body() dto: { inspectionId: string },
   ) {
+    this.ensureNotProduction();
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -442,6 +461,7 @@ export class SimulationController {
       notes?: string;
     },
   ) {
+    this.ensureNotProduction();
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -532,6 +552,7 @@ export class SimulationController {
       longitude?: number;
     },
   ) {
+    this.ensureNotProduction();
     try {
       this.logger.log("[Controller] createFarmerSaleListing called with:" + JSON.stringify({
         farmerId,
@@ -561,6 +582,7 @@ export class SimulationController {
       sellerCommission: number;
     },
   ) {
+    this.ensureNotProduction();
     return this.simulationService.createTradeOperation(dto.buyListingId, {
       adminMargin: dto.adminMargin,
       buyerCommission: dto.buyerCommission,
@@ -583,6 +605,7 @@ export class SimulationController {
       }>;
     },
   ) {
+    this.ensureNotProduction();
     return this.simulationService.sendOffersToFarmers(
       dto.tradeOperationId,
       dto.offers,
@@ -593,6 +616,7 @@ export class SimulationController {
   @ApiOperation({ summary: "Admin accepts farmer counter-offer" })
   @HttpCode(HttpStatus.OK)
   async adminAcceptCounterOffer(@Body() dto: { negotiationId: string }) {
+    this.ensureNotProduction();
     return this.simulationService.adminAcceptCounterOffer(dto.negotiationId);
   }
 
@@ -602,6 +626,7 @@ export class SimulationController {
   async assignInspector(
     @Body() dto: { tradeOperationId: string; inspectorId: string },
   ) {
+    this.ensureNotProduction();
     return this.simulationService.assignInspector(
       dto.tradeOperationId,
       dto.inspectorId,
@@ -624,6 +649,7 @@ export class SimulationController {
       estimatedDuration: number;
     },
   ) {
+    this.ensureNotProduction();
     return this.simulationService.createAndAcceptTransportBid(
       dto.tradeOperationId,
       dto,
@@ -634,6 +660,7 @@ export class SimulationController {
   @ApiOperation({ summary: "Complete trade operation" })
   @HttpCode(HttpStatus.OK)
   async completeTradeOperation(@Body() dto: { tradeOperationId: string }) {
+    this.ensureNotProduction();
     return this.simulationService.completeTradeOperation(dto.tradeOperationId);
   }
 
@@ -653,6 +680,7 @@ export class SimulationController {
       distanceKm?: number;
     },
   ) {
+    this.ensureNotProduction();
     return this.simulationService.createTransportRequest(dto.tradeOperationId, {
       pickupLat: dto.pickupLat,
       pickupLng: dto.pickupLng,
@@ -668,6 +696,7 @@ export class SimulationController {
   async selectTransportBid(
     @Body() dto: { transportRequestId: string; bidId: string },
   ) {
+    this.ensureNotProduction();
     return this.simulationService.adminSelectTransportBid(
       dto.transportRequestId,
       dto.bidId,
@@ -682,6 +711,7 @@ export class SimulationController {
   async updatePricing(
     @Body() dto: { negotiationId: string; newPrice: number; reason?: string },
   ) {
+    this.ensureNotProduction();
     return this.simulationService.updateNegotiationPricing(dto.negotiationId, {
       newPrice: dto.newPrice,
       reason: dto.reason,
@@ -692,6 +722,7 @@ export class SimulationController {
   @ApiOperation({ summary: "Delete all test users and related data" })
   @HttpCode(HttpStatus.OK)
   async cleanupTestData() {
+    this.ensureNotProduction();
     return this.simulationService.cleanupTestData();
   }
 }

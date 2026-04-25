@@ -15,7 +15,7 @@ export const getAppUrl = (): string => {
   }
 
   // For mobile apps or fallback
-  return process.env.EXPO_PUBLIC_APP_URL || 'http://localhost:8081';
+  return process.env['EXPO_PUBLIC_APP_URL'] || 'http://localhost:8081';
 };
 
 /**
@@ -28,8 +28,8 @@ export const getApiUrl = (): string => {
   }
 
   // Use configured API URL if available
-  if (process.env.EXPO_PUBLIC_API_URL) {
-    return process.env.EXPO_PUBLIC_API_URL;
+  if (process.env['EXPO_PUBLIC_API_URL']) {
+    return process.env['EXPO_PUBLIC_API_URL'];
   }
 
   // For web platform in production
@@ -39,8 +39,8 @@ export const getApiUrl = (): string => {
     // If we're on a production domain
     if (host !== 'localhost' && !host.includes('127.0.0.1')) {
       // Check if we have an explicit production API URL
-      if (process.env.EXPO_PUBLIC_API_URL_PRODUCTION) {
-        return process.env.EXPO_PUBLIC_API_URL_PRODUCTION;
+      if (process.env['EXPO_PUBLIC_API_URL_PRODUCTION']) {
+        return process.env['EXPO_PUBLIC_API_URL_PRODUCTION'];
       }
 
       // Assume the API is hosted on a similar domain with 'api' subdomain
@@ -85,7 +85,7 @@ export const getGoogleOAuthUrl = (): string => {
  * Check if we're in production environment
  */
 export const isProduction = (): boolean => {
-  if (process.env.EXPO_PUBLIC_ENVIRONMENT === 'production') {
+  if (process.env['EXPO_PUBLIC_ENVIRONMENT'] === 'production') {
     return true;
   }
 
@@ -113,7 +113,7 @@ export const ENV = {
   get isProduction() {
     return isProduction();
   },
-  googleMapsApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY || '',
-  appName: process.env.EXPO_PUBLIC_APP_NAME || 'AgroTrade',
-  appVersion: process.env.EXPO_PUBLIC_APP_VERSION || '1.0.0',
+  googleMapsApiKey: process.env['EXPO_PUBLIC_GOOGLE_MAPS_API_KEY'] || '',
+  appName: process.env['EXPO_PUBLIC_APP_NAME'] || 'AgroTrade',
+  appVersion: process.env['EXPO_PUBLIC_APP_VERSION'] || '1.0.0',
 };

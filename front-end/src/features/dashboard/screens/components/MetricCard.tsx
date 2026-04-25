@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { BaseComponentProps } from '@shared/types';
-import { GlassCard } from '../../../../design-system';
-import { COLORS } from '../../../../design-system';
+import { GlassCard } from '@design-system';
+import { COLORS } from '@design-system';
 
 interface MetricCardProps extends BaseComponentProps {
   title: string;

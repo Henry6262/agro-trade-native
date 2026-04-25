@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { format } from 'date-fns';
-import { GlassCard, GlassBadge, COLORS } from '../../../../../../../design-system';
+import { GlassCard, GlassBadge, COLORS } from '@design-system';
 import { BuyerRequestCard } from '@shared/components/BuyerRequestCard';
 import type { BuyerRequest } from '../types';
 

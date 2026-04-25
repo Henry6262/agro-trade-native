@@ -141,9 +141,9 @@ export const useSellerTrades = () => {
     const handleTradeUpdate = () => {
       void tradesQuery.refetch();
     };
-    socketService.on('trade-operation:updated', handleTradeUpdate);
+    socketService.on('trade:updated', handleTradeUpdate);
     return () => {
-      socketService.off('trade-operation:updated', handleTradeUpdate);
+      socketService.off('trade:updated', handleTradeUpdate);
     };
   }, [tradesQuery]);
 

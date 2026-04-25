@@ -19,7 +19,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { ChevronDown, ChevronUp, TrendingDown, TrendingUp } from 'lucide-react-native';
 import { AlertPill, NewsCard } from '../intelligence/components';
-import { GlassCard, GlassButton, GlassInput } from '../../../../design-system';
+import { GlassCard, GlassButton, GlassInput } from '@design-system';
 import { formatTimeAgo } from '../../../../utils/formatTimeAgo';
 import { COLORS, GLASS } from '../../../../design-system/tokens';
 import { useMarketStore, PriceAlert } from '../../../../stores/market.store';
