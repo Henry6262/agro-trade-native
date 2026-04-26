@@ -22,17 +22,19 @@ async function runGoldenPath() {
   try {
     // 1. Create Test Users
     console.log('  - Creating Test Users...');
+    const authHeader = { headers: { Authorization: `Bearer ${ADMIN_TOKEN}` } };
+    
     const buyerResponse = await axios.post(`${API_URL}/simulation/users/create-test-user`, {
       role: 'BUYER',
       name: 'E2E Test Buyer',
-    });
-    const buyer = buyerResponse.data.data;
+    }, authHeader);
+    const buyer = buyerResponse.data.data || buyerResponse.data;
 
     const farmerResponse = await axios.post(`${API_URL}/simulation/users/create-test-user`, {
       role: 'FARMER',
       name: 'E2E Test Farmer',
-    });
-    const farmer = farmerResponse.data.data;
+    }, authHeader);
+    const farmer = farmerResponse.data.data || farmerResponse.data;
 
     // 2. Create Buy Listing
     console.log('  - Creating Buy Listing...');
@@ -40,7 +42,7 @@ async function runGoldenPath() {
       productCategory: 'Grain',
       quantity: 100,
       maxPrice: 250,
-    });
+    }, authHeader);
     const listing = listingResponse.data;
 
     // 3. Create Trade Operation
@@ -50,7 +52,7 @@ async function runGoldenPath() {
       adminMargin: 15,
       buyerCommission: 2,
       sellerCommission: 3,
-    });
+    }, authHeader);
     const trade = tradeResponse.data;
 
     // 4. Send Offer to Farmer
@@ -59,7 +61,7 @@ async function runGoldenPath() {
       productCategory: 'Grain',
       quantity: 500,
       pricePerUnit: 200,
-    });
+    }, authHeader);
     const farmerListing = farmerListingResponse.data;
 
     const offerResponse = await axios.post(`${API_URL}/simulation/admin/send-offers`, {
@@ -70,18 +72,16 @@ async function runGoldenPath() {
         requestedQuantity: 100,
         offeredPrice: 210,
       }],
-    });
+    }, authHeader);
     const negotiation = offerResponse.data[0];
 
     // 5. Farmer Accepts Offer
     console.log('  - Simulating Farmer Acceptance...');
-    await axios.post(`${API_URL}/negotiations/${negotiation.id}/accept`, {}, {
-      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` } // Assuming admin can override for simulation
-    });
+    await axios.post(`${API_URL}/negotiations/${negotiation.id}/accept`, {}, authHeader);
 
     // 6. Verify Automated Phase Transition
     console.log('  - Verifying Automated Phase Transition...');
-    const finalStateResponse = await axios.get(`${API_URL}/simulation/trade-operation/${trade.id}/full-state`);
+    const finalStateResponse = await axios.get(`${API_URL}/simulation/trade-operation/${trade.id}/full-state`, authHeader);
     const finalTrade = finalStateResponse.data;
 
     console.log(`    Current Phase: ${finalTrade.phase}`);

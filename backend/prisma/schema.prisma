@@ -371,10 +371,10 @@ model TradeOperation {
   profitMargin              Float?                     @map("profit_margin")
   initiatedAt               DateTime                   @default(now()) @map("initiated_at")
   completedAt               DateTime?                  @map("completed_at")
-  incoterm                  Incoterm?                  @default(DDP)
   metadata                  Json?
   createdAt                 DateTime                   @default(now()) @map("created_at")
   updatedAt                 DateTime                   @updatedAt @map("updated_at")
+  incoterm                  Incoterm?                  @default(DDP)
   inspections               InspectionRequest[]
   investmentPositions       InvestmentPosition[]
   negotiations              OfferNegotiation[]
@@ -536,7 +536,6 @@ model TransportRequest {
   tradeOperationId    String                 @unique @map("trade_operation_id")
   totalWeight         Float                  @map("total_weight")
   requiredVehicleType TruckType?             @map("required_vehicle_type")
-  cargoDescription    String?                @map("cargo_description")
   specialRequirements String[]               @map("special_requirements")
   pickupPoints        Json                   @map("pickup_points")
   deliveryPoint       Json                   @map("delivery_point")
@@ -551,6 +550,7 @@ model TransportRequest {
   selectedBidId       String?                @unique @map("selected_bid_id")
   createdAt           DateTime               @default(now()) @map("created_at")
   updatedAt           DateTime               @updatedAt @map("updated_at")
+  cargoDescription    String?                @map("cargo_description")
   bids                TransportBid[]         @relation("RequestBids")
   transportJob        TransportJob?
   selectedBid         TransportBid?          @relation("SelectedBid", fields: [selectedBidId], references: [id])

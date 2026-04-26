@@ -883,7 +883,7 @@ export class SimulationService {
         isActive: true,
         addresses: {
           create: {
-            addressType: "BUSINESS" as any,
+            addressType: "OFFICE",
             label: "Main",
             latitude: data?.data?.lat || data?.lat || 42.0,
             longitude: data?.data?.lng || data?.lng || 23.0,

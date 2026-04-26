@@ -153,7 +153,11 @@ export class TransportCostService {
         loadingCosts,
         vehicleMultiplier,
         appliedRate,
-        urgencySurcharge: urgencySurcharge > 0 ? urgencySurcharge : undefined,
+        urgencySurcharge: urgencySurcharge > 0 ? {
+          applied: true,
+          surchargeRate: settings.urgencySurcharge,
+          surchargeAmount: urgencySurcharge
+        } : undefined,
       },
       route: {
         pickupSequence: this.createPickupSequence(pickupPoints),
