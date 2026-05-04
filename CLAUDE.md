@@ -50,6 +50,19 @@ agro-trade-native/
 3. Find one pilot trucker/buyer
 4. Do not add features before the pilot confirms the flow
 
+## Strategic expansion: Project Grain Sovereign (EU Regulatory Track)
+
+A parallel regulatory strategy is being developed to position AgroTrade as a **Digital Public Infrastructure (DPI)** provider under EU agrifood regulation (Data Act, CEADS, EBSI, AI Act). This is **not** a product feature track — it is an institutional partnerships and compliance layer that runs alongside the core escrow MVP.
+
+### Relevant docs
+- `docs/eu-strategy/2026_REGULATORY_MASTERPLAN.md` — Four-pillar strategy and funding calendar
+- `docs/eu-strategy/EBSI_TRUSTED_ISSUER_FR_DE_ROADMAP.md` — France–Germany cross-border grain inspection credential roadmap
+
+### Invariant
+- Grain Sovereign work is capped at 40 % of sprint capacity until AgroTrade has a confirmed paying pilot.
+- No AI product features (e.g., voice-AI in the mobile app) ship to production before sandbox certification.
+- EBSI integration is backend-only; mobile UX remains unchanged unless explicitly greenlit.
+
 ## Gotchas
 
 - This is NOT on the AI/Web3 gaming lane. Don't force AI or token framing onto it.

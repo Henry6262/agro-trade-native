@@ -30,6 +30,8 @@ import { EscrowModule } from "./escrow/escrow.module";
 import { HealthModule } from "./health/health.module";
 import { CommodityRegistryModule } from "./commodity-registry/commodity-registry.module";
 import { InvestmentsModule } from "./investments/investments.module";
+import { EbsiModule } from "./ebsi/ebsi.module";
+import { B2gModule } from "./b2g/b2g.module";
 
 @Module({
   imports: [
@@ -69,6 +71,8 @@ import { InvestmentsModule } from "./investments/investments.module";
     CommodityRegistryModule,
     InvestmentsModule,
     HealthModule,
+    EbsiModule,
+    B2gModule,
   ],
 })
 export class AppModule implements NestModule {

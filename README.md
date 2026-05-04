@@ -1,20 +1,6 @@
-# GreenBlock (formerly AgroTrade)
+# AgroTrade
 
-**Regenerative Agriculture DAO & RWA Infrastructure**
-
-Built for **ETHPrague 2026**, GreenBlock provides institutional-grade stablecoin infrastructure for
-regenerative agricultural commodity trading. By combining dual-chain escrow (Gnosis Chain + Celo +
-Solana) with decentralized quality verification, GreenBlock connects farmers, buyers, and inspectors
-in a transparent, ReFi-native ecosystem.
-
-## 🚀 The Vision
-
-GreenBlock pivots the "AgroTrade" institutional framework into a community-led DAO.
-
-- **Focus:** Regenerative farming practices, soil health tracking, and biodiversity.
-- **Inclusion:** Using Ethereum-based ReFi to bridge the gap between small-holder farmers and global
-  buyers.
-- **Local:** Optimized for the **Gnosis Chain** (Prague's favorite L1) and **Celo** (mobile-first).
+> Agricultural commodity escrow platform connecting farmers, buyers, transporters, and inspectors via mobile-first stablecoin settlements.
 
 ---
 
@@ -24,38 +10,36 @@ GreenBlock pivots the "AgroTrade" institutional framework into a community-led D
 # Backend (port 4000)
 cd backend && npm install && npm run build && node dist/main.js
 
-# Admin/DAO Dashboard (port 5173)
+# Admin Dashboard (port 5173)
 cd admin-dashboard && npm install && npm run dev
 
-# Mobile App (Farmer/Inspector)
+# Mobile App (Expo)
 cd front-end && npm install && npx expo start
+
+# Landing Page (port 3000)
+cd landing && npm install && npm run dev
 ```
 
-**Prerequisites:** Node.js 20+, PostgreSQL (Railway DB configured in backend/.env)
+**Prerequisites:** Node.js 20+, PostgreSQL
 
-## Demo Credentials
-
-| Role   | Email                 | Password    |
-| ------ | --------------------- | ----------- |
-| Admin  | admin@agrotrade.com   | admin123    |
-| Farmer | seller1@agrotrade.com | password123 |
-| Farmer | seller2@agrotrade.com | password123 |
-| Buyer  | buyer@agrotrade.com   | password123 |
+---
 
 ## Stack
 
-| Layer                    | Tech                                                                          |
-| ------------------------ | ----------------------------------------------------------------------------- |
-| Backend                  | NestJS + TypeScript + Prisma + PostgreSQL (Railway)                           |
-| Mobile                   | React Native + Expo 52 + NativeWind                                           |
-| Web Portal               | Next.js + shadcn/ui (25 pages)                                                |
-| Smart Contracts (Celo)   | Solidity 0.8.20 + Foundry (37 tests)                                          |
-| Smart Contracts (Solana) | Anchor + Rust + SPL Token (USDC)                                              |
-| Auth                     | Privy JWT + Google OAuth                                                      |
-| Payments                 | cUSD (Celo) + USDC (Solana) — dual-chain escrow only. **Stripe is NOT used.** |
-| Real-time                | Socket.IO + Expo Push Notifications                                           |
+| Layer | Tech |
+|-------|------|
+| Backend | NestJS + TypeScript + Prisma + PostgreSQL |
+| Mobile | React Native + Expo 52 + NativeWind |
+| Web Portal | Next.js + shadcn/ui |
+| Smart Contracts (Celo) | Solidity + Foundry (37 tests) |
+| Smart Contracts (Solana) | Anchor + Rust + SPL Token |
+| Auth | Privy JWT + Google OAuth |
+| Payments | cUSD (Celo) + USDC (Solana) — dual-chain escrow |
+| Real-time | Socket.IO + Expo Push Notifications |
 
-## Trade Lifecycle (9 Phases)
+---
+
+## Trade Lifecycle
 
 ```
 INITIATION → SELLER_MATCHING → SELLER_NEGOTIATION → INSPECTION_PENDING
@@ -64,91 +48,105 @@ INITIATION → SELLER_MATCHING → SELLER_NEGOTIATION → INSPECTION_PENDING
 
 Any phase can → CANCELLED (except COMPLETED).
 
+---
+
 ## User Roles
 
-| Role            | What They Do                                                                                    |
-| --------------- | ----------------------------------------------------------------------------------------------- |
-| **Farmer**      | Create sale listings, accept/reject/counter offers, pass inspections                            |
-| **Buyer**       | Post buy orders with specs + budget, track fulfillment                                          |
-| **Transporter** | Bid on transport jobs, manage fleet, GPS tracking, delivery proof                               |
-| **Inspector**   | Accept jobs, on-site quality checks with photos, score 0-100                                    |
-| **Admin**       | Create trades, match sellers, send offers, assign inspectors, optimize routes, calculate profit |
+| Role | What They Do |
+|------|--------------|
+| **Farmer** | Create listings, accept/reject/counter offers, pass inspections |
+| **Buyer** | Post buy orders with specs + budget, track fulfillment |
+| **Transporter** | Bid on transport jobs, GPS tracking, delivery proof |
+| **Inspector** | On-site quality checks with photos, score 0-100 |
+| **Admin** | Match sellers, assign inspectors, optimize routes, finalize trades |
+
+---
 
 ## Documentation
 
-| Doc                                                | What It Covers                                                             |
-| -------------------------------------------------- | -------------------------------------------------------------------------- |
-| [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md)   | Every endpoint — method, path, auth, body, response, errors                |
-| [`docs/STATE_MACHINES.md`](docs/STATE_MACHINES.md) | All state transitions — trade phases, negotiations, transport, inspections |
-| [`docs/TEST_SCENARIOS.md`](docs/TEST_SCENARIOS.md) | 10 simulation scenarios with exact API call sequences                      |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)     | Product overview — user journeys, features, data model                     |
+| Doc | What It Covers |
+|-----|----------------|
+| [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) | Every endpoint — method, path, auth, body, response |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | System overview, user journeys, data model |
+| [`docs/STATE_MACHINES.md`](docs/STATE_MACHINES.md) | All state transitions — trade, negotiations, transport, inspections |
+| [`docs/COMPLIANCE_ARCHITECTURE.md`](docs/COMPLIANCE_ARCHITECTURE.md) | KYC, KYT, AML, Travel Rule |
+| [`docs/MASTER_ROADMAP.md`](docs/MASTER_ROADMAP.md) | MVP roadmap, issues, phases |
+| [`docs/TEST_SCENARIOS.md`](docs/TEST_SCENARIOS.md) | 10 simulation scenarios with exact API call sequences |
+| [`docs/eu-strategy/`](docs/eu-strategy/) | Project Grain Sovereign — EU regulatory track (Data Act, CEADS, EBSI, AI Act) |
 
-## Compliance Architecture
-
-AgroTrade is built compliance-first for institutional adoption:
-
-- **KYC:** Privy-powered identity verification, Google OAuth, admin account freeze
-- **KYT:** Every transaction logged as `TradeEvent` with blockchain tx hash, actor role, and full
-  metadata
-- **AML:** Custodial model — all stablecoin movements require admin authorization. No direct
-  user-to-user transfers.
-- **Travel Rule:** Every escrow operation captures originator, beneficiary, amount, purpose, and
-  blockchain proof
-
-See [`docs/COMPLIANCE_ARCHITECTURE.md`](docs/COMPLIANCE_ARCHITECTURE.md) for full details.
+---
 
 ## Project Structure
 
 ```
 agro-trade-native/
-├── backend/                # NestJS API (port 4000) — 23 modules, Railway deployed
-│   ├── prisma/             # Schema (33 models) + migrations + seed scripts
-│   └── src/                # auth, buyer, seller, trade-operations, escrow,
-│                           # inspections, transport, simulation, realtime
-├── contracts/              # Celo smart contracts (Foundry, 37 tests)
-│   └── src/AgroEscrow.sol  # cUSD escrow — custodial model
-├── contracts-solana/       # Solana smart contracts (Anchor)
-│   └── programs/agro-escrow/  # USDC escrow — SPL token with PDAs
-├── front-end/              # React Native/Expo mobile app
-├── landing/                # Next.js web portal (25 pages)
-├── docs/                   # API reference, compliance, architecture
-└── rules/                  # Enforced coding standards
+├── backend/           # NestJS API (port 4000)
+│   ├── prisma/        # Schema + migrations + seed
+│   └── src/           # auth, trade, escrow, inspections, transport
+├── contracts/         # Celo escrow (Foundry, 37 tests)
+├── contracts-solana/  # Solana escrow (Anchor, USDC)
+├── front-end/         # React Native / Expo mobile app
+├── landing/           # Next.js marketing site
+├── admin-dashboard/   # React admin UI
+├── docs/              # Architecture, API, compliance, roadmaps
+├── assets/            # Screenshots, marketing images, landing sections
+├── rules/             # Coding standards
+├── scripts/           # Automation scripts
+└── tests-e2e/         # End-to-end tests
 ```
 
-## Simulation Endpoints
+---
 
-The backend has a `/simulation` module (ADMIN only) for automated testing:
+## Demo Credentials
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@agrotrade.com | admin123 |
+| Farmer | seller1@agrotrade.com | password123 |
+| Buyer | buyer@agrotrade.com | password123 |
+
+---
+
+## Compliance
+
+- **KYC:** Privy-powered identity + Google OAuth
+- **KYT:** Every transaction logged as `TradeEvent` with blockchain tx hash
+- **AML:** Custodial model — admin authorization required for all escrow movements
+- **Travel Rule:** Full originator/beneficiary/amount/purpose capture per transfer
+
+See [`docs/COMPLIANCE_ARCHITECTURE.md`](docs/COMPLIANCE_ARCHITECTURE.md).
+
+---
+
+## Simulation & Testing
+
+Backend includes a `/simulation` module (admin-only) for automated end-to-end testing:
 
 ```
 POST /simulation/admin/create-trade-operation
 POST /simulation/admin/send-offers
-POST /simulation/admin/farmer/:id/create-sale-listing
 POST /simulation/seller/:id/accept-offer
-POST /simulation/seller/:id/counter-offer
-POST /simulation/seller/:id/reject-offer
-POST /simulation/admin/assign-inspector
-POST /simulation/inspector/:id/accept-job
 POST /simulation/inspector/:id/submit-results
-POST /simulation/admin/create-transport
 POST /simulation/transporter/:id/submit-bid
-POST /simulation/transporter/:id/start-job
-POST /simulation/transporter/:id/complete-delivery
 POST /simulation/admin/complete-trade
 DELETE /simulation/admin/cleanup-test-data
 ```
 
-See `docs/TEST_SCENARIOS.md` for complete step-by-step scenarios.
-
-## Swagger
-
-API docs available at `http://localhost:4000/api/docs/` when backend is running.
+Run `forge test` in `contracts/` to verify all 37 escrow tests.
 
 ---
 
-## Latest Progress Report
+## Related Projects
 
-> **16 of 22 NI tasks completed** | Updated: 2026-03-26
+- **GreenBlock** — ETHPrague 2026 hackathon spinoff. Regenerative agriculture DAO built on AgroTrade escrow infrastructure. See [`docs/eu-strategy/GREENBLOCK.md`](docs/eu-strategy/GREENBLOCK.md).
+- **Project Grain Sovereign** — EU regulatory strategy track for Data Act, CEADS, EBSI, and AI Act alignment. See [`docs/eu-strategy/2026_REGULATORY_MASTERPLAN.md`](docs/eu-strategy/2026_REGULATORY_MASTERPLAN.md).
 
-See [PROGRESS_REPORT.md](./PROGRESS_REPORT.md) for detailed status of all tasks.
+---
 
-Tracking: [Issue #57](https://github.com/Henry6262/agro-trade-native/issues/57)
+## Swagger
+
+`http://localhost:4000/api/docs/` when backend is running.
+
+---
+
+*Last updated: 2026-05-04*
