@@ -59,7 +59,7 @@ const OfferCard = React.memo(({ offer }: { offer: BuyerIncomingOffer }) => {
       {offer.qualityOffered.length > 0 && (
         <View style={styles.qualityTags}>
           {offer.qualityOffered.map((quality) => (
-            <GlassBadge key={quality} label={quality} variant="muted" size="xs" />
+            <GlassBadge key={quality} label={quality} variant="muted" size="sm" />
           ))}
         </View>
       )}
@@ -88,14 +88,14 @@ const OfferCard = React.memo(({ offer }: { offer: BuyerIncomingOffer }) => {
         <GlassButton
           label="DETAILS"
           variant="ghost"
-          size="small"
+          size="sm"
           style={{ flex: 1 }}
           onPress={() => handleViewDetails(offer.id)}
         />
         <GlassButton
           label="ACCEPT OFFER"
           variant="primary"
-          size="small"
+          size="sm"
           style={{ flex: 1.5 }}
           onPress={() => handleAcceptOffer(offer.id)}
         />

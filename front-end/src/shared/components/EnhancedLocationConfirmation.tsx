@@ -18,15 +18,15 @@ interface LocationData {
   city: string;
   region: string;
   country: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
 }
 
 interface EnhancedLocationConfirmationProps {
   visible: boolean;
   onClose: () => void;
   onConfirm: (location: LocationData) => void;
-  initialLocation?: LocationData;
+  initialLocation?: LocationData | undefined;
 }
 
 type ViewMode = 'text' | 'map';
@@ -47,7 +47,7 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
   );
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<{ address?: string; city?: string; country?: string }>({});
   const [viewMode, setViewMode] = useState<ViewMode>('text');
   const [showMapView, setShowMapView] = useState(false);
 
@@ -81,7 +81,7 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
       });
 
       if (reverseGeocode.length > 0) {
-        const result = reverseGeocode[0];
+        const result = reverseGeocode[0]!;
         setLocation({
           address:
             `${result.streetNumber || ''} ${result.street || ''}`.trim() || result.name || '',
@@ -113,7 +113,7 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
       const geocodeResults = await Location.geocodeAsync(searchQuery);
 
       if (geocodeResults.length > 0) {
-        const result = geocodeResults[0];
+        const result = geocodeResults[0]!;
 
         // Reverse geocode to get full address details
         const reverseGeocode = await Location.reverseGeocodeAsync({
@@ -122,7 +122,7 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
         });
 
         if (reverseGeocode.length > 0) {
-          const addressResult = reverseGeocode[0];
+          const addressResult = reverseGeocode[0]!;
           setLocation({
             address:
               `${addressResult.streetNumber || ''} ${addressResult.street || ''}`.trim() ||
@@ -174,18 +174,18 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
   };
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+    const newErrors: { address?: string; city?: string; country?: string } = {};
 
     if (!location.address.trim()) {
-      newErrors.address = 'Address is required';
+      newErrors['address'] = 'Address is required';
     }
 
     if (!location.city.trim()) {
-      newErrors.city = 'City is required';
+      newErrors['city'] = 'City is required';
     }
 
     if (!location.country.trim()) {
-      newErrors.country = 'Country is required';
+      newErrors['country'] = 'Country is required';
     }
 
     setErrors(newErrors);
@@ -207,10 +207,11 @@ export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmation
     }));
 
     // Clear error for this field
-    if (errors[field]) {
+    const errorKey = field as 'address' | 'city' | 'country';
+    if (errors[errorKey]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
-        delete newErrors[field];
+        delete newErrors[errorKey];
         return newErrors;
       });
     }

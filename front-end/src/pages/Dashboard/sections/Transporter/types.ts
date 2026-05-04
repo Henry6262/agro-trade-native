@@ -1,3 +1,3 @@
 export interface TransporterDashboardSectionProps {
-  activeTab?: 'offers' | 'jobs' | 'transfers' | 'fleet' | 'bidding';
+  activeTab?: 'offers' | 'jobs' | 'transfers' | 'fleet' | 'bidding' | undefined;
 }

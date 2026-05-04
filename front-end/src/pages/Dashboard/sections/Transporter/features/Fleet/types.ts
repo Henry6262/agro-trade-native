@@ -11,8 +11,8 @@ export interface FleetTruck {
   status: FleetTruckStatus;
   location: string;
   verified: boolean;
-  driver?: string;
-  assignment?: string;
+  driver?: string | undefined;
+  assignment?: string | undefined;
 }
 
 export interface FleetDriver {
@@ -22,7 +22,7 @@ export interface FleetDriver {
   phone: string;
   status: FleetDriverStatus;
   experienceYears: number;
-  assignment?: string;
+  assignment?: string | undefined;
 }
 
 export interface FleetSummary {

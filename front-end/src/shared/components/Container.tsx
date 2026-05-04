@@ -12,14 +12,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ContainerProps {
   children: React.ReactNode;
-  scroll?: boolean;
-  style?: StyleProp<ViewStyle>;
-  contentContainerStyle?: StyleProp<ViewStyle>;
-  safeArea?: boolean;
-  maxWidth?: number;
-  centered?: boolean;
-  noPadding?: boolean;
-  backgroundColor?: string;
+  scroll?: boolean | undefined;
+  style?: StyleProp<ViewStyle> | undefined;
+  contentContainerStyle?: StyleProp<ViewStyle> | undefined;
+  safeArea?: boolean | undefined;
+  maxWidth?: number | undefined;
+  centered?: boolean | undefined;
+  noPadding?: boolean | undefined;
+  backgroundColor?: string | undefined;
 }
 
 /**

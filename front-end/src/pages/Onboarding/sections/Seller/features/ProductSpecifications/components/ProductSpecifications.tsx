@@ -148,12 +148,12 @@ export function ProductSpecifications({
                 <View className="relative">
                   <Text className="absolute left-3 top-3.5 text-gray-400 text-base z-10">€</Text>
                   <TextInput
-                    value={spec.pricePerKilo?.toString() || ''}
+                    value={spec["pricePerKilo"]?.toString() || ''}
                     onChangeText={(text) => updateSpecification(productId, 'pricePerKilo', text)}
                     placeholder="25.50"
                     keyboardType="decimal-pad"
                     className={`border-2 rounded-lg pl-8 pr-3 py-3 bg-gray-50 text-gray-900 ${
-                      !spec.pricePerKilo ? 'border-red-500' : 'border-gray-600'
+                      !spec["pricePerKilo"] ? 'border-red-500' : 'border-gray-600'
                     }`}
                     placeholderTextColor="#6B7280"
                   />
@@ -182,7 +182,7 @@ export function ProductSpecifications({
                 <View>
                   <Text className="text-xs font-semibold text-gray-400 mb-2">Harvest Date</Text>
                   <TextInput
-                    value={spec.harvestDate || ''}
+                    value={spec["harvestDate"] || ''}
                     onChangeText={(text) => updateSpecification(productId, 'harvestDate', text)}
                     placeholder="DD/MM/YYYY"
                     className="border-2 border-gray-600 rounded-lg px-3 py-3 bg-gray-50 text-gray-900"
@@ -193,7 +193,7 @@ export function ProductSpecifications({
                 <View>
                   <Text className="text-xs font-semibold text-gray-400 mb-2">Storage Location</Text>
                   <TextInput
-                    value={spec.storageLocation || ''}
+                    value={spec["storageLocation"] || ''}
                     onChangeText={(text) => updateSpecification(productId, 'storageLocation', text)}
                     placeholder="e.g., Warehouse A, City"
                     className="border-2 border-gray-600 rounded-lg px-3 py-3 bg-gray-50 text-gray-900"
@@ -204,7 +204,7 @@ export function ProductSpecifications({
                 <View>
                   <Text className="text-xs font-semibold text-gray-400 mb-2">Quality Notes</Text>
                   <TextInput
-                    value={spec.qualityNotes || ''}
+                    value={spec["qualityNotes"] || ''}
                     onChangeText={(text) => updateSpecification(productId, 'qualityNotes', text)}
                     placeholder="e.g., Organic certified, Premium grade"
                     multiline

@@ -13,13 +13,13 @@ export interface TransfersJobView {
   id: string;
   jobNumber: string;
   productName: string;
-  buyerName?: string;
+  buyerName?: string | undefined;
   status: TransfersJobStatus;
   totalWeightLabel: string;
   budgetLabel: string;
   pickupLabel: string;
   deliveryLabel: string;
-  etaLabel?: string;
+  etaLabel?: string | undefined;
   updatedAtLabel: string;
   stageIndex: number;
   mapOffer: MapOffer;

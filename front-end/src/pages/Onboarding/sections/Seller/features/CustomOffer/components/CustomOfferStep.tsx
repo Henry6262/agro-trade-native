@@ -15,7 +15,7 @@ export function CustomOfferStep() {
 
   const productId = selectedProducts[0];
   const product = products.find((p) => p.id === productId);
-  const currentSpecs = sellerSpecifications[productId] || {};
+  const currentSpecs = sellerSpecifications[productId || ''] || {};
 
   useEffect(() => {
     // Initialize specifications with empty values
@@ -98,7 +98,7 @@ export function CustomOfferStep() {
     }
 
     // Save specifications to store
-    updateSellerSpecification(productId, {
+    updateSellerSpecification(productId || '', {
       ...currentSpecs,
       specifications: specifications,
     });

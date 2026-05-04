@@ -70,7 +70,7 @@ export const OnboardingCompleteScreen: React.FC<Props> = ({ navigation }) => {
             },
           },
         ],
-      })
+      }) as any
     );
 
     // Clear onboarding data

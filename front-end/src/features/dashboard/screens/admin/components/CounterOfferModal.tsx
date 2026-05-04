@@ -34,11 +34,11 @@ interface CounterOfferModalProps {
   onClose: () => void;
   negotiationId: string;
   currentOffer: { price: number; quantity: number; terms?: string };
-  counterOffer?: { price: number; quantity: number; terms?: string; reason?: string };
-  sellerName?: string;
-  buyerMaxPrice?: number;
-  targetMargin?: number;
-  onOfferSent?: () => void;
+  counterOffer?: { price: number; quantity: number; terms?: string; reason?: string } | undefined;
+  sellerName?: string | undefined;
+  buyerMaxPrice?: number | undefined;
+  targetMargin?: number | undefined;
+  onOfferSent?: (() => void) | undefined;
 }
 
 export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({

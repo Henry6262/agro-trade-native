@@ -41,7 +41,7 @@ export interface BuyerIncomingOffer {
   totalValue: number;
   seller: string;
   sellerLocation: string;
-  sellerFlag?: string;
+  sellerFlag?: string | undefined;
   adminNote: string;
   deadline: string;
   responseTime: string;

@@ -52,16 +52,16 @@ export interface ProductSummary {
 export interface VerificationJob {
   id: string;
   sellerListingId: string;
-  inspectorId?: string | null;
+  inspectorId?: string | null | undefined;
   priority: JobPriority;
   status: JobStatus;
   location: LocationCoordinates;
   productDetails: ProductSummary;
-  scheduledDate?: Date;
-  acceptedAt?: Date;
-  completedAt?: Date;
+  scheduledDate?: Date | undefined;
+  acceptedAt?: Date | undefined;
+  completedAt?: Date | undefined;
   estimatedDuration: number; // minutes
-  distance?: number; // km from inspector
+  distance?: number | undefined; // km from inspector
   createdAt: Date;
   updatedAt: Date;
 }
@@ -200,16 +200,16 @@ export interface AvailableJobsTabProps {
 
 export interface JobMapViewProps {
   jobs: VerificationJob[];
-  currentLocation?: { latitude: number; longitude: number };
-  onJobSelect?: (job: VerificationJob) => void;
+  currentLocation?: { latitude: number; longitude: number } | undefined;
+  onJobSelect?: ((job: VerificationJob) => void) | undefined;
   onRegionChange?: (region: any) => void;
 }
 
 export interface JobListViewProps {
   jobs: VerificationJob[];
-  onJobSelect?: (job: VerificationJob) => void;
-  onRefresh?: () => void;
-  isRefreshing?: boolean;
+  onJobSelect?: ((job: VerificationJob) => void) | undefined;
+  onRefresh?: (() => void) | undefined;
+  isRefreshing?: boolean | undefined;
 }
 
 export interface VerificationFormProps {

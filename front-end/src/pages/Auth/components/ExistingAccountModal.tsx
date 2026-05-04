@@ -6,7 +6,7 @@ interface ExistingAccountModalProps {
   visible: boolean;
   userEmail: string;
   userName: string;
-  userRole?: string;
+  userRole?: string | undefined;
   onLoginExisting: () => void;
   onCreateNew: () => void;
   onSwitchAccount: () => void;

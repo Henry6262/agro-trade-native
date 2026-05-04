@@ -15,7 +15,7 @@ export type TransportOffersMapOffer = MapOffer;
 export interface TransportOfferSummary {
   totalPending: number;
   verifiedCount: number;
-  earliestDeadline?: string;
+  earliestDeadline?: string | undefined;
   totalWeight: number;
 }
 

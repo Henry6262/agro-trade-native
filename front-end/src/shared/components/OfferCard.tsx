@@ -142,7 +142,7 @@ export const OfferCard: React.FC<OfferCardProps> = ({
     return buyerRequest.qualityRequirements.map((requirement: string) => {
       const matchingSpec = offer.specifications.find(
         (spec) =>
-          spec.name.toLowerCase().includes(requirement.toLowerCase().split(':')[0]) ||
+          spec.name.toLowerCase().includes(requirement.toLowerCase().split(':')[0] || '') ||
           requirement.toLowerCase().includes(spec.name.toLowerCase())
       );
 

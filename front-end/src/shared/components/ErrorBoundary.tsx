@@ -22,7 +22,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
+  override componentDidCatch(error: Error, info: React.ErrorInfo) {
     // Structured logging makes it easy to grep/filter in production log aggregators.
     // TODO: forward to Sentry with `captureException(error, { extra: logPayload })`
     console.error('[ErrorBoundary] Uncaught render error:', {
@@ -37,7 +37,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
     this.setState({ hasError: false, error: null });
   };
 
-  render() {
+  override render() {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
       return (

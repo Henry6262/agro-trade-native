@@ -253,7 +253,7 @@ export default function DashboardMainScreen() {
         <ErrorBoundary key={`transporter-${activeSection}`}>
           <>
             <View style={isTransporterContentTab ? styles.sectionVisible : styles.sectionHidden}>
-              <TransporterDashboardScreen
+              <TransporterDashboardSection
                 activeTab={activeSection as TransporterDashboardSectionProps['activeTab']}
               />
             </View>

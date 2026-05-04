@@ -37,8 +37,8 @@ describe('market.store — alerts', () => {
     });
 
     expect(result.current.alerts).toHaveLength(1);
-    expect(result.current.alerts[0].symbol).toBe('WHEAT');
-    expect(result.current.alerts[0].triggered).toBe(false);
+    expect(result.current.alerts[0]!.symbol).toBe('WHEAT');
+    expect(result.current.alerts[0]!.triggered).toBe(false);
   });
 
   it('removes an alert by id', () => {
@@ -48,7 +48,7 @@ describe('market.store — alerts', () => {
       result.current.addAlert({ symbol: 'CORN', condition: 'below', threshold: 4.0 });
     });
 
-    const id = result.current.alerts[0].id;
+    const id = result.current.alerts[0]!.id;
 
     act(() => {
       result.current.removeAlert(id);
@@ -90,7 +90,7 @@ describe('market.store — checkAlerts', () => {
       result.current.checkAlerts();
     });
 
-    expect(result.current.alerts[0].triggered).toBe(true);
+    expect(result.current.alerts[0]!.triggered).toBe(true);
 
     // Second check should not re-trigger (already triggered)
     act(() => {
@@ -98,7 +98,7 @@ describe('market.store — checkAlerts', () => {
     });
 
     // triggered stays true, no duplicate notifications
-    expect(result.current.alerts[0].triggered).toBe(true);
+    expect(result.current.alerts[0]!.triggered).toBe(true);
     // notification should only have fired once, not twice
     expect(mockAddNotification).toHaveBeenCalledTimes(1);
   });

@@ -242,8 +242,8 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
       if (companyInfo.companyName) {
         await authService.updateCompany({
           companyName: companyInfo.companyName,
-          vatNumber: companyInfo.vatNumber || undefined,
-          website: companyInfo.website || undefined,
+          ...(companyInfo.vatNumber ? { vatNumber: companyInfo.vatNumber } : {}),
+          ...(companyInfo.website ? { website: companyInfo.website } : {}),
         });
       }
 
@@ -253,7 +253,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
             label: base.name,
             addressType: base.addressType || 'WAREHOUSE',
             street: base.location,
-            isDefault: base.isDefault,
+            isDefault: !!base.isDefault,
           });
         }
       }
@@ -382,7 +382,7 @@ export const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
             admin: { icon: User, color: '#FCD34D' },
             farmer: { icon: Package, color: '#4ADE80' },
           };
-          const roleConfig = roleIcons[personalInfo.role?.toLowerCase()] || roleIcons.buyer;
+          const roleConfig = roleIcons[personalInfo.role?.toLowerCase() || 'buyer']!;
           const RoleIcon = roleConfig.icon;
           return (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>

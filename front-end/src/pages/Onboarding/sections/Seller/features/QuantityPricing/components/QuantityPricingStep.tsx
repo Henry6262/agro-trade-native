@@ -38,7 +38,7 @@ export function QuantityPricingStep() {
 
   const productId = selectedProducts[0];
   const product = products.find((p) => p.id === productId);
-  const currentSpecs = sellerSpecifications[productId] || {};
+  const currentSpecs = sellerSpecifications[productId || ''] || {};
 
   useEffect(() => {
     if (currentSpecs.quantity) {
@@ -105,7 +105,7 @@ export function QuantityPricingStep() {
     setSelectedQuantity(quantity);
     setShowCustomInput(false);
     setCustomQuantity('');
-    updateSellerSpecification(productId, {
+    updateSellerSpecification(productId || '', {
       quantity: quantity.toString(),
       unit: product?.defaultUnit || 'TON',
     });
@@ -121,7 +121,7 @@ export function QuantityPricingStep() {
     setCustomQuantity(numValue);
     if (numValue) {
       setSelectedQuantity(parseFloat(numValue));
-      updateSellerSpecification(productId, {
+      updateSellerSpecification(productId || '', {
         quantity: numValue,
         unit: product?.defaultUnit || 'TON',
       });

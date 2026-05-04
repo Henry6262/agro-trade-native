@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -13,11 +13,13 @@ type GlassTier = 'subtle' | 'medium' | 'strong';
 interface GlassCardProps {
   children: React.ReactNode;
   tier?: GlassTier;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   animate?: boolean;
   delay?: number;
   borderRadius?: number;
   noPadding?: boolean;
+  testID?: string | undefined;
+  accessibilityLabel?: string | undefined;
 }
 
 export const GlassCard: React.FC<GlassCardProps> = ({

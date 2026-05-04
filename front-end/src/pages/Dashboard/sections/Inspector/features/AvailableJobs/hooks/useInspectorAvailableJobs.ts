@@ -41,8 +41,8 @@ export const useInspectorAvailableJobs = (): InspectorAvailableJobsHookResult =>
   useEffect(() => {
     if (!currentLocation && jobs.length) {
       setCurrentLocation({
-        latitude: jobs[0].location.latitude,
-        longitude: jobs[0].location.longitude,
+        latitude: jobs[0]!.location.latitude,
+        longitude: jobs[0]!.location.longitude,
       });
     }
   }, [jobs, currentLocation]);

@@ -16,31 +16,31 @@ export interface LocationCoordinates {
 
 export interface VerificationJob {
   id: string;
-  sellerListingId?: string;
-  inspectorId?: string;
+  sellerListingId?: string | undefined;
+  inspectorId?: string | undefined;
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
   status: 'PENDING' | 'ASSIGNED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED' | 'SCHEDULED';
   location: {
     latitude: number;
     longitude: number;
-    address?: string;
-    city?: string;
-    region?: string;
+    address?: string | undefined;
+    city?: string | undefined;
+    region?: string | undefined;
   };
   productDetails: {
     name: string;
-    type?: string;
-    quantity?: number;
-    unit?: string;
-    claimedSpecs?: Record<string, any>;
+    type?: string | undefined;
+    quantity?: number | undefined;
+    unit?: string | undefined;
+    claimedSpecs?: Record<string, any> | undefined;
   };
-  scheduledDate?: Date;
-  acceptedAt?: Date;
-  completedAt?: Date;
-  estimatedDuration?: number;
-  distance?: number;
-  createdAt?: Date;
-  updatedAt?: Date;
+  scheduledDate?: Date | undefined;
+  acceptedAt?: Date | undefined;
+  completedAt?: Date | undefined;
+  estimatedDuration?: number | undefined;
+  distance?: number | undefined;
+  createdAt?: Date | undefined;
+  updatedAt?: Date | undefined;
 }
 
 export interface InspectorStore {

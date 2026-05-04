@@ -113,9 +113,9 @@ export function BuyerOnboarding({ onComplete }: BuyerOnboardingProps) {
             amount: specs.quantity || 0,
             unit: specs.unit || ('tons' as const),
           },
-          maxPrice: specs.pricePerKilo ? parseFloat(specs.pricePerKilo) : undefined,
+          ...(specs.pricePerKilo ? { maxPrice: parseFloat(specs.pricePerKilo) } : {}),
           qualityRequirements: specs.qualityRequirements || [],
-          deliveryDeadline: specs.deliveryDeadline,
+          ...(specs.deliveryDeadline ? { deliveryDeadline: specs.deliveryDeadline } : {}),
         };
       });
 

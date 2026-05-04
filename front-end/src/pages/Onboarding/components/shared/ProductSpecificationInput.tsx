@@ -14,7 +14,7 @@ interface SpecificationInputProps {
   };
   value: string;
   onChange: (value: string) => void;
-  error?: string;
+  error?: string | undefined;
 }
 
 export function ProductSpecificationInput({

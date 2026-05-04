@@ -25,8 +25,8 @@ interface OfferModalProps {
   tradeOperationId: string;
   tradeOperation?: TradeOperation | null;
   onOfferSent?: () => void;
-  buyerMaxPrice?: number;
-  requiredQuantity?: number;
+  buyerMaxPrice?: number | undefined;
+  requiredQuantity?: number | undefined;
 }
 
 export const OfferModal: React.FC<OfferModalProps> = ({
@@ -120,7 +120,7 @@ export const OfferModal: React.FC<OfferModalProps> = ({
         tradeSellerId: sellerId || tradeSeller?.id || seller?.sellerId || '',
         price: parseFloat(offerPrice),
         quantity: parseFloat(offerQuantity),
-        terms: terms || undefined,
+        ...(terms ? { terms } : {}),
       });
       Alert.alert(
         'Offer Sent',

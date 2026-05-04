@@ -63,7 +63,7 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
           
           <View style={styles.listHeader}>
             <Text style={styles.listTitle}>Open Requests</Text>
-            <GlassBadge label={`${requests.length} Active`} variant="primary" size="sm" />
+            <GlassBadge label={`${requests.length} Active`} variant="info" size="sm" />
           </View>
 
           <OffersList

@@ -64,7 +64,7 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
     const newErrors: Record<string, string> = {};
 
     if (!quantity || parseFloat(quantity) <= 0) {
-      newErrors.quantity = 'Please enter a valid quantity';
+      newErrors['quantity'] = 'Please enter a valid quantity';
     }
 
     // Validate critical specifications
@@ -240,13 +240,13 @@ export const ProductSpecificationDrawer: React.FC<ProductSpecificationDrawerProp
                     placeholder="Enter quantity"
                     placeholderTextColor="#6B7280"
                     className={`flex-1 bg-gray-50 border ${
-                      errors.quantity ? 'border-red-500' : 'border-gray-200'
+                      errors['quantity'] ? 'border-red-500' : 'border-gray-200'
                     } rounded-lg px-3 py-2 text-gray-900`}
                   />
                   <Text className="ml-2 text-gray-500">{productData?.defaultUnit || 'tons'}</Text>
                 </View>
-                {errors.quantity && (
-                  <Text className="text-red-400 text-xs mt-1">{errors.quantity}</Text>
+                {errors['quantity'] && (
+                  <Text className="text-red-400 text-xs mt-1">{errors['quantity']}</Text>
                 )}
               </View>
 

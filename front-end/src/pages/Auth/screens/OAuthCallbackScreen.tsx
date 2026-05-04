@@ -7,6 +7,7 @@ import { useAuthStore } from '@stores/auth.store';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { ExistingAccountModal } from '../components/ExistingAccountModal';
 import { ENV } from '../../../shared/utils/environment';
+import { UserRole } from '../../../shared/types';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -47,8 +48,7 @@ export const OAuthCallbackScreen: React.FC = () => {
               id: userId || '',
               email: userEmail,
               name: decodedUserName,
-              role: onboardingStore.selectedRole || 'buyer',
-              phone: undefined,
+              role: (onboardingStore.selectedRole || 'buyer') as unknown as UserRole,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             });
@@ -64,7 +64,7 @@ export const OAuthCallbackScreen: React.FC = () => {
             setExistingAccountData({
               email: userEmail,
               name: decodedUserName,
-              role: savedUserRole,
+              ...(savedUserRole ? { role: savedUserRole } : {}),
             });
             setShowExistingAccountModal(true);
           } else if (accessToken && userEmail && !hasProfile) {
@@ -163,7 +163,7 @@ export const OAuthCallbackScreen: React.FC = () => {
           visible={showExistingAccountModal}
           userEmail={existingAccountData.email}
           userName={existingAccountData.name}
-          userRole={existingAccountData.role}
+          {...(existingAccountData.role ? { userRole: existingAccountData.role } : {})}
           onLoginExisting={handleLoginExisting}
           onCreateNew={handleCreateNew}
           onSwitchAccount={handleSwitchAccount}

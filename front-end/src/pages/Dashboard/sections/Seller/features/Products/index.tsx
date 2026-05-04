@@ -40,7 +40,7 @@ export default function SellerProductsFeature() {
   const handleEditProduct = (product: SellerProduct) => {
     setEditingProduct({
       ...product,
-      image: getProductImage(product, productMetadata as ProductMetadata[]),
+      image: getProductImage(product, productMetadata as unknown as ProductMetadata[]),
       specifications: product.specifications || {},
     });
     setShowEditDrawer(true);
@@ -96,7 +96,7 @@ export default function SellerProductsFeature() {
     return (
       <SellerProductCard
         product={item}
-        metadata={productMetadata as ProductMetadata[]}
+        metadata={productMetadata as unknown as ProductMetadata[]}
         offerSummary={offerSummary}
         onEdit={handleEditProduct}
         onViewOffers={handleViewOffers}

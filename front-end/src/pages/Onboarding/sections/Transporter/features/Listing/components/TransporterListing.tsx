@@ -6,7 +6,7 @@ import { Badge } from '@shared/components/Badge';
 import { useOnboardingStore } from '@stores/onboarding.store';
 
 interface TransporterListingProps {
-  onComplete?: () => void;
+  onComplete?: (() => void) | undefined;
 }
 
 export function TransporterListing({ onComplete }: TransporterListingProps) {

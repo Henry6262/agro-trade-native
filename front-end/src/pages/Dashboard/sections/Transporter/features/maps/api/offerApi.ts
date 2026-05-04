@@ -8,7 +8,7 @@ import { MapOffer, Location } from '../types';
  */
 const parseAddress = (
   addressString?: string
-): { street?: string; city: string; state: string; country: string } => {
+): { street?: string | undefined; city: string; state: string; country: string } => {
   if (!addressString) {
     return { city: 'Unknown', state: 'Unknown', country: 'Unknown' };
   }

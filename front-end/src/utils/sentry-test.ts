@@ -10,7 +10,7 @@ import * as Sentry from '@sentry/react-native';
  * Test if Sentry is enabled and configured
  */
 export const isSentryEnabled = (): boolean => {
-  return !!process.env.EXPO_PUBLIC_SENTRY_DSN;
+  return !!process.env['EXPO_PUBLIC_SENTRY_DSN'];
 };
 
 /**
@@ -74,8 +74,8 @@ export const setUserContext = (userId: string, email?: string, username?: string
 
   Sentry.setUser({
     id: userId,
-    email,
-    username,
+    ...(email ? { email } : {}),
+    ...(username ? { username } : {}),
   });
   console.log('✅ User context set in Sentry');
 };

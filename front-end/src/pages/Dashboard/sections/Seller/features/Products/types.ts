@@ -67,14 +67,14 @@ export interface SellerOfferMock {
 export interface OfferSummary {
   total: number;
   urgent: number;
-  bestOffer?: number;
+  bestOffer?: number | undefined;
   offers: SellerOfferMock[];
 }
 
 export interface SellerProductEditPayload {
   id: string;
   quantity: number;
-  unit?: string;
-  location?: SellerLocation | null;
-  specifications?: Record<string, unknown>;
+  unit?: string | undefined;
+  location?: SellerLocation | null | undefined;
+  specifications?: Record<string, unknown> | undefined;
 }

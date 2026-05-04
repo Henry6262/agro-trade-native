@@ -436,7 +436,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
                   <TouchableOpacity
                     onPress={() => {
                       if (sellersAwaiting.length > 0) {
-                        onSendOffer(operation.id, sellersAwaiting[0].id);
+                        onSendOffer(operation.id, sellersAwaiting[0]!.id);
                       }
                     }}
                     style={styles.sendOffersBtn}

@@ -3,8 +3,8 @@ export interface LocationData {
   city: string;
   region: string;
   country: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
 }
 
 export interface ProductData {
@@ -24,9 +24,9 @@ export interface BuyerSpecifications {
   productName: string;
   quantity: number;
   unit: string;
-  maxPricePerUnit?: number;
-  neededBy?: string;
-  notes?: string;
+  maxPricePerUnit?: number | undefined;
+  neededBy?: string | undefined;
+  notes?: string | undefined;
 }
 
 export interface ProductSpecifications {
@@ -58,18 +58,18 @@ export interface CreateBuyerRequestDto {
   productId: string;
   quantity: number;
   unit: string;
-  maxPricePerUnit?: number;
-  neededBy?: string;
+  maxPricePerUnit?: number | undefined;
+  neededBy?: string | undefined;
   specifications: Record<string, any>;
   deliveryAddress: {
     address: string;
     city: string;
     region: string;
     country: string;
-    latitude?: number;
-    longitude?: number;
+    latitude?: number | undefined;
+    longitude?: number | undefined;
   };
-  notes?: string;
+  notes?: string | undefined;
   status: 'active' | 'inactive';
 }
 
@@ -111,7 +111,7 @@ export interface LocationConfirmationStepProps {
   onClose: () => void;
   onNext: (location: LocationData) => void;
   onBack: () => void;
-  initialLocation?: LocationData;
+  initialLocation?: LocationData | undefined;
 }
 
 export interface SubmitStepProps {

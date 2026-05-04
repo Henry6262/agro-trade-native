@@ -31,7 +31,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       addNotification({
         title: title ?? 'New Notification',
         body: body ?? '',
-        type: (data?.type as AppNotification['type']) ?? 'system',
+        type: (data?.['type'] as AppNotification['type']) ?? 'system',
         data: data as Record<string, unknown>,
       });
     });
@@ -39,12 +39,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // Listen for notification taps — navigate to the relevant screen
     responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
       const content = response.notification.request.content;
-      const type = content.data?.type as string | undefined;
+      const type = content.data?.['type'] as string | undefined;
       const data = content.data as Record<string, unknown> | undefined;
 
       if (type === 'order' || type === 'trade:updated' || type === 'trade:seller-added') {
-        if (data?.tradeOperationId) {
-          const orderId = data.tradeOperationId as string;
+        if (data?.['tradeOperationId']) {
+          const orderId = data['tradeOperationId'] as string;
           console.warn('[Notifications] Navigating to OrderDetail', { orderId });
           queueNavigate('OrderDetail', { orderId });
         } else {

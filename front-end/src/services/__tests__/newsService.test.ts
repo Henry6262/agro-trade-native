@@ -3,15 +3,15 @@ import { newsService } from '../newsService';
 global.fetch = jest.fn();
 
 describe('newsService', () => {
-  const ORIGINAL_KEY = process.env.EXPO_PUBLIC_GNEWS_KEY;
+  const ORIGINAL_KEY = process.env['EXPO_PUBLIC_GNEWS_KEY'];
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.EXPO_PUBLIC_GNEWS_KEY = 'test-key';
+    process.env['EXPO_PUBLIC_GNEWS_KEY'] = 'test-key';
   });
 
   afterEach(() => {
-    process.env.EXPO_PUBLIC_GNEWS_KEY = ORIGINAL_KEY;
+    process.env['EXPO_PUBLIC_GNEWS_KEY'] = ORIGINAL_KEY;
   });
 
   it('maps GNews article to NewsArticle shape with imageUrl', () => {
@@ -79,11 +79,11 @@ describe('newsService', () => {
 
     const results = await newsService.getAgriNews();
     expect(results).toHaveLength(1);
-    expect(results[0].title).toBe('Wheat update');
+    expect(results[0]!.title).toBe('Wheat update');
   });
 
   it('returns empty array when API key is missing', async () => {
-    process.env.EXPO_PUBLIC_GNEWS_KEY = '';
+    process.env['EXPO_PUBLIC_GNEWS_KEY'] = '';
     const results = await newsService.getAgriNews();
     expect(results).toHaveLength(0);
     // afterEach restores the key

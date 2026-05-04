@@ -27,9 +27,9 @@ interface ActiveJobContentProps {
   onStartVerification: () => void;
   onCancelVerification: () => void;
   onSubmitVerification: (values: InspectorVerificationFormValues) => void | Promise<void>;
-  onExecuteInspection?: () => void;
-  testID?: string;
-  accessibilityLabel?: string;
+  onExecuteInspection?: (() => void) | undefined;
+  testID?: string | undefined;
+  accessibilityLabel?: string | undefined;
 }
 
 export const ActiveJobContent: React.FC<ActiveJobContentProps> = ({

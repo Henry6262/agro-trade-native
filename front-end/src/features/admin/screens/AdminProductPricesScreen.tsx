@@ -91,7 +91,7 @@ export function AdminProductPricesScreen() {
     currency: 'BGN',
     unit: 'TON',
     qualityGrade: 'Standard',
-    effectiveDate: new Date().toISOString().split('T')[0],
+    effectiveDate: new Date().toISOString().split('T')[0] || '',
     expiresDate: '',
   });
 
@@ -206,7 +206,7 @@ export function AdminProductPricesScreen() {
         currency: 'BGN',
         unit: 'TON',
         qualityGrade: 'Standard',
-        effectiveDate: new Date().toISOString().split('T')[0],
+        effectiveDate: new Date().toISOString().split('T')[0] || '',
         expiresDate: '',
       });
       setShowCreateModal(false);
@@ -359,18 +359,18 @@ export function AdminProductPricesScreen() {
               {/* Product Header */}
               <View style={styles.productHeader}>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.productName}>{prices[0].product.displayName}</Text>
+                  <Text style={styles.productName}>{prices[0]!.product.displayName}</Text>
                   <View style={styles.productMeta}>
                     <View style={styles.categoryBadge}>
-                      <Text style={styles.categoryText}>{prices[0].product.category}</Text>
+                      <Text style={styles.categoryText}>{prices[0]!.product.category}</Text>
                     </View>
                     <View
                       style={[
                         styles.zoneDot,
-                        { backgroundColor: prices[0].pricingZone.color || '#60A5FA' },
+                        { backgroundColor: prices[0]!.pricingZone.color || '#60A5FA' },
                       ]}
                     />
-                    <Text style={styles.zoneName}>{prices[0].pricingZone.name}</Text>
+                    <Text style={styles.zoneName}>{prices[0]!.pricingZone.name}</Text>
                   </View>
                 </View>
               </View>

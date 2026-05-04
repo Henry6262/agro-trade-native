@@ -87,7 +87,7 @@ export function AdminProductPricesScreen() {
     currency: 'BGN',
     unit: 'TON',
     qualityGrade: 'Standard',
-    effectiveDate: new Date().toISOString().split('T')[0],
+    effectiveDate: new Date().toISOString().split('T')[0] || '',
     expiresDate: '',
   });
 
@@ -212,7 +212,7 @@ export function AdminProductPricesScreen() {
         currency: 'BGN',
         unit: 'TON',
         qualityGrade: 'Standard',
-        effectiveDate: new Date().toISOString().split('T')[0],
+        effectiveDate: new Date().toISOString().split('T')[0] || '',
         expiresDate: '',
       });
 
@@ -369,17 +369,17 @@ export function AdminProductPricesScreen() {
               <View className="flex-row items-center justify-between mb-3">
                 <View className="flex-1">
                   <Text className="text-gray-900 font-semibold text-lg">
-                    {prices[0].product.displayName}
+                    {prices[0]!.product.displayName}
                   </Text>
                   <View className="flex-row items-center mt-1">
                     <View className="bg-gray-700 rounded-full px-2 py-1 mr-2">
-                      <Text className="text-gray-600 text-xs">{prices[0].product.category}</Text>
+                      <Text className="text-gray-600 text-xs">{prices[0]!.product.category}</Text>
                     </View>
                     <View
                       className="w-3 h-3 rounded-full mr-2"
-                      style={{ backgroundColor: prices[0].pricingZone.color || '#3B82F6' }}
+                      style={{ backgroundColor: prices[0]!.pricingZone.color || '#3B82F6' }}
                     />
-                    <Text className="text-gray-400 text-sm">{prices[0].pricingZone.name}</Text>
+                    <Text className="text-gray-400 text-sm">{prices[0]!.pricingZone.name}</Text>
                   </View>
                 </View>
               </View>

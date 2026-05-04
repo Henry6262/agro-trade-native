@@ -152,7 +152,7 @@ class SellerService {
   async getMyTimeline(limit = 20, cursor?: string): Promise<SellerTimelineResponse> {
     const params: Record<string, string> = { limit: String(limit) };
     if (cursor) {
-      params.cursor = cursor;
+      params['cursor'] = cursor;
     }
     return this.get<SellerTimelineResponse>('/seller/timeline', params);
   }
@@ -161,9 +161,12 @@ class SellerService {
     limit?: number;
     cursor?: string;
   }): Promise<SellerTradeRecord[] | { items: SellerTradeRecord[]; nextCursor: string | null }> {
+    const stringParams: Record<string, string> | undefined = params
+      ? { limit: String(params.limit || 20), ...(params.cursor ? { cursor: params.cursor } : {}) }
+      : undefined;
     return this.get<
       SellerTradeRecord[] | { items: SellerTradeRecord[]; nextCursor: string | null }
-    >('/seller/trades', params);
+    >('/seller/trades', stringParams);
   }
 
   async getMyStats(): Promise<SellerStats> {

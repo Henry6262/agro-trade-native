@@ -149,7 +149,7 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
 
   const extractNumber = (text: string): number | null => {
     const match = text.match(/(\d+(?:\.\d+)?)/);
-    return match ? parseFloat(match[1]) : null;
+    return match ? parseFloat(match[1]!) : null;
   };
 
   const compareNumericValues = (req: string, offer: string) => {
@@ -200,7 +200,7 @@ export const SpecificationComparison: React.FC<SpecificationComparisonProps> = (
 
     let matches = 0;
     for (let i = 0; i < shorter.length; i++) {
-      if (longer.includes(shorter[i])) {
+      if (longer.includes(shorter.charAt(i))) {
         matches++;
       }
     }

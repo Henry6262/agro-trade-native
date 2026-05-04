@@ -11,7 +11,7 @@ interface BuyerMarketRequestProps {
   selectedProducts: string[];
   specifications: ProductSpecification[];
   onSpecificationsChange: (specifications: ProductSpecification[]) => void;
-  onComplete?: () => void;
+  onComplete?: (() => void) | undefined;
 }
 
 export function BuyerMarketRequest({
@@ -36,7 +36,7 @@ export function BuyerMarketRequest({
   const selectedProductId = selectedProducts[0];
   const selectedProduct = products.find((p) => p.id === selectedProductId);
   const productMetadata = selectedProductsMetadata.find((m) => m.id === selectedProductId);
-  const spec = specifications[0] || buyerSpecifications[selectedProductId];
+  const spec = specifications[0] || (selectedProductId ? buyerSpecifications[selectedProductId] : undefined);
   const productSpecs = selectedProductId ? getProductSpecifications(selectedProductId) : [];
 
   const quantity = parseFloat(spec?.quantity) || 0;

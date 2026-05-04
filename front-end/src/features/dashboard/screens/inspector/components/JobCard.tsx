@@ -15,8 +15,7 @@ export const JobCard: React.FC<JobCardProps> = ({
     onPress?.(job);
   };
 
-  const handleAccept = (e: any) => {
-    e.stopPropagation();
+  const handleAccept = () => {
     onAccept?.(job.id);
   };
 

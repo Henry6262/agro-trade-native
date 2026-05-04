@@ -29,7 +29,7 @@ export default function RegisterScreen() {
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(registerSchema as any),
     defaultValues: {
       role: 'buyer',
     },
@@ -37,7 +37,7 @@ export default function RegisterScreen() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      await registerMutation.mutateAsync(data);
+      await registerMutation.mutateAsync(data as any);
     } catch (error: any) {
       Alert.alert('Registration Failed', error?.response?.data?.message || 'Please try again.');
     }

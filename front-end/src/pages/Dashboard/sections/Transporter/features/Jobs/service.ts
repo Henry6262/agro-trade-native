@@ -16,10 +16,10 @@ export interface TransporterPickupPayload {
 }
 
 export interface TransporterDeliveryPayload {
-  deliveryPhotos?: string[];
-  proofOfDelivery?: string;
-  deliveryNotes?: string;
-  recipientSignature?: string;
+  deliveryPhotos?: string[] | undefined;
+  proofOfDelivery?: string | undefined;
+  deliveryNotes?: string | undefined;
+  recipientSignature?: string | undefined;
 }
 
 export const transporterJobsService = {

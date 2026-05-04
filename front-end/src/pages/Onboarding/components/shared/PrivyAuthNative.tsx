@@ -4,12 +4,12 @@ import { CheckCircle } from 'lucide-react-native';
 import { useLoginWithOAuth, usePrivy, OAuthProviderType } from '@privy-io/expo';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useAuthStore } from '@stores/auth.store';
-import { UserRole } from '../../../../shared/types';
+import type { OnboardingRole } from '../../../../shared/types/onboarding';
 import { apiClient } from '@services/api';
 
 interface PrivyAuthNativeProps {
   onComplete: () => void;
-  userRole?: UserRole;
+  userRole?: OnboardingRole;
   mode?: 'inline' | 'modal';
 }
 
@@ -117,9 +117,14 @@ export const PrivyAuthNative: React.FC<PrivyAuthNativeProps> = ({
 
       // Send Privy token to backend for verification and app token generation
       const roleToUse = userRole || selectedRole;
+      const backendRoleMap: Record<string, string> = {
+        seller: 'FARMER',
+        buyer: 'BUYER',
+        transport: 'TRANSPORTER',
+      };
       const response = await apiClient.post('/auth/privy/login', {
         privyToken,
-        role: roleToUse,
+        role: backendRoleMap[roleToUse as string] || roleToUse,
       });
 
       if (response.data.access_token) {

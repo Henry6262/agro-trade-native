@@ -8,6 +8,7 @@ interface GlassBadgeProps {
   variant?: BadgeVariant;
   style?: ViewStyle;
   size?: 'sm' | 'md';
+  testID?: string;
 }
 
 const VARIANT_STYLES: Record<BadgeVariant, { bg: string; text: string; border: string }> = {

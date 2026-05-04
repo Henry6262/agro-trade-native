@@ -17,15 +17,15 @@ interface LocationData {
   city: string;
   region: string;
   country: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
 }
 
 interface LocationConfirmationDrawerProps {
   visible: boolean;
   onClose: () => void;
   onConfirm: (location: LocationData) => void;
-  initialLocation?: LocationData;
+  initialLocation?: LocationData | undefined;
 }
 
 export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProps> = ({
@@ -76,7 +76,7 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
       });
 
       if (reverseGeocode.length > 0) {
-        const result = reverseGeocode[0];
+        const result = reverseGeocode[0]!;
         setLocation({
           address:
             `${result.streetNumber || ''} ${result.street || ''}`.trim() || result.name || '',
@@ -108,7 +108,7 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
       const geocodeResults = await Location.geocodeAsync(searchQuery);
 
       if (geocodeResults.length > 0) {
-        const result = geocodeResults[0];
+        const result = geocodeResults[0]!;
 
         // Reverse geocode to get full address details
         const reverseGeocode = await Location.reverseGeocodeAsync({
@@ -117,7 +117,7 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
         });
 
         if (reverseGeocode.length > 0) {
-          const addressResult = reverseGeocode[0];
+          const addressResult = reverseGeocode[0]!;
           setLocation({
             address:
               `${addressResult.streetNumber || ''} ${addressResult.street || ''}`.trim() ||
@@ -145,15 +145,15 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
     const newErrors: Record<string, string> = {};
 
     if (!location.address.trim()) {
-      newErrors.address = 'Address is required';
+      newErrors['address'] = 'Address is required';
     }
 
     if (!location.city.trim()) {
-      newErrors.city = 'City is required';
+      newErrors['city'] = 'City is required';
     }
 
     if (!location.country.trim()) {
-      newErrors.country = 'Country is required';
+      newErrors['country'] = 'Country is required';
     }
 
     setErrors(newErrors);
@@ -257,11 +257,11 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
                   placeholder="Street address"
                   placeholderTextColor="#6B7280"
                   className={`bg-gray-50 border ${
-                    errors.address ? 'border-red-500' : 'border-gray-200'
+                    errors['address'] ? 'border-red-500' : 'border-gray-200'
                   } rounded-lg px-3 py-2 text-gray-900`}
                 />
-                {errors.address && (
-                  <Text className="text-red-400 text-xs mt-1">{errors.address}</Text>
+                {errors['address'] && (
+                  <Text className="text-red-400 text-xs mt-1">{errors['address']}</Text>
                 )}
               </View>
 
@@ -276,10 +276,10 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
                   placeholder="City"
                   placeholderTextColor="#6B7280"
                   className={`bg-gray-50 border ${
-                    errors.city ? 'border-red-500' : 'border-gray-200'
+                    errors['city'] ? 'border-red-500' : 'border-gray-200'
                   } rounded-lg px-3 py-2 text-gray-900`}
                 />
-                {errors.city && <Text className="text-red-400 text-xs mt-1">{errors.city}</Text>}
+                {errors['city'] && <Text className="text-red-400 text-xs mt-1">{errors['city']}</Text>}
               </View>
 
               {/* Region/State */}
@@ -305,11 +305,11 @@ export const LocationConfirmationDrawer: React.FC<LocationConfirmationDrawerProp
                   placeholder="Country"
                   placeholderTextColor="#6B7280"
                   className={`bg-gray-50 border ${
-                    errors.country ? 'border-red-500' : 'border-gray-200'
+                    errors['country'] ? 'border-red-500' : 'border-gray-200'
                   } rounded-lg px-3 py-2 text-gray-900`}
                 />
-                {errors.country && (
-                  <Text className="text-red-400 text-xs mt-1">{errors.country}</Text>
+                {errors['country'] && (
+                  <Text className="text-red-400 text-xs mt-1">{errors['country']}</Text>
                 )}
               </View>
 

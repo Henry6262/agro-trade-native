@@ -26,12 +26,12 @@ export interface PriceOffer {
 }
 
 export interface ProductDrawerLocation {
-  city?: string;
-  region?: string;
+  city?: string | undefined;
+  region?: string | undefined;
 }
 
 export interface QuantityStepProps {
-  location?: ProductDrawerLocation;
+  location?: ProductDrawerLocation | undefined;
   priceOffer: PriceOffer | null;
   defaultUnit: string;
   quantity: number;

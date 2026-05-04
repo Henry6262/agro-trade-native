@@ -29,7 +29,7 @@ export interface TransporterBiddingRequestView {
   pricePerKmLabel: string;
   bidsCountLabel: string;
   maxBudgetLabel: string;
-  urgencyLabel?: string;
+  urgencyLabel?: string | undefined;
   hasBid: boolean;
   mapOffer: MapOffer | null;
   request: TransportRequest;

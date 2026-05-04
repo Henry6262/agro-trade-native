@@ -4,11 +4,11 @@ export interface Location {
     longitude: number;
   };
   address: {
-    street?: string;
+    street?: string | undefined;
     city: string;
     state: string;
     country: string;
-    postalCode?: string;
+    postalCode?: string | undefined;
   };
   name?: string;
   type: 'pickup' | 'delivery' | 'truck_location';

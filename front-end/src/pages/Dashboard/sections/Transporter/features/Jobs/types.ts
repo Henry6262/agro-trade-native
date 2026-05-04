@@ -12,12 +12,12 @@ export interface TransporterDisplayJob {
   status: string;
   statusColorClass: string;
   totalWeightLabel: string;
-  etaLabel?: string;
+  etaLabel?: string | undefined;
   pickupsCompleted: number;
   pickupPointsTotal: number;
-  currentLocationLabel?: string;
+  currentLocationLabel?: string | undefined;
   hasLocation: boolean;
-  requestNumber?: string;
+  requestNumber?: string | undefined;
   canStart: boolean;
   canCompletePickup: boolean;
   canCompleteDelivery: boolean;

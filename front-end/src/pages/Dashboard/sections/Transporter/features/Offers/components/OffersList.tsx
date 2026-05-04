@@ -42,7 +42,7 @@ export const OffersList: React.FC<OffersListProps> = ({
             <View style={styles.cardHeader}>
               <View style={styles.productInfo}>
                 <Text style={styles.productName}>
-                  {request.tradeOperation?.buyListing?.product?.displayName || request.tradeOperation?.buyListing?.product?.name || 'Bulk Grain'}
+                  {(request.tradeOperation?.buyListing?.product as any)?.displayName || request.tradeOperation?.buyListing?.product?.name || 'Bulk Grain'}
                 </Text>
                 <Text style={styles.buyerName}>
                   {request.tradeOperation?.buyListing?.buyer?.name || 'Unknown Buyer'}
@@ -93,7 +93,7 @@ export const OffersList: React.FC<OffersListProps> = ({
                 onPress={() => onSubmitBid(request.id)} 
                 disabled={isSubmitted || isSubmitting}
                 variant={isSubmitted ? "ghost" : "primary"}
-                size="small"
+                size="sm"
                 style={{ flex: 1.5 }}
                 leftIcon={isSubmitting ? <ActivityIndicator size="small" color="#fff" /> : null}
               />

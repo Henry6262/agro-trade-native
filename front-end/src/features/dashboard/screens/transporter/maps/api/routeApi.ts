@@ -28,7 +28,7 @@ let colorIndex = 0;
  */
 const getColorForTruck = (truckId: string): string => {
   if (!colorMap.has(truckId)) {
-    colorMap.set(truckId, ROUTE_COLORS[colorIndex % ROUTE_COLORS.length]);
+    colorMap.set(truckId, ROUTE_COLORS[colorIndex % ROUTE_COLORS.length]!);
     colorIndex++;
   }
   return colorMap.get(truckId)!;

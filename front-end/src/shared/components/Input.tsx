@@ -3,14 +3,14 @@ import { TextInput, View, Text, TouchableOpacity, TextInputProps } from 'react-n
 import { BaseComponentProps } from '../../shared/types';
 
 interface InputProps extends TextInputProps, BaseComponentProps {
-  label?: string;
-  error?: string;
-  required?: boolean;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  helperText?: string;
-  variant?: 'default' | 'filled' | 'outline';
-  size?: 'small' | 'medium' | 'large';
+  label?: string | undefined;
+  error?: string | undefined;
+  required?: boolean | undefined;
+  leftIcon?: React.ReactNode | undefined;
+  rightIcon?: React.ReactNode | undefined;
+  helperText?: string | undefined;
+  variant?: 'default' | 'filled' | 'outline' | undefined;
+  size?: 'small' | 'medium' | 'large' | undefined;
 }
 
 export const Input: React.FC<InputProps> = ({

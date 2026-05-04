@@ -33,7 +33,7 @@ export default function OrderCreateScreen() {
     handleSubmit,
     formState: { errors },
   } = useForm<DeliveryFormData>({
-    resolver: zodResolver(deliverySchema),
+    resolver: zodResolver(deliverySchema as any),
     defaultValues: {
       country: 'United States',
     },

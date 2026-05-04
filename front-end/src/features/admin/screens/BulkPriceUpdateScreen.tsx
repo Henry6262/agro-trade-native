@@ -98,11 +98,17 @@ export default function BulkPriceUpdateScreen() {
     const updatedPrices = { ...priceUpdates };
     Object.keys(updatedPrices).forEach((productId) => {
       const current = updatedPrices[productId];
-      if (current.minPrice) {
-        updatedPrices[productId].minPrice = (parseFloat(current.minPrice) * multiplier).toFixed(2);
+      if (current?.minPrice) {
+        updatedPrices[productId] = {
+          ...current,
+          minPrice: (parseFloat(current.minPrice) * multiplier).toFixed(2),
+        };
       }
-      if (current.maxPrice) {
-        updatedPrices[productId].maxPrice = (parseFloat(current.maxPrice) * multiplier).toFixed(2);
+      if (current?.maxPrice) {
+        updatedPrices[productId] = {
+          ...current,
+          maxPrice: (parseFloat(current.maxPrice) * multiplier).toFixed(2),
+        };
       }
     });
     setPriceUpdates(updatedPrices);
@@ -155,13 +161,22 @@ export default function BulkPriceUpdateScreen() {
   };
 
   const handlePriceChange = (productId: string, field: 'minPrice' | 'maxPrice', value: string) => {
-    setPriceUpdates((prev) => ({
-      ...prev,
-      [productId]: {
-        ...prev[productId],
-        [field]: value,
-      },
-    }));
+    setPriceUpdates((prev) => {
+      const existing = prev[productId];
+      return {
+        ...prev,
+        [productId]: {
+          productId,
+          minPrice: '',
+          maxPrice: '',
+          currency: 'EUR',
+          unit: 'TON',
+          qualityGrade: 'Standard',
+          ...existing,
+          [field]: value,
+        },
+      };
+    });
   };
 
   if (loading) {

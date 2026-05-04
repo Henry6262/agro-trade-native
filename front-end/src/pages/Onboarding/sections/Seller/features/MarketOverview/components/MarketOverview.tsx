@@ -66,7 +66,7 @@ export function MarketOverview({
 
   const totalValue = specifications.reduce((sum, spec) => {
     const quantity = Number.parseInt(spec.quantity) || 0;
-    const pricePerKilo = Number.parseFloat(spec.pricePerKilo) || 0;
+    const pricePerKilo = Number.parseFloat(spec["pricePerKilo"]) || 0;
     const multiplier = spec.unit === 'ton' ? 1000 : spec.unit === 'quintal' ? 100 : 1;
     return sum + quantity * multiplier * pricePerKilo;
   }, 0);
@@ -180,7 +180,7 @@ export function MarketOverview({
                 })();
 
                 const itemValue = (() => {
-                  const pricePerKilo = Number.parseFloat(spec.pricePerKilo) || 0;
+                  const pricePerKilo = Number.parseFloat(spec["pricePerKilo"]) || 0;
                   return itemWeight * pricePerKilo;
                 })();
 
@@ -194,7 +194,7 @@ export function MarketOverview({
                       <View>
                         <Text className="font-semibold text-gray-900">{product.name}</Text>
                         <Text className="text-sm text-gray-400">
-                          {spec.quantity} {spec.unit} • ₹{spec.pricePerKilo}/kg
+                          {spec.quantity} {spec.unit} • ₹{spec["pricePerKilo"]}/kg
                         </Text>
                       </View>
                     </View>
@@ -254,7 +254,7 @@ export function MarketOverview({
                 w-full py-6 px-4 rounded-lg flex-row items-center justify-center
                 ${
                   specifications.length === 0 ||
-                  !specifications.every((spec) => spec.quantity && spec.pricePerKilo)
+                  !specifications.every((spec) => spec.quantity && spec["pricePerKilo"])
                     ? 'bg-gray-600'
                     : 'bg-primary-500'
                 }
@@ -269,7 +269,7 @@ export function MarketOverview({
               onPress={handleCreateSellRequest}
               disabled={
                 specifications.length === 0 ||
-                !specifications.every((spec) => spec.quantity && spec.pricePerKilo)
+                !specifications.every((spec) => spec.quantity && spec["pricePerKilo"])
               }
               activeOpacity={0.8}
             >

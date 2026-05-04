@@ -16,6 +16,7 @@ import { LogIn } from 'lucide-react-native';
 import { Image } from 'react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useAuthStore } from '@stores/auth.store';
+import type { User } from '@shared/types';
 import { AnimatedRoleCard } from '../components/AnimatedRoleCard';
 import { AuthGuard } from '@shared/components/AuthGuard';
 import { useLoginWithOAuth, usePrivy, OAuthProviderType } from '@privy-io/expo';
@@ -54,7 +55,7 @@ export const RoleSelectionScreen: React.FC = () => {
         CommonActions.reset({
           index: 0,
           routes: [{ name: 'Main' }],
-        })
+        }) as any
       );
     }
   }, [isAuthenticated, user, navigation]);
@@ -131,11 +132,11 @@ export const RoleSelectionScreen: React.FC = () => {
 
         // Extract email from Privy user (ref is updated after loginWithOAuth resolves)
         const currentPrivyUser = privyUserRef.current as Record<string, unknown>;
-        const linkedAccounts = currentPrivyUser?.linkedAccounts as
+        const linkedAccounts = currentPrivyUser?.['linkedAccounts'] as
           | { type: string; address?: string }[]
           | undefined;
         const linkedEmail: string | undefined =
-          (currentPrivyUser?.email as string | undefined) ||
+          (currentPrivyUser?.['email'] as string | undefined) ||
           linkedAccounts?.find((a) => a.type === 'google_oauth' || a.type === 'email')?.address ||
           undefined;
 
@@ -151,12 +152,12 @@ export const RoleSelectionScreen: React.FC = () => {
 
         if (authResponse?.data?.access_token) {
           const { access_token, refresh_token, user: userData } = authResponse.data;
-          login(userData, access_token, refresh_token);
+          login(userData as unknown as User, access_token, refresh_token);
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
               routes: [{ name: 'Main' }],
-            })
+            }) as any
           );
         } else {
           showToast('Authentication failed. Please try again.');

@@ -242,9 +242,9 @@ export interface VehicleType {
   name: string;
   capacity: number;
   suitable_for: string[];
-  unit?: string;
-  type?: string;
-  count?: number;
+  unit?: string | undefined;
+  type?: string | undefined;
+  count?: number | undefined;
 }
 
 export interface VehicleCapacity {
@@ -484,7 +484,7 @@ export type SpecificationPriority = 'required' | 'preferred' | 'optional';
 
 export interface SpecificationMatch {
   specification: BuyerSpecification;
-  offerValue?: OfferSpecification;
+  offerValue?: OfferSpecification | undefined;
   matchType: MatchType;
   score: number; // 0-100
   message?: string;
@@ -553,8 +553,8 @@ export interface RejectReason {
 
 // Component prop types
 export interface BaseComponentProps {
-  testID?: string;
-  accessibilityLabel?: string;
+  testID?: string | undefined;
+  accessibilityLabel?: string | undefined;
 }
 
 export interface ButtonProps extends BaseComponentProps {

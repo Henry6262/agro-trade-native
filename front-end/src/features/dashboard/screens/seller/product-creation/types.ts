@@ -3,8 +3,8 @@ export interface LocationData {
   city: string;
   region: string;
   country: string;
-  latitude?: number;
-  longitude?: number;
+  latitude?: number | undefined;
+  longitude?: number | undefined;
 }
 
 export interface ProductData {
@@ -54,8 +54,8 @@ export interface CreateListingDto {
     city: string;
     region: string;
     country: string;
-    latitude?: number;
-    longitude?: number;
+    latitude?: number | undefined;
+    longitude?: number | undefined;
   };
   status: 'active' | 'inactive';
   offerType: 'STANDARD' | 'PREMIUM';
@@ -89,5 +89,5 @@ export interface LocationConfirmationStepProps {
   onClose: () => void;
   onNext: (location: LocationData) => void;
   onBack: () => void;
-  initialLocation?: LocationData;
+  initialLocation?: LocationData | undefined;
 }

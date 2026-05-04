@@ -330,10 +330,10 @@ export const transportService = {
   async completeDelivery(
     jobId: string,
     deliveryData: {
-      deliveryPhotos?: string[];
-      proofOfDelivery?: string;
-      deliveryNotes?: string;
-      recipientSignature?: string;
+      deliveryPhotos?: string[] | undefined;
+      proofOfDelivery?: string | undefined;
+      deliveryNotes?: string | undefined;
+      recipientSignature?: string | undefined;
     }
   ): Promise<TransportJob> {
     try {

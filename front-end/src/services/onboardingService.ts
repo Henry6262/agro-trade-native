@@ -6,18 +6,18 @@ import type {
   SellerOnboardingData,
   BuyerOnboardingData,
   TransportOnboardingData,
-  UserRole,
 } from '../shared/types';
+import type { OnboardingRole } from '../shared/types/onboarding';
 
 export interface OnboardingSubmissionData {
-  role: UserRole;
-  sellerData?: SellerOnboardingData;
-  buyerData?: BuyerOnboardingData;
-  transportData?: TransportOnboardingData;
+  role: OnboardingRole;
+  sellerData?: SellerOnboardingData | undefined;
+  buyerData?: BuyerOnboardingData | undefined;
+  transportData?: TransportOnboardingData | undefined;
   userInfo: {
     name: string;
     email: string;
-    phone?: string;
+    phone?: string | undefined;
   };
   companyInfo?: {
     companyName: string;
@@ -262,7 +262,7 @@ export const onboardingService = {
    * Get role-specific onboarding requirements
    */
   getOnboardingRequirements: (
-    role: UserRole
+    role: OnboardingRole
   ): {
     requiredSteps: string[];
     optionalSteps: string[];

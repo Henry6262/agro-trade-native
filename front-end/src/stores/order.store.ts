@@ -58,9 +58,9 @@ export const useOrderStore = create<OrderState>()(
 
         if (existingItemIndex >= 0) {
           // Update existing item
-          state.currentOrder.items[existingItemIndex].quantity += quantity;
-          state.currentOrder.items[existingItemIndex].totalPrice =
-            state.currentOrder.items[existingItemIndex].quantity * product.price;
+          state.currentOrder.items[existingItemIndex]!.quantity += quantity;
+          state.currentOrder.items[existingItemIndex]!.totalPrice =
+            state.currentOrder.items[existingItemIndex]!.quantity * product.price;
         } else {
           // Add new item
           const newItem: OrderItem = {
@@ -95,9 +95,9 @@ export const useOrderStore = create<OrderState>()(
           if (quantity <= 0) {
             state.currentOrder.items.splice(itemIndex, 1);
           } else {
-            state.currentOrder.items[itemIndex].quantity = quantity;
-            state.currentOrder.items[itemIndex].totalPrice =
-              quantity * state.currentOrder.items[itemIndex].unitPrice;
+            state.currentOrder.items[itemIndex]!.quantity = quantity;
+            state.currentOrder.items[itemIndex]!.totalPrice =
+              quantity * state.currentOrder.items[itemIndex]!.unitPrice;
           }
         }
       });
@@ -160,8 +160,8 @@ export const useOrderStore = create<OrderState>()(
       set((state) => {
         const orderIndex = state.orders.findIndex((order) => order.id === orderId);
         if (orderIndex >= 0) {
-          state.orders[orderIndex].status = status as any;
-          state.orders[orderIndex].updatedAt = new Date().toISOString();
+          state.orders[orderIndex]!.status = status as any;
+          state.orders[orderIndex]!.updatedAt = new Date().toISOString();
         }
       });
     },

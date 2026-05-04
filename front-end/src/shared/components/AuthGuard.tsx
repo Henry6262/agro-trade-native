@@ -32,7 +32,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
         CommonActions.reset({
           index: 0,
           routes: [{ name: 'RoleSelection' as never }],
-        })
+        }) as any
       );
     } else if (!requireAuth && isAuthenticated) {
       // User is authenticated but on an auth screen - redirect to main app
@@ -41,7 +41,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
         CommonActions.reset({
           index: 0,
           routes: [{ name: targetRoute as never }],
-        })
+        }) as any
       );
     }
   }, [isAuthenticated, isLoading, requireAuth, navigation, redirectTo]);

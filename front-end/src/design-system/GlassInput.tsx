@@ -3,11 +3,11 @@ import { TextInput, View, Text, StyleSheet, TextInputProps, ViewStyle } from 're
 import { GLASS, COLORS } from './tokens';
 
 interface GlassInputProps extends TextInputProps {
-  label?: string;
-  error?: string;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  containerStyle?: ViewStyle;
+  label?: string | undefined;
+  error?: string | undefined;
+  leftIcon?: React.ReactNode | undefined;
+  rightIcon?: React.ReactNode | undefined;
+  containerStyle?: ViewStyle | undefined;
 }
 
 export const GlassInput: React.FC<GlassInputProps> = ({

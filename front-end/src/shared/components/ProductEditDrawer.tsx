@@ -67,15 +67,15 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
     const newErrors: Record<string, string> = {};
 
     if (!editedProduct?.quantity || editedProduct.quantity <= 0) {
-      newErrors.quantity = 'Quantity must be greater than 0';
+      newErrors['quantity'] = 'Quantity must be greater than 0';
     }
 
     if (!editedProduct?.location?.city) {
-      newErrors.city = 'City is required';
+      newErrors['city'] = 'City is required';
     }
 
     if (!editedProduct?.location?.country) {
-      newErrors.country = 'Country is required';
+      newErrors['country'] = 'Country is required';
     }
 
     setErrors(newErrors);
@@ -165,15 +165,15 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                   placeholderTextColor="#6B7280"
                   keyboardType="numeric"
                   className={`flex-1 bg-gray-50 border ${
-                    errors.quantity ? 'border-red-500' : 'border-gray-200'
+                    errors['quantity'] ? 'border-red-500' : 'border-gray-200'
                   } rounded-lg px-3 py-2 text-gray-900`}
                 />
                 <View className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2">
                   <Text className="text-gray-900">{editedProduct.unit || 'ton'}</Text>
                 </View>
               </View>
-              {errors.quantity && (
-                <Text className="text-red-400 text-xs mt-1">{errors.quantity}</Text>
+              {errors['quantity'] && (
+                <Text className="text-red-400 text-xs mt-1">{errors['quantity']}</Text>
               )}
             </View>
 
@@ -206,10 +206,10 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                   placeholder="City"
                   placeholderTextColor="#6B7280"
                   className={`bg-gray-50 border ${
-                    errors.city ? 'border-red-500' : 'border-gray-200'
+                    errors['city'] ? 'border-red-500' : 'border-gray-200'
                   } rounded-lg px-3 py-2 text-gray-900`}
                 />
-                {errors.city && <Text className="text-red-400 text-xs mt-1">{errors.city}</Text>}
+                {errors['city'] && <Text className="text-red-400 text-xs mt-1">{errors['city']}</Text>}
               </View>
 
               {/* Region/State */}
@@ -235,11 +235,11 @@ export const ProductEditDrawer: React.FC<ProductEditDrawerProps> = ({
                   placeholder="Country"
                   placeholderTextColor="#6B7280"
                   className={`bg-gray-50 border ${
-                    errors.country ? 'border-red-500' : 'border-gray-200'
+                    errors['country'] ? 'border-red-500' : 'border-gray-200'
                   } rounded-lg px-3 py-2 text-gray-900`}
                 />
-                {errors.country && (
-                  <Text className="text-red-400 text-xs mt-1">{errors.country}</Text>
+                {errors['country'] && (
+                  <Text className="text-red-400 text-xs mt-1">{errors['country']}</Text>
                 )}
               </View>
             </View>

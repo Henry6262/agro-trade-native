@@ -43,12 +43,13 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
           quality: 0.7,
           base64: false,
         });
-        if (!result.canceled && result.assets[0]) {
+        const asset = result.assets?.[0];
+        if (!result.canceled && asset) {
           setEvidence((prev) => [
             ...prev,
             {
               type: 'photo',
-              url: result.assets[0].uri,
+              url: asset.uri,
               caption: 'Photo from camera',
               timestamp: new Date(),
             },
@@ -65,12 +66,13 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
           quality: 0.7,
           base64: false,
         });
-        if (!result.canceled && result.assets[0]) {
+        const asset = result.assets?.[0];
+        if (!result.canceled && asset) {
           setEvidence((prev) => [
             ...prev,
             {
               type: 'photo',
-              url: result.assets[0].uri,
+              url: asset.uri,
               caption: 'Photo from gallery',
               timestamp: new Date(),
             },
@@ -101,11 +103,11 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
       }
     });
     if (verificationStatus === 'FAILED' && !notes.trim()) {
-      nextErrors.notes = 'Notes are required for failed verification';
+      nextErrors['notes'] = 'Notes are required for failed verification';
     }
     const scoreNum = Number(qualityScore);
     if (!qualityScore || isNaN(scoreNum) || scoreNum < 0 || scoreNum > 100) {
-      nextErrors.qualityScore = 'Quality score must be a number between 0 and 100';
+      nextErrors['qualityScore'] = 'Quality score must be a number between 0 and 100';
     }
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -179,19 +181,19 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
             <View className="mt-2 bg-amber-50 p-3 rounded-lg space-y-2">
               <TextInput
                 placeholder="Product variety (if different)"
-                value={correctedSpecs.variety || ''}
+                value={correctedSpecs['variety'] || ''}
                 onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, variety: value }))}
                 className="bg-white border border-amber-300 rounded px-3 py-2"
               />
               <TextInput
                 placeholder="Grade (if different)"
-                value={correctedSpecs.grade || ''}
+                value={correctedSpecs['grade'] || ''}
                 onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, grade: value }))}
                 className="bg-white border border-amber-300 rounded px-3 py-2"
               />
               <TextInput
                 placeholder="Origin (if different)"
-                value={correctedSpecs.origin || ''}
+                value={correctedSpecs['origin'] || ''}
                 onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, origin: value }))}
                 className="bg-white border border-amber-300 rounded px-3 py-2"
               />
@@ -242,13 +244,13 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
               setErrors((prev) => ({ ...prev, qualityScore: '' }));
             }}
             className={`bg-white border ${
-              errors.qualityScore ? 'border-red-500' : 'border-gray-300'
+              errors['qualityScore'] ? 'border-red-500' : 'border-gray-300'
             } rounded px-3 py-2`}
             keyboardType="numeric"
             maxLength={3}
           />
-          {errors.qualityScore && (
-            <Text className="text-red-500 text-xs mt-1">{errors.qualityScore}</Text>
+          {errors['qualityScore'] && (
+            <Text className="text-red-500 text-xs mt-1">{errors['qualityScore']}</Text>
           )}
         </View>
 
@@ -259,9 +261,9 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
             placeholder="Add additional notes..."
             value={notes}
             onChangeText={setNotes}
-            className={`bg-white border ${errors.notes ? 'border-red-500' : 'border-gray-300'} rounded px-3 py-2 min-h-[80px]`}
+            className={`bg-white border ${errors['notes'] ? 'border-red-500' : 'border-gray-300'} rounded px-3 py-2 min-h-[80px]`}
           />
-          {errors.notes && <Text className="text-red-500 text-xs mt-1">{errors.notes}</Text>}
+          {errors['notes'] && <Text className="text-red-500 text-xs mt-1">{errors['notes']}</Text>}
         </View>
 
         <View>

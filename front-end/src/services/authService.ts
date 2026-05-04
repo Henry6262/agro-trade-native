@@ -225,10 +225,10 @@ export const authService = {
   ): Promise<{ success: boolean; company: CompanyInfo }> => {
     // Map frontend field names to backend field names
     const backendData: Record<string, unknown> = {};
-    if (data.companyName !== undefined) backendData.legalName = data.companyName;
-    if (data.vatNumber !== undefined) backendData.vatNumber = data.vatNumber;
-    if (data.companyAddress !== undefined) backendData.registrationNumber = undefined; // address is not a direct field
-    if (data.website !== undefined) backendData.website = data.website;
+    if (data.companyName !== undefined) backendData['legalName'] = data.companyName;
+    if (data.vatNumber !== undefined) backendData['vatNumber'] = data.vatNumber;
+    if (data.companyAddress !== undefined) backendData['registrationNumber'] = undefined; // address is not a direct field
+    if (data.website !== undefined) backendData['website'] = data.website;
 
     return apiClient
       .patch<{
@@ -278,9 +278,9 @@ export const authService = {
           location: [b.street, b.country].filter(Boolean).join(', ') || '',
           type: (b.addressType || 'warehouse').toLowerCase(),
           capacity: '',
-          addressType: b.addressType,
-          isDefault: b.isDefault,
-        })),
+          ...(b.addressType !== undefined && { addressType: b.addressType }),
+          ...(b.isDefault !== undefined && { isDefault: b.isDefault }),
+        } as BaseInfo)),
       }));
   },
 

@@ -59,7 +59,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
     });
 
     if (verificationStatus === VerificationStatus.FAILED && !notes.trim()) {
-      newErrors.notes = 'Notes are required for failed verification';
+      newErrors['notes'] = 'Notes are required for failed verification';
     }
 
     setErrors(newErrors);
@@ -90,15 +90,15 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
         standardUsed: 'ISO Standards',
       })),
       evidence,
-      notes: notes + (correctedSpecs.notes ? `\n\nCorrections: ${correctedSpecs.notes}` : ''),
+      notes: notes + (correctedSpecs['notes'] ? `\n\nCorrections: ${correctedSpecs['notes']}` : ''),
       verificationStatus,
       verifiedAt: new Date(),
       productSpecifications:
         Object.keys(correctedSpecs).length > 0
           ? {
-              variety: correctedSpecs.variety || job.productDetails.claimedSpecs.variety,
-              grade: correctedSpecs.grade || job.productDetails.claimedSpecs.grade,
-              origin: correctedSpecs.origin || job.productDetails.claimedSpecs.origin,
+              variety: correctedSpecs['variety'] || job.productDetails.claimedSpecs['variety'],
+              grade: correctedSpecs['grade'] || job.productDetails.claimedSpecs['grade'],
+              origin: correctedSpecs['origin'] || job.productDetails.claimedSpecs['origin'],
             }
           : undefined,
     };
@@ -165,25 +165,25 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
 
             <GlassInput
               placeholder="Product variety (if different)"
-              value={correctedSpecs.variety || ''}
+              value={correctedSpecs['variety'] || ''}
               onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, variety: value }))}
               containerStyle={styles.inputContainer}
             />
             <GlassInput
               placeholder="Grade (if different)"
-              value={correctedSpecs.grade || ''}
+              value={correctedSpecs['grade'] || ''}
               onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, grade: value }))}
               containerStyle={styles.inputContainer}
             />
             <GlassInput
               placeholder="Origin (if different)"
-              value={correctedSpecs.origin || ''}
+              value={correctedSpecs['origin'] || ''}
               onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, origin: value }))}
               containerStyle={styles.inputContainer}
             />
             <GlassInput
               placeholder="Additional corrections notes"
-              value={correctedSpecs.notes || ''}
+              value={correctedSpecs['notes'] || ''}
               onChangeText={(value) => setCorrectedSpecs((prev) => ({ ...prev, notes: value }))}
               multiline
               numberOfLines={2}
@@ -285,7 +285,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
           onChangeText={setNotes}
           multiline
           numberOfLines={4}
-          error={errors.notes}
+          error={errors['notes']}
         />
       </View>
 
@@ -293,7 +293,7 @@ export const VerificationForm: React.FC<VerificationFormProps> = ({ job, onSubmi
       <View style={styles.actionsRow}>
         <GlassButton
           label="Cancel"
-          onPress={onCancel}
+          onPress={() => onCancel?.()}
           variant="secondary"
           size="md"
           style={styles.actionBtnHalf}

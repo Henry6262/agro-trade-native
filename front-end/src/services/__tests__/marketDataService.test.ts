@@ -30,7 +30,7 @@ describe('marketDataService', () => {
     });
 
     it('returns zero change when no previous close available', () => {
-      const meta = { ...mockMeta, chartPreviousClose: undefined, previousClose: undefined };
+      const { chartPreviousClose: _cpc, ...meta } = mockMeta;
       const result = marketDataService.parseMeta('WHEAT', meta);
 
       expect(result.change).toBe(0);
@@ -59,7 +59,7 @@ describe('marketDataService', () => {
 
     it('falls back to current time when regularMarketTime missing', () => {
       const before = Date.now();
-      const meta = { ...mockMeta, regularMarketTime: undefined };
+      const { regularMarketTime: _rmt, ...meta } = mockMeta;
       const result = marketDataService.parseMeta('WHEAT', meta);
       const after = Date.now();
 

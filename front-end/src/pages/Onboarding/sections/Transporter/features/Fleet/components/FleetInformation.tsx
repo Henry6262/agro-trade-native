@@ -92,9 +92,9 @@ export function FleetInformation() {
 
     if (existingTruckIndex !== -1) {
       updatedFleet = [...currentFleet];
-      const existingCount = updatedFleet[existingTruckIndex].count || 1;
+      const existingCount = updatedFleet[existingTruckIndex]!.count || 1;
       updatedFleet[existingTruckIndex] = {
-        ...updatedFleet[existingTruckIndex],
+        ...updatedFleet[existingTruckIndex]!,
         count: existingCount + count,
       };
     } else {

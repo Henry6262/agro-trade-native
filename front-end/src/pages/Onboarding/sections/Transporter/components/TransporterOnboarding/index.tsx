@@ -22,7 +22,7 @@ export function TransporterOnboarding({ onComplete }: TransporterOnboardingProps
   const [progressLineHeight, setProgressLineHeight] = useState(0);
 
   useEffect(() => {
-    const transporterSteps = simplifiedRoleSteps.transporter.map((step, index) => ({
+    const transporterSteps = simplifiedRoleSteps.transport.map((step, index) => ({
       ...step,
       completed: index < currentStepIndex, // Mark previous steps as completed
     }));

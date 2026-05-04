@@ -66,7 +66,7 @@ export const useSellerOffers = () => {
       request,
     }: {
       negotiationId: string;
-      request?: AcceptOfferRequest;
+      request?: AcceptOfferRequest | undefined;
     }) => sellerOfferService.acceptOffer(negotiationId, request),
     onSuccess: () => {
       // Invalidate and refetch offers to get updated data
@@ -84,7 +84,7 @@ export const useSellerOffers = () => {
       request,
     }: {
       negotiationId: string;
-      request?: RejectOfferRequest;
+      request?: RejectOfferRequest | undefined;
     }) => sellerOfferService.rejectOffer(negotiationId, request),
     onSuccess: () => {
       // Invalidate and refetch offers to get updated data

@@ -30,7 +30,7 @@ export interface CreateListingDTO {
 interface SimplifiedMarketOverviewProps {
   selectedProducts: string[];
   specifications: any;
-  onComplete?: () => void;
+  onComplete?: (() => void) | undefined;
 }
 
 export function SimplifiedMarketOverview({
@@ -49,7 +49,7 @@ export function SimplifiedMarketOverview({
   const productList = selectedProducts.length > 0 ? selectedProducts : storeSelectedProducts;
   const productId = productList?.[0];
   const product = products.find((p) => p.id === productId);
-  const productSpecs = sellerSpecifications[productId] || {};
+  const productSpecs = sellerSpecifications[productId || ''] || {};
 
   const handleSellClick = () => setShowSellDrawer(true);
   const handleDrawerComplete = () => {
@@ -72,10 +72,10 @@ export function SimplifiedMarketOverview({
       location: {
         latitude: location?.latitude || 0,
         longitude: location?.longitude || 0,
-        city: location?.city,
-        region: location?.region,
-        country: location?.country,
-        address: location?.address,
+        ...(location?.city ? { city: location.city } : {}),
+        ...(location?.region ? { region: location.region } : {}),
+        ...(location?.country ? { country: location.country } : {}),
+        ...(location?.address ? { address: location.address } : {}),
       },
       status: 'draft',
     };

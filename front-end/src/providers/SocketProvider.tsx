@@ -12,6 +12,8 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -21,7 +23,7 @@ async function registerForPushNotifications(token: string, apiUrl: string): Prom
     const { status } = await Notifications.requestPermissionsAsync();
     if (status !== 'granted') return;
     const projectId =
-      Constants.expoConfig?.extra?.eas?.projectId ?? (Constants as any).easConfig?.projectId;
+      Constants.expoConfig?.extra?.['eas']?.projectId ?? (Constants as any).easConfig?.projectId;
     if (!projectId) return;
     const expoPushToken = await Notifications.getExpoPushTokenAsync({ projectId });
     await fetch(`${apiUrl}/notifications/register-device`, {
@@ -49,7 +51,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       // Register for push notifications
       const API_URL =
-        process.env.EXPO_PUBLIC_API_URL ??
+        process.env['EXPO_PUBLIC_API_URL'] ??
         'https://agro-trade-native-production.up.railway.app/api';
       registerForPushNotifications(token, API_URL).catch(console.warn);
 

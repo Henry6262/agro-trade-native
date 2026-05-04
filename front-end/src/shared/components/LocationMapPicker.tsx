@@ -28,15 +28,15 @@ export interface SelectedLocation {
 }
 
 export interface LocationMapPickerProps {
-  onLocationSelect?: (location: SelectedLocation) => void;
-  onLocationConfirm?: (location: SelectedLocation) => void;
-  initialLocation?: LatLng;
-  showUserLocation?: boolean;
-  showSearchBar?: boolean;
-  height?: number;
-  title?: string;
-  confirmButtonText?: string;
-  style?: any;
+  onLocationSelect?: ((location: SelectedLocation) => void) | undefined;
+  onLocationConfirm?: ((location: SelectedLocation) => void) | undefined;
+  initialLocation?: LatLng | undefined;
+  showUserLocation?: boolean | undefined;
+  showSearchBar?: boolean | undefined;
+  height?: number | undefined;
+  title?: string | undefined;
+  confirmButtonText?: string | undefined;
+  style?: any | undefined;
 }
 
 export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
@@ -45,7 +45,7 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   initialLocation,
   showUserLocation = true,
   showSearchBar = true,
-  _height = 400,
+  height = 400,
   title = 'Select Location',
   confirmButtonText = 'Confirm Location',
   style,

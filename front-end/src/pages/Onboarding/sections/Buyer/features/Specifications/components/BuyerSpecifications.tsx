@@ -38,7 +38,7 @@ export function BuyerSpecifications({
   const selectedProductId = selectedProducts[0];
   const selectedProduct = products.find((p) => p.id === selectedProductId);
   const productMetadata = selectedProductsMetadata.find((m) => m.id === selectedProductId);
-  const currentSpecs = buyerSpecifications[selectedProductId] || {};
+  const currentSpecs = buyerSpecifications[selectedProductId || ''] || {};
 
   useEffect(() => {
     if (selectedProductId) {
@@ -90,7 +90,7 @@ export function BuyerSpecifications({
       pricePerKilo: currentSpecs.pricePerKilo || '',
     };
     onSpecificationsChange([updatedSpec]);
-    updateBuyerSpecification(selectedProductId, updatedSpec);
+    updateBuyerSpecification(selectedProductId || '', updatedSpec);
   };
 
   const productImage = selectedProduct?.image || productMetadata?.image;

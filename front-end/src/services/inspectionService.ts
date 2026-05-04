@@ -61,21 +61,21 @@ export interface SubmitInspectionResultsDto {
   qualityScore: number;
   qualityGrade?: string;
   verificationResult: {
-    actualQuantity?: number;
-    actualQuality?: string;
-    moistureContent?: number;
-    foreignMatter?: number;
-    brokenGrains?: number;
-    discoloration?: boolean;
-    pestDamage?: boolean;
-    pestInfestation?: boolean;
-    storageConditions?: string;
+    actualQuantity?: number | undefined;
+    actualQuality?: string | undefined;
+    moistureContent?: number | undefined;
+    foreignMatter?: number | undefined;
+    brokenGrains?: number | undefined;
+    discoloration?: boolean | undefined;
+    pestDamage?: boolean | undefined;
+    pestInfestation?: boolean | undefined;
+    storageConditions?: string | undefined;
     productSpecifications?: {
-      variety?: string;
-      grade?: string;
-      origin?: string;
-      harvestDate?: Date;
-    };
+      variety?: string | undefined;
+      grade?: string | undefined;
+      origin?: string | undefined;
+      harvestDate?: Date | undefined;
+    } | undefined;
   };
   notes?: string;
   photos?: string[];
@@ -198,8 +198,8 @@ export const inspectionService = {
     status?: 'PENDING' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED'
   ): Promise<InspectionRequest[]> {
     const params: Record<string, string> = {};
-    if (status) params.status = status;
-    if (inspectorId) params.inspectorId = inspectorId;
+    if (status) params['status'] = status;
+    if (inspectorId) params['inspectorId'] = inspectorId;
     const response = await apiClient.get('/inspector/jobs', { params });
     // API returns { success: true, data: jobs[] }
     return response.data?.data ?? response.data ?? [];

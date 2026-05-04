@@ -38,7 +38,7 @@ export function BuyerQuantityLocation() {
   const productMetadata = selectedProductsMetadata.find((m) => m.id === productId);
   const productName = product?.displayName || product?.name || productMetadata?.name || 'Product';
 
-  const currentSpecs = buyerSpecifications[productId] || {};
+  const currentSpecs = buyerSpecifications[productId || ''] || {};
   const currentQuantity = currentSpecs.quantity ? parseFloat(currentSpecs.quantity.toString()) : 0;
   const currentPrice = currentSpecs.pricePerKilo || '';
   const isPresetQuantity = PRESET_QUANTITIES.includes(currentQuantity);
@@ -104,7 +104,7 @@ export function BuyerQuantityLocation() {
 
   const handleQuantitySelect = (quantity: number) => {
     setShowCustomInput(false);
-    updateBuyerSpecification(productId, {
+    updateBuyerSpecification(productId || '', {
       ...currentSpecs,
       quantity: quantity.toString(),
       unit: 'tons',
@@ -113,17 +113,17 @@ export function BuyerQuantityLocation() {
 
   const handleCustomQuantity = () => {
     setShowCustomInput(true);
-    updateBuyerSpecification(productId, { ...currentSpecs, quantity: '', unit: 'tons' });
+    updateBuyerSpecification(productId || '', { ...currentSpecs, quantity: '', unit: 'tons' });
   };
 
   const handleCustomQuantityChange = (value: string) => {
     const numValue = value.replace(/[^0-9.]/g, '');
-    updateBuyerSpecification(productId, { ...currentSpecs, quantity: numValue, unit: 'tons' });
+    updateBuyerSpecification(productId || '', { ...currentSpecs, quantity: numValue, unit: 'tons' });
   };
 
   const handleMaxPriceChange = (value: string) => {
     const numValue = value.replace(/[^0-9.]/g, '');
-    updateBuyerSpecification(productId, { ...currentSpecs, pricePerKilo: numValue });
+    updateBuyerSpecification(productId || '', { ...currentSpecs, pricePerKilo: numValue });
   };
 
   const totalBudget =
@@ -278,7 +278,7 @@ export function BuyerQuantityLocation() {
             <TouchableOpacity
               onPress={() => {
                 setShowCustomInput(false);
-                updateBuyerSpecification(productId, { ...currentSpecs, quantity: '' });
+                updateBuyerSpecification(productId || '', { ...currentSpecs, quantity: '' });
               }}
             >
               <Text style={styles.btnCancelText}>Cancel</Text>

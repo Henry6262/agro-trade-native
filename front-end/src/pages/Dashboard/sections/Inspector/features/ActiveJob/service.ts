@@ -20,16 +20,16 @@ const buildClaimedSpecs = (request: InspectionRequest): Record<string, string> =
   };
 };
 
-const toInspectorLocation = (request: InspectionRequest): InspectorLocationCoordinates => ({
-  latitude: request.latitude,
-  longitude: request.longitude,
-  address: request.address,
-  city: request.tradeOperation?.buyListing?.buyer?.name ?? undefined,
-  region:
-    (request.saleListing?.product as any)?.category ??
-    (request.saleListing?.product as any)?.type ??
-    undefined,
-});
+const toInspectorLocation = (request: InspectionRequest): InspectorLocationCoordinates =>
+  ({
+    latitude: request.latitude,
+    longitude: request.longitude,
+    address: request.address,
+    city: request.tradeOperation?.buyListing?.buyer?.name,
+    region:
+      (request.saleListing?.product as any)?.category ??
+      (request.saleListing?.product as any)?.type,
+  } as InspectorLocationCoordinates);
 
 type LatLng = { latitude: number; longitude: number };
 
@@ -72,30 +72,31 @@ const toInspectorJob = (
       jobLat && jobLon && inspectorLocation
         ? haversineKm(inspectorLocation, { latitude: jobLat, longitude: jobLon })
         : undefined,
-  };
+  } as InspectorVerificationJob;
 };
 
 const toSubmitPayload = (
   jobId: string,
   values: InspectorVerificationFormValues
-): SubmitInspectionResultsDto => ({
-  qualityScore: values.qualityScore,
-  verificationResult: {
-    actualQuantity: Number(values.verifiedSpecs.quantity) || undefined,
-    actualQuality: values.verifiedSpecs.grade,
-    productSpecifications: {
-      variety: values.correctedSpecs?.variety,
-      grade: values.correctedSpecs?.grade,
-      origin: values.correctedSpecs?.origin,
+): SubmitInspectionResultsDto =>
+  ({
+    qualityScore: values.qualityScore,
+    verificationResult: {
+      actualQuantity: Number(values.verifiedSpecs['quantity']) || undefined,
+      actualQuality: values.verifiedSpecs['grade'],
+      productSpecifications: {
+        variety: values.correctedSpecs?.variety,
+        grade: values.correctedSpecs?.grade,
+        origin: values.correctedSpecs?.origin,
+      },
+      foreignMatter: Number(values.verifiedSpecs['foreignMatter']) || undefined,
+      moistureContent: Number(values.verifiedSpecs['moisture']) || undefined,
     },
-    foreignMatter: Number(values.verifiedSpecs.foreignMatter) || undefined,
-    moistureContent: Number(values.verifiedSpecs.moisture) || undefined,
-  },
-  notes: values.notes,
-  photos: values.evidence?.map((item) => item.url),
-  recommendVerification: values.verificationStatus !== 'FAILED',
-  qualityGrade: values.verifiedSpecs.grade,
-});
+    notes: values.notes,
+    photos: values.evidence?.map((item) => item.url),
+    recommendVerification: values.verificationStatus !== 'FAILED',
+    qualityGrade: values.verifiedSpecs['grade'],
+  } as SubmitInspectionResultsDto);
 
 export const inspectorActiveJobService = {
   async fetchActiveJob(

@@ -17,9 +17,9 @@ const parseLocation = (location: string): Location => {
 
   // Try to parse "lat,lng" format
   const coords = location.split(',').map((s) => parseFloat(s.trim()));
-  if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+  if (coords.length === 2 && !isNaN(coords[0]!) && !isNaN(coords[1]!)) {
     return {
-      coordinates: { latitude: coords[0], longitude: coords[1] },
+      coordinates: { latitude: coords[0]!, longitude: coords[1]! },
       address: { city: 'Unknown', state: 'Unknown', country: 'Qatar' },
       type: 'truck_location',
     };
@@ -61,12 +61,12 @@ export const fetchAvailableFleet = async (transporterId?: string): Promise<Fleet
       capacity: truck.capacityTons,
       currentLocation: parseLocation(truck.location),
       status: mapTruckStatus(truck.status),
-      assignedDriver: truck.driver || undefined,
+      ...(truck.driver ? { assignedDriver: truck.driver } : {}),
       lastUpdated: new Date(),
       specifications: {
         model: truck.model,
       },
-    }));
+    } as Truck));
 
     // Calculate stats
     const totalCapacity = trucks.reduce((sum, truck) => sum + truck.capacity, 0);

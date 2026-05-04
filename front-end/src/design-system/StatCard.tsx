@@ -38,8 +38,8 @@ export const StatCard: React.FC<StatCardProps> = ({
       </View>
       <AnimatedCounter
         value={value}
-        prefix={prefix}
-        suffix={suffix}
+        {...(prefix ? { prefix } : {})}
+        {...(suffix ? { suffix } : {})}
         color={color}
         style={styles.value}
       />

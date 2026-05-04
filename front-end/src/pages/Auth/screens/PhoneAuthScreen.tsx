@@ -42,7 +42,7 @@ export default function PhoneAuthScreen() {
   const [loading, setLoading] = useState(false);
   const otpRefs = useRef<(TextInput | null)[]>([]);
 
-  const country = COUNTRY_CODES[countryIndex];
+  const country = COUNTRY_CODES[countryIndex]!;
   const fullPhone = `${country.code}${phone}`;
 
   // Countdown timer

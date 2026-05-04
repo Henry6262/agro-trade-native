@@ -84,6 +84,5 @@ export const createDefaultPickupPayload = (): TransporterPickupPayload => ({
 export const createDefaultDeliveryPayload = (): TransporterDeliveryPayload => ({
   deliveryNotes: 'Delivery completed successfully',
   deliveryPhotos: [],
-  proofOfDelivery: undefined,
   recipientSignature: 'Signed digitally',
 });
