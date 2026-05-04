@@ -1,0 +1,35 @@
+To: ebsi-support@dinum.gov.fr
+Subject: Demande d'accréditation EBSI Trusted Issuer — Projet Grain Sovereign (certificats qualité céréales FR-DE)
+
+Madame, Monsieur,
+
+Je me permets de vous contacter au nom du Projet Grain Sovereign, une initiative d'infrastructure numérique européenne visant à sécuriser et fluidifier le commerce transfrontalier de céréales entre la France et l'Allemagne via des credentials vérifiables EBSI (Verifiable Credentials).
+
+Contexte réglementaire
+Le Règlement (UE) 2023/2854 (Data Act), l'entrée dans la phase "Scale" du CEADS (2026), et le déploiement de l'EBSI comme infrastructure de confiance obligent les acteurs agricoles à produire des preuves numériques interopérables. Or, aujourd'hui, un certificat de qualité PDF émis par un laboratoire coopératif français nécessite 24 à 48 heures de vérification manuelle avant d'être accepté par un meunier ou une banque allemande.
+
+Notre proposition
+Nous développons une couche de "confiance institutionnelle" pour la filière céréalière :
+- Un réseau d'inspecteurs agricoles indépendants émet des VC EBSI (humidité, protéines, mycotoxines, OGM) directement depuis le champ.
+- Un acheteur allemand vérifie le credential en <500 ms via le Trusted Issuers Registry (TIR) EBSI, sans contacter notre serveur.
+- Les données agrégées (anonymisées) alimentent une API B2G conforme à l'Article 14 du Data Act, utilisable par la DG AGRI en cas de "besoin exceptionnel".
+
+Demande concrète
+Nous solliciterions un échange de 30 minutes avec votre équipe EBSI / Identité numérique pour clarifier :
+1. La procédure d'accréditation Trusted Issuer pour une entité privée (SAS) dans le domaine "agrifood-inspection".
+2. Le rôle de la DINUM comme TAO (Trusted Accreditation Organisation) de fallback si l'accrédition allemande (BLE) venait à être retardée.
+3. Les exigences de sécurité (HSM, SecNumCloud) pour le endpoint du proxy EBSI.
+
+Éléments de crédibilité
+- Plateforme AgroTrade opérationnelle (escrow stablecoin, 37 tests smart-contract validés, backend NestJS).
+- Candidature au Spain AgriFoodTech Sandbox (2e appel, deadline 15 mai 2026) pour tester la conformité EBSI + AI Act.
+- Partenariat en discussion avec Eurofins Agro Testing France pour l'accréditation ISO 17025 des inspecteurs.
+
+Je vous remercie par avance pour votre retour et reste naturellement disponible pour un échange téléphonique ou visioconférence.
+
+Cordialement,
+
+[Votre Nom]
+CEO, AgroTrade EU SAS (en cours de constitution)
+[Téléphone] | [Email]
+https://grainsovereign.eu

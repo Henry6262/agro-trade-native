@@ -1,0 +1,27 @@
+To: ebsi@ec.europa.eu
+Subject: EBSI Trusted Issuer Onboarding — Private Entity (Agrifood Inspection Domain)
+
+Dear EBSI Support Office,
+
+We are preparing the EBSI Trusted Issuer accreditation for AgroTrade EU SAS, a private legal entity operating in the agrifood inspection and digital trade-finance sector.
+
+Our use case
+Freelance agrifood inspectors issue W3C Verifiable Credentials (moisture, protein, mycotoxin levels) for cross-border grain trade between France and Germany. Buyers verify these credentials via the EBSI Trusted Issuers Registry without contacting the issuer.
+
+Questions before DID registration
+1. Is the EBSI v3 JSON-LD profile still the current standard, or should we prepare for v4 migration?
+2. For private entities without direct government ownership, which Trusted Accreditation Organisation (TAO) category applies: "National Authority Delegation" or "EBSI Support Office Direct"?
+3. What is the current average processing time from onboarding VC request to TIR mainnet enrollment?
+
+Technical readiness
+- Organization Wallet: EBSI CLI configured (testnet).
+- Cryptography: ES256K + ES256 dual-curve support.
+- Infrastructure: AWS CloudHSM in eu-central-1 (Frankfurt).
+
+We would appreciate a 15-minute onboarding clarification call or written guidance at your earliest convenience.
+
+Best regards,
+
+[Your Name]
+CEO, AgroTrade EU SAS
+[Email] | [Phone]

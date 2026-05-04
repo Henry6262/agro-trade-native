@@ -1,0 +1,38 @@
+To: digitalisierung@ble.de
+Subject: EBSI Trusted Issuer Accreditation for Cross-Border Grain Quality Credentials — Project Grain Sovereign
+
+Sehr geehrte Damen und Herren,
+
+I am writing on behalf of Project Grain Sovereign, a European digital infrastructure initiative designed to reduce friction in Franco-German agrifood trade through EBSI-compliant Verifiable Credentials (VCs).
+
+The problem we solve
+Today, a grain quality certificate issued by a French cooperative lab requires 24–48 hours of manual verification before a German miller or bank accepts it. PDF forgery risks, translation costs, and out-of-band reputation checks slow down intra-EU trade for no regulatory benefit.
+
+Our solution
+We have built a mobile-first escrow and inspection platform (AgroTrade) now used by farmers and truckers across Southeast Europe. We are extending this platform to issue W3C-standard, cryptographically signed grain-quality credentials on the European Blockchain Services Infrastructure (EBSI). A German buyer verifying our credential queries the EBSI Trusted Issuers Registry (TIR) directly — no phone calls, no PDFs, no intermediary.
+
+Why BLE specifically
+As the federal agency operating Germany's agricultural market information systems (MIP, Getreidemarktbericht), BLE is the natural Trust Anchor for agrifood data in Germany. By accrediting our inspector network as an EBSI Trusted Issuer, BLE would:
+- Reduce administrative verification costs for German buyers of French grain.
+- Generate a regulatory precedent for digital quality certificates under Regulation (EU) 2017/625.
+- Support the BMEL Digitalisierung strategy and the CEADS Scale-phase objectives.
+
+What we request
+A 30-minute introductory call with your Digitalisierung or Datenmanagement team to discuss:
+1. BLE's role (or delegated role) as a Trusted Accreditation Organisation (TAO) under EBSI v3.
+2. The evidence required to support a "Trusted Issuer Credential" application for agrifood inspection.
+3. Whether BLE would accept a mutual-recognition letter from DGAL or FranceAgriMer as supporting documentation.
+
+Our credentials
+- Existing agrifood escrow platform with 37 passing smart-contract audits (Foundry/Celo).
+- Partnership discussions underway with Eurofins Agro Testing France for ISO 17025 backing.
+- Active application to the Spain AgriFoodTech Sandbox (2nd call, deadline 15 May 2026) for regulatory testing of EBSI + AI Act compliance.
+
+I have attached a one-page technical brief for your review. We would be delighted to present the full roadmap in a video call at your earliest convenience.
+
+Mit freundlichen Grüßen,
+
+[Your Name]
+CEO, AgroTrade EU SAS (in formation)
+[Phone] | [Email]
+https://grainsovereign.eu
