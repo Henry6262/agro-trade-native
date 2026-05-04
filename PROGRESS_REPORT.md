@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-05-03_
+_Auto-generated: 2026-05-04_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-05-03_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `4317a5d` 2026-05-03 — docs: auto-update progress report [skip ci]
 - `a31593b` 2026-05-03 — chore: rebrand to GreenBlock for ETHPrague Hackathon
 - `81d2834` 2026-04-26 — feat(agro): overhaul transport cost logic and simulation service strategy
 - `22e7637` 2026-04-25 — fix(backend): achieve 100% pass rate across 16 E2E suites and resolve regression
@@ -24,7 +25,6 @@ _Auto-generated: 2026-05-03_
 - `55c2787` 2026-04-09 — feat: update landing and contract workspace config
 - `f10e8c4` 2026-04-06 — docs: auto-update progress report [skip ci]
 - `0ec098f` 2026-04-06 — docs: auto-update progress report [skip ci]
-- `3678034` 2026-04-06 — fix(landing): enlarge phone content, remove floating cards & ecosystem section
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
