@@ -1,4 +1,5 @@
-import type { TransportOnboardingData, UserRole } from '@shared/types';
+import type { TransportOnboardingData } from '@shared/types';
+import type { OnboardingRole } from '@shared/types/onboarding';
 
 import type { OnboardingLocation } from './types';
 
@@ -29,7 +30,7 @@ export const createDefaultTransportData = (): TransportOnboardingData => ({
   },
 });
 
-export const getRoleStepCount = (role: UserRole) => {
+export const getRoleStepCount = (role: OnboardingRole) => {
   switch (role) {
     case 'seller':
       return 4;

@@ -23,6 +23,7 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
     currentStep,
     setStep,
     saveOnboardingData,
+    location,
   } = useOnboardingStore();
 
   const { fetchAllData } = useProductStore();
@@ -82,13 +83,15 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
             amount: specs.quantity || 0,
             unit: specs.unit || ('tons' as const),
           },
-          priceRange: specs.pricePerKilo
+          ...(specs.pricePerKilo
             ? {
-                min: parseFloat(specs.pricePerKilo) * 0.9,
-                max: parseFloat(specs.pricePerKilo) * 1.1,
-                currency: 'USD',
+                priceRange: {
+                  min: parseFloat(specs.pricePerKilo) * 0.9,
+                  max: parseFloat(specs.pricePerKilo) * 1.1,
+                  currency: 'USD',
+                },
               }
-            : undefined,
+            : {}),
           qualitySpecs: specs.qualitySpecs || [],
         };
       });
@@ -195,7 +198,7 @@ export function SellerOnboarding({ onComplete }: SellerOnboardingProps) {
         // Check if quantity is set and location is provided
         const hasLocation = store.location !== null && store.location !== undefined;
         const productId = selectedProducts[0];
-        const spec = store.sellerSpecifications[productId];
+        const spec = store.sellerSpecifications[productId || ''];
         const hasQuantity = spec && spec.quantity && parseFloat(spec.quantity) > 0;
         return hasLocation && hasQuantity;
       case 'custom-offer':

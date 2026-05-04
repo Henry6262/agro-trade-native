@@ -10,8 +10,8 @@ import type {
   SellerOnboardingData,
   TransportOnboardingData,
   TransportOpportunities,
-  UserRole,
 } from '@shared/types';
+import type { OnboardingRole } from '@shared/types/onboarding';
 
 export interface OnboardingLocation {
   latitude: number;
@@ -41,7 +41,7 @@ export interface OnboardingUserInfo {
 export interface OnboardingStore {
   currentStep: number;
   totalSteps: number;
-  selectedRole: UserRole | undefined;
+  selectedRole: OnboardingRole | undefined;
   sellerData: SellerOnboardingData | undefined;
   buyerData: BuyerOnboardingData | undefined;
   transportData: TransportOnboardingData | undefined;
@@ -49,7 +49,7 @@ export interface OnboardingStore {
   isLoading: boolean;
   isSubmitting: boolean;
   error: string | null;
-  setRole: (role: UserRole) => void;
+  setRole: (role: OnboardingRole) => void;
   nextStep: () => void;
   previousStep: () => void;
   setStep: (step: number) => void;

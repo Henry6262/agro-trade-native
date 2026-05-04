@@ -137,7 +137,20 @@ export const PermissionGuard: React.FC<PermissionGuardProps> = ({
             <Text className="text-white text-center font-semibold">Enable Location</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => setLocationPermission(true)} className="mt-3 py-3">
+          <TouchableOpacity
+            onPress={() => {
+              setLocationPermission(true);
+              setLocation({
+                latitude: 0,
+                longitude: 0,
+                address: '',
+                city: '',
+                region: '',
+                country: '',
+              });
+            }}
+            className="mt-3 py-3"
+          >
             <Text className="text-gray-400 text-center text-sm">Continue without location</Text>
           </TouchableOpacity>
         </View>

@@ -1,7 +1,7 @@
-import type { UserRole, StepConfig } from '../types/onboarding';
+import type { OnboardingRole, StepConfig } from '../types/onboarding';
 
 // Simplified onboarding steps without base management
-export const simplifiedRoleSteps: Record<UserRole, StepConfig[]> = {
+export const simplifiedRoleSteps: Record<OnboardingRole, StepConfig[]> = {
   seller: [
     { id: 'products', title: 'Product', description: 'Select one product to sell' },
     {
@@ -17,7 +17,7 @@ export const simplifiedRoleSteps: Record<UserRole, StepConfig[]> = {
     { id: 'specifications', title: 'Specifications', description: 'Product requirements' },
     { id: 'market', title: 'Overview', description: 'Review and complete' },
   ],
-  transporter: [
+  transport: [
     { id: 'fleet', title: 'Fleet', description: 'Your vehicles' },
     { id: 'coverage', title: 'Coverage', description: 'Service areas' },
     { id: 'preferences', title: 'Preferences', description: 'Job preferences' },

@@ -1,6 +1,6 @@
-import type { UserRole, StepConfig, Product } from '../types/onboarding';
+import type { OnboardingRole, StepConfig, Product } from '../types/onboarding';
 
-export const roleSteps: Record<UserRole, StepConfig[]> = {
+export const roleSteps: Record<OnboardingRole, StepConfig[]> = {
   seller: [
     { id: 'products', title: 'Products', description: 'Choose products' },
     { id: 'specifications', title: 'Details', description: 'Add specifications' },
@@ -15,7 +15,7 @@ export const roleSteps: Record<UserRole, StepConfig[]> = {
     { id: 'distribution', title: 'Distribution', description: 'Quantity per location' },
     { id: 'market', title: 'Request', description: 'Create offer' },
   ],
-  transporter: [
+  transport: [
     { id: 'fleet', title: 'Fleet', description: 'Your trucks' },
     { id: 'bases', title: 'Bases', description: 'Operating locations' },
     { id: 'location', title: 'Coverage', description: 'Service areas' },

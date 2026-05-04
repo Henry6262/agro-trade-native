@@ -1,4 +1,4 @@
-export type UserRole = 'seller' | 'buyer' | 'transporter';
+export type OnboardingRole = 'seller' | 'buyer' | 'transport';
 export type SortOption =
   | 'relevance'
   | 'price-low'

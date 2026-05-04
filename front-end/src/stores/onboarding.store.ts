@@ -5,7 +5,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService, RegisterWithCompanyDto, CompanyInfo } from '@services/authService';
 import { useAuthStore } from '@stores/auth.store';
 import type {
-  UserRole,
   ProductSelection,
   ProductRequirement,
   FleetInformation,
@@ -14,6 +13,7 @@ import type {
   MarketInsights,
   TransportOpportunities,
 } from '../shared/types';
+import type { OnboardingRole } from '../shared/types/onboarding';
 import { buildOnboardingPayload } from './onboarding-store/payload';
 import {
   createDefaultTransportData,
@@ -32,7 +32,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
     immer((set, get) => ({
       ...getInitialState(),
 
-      setRole: (role: UserRole) =>
+      setRole: (role: OnboardingRole) =>
         set((state) => {
           state.selectedRole = role;
           state.totalSteps = getRoleStepCount(role);
