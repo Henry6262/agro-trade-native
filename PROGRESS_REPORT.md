@@ -10,6 +10,9 @@ _Auto-generated: 2026-05-04_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `63f78d0` 2026-05-04 — Merge branch 'main' of https://github.com/Henry6262/agro-trade-native
+- `44b0987` 2026-05-04 — chore: disable broken pre-commit hook pending ESLint v9 migration
+- `95a689c` 2026-05-04 — docs: auto-update progress report [skip ci]
 - `b21560c` 2026-05-04 — Merge remote-tracking branch 'origin/main'
 - `883b4ee` 2026-05-04 — chore: add sandbox assets, E2E tests, EU strategy docs, and EBSI scripts
 - `655f75e` 2026-05-04 — feat: add B2G and EBSI modules for EU sandbox compliance
@@ -22,9 +25,6 @@ _Auto-generated: 2026-05-04_
 - `81d2834` 2026-04-26 — feat(agro): overhaul transport cost logic and simulation service strategy
 - `22e7637` 2026-04-25 — fix(backend): achieve 100% pass rate across 16 E2E suites and resolve regression
 - `010ad7b` 2026-04-22 — chore: commit 10 minor files for repository cleanup
-- `0f0f95f` 2026-04-18 — fix: remove dynamic ethers imports, use static import for Jest compatibility
-- `f4ee687` 2026-04-18 — fix: resolve 5 TypeScript/Prisma schema errors in backend
-- `8c32c44` 2026-04-17 — feat(zurich): stablehacks top-10 demo prep overhaul
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
