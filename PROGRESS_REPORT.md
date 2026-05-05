@@ -10,6 +10,9 @@ _Auto-generated: 2026-05-05_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `2ae838c` 2026-05-05 — Merge branch 'main' of https://github.com/Henry6262/agro-trade-native
+- `90ec28d` 2026-05-05 — feat: add PC build setup script using Homebrew
+- `54c000a` 2026-05-05 — docs: auto-update progress report [skip ci]
 - `2aac110` 2026-05-05 — Merge branch 'main' of https://github.com/Henry6262/agro-trade-native
 - `6a2147f` 2026-05-05 — feat: add remote workstation setup scripts and configs
 - `ae6cbb1` 2026-05-04 — docs: auto-update progress report [skip ci]
@@ -22,9 +25,6 @@ _Auto-generated: 2026-05-05_
 - `4104ba6` 2026-05-04 — fix: TypeScript strict mode compliance - 0 errors across frontend
 - `d0d1c48` 2026-05-04 — fix: onboarding location bug - SellerOnboarding not subscribing to store changes
 - `f92220c` 2026-05-04 — chore: remove 90 dead files (.bak, .gitkeep, empty scaffolds, duplicates, old as
-- `e10ffe7` 2026-05-04 — docs: auto-update progress report [skip ci]
-- `4317a5d` 2026-05-03 — docs: auto-update progress report [skip ci]
-- `a31593b` 2026-05-03 — chore: rebrand to GreenBlock for ETHPrague Hackathon
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
