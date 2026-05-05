@@ -63,6 +63,9 @@ export type DashboardStackParamList = {
   SellerDashboard: { activeTab?: string };
   BuyerDashboard: { activeTab?: string };
   TransporterDashboard: { activeTab?: string };
+  TradeDetail: { tradeId: string };
+  UnifiedDashboard: undefined;
+  TradeHub: undefined;
 };
 
 export type MarketplaceStackParamList = {

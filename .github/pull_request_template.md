@@ -1,18 +1,31 @@
-## Type Safety Checklist
+## PR Checklist
 
-- [ ] No new or surviving `any` types (`npx tsc --noEmit` passes cleanly)
-- [ ] All new / edited ID fields use branded types (`UserId`, `OfferId`, etc.)
-- [ ] All week/day structures use explicit `DayOfWeek` types with readonly slots
-- [ ] No circular imports (`eslint-plugin-import/no-cycle`)
-- [ ] `object` or `{}` are not used as types
-- [ ] All arrays that are not explicitly mutable by design are `readonly`
+### Scope
+- [ ] Backend (`backend/`)
+- [ ] Mobile (`front-end/`)
+- [ ] Admin Dashboard (`admin-dashboard/`)
+- [ ] Smart Contracts (`contracts/` or `contracts-solana/`)
+- [ ] Docs / Infra
 
-## Testing & Build
+### Type Safety & Quality
+- [ ] `npx tsc --noEmit` passes in affected workspaces
+- [ ] No new `any` types (exception must be justified below)
+- [ ] No circular imports
+- [ ] ESLint passes (`npm run lint` in affected workspace)
 
-- [ ] Local `npx tsc --noEmit` and smoke tests pass
+### Testing
+- [ ] Unit tests pass (`npm test` in affected workspace)
+- [ ] Contract tests pass (`forge test` in `contracts/`)
+- [ ] E2E scenarios pass if trade logic changed
+
+### Compliance & Critical Paths
+- [ ] No changes to escrow logic without new Foundry tests
+- [ ] cUSD amounts use 18 decimals — never truncate or round
+- [ ] KYC/KYT/AML data models unchanged unless reviewed
+
+### Description
+<!-- What changed and why -->
 
 ---
 
-**Important!**
-PRs containing new `any` types or raw string ID fields are subject to a **request for changes**.
-Every exception must be technically justified in the description below!
+**Important:** PRs modifying escrow contracts or financial calculations without accompanying tests will be blocked.

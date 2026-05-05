@@ -1,5 +1,0 @@
-/**
- * InspectionExecution types
- */
-
-export {};

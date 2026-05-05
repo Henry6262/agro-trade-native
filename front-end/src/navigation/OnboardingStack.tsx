@@ -2,12 +2,8 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { OnboardingStackParamList } from './types';
 
-// Import onboarding screens
-import { RoleSelectionScreen } from '../features/onboarding/screens/RoleSelectionScreen';
-import { BuyerOnboardingFlowScreen } from '../features/onboarding/screens/buyer/BuyerOnboardingFlowScreen';
-import { SellerOnboardingFlowScreen } from '../features/onboarding/screens/seller/SellerOnboardingFlowScreen';
-import { TransporterOnboardingFlowScreen } from '../features/onboarding/screens/transporter/TransporterOnboardingFlowScreen';
-import { OnboardingCompleteScreen } from '../features/onboarding/screens/OnboardingCompleteScreen';
+import QuickOnboardingScreen from '../screens/onboarding/QuickOnboardingScreen';
+import { OnboardingCompleteScreen } from '../screens/onboarding/OnboardingCompleteScreen';
 
 const Stack = createNativeStackNavigator<OnboardingStackParamList>();
 
@@ -20,10 +16,10 @@ export default function OnboardingStack() {
         contentStyle: { backgroundColor: 'transparent' },
       }}
     >
-      <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
-      <Stack.Screen name="BuyerOnboardingFlow" component={BuyerOnboardingFlowScreen} />
-      <Stack.Screen name="SellerOnboardingFlow" component={SellerOnboardingFlowScreen} />
-      <Stack.Screen name="TransporterOnboardingFlow" component={TransporterOnboardingFlowScreen} />
+      <Stack.Screen name="RoleSelection" component={QuickOnboardingScreen} />
+      <Stack.Screen name="BuyerOnboardingFlow" component={QuickOnboardingScreen} />
+      <Stack.Screen name="SellerOnboardingFlow" component={QuickOnboardingScreen} />
+      <Stack.Screen name="TransporterOnboardingFlow" component={QuickOnboardingScreen} />
       <Stack.Screen name="OnboardingComplete" component={OnboardingCompleteScreen} />
     </Stack.Navigator>
   );

@@ -1,1 +1,0 @@
-export { BuyerQuantityLocation } from './BuyerQuantityLocation';

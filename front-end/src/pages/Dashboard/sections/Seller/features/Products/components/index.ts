@@ -1,1 +1,0 @@
-export { SellerProductCard } from './ProductCard';

@@ -16,8 +16,7 @@
     "baseUrl": "src",
     "verbatimModuleSyntax": false,
     "paths": {
-      "@features/*": ["features/*"],
-      "@pages/*": ["pages/*"],
+      "@screens/*": ["screens/*"],
       "@shared/*": ["shared/*"],
       "@navigation/*": ["navigation/*"],
       "@stores/*": ["stores/*"],
