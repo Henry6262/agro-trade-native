@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-05-04_
+_Auto-generated: 2026-05-05_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,9 @@ _Auto-generated: 2026-05-04_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `2aac110` 2026-05-05 — Merge branch 'main' of https://github.com/Henry6262/agro-trade-native
+- `6a2147f` 2026-05-05 — feat: add remote workstation setup scripts and configs
+- `ae6cbb1` 2026-05-04 — docs: auto-update progress report [skip ci]
 - `63f78d0` 2026-05-04 — Merge branch 'main' of https://github.com/Henry6262/agro-trade-native
 - `44b0987` 2026-05-04 — chore: disable broken pre-commit hook pending ESLint v9 migration
 - `95a689c` 2026-05-04 — docs: auto-update progress report [skip ci]
@@ -22,9 +25,6 @@ _Auto-generated: 2026-05-04_
 - `e10ffe7` 2026-05-04 — docs: auto-update progress report [skip ci]
 - `4317a5d` 2026-05-03 — docs: auto-update progress report [skip ci]
 - `a31593b` 2026-05-03 — chore: rebrand to GreenBlock for ETHPrague Hackathon
-- `81d2834` 2026-04-26 — feat(agro): overhaul transport cost logic and simulation service strategy
-- `22e7637` 2026-04-25 — fix(backend): achieve 100% pass rate across 16 E2E suites and resolve regression
-- `010ad7b` 2026-04-22 — chore: commit 10 minor files for repository cleanup
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
