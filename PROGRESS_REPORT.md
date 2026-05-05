@@ -10,6 +10,9 @@ _Auto-generated: 2026-05-05_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `1abc517` 2026-05-05 — Merge branch 'main' of https://github.com/Henry6262/agro-trade-native
+- `9fdafe7` 2026-05-05 — feat: add Tailscale nuke script + ZeroTier alternative
+- `a042613` 2026-05-05 — docs: auto-update progress report [skip ci]
 - `2ae838c` 2026-05-05 — Merge branch 'main' of https://github.com/Henry6262/agro-trade-native
 - `90ec28d` 2026-05-05 — feat: add PC build setup script using Homebrew
 - `54c000a` 2026-05-05 — docs: auto-update progress report [skip ci]
@@ -22,9 +25,6 @@ _Auto-generated: 2026-05-05_
 - `b21560c` 2026-05-04 — Merge remote-tracking branch 'origin/main'
 - `883b4ee` 2026-05-04 — chore: add sandbox assets, E2E tests, EU strategy docs, and EBSI scripts
 - `655f75e` 2026-05-04 — feat: add B2G and EBSI modules for EU sandbox compliance
-- `4104ba6` 2026-05-04 — fix: TypeScript strict mode compliance - 0 errors across frontend
-- `d0d1c48` 2026-05-04 — fix: onboarding location bug - SellerOnboarding not subscribing to store changes
-- `f92220c` 2026-05-04 — chore: remove 90 dead files (.bak, .gitkeep, empty scaffolds, duplicates, old as
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
