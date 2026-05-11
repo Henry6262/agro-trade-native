@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-05-05_
+_Auto-generated: 2026-05-11_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-05-05_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `409d3c3` 2026-05-05 — docs: auto-update progress report [skip ci]
 - `d3181f5` 2026-05-05 — Merge branch 'main' of https://github.com/Henry6262/agro-trade-native
 - `47f76f8` 2026-05-05 — feat(front-end): full revamp — unified dashboard, quick onboarding, trade hub, b
 - `da3ed88` 2026-05-05 — docs: auto-update progress report [skip ci]
@@ -24,7 +25,6 @@ _Auto-generated: 2026-05-05_
 - `ae6cbb1` 2026-05-04 — docs: auto-update progress report [skip ci]
 - `63f78d0` 2026-05-04 — Merge branch 'main' of https://github.com/Henry6262/agro-trade-native
 - `44b0987` 2026-05-04 — chore: disable broken pre-commit hook pending ESLint v9 migration
-- `95a689c` 2026-05-04 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
