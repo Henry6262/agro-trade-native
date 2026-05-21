@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   useWindowDimensions,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MotiView } from 'moti';
@@ -18,8 +19,9 @@ import { CharacterAvatar } from '../components/CharacterAvatar';
 import { VoiceStateIndicator } from '../components/VoiceStateIndicator';
 import { ChatBubble } from '../components/ChatBubble';
 import { AIConfirmationModal } from '../components/AIConfirmationModal';
+import { useVoiceSession } from '../hooks/useVoiceSession';
 import { useAIModeStore } from '../store/ai-mode.store';
-import type { AIUserRole, AIOnboardingForm } from '../types';
+import type { AIUserRole, AIOnboardingForm, AIActionPayload } from '../types';
 
 interface AIModeScreenProps {
   route: {
@@ -44,11 +46,45 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
     isConnected,
     sessionError,
     onboardingForm,
-    addUserMessage,
-    setVoiceState,
     setActive,
     resetSession,
+    showConfirmation,
   } = useAIModeStore();
+
+  // Handle AI actions from voice bot
+  const handleAction = useCallback(
+    (action: AIActionPayload) => {
+      switch (action.action) {
+        case 'create_offer':
+          showConfirmation(
+            'Публикуване на оферта?',
+            `Оферта: ${JSON.stringify(action.params)}`,
+            action
+          );
+          break;
+        case 'create_request':
+          showConfirmation(
+            'Публикуване на заявка?',
+            `Заявка: ${JSON.stringify(action.params)}`,
+            action
+          );
+          break;
+        case 'navigate':
+          // Direct navigation without confirmation
+          navigation.navigate(action.params['screen'] as never);
+          break;
+        default:
+          console.log('AI Action:', action);
+      }
+    },
+    [showConfirmation, navigation]
+  );
+
+  const { isConnecting, connect, disconnect, startListening, stopListening } = useVoiceSession({
+    role,
+    mode,
+    onAction: handleAction,
+  });
 
   const isListening = voiceState === 'listening';
 
@@ -61,38 +97,35 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
     }
   }, [messages.length]);
 
-  // Set active on mount
+  // Set active on mount, auto-connect
   React.useEffect(() => {
     setActive(true);
+    if (!isConnected && !isConnecting) {
+      connect();
+    }
     return () => {
       setActive(false);
-      resetSession();
+      disconnect();
     };
-  }, [setActive, resetSession]);
+  }, []);
 
-  // Simulate voice session for MVP (replace with Pipecat hook later)
   const handlePushToTalk = useCallback(() => {
     if (isListening) {
-      setVoiceState('thinking');
-      setTimeout(() => {
-        setVoiceState('talking');
-        // Simulate assistant response
-        setTimeout(() => {
-          setVoiceState('idle');
-        }, 3000);
-      }, 1500);
+      stopListening();
     } else {
-      setVoiceState('listening');
+      startListening();
     }
-  }, [isListening, setVoiceState]);
+  }, [isListening, startListening, stopListening]);
 
   const handleBack = () => {
-    setActive(false);
+    disconnect();
     navigation.goBack();
   };
 
   const handleReset = () => {
+    disconnect();
     resetSession();
+    connect();
   };
 
   return (
@@ -118,6 +151,18 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
             </TouchableOpacity>
           </View>
 
+          {/* Connecting state */}
+          {isConnecting && (
+            <MotiView
+              from={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              style={styles.connectingBanner}
+            >
+              <ActivityIndicator size="small" color="#4ADE80" />
+              <Text style={styles.connectingText}>Свързване с AI...</Text>
+            </MotiView>
+          )}
+
           {/* Character + Live Form Area */}
           <View style={styles.characterSection}>
             <CharacterAvatar role={role} />
@@ -137,7 +182,7 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
               contentContainerStyle={styles.chatContent}
               showsVerticalScrollIndicator={false}
             >
-              {messages.length === 0 && (
+              {messages.length === 0 && !isConnecting && (
                 <View style={styles.welcomeMessage}>
                   <Text style={styles.welcomeTitle}>
                     {mode === 'onboarding'
@@ -161,6 +206,9 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
           {sessionError && (
             <View style={styles.errorBanner}>
               <Text style={styles.errorText}>{sessionError}</Text>
+              <TouchableOpacity onPress={connect} style={styles.retryBtn}>
+                <Text style={styles.retryText}>Опитайте отново</Text>
+              </TouchableOpacity>
             </View>
           )}
 
@@ -168,12 +216,13 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
           <View style={styles.controls}>
             <TouchableOpacity
               onPressIn={handlePushToTalk}
-              onPressOut={isListening ? handlePushToTalk : undefined}
               activeOpacity={0.8}
               style={[
                 styles.pttButton,
                 isListening && styles.pttButtonActive,
+                !isConnected && !isConnecting && styles.pttButtonDisabled,
               ]}
+              disabled={!isConnected && !isConnecting}
             >
               <MotiView
                 animate={{
@@ -191,7 +240,11 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
                 )}
               </MotiView>
               <Text style={styles.pttLabel}>
-                {isListening ? 'Слушам...' : 'Задръжте, за да говорите'}
+                {isListening
+                  ? 'Слушам...'
+                  : isConnecting
+                    ? 'Свързване...'
+                    : 'Задръжте, за да говорите'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -233,7 +286,8 @@ const LiveFormPreview: React.FC<{ form: AIOnboardingForm; role: AIUserRole }> = 
       ) : null}
       {role === 'seller' && form.sellerOffer?.commodity ? (
         <Text style={styles.formPreviewItem}>
-          🌾 Оферта: {form.sellerOffer.quantity}кг {form.sellerOffer.commodity} @ {form.sellerOffer.pricePerKg} лв/кг
+          🌾 Оферта: {form.sellerOffer.quantity}кг {form.sellerOffer.commodity} @{' '}
+          {form.sellerOffer.pricePerKg} лв/кг
         </Text>
       ) : null}
       {role === 'buyer' && form.buyerRequest?.commodity ? (
@@ -295,10 +349,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  connectingBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 8,
+    marginHorizontal: 16,
+    marginBottom: 4,
+    backgroundColor: 'rgba(74, 222, 128, 0.1)',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(74, 222, 128, 0.2)',
+  },
+  connectingText: {
+    color: '#4ADE80',
+    fontSize: 13,
+    fontWeight: '600',
+  },
   characterSection: {
     alignItems: 'center',
-    paddingTop: 8,
-    paddingBottom: 16,
+    paddingTop: 4,
+    paddingBottom: 12,
   },
   chatSection: {
     flex: 1,
@@ -329,7 +401,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   formPreview: {
-    marginTop: 12,
+    marginTop: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: 'rgba(255,255,255,0.06)',
@@ -354,7 +426,7 @@ const styles = StyleSheet.create({
   },
   controls: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 16,
     paddingHorizontal: 24,
   },
   pttButton: {
@@ -377,6 +449,9 @@ const styles = StyleSheet.create({
     borderColor: '#EF4444',
     shadowColor: '#EF4444',
   },
+  pttButtonDisabled: {
+    opacity: 0.5,
+  },
   pttLabel: {
     position: 'absolute',
     bottom: -24,
@@ -392,10 +467,23 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(239, 68, 68, 0.3)',
+    alignItems: 'center',
   },
   errorText: {
     color: '#FCA5A5',
     fontSize: 13,
     textAlign: 'center',
+    marginBottom: 8,
+  },
+  retryBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(239, 68, 68, 0.3)',
+    borderRadius: 8,
+  },
+  retryText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

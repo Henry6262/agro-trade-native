@@ -40,7 +40,7 @@ export default function WelcomeScreen() {
 
             {/* AI Mode Entry */}
             <TouchableOpacity
-              onPress={() => navigation.navigate('AIMode' as never, { role: 'seller', mode: 'onboarding' } as any)}
+              onPress={() => (navigation as any).navigate('AIMode', { role: 'seller', mode: 'onboarding' })}
               style={styles.aiModeBtn}
             >
               <View style={styles.aiModeIcon}>

@@ -24,9 +24,11 @@
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby bases and optimize delivery routes.",
         "NSCameraUsageDescription": "This app uses the camera to take photos of your agricultural products.",
         "NSPhotoLibraryUsageDescription": "This app accesses your photo library to upload product images.",
+        "NSMicrophoneUsageDescription": "This app uses your microphone for voice conversations with the AI assistant.",
         "UIBackgroundModes": [
           "remote-notification",
-          "location"
+          "location",
+          "audio"
         ]
       }
     },
@@ -45,7 +47,9 @@
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
-        "POST_NOTIFICATIONS"
+        "POST_NOTIFICATIONS",
+        "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS"
       ]
     },
     "web": {
@@ -97,7 +101,8 @@
         }
       ],
       "expo-localization",
-      "expo-camera"
+      "expo-camera",
+      "@daily-co/config-plugin-rn-daily-js"
     ],
     "owner": "henry6262",
     "extra": {

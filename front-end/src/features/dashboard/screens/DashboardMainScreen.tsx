@@ -350,10 +350,10 @@ export default function DashboardMainScreen() {
       {/* AI Floating Assistant Button */}
       <AIFloatingButton
         onPress={() =>
-          navigation.navigate('AIMode' as never, {
+          (navigation as any).navigate('AIMode', {
             role: userRole === 'transporter' ? 'transporter' : (userRole as 'seller' | 'buyer' | 'transporter'),
             mode: 'assistant',
-          } as any)
+          })
         }
       />
 
