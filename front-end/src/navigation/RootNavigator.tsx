@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { CharacterTourOverlay } from '../screens/onboarding/components/CharacterTourOverlay';
+import { CharacterTourOverlay } from '../features/onboarding/components/CharacterTourOverlay';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
 import { linking } from './linking';
@@ -16,7 +16,7 @@ import AdminStack from './AdminStack';
 import OrderCreateScreen from '../screens/orders/OrderCreateScreen';
 import OrderDetailScreen from '../screens/orders/OrderDetailScreen';
 import ProductDetailScreen from '../screens/marketplace/ProductDetailScreen';
-import { OAuthCallbackScreen } from '../screens/auth/OAuthCallbackScreen';
+import { OAuthCallbackScreen } from '../pages/Auth/screens/OAuthCallbackScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 

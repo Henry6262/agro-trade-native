@@ -88,14 +88,14 @@ export function BuyerDashboardSection({ activeTab = 'orders' }: BuyerDashboardSe
   const getStatusConfig = (status: string) => {
     const s = status.toLowerCase();
     if (s === 'delivered' || s === 'complete' || s === 'confirmed')
-      return { icon: <CheckCircle2 size={14} color="#4ADE80" />, color: '#4ADE80', label: status.toUpperCase() };
+      return { icon: <CheckCircle2 size={14} color={COLORS.success} />, color: COLORS.success, label: status.toUpperCase() };
     if (s === 'cancelled' || s === 'refunded')
-      return { icon: <XCircle size={14} color="#F87171" />, color: '#F87171', label: status.toUpperCase() };
+      return { icon: <XCircle size={14} color={COLORS.danger} />, color: COLORS.danger, label: status.toUpperCase() };
     if (s === 'shipped')
-      return { icon: <Truck size={14} color="#4ADE80" />, color: '#4ADE80', label: 'IN TRANSIT' };
+      return { icon: <Truck size={14} color={COLORS.success} />, color: COLORS.success, label: 'IN TRANSIT' };
     if (s === 'pending')
-      return { icon: <Clock size={14} color="#FCD34D" />, color: '#FCD34D', label: 'PENDING' };
-    return { icon: <Package size={14} color="#FCD34D" />, color: '#FCD34D', label: status.toUpperCase() };
+      return { icon: <Clock size={14} color={COLORS.warning} />, color: COLORS.warning, label: 'PENDING' };
+    return { icon: <Package size={14} color={COLORS.warning} />, color: COLORS.warning, label: status.toUpperCase() };
   };
 
   const renderStats = () => {
@@ -113,16 +113,16 @@ export function BuyerDashboardSection({ activeTab = 'orders' }: BuyerDashboardSe
         <StatCard
           label="Pending"
           value={stats.pending}
-          icon={<Clock size={16} color="#FCD34D" />}
-          color="#FCD34D"
+          icon={<Clock size={16} color={COLORS.warning} />}
+          color={COLORS.warning}
           style={styles.statCard}
           delay={50}
         />
         <StatCard
           label="Completed"
           value={stats.completed}
-          icon={<CheckCircle2 size={16} color="#4ADE80" />}
-          color="#4ADE80"
+          icon={<CheckCircle2 size={16} color={COLORS.success} />}
+          color={COLORS.success}
           style={styles.statCard}
           delay={100}
         />
@@ -130,8 +130,8 @@ export function BuyerDashboardSection({ activeTab = 'orders' }: BuyerDashboardSe
           label="Total Spent"
           value={stats.totalSpent}
           prefix="$"
-          icon={<DollarSign size={16} color="#FCD34D" />}
-          color="#FCD34D"
+          icon={<DollarSign size={16} color={COLORS.accentGold} />}
+          color={COLORS.accentGold}
           style={styles.statCard}
           delay={150}
         />
@@ -277,7 +277,7 @@ export function BuyerDashboardSection({ activeTab = 'orders' }: BuyerDashboardSe
           subtitle={error}
           cta="Retry"
           onPress={fetchData}
-          icon={<AlertCircle size={32} color="#F87171" />}
+          icon={<AlertCircle size={32} color={COLORS.danger} />}
         />
       </View>
     );
@@ -288,7 +288,7 @@ export function BuyerDashboardSection({ activeTab = 'orders' }: BuyerDashboardSe
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4ADE80" />
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accentGreen} />
       }
     >
       {renderStats()}

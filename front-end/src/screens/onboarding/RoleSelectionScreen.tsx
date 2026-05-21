@@ -24,9 +24,9 @@ import { apiClient } from '@services/api';
 import { GradientBackground, GlassButton } from '@design-system';
 
 const ROLE_IMAGES = {
-  buyer: require('../../../../assets/UserTypes/Buyer.png'),
-  seller: require('../../../../assets/UserTypes/Seller.png'),
-  transport: require('../../../../assets/UserTypes/transporter.png'),
+  buyer: require('../../../assets/UserTypes/Buyer.png'),
+  seller: require('../../../assets/UserTypes/Seller.png'),
+  transport: require('../../../assets/UserTypes/transporter.png'),
 } as const;
 
 type RoleSelectionScreenNavigationProp = NativeStackNavigationProp<
@@ -182,7 +182,7 @@ export const RoleSelectionScreen: React.FC = () => {
           <View style={styles.topHeader}>
             <View style={styles.logoWrapper}>
               <Image
-                source={require('../../../../assets/agra-logo.png')}
+                source={require('../../../assets/agra-logo.png')}
                 style={styles.logoImage}
                 resizeMode="cover"
               />

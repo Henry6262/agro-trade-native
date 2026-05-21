@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -105,7 +105,7 @@ function emptyForm(): CreateTransportRequestPayload {
 
 // ── Page component ───────────────────────────────────────────────────────────
 
-export default function AdminTransportPage() {
+function AdminTransportPageContent() {
   const searchParams = useSearchParams();
   const preselectedTradeId = searchParams.get("tradeId");
   const didAutoOpen = useRef(false);
@@ -719,5 +719,15 @@ export default function AdminTransportPage() {
         </div>
       )}
     </>
+  );
+}
+
+
+// Suspense wrapper required for useSearchParams in Next.js 14+ static generation
+export default function AdminTransportPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-muted">Loading transport dashboard…</div>}>
+      <AdminTransportPageContent />
+    </Suspense>
   );
 }

@@ -31,7 +31,6 @@ import SellerDashboardSection from './seller';
 import BuyerDashboardSection from './buyer';
 import TransporterDashboardSection from './transporter';
 import { InspectorDashboardSection } from './inspector';
-import UnifiedDashboardScreen from './UnifiedDashboardScreen';
 import { useAuthStore } from '../../stores/auth.store';
 import { UserRole } from '../../shared/types';
 import { GradientBackground, GlassHeader } from '../../design-system';
@@ -82,7 +81,7 @@ export default function DashboardMainScreen() {
         setActiveSection('orders');
         break;
       case 'transporter':
-        setActiveSection('bidding');
+        setActiveSection('jobs');
         break;
       case 'inspector':
         setActiveSection('active');
@@ -110,11 +109,9 @@ export default function DashboardMainScreen() {
     }
     if (userRole === 'transporter') {
       return [
-        { id: 'bidding', icon: Package, label: 'BIDDING' },
-        { id: 'offers', icon: Bell, label: 'OFFERS' },
-        { id: 'transfers', icon: Truck, label: 'TRANSFERS' },
-        { id: 'fleet', icon: Users, label: 'FLEET' },
-        { id: 'intelligence', icon: TrendingUp, label: 'MARKET' },
+        { id: 'jobs', icon: Package, label: 'JOBS' },
+        { id: 'active', icon: Truck, label: 'ACTIVE' },
+        { id: 'history', icon: TrendingUp, label: 'HISTORY' },
       ];
     }
     if (userRole === 'inspector') {
@@ -136,10 +133,17 @@ export default function DashboardMainScreen() {
   const navigationItems = getNavigationItems();
 
   const renderContent = () => {
-    if (userRole === 'seller' || userRole === 'buyer') {
+    if (userRole === 'seller') {
       return (
         <View style={{ flex: 1 }}>
-          <UnifiedDashboardScreen />
+          <SellerDashboardSection activeTab={activeSection} />
+        </View>
+      );
+    }
+    if (userRole === 'buyer') {
+      return (
+        <View style={{ flex: 1 }}>
+          <BuyerDashboardSection activeTab={activeSection} />
         </View>
       );
     }

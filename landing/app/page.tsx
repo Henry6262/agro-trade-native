@@ -8,6 +8,7 @@ import { AppShowcase } from "./components/sections/AppShowcase";
 import { LiveDealFlow } from "./components/sections/LiveDealFlow";
 import { RolesSection } from "./components/sections/RolesSection";
 import { VaultSection } from "./components/sections/VaultSection";
+import { SkyHarvestSection } from "./components/sections/SkyHarvestSection";
 import { CtaFooter } from "./components/sections/CtaFooter";
 import { SectionDivider } from "./components/SectionDivider";
 import { JsonLd } from "./components/JsonLd";
@@ -27,6 +28,8 @@ export default function LandingPage() {
         <HowItWorks />
         <SectionDivider />
         <AppShowcase />
+        <SectionDivider />
+        <SkyHarvestSection />
         <SectionDivider />
         <LiveDealFlow />
         <SectionDivider />

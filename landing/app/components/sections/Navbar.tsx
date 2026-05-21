@@ -39,11 +39,11 @@ export function Navbar() {
 
           <div className="hidden md:flex">
             <a
-              href="#cta"
+              href="/auth/login"
               className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all hover:opacity-90 active:scale-95"
               style={{ backgroundColor: B.wheat, color: B.bg }}
             >
-              Join Waitlist
+              Launch Web Portal
               <ArrowRight size={14} />
             </a>
           </div>
@@ -60,9 +60,9 @@ export function Navbar() {
                 {label}
               </a>
             ))}
-            <a href="#cta" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold mt-2"
+            <a href="/auth/login" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold mt-2"
               style={{ backgroundColor: B.wheat, color: B.bg }} onClick={() => setOpen(false)}>
-              Join Waitlist
+              Launch Web Portal
             </a>
           </div>
         )}

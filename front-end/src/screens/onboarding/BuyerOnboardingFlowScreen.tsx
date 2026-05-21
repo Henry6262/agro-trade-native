@@ -82,7 +82,7 @@ export default function BuyerOnboardingFlowScreen() {
       const res = await productService.getProducts();
       setProducts(res.data || []);
     } catch (err) {
-      console.error('Failed to load products', err);
+      Alert.alert('Error', 'Failed to load products. Please check your connection and try again.');
     } finally {
       setLoadingProducts(false);
     }
@@ -316,7 +316,7 @@ export default function BuyerOnboardingFlowScreen() {
 
         {renderProgress()}
 
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
           {renderStepContent()}
         </ScrollView>
 

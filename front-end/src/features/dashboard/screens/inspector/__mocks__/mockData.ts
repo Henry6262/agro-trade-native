@@ -1,0 +1,257 @@
+export const mockVerificationJobs = [
+  {
+    id: 'job-001',
+    sellerListingId: 'listing-123',
+    inspectorId: null,
+    priority: 'HIGH',
+    status: 'PENDING',
+    location: {
+      latitude: 42.6977,
+      longitude: 23.3219,
+      address: 'Field Road 123',
+      city: 'Plovdiv',
+      region: 'Plovdiv Province',
+    },
+    productDetails: {
+      name: 'Wheat Grade A',
+      type: 'Grain',
+      quantity: 1000,
+      unit: 'kg',
+      claimedSpecs: {
+        moisture: '12%',
+        protein: '14%',
+        gluten: '28%',
+      },
+    },
+    estimatedDuration: 120,
+    distance: 25.5,
+    createdAt: new Date('2025-01-13'),
+    updatedAt: new Date('2025-01-13'),
+  },
+  {
+    id: 'job-002',
+    sellerListingId: 'listing-124',
+    inspectorId: null,
+    priority: 'MEDIUM',
+    status: 'PENDING',
+    location: {
+      latitude: 42.1354,
+      longitude: 24.7453,
+      address: 'Farm Estate 45',
+      city: 'Sofia',
+      region: 'Sofia Province',
+    },
+    productDetails: {
+      name: 'Corn Premium',
+      type: 'Grain',
+      quantity: 2000,
+      unit: 'kg',
+      claimedSpecs: {
+        moisture: '14%',
+        protein: '9%',
+        starch: '72%',
+      },
+    },
+    estimatedDuration: 90,
+    distance: 45.2,
+    createdAt: new Date('2025-01-13'),
+    updatedAt: new Date('2025-01-13'),
+  },
+  {
+    id: 'job-003',
+    sellerListingId: 'listing-125',
+    inspectorId: null,
+    priority: 'LOW',
+    status: 'PENDING',
+    location: {
+      latitude: 43.2141,
+      longitude: 27.9147,
+      address: 'Coastal Farm 12',
+      city: 'Varna',
+      region: 'Varna Province',
+    },
+    productDetails: {
+      name: 'Barley Standard',
+      type: 'Grain',
+      quantity: 500,
+      unit: 'kg',
+      claimedSpecs: {
+        moisture: '13%',
+        protein: '11%',
+      },
+    },
+    estimatedDuration: 60,
+    distance: 120.8,
+    createdAt: new Date('2025-01-13'),
+    updatedAt: new Date('2025-01-13'),
+  },
+];
+
+export const mockActiveJob = {
+  id: 'job-active',
+  sellerListingId: 'listing-126',
+  inspectorId: 'inspector-001',
+  priority: 'HIGH',
+  status: 'IN_PROGRESS',
+  location: {
+    latitude: 42.7977,
+    longitude: 23.4219,
+    address: 'Test Field 99',
+    city: 'Plovdiv',
+    region: 'Plovdiv Province',
+  },
+  productDetails: {
+    name: 'Sunflower Seeds',
+    type: 'Seeds',
+    quantity: 800,
+    unit: 'kg',
+    claimedSpecs: {
+      moisture: '8%',
+      oilContent: '45%',
+      purity: '98%',
+    },
+  },
+  estimatedDuration: 150,
+  distance: 12.3,
+  acceptedAt: new Date('2025-01-13T10:00:00'),
+  createdAt: new Date('2025-01-13'),
+  updatedAt: new Date('2025-01-13'),
+};
+
+export const mockInspectorProfile = {
+  id: 'inspector-001',
+  userId: 'user-123',
+  employeeId: 'EMP001',
+  specializations: ['Grain', 'Seeds', 'Vegetables'],
+  certifications: [
+    {
+      name: 'ISO 9001 Auditor',
+      issuedBy: 'ISO',
+      validUntil: new Date('2026-12-31'),
+      documentUrl: 'https://example.com/cert1.pdf',
+    },
+    {
+      name: 'Agricultural Quality Inspector',
+      issuedBy: 'Ministry of Agriculture',
+      validUntil: new Date('2025-06-30'),
+      documentUrl: 'https://example.com/cert2.pdf',
+    },
+  ],
+  activeJobId: 'job-active',
+  currentLocation: {
+    latitude: 42.6877,
+    longitude: 23.3119,
+    accuracy: 10,
+    timestamp: new Date(),
+  },
+  isAvailable: true,
+  workingHours: {
+    start: '09:00',
+    end: '18:00',
+    workDays: [1, 2, 3, 4, 5], // Mon-Fri
+  },
+  totalJobsCompleted: 47,
+  averageRating: 4.7,
+  createdAt: new Date('2024-01-01'),
+  updatedAt: new Date('2025-01-13'),
+};
+
+export const mockLocationUpdates = [
+  {
+    id: 'loc-001',
+    inspectorId: 'inspector-001',
+    jobId: 'job-active',
+    coordinates: {
+      latitude: 42.6877,
+      longitude: 23.3119,
+      accuracy: 10,
+      altitude: 550,
+      heading: 45,
+      speed: 15.5,
+    },
+    timestamp: new Date('2025-01-13T10:00:00'),
+    batteryLevel: 85,
+    networkType: 'cellular',
+    isMoving: true,
+  },
+  {
+    id: 'loc-002',
+    inspectorId: 'inspector-001',
+    jobId: 'job-active',
+    coordinates: {
+      latitude: 42.6977,
+      longitude: 23.3219,
+      accuracy: 8,
+      altitude: 545,
+      heading: 47,
+      speed: 16.2,
+    },
+    timestamp: new Date('2025-01-13T10:00:10'),
+    batteryLevel: 85,
+    networkType: 'cellular',
+    isMoving: true,
+  },
+];
+
+export const mockVerificationResult = {
+  id: 'result-001',
+  jobId: 'job-001',
+  inspectorId: 'inspector-001',
+  sellerListingId: 'listing-123',
+  originalSpecs: {
+    moisture: '12%',
+    protein: '14%',
+    gluten: '28%',
+  },
+  verifiedSpecs: {
+    moisture: '13%',
+    protein: '13.5%',
+    gluten: '27%',
+  },
+  testMethods: [
+    {
+      parameter: 'moisture',
+      method: 'Laboratory Analysis',
+      equipment: 'Moisture Analyzer MA-100',
+      standardUsed: 'ISO 712',
+    },
+    {
+      parameter: 'protein',
+      method: 'Kjeldahl Method',
+      equipment: 'Protein Analyzer',
+      standardUsed: 'ISO 20483',
+    },
+    {
+      parameter: 'gluten',
+      method: 'Wet Gluten Test',
+      equipment: 'Glutomatic System',
+      standardUsed: 'ISO 21415',
+    },
+  ],
+  evidence: [
+    {
+      type: 'photo',
+      url: 'https://example.com/sample1.jpg',
+      caption: 'Grain sample before testing',
+      timestamp: new Date('2025-01-13T11:00:00'),
+    },
+    {
+      type: 'photo',
+      url: 'https://example.com/equipment.jpg',
+      caption: 'Testing equipment setup',
+      timestamp: new Date('2025-01-13T11:05:00'),
+    },
+    {
+      type: 'document',
+      url: 'https://example.com/lab-report.pdf',
+      caption: 'Laboratory analysis report',
+      timestamp: new Date('2025-01-13T12:00:00'),
+    },
+  ],
+  notes:
+    'Sample tested according to ISO standards. Minor deviation in moisture content detected, likely due to storage conditions.',
+  verificationStatus: 'PARTIALLY_VERIFIED',
+  signature: 'digital-signature-hash-here',
+  verifiedAt: new Date('2025-01-13T12:30:00'),
+  createdAt: new Date('2025-01-13T12:30:00'),
+};

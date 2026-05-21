@@ -3,19 +3,16 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { DashboardStackParamList } from './types';
 import { UserDataProvider } from '@contexts/UserDataContext';
 
-import DashboardMainScreen from '../screens/dashboard/DashboardMainScreen';
-import CommandCenterScreen from '../screens/dashboard/admin/CommandCenterScreen';
-import AgentNetworkScreen from '../screens/dashboard/admin/AgentNetworkScreen';
-import OperationsScreen from '../screens/dashboard/admin/OperationsScreen';
-import IntelligenceScreen from '../screens/dashboard/shared/IntelligenceScreen';
-import ImpactScreen from '../screens/dashboard/shared/ImpactScreen';
-import TraceabilityScreen from '../screens/dashboard/shared/TraceabilityScreen';
-import SellerDashboardScreen from '../screens/dashboard/SellerDashboardScreen';
-import BuyerDashboardScreen from '../screens/dashboard/BuyerDashboardScreen';
-import TransporterDashboardScreen from '../screens/dashboard/TransporterDashboardScreen';
-import TradeDetailScreen from '../screens/trade/TradeDetailScreen';
-import UnifiedDashboardScreen from '../screens/dashboard/UnifiedDashboardScreen';
-import TradeHubScreen from '../screens/trade/TradeHubScreen';
+import DashboardMainScreen from '../features/dashboard/screens/DashboardMainScreen';
+import CommandCenterScreen from '../features/dashboard/screens/admin/CommandCenterScreen';
+import AgentNetworkScreen from '../features/dashboard/screens/admin/AgentNetworkScreen';
+import OperationsScreen from '../features/dashboard/screens/admin/OperationsScreen';
+import IntelligenceScreen from '../features/dashboard/screens/shared/IntelligenceScreen';
+import ImpactScreen from '../features/dashboard/screens/shared/ImpactScreen';
+import TraceabilityScreen from '../features/dashboard/screens/shared/TraceabilityScreen';
+import SellerDashboardScreen from '../features/dashboard/screens/seller/SellerDashboardScreen';
+import BuyerDashboardScreen from '../features/dashboard/screens/buyer/BuyerDashboardScreen';
+import TransporterDashboardScreen from '../features/dashboard/screens/transporter/TransporterDashboardScreen';
 
 const Stack = createNativeStackNavigator<DashboardStackParamList>();
 
@@ -38,9 +35,6 @@ export default function DashboardStack() {
         <Stack.Screen name="SellerDashboard" component={SellerDashboardScreen} />
         <Stack.Screen name="BuyerDashboard" component={BuyerDashboardScreen} />
         <Stack.Screen name="TransporterDashboard" component={TransporterDashboardScreen} />
-        <Stack.Screen name="TradeDetail" component={TradeDetailScreen} />
-        <Stack.Screen name="UnifiedDashboard" component={UnifiedDashboardScreen} />
-        <Stack.Screen name="TradeHub" component={TradeHubScreen} />
       </Stack.Navigator>
     </UserDataProvider>
   );

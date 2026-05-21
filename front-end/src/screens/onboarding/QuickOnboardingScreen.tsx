@@ -20,15 +20,16 @@ import {
 } from 'lucide-react-native';
 
 import { useOnboardingStore } from '../../stores/onboarding.store';
-import { GradientBackground, GlassCard, GlassButton, GlassInput, COLORS } from '../../design-system';
+import { GradientBackground, GlassCard, GlassButton, GlassInput, COLORS, GLASS } from '../../design-system';
+import { MotiView } from 'moti';
 import { LoadingSpinner } from '../../shared/components/LoadingSpinner';
 
 type OnboardingRole = 'seller' | 'buyer' | 'transport';
 
 const ROLES: { id: OnboardingRole; label: string; icon: any; color: string; desc: string }[] = [
-  { id: 'seller', label: 'Seller', icon: User, color: '#4ADE80', desc: 'Sell agricultural products' },
-  { id: 'buyer', label: 'Buyer', icon: Building2, color: '#FCD34D', desc: 'Buy crops & commodities' },
-  { id: 'transport', label: 'Transporter', icon: Truck, color: '#FCD34D', desc: 'Move goods between parties' },
+  { id: 'seller', label: 'Seller', icon: User, color: COLORS.accentGreen, desc: 'Sell agricultural products' },
+  { id: 'buyer', label: 'Buyer', icon: Building2, color: COLORS.accentGold, desc: 'Buy crops & commodities' },
+  { id: 'transport', label: 'Transporter', icon: Truck, color: COLORS.accentGold, desc: 'Move goods between parties' },
 ];
 
 export default function QuickOnboardingScreen() {
@@ -110,7 +111,7 @@ export default function QuickOnboardingScreen() {
   const renderProfileStep = () => (
     <View style={styles.stepContainer}>
       <TouchableOpacity onPress={() => setStep('role')} style={styles.backBtn}>
-        <ArrowLeft size={20} color="#fff" />
+        <ArrowLeft size={20} color={COLORS.textPrimary} />
       </TouchableOpacity>
 
       <Text style={styles.stepTitle}>Quick Setup</Text>
@@ -155,6 +156,12 @@ export default function QuickOnboardingScreen() {
 
   return (
     <GradientBackground>
+      <MotiView
+        from={{ opacity: 0, translateY: 20 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'spring', damping: 18, stiffness: 200 }}
+        style={{ flex: 1 }}
+      >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
@@ -172,6 +179,7 @@ export default function QuickOnboardingScreen() {
           {step === 'role' ? renderRoleStep() : renderProfileStep()}
         </ScrollView>
       </KeyboardAvoidingView>
+      </MotiView>
     </GradientBackground>
   );
 }
@@ -199,7 +207,7 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
   },
   tagline: {
-    color: 'rgba(255,255,255,0.5)',
+    color: COLORS.textSecondary,
     fontSize: 13,
     marginTop: 4,
   },
@@ -213,13 +221,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stepTitle: {
-    color: '#fff',
+    color: COLORS.textPrimary,
     fontSize: 28,
     fontWeight: '800',
     marginBottom: 6,
   },
   stepSubtitle: {
-    color: 'rgba(255,255,255,0.5)',
+    color: COLORS.textSecondary,
     fontSize: 15,
     marginBottom: 24,
   },
@@ -240,13 +248,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   roleLabel: {
-    color: '#fff',
+    color: COLORS.textPrimary,
     fontSize: 16,
     fontWeight: '700',
     flex: 1,
   },
   roleDesc: {
-    color: 'rgba(255,255,255,0.45)',
+    color: COLORS.textMuted,
     fontSize: 12,
     position: 'absolute',
     left: 78,

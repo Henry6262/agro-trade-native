@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AgroTrade — StableHacks Demo Day</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f;
+      --bg-slide: #111118;
+      --text: #e8e8f0;
+      --muted: #8888a0;
+      --accent: #00d4aa;
+      --accent2: #6366f1;
+      --border: #22222e;
+      --warn: #f59e0b;
+    }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+    }
+    #deck {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .slide {
+      display: none;
+      width: 100%;
+      height: 100%;
+      padding: 60px 80px;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      max-width: 1400px;
+    }
+    .slide.active { display: flex; }
+    .slide-number {
+      position: absolute;
+      top: 30px;
+      right: 40px;
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 2px;
+    }
+    .tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 6px 14px;
+      border-radius: 4px;
+      margin-bottom: 30px;
+    }
+    h1 {
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 30px;
+      letter-spacing: -1px;
+    }
+    h2 {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 24px;
+      letter-spacing: -0.5px;
+    }
+    h3 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+    p.lead {
+      font-size: 28px;
+      line-height: 1.4;
+      color: var(--muted);
+      max-width: 900px;
+    }
+    p {
+      font-size: 22px;
+      line-height: 1.5;
+      color: var(--text);
+      max-width: 900px;
+    }
+    .big-stat {
+      font-size: 96px;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 50px;
+      margin-top: 20px;
+      width: 100%;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 30px;
+      margin-top: 20px;
+      width: 100%;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 24px;
+      margin-top: 20px;
+      width: 100%;
+    }
+    .card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+    }
+    .card h4 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .card p {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .timeline {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .timeline-item {
+      background: rgba(0,212,170,0.08);
+      border: 1px solid rgba(0,212,170,0.2);
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .timeline-arrow {
+      color: var(--accent);
+      font-size: 20px;
+    }
+    .checklist {
+      list-style: none;
+      margin-top: 20px;
+    }
+    .checklist li {
+      font-size: 18px;
+      padding: 8px 0;
+      padding-left: 32px;
+      position: relative;
+      color: var(--muted);
+    }
+    .checklist li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .footer-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+    .nav-hint {
+      position: absolute;
+      bottom: 20px;
+      right: 40px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .speaker-notes {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #1a1a24;
+      border-top: 1px solid var(--border);
+      padding: 16px 40px;
+      font-size: 15px;
+      color: #aaa;
+      max-height: 100px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+    }
+    .speaker-notes.visible { display: block; }
+    .speaker-notes strong { color: var(--accent); }
+    .badge {
+      display: inline-block;
+      background: rgba(99,102,241,0.15);
+      color: var(--accent2);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .accent-line {
+      width: 60px;
+      height: 4px;
+      background: var(--accent);
+      margin-bottom: 24px;
+    }
+    @media (max-width: 1000px) {
+      .slide { padding: 30px 40px; }
+      h1 { font-size: 40px; }
+      h2 { font-size: 32px; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .big-stat { font-size: 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="deck">
+
+<!-- SLIDE 1: HOOK -->
+<div class="slide active">
+  <div class="slide-number">01 / 08</div>
+  <div class="tag">StableHacks Demo Day — Zurich 2026</div>
+  <div class="big-stat">$3.4T</div>
+  <h1 style="font-size:56px;">Agricultural trade runs on<br>fax machines and 90-day wires.</h1>
+  <p class="lead">Zero transparency. Zero compliance. Zero stablecoin infrastructure. We are building the regulated escrow layer that turns commodity trading into programmable settlement.</p>
+  <div class="footer-bar"></div>
+</div>
+
+<!-- SLIDE 2: PROBLEM -->
+<div class="slide">
+  <div class="slide-number">02 / 08</div>
+  <div class="accent-line"></div>
+  <h2>Two institutional bottlenecks</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h4>Settlement Friction</h4>
+      <p>Cross-border commodity payments take 30–90 days. FX losses eat 3–7% of value. Wire transfers leave no audit trail for regulators. In Bulgaria, 40% of grain deals fail due to payment delays.</p>
+    </div>
+    <div class="card">
+      <h4>Compliance Darkness</h4>
+      <p>KYC is a PDF scan. KYT does not exist for commodity flows. Travel Rule data is missing. AML thresholds are ignored. FINMA and MiCA require what the market cannot deliver.</p>
+    </div>
+  </div>
+  <p style="margin-top:30px; font-size:20px; color:var(--muted);">The result: banks cannot touch agricultural trade. Farmers cannot get working capital. Buyers cannot verify supply chains.</p>
+  <div class="footer-bar"></div>
+</div>
+
+<!-- SLIDE 3: SOLUTION -->
+<div class="slide">
+  <div class="slide-number">03 / 08</div>
+  <div class="accent-line"></div>
+  <h2>AgroTrade — Dual-chain commodity escrow</h2>
+  <p class="lead" style="margin-bottom:30px;">A full-stack trading platform with custodial stablecoin escrow on Celo and Solana. Farmers and buyers never touch a wallet.</p>
+  <div class="timeline">
+    <div class="timeline-item">List</div>
+    <div class="timeline-arrow">→</div>
+    <div class="timeline-item">Negotiate</div>
+    <div class="timeline-arrow">→</div>
+    <div class="timeline-item">Inspect</div>
+    <div class="timeline-arrow">→</div>
+    <div class="timeline-item">Escrow Lock</div>
+    <div class="timeline-arrow">→</div>
+    <div class="timeline-item">Transport</div>
+    <div class="timeline-arrow">→</div>
+    <div class="timeline-item">Delivery</div>
+    <div class="timeline-arrow">→</div>
+    <div class="timeline-item">Settlement</div>
+  </div>
+  <div class="grid-2" style="margin-top:30px;">
+    <div class="card">
+      <h4>Celo — cUSD</h4>
+      <p>Mobile-first emerging markets. Ultra-low fees. Optimized for farmers in the Balkans and Africa.</p>
+    </div>
+    <div class="card">
+      <h4>Solana — USDC</h4>
+      <p>Institutional throughput. 400ms finality. SPL token vaults with PDA security. For banks and trading houses.</p>
+    </div>
+  </div>
+  <div class="footer-bar"></div>
+</div>
+
+<!-- SLIDE 4: COMPLIANCE -->
+<div class="slide">
+  <div class="slide-number">04 / 08</div>
+  <div class="accent-line"></div>
+  <h2>Compliance by design — not bolted on</h2>
+  <p class="lead" style="margin-bottom:24px;">Built for regulated institutions from day one. Every transaction is auditable, traceable, and regulator-ready.</p>
+  <div class="grid-4">
+    <div class="card">
+      <h4>KYC</h4>
+      <p>Privy tiered identity: Basic, Enhanced, Institutional. Google OAuth + JWT. Admin freeze capability.</p>
+    </div>
+    <div class="card">
+      <h4>KYT</h4>
+      <p>Every escrow movement is a <code>TradeEvent</code> with on-chain hash, actor role, timestamp, and metadata.</p>
+    </div>
+    <div class="card">
+      <h4>AML</h4>
+      <p>Jurisdiction-configurable thresholds. Suspicious pattern auto-flagging. Admin-gated escrow release.</p>
+    </div>
+    <div class="card">
+      <h4>Travel Rule</h4>
+      <p>Full originator/beneficiary capture per Swiss & EU TFR. Compliant data available for VASP-to-VASP sharing.</p>
+    </div>
+  </div>
+  <p style="margin-top:24px; font-size:18px; color:var(--muted);"><span class="badge">FINMA</span> Trade-conditional escrow structure = not a deposit. <span class="badge">MiCA</span> CASP-aligned custody model.</p>
+  <div class="footer-bar"></div>
+</div>
+
+<!-- SLIDE 5: TECHNICAL READINESS -->
+<div class="slide">
+  <div class="slide-number">05 / 08</div>
+  <div class="accent-line"></div>
+  <h2>Production-ready, not a concept</h2>
+  <div class="grid-2">
+    <div>
+      <h3 style="margin-top:0;">Smart Contracts</h3>
+      <ul class="checklist">
+        <li>37 Foundry tests passing — Celo Sepolia deployed</li>
+        <li>Anchor escrow on Solana — 8 instructions, PDA vaults, CPI security</li>
+        <li>State machine enforced: no skip, no double-release</li>
+        <li>Two-step admin transfer: nominate → accept</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="margin-top:0;">Platform Stack</h3>
+      <ul class="checklist">
+        <li>NestJS backend — 205 TS files, live on Railway</li>
+        <li>React Native Expo mobile — 574 TS files, iOS + Android</li>
+        <li>Next.js admin dashboard — 25 pages, shadcn/ui</li>
+        <li>WebSocket real-time + GPS tracking + push notifications</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bar"></div>
+</div>
+
+<!-- SLIDE 6: RWA ORACLE -->
+<div class="slide">
+  <div class="slide-number">06 / 08</div>
+  <div class="accent-line"></div>
+  <h2>The RWA verification layer</h2>
+  <p class="lead" style="margin-bottom:24px;">Without verified quality data, escrow is just a locked box. SkyInspect is the key.</p>
+  <div class="grid-3">
+    <div class="card">
+      <h4>Autonomous Inspection</h4>
+      <p>Drone with RTK-GNSS, NIR spectrometry, and edge AI. 45-second on-site quality scoring vs. 3-day lab wait.</p>
+    </div>
+    <div class="card">
+      <h4>EBSI Credentials</h4>
+      <p>EU Blockchain Services Infrastructure verifiable quality credentials. Cross-border recognized from Bulgaria to Germany.</p>
+    </div>
+    <div class="card">
+      <h4>Oracle Feed</h4>
+      <p>Inspection data feeds directly into escrow state. Underperformance triggers smart-contract pro-rata refunds. No court needed.</p>
+    </div>
+  </div>
+  <p style="margin-top:24px; font-size:20px; color:var(--muted);">This turns physical grain into a verified, auditable on-chain asset — the missing data layer for RWA-backed commodity vaults.</p>
+  <div class="footer-bar"></div>
+</div>
+
+<!-- SLIDE 7: TRACTION & ASK -->
+<div class="slide">
+  <div class="slide-number">07 / 08</div>
+  <div class="accent-line"></div>
+  <h2>Pilot ready. Partnerships open.</h2>
+  <div class="grid-2" style="margin-top:10px;">
+    <div>
+      <h3 style="margin-top:0; color:var(--text);">Traction</h3>
+      <ul class="checklist">
+        <li>Bulgaria pilot: Dobrich region, 500 hectares winter wheat</li>
+        <li>Grain corridor: Dobrich → Danube port → Germany / Austria</li>
+        <li>Discussions with Bulgarian Grain and Feed Association</li>
+        <li>Spain sandbox: AgriFoodTech application submitted May 2026</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="margin-top:0; color:var(--text);">The Ask</h3>
+      <ul class="checklist">
+        <li><strong style="color:var(--accent);">AMINA Bank:</strong> Pilot opportunity — regulated custody + on-ramp</li>
+        <li><strong style="color:var(--accent);">SIX BFI:</strong> FX + commodity price feed integration</li>
+        <li><strong style="color:var(--accent);">Solana Foundation:</strong> DevRel + institutional introduction</li>
+        <li><strong style="color:var(--accent);">€100K:</strong> 6-month validated infrastructure for Balkans + Iberia</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bar"></div>
+</div>
+
+<!-- SLIDE 8: CLOSE -->
+<div class="slide">
+  <div class="slide-number">08 / 08</div>
+  <div class="tag">AgroTrade</div>
+  <h1 style="font-size:52px;">The future of commodity finance<br>is not a wire transfer.<br>It is programmable.</h1>
+  <p class="lead" style="margin-top:20px;">On Celo. On Solana. From Dobrich to Zurich.<br>Compliance-first. Custodial. Cross-border. Ready now.</p>
+  <p style="margin-top:40px; font-size:18px; color:var(--muted);">
+    <span class="badge">Celo</span>
+    <span class="badge">Solana</span>
+    <span class="badge">FINMA</span>
+    <span class="badge">MiCA</span>
+    <span class="badge">EBSI</span>
+  </p>
+  <div class="footer-bar"></div>
+</div>
+
+</div>
+
+<div class="nav-hint">← → arrow keys to navigate &nbsp;|&nbsp; N to toggle speaker notes</div>
+
+<div class="speaker-notes" id="notes">
+  <strong>Slide 1 (0:00–0:15):</strong> Open with the number. Pause. Let it land. "$3.4 trillion. Fax machines. 90-day wires." This is not a farming problem. This is an infrastructure problem.
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const notes = document.getElementById('notes');
+  let current = 0;
+
+  const speakerNotes = [
+    "<strong>Slide 1 (0:00–0:15):</strong> Open with the number. Pause. Let it land. '$3.4 trillion. Fax machines. 90-day wires.' This is not a farming problem. This is an infrastructure problem. The judges at AMINA and UBS understand settlement pain instantly.",
+    "<strong>Slide 2 (0:15–0:40):</strong> Two problems. Left hand: settlement friction. Right hand: compliance darkness. Do not blame farmers or brokers. Blame the absence of infrastructure. Banks want to trade commodities. They cannot because there is no compliance layer.",
+    "<strong>Slide 3 (0:40–1:10):</strong> Walk through the timeline slowly. Point at each phase. Emphasize dual-chain. Celo for emerging markets, Solana for institutional throughput. The custodial model is critical — users never touch wallets. This is what makes it bank-ready.",
+    "<strong>Slide 4 (1:10–1:35):</strong> This is your moat. Slow down. KYC. KYT. AML. Travel Rule. Every box a bank needs, checked. FINMA: trade-conditional escrow is NOT a deposit. MiCA: CASP-aligned. Say it clearly: 'We did not bolt on compliance. We built the platform inside it.'",
+    "<strong>Slide 5 (1:35–2:00):</strong> Numbers matter to this room. 37 tests. 205 backend files. 574 mobile files. Live on Railway. Anchor program with PDA vaults. This is production code, not a hackathon project. If asked, you can show the GitHub.",
+    "<strong>Slide 6 (2:00–2:20):</strong> SkyInspect is the RWA oracle. But frame it as data infrastructure, not drones. 'Without verified quality data, escrow is just a locked box.' EBSI credentials make the quality score cross-border auditable. This is the missing layer for RWA vaults.",
+    "<strong>Slide 7 (2:20–2:45):</strong> Be specific about the ask. AMINA Bank = pilot. SIX = data feeds. Solana Foundation = DevRel + intros. €100K = 6-month runway. You are not asking for belief. You are asking for regulated partners to validate the stack.",
+    "<strong>Slide 8 (2:45–3:00):</strong> Stop. Breathe. Smile. 'The future of commodity finance is programmable.' Thank them. The line should echo. Do not rush the close."
+  ];
+
+  function showSlide(i) {
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === i));
+    notes.innerHTML = speakerNotes[i];
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault();
+      if (current < slides.length - 1) { current++; showSlide(current); }
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      if (current > 0) { current--; showSlide(current); }
+    } else if (e.key === 'n' || e.key === 'N') {
+      notes.classList.toggle('visible');
+    }
+  });
+
+  showSlide(0);
+</script>
+
+</body>
+</html>

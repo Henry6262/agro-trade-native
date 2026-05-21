@@ -214,8 +214,8 @@ export function Hero() {
 
           <FadeInUp delay={0.26}>
             <div className="flex flex-col sm:flex-row items-start gap-3 mb-12">
-              <a href="#cta" className="btn-primary">
-                Get Early Access <ArrowRight size={16} />
+              <a href="/auth/login" className="btn-primary">
+                Launch Web Portal <ArrowRight size={16} />
               </a>
               <a href="#app" className="btn-secondary">
                 See the App

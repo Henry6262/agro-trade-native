@@ -102,16 +102,16 @@ export function SellerDashboardSection({ activeTab = 'products' }: SellerDashboa
         <StatCard
           label="Pending Offers"
           value={stats.pendingOffers}
-          icon={<ClipboardList size={16} color="#4ADE80" />}
-          color="#4ADE80"
+          icon={<ClipboardList size={16} color={COLORS.success} />}
+          color={COLORS.success}
           style={styles.statCard}
           delay={50}
         />
         <StatCard
           label="Completed"
           value={stats.completedTrades}
-          icon={<TrendingUp size={16} color="#4ADE80" />}
-          color="#4ADE80"
+          icon={<TrendingUp size={16} color={COLORS.success} />}
+          color={COLORS.success}
           style={styles.statCard}
           delay={100}
         />
@@ -119,8 +119,8 @@ export function SellerDashboardSection({ activeTab = 'products' }: SellerDashboa
           label="Revenue"
           value={stats.totalRevenue}
           prefix="$"
-          icon={<DollarSign size={16} color="#FCD34D" />}
-          color="#FCD34D"
+          icon={<DollarSign size={16} color={COLORS.accentGold} />}
+          color={COLORS.accentGold}
           style={styles.statCard}
           delay={150}
         />
@@ -232,7 +232,7 @@ export function SellerDashboardSection({ activeTab = 'products' }: SellerDashboa
                     {offer.product}
                   </Text>
                   {offer.isExpiringSoon && (
-                    <AlertCircle size={14} color="#F87171" />
+                    <AlertCircle size={14} color={COLORS.danger} />
                   )}
                 </View>
                 <GlassBadge
@@ -324,7 +324,7 @@ export function SellerDashboardSection({ activeTab = 'products' }: SellerDashboa
           subtitle={error}
           cta="Retry"
           onPress={fetchData}
-          icon={<AlertCircle size={32} color="#F87171" />}
+          icon={<AlertCircle size={32} color={COLORS.danger} />}
         />
       </View>
     );
@@ -335,7 +335,7 @@ export function SellerDashboardSection({ activeTab = 'products' }: SellerDashboa
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#4ADE80" />
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accentGreen} />
       }
     >
       {renderStats()}
@@ -433,12 +433,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   offerExpiryText: {
-    color: '#F87171',
+    color: COLORS.danger,
     fontSize: 12,
     fontWeight: '600',
   },
   offerProfitText: {
-    color: '#4ADE80',
+    color: COLORS.success,
     fontSize: 12,
     marginTop: 4,
   },

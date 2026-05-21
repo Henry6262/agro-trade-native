@@ -167,7 +167,7 @@ export function CtaFooter() {
                 color: B.wheat,
               }}>
               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: B.wheat }} />
-              Early access — limited spots per region
+              Live & Secure — Global Grain Trading Platform
             </div>
 
             {/* Giant headline */}
@@ -177,7 +177,7 @@ export function CtaFooter() {
               letterSpacing: "-0.025em",
               lineHeight: 0.96,
             }}>
-              <span style={{ color: B.cream }}>Be first to trade</span>
+              <span style={{ color: B.cream }}>Trade grain</span>
               <br />
               <span style={{
                 background: "linear-gradient(135deg, #E8C870 0%, #FFD770 45%, #C4831A 100%)",
@@ -191,11 +191,15 @@ export function CtaFooter() {
             </h2>
 
             <p className="text-lg sm:text-xl mb-10 max-w-lg mx-auto" style={{ color: B.muted }}>
-              AgroTrade is launching region by region — Balkans first, then Middle East and Asia.
-              Join the waitlist and lock your early access.
+              AgroTrade is live in the Balkans, Middle East, and Asia.
+              Launch the web portal now to start trading with escrow protection.
             </p>
 
-            <WaitlistForm />
+            <div className="flex justify-center">
+              <a href="/auth/login" className="btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.1rem' }}>
+                Launch Web Portal <ArrowRight size={20} />
+              </a>
+            </div>
 
             {/* Trust indicators */}
             <div className="mt-10 flex flex-wrap items-center justify-center gap-5">

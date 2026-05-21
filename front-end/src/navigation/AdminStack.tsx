@@ -3,12 +3,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AdminStackParamList } from './types';
 
 // Import admin screens
-import { AdminDashboardScreen } from '../screens/admin/AdminDashboardScreen';
-import { AdminPricingZonesScreen } from '../screens/admin/AdminPricingZonesScreen';
-import { AdminZoneDetailsScreen } from '../screens/admin/AdminZoneDetailsScreen';
-import { AdminProductPricesScreen } from '../screens/admin/AdminProductPricesScreen';
-import BulkPriceUpdateScreen from '../screens/admin/BulkPriceUpdateScreen';
-import { AdminMapView } from '../screens/admin/AdminMapView';
+import { AdminDashboardScreen } from '../pages/Admin/screens/AdminDashboardScreen';
+import { AdminPricingZonesScreen } from '../pages/Admin/screens/AdminPricingZonesScreen';
+import { AdminZoneDetailsScreen } from '../pages/Admin/screens/AdminZoneDetailsScreen';
+import { AdminProductPricesScreen } from '../pages/Admin/screens/AdminProductPricesScreen';
+import BulkPriceUpdateScreen from '../pages/Admin/screens/BulkPriceUpdateScreen';
+import { AdminMapView } from '../pages/Admin/screens/AdminMapView';
 
 const Stack = createNativeStackNavigator<AdminStackParamList>();
 

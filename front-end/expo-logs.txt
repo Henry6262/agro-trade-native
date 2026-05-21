@@ -1,9 +1,0 @@
-env: load .env
-env: export EXPO_PUBLIC_GOOGLE_MAPS_API_KEY EXPO_PUBLIC_API_URL
-Starting project at /Users/henry/agro-trade/front-end
-› Port 8081 is running this app in another window
-  /Users/henry/agro-trade/front-end (pid 47168)
-Input is required, but 'npx expo' is in non-interactive mode.
-Required input:
-> Use port 8082 instead?
-› Skipping dev server
