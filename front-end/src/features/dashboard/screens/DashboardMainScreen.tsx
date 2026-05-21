@@ -35,6 +35,7 @@ import { InspectorDashboard } from './inspector/InspectorDashboard';
 import { ProfileDrawer } from '../components/ProfileDrawer';
 import { BottomNavigation } from '../components/BottomNavigation';
 import { CharacterTourOverlay } from '@features/onboarding/components';
+import { AIFloatingButton } from '@features/ai-mode';
 import { useAuthStore } from '@stores/auth.store';
 import { useTourStore } from '@stores/tour.store';
 import { useNotificationStore } from '@stores/notification.store';
@@ -344,6 +345,16 @@ export default function DashboardMainScreen() {
           setShowSuccessAnimation(false);
         }}
         showSuccessAnimation={showSuccessAnimation}
+      />
+
+      {/* AI Floating Assistant Button */}
+      <AIFloatingButton
+        onPress={() =>
+          navigation.navigate('AIMode' as never, {
+            role: userRole === 'transporter' ? 'transporter' : (userRole as 'seller' | 'buyer' | 'transporter'),
+            mode: 'assistant',
+          } as any)
+        }
       />
 
       {/* Character Tour Overlay — rendered last so it sits above everything */}

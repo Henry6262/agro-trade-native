@@ -24,6 +24,7 @@
       "@assets/*": ["assets/*"],
       "@styles/*": ["styles/*"],
       "@contexts/*": ["contexts/*"],
+      "@features/*": ["features/*"],
       "@design-system": ["design-system"],
       "@design-system/*": ["design-system/*"]
     }

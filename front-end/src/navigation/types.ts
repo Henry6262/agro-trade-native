@@ -11,6 +11,7 @@ export type RootStackParamList = {
   OrderDetail: { orderId: string };
   ProductDetail: { productId: string };
   Profile: undefined;
+  AIMode: { role: 'seller' | 'buyer' | 'transporter'; mode: 'onboarding' | 'assistant' };
 };
 
 export type AuthStackParamList = {

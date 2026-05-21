@@ -17,6 +17,7 @@ import OrderCreateScreen from '../screens/orders/OrderCreateScreen';
 import OrderDetailScreen from '../screens/orders/OrderDetailScreen';
 import ProductDetailScreen from '../screens/marketplace/ProductDetailScreen';
 import { OAuthCallbackScreen } from '../pages/Auth/screens/OAuthCallbackScreen';
+import { AIModeScreen } from '../features/ai-mode/screens/AIModeScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -59,6 +60,9 @@ export default function RootNavigator({ appState }: RootNavigatorProps) {
 
           {/* Main App Stack */}
           <Stack.Screen name="Main" component={DashboardStack} />
+
+          {/* AI Mode Screen */}
+          <Stack.Screen name="AIMode" component={AIModeScreen} options={{ animation: 'slide_from_bottom' }} />
 
           {/* Admin Stack */}
           <Stack.Screen name="Admin" component={AdminStack} />
