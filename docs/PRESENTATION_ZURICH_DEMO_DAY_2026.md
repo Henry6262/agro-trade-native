@@ -13,7 +13,7 @@
 
 **AgroTrade**  
 Agricultural Commodity Escrow Infrastructure  
-*Mobile-first · Stablecoin-settled · Compliance-native · EU-regulatory ready*
+*Mobile-first · Stablecoin-settled · Compliance-aware · EU expansion path*
 
 **Tagline (verbal only):**  
 "We are not building a DeFi protocol. We are replacing the paper-based agrifood supply chain with programmable trust."
@@ -65,7 +65,7 @@ Agricultural Commodity Escrow Infrastructure
 
 **Speaker Notes:**  
 - All 5 roles live in one React Native app. The user picks their role at onboarding.
-- Admin is not a "centralized middleman." Admin is the compliance layer — every escrow movement requires human authorization. This satisfies FINMA custody guidance and MiCA.
+- Admin is not a "centralized middleman." Admin is the operational control layer, and every escrow movement requires human authorization and auditable workflow coordination.
 
 ---
 
@@ -91,8 +91,8 @@ Agricultural Commodity Escrow Infrastructure
 5. Log in as Transporter → bid on the job
 
 **Speaker Notes:**  
-- The app is live on Expo Go. Judges can scan the QR code and play with all 5 roles during the networking session.
-- This is not a mocked UI. Every button hits the NestJS backend. Every escrow operation hits the Celo testnet.
+- The app demo is designed to show the full operating flow across roles.
+- The objective is to demonstrate real workflow orchestration and escrow logic, not a slideware concept.
 
 ---
 
@@ -106,17 +106,17 @@ Agricultural Commodity Escrow Infrastructure
 | **Mobile** | React Native + Expo 52 + NativeWind | 574 files. One codebase, iOS + Android. Offline queue. |
 | **Admin** | React + Vite + shadcn/ui | Map-based seller matching. Real-time trade ops console. |
 | **Contracts (Celo)** | Solidity + Foundry | 37 tests. Custodial escrow. cUSD ERC-20. |
-| **Contracts (Solana)** | Anchor + Rust + SPL Token | USDC escrow. Devnet ready. Token Extensions for compliance. |
+| **Contracts (Solana)** | Anchor + Rust + SPL Token | USDC escrow program. Token-account based control flow. |
 | **Auth** | Privy (ES256 JWKS) | OAuth + email. Role-based JWT. Wallet-managed. |
 | **Real-Time** | Socket.IO + Expo Push | Phase-change notifications to all connected clients. |
 | **Compliance** | PostgreSQL `TradeEvent` schema | Every tx: actor, amount, on-chain hash, timestamp. Immutable. |
 
 **Key architectural decision:**  
-**Custodial escrow with admin gating.** Funds cannot move unless the trade reaches the correct phase AND an admin authorizes. This is not DeFi. This is regulated trade infrastructure.
+**Custodial escrow with admin gating.** Funds cannot move unless the trade reaches the correct phase and an admin authorizes. This is not DeFi. This is controlled trade infrastructure.
 
 **Speaker Notes:**  
-- Why Celo? Mobile-native. Sub-cent fees. cUSD is used by Mento in emerging markets. Our pilot geography is Bulgaria → our farmers already have Celo wallets via Valora.
-- Why Solana? Institutional buyers want USDC. Solana Token Extensions (transfer hooks) let us enforce KYC/AML at the token level — exactly what Christian Meisser discussed in the regulatory webinar.
+- Why Celo? Mobile-native, low-fee settlement for emerging-market usage patterns.
+- Why Solana? Fast USDC-denominated settlement rails and a strong account model for controlled asset flows.
 
 ---
 
@@ -192,26 +192,26 @@ function refundEscrow(bytes32 tradeId) external onlyAdmin {
 - Identical state machine (5 states)
 - `USDC` SPL Token with Token Extensions
 - `admin` PDA-gated execution
-- Devnet deployed and tested
+- Devnet deployment workflow prepared
 
 **Speaker Notes:**  
 - The Foundry test suite is in `contracts/`. Run `forge test` — 37 tests, all green.
-- We do not have a mainnet audit yet. We have "audited by test" — every line of escrow logic has a test. The next step before mainnet is a formal audit (budget: €8,000–€15,000).
-- Solana Token Extensions are critical for the Swiss institutional angle. FINMA's June 2024 guidance asks for "deposit-like" safeguards. Transfer hooks let us freeze, whitelist, and claw back USDC at the token level. This is compliance as code.
+- We do not have a formal audit yet. What we do have is tested escrow logic and a clear picture of what must be hardened before production use.
+- On Solana, the focus is controlled asset movement and explicit authority boundaries rather than speculative token design.
 
 ---
 
 ## SLIDE 8 — Compliance Architecture
 
-**Built for FINMA. Built for MiCA. Built for the Travel Rule.**
+**Designed for regulated operating constraints and auditability.**
 
 | Requirement | How AgroTrade Satisfies It |
 |-------------|---------------------------|
-| **KYC** | Privy-powered identity. Tiered: Basic (< €1,000) → Enhanced (> €1,000) → Institutional (corporate entities). |
-| **KYT** | Every payment creates a `TradeEvent`: actor role, amount, on-chain tx hash, metadata JSON, timestamp. Full audit trail. |
-| **AML** | Custodial model. No P2P transfers. Admin authorization required for every escrow movement. Suspicious patterns auto-flagged. |
-| **Travel Rule (Swiss + EU TFR)** | Every escrow captures: originator name, beneficiary name, wallet addresses, amount, purpose (trade ID → commodity type + quantity), blockchain hash. |
-| **FINMA Stablecoin Guidance (06/2024)** | Funds are tied to an underlying physical trade contract. Admin-gated release. Not a "deposit" but a **trade-conditional escrow**. |
+| **Identity** | Privy-powered auth and role-aware access with a path to tiered verification |
+| **KYT-ready audit trail** | `TradeEvent` records with actor role, amount, timestamp, metadata, and blockchain references |
+| **AML-aware controls** | Custodial model with admin authorization on escrow movements |
+| **Travel Rule-ready data** | Workflow records can capture originator, beneficiary, amount, purpose, and blockchain references |
+| **Custody framing** | Funds are tied to an underlying trade workflow with admin-gated release and dispute handling |
 
 **The compliance moat:**
 Most agritech platforms ignore financial compliance. We treat it as infrastructure. This opens doors to:
@@ -220,8 +220,8 @@ Most agritech platforms ignore financial compliance. We treat it as infrastructu
 - EU funding (they need Data Act compliance)
 
 **Speaker Notes:**  
-- This slide is the answer to Christian Meisser's webinar. We did not bolt on compliance after building the protocol. We architected the protocol around custody, gating, and audit trails.
-- The "trade-conditional escrow" framing is important for FINMA. We are not holding deposits. We are holding funds that are contractually tied to a physical delivery event.
+- We did not bolt on operational controls after building the protocol. We structured the product around custody, gating, and audit trails from the start.
+- The core point is that funds are tied to a real trade workflow rather than free-floating token movement.
 
 ---
 
@@ -242,8 +242,8 @@ Four EU regulations converge in 2026–2028. We are positioning as a **Digital P
 We generate the regulatory evidence that both industry and authorities need.
 
 **Speaker Notes:**  
-- Grain Sovereign is a separate EU entity (AgroTrade EU SAS, in formation). This separation is intentional — it keeps the crypto-native AgroTrade brand away from institutional EU negotiations.
-- Sandbox application: Spain AgriFoodTech, submitted May 2026. Budget: €46,000. 5 inspectors, 50 verifiable credentials, France–Germany grain corridor.
+- Grain Sovereign is the strategic EU-facing expansion path layered on top of AgroTrade's operational core.
+- The goal is to turn trade workflow data, inspection events, and escrow state into institution-usable infrastructure.
 
 ---
 

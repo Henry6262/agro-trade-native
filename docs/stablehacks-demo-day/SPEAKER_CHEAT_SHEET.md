@@ -26,8 +26,8 @@ If you forget everything else, say these exactly:
 
 1. **"$3.4 trillion in agricultural trade runs on fax machines and 90-day wires."**
 2. **"We did not bolt on compliance. We built the platform inside it."**
-3. **"Custodial model — farmers and buyers never touch a wallet. This is what makes it bank-ready."**
-4. **"37 Foundry tests passing. Anchor escrow on Solana. Live backend. This is production code."**
+3. **"Custodial model — farmers and buyers never touch a wallet. This is what makes the system usable for real-world operators."**
+4. **"37 Foundry tests passing. Anchor escrow on Solana. Working MVP with real settlement logic."**
 5. **"The future of commodity finance is not a wire transfer. It is programmable."**
 
 ---
@@ -36,12 +36,12 @@ If you forget everything else, say these exactly:
 
 ```
 0:00  SHOCK     ("$3.4 trillion...")
-0:15  URGENCY   ("Zero compliance...")
+0:15  URGENCY   ("Settlement and compliance friction...")
 0:40  CLARITY   ("Dual-chain escrow...")
 1:10  AUTHORITY ("Compliance by design...")
-1:35  PROOF     ("Production-ready...")
+1:35  PROOF     ("Working MVP...")
 2:00  VISION    ("RWA verification...")
-2:20  DIRECT    ("Pilot ready...")
+2:20  DIRECT    ("Partnership ready...")
 2:45  POWER     ("It is programmable.")
 ```
 
@@ -56,16 +56,16 @@ If you forget everything else, say these exactly:
 > "Solana for institutional throughput and USDC corridors. Celo for mobile-first emerging markets where farmers actually live. Same backend. Chain-agnostic escrow service."
 
 **Q: What is your regulatory status?**
-> "We are pre-license. Our custody model is designed to satisfy FINMA guidance — trade-conditional escrow is not a deposit. We are engaging AMINA Bank for a regulated pilot."
+> "We are pre-license. The product is designed around a controlled custody and audit-trail model so it can support regulated workflows, but we are not claiming licensing or full regulatory clearance today."
 
 **Q: How is this different from Centrifuge or AgriDigital?**
 > "Centrifuge has no physical-world verification layer. AgriDigital has no blockchain escrow. We have both — plus KYC/KYT/AML/Travel Rule baked in."
 
 **Q: Do you have revenue?**
-> "Not yet. We have a committed 500-hectare pilot in Bulgaria and active discussions with the Bulgarian Grain and Feed Association. We are here for the AMINA pilot and SIX data partnership."
+> "Not yet. We are focused on turning the current MVP into something pilot-ready, and this hackathon is part of validating the institutional path and partner fit."
 
 **Q: What happens if the drone fails?**
-> "SkyInspect is the verification layer, not the escrow layer. If inspection fails, the escrow refunds pro-rata via smart contract. The trade still settles."
+> "The inspection layer and the escrow layer are separated. If verification fails, the trade can be disputed or halted. The goal is to keep settlement conditional on verified operational milestones."
 
 ---
 

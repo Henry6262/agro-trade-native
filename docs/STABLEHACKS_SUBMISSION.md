@@ -37,10 +37,10 @@ AgroTrade digitizes the entire agricultural trade lifecycle — from listing to 
 - **Custodial model:** Admin wallet executes all on-chain calls — traders never need to own or manage crypto wallets. This is critical for agricultural markets where users are non-crypto-native.
 
 ### Compliance-First Architecture
-- **KYC:** Privy-powered identity verification at onboarding. Google OAuth + JWT for seamless auth. Admin can freeze accounts.
-- **KYT:** Every transaction logged as a `TradeEvent` with blockchain tx hash, actor role, timestamp, and metadata. Full audit trail from escrow creation to settlement.
-- **AML:** Trade amount thresholds configurable per jurisdiction. Suspicious activity flagged via admin dashboard. All escrow movements require admin authorization (custodial model = built-in AML gating).
-- **Travel Rule:** Every `TradeEvent` record captures originator (buyer), beneficiary (seller), amounts, and purpose (trade operation ID). Compliant data available for VASP-to-VASP information sharing.
+- **Identity layer:** Privy auth at onboarding with role-aware access and JWT-backed sessions.
+- **KYT-ready audit trail:** Trade and payment actions are modeled as `TradeEvent` records with actor role, timestamps, metadata, and blockchain references.
+- **AML-aware operating model:** Escrow movements are admin-gated, creating a controlled settlement flow rather than open peer-to-peer transfers.
+- **Travel Rule-ready data model:** Trade records capture originator, beneficiary, amount, and trade purpose so compliance data can be attached at the workflow layer.
 
 ### Real-Time Infrastructure
 - **WebSocket events:** Socket.IO pushes on every trade phase change
@@ -63,11 +63,11 @@ AgroTrade digitizes the entire agricultural trade lifecycle — from listing to 
 
 ## Key Differentiators
 
-1. **Production-ready, not a concept** — Backend deployed on Railway, mobile app feature-complete, 53+ tests passing, real trade lifecycle working end-to-end
+1. **Working MVP, not a concept** — Backend, mobile, and escrow flows are implemented with tested contract logic and a modeled end-to-end trade lifecycle
 2. **Dual-chain escrow** — Celo for low-cost emerging markets, Solana for institutional throughput. Same backend, same API, chain-agnostic escrow service.
 3. **Non-crypto-native UX** — Farmers and buyers never touch wallets or gas fees. Custodial model abstracts all blockchain complexity.
-4. **Full trade lifecycle** — Not just payments. Inspection, transport, GPS tracking, quality scoring, dispute resolution — all on-chain auditable.
-5. **Compliance by design** — KYC/KYT/AML/Travel Rule baked into every transaction, not bolted on.
+4. **Full trade lifecycle** — Not just payments. Inspection, transport, GPS tracking, quality scoring, and dispute handling sit in one operational flow.
+5. **Compliance-aware by design** — Identity, audit trail, admin-gated settlement, and Travel Rule-ready records are built into the system architecture.
 
 ## Scalability & Adoption
 
@@ -79,7 +79,7 @@ AgroTrade digitizes the entire agricultural trade lifecycle — from listing to 
 ## Links
 
 - **GitHub:** https://github.com/Henry6262/agro-trade-native
-- **Backend (Live):** Railway deployment
+- **Backend:** See repo and environment setup
 - **Demo credentials:** See README.md
 
 ---

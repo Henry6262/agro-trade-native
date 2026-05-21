@@ -7,7 +7,7 @@
 
 You made Top 10 at StableHacks. On May 28, you pitch live on stage in Zurich to AMINA Bank, Solana Foundation, UBS, SIX BFI, Fireblocks, and Keyrock. This folder contains everything you need to deliver that pitch.
 
-**The deck has been reframed for institutional finance judges.** It leads with settlement infrastructure and compliance — not drones. The drone is the RWA verification layer, mentioned in Slide 6.
+**The deck has been reframed for institutional finance judges.** It leads with settlement infrastructure and compliance rather than novelty. The physical-world verification layer supports the settlement story; it does not replace it.
 
 ---
 
@@ -17,6 +17,7 @@ You made Top 10 at StableHacks. On May 28, you pitch live on stage in Zurich to 
 |------|---------|
 | `deck.html` | Self-contained slide deck. Open in Chrome, go fullscreen (`F11`). Arrow keys to navigate. `N` for speaker notes. |
 | `SPEAKER_CHEAT_SHEET.md` | One-page timing, anchor phrases, Q&A prep, and panic recovery. Print this. |
+| `SOFTSTACK_MEETING_BRIEF.md` | Sponsor-facing 30-minute meeting brief with a 90-second pitch, likely questions, and safe public-language answers. |
 
 ---
 
@@ -62,8 +63,9 @@ cd docs/stablehacks-demo-day && python3 -m http.server 8080
 ### Should Do (Increases Win Probability)
 - [ ] **Deploy Solana escrow to devnet** if not already done. Have the explorer link ready.
 - [ ] **Prepare a 60-second demo** on your phone: create trade → lock escrow → release. Judges will ask.
-- [ ] **Prepare a QR code** linking to your GitHub + live backend.
+- [ ] **Prepare a QR code** linking to your GitHub and demo materials.
 - [ ] **Review Q&A section** in the cheat sheet. Have a teammate drill you.
+- [ ] **Review the Softstack brief** before any sponsor or audit-style conversation so claims stay tight and consistent.
 
 ### Nice to Have
 - [ ] Add real app screenshots to Slide 3 (replace placeholder text with actual UI)
@@ -84,7 +86,7 @@ Do not lie. Do not panic. Top 10 means they already accepted your submission. Ju
 
 ## The Pitch Narrative (One Sentence)
 
-> "AgroTrade is a compliance-first, dual-chain stablecoin escrow platform for agricultural commodities — built on Celo and Solana, designed for regulated banks, and production-ready today."
+> "AgroTrade is a compliance-aware, dual-chain stablecoin escrow platform for agricultural commodities, built around controlled settlement on Celo and Solana."
 
 ---
 

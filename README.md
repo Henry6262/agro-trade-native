@@ -10,9 +10,9 @@
 
 ### Agricultural Commodity Escrow Infrastructure
 
-**Mobile-first · Stablecoin-settled · Compliance-native · EU-regulatory ready**
+**Mobile-first · Stablecoin-settled · Compliance-aware · EU expansion path**
 
-[Live Demo](#live-demo) · [Architecture](#architecture) · [Docs](#documentation) · [Quick Start](#quick-start)
+[Demo](#live-demo) · [Architecture](#architecture) · [Docs](#documentation) · [Quick Start](#quick-start)
 
 <img src="assets/screenshots/app-showcase.png" alt="AgroTrade Mobile App" width="800"/>
 
@@ -86,7 +86,7 @@ npx expo start
 | Buyer | `buyer@agrotrade.com` | `password123` |
 
 > **Zurich Demo Day — May 28, 2026**  
-> All attendees will receive QR-code access to the live mobile build. Every role is playable in real time.
+> Demo access and walkthrough materials are prepared for sponsor and judge conversations.
 
 ---
 
@@ -149,25 +149,25 @@ npx expo start
 | **Mobile App** | React Native + Expo 52 + NativeWind | 574 TS files, all 5 roles |
 | **Admin Console** | React + Vite | Map-based matching, live trade ops |
 | **Smart Contracts (Celo)** | Solidity + Foundry | 37 passing tests, custodial escrow |
-| **Smart Contracts (Solana)** | Anchor + Rust + SPL Token | USDC escrow, devnet ready |
+| **Smart Contracts (Solana)** | Anchor + Rust + SPL Token | USDC escrow program, devnet workflow prepared |
 | **Auth** | Privy (JWT + Google OAuth) | Role-based, wallet-managed |
 | **Real-Time** | Socket.IO + Expo Push | Live phase-change notifications |
 | **Compliance** | KYC / KYT / AML / Travel Rule | Every tx has on-chain hash + metadata |
 
-**Key decision:** Custodial escrow. Admin authorization is required for every fund movement. This is not DeFi speculation — it is regulated trade infrastructure with human oversight.
+**Key decision:** Custodial escrow. Admin authorization is required for every fund movement. This is not DeFi speculation; it is controlled trade infrastructure with human oversight.
 
 ---
 
 ## Compliance by Design
 
-Built to satisfy **FINMA stablecoin guidance (06/2024)**, **MiCA**, and the **Swiss + EU Travel Rule** from day one.
+Designed with **regulated operating constraints**, **auditability**, and **Travel Rule-ready record keeping** in mind.
 
 | Concern | Implementation |
 |---------|---------------|
-| **KYC** | Privy-powered identity with tiered verification (basic → enhanced → institutional) |
-| **KYT** | Every payment creates a `TradeEvent` with on-chain tx hash, actor role, amount, timestamp |
-| **AML** | No direct P2P transfers. All funds flow through admin-gated escrow. Suspicious patterns auto-flagged. |
-| **Travel Rule** | Every escrow captures originator name, beneficiary name, wallet addresses, amount, purpose, and blockchain hash — compliant by design. |
+| **Identity** | Privy-powered auth with role-aware sessions and a path to tiered verification |
+| **KYT-ready audit trail** | Trade and payment actions create `TradeEvent` records with actor, amount, timestamp, and blockchain references |
+| **AML-aware controls** | No direct P2P transfers. Funds move through admin-gated escrow and a controlled operating model |
+| **Travel Rule-ready data** | Trade records can capture originator, beneficiary, amount, purpose, and blockchain references at the workflow layer |
 | **Custodial Gating** | Funds lock on `IN_TRANSIT`. Release on `DELIVERED`. Refunds only from `DISPUTED` state (admin review). |
 
 > Most agritech platforms ignore financial compliance. AgroTrade treats it as a feature, not a bug.
@@ -204,7 +204,7 @@ AgroTrade is the operational core. **Project Grain Sovereign** extends it upward
 | Trade phases modeled | **9 phases, 2 terminal states** |
 | Compliance layers | **4 (KYC, KYT, AML, Travel Rule)** |
 | Hackathon | **StableHacks 2026 Top 10** (Tenity × AMINA Bank × Solana Foundation) |
-| Sandbox application | **Spain AgriFoodTech, May 2026** |
+| Strategic expansion | **Project Grain Sovereign** EU data and compliance track |
 
 ---
 

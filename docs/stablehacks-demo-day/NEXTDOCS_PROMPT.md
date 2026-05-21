@@ -7,7 +7,7 @@
 
 **Project Name:** AgroTrade
 **Tagline:** Compliance-first, dual-chain stablecoin escrow for agricultural commodities.
-**One-Sentence Pitch:** AgroTrade is a production-ready, custodial escrow platform that connects farmers and commodity buyers via stablecoin settlement on Celo and Solana — with KYC/KYT/AML/Travel Rule compliance built in from day one.
+**One-Sentence Pitch:** AgroTrade is a compliance-aware, custodial escrow platform that connects farmers and commodity buyers through controlled stablecoin settlement on Celo and Solana.
 **Track:** RWA-Backed Stablecoin & Commodity Vaults (StableHacks 2026)
 **Demo Day:** Zurich, 28 May 2026. Live 3-minute pitch to AMINA Bank, Solana Foundation, UBS, SIX BFI, Fireblocks, Keyrock, Steakhouse Financial, Softstack.
 
@@ -335,8 +335,8 @@ StableHacks Demo Day judges evaluate on 5 dimensions. Here is how AgroTrade maps
 
 - "$3.4 trillion in agricultural trade runs on fax machines and 90-day wires."
 - "We did not bolt on compliance. We built the platform inside it."
-- "Custodial model — farmers and buyers never touch a wallet. This is what makes it bank-ready."
-- "37 Foundry tests passing. Anchor escrow on Solana. Live backend. This is production code."
+- "Custodial model — farmers and buyers never touch a wallet. This is what makes the system usable for real-world operators."
+- "37 Foundry tests passing. Anchor escrow on Solana. Working MVP with real settlement logic."
 - "Our partner already operates mobile NIR labs and a cross-border grain fleet — and they are in daily pain from manual legacy systems. We are replacing that pain."
 - "We are not guessing. We are replacing a system that already moves grain across the EU."
 - "China proved the technology. The EU mandated the data infrastructure. We are the only team building at the intersection of both."
