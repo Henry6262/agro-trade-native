@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DTO Contract Snapshots CreateOfferDto contract snapshot 1`] = `{}`;
+
+exports[`DTO Contract Snapshots CreateTradeOperationDto contract snapshot 1`] = `{}`;
+
+exports[`DTO Contract Snapshots LoginDto contract snapshot 1`] = `{}`;
+
+exports[`DTO Contract Snapshots RegisterDto contract snapshot 1`] = `{}`;

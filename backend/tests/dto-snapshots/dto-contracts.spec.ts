@@ -71,11 +71,9 @@ async function getValidationErrors(
 // ═════════════════════════════════════════════════════════════════════════════
 // DTO IMPORTS  –  add your DTOs here
 // ═════════════════════════════════════════════════════════════════════════════
-import { CreateProductDto } from '../../src/products/dto/create-product.dto';
-import { CreateOrderDto } from '../../src/orders/dto/create-order.dto';
-import { CreateNegotiationDto } from '../../src/negotiations/dto/create-negotiation.dto';
-import { LoginDto } from '../../src/auth/dto/login.dto';
-import { RegisterDto } from '../../src/auth/dto/register.dto';
+import { CreateOfferDto } from '../../src/negotiations/dto/negotiation.dto';
+import { CreateTradeOperationDto } from '../../src/trade-operations/dto/create-trade-operation.dto';
+import { LoginDto, RegisterDto } from '../../src/auth/dto/auth.dto';
 
 // ═════════════════════════════════════════════════════════════════════════════
 // SNAPSHOT TESTS
@@ -114,40 +112,31 @@ describe('DTO Contract Snapshots', () => {
   });
 
   // ── Products ─────────────────────────────────────────────────────────────
-  describe('CreateProductDto', () => {
+  describe('CreateTradeOperationDto', () => {
     it('contract snapshot', () => {
-      expect(extractDtoContract(CreateProductDto)).toMatchSnapshot();
+      expect(extractDtoContract(CreateTradeOperationDto)).toMatchSnapshot();
     });
 
     it('rejects empty payload', async () => {
-      const errors = await getValidationErrors(CreateProductDto, {});
+      const errors = await getValidationErrors(CreateTradeOperationDto, {});
       expect(errors.length).toBeGreaterThan(0);
     });
   });
 
   // ── Orders ────────────────────────────────────────────────────────────────
-  describe('CreateOrderDto', () => {
+  describe('CreateOfferDto', () => {
     it('contract snapshot', () => {
-      expect(extractDtoContract(CreateOrderDto)).toMatchSnapshot();
+      expect(extractDtoContract(CreateOfferDto)).toMatchSnapshot();
     });
 
     it('rejects empty payload', async () => {
-      const errors = await getValidationErrors(CreateOrderDto, {});
+      const errors = await getValidationErrors(CreateOfferDto, {});
       expect(errors.length).toBeGreaterThan(0);
     });
   });
 
   // ── Negotiations ──────────────────────────────────────────────────────────
-  describe('CreateNegotiationDto', () => {
-    it('contract snapshot', () => {
-      expect(extractDtoContract(CreateNegotiationDto)).toMatchSnapshot();
-    });
-
-    it('rejects empty payload', async () => {
-      const errors = await getValidationErrors(CreateNegotiationDto, {});
-      expect(errors.length).toBeGreaterThan(0);
-    });
-  });
+  // CreateNegotiationDto removed — does not exist in current codebase
 });
 
 /**
