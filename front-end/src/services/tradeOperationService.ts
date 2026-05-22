@@ -44,6 +44,37 @@ export interface TradeOperationAnalytics {
   periodEnd: string | null;
 }
 
+export interface BuyListing {
+  id: string;
+  quantity: number;
+  product?: { id: string; name: string; category?: string } | null;
+  buyer?: { id: string; name: string; email?: string } | null;
+  deliveryAddress?: { city?: string; country?: string } | null;
+}
+
+export interface MatchingSeller {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  distance?: number;
+  rating?: number;
+}
+
+export interface ProfitCalculation {
+  estimatedProfit: number;
+  profitMargin: number;
+  revenue: number;
+  costs: number;
+}
+
+export interface TransportEstimate {
+  distance: number;
+  estimatedTime: number;
+  estimatedCost: number;
+  route?: TransportRoute;
+}
+
 export interface TradeOperationsFilters {
   status?: string;
   phase?: string;
@@ -81,6 +112,22 @@ export const tradeOperationService = {
 
   getById: async (id: string): Promise<TradeOperation> => {
     const response = await apiClient.get<TradeOperation>(`/trade-operations/${id}`);
+    return response.data;
+  },
+
+  getTradeOperations: async (filters?: TradeOperationsFilters): Promise<TradeOperation[]> => {
+    return tradeOperationService.getAll(filters);
+  },
+
+  getTradeOperation: async (id: string): Promise<TradeOperation> => {
+    return tradeOperationService.getById(id);
+  },
+
+  updateTradeOperation: async (
+    id: string,
+    data: Partial<TradeOperation>,
+  ): Promise<TradeOperation> => {
+    const response = await apiClient.patch<TradeOperation>(`/trade-operations/${id}`, data);
     return response.data;
   },
 };

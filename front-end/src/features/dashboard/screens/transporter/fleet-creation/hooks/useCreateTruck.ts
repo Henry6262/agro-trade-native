@@ -1,9 +1,13 @@
 import { useState, useCallback } from 'react';
 
 interface TruckInput {
-  plateNumber: string;
-  type: string;
-  capacity: number;
+  plateNumber?: string;
+  licensePlate?: string;
+  model?: string;
+  type?: string;
+  vehicleType?: string;
+  capacity?: number;
+  capacityTons?: number;
 }
 
 export function useCreateTruck() {
@@ -19,5 +23,7 @@ export function useCreateTruck() {
     }
   }, []);
 
-  return { createTruck, loading };
+  const mutateAsync = createTruck;
+
+  return { createTruck, mutateAsync, loading };
 }

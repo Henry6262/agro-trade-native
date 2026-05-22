@@ -1,9 +1,14 @@
 import { useState, useCallback } from 'react';
 
 interface DriverInput {
-  name: string;
-  licenseType: string;
-  experience: number;
+  name?: string;
+  firstName?: string;
+  lastName?: string;
+  licenseType?: string;
+  licenseNumber?: string;
+  phone?: string;
+  experience?: number;
+  experienceYears?: number;
 }
 
 export function useCreateDriver() {
@@ -19,5 +24,7 @@ export function useCreateDriver() {
     }
   }, []);
 
-  return { createDriver, loading };
+  const mutateAsync = createDriver;
+
+  return { createDriver, mutateAsync, loading };
 }

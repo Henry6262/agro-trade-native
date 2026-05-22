@@ -299,7 +299,7 @@ const RichJobCard: React.FC<{
 
 /* ─── Main Screen ─── */
 
-interface TransporterDashboardSectionProps {
+export interface TransporterDashboardSectionProps {
   activeTab?: string;
 }
 

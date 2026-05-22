@@ -22,7 +22,7 @@ export const AlertPill: React.FC<AlertPillProps> = ({ alert, onRemove }) => {
         <Text style={[styles.condition, { color: conditionColor }]}>
           {alert.condition.toUpperCase()}
         </Text>
-        <Text style={styles.threshold}>${alert.threshold.toFixed(2)}</Text>
+        <Text style={styles.threshold}>${alert.threshold?.toFixed(2) ?? alert.targetPrice}</Text>
       </View>
       {alert.triggered ? (
         <Text style={styles.triggered}>TRIGGERED</Text>

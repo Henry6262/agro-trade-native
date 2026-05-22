@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text } from 'react-native';
 
 interface EnhancedLocationConfirmationProps {
-  location: { latitude: number; longitude: number };
+  location?: { latitude: number; longitude: number };
   address?: string;
-  onConfirm: () => void;
-  onEdit: () => void;
+  onConfirm?: (loc?: { latitude: number; longitude: number }) => void;
+  onEdit?: () => void;
 }
 
 export const EnhancedLocationConfirmation: React.FC<EnhancedLocationConfirmationProps> = () => {
