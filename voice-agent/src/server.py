@@ -9,14 +9,13 @@ import uuid
 from contextlib import asynccontextmanager
 from typing import Optional
 
+import aiohttp
 from fastapi import FastAPI, HTTPException, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 from loguru import logger
-
-from pipecat.transports.services.helpers.daily_rest import DailyRESTHelper
 
 from .bot import run_voice_bot
 
@@ -27,14 +26,55 @@ DAILY_API_KEY = os.getenv("DAILY_API_KEY", "")
 DAILY_API_URL = os.getenv("DAILY_API_URL", "https://api.daily.co/v1")
 MAX_SESSION_MINUTES = int(os.getenv("MAX_SESSION_MINUTES", "15"))
 
-# ─── Daily helper ────────────────────────────────────────────────────────────
-daily_helper = DailyRESTHelper(
-    daily_api_key=DAILY_API_KEY,
-    daily_api_url=DAILY_API_URL,
-)
-
 # ─── Active bot tasks ────────────────────────────────────────────────────────
 active_bots: dict[str, asyncio.Task] = {}
+
+
+# ─── Daily.co API helpers ────────────────────────────────────────────────────
+async def create_daily_room(room_name: str, expire_seconds: int) -> str:
+    """Create a private Daily.co room."""
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            f"{DAILY_API_URL}/rooms",
+            headers={"Authorization": f"Bearer {DAILY_API_KEY}"},
+            json={
+                "name": room_name,
+                "privacy": "private",
+                "properties": {
+                    "exp": int(asyncio.get_event_loop().time()) + expire_seconds,
+                    "enable_screenshare": False,
+                    "enable_chat": False,
+                    "start_video_off": True,
+                    "start_audio_off": False,
+                },
+            },
+        ) as resp:
+            if resp.status != 200:
+                text = await resp.text()
+                raise HTTPException(status_code=500, detail=f"Daily room creation failed: {text}")
+            data = await resp.json()
+            return data["url"]
+
+
+async def create_daily_token(room_name: str, expire_minutes: int) -> str:
+    """Create a meeting token for the room."""
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            f"{DAILY_API_URL}/meeting-tokens",
+            headers={"Authorization": f"Bearer {DAILY_API_KEY}"},
+            json={
+                "properties": {
+                    "room_name": room_name,
+                    "is_owner": False,
+                    "exp": int(asyncio.get_event_loop().time()) + expire_minutes * 60,
+                },
+            },
+        ) as resp:
+            if resp.status != 200:
+                text = await resp.text()
+                raise HTTPException(status_code=500, detail=f"Daily token creation failed: {text}")
+            data = await resp.json()
+            return data["token"]
 
 
 # ─── Pydantic models ─────────────────────────────────────────────────────────
@@ -102,20 +142,11 @@ async def start_session(
     try:
         # Create a Daily room
         room_name = f"agrotrade-{uuid.uuid4().hex[:12]}"
-        room_url = await daily_helper.create_room(
-            room_name,
-            privacy="private",
-            expire=int(MAX_SESSION_MINUTES * 60),
-        )
-
-        if not room_url:
-            raise HTTPException(status_code=500, detail="Failed to create Daily room")
+        expire_seconds = MAX_SESSION_MINUTES * 60
+        room_url = await create_daily_room(room_name, expire_seconds)
 
         # Create a meeting token for the client
-        token = await daily_helper.get_token(room_url, MAX_SESSION_MINUTES)
-
-        if not token:
-            raise HTTPException(status_code=500, detail="Failed to create meeting token")
+        token = await create_daily_token(room_name, MAX_SESSION_MINUTES)
 
         session_id = uuid.uuid4().hex
 
