@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
   Building2,
@@ -22,7 +15,14 @@ import {
 import { useOnboardingStore } from '../../stores/onboarding.store';
 import { productService } from '../../services/productService';
 import { Product } from '../../shared/types';
-import { GradientBackground, GlassCard, GlassButton, GlassInput, GlassBadge, COLORS } from '../../design-system';
+import {
+  GradientBackground,
+  GlassCard,
+  GlassButton,
+  GlassInput,
+  GlassBadge,
+  COLORS,
+} from '../../design-system';
 import { LoadingSpinner } from '../../shared/components/LoadingSpinner';
 
 const STEPS = [
@@ -130,7 +130,10 @@ export default function SellerOnboardingFlowScreen() {
         productName: product.name,
         category: product.category?.name || 'General',
         varieties: [],
-        quantity: { amount: 0, unit: (product.unit || 'tons') as 'kg' | 'tons' | 'bags' | 'boxes' | 'liters' },
+        quantity: {
+          amount: 0,
+          unit: (product.unit || 'tons') as 'kg' | 'tons' | 'bags' | 'boxes' | 'liters',
+        },
       });
     }
   };
@@ -143,7 +146,10 @@ export default function SellerOnboardingFlowScreen() {
 
   const updateVarieties = (productId: string, varietiesText: string) => {
     updateSellerProduct(productId, {
-      varieties: varietiesText.split(',').map((v) => v.trim()).filter(Boolean),
+      varieties: varietiesText
+        .split(',')
+        .map((v) => v.trim())
+        .filter(Boolean),
     });
   };
 
@@ -256,9 +262,7 @@ export default function SellerOnboardingFlowScreen() {
                     </Text>
                     {selected && <CheckCircle2 size={16} color={COLORS.accentGreen} />}
                   </View>
-                  <Text style={styles.productCategory}>
-                    {product.category?.name || 'General'}
-                  </Text>
+                  <Text style={styles.productCategory}>{product.category?.name || 'General'}</Text>
                   <Text style={styles.productPrice}>
                     ${product.price}/{product.unit}
                   </Text>
@@ -269,9 +273,7 @@ export default function SellerOnboardingFlowScreen() {
         </View>
       )}
       {sellerData?.selectedProducts?.length ? (
-        <Text style={styles.selectedCount}>
-          {sellerData.selectedProducts.length} selected
-        </Text>
+        <Text style={styles.selectedCount}>{sellerData.selectedProducts.length} selected</Text>
       ) : null}
     </View>
   );
@@ -321,17 +323,13 @@ export default function SellerOnboardingFlowScreen() {
               {p.productName} — {p.quantity?.amount || 0} {p.quantity?.unit}
             </Text>
             {p.varieties?.length ? (
-              <Text style={styles.reviewSubtext}>
-                Varieties: {p.varieties.join(', ')}
-              </Text>
+              <Text style={styles.reviewSubtext}>Varieties: {p.varieties.join(', ')}</Text>
             ) : null}
           </View>
         ))}
       </GlassCard>
 
-      {error ? (
-        <Text style={styles.errorText}>{error}</Text>
-      ) : null}
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
 
@@ -366,7 +364,11 @@ export default function SellerOnboardingFlowScreen() {
 
         {renderProgress()}
 
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
           {renderStepContent()}
         </ScrollView>
 
@@ -405,37 +407,80 @@ export default function SellerOnboardingFlowScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 60,
-  },
-  header: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
   backBtn: {
     alignItems: 'center',
     height: 40,
     justifyContent: 'center',
     width: 40,
   },
+  backButton: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    paddingTop: 60,
+  },
+  errorText: {
+    color: '#F87171',
+    fontSize: 14,
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  footer: {
+    flexDirection: 'row',
+    gap: 12,
+    padding: 16,
+    paddingBottom: 32,
+  },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+  },
   headerTitle: {
     color: '#fff',
     fontSize: 17,
     fontWeight: '700',
   },
-  progressRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+  nextButton: {
+    flex: 2,
   },
-  progressItem: {
+  productCard: {
+    minWidth: '47%',
+    padding: 12,
+  },
+  productCardHeader: {
     alignItems: 'center',
-    gap: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  productCardSelected: {
+    borderColor: COLORS.accentGreen,
+    borderWidth: 1,
+  },
+  productCategory: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    marginTop: 4,
+  },
+  productGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  productName: {
+    color: '#fff',
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  productPrice: {
+    color: COLORS.accentGold,
+    fontSize: 13,
+    fontWeight: '700',
+    marginTop: 6,
   },
   progressCircle: {
     alignItems: 'center',
@@ -451,6 +496,10 @@ const styles = StyleSheet.create({
   progressCircleDone: {
     backgroundColor: 'rgba(74,222,128,0.2)',
   },
+  progressItem: {
+    alignItems: 'center',
+    gap: 6,
+  },
   progressLabel: {
     color: COLORS.textMuted,
     fontSize: 10,
@@ -462,56 +511,43 @@ const styles = StyleSheet.create({
   progressLabelDone: {
     color: COLORS.accentGreen,
   },
+  progressRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+  },
+  reviewCard: {
+    marginBottom: 12,
+    padding: 16,
+  },
+  reviewItem: {
+    marginBottom: 10,
+  },
+  reviewSection: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+  },
+  reviewSubtext: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  reviewText: {
+    color: '#fff',
+    fontSize: 14,
+    marginBottom: 4,
+  },
   scroll: {
     flex: 1,
   },
   scrollContent: {
     padding: 16,
     paddingBottom: 32,
-  },
-  stepContent: {
-    flex: 1,
-  },
-  stepTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 20,
-  },
-  productGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  productCard: {
-    minWidth: '47%',
-    padding: 12,
-  },
-  productCardSelected: {
-    borderColor: COLORS.accentGreen,
-    borderWidth: 1,
-  },
-  productCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  productName: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '700',
-    flex: 1,
-  },
-  productCategory: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-    marginTop: 4,
-  },
-  productPrice: {
-    color: COLORS.accentGold,
-    fontSize: 13,
-    fontWeight: '700',
-    marginTop: 6,
   },
   selectedCount: {
     color: COLORS.accentGreen,
@@ -530,47 +566,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginBottom: 12,
   },
-  reviewCard: {
-    marginBottom: 12,
-    padding: 16,
-  },
-  reviewSection: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
-    marginBottom: 8,
-    textTransform: 'uppercase',
-  },
-  reviewText: {
-    color: '#fff',
-    fontSize: 14,
-    marginBottom: 4,
-  },
-  reviewSubtext: {
-    color: COLORS.textMuted,
-    fontSize: 12,
-    marginTop: 2,
-  },
-  reviewItem: {
-    marginBottom: 10,
-  },
-  errorText: {
-    color: '#F87171',
-    fontSize: 14,
-    marginTop: 12,
-    textAlign: 'center',
-  },
-  footer: {
-    flexDirection: 'row',
-    gap: 12,
-    padding: 16,
-    paddingBottom: 32,
-  },
-  backButton: {
+  stepContent: {
     flex: 1,
   },
-  nextButton: {
-    flex: 2,
+  stepTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    marginBottom: 20,
   },
 });

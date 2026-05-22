@@ -18,6 +18,7 @@ let RNDailyTransport: any;
 let RTVIEvent: any;
 
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const clientJs = require('@pipecat-ai/client-js');
   PipecatClient = clientJs.PipecatClient;
   RTVIEvent = clientJs.RTVIEvent;
@@ -26,6 +27,7 @@ try {
 }
 
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const transport = require('@pipecat-ai/react-native-daily-transport');
   RNDailyTransport = transport.RNDailyTransport;
 } catch {
@@ -235,12 +237,10 @@ export function useVoiceSession(options: UseVoiceSessionOptions): UseVoiceSessio
     setIsConnecting(false);
 
     const welcomeMessages: Record<string, string> = {
-      seller:
-        'Здравейте! Ще ви помогна да създадете профил и първата си оферта. Как се казвате?',
+      seller: 'Здравейте! Ще ви помогна да създадете профил и първата си оферта. Как се казвате?',
       buyer:
         'Здравейте! Ще ви помогна да намерите продукция и да направите заявка. Как се казвате?',
-      transporter:
-        'Здравейте! Ще ви помогна да регистрирате камиона си. Как се казвате?',
+      transporter: 'Здравейте! Ще ви помогна да регистрирате камиона си. Как се казвате?',
     };
 
     setTimeout(() => {

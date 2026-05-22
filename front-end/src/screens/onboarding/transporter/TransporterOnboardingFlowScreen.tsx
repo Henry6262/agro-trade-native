@@ -10,6 +10,11 @@ export default function OnboardingFlowScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0a0a0f' },
+  container: {
+    alignItems: 'center',
+    backgroundColor: '#0a0a0f',
+    flex: 1,
+    justifyContent: 'center',
+  },
   text: { color: '#fff', fontSize: 20 },
 });

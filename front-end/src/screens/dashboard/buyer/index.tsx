@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
@@ -88,14 +81,34 @@ export function BuyerDashboardSection({ activeTab = 'orders' }: BuyerDashboardSe
   const getStatusConfig = (status: string) => {
     const s = status.toLowerCase();
     if (s === 'delivered' || s === 'complete' || s === 'confirmed')
-      return { icon: <CheckCircle2 size={14} color={COLORS.success} />, color: COLORS.success, label: status.toUpperCase() };
+      return {
+        icon: <CheckCircle2 size={14} color={COLORS.success} />,
+        color: COLORS.success,
+        label: status.toUpperCase(),
+      };
     if (s === 'cancelled' || s === 'refunded')
-      return { icon: <XCircle size={14} color={COLORS.danger} />, color: COLORS.danger, label: status.toUpperCase() };
+      return {
+        icon: <XCircle size={14} color={COLORS.danger} />,
+        color: COLORS.danger,
+        label: status.toUpperCase(),
+      };
     if (s === 'shipped')
-      return { icon: <Truck size={14} color={COLORS.success} />, color: COLORS.success, label: 'IN TRANSIT' };
+      return {
+        icon: <Truck size={14} color={COLORS.success} />,
+        color: COLORS.success,
+        label: 'IN TRANSIT',
+      };
     if (s === 'pending')
-      return { icon: <Clock size={14} color={COLORS.warning} />, color: COLORS.warning, label: 'PENDING' };
-    return { icon: <Package size={14} color={COLORS.warning} />, color: COLORS.warning, label: status.toUpperCase() };
+      return {
+        icon: <Clock size={14} color={COLORS.warning} />,
+        color: COLORS.warning,
+        label: 'PENDING',
+      };
+    return {
+      icon: <Package size={14} color={COLORS.warning} />,
+      color: COLORS.warning,
+      label: status.toUpperCase(),
+    };
   };
 
   const renderStats = () => {
@@ -178,9 +191,7 @@ export function BuyerDashboardSection({ activeTab = 'orders' }: BuyerDashboardSe
                   <Text style={styles.listCardMetaText}>{totalItems} units</Text>
                 </View>
                 <View style={styles.orderFooter}>
-                  <Text style={styles.orderTotal}>
-                    ${order.totalAmount?.toLocaleString() || 0}
-                  </Text>
+                  <Text style={styles.orderTotal}>${order.totalAmount?.toLocaleString() || 0}</Text>
                   <Text style={styles.orderDate}>
                     {order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'N/A'}
                   </Text>
@@ -231,16 +242,10 @@ export function BuyerDashboardSection({ activeTab = 'orders' }: BuyerDashboardSe
                   </Text>
                   <ChevronRight size={16} color="rgba(255,255,255,0.4)" />
                 </View>
-                <GlassBadge
-                  label={product.quality?.grade || 'A'}
-                  variant="success"
-                  size="sm"
-                />
+                <GlassBadge label={product.quality?.grade || 'A'} variant="success" size="sm" />
               </View>
               <View style={styles.listCardMeta}>
-                <Text style={styles.listCardMetaText}>
-                  {product.category?.name || 'General'}
-                </Text>
+                <Text style={styles.listCardMetaText}>{product.category?.name || 'General'}</Text>
                 <Text style={styles.listCardMetaText}>•</Text>
                 <Text style={styles.listCardMetaText}>
                   {product.quantity} {product.unit} available
@@ -250,9 +255,7 @@ export function BuyerDashboardSection({ activeTab = 'orders' }: BuyerDashboardSe
                 <Text style={styles.orderTotal}>
                   ${product.price}/{product.unit}
                 </Text>
-                <Text style={styles.orderDate}>
-                  {product.seller?.name || 'Unknown Seller'}
-                </Text>
+                <Text style={styles.orderDate}>{product.seller?.name || 'Unknown Seller'}</Text>
               </View>
             </GlassCard>
           </TouchableOpacity>
@@ -288,7 +291,11 @@ export function BuyerDashboardSection({ activeTab = 'orders' }: BuyerDashboardSe
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accentGreen} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={COLORS.accentGreen}
+        />
       }
     >
       {renderStats()}
@@ -303,9 +310,9 @@ export function BuyerDashboardSection({ activeTab = 'orders' }: BuyerDashboardSe
 
 const styles = StyleSheet.create({
   center: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     padding: 24,
   },
   container: {
@@ -315,19 +322,6 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 32,
   },
-  statsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 20,
-  },
-  statCard: {
-    width: '47%',
-    minWidth: 140,
-  },
-  tabContent: {
-    flex: 1,
-  },
   list: {
     gap: 12,
   },
@@ -335,26 +329,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   listCardHeader: {
+    alignItems: 'flex-start',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
     marginBottom: 8,
   },
-  listCardTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: 8,
-  },
-  listCardTitle: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-    flex: 1,
-  },
   listCardMeta: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     gap: 8,
     marginBottom: 6,
   },
@@ -362,23 +344,48 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.55)',
     fontSize: 13,
   },
+  listCardTitle: {
+    color: '#fff',
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  listCardTitleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
+    gap: 8,
+  },
+  orderDate: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+  },
   orderFooter: {
+    alignItems: 'center',
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    borderTopWidth: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     marginTop: 8,
     paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.08)',
   },
   orderTotal: {
     color: COLORS.accentGold,
     fontSize: 16,
     fontWeight: '800',
   },
-  orderDate: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 12,
+  statCard: {
+    minWidth: 140,
+    width: '47%',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 20,
+  },
+  tabContent: {
+    flex: 1,
   },
 });
 

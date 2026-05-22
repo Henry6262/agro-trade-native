@@ -1,6 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Leaf, Users, Droplets, Sun, ArrowUpRight, Sprout, ShieldCheck, Zap } from 'lucide-react-native';
+import {
+  Leaf,
+  Users,
+  Droplets,
+  Sun,
+  ArrowUpRight,
+  Sprout,
+  ShieldCheck,
+  Zap,
+} from 'lucide-react-native';
 import { GlassCard, COLORS, GLASS } from '../../../design-system';
 import { MotiView } from 'moti';
 
@@ -173,7 +182,11 @@ export default function ImpactScreen() {
   return (
     <MotiView from={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ flex: 1 }}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <MotiView from={{ opacity: 0, translateY: -12 }} animate={{ opacity: 1, translateY: 0 }} transition={{ type: 'timing', duration: 500 }}>
+        <MotiView
+          from={{ opacity: 0, translateY: -12 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500 }}
+        >
           <Text style={styles.header}>ESG Impact</Text>
           <Text style={styles.subheader}>Real-world outcomes from verified trade</Text>
         </MotiView>
@@ -192,7 +205,12 @@ export default function ImpactScreen() {
               >
                 <GlassCard tier="medium" style={styles.statCard} delay={i * 60}>
                   <View style={styles.statTopRow}>
-                    <View style={[styles.iconCircle, { backgroundColor: `${m.color}18`, borderColor: `${m.color}33` }]}>
+                    <View
+                      style={[
+                        styles.iconCircle,
+                        { backgroundColor: `${m.color}18`, borderColor: `${m.color}33` },
+                      ]}
+                    >
                       <Icon size={20} color={m.color} />
                     </View>
                     <CircularProgress value={m.progress} color={m.color} size={48} stroke={3}>
@@ -220,14 +238,16 @@ export default function ImpactScreen() {
         >
           <GlassCard tier="strong" style={styles.summaryBanner}>
             <View style={styles.summaryRow}>
-              <View style={[styles.summaryIconWrap, { backgroundColor: `${COLORS.accentGreen}18` }]}>
+              <View
+                style={[styles.summaryIconWrap, { backgroundColor: `${COLORS.accentGreen}18` }]}
+              >
                 <Leaf size={22} color={COLORS.accentGreen} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.summaryTitle}>AGRoGEo Project Milestone</Text>
                 <Text style={styles.summaryDesc}>
-                  EU-funded initiative now active across 3 regions with mobile NIR labs and satellite-linked
-                  storage bases.
+                  EU-funded initiative now active across 3 regions with mobile NIR labs and
+                  satellite-linked storage bases.
                 </Text>
               </View>
               <ArrowUpRight size={18} color={COLORS.accentGreen} />
@@ -248,7 +268,9 @@ export default function ImpactScreen() {
             >
               <GlassCard tier="subtle" style={styles.milestoneCard} delay={i * 60}>
                 <View style={styles.milestoneHeader}>
-                  <View style={[styles.milestoneIconWrap, { backgroundColor: `${item.tagColor}15` }]}>
+                  <View
+                    style={[styles.milestoneIconWrap, { backgroundColor: `${item.tagColor}15` }]}
+                  >
                     <Icon size={16} color={item.tagColor} />
                   </View>
                   <View style={styles.milestoneMeta}>
@@ -272,45 +294,99 @@ export default function ImpactScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: 16, paddingBottom: 32 },
-  header: { color: COLORS.textPrimary, fontSize: 24, fontWeight: '900', marginBottom: 4, letterSpacing: -0.5 },
-  subheader: { color: COLORS.textSecondary, fontSize: 13, marginBottom: 22 },
-
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 20,
-  },
-  statCard: {
-    padding: 14,
-    width: '100%',
-  },
-  statTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
   circularValue: {
     fontSize: 10,
     fontWeight: '800',
     position: 'absolute',
   },
-  statValue: {
-    fontSize: 26,
+  container: { flex: 1 },
+  content: { padding: 16, paddingBottom: 32 },
+  header: {
+    color: COLORS.textPrimary,
+    fontSize: 24,
     fontWeight: '900',
-    marginBottom: 2,
     letterSpacing: -0.5,
+    marginBottom: 4,
+  },
+
+  iconCircle: {
+    alignItems: 'center',
+    borderRadius: 12,
+    borderWidth: 1,
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  milestoneCard: {
+    marginBottom: 10,
+    padding: 14,
+  },
+  milestoneDate: {
+    color: COLORS.textMuted,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  milestoneDesc: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  milestoneHeader: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 8,
+  },
+  milestoneIconWrap: {
+    alignItems: 'center',
+    borderRadius: 10,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  milestoneMeta: {
+    flex: 1,
+  },
+  milestoneTagRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 10,
+  },
+
+  milestoneTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    fontWeight: '800',
+    lineHeight: 19,
+    marginBottom: 6,
+  },
+  progressFill: {
+    borderRadius: 3,
+    height: '100%',
+  },
+  progressLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '600',
+  },
+
+  progressTrack: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 3,
+    height: 5,
+    marginBottom: 6,
+    overflow: 'hidden',
+  },
+  sectionTitle: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    marginBottom: 12,
+    textTransform: 'uppercase',
+  },
+  statCard: {
+    padding: 14,
+    width: '100%',
   },
   statLabel: {
     color: COLORS.textPrimary,
@@ -324,38 +400,46 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  progressTrack: {
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    overflow: 'hidden',
-    marginBottom: 6,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  progressLabel: {
-    color: COLORS.textMuted,
-    fontSize: 10,
-    fontWeight: '600',
+  statTopRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
   },
 
+  statValue: {
+    fontSize: 26,
+    fontWeight: '900',
+    letterSpacing: -0.5,
+    marginBottom: 2,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 20,
+  },
+  subheader: { color: COLORS.textSecondary, fontSize: 13, marginBottom: 22 },
   summaryBanner: {
     marginBottom: 24,
     padding: 16,
   },
-  summaryRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
+  summaryDesc: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    lineHeight: 17,
   },
   summaryIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
     alignItems: 'center',
+    borderRadius: 14,
+    height: 44,
     justifyContent: 'center',
+    width: 44,
+  },
+  summaryRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 14,
   },
   summaryTitle: {
     color: COLORS.textPrimary,
@@ -363,71 +447,15 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     marginBottom: 3,
   },
-  summaryDesc: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-    lineHeight: 17,
-  },
-
-  sectionTitle: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    marginBottom: 12,
-  },
-
-  milestoneCard: {
-    marginBottom: 10,
-    padding: 14,
-  },
-  milestoneHeader: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 8,
-  },
-  milestoneIconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  milestoneMeta: {
-    flex: 1,
-  },
-  milestoneTitle: {
-    color: COLORS.textPrimary,
-    fontSize: 14,
-    fontWeight: '800',
-    marginBottom: 6,
-    lineHeight: 19,
-  },
-  milestoneTagRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
   tagPill: {
+    borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 6,
   },
   tagText: {
     fontSize: 10,
     fontWeight: '800',
-    textTransform: 'uppercase',
     letterSpacing: 0.4,
-  },
-  milestoneDate: {
-    color: COLORS.textMuted,
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  milestoneDesc: {
-    color: COLORS.textSecondary,
-    fontSize: 12,
-    lineHeight: 18,
+    textTransform: 'uppercase',
   },
 });

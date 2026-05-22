@@ -125,25 +125,25 @@ const ListeningRings: React.FC<{ size: number }> = ({ size }) => {
 };
 
 const styles = StyleSheet.create({
+  characterWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2,
+  },
   container: {
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
   },
   glow: {
-    position: 'absolute',
-    borderRadius: 999,
     backgroundColor: 'rgba(74, 222, 128, 0.25)',
-  },
-  characterWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 2,
+    borderRadius: 999,
+    position: 'absolute',
   },
   ring: {
-    position: 'absolute',
-    borderWidth: 2,
     borderColor: 'rgba(74, 222, 128, 0.4)',
+    borderWidth: 2,
+    position: 'absolute',
     zIndex: 1,
   },
 });

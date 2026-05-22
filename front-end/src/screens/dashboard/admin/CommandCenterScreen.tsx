@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
 import {
   Bell,
   TrendingUp,
@@ -20,7 +13,11 @@ import {
 } from 'lucide-react-native';
 import { GlassCard, GlassBadge } from '@design-system';
 import { COLORS } from '@design-system';
-import { tradeOperationService, TradeOperation, TradeOperationAnalytics } from '../../../services/tradeOperationService';
+import {
+  tradeOperationService,
+  TradeOperation,
+  TradeOperationAnalytics,
+} from '../../../services/tradeOperationService';
 import { LoadingSpinner } from '../../../shared/components/LoadingSpinner';
 import { EmptyState } from '../../../shared/components/EmptyState';
 import { socketService } from '../../../services/socketService';
@@ -56,7 +53,9 @@ function deriveEvents(operations: TradeOperation[]): LiveEvent[] {
     const productName = op.buyListing?.product?.name || 'Unknown Product';
     const buyerName = op.buyListing?.buyer?.name || 'Unknown Buyer';
     const location = op.buyListing?.deliveryAddress
-      ? `${op.buyListing.deliveryAddress.city || ''}, ${op.buyListing.deliveryAddress.country || ''}`.replace(/^,\s*/, '').trim()
+      ? `${op.buyListing.deliveryAddress.city || ''}, ${op.buyListing.deliveryAddress.country || ''}`
+          .replace(/^,\s*/, '')
+          .trim()
       : 'Unknown Location';
 
     let type: LiveEvent['type'] = 'listing';
@@ -177,20 +176,22 @@ export default function CommandCenterScreen() {
 
   const getStatusIcon = (status: string) => {
     const s = (status || '').toLowerCase();
-    if (s === 'completed' || s === 'delivered') return <CheckCircle color={COLORS.accentGreen} size={15} />;
-    if (s === 'in_transit' || s === 'transit') return <Truck color={COLORS.textSecondary} size={15} />;
+    if (s === 'completed' || s === 'delivered')
+      return <CheckCircle color={COLORS.accentGreen} size={15} />;
+    if (s === 'in_transit' || s === 'transit')
+      return <Truck color={COLORS.textSecondary} size={15} />;
     if (s === 'matched') return <TrendingUp color={COLORS.accentGreen} size={15} />;
     if (s === 'disputed') return <AlertCircle color="#F87171" size={15} />;
     return <Clock color={COLORS.textMuted} size={15} />;
   };
 
   const matchedCount = operations.filter(
-    (o) => (o.status || '').toLowerCase() === 'matched' || (o.phase || '').toLowerCase() === 'matched'
+    (o) =>
+      (o.status || '').toLowerCase() === 'matched' || (o.phase || '').toLowerCase() === 'matched'
   ).length;
 
   const activeCount = operations.filter(
-    (o) =>
-      !['completed', 'cancelled', 'refunded'].includes((o.status || '').toLowerCase())
+    (o) => !['completed', 'cancelled', 'refunded'].includes((o.status || '').toLowerCase())
   ).length;
 
   if (loading && !refreshing) {
@@ -267,9 +268,7 @@ export default function CommandCenterScreen() {
                     {op.buyListing?.product?.name || 'Unknown'} — {op.buyListing?.quantity || 0}T
                   </Text>
                 </View>
-                <Text style={styles.goldPrice}>
-                  {op._count?.sellers ?? 0} sellers
-                </Text>
+                <Text style={styles.goldPrice}>{op._count?.sellers ?? 0} sellers</Text>
                 <ArrowRight color={COLORS.textMuted} size={12} />
               </TouchableOpacity>
             ))
@@ -330,7 +329,8 @@ export default function CommandCenterScreen() {
           <Text style={styles.sectionTitle}>TRADE VOLUME OVERVIEW</Text>
           {analytics && (
             <Text style={styles.analyticsText}>
-              {analytics.totalTrades} trades • avg margin {(analytics.averageMargin * 100).toFixed(1)}%
+              {analytics.totalTrades} trades • avg margin{' '}
+              {(analytics.averageMargin * 100).toFixed(1)}%
             </Text>
           )}
         </View>

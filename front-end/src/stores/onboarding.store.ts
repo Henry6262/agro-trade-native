@@ -14,10 +14,7 @@ import type {
   MarketInsights,
   TransportOpportunities,
 } from '../shared/types';
-import {
-  OnboardingStore,
-  GoogleAuthData,
-} from './onboarding-store/types';
+import { OnboardingStore, GoogleAuthData } from './onboarding-store/types';
 import {
   getInitialState,
   getRoleStepCount,

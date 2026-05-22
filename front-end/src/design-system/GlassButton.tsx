@@ -89,7 +89,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   if (usesGradient) {
     const gradientColors = disabled
       ? DISABLED_GRADIENT
-      : VARIANT_GRADIENTS[variant] ?? GRADIENT.green;
+      : (VARIANT_GRADIENTS[variant] ?? GRADIENT.green);
 
     return (
       <AnimatedPressable
@@ -136,9 +136,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
         style,
       ]}
     >
-      <View style={[styles.inner, sizeStyle.inner]}>
-        {content}
-      </View>
+      <View style={[styles.inner, sizeStyle.inner]}>{content}</View>
     </AnimatedPressable>
   );
 };

@@ -64,13 +64,18 @@ export const tradeOperationService = {
     return response.data;
   },
 
-  getAnalytics: async (params?: { startDate?: string; endDate?: string }): Promise<TradeOperationAnalytics> => {
+  getAnalytics: async (params?: {
+    startDate?: string;
+    endDate?: string;
+  }): Promise<TradeOperationAnalytics> => {
     const query = new URLSearchParams();
     if (params?.startDate) query.append('startDate', params.startDate);
     if (params?.endDate) query.append('endDate', params.endDate);
 
     const queryStr = query.toString() ? `?${query.toString()}` : '';
-    const response = await apiClient.get<TradeOperationAnalytics>(`/trade-operations/analytics${queryStr}`);
+    const response = await apiClient.get<TradeOperationAnalytics>(
+      `/trade-operations/analytics${queryStr}`
+    );
     return response.data;
   },
 

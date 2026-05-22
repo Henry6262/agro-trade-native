@@ -16,8 +16,8 @@ export default function SellerProductsTab() {
 }
 
 const styles = StyleSheet.create({
+  card: { alignItems: 'center', gap: 8, padding: 24 },
   container: { padding: 16 },
-  card: { alignItems: 'center', padding: 24, gap: 8 },
-  title: { color: COLORS.textPrimary, fontSize: 16, fontWeight: '700' },
   subtitle: { color: COLORS.textSecondary, fontSize: 13 },
+  title: { color: COLORS.textPrimary, fontSize: 16, fontWeight: '700' },
 });

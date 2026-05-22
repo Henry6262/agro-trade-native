@@ -74,7 +74,7 @@ export default function DashboardMainScreen() {
   const userRole = React.useMemo(() => {
     const role = (route.params?.userRole || user?.role || UserRole.FARMER) as string;
     const normalized = role.toUpperCase();
-    
+
     if (normalized === UserRole.FARMER || normalized === 'SELLER') return 'seller';
     if (normalized === UserRole.BUYER) return 'buyer';
     if (normalized === UserRole.TRANSPORTER || normalized === 'TRANSPORT') return 'transporter';
@@ -351,7 +351,10 @@ export default function DashboardMainScreen() {
       <AIFloatingButton
         onPress={() =>
           (navigation as any).navigate('AIMode', {
-            role: userRole === 'transporter' ? 'transporter' : (userRole as 'seller' | 'buyer' | 'transporter'),
+            role:
+              userRole === 'transporter'
+                ? 'transporter'
+                : (userRole as 'seller' | 'buyer' | 'transporter'),
             mode: 'assistant',
           })
         }

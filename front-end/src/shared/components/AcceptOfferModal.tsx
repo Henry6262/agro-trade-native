@@ -170,10 +170,7 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
               <View className="p-6 border-b border-gray-200">
                 <View className="flex-row justify-between items-center">
                   {/* a11y fix: header role for title */}
-                  <Text
-                    className="text-xl font-bold text-gray-900"
-                    accessibilityRole="header"
-                  >
+                  <Text className="text-xl font-bold text-gray-900" accessibilityRole="header">
                     Accept Offer
                   </Text>
                   {/* a11y fix: close button with role and label */}
@@ -273,7 +270,9 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                       <View className="border-t border-green-500/20 pt-3">
                         <View className="flex-row justify-between items-center">
                           <Text className="text-green-300 font-semibold">Total Value</Text>
-                          <Text className="text-green-400 font-bold text-lg">\u20AC{totalValue}</Text>
+                          <Text className="text-green-400 font-bold text-lg">
+                            \u20AC{totalValue}
+                          </Text>
                         </View>
                         {savings && (
                           <View className="flex-row justify-between items-center mt-1">
@@ -324,9 +323,8 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
                     <View className="flex-row items-start">
                       <Info size={16} color="#3B82F6" />
                       <Text className="text-blue-300 text-xs ml-2 flex-1">
-                        By accepting this offer, you agree to the seller's terms and
-                        conditions. Payment will be processed according to the platform's
-                        payment policy.
+                        By accepting this offer, you agree to the seller's terms and conditions.
+                        Payment will be processed according to the platform's payment policy.
                       </Text>
                     </View>
                   </View>
@@ -372,10 +370,7 @@ export const AcceptOfferModal: React.FC<AcceptOfferModalProps> = ({
               <View className="p-6 border-b border-gray-200">
                 <View className="flex-row justify-between items-center">
                   {/* a11y fix: header role */}
-                  <Text
-                    className="text-xl font-bold text-gray-900"
-                    accessibilityRole="header"
-                  >
+                  <Text className="text-xl font-bold text-gray-900" accessibilityRole="header">
                     Confirm Acceptance
                   </Text>
                   {/* a11y fix: close button label */}

@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import {
   ArrowLeft,
@@ -22,7 +14,13 @@ import {
 import { RootStackParamList } from '../../navigation/types';
 import { productService } from '../../services/productService';
 import { Product } from '../../shared/types';
-import { GradientBackground, GlassCard, GlassButton, GlassBadge, COLORS } from '../../design-system';
+import {
+  GradientBackground,
+  GlassCard,
+  GlassButton,
+  GlassBadge,
+  COLORS,
+} from '../../design-system';
 import { LoadingSpinner } from '../../shared/components/LoadingSpinner';
 import { EmptyState } from '../../shared/components/EmptyState';
 
@@ -65,7 +63,10 @@ export default function ProductDetailScreen() {
         {
           text: 'Send Offer',
           onPress: () => {
-            Alert.alert('Offer Sent', 'Your offer has been sent to the seller. You will be notified when they respond.');
+            Alert.alert(
+              'Offer Sent',
+              'Your offer has been sent to the seller. You will be notified when they respond.'
+            );
           },
         },
       ]
@@ -141,14 +142,8 @@ export default function ProductDetailScreen() {
           <View style={styles.titleLeft}>
             <Text style={styles.productName}>{product.name}</Text>
             <View style={styles.metaRow}>
-              <GlassBadge
-                label={product.quality?.grade || 'A'}
-                variant="success"
-                size="sm"
-              />
-              {product.isOrganic && (
-                <GlassBadge label="ORGANIC" variant="gold" size="sm" />
-              )}
+              <GlassBadge label={product.quality?.grade || 'A'} variant="success" size="sm" />
+              {product.isOrganic && <GlassBadge label="ORGANIC" variant="gold" size="sm" />}
             </View>
           </View>
           <View style={styles.priceBlock}>
@@ -244,68 +239,90 @@ export default function ProductDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  backBtn: {
+    alignItems: 'center',
+    height: 40,
+    justifyContent: 'center',
+    width: 40,
+  },
+  center: {
+    alignItems: 'center',
     flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+  },
+  certRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  container: {
     backgroundColor: '#021207',
+    flex: 1,
+  },
+  descriptionText: {
+    color: 'rgba(255,255,255,0.75)',
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  footer: {
+    backgroundColor: 'rgba(10,15,10,0.95)',
+    flexDirection: 'row',
+    gap: 12,
+    padding: 16,
+    paddingBottom: 32,
+  },
+  footerBtn: {
+    flex: 1,
+  },
+  footerBtnPrimary: {
+    flex: 2,
   },
   header: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingBottom: 12,
     paddingHorizontal: 16,
     paddingTop: 60,
-    paddingBottom: 12,
-  },
-  backBtn: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   headerTitle: {
     color: '#fff',
+    flex: 1,
     fontSize: 17,
     fontWeight: '700',
-    flex: 1,
     textAlign: 'center',
   },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  scroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
   imageCard: {
-    marginBottom: 16,
     height: 200,
+    marginBottom: 16,
   },
   imagePlaceholder: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.04)',
+    flex: 1,
+    justifyContent: 'center',
   },
   imagePlaceholderText: {
     color: 'rgba(255,255,255,0.3)',
     fontSize: 14,
     marginTop: 12,
   },
-  titleRow: {
+  metaRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
+    gap: 8,
   },
-  titleLeft: {
-    flex: 1,
-    marginRight: 12,
+  price: {
+    color: COLORS.accentGold,
+    fontSize: 24,
+    fontWeight: '800',
+  },
+  priceBlock: {
+    alignItems: 'flex-end',
+  },
+  priceUnit: {
+    color: COLORS.textMuted,
+    fontSize: 13,
   },
   productName: {
     color: '#fff',
@@ -313,41 +330,21 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     marginBottom: 8,
   },
-  metaRow: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  priceBlock: {
-    alignItems: 'flex-end',
-  },
-  price: {
-    color: COLORS.accentGold,
-    fontSize: 24,
-    fontWeight: '800',
-  },
-  priceUnit: {
+  qualityCertifier: {
     color: COLORS.textMuted,
-    fontSize: 13,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
-  },
-  statCard: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 12,
-  },
-  statValue: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: '800',
-  },
-  statLabel: {
-    color: COLORS.textMuted,
-    fontSize: 11,
+    fontSize: 12,
     marginTop: 4,
+  },
+  qualityText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 100,
   },
   sectionCard: {
     marginBottom: 12,
@@ -358,54 +355,52 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     letterSpacing: 1,
-    textTransform: 'uppercase',
     marginBottom: 10,
+    textTransform: 'uppercase',
   },
-  descriptionText: {
-    color: 'rgba(255,255,255,0.75)',
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  sellerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 8,
+  sellerLocation: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 13,
   },
   sellerName: {
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
-  sellerLocation: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 13,
+  sellerRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 8,
   },
-  qualityText: {
-    color: '#fff',
-    fontSize: 14,
+  statCard: {
+    alignItems: 'center',
+    flex: 1,
+    padding: 12,
   },
-  qualityCertifier: {
+  statLabel: {
     color: COLORS.textMuted,
-    fontSize: 12,
+    fontSize: 11,
     marginTop: 4,
   },
-  certRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
+  statValue: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '800',
   },
-  footer: {
+  statsRow: {
     flexDirection: 'row',
     gap: 12,
-    padding: 16,
-    paddingBottom: 32,
-    backgroundColor: 'rgba(10,15,10,0.95)',
+    marginBottom: 16,
   },
-  footerBtn: {
+  titleLeft: {
     flex: 1,
+    marginRight: 12,
   },
-  footerBtnPrimary: {
-    flex: 2,
+  titleRow: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
   },
 });

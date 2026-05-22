@@ -172,13 +172,17 @@ export default function DashboardMainScreen() {
         <View style={activeSection === 'operations' ? styles.sectionVisible : styles.sectionHidden}>
           <OperationsScreen />
         </View>
-        <View style={activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden}>
+        <View
+          style={activeSection === 'intelligence' ? styles.sectionVisible : styles.sectionHidden}
+        >
           <IntelligenceScreen />
         </View>
         <View style={activeSection === 'impact' ? styles.sectionVisible : styles.sectionHidden}>
           <ImpactScreen />
         </View>
-        <View style={activeSection === 'traceability' ? styles.sectionVisible : styles.sectionHidden}>
+        <View
+          style={activeSection === 'traceability' ? styles.sectionVisible : styles.sectionHidden}
+        >
           <TraceabilityScreen />
         </View>
       </>

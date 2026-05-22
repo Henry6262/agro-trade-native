@@ -179,7 +179,9 @@ const RichInspectionCard: React.FC<{
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
             {getInspectionIcon(job.inspectionType)}
-            <Text style={styles.cardTitle} numberOfLines={1}>{job.product}</Text>
+            <Text style={styles.cardTitle} numberOfLines={1}>
+              {job.product}
+            </Text>
           </View>
           <GlassBadge label={status.label} variant={status.variant} size="sm" />
         </View>
@@ -187,7 +189,9 @@ const RichInspectionCard: React.FC<{
         {/* Location with GPS hint */}
         <View style={styles.locationRow}>
           <MapPin size={13} color={COLORS.info} />
-          <Text style={styles.locationText} numberOfLines={1}>{job.location}</Text>
+          <Text style={styles.locationText} numberOfLines={1}>
+            {job.location}
+          </Text>
           {job.gpsLat && (
             <View style={styles.gpsBadge}>
               <Text style={styles.gpsText}>GPS ✓</Text>
@@ -197,9 +201,13 @@ const RichInspectionCard: React.FC<{
 
         {/* Meta */}
         <View style={styles.metaRow}>
-          <Text style={styles.metaText}>{job.quantity} {job.unit}</Text>
+          <Text style={styles.metaText}>
+            {job.quantity} {job.unit}
+          </Text>
           <Text style={styles.metaDot}>•</Text>
-          <Text style={styles.metaText} numberOfLines={1}>{job.sellerName}</Text>
+          <Text style={styles.metaText} numberOfLines={1}>
+            {job.sellerName}
+          </Text>
         </View>
 
         {/* Dates */}
@@ -207,7 +215,8 @@ const RichInspectionCard: React.FC<{
           <Clock size={12} color={COLORS.textMuted} />
           <Text style={styles.dateText}>
             {job.scheduledDate && `Scheduled: ${new Date(job.scheduledDate).toLocaleDateString()}`}
-            {job.completedDate && ` → Completed: ${new Date(job.completedDate).toLocaleDateString()}`}
+            {job.completedDate &&
+              ` → Completed: ${new Date(job.completedDate).toLocaleDateString()}`}
           </Text>
         </View>
 
@@ -231,9 +240,17 @@ const RichInspectionCard: React.FC<{
 
         {/* Notes */}
         {job.notes && (
-          <View style={[styles.notesBox, isCompleted ? styles.notesBoxDone : styles.notesBoxPending]}>
+          <View
+            style={[styles.notesBox, isCompleted ? styles.notesBoxDone : styles.notesBoxPending]}
+          >
             <FileText size={12} color={isCompleted ? COLORS.success : COLORS.warning} />
-            <Text style={[styles.notesText, { color: isCompleted ? COLORS.success : COLORS.textSecondary }]} numberOfLines={2}>
+            <Text
+              style={[
+                styles.notesText,
+                { color: isCompleted ? COLORS.success : COLORS.textSecondary },
+              ]}
+              numberOfLines={2}
+            >
               {job.notes}
             </Text>
           </View>
@@ -256,7 +273,9 @@ interface InspectorDashboardSectionProps {
   activeTab?: string;
 }
 
-export function InspectorDashboardSection({ activeTab = 'available' }: InspectorDashboardSectionProps) {
+export function InspectorDashboardSection({
+  activeTab = 'available',
+}: InspectorDashboardSectionProps) {
   const [tab, setTab] = useState<TabId>(activeTab as TabId);
   const [available, setAvailable] = useState<InspectionJob[]>([]);
   const [active, setActive] = useState<InspectionJob[]>([]);
@@ -323,7 +342,11 @@ export function InspectorDashboardSection({ activeTab = 'available' }: Inspector
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accentGreen} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={COLORS.accentGreen}
+          />
         }
       >
         {/* Stats */}
@@ -361,7 +384,12 @@ export function InspectorDashboardSection({ activeTab = 'available' }: Inspector
           style={styles.sectionHeader}
         >
           <ClipboardCheck size={18} color={tab === 'available' ? COLORS.info : COLORS.success} />
-          <Text style={[styles.sectionTitle, { color: tab === 'available' ? COLORS.info : COLORS.success }]}>
+          <Text
+            style={[
+              styles.sectionTitle,
+              { color: tab === 'available' ? COLORS.info : COLORS.success },
+            ]}
+          >
             {tab === 'available' ? 'AVAILABLE INSPECTIONS' : 'MY ASSIGNMENTS'}
           </Text>
           <Text style={styles.sectionCount}>
@@ -370,13 +398,11 @@ export function InspectorDashboardSection({ activeTab = 'available' }: Inspector
         </MotiView>
 
         {/* Cards */}
-        {tab === 'available' && available.map((job, i) => (
-          <RichInspectionCard key={job.id} job={job} index={i} />
-        ))}
+        {tab === 'available' &&
+          available.map((job, i) => <RichInspectionCard key={job.id} job={job} index={i} />)}
 
-        {tab === 'active' && active.map((job, i) => (
-          <RichInspectionCard key={job.id} job={job} index={i} />
-        ))}
+        {tab === 'active' &&
+          active.map((job, i) => <RichInspectionCard key={job.id} job={job} index={i} />)}
 
         {tab === 'available' && available.length === 0 && (
           <View style={styles.emptyWrap}>
@@ -384,7 +410,10 @@ export function InspectorDashboardSection({ activeTab = 'available' }: Inspector
               <ClipboardCheck size={40} color={`${COLORS.textMuted}80`} />
             </View>
             <Text style={styles.emptyTitle}>No available jobs</Text>
-            <Text style={styles.emptySubtitle}>Inspection requests will appear here when buyers or sellers request quality verification.</Text>
+            <Text style={styles.emptySubtitle}>
+              Inspection requests will appear here when buyers or sellers request quality
+              verification.
+            </Text>
           </View>
         )}
 
@@ -394,7 +423,9 @@ export function InspectorDashboardSection({ activeTab = 'available' }: Inspector
               <Clock size={40} color={`${COLORS.textMuted}80`} />
             </View>
             <Text style={styles.emptyTitle}>No assignments</Text>
-            <Text style={styles.emptySubtitle}>Your accepted inspection jobs will appear here.</Text>
+            <Text style={styles.emptySubtitle}>
+              Your accepted inspection jobs will appear here.
+            </Text>
           </View>
         )}
       </ScrollView>
@@ -405,64 +436,122 @@ export function InspectorDashboardSection({ activeTab = 'available' }: Inspector
 /* ─── Styles ─── */
 
 const styles = StyleSheet.create({
-  root: { flex: 1 },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  card: { marginBottom: 12, padding: 14 },
+  cardHeader: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
 
+  cardHeaderLeft: { alignItems: 'center', flexDirection: 'row', flex: 1, gap: 8 },
+  cardTitle: { color: COLORS.textPrimary, flex: 1, fontSize: 15, fontWeight: '700' },
+  center: { alignItems: 'center', flex: 1, justifyContent: 'center', padding: 24 },
+  dateRow: { alignItems: 'center', flexDirection: 'row', gap: 6, marginBottom: 8 },
+  dateText: { color: COLORS.textMuted, fontSize: 11 },
+
+  emptyIconWrap: {
+    alignItems: 'center',
+    backgroundColor: GLASS.subtle.fill,
+    borderRadius: 40,
+    height: 80,
+    justifyContent: 'center',
+    marginBottom: 16,
+    width: 80,
+  },
+  emptySubtitle: { color: COLORS.textSecondary, fontSize: 13, lineHeight: 20, textAlign: 'center' },
+
+  emptyTitle: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '800', marginBottom: 6 },
+  emptyWrap: { alignItems: 'center', paddingHorizontal: 24, paddingVertical: 60 },
+  gpsBadge: {
+    backgroundColor: `${COLORS.info}15`,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  gpsText: { color: COLORS.info, fontSize: 10, fontWeight: '700' },
+  locationRow: { alignItems: 'center', flexDirection: 'row', gap: 6, marginBottom: 6 },
+  locationText: { color: COLORS.textSecondary, flex: 1, fontSize: 13, fontWeight: '600' },
+
+  metaDot: { color: COLORS.textMuted, fontSize: 12 },
+  metaRow: { alignItems: 'center', flexDirection: 'row', gap: 8, marginBottom: 6 },
+  metaText: { color: COLORS.textSecondary, fontSize: 12 },
+
+  metricPill: {
+    alignItems: 'center',
+    borderRadius: 8,
+    flexDirection: 'row',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  metricPillText: { fontSize: 11, fontWeight: '700' },
+  metricsRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
+  notesBox: {
+    alignItems: 'flex-start',
+    borderRadius: 8,
+    flexDirection: 'row',
+    gap: 6,
+    marginTop: 4,
+    padding: 10,
+  },
+
+  notesBoxDone: {
+    backgroundColor: `${COLORS.success}10`,
+    borderLeftColor: COLORS.success,
+    borderLeftWidth: 3,
+  },
+  notesBoxPending: {
+    backgroundColor: GLASS.subtle.fill,
+    borderLeftColor: COLORS.warning,
+    borderLeftWidth: 3,
+  },
+  notesText: { flex: 1, fontSize: 12, lineHeight: 18 },
+  root: { flex: 1 },
+
+  scroll: { flex: 1 },
+  scrollContent: { padding: 16, paddingBottom: 32 },
+  sectionCount: { color: COLORS.accentGold, fontSize: 13, fontWeight: '800', marginLeft: 'auto' },
+
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 14,
+    marginTop: 4,
+  },
+  sectionTitle: { fontSize: 13, fontWeight: '800', letterSpacing: 0.8 },
+
+  statBox: { flex: 1 },
+  statCard: { alignItems: 'center', gap: 6, padding: 12 },
+  statIconWrap: {
+    alignItems: 'center',
+    borderRadius: 10,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+
+  statLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  statValue: { fontSize: 18, fontWeight: '800' },
+  statsGrid: { flexDirection: 'row', gap: 10, marginBottom: 20 },
   tabBar: {
     borderBottomColor: GLASS.subtle.border,
     borderBottomWidth: 1,
     flexDirection: 'row',
     paddingHorizontal: 16,
   },
+
   tabBtn: { marginRight: 24, paddingBottom: 12, paddingTop: 8 },
   tabBtnActive: { borderBottomColor: COLORS.accentGreen, borderBottomWidth: 2 },
   tabText: { color: COLORS.textMuted, fontSize: 14, fontWeight: '600' },
   tabTextActive: { color: COLORS.accentGreen },
-
-  scroll: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 32 },
-
-  statsGrid: { flexDirection: 'row', gap: 10, marginBottom: 20 },
-  statBox: { flex: 1 },
-  statCard: { alignItems: 'center', padding: 12, gap: 6 },
-  statIconWrap: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  statValue: { fontSize: 18, fontWeight: '800' },
-  statLabel: { color: COLORS.textMuted, fontSize: 10, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase' },
-
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14, marginTop: 4 },
-  sectionTitle: { fontSize: 13, fontWeight: '800', letterSpacing: 0.8 },
-  sectionCount: { color: COLORS.accentGold, fontSize: 13, fontWeight: '800', marginLeft: 'auto' },
-
-  card: { padding: 14, marginBottom: 12 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
-  cardHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1 },
-  cardTitle: { color: COLORS.textPrimary, fontSize: 15, fontWeight: '700', flex: 1 },
-
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  locationText: { color: COLORS.textSecondary, fontSize: 13, fontWeight: '600', flex: 1 },
-  gpsBadge: { backgroundColor: `${COLORS.info}15`, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6 },
-  gpsText: { color: COLORS.info, fontSize: 10, fontWeight: '700' },
-
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
-  metaText: { color: COLORS.textSecondary, fontSize: 12 },
-  metaDot: { color: COLORS.textMuted, fontSize: 12 },
-
-  dateRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8 },
-  dateText: { color: COLORS.textMuted, fontSize: 11 },
-
-  metricsRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
-  metricPill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-  metricPillText: { fontSize: 11, fontWeight: '700' },
-
-  notesBox: { flexDirection: 'row', alignItems: 'flex-start', gap: 6, padding: 10, borderRadius: 8, marginTop: 4 },
-  notesBoxDone: { backgroundColor: `${COLORS.success}10`, borderLeftWidth: 3, borderLeftColor: COLORS.success },
-  notesBoxPending: { backgroundColor: GLASS.subtle.fill, borderLeftWidth: 3, borderLeftColor: COLORS.warning },
-  notesText: { fontSize: 12, lineHeight: 18, flex: 1 },
-
-  emptyWrap: { alignItems: 'center', paddingVertical: 60, paddingHorizontal: 24 },
-  emptyIconWrap: { width: 80, height: 80, borderRadius: 40, backgroundColor: GLASS.subtle.fill, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  emptyTitle: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '800', marginBottom: 6 },
-  emptySubtitle: { color: COLORS.textSecondary, fontSize: 13, textAlign: 'center', lineHeight: 20 },
 });
 
 export default InspectorDashboardSection;

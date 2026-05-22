@@ -52,13 +52,17 @@ export const escrowService = {
 
   // Release funds (admin only)
   releaseFunds: async (tradeOperationId: string): Promise<EscrowActionResponse> => {
-    const response = await apiClient.post<EscrowActionResponse>(`/escrow/${tradeOperationId}/release`);
+    const response = await apiClient.post<EscrowActionResponse>(
+      `/escrow/${tradeOperationId}/release`
+    );
     return response.data;
   },
 
   // Raise dispute (admin only)
   raiseDispute: async (tradeOperationId: string): Promise<EscrowActionResponse> => {
-    const response = await apiClient.post<EscrowActionResponse>(`/escrow/${tradeOperationId}/dispute`);
+    const response = await apiClient.post<EscrowActionResponse>(
+      `/escrow/${tradeOperationId}/dispute`
+    );
     return response.data;
   },
 
@@ -76,7 +80,9 @@ export const escrowService = {
 
   // Refund (admin only)
   refund: async (tradeOperationId: string): Promise<EscrowActionResponse> => {
-    const response = await apiClient.post<EscrowActionResponse>(`/escrow/${tradeOperationId}/refund`);
+    const response = await apiClient.post<EscrowActionResponse>(
+      `/escrow/${tradeOperationId}/refund`
+    );
     return response.data;
   },
 };

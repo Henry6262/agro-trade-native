@@ -1,12 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
@@ -51,9 +44,9 @@ export function SellerDashboardSection({ activeTab = 'products' }: SellerDashboa
     try {
       const [statsData, tradesData, offersData] = await Promise.all([
         sellerService.getMyStats(),
-        sellerService.getMyTrades({ limit: 20 }).then((res) =>
-          Array.isArray(res) ? res : res.items || []
-        ),
+        sellerService
+          .getMyTrades({ limit: 20 })
+          .then((res) => (Array.isArray(res) ? res : res.items || [])),
         sellerService.getMyOffers().then((res) => res.data?.offers || []),
       ]);
       setStats(statsData);
@@ -225,15 +218,18 @@ export function SellerDashboardSection({ activeTab = 'products' }: SellerDashboa
           const isPending = (offer.status || '').toLowerCase() === 'pending';
           const isLoading = actionLoading === offer.negotiationId;
           return (
-            <GlassCard key={offer.id || index} tier="medium" style={styles.listCard} delay={index * 40}>
+            <GlassCard
+              key={offer.id || index}
+              tier="medium"
+              style={styles.listCard}
+              delay={index * 40}
+            >
               <View style={styles.listCardHeader}>
                 <View style={styles.listCardTitleRow}>
                   <Text style={styles.listCardTitle} numberOfLines={1}>
                     {offer.product}
                   </Text>
-                  {offer.isExpiringSoon && (
-                    <AlertCircle size={14} color={COLORS.danger} />
-                  )}
+                  {offer.isExpiringSoon && <AlertCircle size={14} color={COLORS.danger} />}
                 </View>
                 <GlassBadge
                   label={offer.status}
@@ -250,7 +246,10 @@ export function SellerDashboardSection({ activeTab = 'products' }: SellerDashboa
               </View>
               <View style={styles.offerValueRow}>
                 <Text style={styles.offerValueText}>
-                  Total Value: <Text style={styles.offerValueHighlight}>${offer.totalValue.toLocaleString()}</Text>
+                  Total Value:{' '}
+                  <Text style={styles.offerValueHighlight}>
+                    ${offer.totalValue.toLocaleString()}
+                  </Text>
                 </Text>
                 {offer.hoursUntilExpiry !== undefined && (
                   <Text style={styles.offerExpiryText}>
@@ -335,7 +334,11 @@ export function SellerDashboardSection({ activeTab = 'products' }: SellerDashboa
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accentGreen} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={COLORS.accentGreen}
+        />
       }
     >
       {renderStats()}
@@ -350,10 +353,13 @@ export function SellerDashboardSection({ activeTab = 'products' }: SellerDashboa
 }
 
 const styles = StyleSheet.create({
+  actionBtn: {
+    flex: 1,
+  },
   center: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     padding: 24,
   },
   container: {
@@ -363,46 +369,26 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingBottom: 32,
   },
-  statsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 20,
-  },
-  statCard: {
-    width: '47%',
-    minWidth: 140,
-  },
-  tabContent: {
-    flex: 1,
-  },
   list: {
     gap: 12,
   },
   listCard: {
     marginBottom: 12,
   },
+  listCardDate: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    marginTop: 4,
+  },
   listCardHeader: {
+    alignItems: 'flex-start',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
     marginBottom: 8,
   },
-  listCardTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-    gap: 8,
-  },
-  listCardTitle: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-    flex: 1,
-  },
   listCardMeta: {
-    flexDirection: 'row',
     alignItems: 'center',
+    flexDirection: 'row',
     gap: 8,
     marginBottom: 6,
   },
@@ -410,27 +396,25 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.55)',
     fontSize: 13,
   },
-  listCardDate: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  offerValueRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.08)',
-  },
-  offerValueText: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 13,
-  },
-  offerValueHighlight: {
-    color: COLORS.accentGold,
+  listCardTitle: {
+    color: '#fff',
+    flex: 1,
+    fontSize: 15,
     fontWeight: '700',
+  },
+  listCardTitleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flex: 1,
+    gap: 8,
+  },
+  offerActions: {
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 12,
+    paddingTop: 12,
   },
   offerExpiryText: {
     color: COLORS.danger,
@@ -442,15 +426,34 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-  offerActions: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255,255,255,0.08)',
+  offerValueHighlight: {
+    color: COLORS.accentGold,
+    fontWeight: '700',
   },
-  actionBtn: {
+  offerValueRow: {
+    alignItems: 'center',
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+    paddingTop: 8,
+  },
+  offerValueText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 13,
+  },
+  statCard: {
+    minWidth: 140,
+    width: '47%',
+  },
+  statsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+    marginBottom: 20,
+  },
+  tabContent: {
     flex: 1,
   },
 });

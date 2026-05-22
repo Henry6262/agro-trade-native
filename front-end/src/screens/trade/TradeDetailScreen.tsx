@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
@@ -34,14 +28,38 @@ type TradeDetailNavigationProp = NativeStackNavigationProp<DashboardStackParamLi
 
 const STATUS_CONFIG: Record<string, { icon: React.ReactNode; color: string; label: string }> = {
   pending: { icon: <Clock size={14} color="#FCD34D" />, color: '#FCD34D', label: 'PENDING' },
-  confirmed: { icon: <CheckCircle2 size={14} color="#4ADE80" />, color: '#4ADE80', label: 'CONFIRMED' },
-  processing: { icon: <Package size={14} color="#4ADE80" />, color: '#4ADE80', label: 'PROCESSING' },
+  confirmed: {
+    icon: <CheckCircle2 size={14} color="#4ADE80" />,
+    color: '#4ADE80',
+    label: 'CONFIRMED',
+  },
+  processing: {
+    icon: <Package size={14} color="#4ADE80" />,
+    color: '#4ADE80',
+    label: 'PROCESSING',
+  },
   shipped: { icon: <Truck size={14} color="#4ADE80" />, color: '#4ADE80', label: 'IN TRANSIT' },
-  delivered: { icon: <CheckCircle2 size={14} color="#4ADE80" />, color: '#4ADE80', label: 'DELIVERED' },
-  complete: { icon: <CheckCircle2 size={14} color="#4ADE80" />, color: '#4ADE80', label: 'COMPLETE' },
+  delivered: {
+    icon: <CheckCircle2 size={14} color="#4ADE80" />,
+    color: '#4ADE80',
+    label: 'DELIVERED',
+  },
+  complete: {
+    icon: <CheckCircle2 size={14} color="#4ADE80" />,
+    color: '#4ADE80',
+    label: 'COMPLETE',
+  },
   cancelled: { icon: <XCircle size={14} color="#F87171" />, color: '#F87171', label: 'CANCELLED' },
-  disputed: { icon: <AlertCircle size={14} color="#F87171" />, color: '#F87171', label: 'DISPUTED' },
-  refunded: { icon: <XCircle size={14} color="rgba(255,255,255,0.35)" />, color: 'rgba(255,255,255,0.35)', label: 'REFUNDED' },
+  disputed: {
+    icon: <AlertCircle size={14} color="#F87171" />,
+    color: '#F87171',
+    label: 'DISPUTED',
+  },
+  refunded: {
+    icon: <XCircle size={14} color="rgba(255,255,255,0.35)" />,
+    color: 'rgba(255,255,255,0.35)',
+    label: 'REFUNDED',
+  },
 };
 
 const ESCROW_STATE_CONFIG: Record<string, { variant: any; label: string; description: string }> = {
@@ -192,9 +210,7 @@ export default function TradeDetailScreen() {
               {statusConfig.label}
             </Text>
           </View>
-          <Text style={styles.statusSubtext}>
-            Trade ID: {trade.tradeOperationId || trade.id}
-          </Text>
+          <Text style={styles.statusSubtext}>Trade ID: {trade.tradeOperationId || trade.id}</Text>
         </GlassCard>
 
         {/* Product Info */}
@@ -239,11 +255,11 @@ export default function TradeDetailScreen() {
             <View style={styles.termItem}>
               <Text style={styles.termLabel}>Total Value</Text>
               <Text style={[styles.termValue, styles.termValueHighlight]}>
-                ${
-                  ((trade.agreedQuantity || trade.quantity || 0) *
-                    (trade.agreedPrice || trade.agreedPricePerTon || trade.agreedPricePerUnit || 0)
-                  ).toLocaleString()
-                }
+                $
+                {(
+                  (trade.agreedQuantity || trade.quantity || 0) *
+                  (trade.agreedPrice || trade.agreedPricePerTon || trade.agreedPricePerUnit || 0)
+                ).toLocaleString()}
               </Text>
             </View>
             {trade.pickupDate && (
@@ -266,11 +282,7 @@ export default function TradeDetailScreen() {
           {escrow && escrowConfig ? (
             <View>
               <View style={styles.escrowStatusRow}>
-                <GlassBadge
-                  label={escrowConfig.label}
-                  variant={escrowConfig.variant}
-                  size="md"
-                />
+                <GlassBadge label={escrowConfig.label} variant={escrowConfig.variant} size="md" />
                 <Text style={styles.escrowAmount}>
                   {escrow.amountFormatted || `${escrow.amount} ${escrow.token}`}
                 </Text>
@@ -285,9 +297,7 @@ export default function TradeDetailScreen() {
                 <Text style={styles.escrowMetaText}>Chain: {escrow.chain}</Text>
                 <Text style={styles.escrowMetaText}>•</Text>
                 <Text style={styles.escrowMetaText}>
-                  {escrow.createdAt
-                    ? new Date(escrow.createdAt).toLocaleDateString()
-                    : 'N/A'}
+                  {escrow.createdAt ? new Date(escrow.createdAt).toLocaleDateString() : 'N/A'}
                 </Text>
               </View>
             </View>
@@ -339,16 +349,12 @@ export default function TradeDetailScreen() {
                       }
                       size="sm"
                     />
-                    <Text style={styles.negotiationRound}>
-                      Round {neg.roundNumber || 1}
-                    </Text>
+                    <Text style={styles.negotiationRound}>Round {neg.roundNumber || 1}</Text>
                   </View>
                   <Text style={styles.negotiationPrice}>
                     ${neg.currentOffer?.price || 0} / {neg.currentOffer?.quantity || 0} tons
                   </Text>
-                  {neg.message && (
-                    <Text style={styles.negotiationMessage}>{neg.message}</Text>
-                  )}
+                  {neg.message && <Text style={styles.negotiationMessage}>{neg.message}</Text>}
                 </View>
               ))}
             </View>
@@ -360,118 +366,21 @@ export default function TradeDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#021207',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 60,
-    paddingBottom: 12,
-  },
   backBtn: {
-    width: 40,
-    height: 40,
     alignItems: 'center',
+    height: 40,
     justifyContent: 'center',
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '700',
+    width: 40,
   },
   center: {
+    alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     padding: 24,
   },
-  scroll: {
+  container: {
+    backgroundColor: '#021207',
     flex: 1,
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 40,
-  },
-  statusBanner: {
-    marginBottom: 16,
-    padding: 16,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  statusLabel: {
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 0.5,
-  },
-  statusSubtext: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 12,
-    marginTop: 6,
-  },
-  sectionCard: {
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    color: 'rgba(255,255,255,0.6)',
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: 12,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 10,
-  },
-  infoText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  termsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-  },
-  termItem: {
-    minWidth: '45%',
-  },
-  termLabel: {
-    color: 'rgba(255,255,255,0.45)',
-    fontSize: 11,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  termValue: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  termValueHighlight: {
-    color: COLORS.accentGold,
-  },
-  escrowHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  escrowStatusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 10,
   },
   escrowAmount: {
     color: COLORS.accentGold,
@@ -484,21 +393,6 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: 10,
   },
-  escrowTx: {
-    color: 'rgba(255,255,255,0.35)',
-    fontSize: 11,
-    fontFamily: 'monospace',
-    marginBottom: 8,
-  },
-  escrowMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  escrowMetaText: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 12,
-  },
   escrowEmpty: {
     paddingVertical: 8,
   },
@@ -507,29 +401,81 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
-  transporterMeta: {
-    color: 'rgba(255,255,255,0.45)',
+  escrowHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  escrowMeta: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  escrowMetaText: {
+    color: 'rgba(255,255,255,0.4)',
     fontSize: 12,
-    marginTop: 4,
-    marginLeft: 26,
+  },
+  escrowStatusRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  escrowTx: {
+    color: 'rgba(255,255,255,0.35)',
+    fontFamily: 'monospace',
+    fontSize: 11,
+    marginBottom: 8,
+  },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+    paddingTop: 60,
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  infoRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 10,
+  },
+  infoText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  negotiationEmpty: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 13,
+    paddingVertical: 12,
+    textAlign: 'center',
+  },
+  negotiationHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  negotiationItem: {
+    borderBottomColor: 'rgba(255,255,255,0.06)',
+    borderBottomWidth: 1,
+    paddingBottom: 12,
   },
   negotiationList: {
     gap: 12,
   },
-  negotiationItem: {
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
-    paddingBottom: 12,
-  },
-  negotiationHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 6,
-  },
-  negotiationRound: {
-    color: 'rgba(255,255,255,0.4)',
-    fontSize: 12,
+  negotiationMessage: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 13,
+    lineHeight: 18,
   },
   negotiationPrice: {
     color: '#fff',
@@ -537,15 +483,75 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 4,
   },
-  negotiationMessage: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  negotiationEmpty: {
+  negotiationRound: {
     color: 'rgba(255,255,255,0.4)',
-    fontSize: 13,
-    textAlign: 'center',
-    paddingVertical: 12,
+    fontSize: 12,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  sectionCard: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 12,
+    textTransform: 'uppercase',
+  },
+  statusBanner: {
+    marginBottom: 16,
+    padding: 16,
+  },
+  statusLabel: {
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  statusRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  statusSubtext: {
+    color: 'rgba(255,255,255,0.4)',
+    fontSize: 12,
+    marginTop: 6,
+  },
+  termItem: {
+    minWidth: '45%',
+  },
+  termLabel: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+    textTransform: 'uppercase',
+  },
+  termValue: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  termValueHighlight: {
+    color: COLORS.accentGold,
+  },
+  termsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+  },
+  transporterMeta: {
+    color: 'rgba(255,255,255,0.45)',
+    fontSize: 12,
+    marginLeft: 26,
+    marginTop: 4,
   },
 });

@@ -70,7 +70,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         invalidateTradeData();
         useNotificationStore.getState().addNotification({
           title: 'New Offer Received',
-          body: data?.tradeSeller?.saleListing?.product?.name 
+          body: data?.tradeSeller?.saleListing?.product?.name
             ? `New offer for your ${data.tradeSeller.saleListing.product.name}`
             : 'A buyer made an offer on your product.',
           type: 'offer',

@@ -7,7 +7,10 @@ import { OnboardingStackParamList } from '../../../../navigation/types';
 import { GradientBackground, GlassCard, GlassButton, GlassInput, COLORS } from '@design-system';
 import { MotiView } from 'moti';
 
-type NavigationProp = NativeStackNavigationProp<OnboardingStackParamList, 'TransporterOnboardingFlow'>;
+type NavigationProp = NativeStackNavigationProp<
+  OnboardingStackParamList,
+  'TransporterOnboardingFlow'
+>;
 
 export const TransporterOnboardingFlowScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
@@ -85,10 +88,10 @@ export const TransporterOnboardingFlowScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  scroll: { padding: 20, paddingTop: 60, paddingBottom: 40 },
+  formCard: { marginBottom: 20, padding: 16 },
   header: { alignItems: 'center', marginBottom: 28 },
-  title: { color: COLORS.textPrimary, fontSize: 24, fontWeight: '800', marginTop: 12 },
-  subtitle: { color: COLORS.textSecondary, fontSize: 14, marginTop: 4 },
-  formCard: { padding: 16, marginBottom: 20 },
+  scroll: { padding: 20, paddingBottom: 40, paddingTop: 60 },
   submitBtn: { marginTop: 8 },
+  subtitle: { color: COLORS.textSecondary, fontSize: 14, marginTop: 4 },
+  title: { color: COLORS.textPrimary, fontSize: 24, fontWeight: '800', marginTop: 12 },
 });

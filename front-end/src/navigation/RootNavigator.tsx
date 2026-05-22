@@ -62,7 +62,11 @@ export default function RootNavigator({ appState }: RootNavigatorProps) {
           <Stack.Screen name="Main" component={DashboardStack} />
 
           {/* AI Mode Screen */}
-          <Stack.Screen name="AIMode" component={AIModeScreen} options={{ animation: 'slide_from_bottom' }} />
+          <Stack.Screen
+            name="AIMode"
+            component={AIModeScreen}
+            options={{ animation: 'slide_from_bottom' }}
+          />
 
           {/* Admin Stack */}
           <Stack.Screen name="Admin" component={AdminStack} />

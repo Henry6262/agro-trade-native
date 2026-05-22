@@ -7,4 +7,8 @@ export { AIFloatingButton } from './components/AIFloatingButton';
 export { AIConfirmationModal } from './components/AIConfirmationModal';
 export { useAIModeStore } from './store/ai-mode.store';
 export * from './types';
-export { parseBulgarianQuantity, parseBulgarianCurrency, extractOfferFromText } from './utils/bulgarianParser';
+export {
+  parseBulgarianQuantity,
+  parseBulgarianCurrency,
+  extractOfferFromText,
+} from './utils/bulgarianParser';

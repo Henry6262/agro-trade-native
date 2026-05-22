@@ -134,9 +134,12 @@ type BadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'muted' | 'gold'
 
 const getStatusConfig = (status: string) => {
   const s = status.toLowerCase();
-  if (s === 'delivered') return { variant: 'success' as BadgeVariant, label: 'DELIVERED', color: COLORS.success };
-  if (s === 'in_transit') return { variant: 'info' as BadgeVariant, label: 'IN TRANSIT', color: COLORS.info };
-  if (s === 'assigned') return { variant: 'warning' as BadgeVariant, label: 'ASSIGNED', color: COLORS.warning };
+  if (s === 'delivered')
+    return { variant: 'success' as BadgeVariant, label: 'DELIVERED', color: COLORS.success };
+  if (s === 'in_transit')
+    return { variant: 'info' as BadgeVariant, label: 'IN TRANSIT', color: COLORS.info };
+  if (s === 'assigned')
+    return { variant: 'warning' as BadgeVariant, label: 'ASSIGNED', color: COLORS.warning };
   return { variant: 'success' as BadgeVariant, label: 'AVAILABLE', color: COLORS.success };
 };
 
@@ -184,7 +187,9 @@ const RichJobCard: React.FC<{
             <Text style={styles.jobProduct}>{job.product}</Text>
             <View style={styles.jobMetaRow}>
               <Weight size={12} color={COLORS.textMuted} />
-              <Text style={styles.jobMetaText}>{job.quantity} {job.unit}</Text>
+              <Text style={styles.jobMetaText}>
+                {job.quantity} {job.unit}
+              </Text>
               <MapPin size={12} color={COLORS.textMuted} />
               <Text style={styles.jobMetaText}>{job.distanceKm} km</Text>
             </View>
@@ -197,20 +202,37 @@ const RichJobCard: React.FC<{
         {/* Route */}
         <View style={styles.routeRow}>
           <View style={styles.routePoint}>
-            <View style={[styles.routeDot, { backgroundColor: `${COLORS.info}25`, borderColor: `${COLORS.info}50` }]}>
+            <View
+              style={[
+                styles.routeDot,
+                { backgroundColor: `${COLORS.info}25`, borderColor: `${COLORS.info}50` },
+              ]}
+            >
               <MapPin size={12} color={COLORS.info} />
             </View>
-            <Text style={styles.routeText} numberOfLines={1}>{job.origin}</Text>
+            <Text style={styles.routeText} numberOfLines={1}>
+              {job.origin}
+            </Text>
           </View>
           <View style={styles.routeLineWrap}>
             <View style={styles.routeLine} />
             <Navigation size={14} color={COLORS.textMuted} />
           </View>
           <View style={styles.routePoint}>
-            <View style={[styles.routeDot, { backgroundColor: `${COLORS.accentGold}25`, borderColor: `${COLORS.accentGold}50` }]}>
+            <View
+              style={[
+                styles.routeDot,
+                {
+                  backgroundColor: `${COLORS.accentGold}25`,
+                  borderColor: `${COLORS.accentGold}50`,
+                },
+              ]}
+            >
               <MapPin size={12} color={COLORS.accentGold} />
             </View>
-            <Text style={styles.routeText} numberOfLines={1}>{job.destination}</Text>
+            <Text style={styles.routeText} numberOfLines={1}>
+              {job.destination}
+            </Text>
           </View>
         </View>
 
@@ -225,12 +247,16 @@ const RichJobCard: React.FC<{
           <View style={styles.financeDivider} />
           <View style={styles.financeItem}>
             <Text style={styles.financeLabel}>BUYER</Text>
-            <Text style={styles.financeValueSmall} numberOfLines={1}>{job.buyerName}</Text>
+            <Text style={styles.financeValueSmall} numberOfLines={1}>
+              {job.buyerName}
+            </Text>
           </View>
           <View style={styles.financeDivider} />
           <View style={styles.financeItem}>
             <Text style={styles.financeLabel}>SELLER</Text>
-            <Text style={styles.financeValueSmall} numberOfLines={1}>{job.sellerName}</Text>
+            <Text style={styles.financeValueSmall} numberOfLines={1}>
+              {job.sellerName}
+            </Text>
           </View>
         </View>
 
@@ -248,7 +274,9 @@ const RichJobCard: React.FC<{
           <View style={styles.actionsRow}>
             <GlassButton
               label="View Route"
-              onPress={() => Alert.alert('Route', `${job.origin} → ${job.destination}\n${job.distanceKm} km`)}
+              onPress={() =>
+                Alert.alert('Route', `${job.origin} → ${job.destination}\n${job.distanceKm} km`)
+              }
               variant="secondary"
               size="sm"
               style={styles.actionBtnHalf}
@@ -275,7 +303,9 @@ interface TransporterDashboardSectionProps {
   activeTab?: string;
 }
 
-export default function TransporterDashboardSection({ activeTab = 'jobs' }: TransporterDashboardSectionProps) {
+export default function TransporterDashboardSection({
+  activeTab = 'jobs',
+}: TransporterDashboardSectionProps) {
   const [jobs, setJobs] = useState<TransportJob[]>(MOCK_JOBS);
   const [available, setAvailable] = useState<TransportJob[]>(MOCK_AVAILABLE);
   const [stats] = useState<TransporterStats>(MOCK_STATS);
@@ -312,7 +342,11 @@ export default function TransporterDashboardSection({ activeTab = 'jobs' }: Tran
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.accentGreen} />
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={COLORS.accentGreen}
+        />
       }
     >
       {/* Stats */}
@@ -395,7 +429,9 @@ export default function TransporterDashboardSection({ activeTab = 'jobs' }: Tran
             <Clock size={40} color={`${COLORS.textMuted}80`} />
           </View>
           <Text style={styles.emptyTitle}>History</Text>
-          <Text style={styles.emptySubtitle}>Your completed deliveries and earnings history will appear here.</Text>
+          <Text style={styles.emptySubtitle}>
+            Your completed deliveries and earnings history will appear here.
+          </Text>
         </MotiView>
       )}
     </ScrollView>
@@ -405,52 +441,103 @@ export default function TransporterDashboardSection({ activeTab = 'jobs' }: Tran
 /* ─── Styles ─── */
 
 const styles = StyleSheet.create({
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
+  actionBtnHalf: { flex: 1 },
+  actionsRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
+  center: { alignItems: 'center', flex: 1, justifyContent: 'center', padding: 24 },
+
   container: { flex: 1 },
   contentContainer: { padding: 16, paddingBottom: 32 },
+  dateRow: { alignItems: 'center', flexDirection: 'row', gap: 6, marginBottom: 10 },
+  dateText: { color: COLORS.textMuted, fontSize: 11 },
+  emptyIconWrap: {
+    alignItems: 'center',
+    backgroundColor: GLASS.subtle.fill,
+    borderRadius: 40,
+    height: 80,
+    justifyContent: 'center',
+    marginBottom: 16,
+    width: 80,
+  },
+  emptySubtitle: { color: COLORS.textSecondary, fontSize: 13, lineHeight: 20, textAlign: 'center' },
 
-  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
-  statBox: { width: '47%', minWidth: 140 },
-  statCard: { alignItems: 'center', padding: 14, gap: 6 },
-  statIconWrap: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
-  statValue: { fontSize: 18, fontWeight: '800' },
-  statLabel: { color: COLORS.textMuted, fontSize: 10, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase' },
+  emptyTitle: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '800', marginBottom: 6 },
+  emptyWrap: { alignItems: 'center', paddingHorizontal: 24, paddingVertical: 60 },
+  financeDivider: { backgroundColor: GLASS.subtle.border, height: 28, width: 1 },
 
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 14, marginTop: 4 },
-  sectionTitle: { fontSize: 13, fontWeight: '800', letterSpacing: 0.8 },
-  sectionCount: { color: COLORS.accentGold, fontSize: 13, fontWeight: '800', marginLeft: 'auto' },
-
-  jobCard: { padding: 14, marginBottom: 12 },
-  jobHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 },
-  jobHeaderLeft: { flex: 1, marginRight: 8 },
-  jobProduct: { color: COLORS.textPrimary, fontSize: 15, fontWeight: '700' },
-  jobMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
-  jobMetaText: { color: COLORS.textMuted, fontSize: 12 },
-
-  separator: { height: 1, backgroundColor: GLASS.subtle.border, marginVertical: 10 },
-
-  routeRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
-  routePoint: { flexDirection: 'row', alignItems: 'center', flex: 1, gap: 6 },
-  routeDot: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
-  routeText: { color: COLORS.textSecondary, fontSize: 12, fontWeight: '600' },
-  routeLineWrap: { alignItems: 'center', justifyContent: 'center', width: 30 },
-  routeLine: { width: 20, height: 2, backgroundColor: GLASS.subtle.border, marginBottom: 4 },
-
-  financeRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: GLASS.subtle.fill, borderRadius: 10, padding: 10, marginBottom: 10 },
-  financeItem: { flex: 1, alignItems: 'center' },
-  financeDivider: { width: 1, height: 28, backgroundColor: GLASS.subtle.border },
-  financeLabel: { color: COLORS.textMuted, fontSize: 9, fontWeight: '700', letterSpacing: 0.8, marginBottom: 4 },
+  financeItem: { alignItems: 'center', flex: 1 },
+  financeLabel: {
+    color: COLORS.textMuted,
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 4,
+  },
+  financeRow: {
+    alignItems: 'center',
+    backgroundColor: GLASS.subtle.fill,
+    borderRadius: 10,
+    flexDirection: 'row',
+    marginBottom: 10,
+    padding: 10,
+  },
   financeValue: { fontSize: 15, fontWeight: '800' },
   financeValueSmall: { color: COLORS.textSecondary, fontSize: 12, fontWeight: '600' },
+  jobCard: { marginBottom: 12, padding: 14 },
 
-  dateRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
-  dateText: { color: COLORS.textMuted, fontSize: 11 },
+  jobHeader: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
 
-  actionsRow: { flexDirection: 'row', gap: 10, marginTop: 4 },
-  actionBtnHalf: { flex: 1 },
+  jobHeaderLeft: { flex: 1, marginRight: 8 },
+  jobMetaRow: { alignItems: 'center', flexDirection: 'row', gap: 8, marginTop: 4 },
+  jobMetaText: { color: COLORS.textMuted, fontSize: 12 },
+  jobProduct: { color: COLORS.textPrimary, fontSize: 15, fontWeight: '700' },
+  routeDot: {
+    alignItems: 'center',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    height: 28,
+    justifyContent: 'center',
+    width: 28,
+  },
+  routeLine: { backgroundColor: GLASS.subtle.border, height: 2, marginBottom: 4, width: 20 },
 
-  emptyWrap: { alignItems: 'center', paddingVertical: 60, paddingHorizontal: 24 },
-  emptyIconWrap: { width: 80, height: 80, borderRadius: 40, backgroundColor: GLASS.subtle.fill, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  emptyTitle: { color: COLORS.textPrimary, fontSize: 18, fontWeight: '800', marginBottom: 6 },
-  emptySubtitle: { color: COLORS.textSecondary, fontSize: 13, textAlign: 'center', lineHeight: 20 },
+  routeLineWrap: { alignItems: 'center', justifyContent: 'center', width: 30 },
+  routePoint: { alignItems: 'center', flexDirection: 'row', flex: 1, gap: 6 },
+  routeRow: { alignItems: 'center', flexDirection: 'row', gap: 8, marginBottom: 12 },
+  routeText: { color: COLORS.textSecondary, fontSize: 12, fontWeight: '600' },
+  sectionCount: { color: COLORS.accentGold, fontSize: 13, fontWeight: '800', marginLeft: 'auto' },
+  sectionHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 14,
+    marginTop: 4,
+  },
+
+  sectionTitle: { fontSize: 13, fontWeight: '800', letterSpacing: 0.8 },
+  separator: { backgroundColor: GLASS.subtle.border, height: 1, marginVertical: 10 },
+
+  statBox: { minWidth: 140, width: '47%' },
+  statCard: { alignItems: 'center', gap: 6, padding: 14 },
+
+  statIconWrap: {
+    alignItems: 'center',
+    borderRadius: 10,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
+  },
+  statLabel: {
+    color: COLORS.textMuted,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
+  },
+  statValue: { fontSize: 18, fontWeight: '800' },
+  statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 20 },
 });

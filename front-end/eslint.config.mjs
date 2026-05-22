@@ -57,12 +57,18 @@ export default [
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'prefer-const': 'error',
       'no-var': 'error',
+      'import/no-unresolved': 'error',
     },
     env: {
       'react-native/react-native': true,
     },
     settings: {
       react: { version: 'detect' },
+      'import/resolver': {
+        typescript: {
+          project: './tsconfig.json',
+        },
+      },
     },
   }),
 ];

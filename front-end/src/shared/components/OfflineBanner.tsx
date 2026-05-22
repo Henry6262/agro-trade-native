@@ -53,7 +53,9 @@ export const OfflineBanner: React.FC = () => {
       // a11y fix: explicit label for screen readers
       accessibilityLabel="You are offline. Changes will sync when reconnected."
     >
-      <Text style={styles.text}>{"\u26A0\uFE0F You're offline \u2014 changes will sync when reconnected"}</Text>
+      <Text style={styles.text}>
+        {"\u26A0\uFE0F You're offline \u2014 changes will sync when reconnected"}
+      </Text>
     </Animated.View>
   );
 };

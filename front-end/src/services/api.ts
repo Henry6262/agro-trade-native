@@ -46,7 +46,9 @@ api.interceptors.response.use(
     // Network error (no response) — device is offline or server unreachable
     if (!error.response) {
       const networkError = new Error(
-        error.code === 'ECONNABORTED' ? 'Request timed out. Check your connection.' : 'No internet connection.'
+        error.code === 'ECONNABORTED'
+          ? 'Request timed out. Check your connection.'
+          : 'No internet connection.'
       );
       (networkError as any).isNetworkError = true;
       return Promise.reject(networkError);

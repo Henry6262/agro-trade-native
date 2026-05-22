@@ -94,11 +94,7 @@ const CURRENCY_TERMS = ['лев', 'лева', 'левче', 'стотинки', 
 export function parseBulgarianQuantity(input: string): number | null {
   if (!input || typeof input !== 'string') return null;
 
-  const normalized = input
-    .toLowerCase()
-    .trim()
-    .replace(/[.,]/g, ' ')
-    .replace(/\s+/g, ' ');
+  const normalized = input.toLowerCase().trim().replace(/[.,]/g, ' ').replace(/\s+/g, ' ');
 
   // Quick numeric fallback — if already a digit string
   const pureNum = parseFloat(normalized.replace(/\s/g, ''));
@@ -192,7 +188,10 @@ export function parseBulgarianCurrency(input: string): number | null {
 /**
  * Normalize agricultural units to standard form.
  */
-export function normalizeAgriculturalUnit(input: string): { quantity: number | null; unit: string } {
+export function normalizeAgriculturalUnit(input: string): {
+  quantity: number | null;
+  unit: string;
+} {
   const normalized = input.toLowerCase().trim();
 
   // Extract number
@@ -240,10 +239,7 @@ export function extractOfferFromText(input: string): {
 
   // Quantity extraction — look for patterns like "X килограма"
   let quantity: number | null = null;
-  const qtyPatterns = [
-    /(\S+)\s*(?:килограм|кг|kilo|тон|тона)/,
-    /(\S+)\s*(?:брой|бр|pieces)/,
-  ];
+  const qtyPatterns = [/(\S+)\s*(?:килограм|кг|kilo|тон|тона)/, /(\S+)\s*(?:брой|бр|pieces)/];
   for (const pattern of qtyPatterns) {
     const match = normalized.match(pattern);
     if (match && match[1]) {

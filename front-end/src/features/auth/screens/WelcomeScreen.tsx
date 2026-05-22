@@ -40,7 +40,9 @@ export default function WelcomeScreen() {
 
             {/* AI Mode Entry */}
             <TouchableOpacity
-              onPress={() => (navigation as any).navigate('AIMode', { role: 'seller', mode: 'onboarding' })}
+              onPress={() =>
+                (navigation as any).navigate('AIMode', { role: 'seller', mode: 'onboarding' })
+              }
               style={styles.aiModeBtn}
             >
               <View style={styles.aiModeIcon}>
@@ -71,24 +73,29 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   aiModeBtn: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
     backgroundColor: 'rgba(139, 92, 246, 0.12)',
+    borderColor: 'rgba(139, 92, 246, 0.3)',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.3)',
+    flexDirection: 'row',
+    gap: 12,
     marginTop: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
   },
   aiModeIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(139, 92, 246, 0.2)',
     alignItems: 'center',
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    borderRadius: 20,
+    height: 40,
     justifyContent: 'center',
+    width: 40,
+  },
+  aiModeSubtitle: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+    marginTop: 2,
   },
   aiModeTextBlock: {
     flex: 1,
@@ -97,11 +104,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
-  },
-  aiModeSubtitle: {
-    color: 'rgba(255,255,255,0.5)',
-    fontSize: 12,
-    marginTop: 2,
   },
   container: {
     flex: 1,

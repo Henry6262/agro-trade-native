@@ -10,26 +10,44 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import {
-  User,
-  Building2,
-  Truck,
-  ShieldCheck,
-  ChevronRight,
-  ArrowLeft,
-} from 'lucide-react-native';
+import { User, Building2, Truck, ShieldCheck, ChevronRight, ArrowLeft } from 'lucide-react-native';
 
 import { useOnboardingStore } from '../../stores/onboarding.store';
-import { GradientBackground, GlassCard, GlassButton, GlassInput, COLORS, GLASS } from '../../design-system';
+import {
+  GradientBackground,
+  GlassCard,
+  GlassButton,
+  GlassInput,
+  COLORS,
+  GLASS,
+} from '../../design-system';
 import { MotiView } from 'moti';
 import { LoadingSpinner } from '../../shared/components/LoadingSpinner';
 
 type OnboardingRole = 'seller' | 'buyer' | 'transport';
 
 const ROLES: { id: OnboardingRole; label: string; icon: any; color: string; desc: string }[] = [
-  { id: 'seller', label: 'Seller', icon: User, color: COLORS.accentGreen, desc: 'Sell agricultural products' },
-  { id: 'buyer', label: 'Buyer', icon: Building2, color: COLORS.accentGold, desc: 'Buy crops & commodities' },
-  { id: 'transport', label: 'Transporter', icon: Truck, color: COLORS.accentGold, desc: 'Move goods between parties' },
+  {
+    id: 'seller',
+    label: 'Seller',
+    icon: User,
+    color: COLORS.accentGreen,
+    desc: 'Sell agricultural products',
+  },
+  {
+    id: 'buyer',
+    label: 'Buyer',
+    icon: Building2,
+    color: COLORS.accentGold,
+    desc: 'Buy crops & commodities',
+  },
+  {
+    id: 'transport',
+    label: 'Transporter',
+    icon: Truck,
+    color: COLORS.accentGold,
+    desc: 'Move goods between parties',
+  },
 ];
 
 export default function QuickOnboardingScreen() {
@@ -55,10 +73,7 @@ export default function QuickOnboardingScreen() {
     }
     setIsSubmitting(true);
     try {
-      await store.submitOnboarding(
-        { companyName: company, email } as any,
-        { name, email }
-      );
+      await store.submitOnboarding({ companyName: company, email } as any, { name, email });
       navigation.navigate('OnboardingComplete' as never);
     } catch (err: any) {
       Alert.alert('Error', err?.message || 'Failed to complete onboarding');
@@ -162,32 +177,83 @@ export default function QuickOnboardingScreen() {
         transition={{ type: 'spring', damping: 18, stiffness: 200 }}
         style={{ flex: 1 }}
       >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.container}
-      >
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.container}
         >
-          <View style={styles.header}>
-            <Text style={styles.brand}>AGRO TRADE</Text>
-            <Text style={styles.tagline}>Secure commodity escrow</Text>
-          </View>
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.header}>
+              <Text style={styles.brand}>AGRO TRADE</Text>
+              <Text style={styles.tagline}>Secure commodity escrow</Text>
+            </View>
 
-          {step === 'role' ? renderRoleStep() : renderProfileStep()}
-        </ScrollView>
-      </KeyboardAvoidingView>
+            {step === 'role' ? renderRoleStep() : renderProfileStep()}
+          </ScrollView>
+        </KeyboardAvoidingView>
       </MotiView>
     </GradientBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backBtn: {
+    height: 40,
+    justifyContent: 'center',
+    marginBottom: 16,
+    width: 40,
+  },
+  brand: {
+    color: COLORS.accentGreen,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 3,
+  },
   container: {
     flex: 1,
     paddingTop: 60,
+  },
+  footer: {
+    marginTop: 24,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  roleCard: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 14,
+    padding: 16,
+  },
+  roleChevron: {
+    marginLeft: 'auto',
+  },
+  roleDesc: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    left: 78,
+    position: 'absolute',
+    top: 40,
+  },
+  roleGrid: {
+    gap: 12,
+  },
+  roleIconWrap: {
+    alignItems: 'center',
+    borderRadius: 14,
+    height: 48,
+    justifyContent: 'center',
+    width: 48,
+  },
+  roleLabel: {
+    color: COLORS.textPrimary,
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '700',
   },
   scroll: {
     flex: 1,
@@ -196,29 +262,13 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 40,
   },
-  header: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  brand: {
-    color: COLORS.accentGreen,
-    fontSize: 14,
-    fontWeight: '800',
-    letterSpacing: 3,
-  },
-  tagline: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    marginTop: 4,
-  },
   stepContainer: {
     flex: 1,
   },
-  backBtn: {
-    marginBottom: 16,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
+  stepSubtitle: {
+    color: COLORS.textSecondary,
+    fontSize: 15,
+    marginBottom: 24,
   },
   stepTitle: {
     color: COLORS.textPrimary,
@@ -226,61 +276,26 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     marginBottom: 6,
   },
-  stepSubtitle: {
+  tagline: {
     color: COLORS.textSecondary,
-    fontSize: 15,
-    marginBottom: 24,
-  },
-  roleGrid: {
-    gap: 12,
-  },
-  roleCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    gap: 14,
-  },
-  roleIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  roleLabel: {
-    color: COLORS.textPrimary,
-    fontSize: 16,
-    fontWeight: '700',
-    flex: 1,
-  },
-  roleDesc: {
-    color: COLORS.textMuted,
-    fontSize: 12,
-    position: 'absolute',
-    left: 78,
-    top: 40,
-  },
-  roleChevron: {
-    marginLeft: 'auto',
+    fontSize: 13,
+    marginTop: 4,
   },
   trustBadge: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 32,
-    padding: 12,
     backgroundColor: 'rgba(74,222,128,0.08)',
+    borderColor: 'rgba(74,222,128,0.15)',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(74,222,128,0.15)',
+    flexDirection: 'row',
+    gap: 8,
+    justifyContent: 'center',
+    marginTop: 32,
+    padding: 12,
   },
   trustText: {
     color: COLORS.accentGreen,
     fontSize: 12,
     fontWeight: '600',
-  },
-  footer: {
-    marginTop: 24,
   },
 });

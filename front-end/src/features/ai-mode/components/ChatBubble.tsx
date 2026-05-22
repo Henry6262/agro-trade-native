@@ -17,12 +17,7 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
       transition={{ type: 'timing', duration: 250 }}
       style={[styles.container, isUser ? styles.userContainer : styles.assistantContainer]}
     >
-      <View
-        style={[
-          styles.bubble,
-          isUser ? styles.userBubble : styles.assistantBubble,
-        ]}
-      >
+      <View style={[styles.bubble, isUser ? styles.userBubble : styles.assistantBubble]}>
         <Text style={[styles.text, isUser ? styles.userText : styles.assistantText]}>
           {message.text}
         </Text>
@@ -32,41 +27,41 @@ export const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    maxWidth: '85%',
-    marginVertical: 4,
-  },
-  userContainer: {
-    alignSelf: 'flex-end',
+  assistantBubble: {
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    borderBottomLeftRadius: 4,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderWidth: 1,
   },
   assistantContainer: {
     alignSelf: 'flex-start',
   },
+  assistantText: {
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
   bubble: {
+    borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 16,
   },
-  userBubble: {
-    backgroundColor: 'rgba(74, 222, 128, 0.2)',
-    borderWidth: 1,
-    borderColor: 'rgba(74, 222, 128, 0.3)',
-    borderBottomRightRadius: 4,
-  },
-  assistantBubble: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    borderBottomLeftRadius: 4,
+  container: {
+    marginVertical: 4,
+    maxWidth: '85%',
   },
   text: {
     fontSize: 14,
     lineHeight: 20,
   },
+  userBubble: {
+    backgroundColor: 'rgba(74, 222, 128, 0.2)',
+    borderBottomRightRadius: 4,
+    borderColor: 'rgba(74, 222, 128, 0.3)',
+    borderWidth: 1,
+  },
+  userContainer: {
+    alignSelf: 'flex-end',
+  },
   userText: {
     color: '#FFFFFF',
-  },
-  assistantText: {
-    color: 'rgba(255, 255, 255, 0.9)',
   },
 });

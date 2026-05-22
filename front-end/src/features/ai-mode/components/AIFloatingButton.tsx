@@ -49,56 +49,52 @@ export const AIFloatingButton: React.FC<AIFloatingButtonProps> = ({ onPress }) =
         activeOpacity={0.8}
         style={[styles.button, isActive && styles.buttonActive]}
       >
-        {isActive ? (
-          <Sparkles size={24} color="#FFFFFF" />
-        ) : (
-          <Mic size={24} color="#FFFFFF" />
-        )}
+        {isActive ? <Sparkles size={24} color="#FFFFFF" /> : <Mic size={24} color="#FFFFFF" />}
       </TouchableOpacity>
     </MotiView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    right: 20,
-    bottom: 110,
-    zIndex: 100,
-  },
   button: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#4ADE80',
     alignItems: 'center',
+    backgroundColor: '#4ADE80',
+    borderColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 28,
+    borderWidth: 2,
+    elevation: 8,
+    height: 56,
     justifyContent: 'center',
     shadowColor: '#4ADE80',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 12,
-    elevation: 8,
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.2)',
+    width: 56,
   },
   buttonActive: {
     backgroundColor: '#8B5CF6',
     shadowColor: '#8B5CF6',
   },
-  pulseRing: {
+  container: {
+    bottom: 110,
     position: 'absolute',
-    width: 56,
-    height: 56,
+    right: 20,
+    zIndex: 100,
+  },
+  pulseRing: {
+    borderColor: '#4ADE80',
     borderRadius: 28,
     borderWidth: 2,
-    borderColor: '#4ADE80',
-  },
-  pulseRingOuter: {
-    top: 0,
-    left: 0,
+    height: 56,
+    position: 'absolute',
+    width: 56,
   },
   pulseRingInner: {
-    top: 0,
     left: 0,
+    top: 0,
+  },
+  pulseRingOuter: {
+    left: 0,
+    top: 0,
   },
 });

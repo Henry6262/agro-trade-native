@@ -72,19 +72,15 @@ const ThinkingDots: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    marginTop: 12,
-  },
   badge: {
-    flexDirection: 'row',
     alignItems: 'center',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 20,
+    borderWidth: 1,
+    flexDirection: 'row',
     gap: 8,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
   },
   badgeText: {
     color: '#FFFFFF',
@@ -92,15 +88,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.3,
   },
+  container: {
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  dot: {
+    backgroundColor: '#A78BFA',
+    borderRadius: 2,
+    height: 4,
+    width: 4,
+  },
   dotsRow: {
     flexDirection: 'row',
     gap: 4,
     marginLeft: 4,
-  },
-  dot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#A78BFA',
   },
 });

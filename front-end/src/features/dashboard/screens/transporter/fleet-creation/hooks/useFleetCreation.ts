@@ -6,10 +6,8 @@ import {
   TruckInfo,
   DriverInfo,
 } from '../types';
-import {
-  useCreateTruck,
-  useCreateDriver,
-} from '../../../../../../pages/Dashboard/sections/Transporter/features/Fleet/hooks';
+import { useCreateTruck } from './useCreateTruck';
+import { useCreateDriver } from './useCreateDriver';
 
 const initialState: FleetCreationState = {
   currentStep: 'type-selection',

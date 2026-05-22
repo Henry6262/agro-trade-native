@@ -272,15 +272,18 @@ export const authService = {
       .get<{ success: boolean; bases: RawBase[] }>('/auth/me/bases')
       .then((response) => ({
         success: true,
-        bases: (response.data.bases || []).map((b) => ({
-          id: b.id,
-          name: b.label,
-          location: [b.street, b.country].filter(Boolean).join(', ') || '',
-          type: (b.addressType || 'warehouse').toLowerCase(),
-          capacity: '',
-          ...(b.addressType !== undefined && { addressType: b.addressType }),
-          ...(b.isDefault !== undefined && { isDefault: b.isDefault }),
-        } as BaseInfo)),
+        bases: (response.data.bases || []).map(
+          (b) =>
+            ({
+              id: b.id,
+              name: b.label,
+              location: [b.street, b.country].filter(Boolean).join(', ') || '',
+              type: (b.addressType || 'warehouse').toLowerCase(),
+              capacity: '',
+              ...(b.addressType !== undefined && { addressType: b.addressType }),
+              ...(b.isDefault !== undefined && { isDefault: b.isDefault }),
+            }) as BaseInfo
+        ),
       }));
   },
 

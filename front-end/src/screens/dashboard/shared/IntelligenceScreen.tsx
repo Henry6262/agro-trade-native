@@ -134,7 +134,11 @@ export default function IntelligenceScreen() {
   return (
     <MotiView from={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ flex: 1 }}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <MotiView from={{ opacity: 0, translateY: -12 }} animate={{ opacity: 1, translateY: 0 }} transition={{ type: 'timing', duration: 500 }}>
+        <MotiView
+          from={{ opacity: 0, translateY: -12 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 500 }}
+        >
           <Text style={styles.header}>Market Intelligence</Text>
           <Text style={styles.subheader}>Live price feeds & risk alerts</Text>
         </MotiView>
@@ -145,12 +149,27 @@ export default function IntelligenceScreen() {
           animate={{ opacity: 1, translateY: 0 }}
           transition={{ type: 'spring', damping: 18, stiffness: 200, delay: 100 }}
         >
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.trendScroll} contentContainerStyle={styles.trendContent}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.trendScroll}
+            contentContainerStyle={styles.trendContent}
+          >
             {TRENDS.map((t, i) => (
-              <View key={i} style={[styles.trendPill, { borderColor: t.up ? `${COLORS.accentGreen}30` : `${COLORS.danger}30` }]}>
+              <View
+                key={i}
+                style={[
+                  styles.trendPill,
+                  { borderColor: t.up ? `${COLORS.accentGreen}30` : `${COLORS.danger}30` },
+                ]}
+              >
                 <Activity size={12} color={t.up ? COLORS.accentGreen : COLORS.danger} />
                 <Text style={styles.trendLabel}>{t.label}</Text>
-                <Text style={[styles.trendValue, { color: t.up ? COLORS.accentGreen : COLORS.danger }]}>{t.value}</Text>
+                <Text
+                  style={[styles.trendValue, { color: t.up ? COLORS.accentGreen : COLORS.danger }]}
+                >
+                  {t.value}
+                </Text>
               </View>
             ))}
           </ScrollView>
@@ -228,8 +247,8 @@ export default function IntelligenceScreen() {
                       alert.level === 'high'
                         ? COLORS.danger
                         : alert.level === 'medium'
-                        ? COLORS.accentGold
-                        : COLORS.info
+                          ? COLORS.accentGold
+                          : COLORS.info
                     }
                   />
                   <Text style={styles.alertTitle}>{alert.title}</Text>
@@ -238,7 +257,9 @@ export default function IntelligenceScreen() {
               </View>
               <Text style={styles.alertDesc}>{alert.desc}</Text>
               <View style={[styles.alertMetric, { backgroundColor: `${alert.metricColor}18` }]}>
-                <Text style={[styles.alertMetricText, { color: alert.metricColor }]}>{alert.metric}</Text>
+                <Text style={[styles.alertMetricText, { color: alert.metricColor }]}>
+                  {alert.metric}
+                </Text>
               </View>
             </GlassCard>
           </MotiView>
@@ -249,138 +270,150 @@ export default function IntelligenceScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  content: { padding: 16, paddingBottom: 32 },
-  header: { color: COLORS.textPrimary, fontSize: 24, fontWeight: '900', marginBottom: 4, letterSpacing: -0.5 },
-  subheader: { color: COLORS.textSecondary, fontSize: 13, marginBottom: 18 },
-
-  trendScroll: { marginBottom: 20 },
-  trendContent: { gap: 8, paddingRight: 8 },
-  trendPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 20,
-    borderWidth: 1,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-  },
-  trendLabel: { color: COLORS.textSecondary, fontSize: 11, fontWeight: '600' },
-  trendValue: { fontSize: 12, fontWeight: '800' },
-
-  sectionTitle: {
-    color: COLORS.textSecondary,
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    marginBottom: 12,
-  },
-
-  priceList: { gap: 10, marginBottom: 24 },
-  priceCard: { padding: 14 },
-  priceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  priceLeft: { flex: 1, marginRight: 12 },
-  priceProductRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 10,
-  },
-  priceIconWrap: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  priceProduct: { color: COLORS.textPrimary, fontSize: 14, fontWeight: '800', marginBottom: 1 },
-  priceUnit: { color: COLORS.textMuted, fontSize: 11 },
-  priceRight: { alignItems: 'flex-end', minWidth: 60 },
-  priceValue: { fontSize: 20, fontWeight: '900', letterSpacing: -0.5 },
-  changeRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 3 },
-  priceChange: { fontSize: 12, fontWeight: '800' },
-
-  sparklineRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 3,
-    height: 30,
-  },
-  sparkBar: {
-    width: 5,
-    borderRadius: 2,
-    opacity: 0.85,
-  },
-  sparkArrowWrap: {
-    marginLeft: 4,
-    justifyContent: 'flex-end',
-    height: 30,
-    paddingBottom: 2,
-  },
-
-  alertHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 0,
-  },
   alertBadge: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
     backgroundColor: `${COLORS.accentGold}22`,
+    borderRadius: 10,
+    flexDirection: 'row',
+    gap: 4,
+    marginBottom: 12,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 10,
-    marginBottom: 12,
   },
   alertBadgeText: {
     color: COLORS.accentGold,
     fontSize: 11,
     fontWeight: '800',
   },
-
-  alertCard: { padding: 14, marginBottom: 10 },
-  alertTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
-  },
-  alertTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, marginRight: 10 },
-  alertTitle: { color: COLORS.textPrimary, fontSize: 13, fontWeight: '800', flex: 1, lineHeight: 18 },
+  alertCard: { marginBottom: 10, padding: 14 },
   alertDesc: { color: COLORS.textSecondary, fontSize: 12, lineHeight: 18, marginBottom: 10 },
 
-  severityPill: {
-    flexDirection: 'row',
+  alertHeaderRow: {
     alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 0,
   },
-  severityDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  severityText: {
-    fontSize: 9,
-    fontWeight: '900',
-    letterSpacing: 0.5,
-  },
-
   alertMetric: {
     alignSelf: 'flex-start',
+    borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 6,
   },
   alertMetricText: {
     fontSize: 11,
     fontWeight: '800',
   },
+  alertTitle: {
+    color: COLORS.textPrimary,
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '800',
+    lineHeight: 18,
+  },
+  alertTitleRow: { alignItems: 'center', flexDirection: 'row', flex: 1, gap: 8, marginRight: 10 },
+
+  alertTop: {
+    alignItems: 'flex-start',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+
+  changeRow: { alignItems: 'center', flexDirection: 'row', gap: 4, marginTop: 3 },
+  container: { flex: 1 },
+  content: { padding: 16, paddingBottom: 32 },
+  header: {
+    color: COLORS.textPrimary,
+    fontSize: 24,
+    fontWeight: '900',
+    letterSpacing: -0.5,
+    marginBottom: 4,
+  },
+  priceCard: { padding: 14 },
+  priceChange: { fontSize: 12, fontWeight: '800' },
+  priceIconWrap: {
+    alignItems: 'center',
+    borderRadius: 10,
+    height: 34,
+    justifyContent: 'center',
+    width: 34,
+  },
+  priceLeft: { flex: 1, marginRight: 12 },
+  priceList: { gap: 10, marginBottom: 24 },
+  priceProduct: { color: COLORS.textPrimary, fontSize: 14, fontWeight: '800', marginBottom: 1 },
+  priceProductRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 10,
+  },
+  priceRight: { alignItems: 'flex-end', minWidth: 60 },
+
+  priceRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
+  priceUnit: { color: COLORS.textMuted, fontSize: 11 },
+  priceValue: { fontSize: 20, fontWeight: '900', letterSpacing: -0.5 },
+
+  sectionTitle: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+    marginBottom: 12,
+    textTransform: 'uppercase',
+  },
+  severityDot: {
+    borderRadius: 3,
+    height: 6,
+    width: 6,
+  },
+  severityPill: {
+    alignItems: 'center',
+    borderRadius: 6,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+
+  severityText: {
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  sparkArrowWrap: {
+    height: 30,
+    justifyContent: 'flex-end',
+    marginLeft: 4,
+    paddingBottom: 2,
+  },
+  sparkBar: {
+    borderRadius: 2,
+    opacity: 0.85,
+    width: 5,
+  },
+  sparklineRow: {
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    gap: 3,
+    height: 30,
+  },
+  subheader: { color: COLORS.textSecondary, fontSize: 13, marginBottom: 18 },
+
+  trendContent: { gap: 8, paddingRight: 8 },
+  trendLabel: { color: COLORS.textSecondary, fontSize: 11, fontWeight: '600' },
+  trendPill: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 20,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+  },
+
+  trendScroll: { marginBottom: 20 },
+  trendValue: { fontSize: 12, fontWeight: '800' },
 });

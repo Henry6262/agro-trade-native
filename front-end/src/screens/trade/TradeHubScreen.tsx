@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
   Shield,
@@ -27,11 +21,36 @@ import { LoadingSpinner } from '../../shared/components/LoadingSpinner';
 import { EmptyState } from '../../shared/components/EmptyState';
 
 const ESCROW_CONFIG: Record<string, { label: string; color: string; icon: any; desc: string }> = {
-  AWAITING_PAYMENT: { label: 'AWAITING PAYMENT', color: '#FCD34D', icon: Clock, desc: 'Buyer has not deposited funds yet' },
-  AWAITING_DELIVERY: { label: 'FUNDS LOCKED', color: '#4ADE80', icon: Shield, desc: 'Payment secured. Awaiting delivery.' },
-  COMPLETE: { label: 'RELEASED', color: '#4ADE80', icon: CheckCircle2, desc: 'Funds released to seller' },
-  DISPUTED: { label: 'DISPUTED', color: '#F87171', icon: AlertTriangle, desc: 'Under admin review' },
-  REFUNDED: { label: 'REFUNDED', color: 'rgba(255,255,255,0.35)', icon: XCircle, desc: 'Funds returned to buyer' },
+  AWAITING_PAYMENT: {
+    label: 'AWAITING PAYMENT',
+    color: '#FCD34D',
+    icon: Clock,
+    desc: 'Buyer has not deposited funds yet',
+  },
+  AWAITING_DELIVERY: {
+    label: 'FUNDS LOCKED',
+    color: '#4ADE80',
+    icon: Shield,
+    desc: 'Payment secured. Awaiting delivery.',
+  },
+  COMPLETE: {
+    label: 'RELEASED',
+    color: '#4ADE80',
+    icon: CheckCircle2,
+    desc: 'Funds released to seller',
+  },
+  DISPUTED: {
+    label: 'DISPUTED',
+    color: '#F87171',
+    icon: AlertTriangle,
+    desc: 'Under admin review',
+  },
+  REFUNDED: {
+    label: 'REFUNDED',
+    color: 'rgba(255,255,255,0.35)',
+    icon: XCircle,
+    desc: 'Funds returned to buyer',
+  },
 };
 
 export default function TradeHubScreen() {
@@ -103,12 +122,15 @@ export default function TradeHubScreen() {
         desc: 'Escrow will be created when payment is confirmed',
       };
     }
-    return ESCROW_CONFIG[escrow.state] || ESCROW_CONFIG['AWAITING_PAYMENT'] || {
-      label: 'UNKNOWN',
-      color: 'rgba(255,255,255,0.3)',
-      icon: Shield,
-      desc: 'Escrow status unknown',
-    };
+    return (
+      ESCROW_CONFIG[escrow.state] ||
+      ESCROW_CONFIG['AWAITING_PAYMENT'] || {
+        label: 'UNKNOWN',
+        color: 'rgba(255,255,255,0.3)',
+        icon: Shield,
+        desc: 'Escrow status unknown',
+      }
+    );
   };
 
   if (loading) {
@@ -142,7 +164,11 @@ export default function TradeHubScreen() {
         {trades.length === 0 ? (
           <EmptyState
             title="No active trades"
-            subtitle={isSeller ? 'Your trades will appear here once offers are accepted.' : 'Your orders will appear here.'}
+            subtitle={
+              isSeller
+                ? 'Your trades will appear here once offers are accepted.'
+                : 'Your orders will appear here.'
+            }
             icon={<Package size={32} color="rgba(255,255,255,0.2)" />}
           />
         ) : (
@@ -159,14 +185,19 @@ export default function TradeHubScreen() {
 
                   <View style={styles.escrowRow}>
                     <EscrowIcon size={16} color={escrowUI.color} />
-                    <Text style={[styles.escrowLabel, { color: escrowUI.color }]}>{escrowUI.desc}</Text>
+                    <Text style={[styles.escrowLabel, { color: escrowUI.color }]}>
+                      {escrowUI.desc}
+                    </Text>
                   </View>
 
                   <View style={styles.tradeMetaRow}>
                     <Text style={styles.tradeMeta}>
-                      {isSeller ? trade.buyerName : trade.sellerName || 'Seller'} • {trade.agreedQuantity || trade.quantity || 0} {trade.unit || 'tons'}
+                      {isSeller ? trade.buyerName : trade.sellerName || 'Seller'} •{' '}
+                      {trade.agreedQuantity || trade.quantity || 0} {trade.unit || 'tons'}
                     </Text>
-                    <Text style={styles.tradePrice}>${trade.agreedPrice || trade.totalAmount || 0}</Text>
+                    <Text style={styles.tradePrice}>
+                      ${trade.agreedPrice || trade.totalAmount || 0}
+                    </Text>
                   </View>
 
                   {trade.tradeOperationId && escrowMap[trade.tradeOperationId]?.txHash && (
@@ -185,20 +216,40 @@ export default function TradeHubScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#021207' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingTop: 60, paddingBottom: 12 },
-  backBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  backBtn: { alignItems: 'center', height: 40, justifyContent: 'center', width: 40 },
+  center: { alignItems: 'center', flex: 1, justifyContent: 'center', padding: 24 },
+  container: { backgroundColor: '#021207', flex: 1 },
+  escrowLabel: { fontSize: 12, fontWeight: '600' },
+  escrowRow: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 10,
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 10,
+    padding: 10,
+  },
+  header: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom: 12,
+    paddingHorizontal: 16,
+    paddingTop: 60,
+  },
   headerTitle: { color: '#fff', fontSize: 17, fontWeight: '700' },
-  center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 },
   scroll: { flex: 1 },
   scrollContent: { padding: 16, paddingBottom: 40 },
-  tradeCard: { padding: 14, marginBottom: 10 },
-  tradeHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  tradeName: { color: '#fff', fontSize: 15, fontWeight: '700', flex: 1 },
-  escrowRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10, padding: 10, backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 10 },
-  escrowLabel: { fontSize: 12, fontWeight: '600' },
-  tradeMetaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  tradeCard: { marginBottom: 10, padding: 14 },
+  tradeHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
   tradeMeta: { color: 'rgba(255,255,255,0.55)', fontSize: 13 },
+  tradeMetaRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
+  tradeName: { color: '#fff', flex: 1, fontSize: 15, fontWeight: '700' },
   tradePrice: { color: COLORS.accentGold, fontSize: 14, fontWeight: '700' },
-  txHash: { color: 'rgba(255,255,255,0.3)', fontSize: 10, fontFamily: 'monospace', marginTop: 8 },
+  txHash: { color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace', fontSize: 10, marginTop: 8 },
 });
