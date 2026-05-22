@@ -69,7 +69,6 @@ export function useVoiceSession(options: UseVoiceSessionOptions): UseVoiceSessio
 
   const [isConnecting, setIsConnecting] = useState(false);
   const clientRef = useRef<any>(null);
-  const sessionIdRef = useRef<string | null>(null);
 
   // ─── Cleanup on unmount ────────────────────────────────────────────────────
   useEffect(() => {
@@ -93,21 +92,7 @@ export function useVoiceSession(options: UseVoiceSessionOptions): UseVoiceSessio
     setVoiceState('idle');
 
     try {
-      // 1. Start session on backend
-      const startRes = await fetch(`${VOICE_API_URL}/start`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role, mode, language: 'bg' }),
-      });
-
-      if (!startRes.ok) {
-        throw new Error(`Backend error: ${startRes.status}`);
-      }
-
-      const { room_url, token, session_id } = await startRes.json();
-      sessionIdRef.current = session_id;
-
-      // 2. Create Pipecat client
+      // 1. Create Pipecat client
       const transport = new RNDailyTransport();
 
       const client = new PipecatClient({
@@ -176,13 +161,11 @@ export function useVoiceSession(options: UseVoiceSessionOptions): UseVoiceSessio
 
       clientRef.current = client;
 
-      // 4. Connect
+      // 2. Connect — this calls /start, spawns the bot, and joins the Daily room
       await client.startBotAndConnect({
         endpoint: VOICE_API_URL + '/start',
+        body: { role, mode, language: 'bg' },
       });
-
-      // Note: startBotAndConnect might handle spawning the bot itself.
-      // If it does, we may need to adjust the flow above.
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to connect to voice AI';
       console.error('[useVoiceSession] Connect failed:', message);
@@ -217,13 +200,7 @@ export function useVoiceSession(options: UseVoiceSessionOptions): UseVoiceSessio
       clientRef.current = null;
     }
 
-    // Tell backend to end session
-    if (sessionIdRef.current) {
-      fetch(`${VOICE_API_URL}/session/${sessionIdRef.current}`, {
-        method: 'DELETE',
-      }).catch(() => {});
-      sessionIdRef.current = null;
-    }
+    // Bot auto-cancels on_client_disconnected; no explicit cleanup needed
 
     setConnected(false);
     setIsConnecting(false);
