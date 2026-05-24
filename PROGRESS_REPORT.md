@@ -10,6 +10,8 @@ _Auto-generated: 2026-05-24_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `1fca777` 2026-05-24 — fix(backend): regenerate package-lock.json to include Solana SDK deps
+- `411a0c2` 2026-05-24 — docs: auto-update progress report [skip ci]
 - `1201168` 2026-05-24 — feat(front-end): wire inspectionService and transportService to backend
 - `3f6180f` 2026-05-24 — docs: auto-update progress report [skip ci]
 - `7454d0d` 2026-05-24 — docs(backend): mobile portal audit in INTEGRATION_STATUS.json
@@ -23,7 +25,5 @@ _Auto-generated: 2026-05-24_
 - `93d6ba3` 2026-05-24 — refactor(contracts-solana): drop redundant module-path qualifiers on Context typ
 - `6ef2865` 2026-05-22 — fix(front-end): type stubs and service signatures for post-refactor compat
 - `784e1e0` 2026-05-22 — fix(backend): add missing profit service/controller and mock prisma
-- `b5b451d` 2026-05-22 — fix(front-end): resolve missing imports and broken paths post-refactor
-- `7a2da01` 2026-05-22 — feat(front-end): fix usevoicesession double start call
 
 ## Open Issues
