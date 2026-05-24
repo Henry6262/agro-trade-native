@@ -142,6 +142,7 @@ export class SimulationController {
     @Param("userId") userId: string,
     @Body() dto: { negotiationId: string },
   ) {
+    this.ensureNotProduction();
     const negotiation = await this.prisma.offerNegotiation.findUnique({
       where: { id: dto.negotiationId },
       include: {
@@ -199,6 +200,7 @@ export class SimulationController {
       counterQuantity?: number;
     },
   ) {
+    this.ensureNotProduction();
     const negotiation = await this.prisma.offerNegotiation.findUnique({
       where: { id: dto.negotiationId },
       include: {
@@ -246,6 +248,7 @@ export class SimulationController {
     @Param("userId") userId: string,
     @Body() dto: { negotiationId: string; reason?: string },
   ) {
+    this.ensureNotProduction();
     const negotiation = await this.prisma.offerNegotiation.findUnique({
       where: { id: dto.negotiationId },
       include: {
