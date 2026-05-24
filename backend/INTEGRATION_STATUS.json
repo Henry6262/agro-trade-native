@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-25T14:35:00.000Z",
+  "lastUpdated": "2026-05-24T07:45:00.000Z",
   "sprint": "004-trade-operation-management",
   "completedSessions": [
     {
@@ -260,9 +260,61 @@
       }
     },
     "mobile": {
-      "status": "not-affected",
-      "version": "n/a",
-      "notes": "Trade operations management is admin-only feature"
+      "status": "partially-integrated",
+      "version": "audit-2026-05-24",
+      "notes": "Issue #89 audit completed 2026-05-24. Mobile is React Native (Expo). Verified service-level wiring against backend boot-mapped routes — not yet device-tested end-to-end.",
+      "portals": {
+        "seller": {
+          "status": "integrated",
+          "service": "front-end/src/services/sellerService.ts",
+          "endpoints": [
+            "GET /seller/offers",
+            "GET /seller/stats",
+            "GET /seller/timeline",
+            "GET /seller/trades"
+          ],
+          "notes": "Real apiClient calls, typed responses. Manual device test still pending."
+        },
+        "inspector": {
+          "status": "stubbed",
+          "service": "front-end/src/services/inspectionService.ts",
+          "blocker": "All 10 service methods return mock data or throw 'Not implemented'. Zero backend calls.",
+          "trackingIssue": "#130",
+          "backendReady": true,
+          "backendEndpoints": [
+            "POST /api/inspections (+ /batch)",
+            "GET /api/inspections/trade-operation/:tradeOperationId",
+            "GET /api/inspections/inspector/:inspectorId/active",
+            "PUT /api/inspections/:id/assign",
+            "POST /api/inspections/:id/results"
+          ]
+        },
+        "transporter": {
+          "status": "stubbed",
+          "service": "front-end/src/services/transportService.ts",
+          "blocker": "All 10 service methods return mock data or throw 'Not implemented'. Zero backend calls.",
+          "trackingIssue": "#131",
+          "backendReady": true,
+          "backendEndpoints": [
+            "GET /api/transport/jobs",
+            "GET /api/transport/requests/available",
+            "POST /api/transport/bids",
+            "POST /api/transport/jobs/:id/{start,pickup,delivery}",
+            "GET /api/transport-company/me/fleet"
+          ]
+        },
+        "buyer": {
+          "status": "integrated",
+          "service": "front-end/src/services/tradeOperationService.ts",
+          "endpoints": [
+            "GET /trade-operations",
+            "POST /trade-operations",
+            "GET /buy-listings/active",
+            "GET /trade-operations/:id"
+          ],
+          "notes": "Real apiClient calls. Manual device test still pending."
+        }
+      }
     }
   },
   "contracts": {
