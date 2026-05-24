@@ -40,6 +40,11 @@ const makePrismaMock = () => ({
   inspection: {
     findFirst: jest.fn().mockResolvedValue({ id: 'insp-1', status: 'COMPLETED' }),
   },
+  // Required by EscrowService.resolveChainForTrade for multi-chain dispatch.
+  // Returning null defaults to CELO engine — matches the test scenarios.
+  tradeOperation: {
+    findUnique: jest.fn().mockResolvedValue(null),
+  },
   $transaction: jest.fn().mockImplementation((cb: (tx: unknown) => unknown) => {
     // If cb is a function (interactive transaction), execute it with the mock itself.
     // If it is an array (batch transaction), resolve immediately.
@@ -176,7 +181,7 @@ describe('EscrowService', () => {
     it('should throw when blockchain config is missing', async () => {
       const ctx = await buildModule(false);
       await expect(ctx.service.createEscrow('trade-1', '0xSeller', '100'))
-        .rejects.toThrow(/config not set/i);
+        .rejects.toThrow(/(config not set|config missing)/i);
     });
 
     // ── Edge: on-chain revert must NOT produce an audit trail ─────────────
@@ -232,7 +237,7 @@ describe('EscrowService', () => {
     it('should throw when blockchain config is missing', async () => {
       const ctx = await buildModule(false);
       await expect(ctx.service.releaseFunds('trade-99'))
-        .rejects.toThrow(/config not set/i);
+        .rejects.toThrow(/(config not set|config missing)/i);
     });
   });
 
@@ -256,7 +261,7 @@ describe('EscrowService', () => {
     it('should throw when blockchain config is missing', async () => {
       const ctx = await buildModule(false);
       await expect(ctx.service.raiseDispute('trade-99'))
-        .rejects.toThrow(/config not set/i);
+        .rejects.toThrow(/(config not set|config missing)/i);
     });
   });
 
@@ -287,7 +292,7 @@ describe('EscrowService', () => {
     it('should throw when blockchain config is missing', async () => {
       const ctx = await buildModule(false);
       await expect(ctx.service.resolveDispute('trade-99', true))
-        .rejects.toThrow(/config not set/i);
+        .rejects.toThrow(/(config not set|config missing)/i);
     });
   });
 
@@ -316,7 +321,7 @@ describe('EscrowService', () => {
     it('should throw when blockchain config is missing', async () => {
       const ctx = await buildModule(false);
       await expect(ctx.service.refund('trade-99'))
-        .rejects.toThrow(/config not set/i);
+        .rejects.toThrow(/(config not set|config missing)/i);
     });
 
     // ── Edge: on-chain revert during refund must NOT produce audit trail ───
@@ -375,7 +380,7 @@ describe('EscrowService', () => {
     it('should throw when blockchain config is missing', async () => {
       const ctx = await buildModule(false);
       await expect(ctx.service.getStatus('trade-99'))
-        .rejects.toThrow(/config not set/i);
+        .rejects.toThrow(/(config not set|config missing)/i);
     });
   });
 
@@ -389,6 +394,12 @@ describe('EscrowService', () => {
       const spy = jest.fn().mockResolvedValue('ok');
       await prisma.$transaction(spy);
       expect(spy).toHaveBeenCalled();
+    });
+
+    it('should resolve batch $transaction (array form)', async () => {
+      const batch = [Promise.resolve('a'), Promise.resolve('b')];
+      const result = await prisma.$transaction(batch as any);
+      expect(result).toBe(batch);
     });
   });
 
