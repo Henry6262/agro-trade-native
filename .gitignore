@@ -73,3 +73,12 @@ front-end/.expo/.worktrees/
 .worktrees/
 *.docx
 .env.escrow
+
+# Python build artifacts (voice-agent)
+__pycache__/
+*.py[cod]
+
+# Large media — keep out of git, use external storage
+recordings/
+*.mp4
+*.mov
