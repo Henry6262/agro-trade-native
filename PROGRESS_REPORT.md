@@ -10,6 +10,8 @@ _Auto-generated: 2026-05-24_
 | Unlabeled | 6 |
 
 ## Recent Commits (last 15)
+- `a5bc112` 2026-05-24 — chore: add audit report, security tests, demo-day pitch + deck
+- `61c11b6` 2026-05-24 — docs: auto-update progress report [skip ci]
 - `d15c283` 2026-05-24 — feat(front-end): polish post-features-refactor — onboarding revamp + voice + ser
 - `93d6ba3` 2026-05-24 — refactor(contracts-solana): drop redundant module-path qualifiers on Context typ
 - `6ef2865` 2026-05-22 — fix(front-end): type stubs and service signatures for post-refactor compat
@@ -23,8 +25,6 @@ _Auto-generated: 2026-05-24_
 - `cde1dd2` 2026-05-21 — refactor: migrate pages/ to features/ structure + consolidate dashboard screens
 - `df614ed` 2026-05-18 — docs: auto-update progress report [skip ci]
 - `9fd3479` 2026-05-11 — docs: auto-update progress report [skip ci]
-- `409d3c3` 2026-05-05 — docs: auto-update progress report [skip ci]
-- `d3181f5` 2026-05-05 — Merge branch 'main' of https://github.com/Henry6262/agro-trade-native
 
 ## Open Issues
 - #90 🟢 [ENHANCEMENT] Add NODE_ENV guard to simulation endpoints (production protection) [none]
