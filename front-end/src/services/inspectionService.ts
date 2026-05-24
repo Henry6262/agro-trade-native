@@ -1,3 +1,5 @@
+import { apiClient } from './api';
+
 export interface InspectionRequest {
   id: string;
   tradeOperationId: string;
@@ -15,43 +17,112 @@ export interface InspectionRequest {
   } | null;
 }
 
+interface SubmitResultsPayload {
+  findings?: string;
+  score?: number;
+  qualityScore?: number;
+  verificationResult?: unknown;
+  recommendVerification?: boolean;
+  notes?: string;
+  photos?: string[];
+  status?: string;
+}
+
 const inspectionService = {
-  getByTradeOperation: async (tradeOperationId: string): Promise<InspectionRequest[]> => [],
+  getByTradeOperation: async (tradeOperationId: string): Promise<InspectionRequest[]> => {
+    const { data } = await apiClient.get<InspectionRequest[]>(
+      `/inspections/trade-operation/${tradeOperationId}`,
+    );
+    return data ?? [];
+  },
+
   getInspectionsByTradeOperation: async (
-    tradeOperationId: string
-  ): Promise<InspectionRequest[]> => [],
-  getById: async (id: string): Promise<InspectionRequest | null> => null,
-  create: async (data: Partial<InspectionRequest>): Promise<InspectionRequest> =>
-    data as InspectionRequest,
-  update: async (id: string, data: Partial<InspectionRequest>): Promise<InspectionRequest> =>
-    data as InspectionRequest,
-  acceptJob: async (
-    _id: string,
-    _data?: string | { inspectorId: string; estimatedArrival: string }
-  ): Promise<InspectionRequest> => ({}) as InspectionRequest,
-  getInspectorMissions: async (_inspectorId: string): Promise<InspectionRequest[]> => [],
-  assignInspector: async (
-    _tradeOperationId: string,
-    _inspectorId: string
-  ): Promise<InspectionRequest> => ({}) as InspectionRequest,
-  submitInspectionResults: async (
-    _id: string,
-    _data: {
-      findings?: string;
-      score?: number;
-      qualityScore?: number;
-      verificationResult?: unknown;
-      recommendVerification?: boolean;
-      notes?: string;
-      photos?: string[];
-      status?: string;
+    tradeOperationId: string,
+  ): Promise<InspectionRequest[]> => {
+    const { data } = await apiClient.get<InspectionRequest[]>(
+      `/inspections/trade-operation/${tradeOperationId}`,
+    );
+    return data ?? [];
+  },
+
+  getById: async (id: string): Promise<InspectionRequest | null> => {
+    try {
+      // No dedicated GET /inspections/:id on backend — list and filter.
+      const { data } = await apiClient.get<{ data: InspectionRequest[] }>('/inspections');
+      return data?.data?.find((i) => i.id === id) ?? null;
+    } catch {
+      return null;
     }
-  ): Promise<InspectionRequest> => ({}) as InspectionRequest,
+  },
+
+  create: async (data: Partial<InspectionRequest>): Promise<InspectionRequest> => {
+    const { data: created } = await apiClient.post<InspectionRequest>('/inspections', data);
+    return created;
+  },
+
+  update: async (
+    id: string,
+    data: Partial<InspectionRequest>,
+  ): Promise<InspectionRequest> => {
+    const { data: updated } = await apiClient.patch<InspectionRequest>(
+      `/inspections/${id}`,
+      data,
+    );
+    return updated;
+  },
+
+  acceptJob: async (
+    id: string,
+    payload?: string | { inspectorId: string; estimatedArrival: string },
+  ): Promise<InspectionRequest> => {
+    // Backend accepts a job via PUT /:id/status with status=ASSIGNED|IN_PROGRESS.
+    // Caller convention: passing inspectorId/estimatedArrival is informational —
+    // the backend resolves the inspectorId from the JWT.
+    const status = typeof payload === 'string' ? payload : 'IN_PROGRESS';
+    const { data } = await apiClient.put<InspectionRequest>(
+      `/inspections/${id}/status`,
+      { status },
+    );
+    return data;
+  },
+
+  getInspectorMissions: async (inspectorId: string): Promise<InspectionRequest[]> => {
+    const { data } = await apiClient.get<InspectionRequest[]>(
+      `/inspections/inspector/${inspectorId}`,
+    );
+    return data ?? [];
+  },
+
+  assignInspector: async (
+    inspectionId: string,
+    inspectorId: string,
+  ): Promise<InspectionRequest> => {
+    const { data } = await apiClient.put<InspectionRequest>(
+      `/inspections/${inspectionId}/assign`,
+      { inspectorId },
+    );
+    return data;
+  },
+
+  submitInspectionResults: async (
+    id: string,
+    payload: SubmitResultsPayload,
+  ): Promise<InspectionRequest> => {
+    const { data } = await apiClient.post<InspectionRequest>(
+      `/inspections/${id}/results`,
+      payload,
+    );
+    return data;
+  },
+
   requestInspectionsForTrade: async (
-    _tradeOperationId: string,
-    _saleListingIds: string[]
+    tradeOperationId: string,
+    saleListingIds: string[],
   ): Promise<void> => {
-    throw new Error('Not implemented');
+    await apiClient.post('/inspections/batch', {
+      tradeOperationId,
+      saleListingIds,
+    });
   },
 };
 

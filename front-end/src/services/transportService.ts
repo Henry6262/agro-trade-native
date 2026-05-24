@@ -1,3 +1,5 @@
+import { apiClient } from './api';
+
 export interface TransportPickupPoint {
   id: string;
   address: string;
@@ -132,50 +134,77 @@ export type TransporterPerformance = TransportPerformance;
 
 const transportService = {
   async getMyJobs(): Promise<TransportJob[]> {
-    return [];
+    const { data } = await apiClient.get<TransportJob[]>('/transport/jobs');
+    return data ?? [];
   },
 
   async startJob(
-    _jobId: string,
-    _data: { startedAt?: string; actualPickupTime?: string }
+    jobId: string,
+    data: { startedAt?: string; actualPickupTime?: string },
   ): Promise<TransportJob> {
-    throw new Error('Not implemented');
+    const { data: job } = await apiClient.post<TransportJob>(
+      `/transport/jobs/${jobId}/start`,
+      data,
+    );
+    return job;
   },
 
   async completePickup(
-    _jobId: string,
-    _data: { pickupCompletedAt?: string; notes?: string; pickupPhotos?: string[] }
+    jobId: string,
+    data: { pickupCompletedAt?: string; notes?: string; pickupPhotos?: string[] },
   ): Promise<TransportJob> {
-    throw new Error('Not implemented');
+    const { data: job } = await apiClient.post<TransportJob>(
+      `/transport/jobs/${jobId}/pickup`,
+      data,
+    );
+    return job;
   },
 
   async completeDelivery(
-    _jobId: string,
-    _data: { deliveryCompletedAt?: string; notes?: string; deliveryPhotos?: string[] }
+    jobId: string,
+    data: { deliveryCompletedAt?: string; notes?: string; deliveryPhotos?: string[] },
   ): Promise<TransportJob> {
-    throw new Error('Not implemented');
+    const { data: job } = await apiClient.post<TransportJob>(
+      `/transport/jobs/${jobId}/delivery`,
+      data,
+    );
+    return job;
   },
 
-  async updateJobLocation(_jobId: string, _latitude: number, _longitude: number): Promise<void> {
-    // no-op stub
+  async updateJobLocation(jobId: string, latitude: number, longitude: number): Promise<void> {
+    await apiClient.put(`/transport/jobs/${jobId}/location`, { latitude, longitude });
   },
 
   async getAvailableRequests(): Promise<TransportRequest[]> {
-    return [];
+    const { data } = await apiClient.get<TransportRequest[]>(
+      '/transport/requests/available',
+    );
+    return data ?? [];
   },
 
   async getMyBids(): Promise<TransportBid[]> {
-    return [];
+    const { data } = await apiClient.get<TransportBid[]>('/transport/bids');
+    return data ?? [];
   },
 
   async submitBid(
-    _bidData: Partial<TransportBid> & { estimatedDuration?: number }
+    bidData: Partial<TransportBid> & { estimatedDuration?: number },
   ): Promise<TransportBid> {
-    throw new Error('Not implemented');
+    const { data } = await apiClient.post<TransportBid>('/transport/bids', bidData);
+    return data;
   },
 
   async getTransporterPerformance(_id: string): Promise<TransportPerformance> {
-    return { completedJobs: 0, onTimeRate: 0, avgRating: 0, totalEarnings: 0 };
+    // Backend resolves transporter from JWT, ignores path id.
+    const { data } = await apiClient.get<TransportPerformance>('/transport/me/analytics');
+    return (
+      data ?? {
+        completedJobs: 0,
+        onTimeRate: 0,
+        avgRating: 0,
+        totalEarnings: 0,
+      }
+    );
   },
 
   async getMyFleet(): Promise<{
@@ -183,17 +212,24 @@ const transportService = {
     drivers: TransportFleetDriver[];
     summary: TransportFleetSummary;
   }> {
-    return {
-      trucks: [],
-      drivers: [],
-      summary: {
-        totalTrucks: 0,
-        totalDrivers: 0,
-        availableTrucks: 0,
-        availableDrivers: 0,
-        assignedDrivers: 0,
-      },
-    };
+    const { data } = await apiClient.get<{
+      trucks: TransportFleetTruck[];
+      drivers: TransportFleetDriver[];
+      summary: TransportFleetSummary;
+    }>('/transport-company/me/fleet');
+    return (
+      data ?? {
+        trucks: [],
+        drivers: [],
+        summary: {
+          totalTrucks: 0,
+          totalDrivers: 0,
+          availableTrucks: 0,
+          availableDrivers: 0,
+          assignedDrivers: 0,
+        },
+      }
+    );
   },
 };
 
