@@ -27,6 +27,7 @@ import { Roles } from "../../auth/decorators/roles.decorator";
 import { UserRole, TradePhase } from "@prisma/client";
 import {
   AddSellersDto,
+  CreateOffersDto,
   CreateTradeOperationDto,
 } from "../dto/create-trade-operation.dto";
 import { UpdateTradeOperationDto } from "../dto/update-trade-operation.dto";
@@ -125,6 +126,26 @@ export class TradeOperationController {
   @ApiOperation({ summary: "Add sellers to a trade operation" })
   async addSellers(@Param("id") id: string, @Body() dto: AddSellersDto) {
     return await this.tradeOperationService.addSellersToTrade(id, dto);
+  }
+
+  @Post(":id/create-offers")
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: "Create offers against a trade operation with price validation",
+    description:
+      "Validates each offer price against the buyer's maxPricePerUnit (hard reject above max; hard reject below 10% sanity floor), then creates trade sellers + negotiations in batch.",
+  })
+  @ApiResponse({ status: HttpStatus.CREATED, description: "Negotiations created" })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: "Price validation failed" })
+  async createOffers(@Param("id") id: string, @Body() dto: CreateOffersDto) {
+    await this.negotiationService.validateOfferPrices(id, dto.offers);
+    const result = await this.negotiationService.createTradeSellersWithOffers(
+      id,
+      dto.offers,
+    );
+    await this.tradeOperationService.setInitialNegotiationPhase(id);
+    return result;
   }
 
   @Get(":id/matching-sellers")

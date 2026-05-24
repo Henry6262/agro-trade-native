@@ -177,6 +177,17 @@ export class SellerOfferDto {
   offerPrice: number;
 }
 
+export class CreateOffersDto {
+  @ApiProperty({
+    description: "List of seller offers to create against this trade operation",
+    type: [SellerOfferDto],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SellerOfferDto)
+  offers: SellerOfferDto[];
+}
+
 export class CreateTradeOperationWithOffersDto {
   @ApiProperty({
     description: "ID of the buy listing to create a trade operation for",

@@ -268,6 +268,48 @@ export class NegotiationService {
   }
 
   /**
+   * Validate that each offer price falls within the buyer's accepted bounds.
+   * Hard reject above maxPricePerUnit (buyer literally won't pay).
+   * Hard reject below 10% of maxPricePerUnit as a sanity floor against typos.
+   */
+  async validateOfferPrices(
+    tradeOperationId: string,
+    offers: Array<{ sellerId: string; offerPrice: number }>,
+  ): Promise<void> {
+    const trade = await this.prisma.tradeOperation.findUnique({
+      where: { id: tradeOperationId },
+      include: { buyListing: { select: { maxPricePerUnit: true } } },
+    });
+    if (!trade) throw new NotFoundException("Trade operation not found");
+
+    const max = trade.buyListing.maxPricePerUnit
+      ? Number(trade.buyListing.maxPricePerUnit)
+      : null;
+
+    const errors: string[] = [];
+    for (const o of offers) {
+      if (o.offerPrice <= 0) {
+        errors.push(`Seller ${o.sellerId}: price must be > 0`);
+        continue;
+      }
+      if (max !== null) {
+        if (o.offerPrice > max) {
+          errors.push(
+            `Seller ${o.sellerId}: price ${o.offerPrice} exceeds buyer max ${max}`,
+          );
+        } else if (o.offerPrice < max * 0.1) {
+          errors.push(
+            `Seller ${o.sellerId}: price ${o.offerPrice} is below sanity floor (10% of ${max} = ${(max * 0.1).toFixed(2)})`,
+          );
+        }
+      }
+    }
+    if (errors.length > 0) {
+      throw new BadRequestException(`Offer price validation failed: ${errors.join("; ")}`);
+    }
+  }
+
+  /**
    * Create trade sellers and send batch offers in one transaction
    * Used when creating a new trade operation with sellers
    */
