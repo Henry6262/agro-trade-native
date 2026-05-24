@@ -4,12 +4,14 @@ _Auto-generated: 2026-05-24_
 ## Issue Summary
 | Category | Count |
 |----------|-------|
-| Total Open | 2 |
+| Total Open | 0 |
 | Bugs | 0 |
 | Features | 0 |
-| Unlabeled | 2 |
+| Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `1201168` 2026-05-24 — feat(front-end): wire inspectionService and transportService to backend
+- `3f6180f` 2026-05-24 — docs: auto-update progress report [skip ci]
 - `7454d0d` 2026-05-24 — docs(backend): mobile portal audit in INTEGRATION_STATUS.json
 - `668134f` 2026-05-24 — feat(backend): add create-offers endpoint with price validation
 - `b1a81d6` 2026-05-24 — test(backend): restore escrow.service.spec to 38/38 passing + batch \$transactio
@@ -23,9 +25,5 @@ _Auto-generated: 2026-05-24_
 - `784e1e0` 2026-05-22 — fix(backend): add missing profit service/controller and mock prisma
 - `b5b451d` 2026-05-22 — fix(front-end): resolve missing imports and broken paths post-refactor
 - `7a2da01` 2026-05-22 — feat(front-end): fix usevoicesession double start call
-- `4ca7e4a` 2026-05-22 — feat(backend): pipecat 1.2.1 migration with rtvi kept
-- `f72ddc1` 2026-05-21 — docs: tighten StableHacks and sponsor-facing narrative
 
 ## Open Issues
-- #131 🔴 [CRITICAL] Mobile transportService.ts is fully stubbed — Transport portal has no backend integration [none]
-- #130 🔴 [CRITICAL] Mobile inspectionService.ts is fully stubbed — Inspector portal has no backend integration [none]
