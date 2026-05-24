@@ -208,7 +208,7 @@ export const ProductDetailDrawer: React.FC<ProductDetailDrawerProps> = ({
                           {product.displayName || product.name}
                         </Text>
                         <Text style={styles.productCategory}>
-                          {product.category.replace(/_/g, ' ')}
+                          {product.category?.replace(/_/g, ' ')}
                         </Text>
                       </View>
                     </View>

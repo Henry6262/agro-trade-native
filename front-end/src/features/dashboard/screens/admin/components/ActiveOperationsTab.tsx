@@ -140,7 +140,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
 
   const loadOperations = async () => {
     try {
-      const ops = await tradeOperationService.getTradeOperations('ACTIVE');
+      const ops = await tradeOperationService.getTradeOperations({ status: 'ACTIVE' });
 
       const opsWithNegotiations = await Promise.all(
         ops.map(async (op) => {
@@ -174,7 +174,7 @@ export const ActiveOperationsTab: React.FC<Props> = ({
         })
       );
 
-      setOperations(opsWithNegotiations as TradeOperation[]);
+      setOperations(opsWithNegotiations as unknown as TradeOperation[]);
     } catch (error) {
       console.error('Failed to load operations:', error);
       Alert.alert('Error', 'Failed to load active operations');
@@ -316,13 +316,13 @@ export const ActiveOperationsTab: React.FC<Props> = ({
             <View style={styles.productRow}>
               <View style={styles.emojiCircle}>
                 <Text style={styles.emojiText}>
-                  {getProductEmoji(operation.buyListing?.product)}
+                  {getProductEmoji(operation.buyListing?.product?.name || '')}
                 </Text>
               </View>
               <View style={styles.opHeaderLeft}>
                 <View style={styles.opTitleRow}>
                   <Text style={styles.opProductName}>
-                    {formatProductName(operation.buyListing?.product?.name)}
+                    {formatProductName(operation.buyListing?.product?.name || '')}
                   </Text>
                   {hasUrgentItems && (
                     <GlassBadge

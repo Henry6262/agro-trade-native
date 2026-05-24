@@ -137,7 +137,7 @@ export const TradeCreationDrawer: React.FC<TradeCreationDrawerProps> = ({
       return {
         latitude: 42.0 + index * 0.1,
         longitude: -93.0 + index * 0.1,
-        address: seller?.saleListing.address?.address || `Farm ${index + 1}`,
+        address: seller?.saleListing?.address?.address || `Farm ${index + 1}`,
         quantity: seller?.availability || 0,
       };
     });
@@ -198,7 +198,7 @@ export const TradeCreationDrawer: React.FC<TradeCreationDrawerProps> = ({
       return;
     }
 
-    const buyerPrice = parseFloat(offerPrices.buyer || buyListing.maxPricePerUnit.toString());
+    const buyerPrice = parseFloat(offerPrices.buyer || (buyListing.maxPricePerUnit ?? 0).toString());
     const sellerOffers = selectedSellers
       .map((sellerId) => {
         const seller = matchingSellers.find((item) => item.sellerId === sellerId);

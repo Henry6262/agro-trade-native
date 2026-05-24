@@ -355,7 +355,7 @@ export function TradeCreationTransportStep({
             sellerName: seller?.saleListing?.seller?.name || 'Seller',
             latitude: 42.0 + index * 0.15,
             longitude: -93.0 + index * 0.15,
-            address: seller?.saleListing.address?.address || `Farm ${index + 1}`,
+            address: seller?.saleListing?.address?.address || `Farm ${index + 1}`,
             quantity: seller?.availability || 0,
             product: seller?.saleListing?.product?.name || 'Product',
           };
@@ -366,8 +366,8 @@ export function TradeCreationTransportStep({
           address: buyListing.deliveryAddress?.address || 'Chicago, IL',
         },
         totalDistance: transportEstimate?.distance,
-        estimatedDuration: transportEstimate?.duration,
-        estimatedCost: transportEstimate?.costs.totalCost,
+        estimatedDuration: transportEstimate?.duration ?? 0,
+        estimatedCost: transportEstimate?.costs?.totalCost ?? 0,
       }
     : null;
 
@@ -438,18 +438,18 @@ export function TradeCreationProfitStep({
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>Selling Price:</Text>
               <Text style={styles.metaValue}>
-                ${profitCalculation.revenue.sellingPrice.toFixed(2)}
+                ${(profitCalculation.revenue?.sellingPrice ?? 0).toFixed(2)}
               </Text>
             </View>
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>Quantity:</Text>
-              <Text style={styles.metaValue}>{profitCalculation.revenue.quantity} units</Text>
+              <Text style={styles.metaValue}>{profitCalculation.revenue?.quantity ?? 0} units</Text>
             </View>
             <View style={DIVIDER} />
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>Total Revenue:</Text>
               <Text style={styles.goldPrice}>
-                ${profitCalculation.revenue.totalRevenue.toFixed(2)}
+                ${(profitCalculation.revenue?.totalRevenue ?? 0).toFixed(2)}
               </Text>
             </View>
           </GlassCard>
@@ -459,35 +459,35 @@ export function TradeCreationProfitStep({
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>Purchase Cost:</Text>
               <Text style={styles.metaValue}>
-                ${profitCalculation.costs.purchases.totalCost.toFixed(2)}
+                ${(profitCalculation.costs?.purchases?.totalCost ?? 0).toFixed(2)}
               </Text>
             </View>
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>Transport Cost:</Text>
               <Text style={styles.metaValue}>
-                ${profitCalculation.costs.transport.estimatedCost.toFixed(2)}
+                ${(profitCalculation.costs?.transport?.estimatedCost ?? 0).toFixed(2)}
               </Text>
             </View>
             <View style={DIVIDER} />
             <View style={styles.metaRow}>
               <Text style={styles.metaLabel}>Total Costs:</Text>
               <Text style={[styles.goldPrice, { color: COLORS.danger }]}>
-                ${profitCalculation.costs.totalCosts.toFixed(2)}
+                ${(profitCalculation.costs?.totalCosts ?? 0).toFixed(2)}
               </Text>
             </View>
           </GlassCard>
 
           <GlassCard
-            tier={profitCalculation.profit.meetsMinimumMargin ? 'medium' : 'subtle'}
+            tier={profitCalculation.profit?.meetsMinimumMargin ? 'medium' : 'subtle'}
             animate={false}
             style={{
-              borderColor: profitCalculation.profit.meetsMinimumMargin
+              borderColor: profitCalculation.profit?.meetsMinimumMargin
                 ? 'rgba(74,222,128,0.3)'
                 : 'rgba(248,113,113,0.3)',
             }}
           >
             <View style={styles.metaRow}>
-              {profitCalculation.profit.meetsMinimumMargin ? (
+              {profitCalculation.profit?.meetsMinimumMargin ? (
                 <CheckCircle size={18} color={COLORS.accentGreen} />
               ) : (
                 <AlertTriangle size={18} color={COLORS.danger} />
@@ -496,14 +496,14 @@ export function TradeCreationProfitStep({
                 style={[
                   styles.subSectionLabel,
                   {
-                    color: profitCalculation.profit.meetsMinimumMargin
+                    color: profitCalculation.profit?.meetsMinimumMargin
                       ? COLORS.accentGreen
                       : COLORS.danger,
                     marginLeft: 8,
                   },
                 ]}
               >
-                {profitCalculation.profit.meetsMinimumMargin
+                {profitCalculation.profit?.meetsMinimumMargin
                   ? 'Profitable Trade'
                   : 'Below Minimum Margin'}
               </Text>
@@ -515,12 +515,12 @@ export function TradeCreationProfitStep({
                   styles.goldPrice,
                   {
                     color:
-                      profitCalculation.profit.netProfit > 0 ? COLORS.accentGreen : COLORS.danger,
+                      (profitCalculation.profit?.netProfit ?? 0) > 0 ? COLORS.accentGreen : COLORS.danger,
                     fontSize: 18,
                   },
                 ]}
               >
-                ${profitCalculation.profit.netProfit.toFixed(2)}
+                ${(profitCalculation.profit?.netProfit ?? 0).toFixed(2)}
               </Text>
             </View>
             <View style={styles.metaRow}>
@@ -529,14 +529,14 @@ export function TradeCreationProfitStep({
                 style={[
                   styles.goldPrice,
                   {
-                    color: profitCalculation.profit.meetsMinimumMargin
+                    color: profitCalculation.profit?.meetsMinimumMargin
                       ? COLORS.accentGreen
                       : COLORS.danger,
                     fontSize: 18,
                   },
                 ]}
               >
-                {profitCalculation.profit.profitMargin.toFixed(1)}%
+                {(profitCalculation.profit?.profitMargin ?? 0).toFixed(1)}%
               </Text>
             </View>
           </GlassCard>
@@ -581,11 +581,11 @@ export function TradeCreationOffersStep({
       <GlassCard tier="subtle" animate={false} style={{ marginBottom: 12 }}>
         <Text style={styles.subSectionLabel}>Buyer Offer</Text>
         <Text style={styles.metaLabel}>To: {buyListing.buyer?.name || 'Unknown Buyer'}</Text>
-        <Text style={styles.hintText}>Max price: ${buyListing.maxPricePerUnit}</Text>
+        <Text style={styles.hintText}>Max price: ${buyListing.maxPricePerUnit ?? 0}</Text>
         <GlassInput
           value={offerPrices.buyer}
           onChangeText={onChangeBuyerPrice}
-          placeholder={buyListing.maxPricePerUnit.toString()}
+          placeholder={(buyListing.maxPricePerUnit ?? 0).toString()}
           keyboardType="numeric"
           leftIcon={<DollarSign size={15} color={COLORS.textMuted} />}
           containerStyle={{ marginBottom: 0, marginTop: 8 }}
@@ -632,8 +632,8 @@ export function TradeCreationOffersStep({
       {profitCalculation ? (
         <GlassCard tier="subtle" animate={false} style={{ borderColor: 'rgba(252,211,77,0.2)' }}>
           <Text style={[styles.hintText, { color: COLORS.accentGold, fontSize: 13 }]}>
-            Expected profit with current prices: ${profitCalculation.profit.netProfit.toFixed(2)} (
-            {profitCalculation.profit.profitMargin.toFixed(1)}%)
+            Expected profit with current prices: ${(profitCalculation.profit?.netProfit ?? 0).toFixed(2)} (
+            {(profitCalculation.profit?.profitMargin ?? 0).toFixed(1)}%)
           </Text>
         </GlassCard>
       ) : null}

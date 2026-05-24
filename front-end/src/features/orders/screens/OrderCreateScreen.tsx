@@ -67,8 +67,11 @@ export default function OrderCreateScreen() {
           quantity: item.quantity,
         })),
         deliveryAddress: {
-          ...deliveryData,
+          address: deliveryData.address,
+          city: deliveryData.city,
+          state: deliveryData.state || '',
           country: deliveryData.country || 'United States',
+          zipCode: deliveryData.zipCode || deliveryData.postalCode || '',
         },
         paymentMethod: selectedPaymentMethod,
         notes: deliveryData.notes || '',

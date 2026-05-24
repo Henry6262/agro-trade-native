@@ -9,7 +9,7 @@ export interface ProductSpecification {
   dataType?: string;
   minValue?: number;
   maxValue?: number;
-  importance?: 'required' | 'recommended' | 'optional';
+  importance?: 'required' | 'recommended' | 'optional' | 'CRITICAL' | 'IMPORTANT';
   [key: string]: any;
 }
 
@@ -20,6 +20,7 @@ export interface ProductWithSpecs {
   specifications?: ProductSpecification[];
   image?: string;
   category?: string;
+  defaultUnit?: string;
   priceRangeMin?: number;
   priceRangeMax?: number;
   [key: string]: any;

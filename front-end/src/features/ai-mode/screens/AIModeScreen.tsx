@@ -8,13 +8,12 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  useWindowDimensions,
   ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MotiView } from 'moti';
-import { Mic, MicOff, ArrowLeft, RotateCcw } from 'lucide-react-native';
-import { GradientBackground } from '@design-system';
+import { Mic, MicOff, ArrowLeft, RotateCcw, Check } from 'lucide-react-native';
+import { GradientBackground, COLORS } from '@design-system';
 import { CharacterAvatar } from '../components/CharacterAvatar';
 import { VoiceStateIndicator } from '../components/VoiceStateIndicator';
 import { ChatBubble } from '../components/ChatBubble';
@@ -34,7 +33,6 @@ interface AIModeScreenProps {
 
 export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
   const navigation = useNavigation();
-  const { height } = useWindowDimensions();
   const scrollRef = useRef<ScrollView>(null);
 
   const role = route.params?.role || 'seller';
@@ -57,15 +55,15 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
       switch (action.action) {
         case 'create_offer':
           showConfirmation(
-            'Публикуване на оферта?',
-            `Оферта: ${JSON.stringify(action.params)}`,
+            'Publish your sale offer?',
+            `Offer: ${JSON.stringify(action.params)}`,
             action
           );
           break;
         case 'create_request':
           showConfirmation(
-            'Публикуване на заявка?',
-            `Заявка: ${JSON.stringify(action.params)}`,
+            'Publish your buy request?',
+            `Request: ${JSON.stringify(action.params)}`,
             action
           );
           break;
@@ -128,6 +126,23 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
     connect();
   };
 
+  const handleDone = () => {
+    disconnect();
+    (navigation as any).getParent()?.navigate('Onboarding', {
+      screen: 'OnboardingComplete',
+    });
+  };
+
+  // Show "Done" CTA once we have at least a name OR some role-specific data
+  const hasCapturedData = Boolean(
+    onboardingForm.fullName ||
+    onboardingForm.village ||
+    onboardingForm.phone ||
+    onboardingForm.sellerOffer?.commodity ||
+    onboardingForm.buyerRequest?.commodity ||
+    onboardingForm.transporterProfile?.truckType
+  );
+
   return (
     <GradientBackground>
       <SafeAreaView style={styles.safeArea}>
@@ -142,7 +157,7 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
             </TouchableOpacity>
             <View style={styles.headerCenter}>
               <Text style={styles.headerTitle}>
-                {mode === 'onboarding' ? 'AI Регистрация' : 'AI Асистент'}
+                {mode === 'onboarding' ? 'Voice Setup' : 'AI Assistant'}
               </Text>
               <View style={[styles.connectionDot, isConnected && styles.connectionDotActive]} />
             </View>
@@ -159,7 +174,7 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
               style={styles.connectingBanner}
             >
               <ActivityIndicator size="small" color="#4ADE80" />
-              <Text style={styles.connectingText}>Свързване с AI...</Text>
+              <Text style={styles.connectingText}>Connecting to your AI assistant…</Text>
             </MotiView>
           )}
 
@@ -184,13 +199,13 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
                 <View style={styles.welcomeMessage}>
                   <Text style={styles.welcomeTitle}>
                     {mode === 'onboarding'
-                      ? 'Здравейте! Аз съм вашият AI асистент.'
-                      : 'Как мога да ви помогна днес?'}
+                      ? `Hi — I'll set up your ${role} profile.`
+                      : 'How can I help you today?'}
                   </Text>
                   <Text style={styles.welcomeSubtitle}>
                     {mode === 'onboarding'
-                      ? 'Говорете свободно и аз ще попълня вашия профил.'
-                      : 'Говорете или докоснете бутона по-долу.'}
+                      ? "Press and hold the mic, then just talk. I'll fill in everything as we go."
+                      : 'Press the mic to start a conversation.'}
                   </Text>
                 </View>
               )}
@@ -205,12 +220,12 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
             <View style={styles.errorBanner}>
               <Text style={styles.errorText}>{sessionError}</Text>
               <TouchableOpacity onPress={connect} style={styles.retryBtn}>
-                <Text style={styles.retryText}>Опитайте отново</Text>
+                <Text style={styles.retryText}>Try again</Text>
               </TouchableOpacity>
             </View>
           )}
 
-          {/* Push-to-Talk Button */}
+          {/* Push-to-Talk Button + optional Done CTA */}
           <View style={styles.controls}>
             <TouchableOpacity
               onPressIn={handlePushToTalk}
@@ -238,13 +253,23 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
                 )}
               </MotiView>
               <Text style={styles.pttLabel}>
-                {isListening
-                  ? 'Слушам...'
-                  : isConnecting
-                    ? 'Свързване...'
-                    : 'Задръжте, за да говорите'}
+                {isListening ? 'Listening…' : isConnecting ? 'Connecting…' : 'Hold to speak'}
               </Text>
             </TouchableOpacity>
+
+            {mode === 'onboarding' && hasCapturedData && !isListening && (
+              <MotiView
+                from={{ opacity: 0, translateY: 10 }}
+                animate={{ opacity: 1, translateY: 0 }}
+                transition={{ type: 'spring', damping: 18, stiffness: 200 }}
+                style={styles.doneWrap}
+              >
+                <TouchableOpacity onPress={handleDone} style={styles.doneBtn} activeOpacity={0.85}>
+                  <Check size={16} color={COLORS.accentGreen} />
+                  <Text style={styles.doneText}>I&apos;m done — take me to my dashboard</Text>
+                </TouchableOpacity>
+              </MotiView>
+            )}
           </View>
 
           {/* Confirmation Modal */}
@@ -272,19 +297,21 @@ const LiveFormPreview: React.FC<{ form: AIOnboardingForm; role: AIUserRole }> = 
       animate={{ opacity: 1, translateY: 0 }}
       style={styles.formPreview}
     >
-      <Text style={styles.formPreviewTitle}>📋 Попълнено досега:</Text>
-      {form.fullName ? <Text style={styles.formPreviewItem}>👤 Име: {form.fullName}</Text> : null}
-      {form.village ? <Text style={styles.formPreviewItem}>📍 Село: {form.village}</Text> : null}
-      {form.phone ? <Text style={styles.formPreviewItem}>📞 Телефон: {form.phone}</Text> : null}
+      <Text style={styles.formPreviewTitle}>Captured so far</Text>
+      {form.fullName ? <Text style={styles.formPreviewItem}>👤 Name · {form.fullName}</Text> : null}
+      {form.village ? (
+        <Text style={styles.formPreviewItem}>📍 Location · {form.village}</Text>
+      ) : null}
+      {form.phone ? <Text style={styles.formPreviewItem}>📞 Phone · {form.phone}</Text> : null}
       {role === 'seller' && form.sellerOffer?.commodity ? (
         <Text style={styles.formPreviewItem}>
-          🌾 Оферта: {form.sellerOffer.quantity}кг {form.sellerOffer.commodity} @{' '}
-          {form.sellerOffer.pricePerKg} лв/кг
+          🌾 Offer · {form.sellerOffer.quantity}kg {form.sellerOffer.commodity} @{' '}
+          {form.sellerOffer.pricePerKg}/kg
         </Text>
       ) : null}
       {role === 'buyer' && form.buyerRequest?.commodity ? (
         <Text style={styles.formPreviewItem}>
-          🛒 Заявка: {form.buyerRequest.quantity}кг {form.buyerRequest.commodity}
+          🛒 Request · {form.buyerRequest.quantity}kg {form.buyerRequest.commodity}
         </Text>
       ) : null}
     </MotiView>
@@ -350,6 +377,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 24,
     paddingVertical: 16,
+  },
+  doneBtn: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(74, 222, 128, 0.12)',
+    borderColor: 'rgba(74, 222, 128, 0.35)',
+    borderRadius: 999,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: 8,
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+  },
+  doneText: {
+    color: COLORS.accentGreen,
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  doneWrap: {
+    alignItems: 'center',
+    marginTop: 32,
   },
   errorBanner: {
     alignItems: 'center',

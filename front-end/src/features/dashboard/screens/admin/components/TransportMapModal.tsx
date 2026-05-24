@@ -53,20 +53,20 @@ export const TransportMapModal: React.FC<TransportMapModalProps> = ({
     };
 
     const buyerCoords = {
-      latitude: tradeOperation.buyListing.deliveryAddress?.latitude || 41.8781,
-      longitude: tradeOperation.buyListing.deliveryAddress?.longitude || -87.6298,
-      address: tradeOperation.buyListing.deliveryAddress?.address || 'Chicago, IL',
+      latitude: tradeOperation.buyListing?.deliveryAddress?.latitude || 41.8781,
+      longitude: tradeOperation.buyListing?.deliveryAddress?.longitude || -87.6298,
+      address: tradeOperation.buyListing?.deliveryAddress?.address || 'Chicago, IL',
     };
 
     const pickupLocations =
       tradeOperation.selectedSellers?.map((seller, index) => ({
         sellerId: seller.sellerId,
-        sellerName: seller.saleListing.seller.name,
+        sellerName: seller.saleListing?.seller?.name || 'Unknown',
         latitude: 42.0 + index * 0.15, // Mock coordinates
         longitude: -93.0 + index * 0.15,
-        address: seller.saleListing.address?.address || `Farm ${index + 1}`,
+        address: seller.saleListing?.address?.address || `Farm ${index + 1}`,
         quantity: seller.requestedQuantity,
-        product: seller.saleListing.product.name,
+        product: seller.saleListing?.product?.name || 'Unknown',
       })) || [];
 
     return {
@@ -74,8 +74,8 @@ export const TransportMapModal: React.FC<TransportMapModalProps> = ({
       pickupLocations,
       destination: buyerCoords,
       totalDistance: transportEstimate.distance,
-      estimatedDuration: transportEstimate.duration,
-      estimatedCost: transportEstimate.costs.totalCost,
+      estimatedDuration: transportEstimate.duration ?? 0,
+      estimatedCost: transportEstimate.costs?.totalCost || 0,
     };
   };
 
@@ -131,7 +131,7 @@ export const TransportMapModal: React.FC<TransportMapModalProps> = ({
                   <Text style={styles.labelText}>Estimated Time</Text>
                 </View>
                 <Text style={styles.valueText}>
-                  {Math.round(transportEstimate.duration / 60)} hours
+                  {Math.round((transportEstimate.duration ?? 0) / 60)} hours
                 </Text>
               </View>
 
@@ -151,7 +151,7 @@ export const TransportMapModal: React.FC<TransportMapModalProps> = ({
                   <Text style={styles.valueBold}>Transport Cost</Text>
                 </View>
                 <Text style={styles.costValue}>
-                  ${transportEstimate.costs.totalCost.toFixed(2)}
+                  ${transportEstimate.costs?.totalCost?.toFixed(2) ?? '0.00'}
                 </Text>
               </View>
             </View>
@@ -163,22 +163,22 @@ export const TransportMapModal: React.FC<TransportMapModalProps> = ({
               <View style={styles.breakdownRow}>
                 <Text style={styles.labelText}>Base Rate</Text>
                 <Text style={styles.valueText}>
-                  ${transportEstimate.breakdown.baseRate?.toFixed(2) || '0.00'}
+                  ${transportEstimate.breakdown?.baseRate?.toFixed(2) || '0.00'}
                 </Text>
               </View>
 
               <View style={styles.breakdownRow}>
                 <Text style={styles.labelText}>Distance Charge</Text>
                 <Text style={styles.valueText}>
-                  ${transportEstimate.breakdown.distanceCharge?.toFixed(2) || '0.00'}
+                  ${transportEstimate.breakdown?.distanceCharge?.toFixed(2) || '0.00'}
                 </Text>
               </View>
 
-              {(transportEstimate.breakdown.multiPickupSurcharge ?? 0) > 0 && (
+              {(transportEstimate.breakdown?.multiPickupSurcharge ?? 0) > 0 && (
                 <View style={styles.breakdownRow}>
                   <Text style={styles.labelText}>Multi-Pickup Surcharge</Text>
                   <Text style={styles.valueText}>
-                    ${transportEstimate.breakdown.multiPickupSurcharge?.toFixed(2) || '0.00'}
+                    ${transportEstimate.breakdown?.multiPickupSurcharge?.toFixed(2) || '0.00'}
                   </Text>
                 </View>
               )}
@@ -186,7 +186,7 @@ export const TransportMapModal: React.FC<TransportMapModalProps> = ({
               <View style={styles.breakdownRow}>
                 <Text style={styles.labelText}>Cost per km</Text>
                 <Text style={styles.mutedText}>
-                  ${transportEstimate.breakdown.costPerKm.toFixed(2)}/km
+                  ${transportEstimate.breakdown?.costPerKm?.toFixed(2) ?? '0.00'}/km
                 </Text>
               </View>
             </View>
@@ -196,11 +196,11 @@ export const TransportMapModal: React.FC<TransportMapModalProps> = ({
               <View style={styles.vehicleRow}>
                 <Truck size={20} color={COLORS.info} />
                 <Text style={styles.vehicleTitle}>
-                  Vehicle Type: {transportEstimate.vehicleType}
+                  Vehicle Type: {transportEstimate.vehicleType || 'Standard'}
                 </Text>
               </View>
               <Text style={styles.vehicleSub}>
-                Capacity: {tradeOperation.buyListing.quantity} {tradeOperation.buyListing.unit}
+                Capacity: {tradeOperation.buyListing?.quantity || 0} {tradeOperation.buyListing?.unit || ''}
               </Text>
             </View>
 
@@ -235,7 +235,7 @@ export const TransportMapModal: React.FC<TransportMapModalProps> = ({
                   <Text style={styles.pickupName}>Final Delivery</Text>
                   <Text style={styles.pickupAddress}>{route.destination.address}</Text>
                   <Text style={styles.deliveryBuyerText}>
-                    Buyer: {tradeOperation.buyListing.buyer.name}
+                    Buyer: {tradeOperation.buyListing?.buyer?.name || 'N/A'}
                   </Text>
                 </View>
               </View>

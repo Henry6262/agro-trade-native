@@ -177,7 +177,7 @@ export default function OperationsScreenRefactored() {
                 {/* Product emoji header */}
                 <View style={styles.productEmojiRow}>
                   <View style={styles.emojiCircle}>
-                    <Text style={styles.emojiText}>{getProductEmoji(listing.product)}</Text>
+                    <Text style={styles.emojiText}>{getProductEmoji(listing.product?.name || '')}</Text>
                   </View>
                   <View style={styles.listingHeaderLeft}>
                     <Text style={styles.listingTitle}>
@@ -312,7 +312,7 @@ export default function OperationsScreenRefactored() {
                 {/* Product emoji header */}
                 <View style={styles.productEmojiRow}>
                   <View style={styles.emojiCircle}>
-                    <Text style={styles.emojiText}>{getProductEmoji(listing.product)}</Text>
+                    <Text style={styles.emojiText}>{getProductEmoji(listing.product?.name || '')}</Text>
                   </View>
                   <View style={styles.listingHeaderLeft}>
                     <Text style={styles.listingTitle}>

@@ -40,7 +40,7 @@ export function SpecificationsStep({
         <View>
           {productSpecifications.map((specification) => {
             const specificationKey = getSpecificationKey(specification);
-            const isRequired = ['CRITICAL', 'IMPORTANT'].includes(specification.importance);
+            const isRequired = ['CRITICAL', 'IMPORTANT'].includes(specification.importance || '');
 
             return (
               <View key={specificationKey} style={styles.specCard}>

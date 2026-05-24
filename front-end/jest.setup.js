@@ -5,7 +5,9 @@
 jest.mock('expo-modules-core', () => ({
   NativeModulesProxy: {},
   EventEmitter: class EventEmitter {
-    addListener() { return { remove: jest.fn() }; }
+    addListener() {
+      return { remove: jest.fn() };
+    }
     removeAllListeners() {}
   },
   requireNativeModule: jest.fn(() => ({})),
@@ -55,7 +57,9 @@ jest.mock('expo-notifications', () => ({
 jest.mock('expo-location', () => ({
   requestForegroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
   requestBackgroundPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'granted' })),
-  getCurrentPositionAsync: jest.fn(() => Promise.resolve({ coords: { latitude: 0, longitude: 0 } })),
+  getCurrentPositionAsync: jest.fn(() =>
+    Promise.resolve({ coords: { latitude: 0, longitude: 0 } })
+  ),
   watchPositionAsync: jest.fn(() => Promise.resolve({ remove: jest.fn() })),
 }));
 

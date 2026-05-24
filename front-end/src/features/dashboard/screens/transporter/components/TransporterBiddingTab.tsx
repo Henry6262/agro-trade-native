@@ -179,7 +179,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
 
     const mapOffer: MapOffer = {
       id: request.id,
-      quantity: request.totalWeight,
+      quantity: request.totalWeight ?? 0,
       pickup: {
         coordinates: {
           latitude: pickupPoint?.lat ?? DEFAULT_COORDS.lat,
@@ -207,7 +207,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
         name: deliveryPoint?.address || 'Delivery',
         type: 'delivery',
       },
-      deadline: new Date(request.biddingDeadline),
+      deadline: new Date(request.biddingDeadline || ''),
       status: 'pending',
       estimatedValue: request.maxBudget ?? 0,
       productType: request.tradeOperation?.buyListing?.product?.name || 'Agricultural Goods',
@@ -235,8 +235,9 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
 
   const handleSelectBid = (request: TransportRequest) => {
     setSelectedBid(request.id);
-    if (request.lowestBid) {
-      setBidAmount(Math.ceil(request.lowestBid + 50).toString());
+    const lowestBidNum = typeof request.lowestBid === 'number' ? request.lowestBid : 0;
+    if (lowestBidNum > 0) {
+      setBidAmount(Math.ceil(lowestBidNum + 50).toString());
     } else {
       setBidAmount('');
     }
@@ -385,10 +386,11 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
               const lowestBidDisplay = request.lowestBid
                 ? currencyFormatter.format(request.lowestBid)
                 : 'No bids yet';
+              const lowestBidNumber = typeof request.lowestBid === 'number' ? request.lowestBid : 0;
               const pricePerKmDisplay =
-                request.lowestBid && request.estimatedDistance
+                lowestBidNumber > 0 && request.estimatedDistance
                   ? `${currencyFormatter.format(
-                      request.lowestBid / Math.max(request.estimatedDistance, 1)
+                      lowestBidNumber / Math.max(request.estimatedDistance, 1)
                     )}/km`
                   : '--';
               const totalBids = request.bidsCount ?? 0;
@@ -420,7 +422,7 @@ export const TransporterBiddingTab: React.FC<TransporterBiddingTabProps> = ({
                         </Text>
                         <Calendar size={13} color="rgba(255,255,255,0.4)" />
                         <Text style={styles.auctionMetaText}>
-                          {getTimeRemaining(request.biddingDeadline)}
+                          {getTimeRemaining(request.biddingDeadline || '')}
                         </Text>
                       </View>
                     </View>

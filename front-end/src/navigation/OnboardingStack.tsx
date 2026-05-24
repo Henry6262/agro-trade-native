@@ -4,6 +4,7 @@ import { OnboardingStackParamList } from './types';
 
 // Import onboarding screens
 import { RoleSelectionScreen } from '../features/onboarding/screens/RoleSelectionScreen';
+import { PathSelectScreen } from '../features/onboarding/screens/PathSelectScreen';
 import { BuyerOnboardingFlowScreen } from '../features/onboarding/screens/buyer/BuyerOnboardingFlowScreen';
 import { SellerOnboardingFlowScreen } from '../features/onboarding/screens/seller/SellerOnboardingFlowScreen';
 import { TransporterOnboardingFlowScreen } from '../features/onboarding/screens/transporter/TransporterOnboardingFlowScreen';
@@ -18,9 +19,11 @@ export default function OnboardingStack() {
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: 'transparent' },
+        animation: 'slide_from_right',
       }}
     >
       <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
+      <Stack.Screen name="PathSelect" component={PathSelectScreen} />
       <Stack.Screen name="BuyerOnboardingFlow" component={BuyerOnboardingFlowScreen} />
       <Stack.Screen name="SellerOnboardingFlow" component={SellerOnboardingFlowScreen} />
       <Stack.Screen name="TransporterOnboardingFlow" component={TransporterOnboardingFlowScreen} />

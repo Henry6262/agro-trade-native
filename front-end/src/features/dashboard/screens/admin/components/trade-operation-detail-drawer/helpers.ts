@@ -1,18 +1,18 @@
 import { COLORS } from '@design-system';
-import { TradePhase, TradeStatus } from '../../../../../../types/trade-operations';
+import type { TradePhase, TradeStatus } from '../../../../../../types/trade-operations';
 
 export type StatusBadgeVariant = 'success' | 'warning' | 'danger' | 'info' | 'muted' | 'gold';
 
 export const getStatusBadgeVariant = (status: TradeStatus): StatusBadgeVariant => {
   switch (status) {
-    case TradeStatus.ACTIVE:
+    case 'ACTIVE':
       return 'success';
-    case TradeStatus.PAUSED:
+    case 'PAUSED':
       return 'warning';
-    case TradeStatus.COMPLETED:
+    case 'COMPLETED':
       return 'info';
-    case TradeStatus.CANCELLED:
-    case TradeStatus.FAILED:
+    case 'CANCELLED':
+    case 'FAILED':
       return 'danger';
     default:
       return 'muted';
@@ -58,12 +58,12 @@ export const getNegotiationStatusVariant = (status: string): StatusBadgeVariant 
 
 export const getPhaseColor = (phase: TradePhase): string => {
   switch (phase) {
-    case TradePhase.COMPLETED:
+    case 'COMPLETED':
       return COLORS.accentGreen;
-    case TradePhase.CANCELLED:
+    case 'CANCELLED':
       return COLORS.danger;
-    case TradePhase.IN_PROGRESS:
-    case TradePhase.TRANSPORT_MATCHING:
+    case 'IN_PROGRESS':
+    case 'TRANSPORT_MATCHING':
       return COLORS.info;
     default:
       return '#F97316';

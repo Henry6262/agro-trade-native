@@ -300,7 +300,7 @@ const RichJobCard: React.FC<{
 /* ─── Main Screen ─── */
 
 export interface TransporterDashboardSectionProps {
-  activeTab?: string;
+  activeTab?: string | undefined;
 }
 
 export default function TransporterDashboardSection({

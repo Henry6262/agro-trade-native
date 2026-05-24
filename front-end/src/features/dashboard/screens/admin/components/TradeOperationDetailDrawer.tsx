@@ -234,7 +234,7 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
               <View style={styles.fieldRow}>
                 <Text style={styles.fieldKey}>Estimated Profit</Text>
                 <Text style={[styles.fieldVal, { color: COLORS.accentGold }]}>
-                  €{operation.estimatedProfit.toFixed(2)}
+                  €{(operation.estimatedProfit ?? 0).toFixed(2)}
                 </Text>
               </View>
             )}
@@ -242,7 +242,7 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
               <View style={styles.fieldRow}>
                 <Text style={styles.fieldKey}>Profit Margin</Text>
                 <Text style={[styles.fieldVal, { color: COLORS.accentGreen }]}>
-                  {operation.profitMargin.toFixed(1)}%
+                  {(operation.profitMargin ?? 0).toFixed(1)}%
                 </Text>
               </View>
             )}
@@ -306,11 +306,10 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
                   return;
                 }
                 try {
-                  const saleListingIds = unverifiedSellers.map((s: TradeSeller) => s.saleListingId);
+                  const saleListingIds = unverifiedSellers.map((s: TradeSeller) => s.saleListingId).filter((id): id is string => !!id);
                   await inspectionService.requestInspectionsForTrade(
                     operation.id,
-                    saleListingIds,
-                    'MEDIUM'
+                    saleListingIds
                   );
                   Alert.alert(
                     'Success',
@@ -327,17 +326,17 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
 
         {/* Phase actions */}
         <View style={styles.actionButtons}>
-          {operation.phase === TradePhase.SELLER_NEGOTIATION && (
+          {operation.phase === 'SELLER_NEGOTIATION' && (
             <GlassButton
               label="Proceed to Transport"
               variant="primary"
               size="md"
               fullWidth
               leftIcon={<Truck size={16} color="#fff" />}
-              onPress={() => handlePhaseTransition(TradePhase.TRANSPORT_MATCHING)}
+              onPress={() => handlePhaseTransition('TRANSPORT_MATCHING')}
             />
           )}
-          {operation.phase === TradePhase.TRANSPORT_MATCHING && (
+          {operation.phase === 'TRANSPORT_MATCHING' && (
             <GlassButton
               label="Awaiting Transport Bids"
               variant="ghost"
@@ -362,11 +361,11 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
           <GlassCard key={seller.id} tier="subtle" animate={false} style={styles.sellerCard}>
             <View style={styles.sellerHeader}>
               <Text style={styles.sellerName}>
-                {(seller as any).seller?.name || `Seller ${seller.sellerId.slice(-4)}`}
+                {(seller as any).seller?.name || `Seller ${(seller.sellerId || '').slice(-4)}`}
               </Text>
               <GlassBadge
-                label={seller.status}
-                variant={getSellerStatusVariant(seller.status)}
+                label={seller.status || ''}
+                variant={getSellerStatusVariant(seller.status || '')}
                 size="sm"
               />
             </View>
@@ -413,9 +412,9 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
                   leftIcon={<CheckCircle size={13} color="#fff" />}
                   onPress={async () => {
                     try {
-                      await inspectionService.createInspectionRequest({
+                      await inspectionService.create({
                         tradeOperationId: operation!.id,
-                        saleListingId: seller.saleListingId,
+                        saleListingId: seller.saleListingId || '',
                         priority: 'MEDIUM',
                         notes: `Inspection requested for ${(seller as any).seller?.name}`,
                       });
@@ -511,7 +510,7 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
       ? ([
           {
             id: '1',
-            phase: TradePhase.BUYER_SELECTION,
+            phase: 'BUYER_SELECTION',
             timestamp: operation.createdAt,
             description: 'Trade operation created',
             actor: 'System',
@@ -523,7 +522,7 @@ export const TradeOperationDetailDrawer: React.FC<TradeOperationDetailDrawerProp
             description: `Phase changed to ${operation.phase.replace(/_/g, ' ').toLowerCase()}`,
             actor: 'Admin',
           },
-        ] as TimelineEvent[])
+        ] as unknown as TimelineEvent[])
       : [];
 
     return (

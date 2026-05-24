@@ -62,7 +62,7 @@ export interface TransportRequest {
   biddingDeadline?: string;
   maxBudget?: number;
   tradeOperation?: { id: string; buyerName?: string; buyListing?: { product?: { name?: string } } };
-  lowestBid?: number | TransportBid;
+  lowestBid?: number;
   estimatedDistance?: number;
   requestNumber?: string;
   bidsCount?: number;
@@ -135,7 +135,10 @@ const transportService = {
     return [];
   },
 
-  async startJob(_jobId: string, _data: { startedAt?: string; actualPickupTime?: string }): Promise<TransportJob> {
+  async startJob(
+    _jobId: string,
+    _data: { startedAt?: string; actualPickupTime?: string }
+  ): Promise<TransportJob> {
     throw new Error('Not implemented');
   },
 
@@ -165,7 +168,9 @@ const transportService = {
     return [];
   },
 
-  async submitBid(_bidData: Partial<TransportBid> & { estimatedDuration?: number }): Promise<TransportBid> {
+  async submitBid(
+    _bidData: Partial<TransportBid> & { estimatedDuration?: number }
+  ): Promise<TransportBid> {
     throw new Error('Not implemented');
   },
 

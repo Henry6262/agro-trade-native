@@ -115,7 +115,7 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
 
     const mapOffer: MapOffer = {
       id: request.id,
-      quantity: request.totalWeight,
+      quantity: request.totalWeight || 0,
       pickup: {
         coordinates: {
           latitude: pickupPoint?.lat ?? 42.6977,
@@ -143,7 +143,7 @@ export const TransporterIncomingOffersTab: React.FC<TransporterIncomingOffersTab
         name: deliveryPoint?.address || 'Delivery',
         type: 'delivery',
       },
-      deadline: new Date(request.biddingDeadline),
+      deadline: new Date(request.biddingDeadline || ''),
       status: 'pending',
       estimatedValue: request.maxBudget || 5000,
       productType: request.tradeOperation?.buyListing?.product?.name || 'Agricultural Goods',

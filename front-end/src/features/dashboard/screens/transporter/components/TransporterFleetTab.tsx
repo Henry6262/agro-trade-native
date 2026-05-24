@@ -266,7 +266,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
                     <View style={styles.fleetDetails}>
                       <View style={styles.detailRow}>
                         <MapPin size={13} color="#60A5FA" />
-                        <Text style={styles.detailText}>{truck.location}</Text>
+                        <Text style={styles.detailText}>{truck.location?.address || 'Unknown location'}</Text>
                       </View>
 
                       {truck.status === 'assigned' && truck.driver && (
@@ -278,7 +278,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
                           {truck.assignment && (
                             <View style={styles.detailRow}>
                               <Route size={13} color="#4ADE80" />
-                              <Text style={styles.detailText}>{truck.assignment}</Text>
+                              <Text style={styles.detailText}>{truck.assignment?.route || 'Unknown route'}</Text>
                             </View>
                           )}
                         </>
@@ -339,7 +339,7 @@ export const TransporterFleetTab: React.FC<TransporterFleetTabProps> = ({
                         </Text>
                         {driver.assignment && (
                           <Text style={styles.assignmentText}>
-                            Assigned to: {driver.assignment}
+                            Assigned to: {driver.assignment?.route || 'N/A'}
                           </Text>
                         )}
                       </View>

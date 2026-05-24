@@ -32,8 +32,8 @@ export const getDefaultPriceOffer = (product?: ProductWithSpecs | null): PriceOf
   }
 
   return {
-    min: parseFloat(product.priceRangeMin || '0'),
-    max: parseFloat(product.priceRangeMax || '0'),
+    min: parseFloat(String(product.priceRangeMin ?? 0)),
+    max: parseFloat(String(product.priceRangeMax ?? 0)),
     currency: 'USD',
   };
 };
@@ -44,7 +44,7 @@ export const getQuantityValue = (selectedQuantity: number | null, customQuantity
   selectedQuantity || parseFloat(customQuantity) || 0;
 
 export const getSpecificationKey = (specification: ProductSpecification) =>
-  specification.code || specification.id;
+  specification.code || specification.id || 'unknown-spec';
 
 export const normalizeSpecificationValue = (specification: ProductSpecification, value: string) => {
   return specification.dataType === 'NUMBER' ? parseQuantityInput(value) : value;
@@ -54,8 +54,8 @@ export const validateSpecifications = (
   product: ProductWithSpecs,
   specifications: ProductSpecificationsMap
 ) => {
-  const requiredSpecifications = product.specifications
-    .filter((specification) => ['CRITICAL', 'IMPORTANT'].includes(specification.importance))
+  const requiredSpecifications = (product.specifications || [])
+    .filter((specification) => ['CRITICAL', 'IMPORTANT'].includes(specification.importance || ''))
     .filter((specification) => !specifications[getSpecificationKey(specification)]?.trim());
 
   if (requiredSpecifications.length > 0) {
@@ -69,7 +69,7 @@ export const validateSpecifications = (
     return false;
   }
 
-  for (const specification of product.specifications) {
+  for (const specification of product.specifications || []) {
     const specKey = getSpecificationKey(specification);
     const value = specifications[specKey];
 

@@ -24,6 +24,7 @@ export type AuthStackParamList = {
 
 export type OnboardingStackParamList = {
   RoleSelection: undefined;
+  PathSelect: { role: 'buyer' | 'seller' | 'transport' };
   BuyerOnboardingFlow: undefined;
   SellerOnboardingFlow: undefined;
   TransporterOnboardingFlow: undefined;

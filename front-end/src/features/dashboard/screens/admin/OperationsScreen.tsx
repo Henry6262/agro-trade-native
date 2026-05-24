@@ -104,7 +104,7 @@ export default function OperationsScreen() {
           saleListingId: seller.saleListingId,
           requestedQuantity: Math.min(
             seller.availability,
-            currentTradeOperation.buyListing.quantity
+            currentTradeOperation.buyListing?.quantity || 0
           ),
         };
       })
@@ -151,21 +151,21 @@ export default function OperationsScreen() {
     if (
       !currentTradeOperation ||
       !currentTradeOperation.selectedSellers ||
-      !currentTradeOperation.buyListing.deliveryAddress
+      !currentTradeOperation.buyListing?.deliveryAddress
     ) {
       Alert.alert('Error', 'Missing seller or delivery information');
       return;
     }
     const origin = { latitude: 42.0, longitude: -93.0, address: 'Warehouse, Iowa' };
     const destination = {
-      latitude: currentTradeOperation.buyListing.deliveryAddress.latitude || 41.8781,
-      longitude: currentTradeOperation.buyListing.deliveryAddress.longitude || -87.6298,
-      address: currentTradeOperation.buyListing.deliveryAddress.address || 'Chicago, IL',
+      latitude: currentTradeOperation.buyListing?.deliveryAddress?.latitude || 41.8781,
+      longitude: currentTradeOperation.buyListing?.deliveryAddress?.longitude || -87.6298,
+      address: currentTradeOperation.buyListing?.deliveryAddress?.address || 'Chicago, IL',
     };
     const pickupLocations = currentTradeOperation.selectedSellers.map((seller, index) => ({
       latitude: 42.0 + index * 0.1,
       longitude: -93.0 + index * 0.1,
-      address: seller.saleListing.address?.address || `Farm ${index + 1}`,
+      address: seller.saleListing?.address?.address || `Farm ${index + 1}`,
       quantity: seller.requestedQuantity,
     }));
     await estimateTransportCost({
@@ -217,7 +217,7 @@ export default function OperationsScreen() {
         >
           <View style={styles.cardTopRow}>
             <Text style={styles.cardProductName}>{listing.product?.name || 'Unknown Product'}</Text>
-            <GlassBadge label={listing.status} variant="info" size="sm" />
+            <GlassBadge label={listing.status || ''} variant="info" size="sm" />
           </View>
           <Text style={styles.cardSecondary}>{listing.buyer?.name || 'Unknown Buyer'}</Text>
           <Text style={styles.cardSecondary}>
@@ -490,7 +490,7 @@ export default function OperationsScreen() {
                     <View style={styles.metaRow}>
                       <Text style={styles.cardSecondary}>Duration:</Text>
                       <Text style={styles.cardPrimary}>
-                        {Math.round(transportEstimate.duration / 60)} hours
+                        {Math.round((transportEstimate.duration ?? 0) / 60)} hours
                       </Text>
                     </View>
                     <View style={styles.metaRow}>
@@ -641,7 +641,7 @@ export default function OperationsScreen() {
                     onChangeText={(value) =>
                       setNegotiationPrices((prev) => ({ ...prev, buyer: value }))
                     }
-                    placeholder={`${currentTradeOperation.buyListing.maxPricePerUnit}`}
+                    placeholder={`${currentTradeOperation.buyListing?.maxPricePerUnit ?? 0}`}
                     keyboardType="numeric"
                     leftIcon={<DollarSign size={16} color={COLORS.textMuted} />}
                   />

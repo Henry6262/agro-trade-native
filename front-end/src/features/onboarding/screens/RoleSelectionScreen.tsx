@@ -95,20 +95,11 @@ export const RoleSelectionScreen: React.FC = () => {
   const handleRoleSelect = (role: 'buyer' | 'seller' | 'transport') => {
     setRole(role);
     setSelectedRole(role);
+  };
 
-    setTimeout(() => {
-      switch (role) {
-        case 'buyer':
-          navigation.navigate('BuyerOnboardingFlow');
-          break;
-        case 'seller':
-          navigation.navigate('SellerOnboardingFlow');
-          break;
-        case 'transport':
-          navigation.navigate('TransporterOnboardingFlow');
-          break;
-      }
-    }, 200);
+  const handleContinue = () => {
+    if (!selectedRole) return;
+    navigation.navigate('PathSelect', { role: selectedRole });
   };
 
   const handleExistingUserSignIn = async () => {
@@ -244,7 +235,7 @@ export const RoleSelectionScreen: React.FC = () => {
               <View style={styles.continueWrap}>
                 <GlassButton
                   label="Continue"
-                  onPress={() => selectedRole && handleRoleSelect(selectedRole)}
+                  onPress={handleContinue}
                   variant="primary"
                   fullWidth
                   disabled={!selectedRole}

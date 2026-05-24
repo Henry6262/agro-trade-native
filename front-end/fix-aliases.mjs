@@ -47,7 +47,7 @@ function processFile(filePath) {
 }
 
 function walk(dir) {
-  fs.readdirSync(dir).forEach(f => {
+  fs.readdirSync(dir).forEach((f) => {
     const full = path.join(dir, f);
     if (fs.statSync(full).isDirectory()) walk(full);
     else if (f.endsWith('.ts') || f.endsWith('.tsx')) processFile(full);
