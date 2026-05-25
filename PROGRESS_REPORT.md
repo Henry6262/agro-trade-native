@@ -10,6 +10,8 @@ _Auto-generated: 2026-05-25_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `2b6ed65` 2026-05-25 — fix(deps): regenerate root lockfile so npm ci works on EAS Build
+- `473b94f` 2026-05-25 — docs: auto-update progress report [skip ci]
 - `f4ac496` 2026-05-25 — fix(backend): drop ../tsconfig.base.json extends so Docker build works
 - `f9831c3` 2026-05-25 — docs: auto-update progress report [skip ci]
 - `ad8fb8e` 2026-05-25 — fix(backend): inline skipLibCheck and type response.json() for Railway build
@@ -23,7 +25,5 @@ _Auto-generated: 2026-05-25_
 - `3f6180f` 2026-05-24 — docs: auto-update progress report [skip ci]
 - `7454d0d` 2026-05-24 — docs(backend): mobile portal audit in INTEGRATION_STATUS.json
 - `668134f` 2026-05-24 — feat(backend): add create-offers endpoint with price validation
-- `b1a81d6` 2026-05-24 — test(backend): restore escrow.service.spec to 38/38 passing + batch \$transactio
-- `e800a37` 2026-05-24 — fix(backend): add ensureNotProduction guard to 3 unguarded seller simulation end
 
 ## Open Issues
