@@ -10,6 +10,8 @@ _Auto-generated: 2026-05-25_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `d317fda` 2026-05-25 — style(front-end): centered circular logo only in top header
+- `0bc13f6` 2026-05-25 — docs: auto-update progress report [skip ci]
 - `2b6ed65` 2026-05-25 — fix(deps): regenerate root lockfile so npm ci works on EAS Build
 - `473b94f` 2026-05-25 — docs: auto-update progress report [skip ci]
 - `f4ac496` 2026-05-25 — fix(backend): drop ../tsconfig.base.json extends so Docker build works
@@ -23,7 +25,5 @@ _Auto-generated: 2026-05-25_
 - `411a0c2` 2026-05-24 — docs: auto-update progress report [skip ci]
 - `1201168` 2026-05-24 — feat(front-end): wire inspectionService and transportService to backend
 - `3f6180f` 2026-05-24 — docs: auto-update progress report [skip ci]
-- `7454d0d` 2026-05-24 — docs(backend): mobile portal audit in INTEGRATION_STATUS.json
-- `668134f` 2026-05-24 — feat(backend): add create-offers endpoint with price validation
 
 ## Open Issues
