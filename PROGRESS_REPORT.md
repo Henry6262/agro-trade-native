@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-05-24_
+_Auto-generated: 2026-05-25_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-05-24_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `fcac089` 2026-05-24 — docs: auto-update progress report [skip ci]
 - `7fe1f4d` 2026-05-24 — fix(backend): add utf-8-validate + bufferutil as explicit deps for Railway
 - `a4c1991` 2026-05-24 — docs: auto-update progress report [skip ci]
 - `1fca777` 2026-05-24 — fix(backend): regenerate package-lock.json to include Solana SDK deps
@@ -24,6 +25,5 @@ _Auto-generated: 2026-05-24_
 - `a5bc112` 2026-05-24 — chore: add audit report, security tests, demo-day pitch + deck
 - `61c11b6` 2026-05-24 — docs: auto-update progress report [skip ci]
 - `d15c283` 2026-05-24 — feat(front-end): polish post-features-refactor — onboarding revamp + voice + ser
-- `93d6ba3` 2026-05-24 — refactor(contracts-solana): drop redundant module-path qualifiers on Context typ
 
 ## Open Issues
