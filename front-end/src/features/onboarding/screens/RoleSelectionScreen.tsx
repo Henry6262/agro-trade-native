@@ -29,6 +29,12 @@ const ROLE_IMAGES = {
   transport: require('../../../../assets/UserTypes/transporter.png'),
 } as const;
 
+const ROLE_LOTTIES = {
+  buyer: require('../../../assets/animations/buyer.json'),
+  seller: require('../../../assets/animations/seller.json'),
+  transport: require('../../../assets/animations/transporter.json'),
+} as const;
+
 type RoleSelectionScreenNavigationProp = NativeStackNavigationProp<
   OnboardingStackParamList,
   'RoleSelection'
@@ -75,6 +81,7 @@ export const RoleSelectionScreen: React.FC = () => {
       color: '#60A5FA',
       gradient: ['#3B82F6', '#1E40AF'],
       imageSource: ROLE_IMAGES.buyer,
+      lottieSource: ROLE_LOTTIES.buyer,
     },
     {
       id: 'seller' as const,
@@ -82,6 +89,7 @@ export const RoleSelectionScreen: React.FC = () => {
       color: '#4ADE80',
       gradient: ['#10B981', '#065F46'],
       imageSource: ROLE_IMAGES.seller,
+      lottieSource: ROLE_LOTTIES.seller,
     },
     {
       id: 'transport' as const,
@@ -89,6 +97,7 @@ export const RoleSelectionScreen: React.FC = () => {
       color: '#A78BFA',
       gradient: ['#8B5CF6', '#5B21B6'],
       imageSource: ROLE_IMAGES.transport,
+      lottieSource: ROLE_LOTTIES.transport,
     },
   ];
 
@@ -169,7 +178,7 @@ export const RoleSelectionScreen: React.FC = () => {
     <AuthGuard requireAuth={false} redirectTo="Main">
       <GradientBackground>
         <SafeAreaView style={styles.safeArea}>
-          {/* Fixed top header — logo + brand */}
+          {/* Fixed top header — centered circular logo only */}
           <View style={styles.topHeader}>
             <View style={styles.logoWrapper}>
               <Image
@@ -177,10 +186,6 @@ export const RoleSelectionScreen: React.FC = () => {
                 style={styles.logoImage}
                 resizeMode="cover"
               />
-            </View>
-            <View style={styles.brandText}>
-              <Text style={styles.brandName}>AGRO TRADE</Text>
-              <Text style={styles.brandTagline}>Agricultural marketplace</Text>
             </View>
           </View>
 
@@ -200,10 +205,11 @@ export const RoleSelectionScreen: React.FC = () => {
                 label={isPending ? 'Signing in...' : 'Sign In'}
                 onPress={handleExistingUserSignIn}
                 variant="secondary"
+                size="lg"
                 fullWidth
                 loading={isPending}
                 disabled={isPending}
-                leftIcon={<LogIn size={18} color="rgba(255,255,255,0.7)" />}
+                leftIcon={<LogIn size={22} color="rgba(255,255,255,0.85)" />}
                 style={styles.signInBtn}
               />
 
@@ -224,9 +230,11 @@ export const RoleSelectionScreen: React.FC = () => {
                     color={card.color}
                     gradient={card.gradient}
                     imageSource={card.imageSource}
+                    lottieSource={card.lottieSource}
                     isSelected={selectedRole === card.id}
                     onPress={() => handleRoleSelect(card.id)}
                     delay={index * 100}
+                    index={index}
                   />
                 ))}
               </View>
@@ -318,7 +326,7 @@ const styles = StyleSheet.create({
     width: 44,
   },
   logoWrapper: {
-    borderRadius: 12,
+    borderRadius: 22,
     elevation: 6,
     height: 44,
     overflow: 'hidden',
@@ -349,7 +357,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomColor: 'rgba(255,255,255,0.07)',
     borderBottomWidth: 1,
-    flexDirection: 'row',
+    flexDirection: 'column',
+    justifyContent: 'center',
     paddingBottom: 12,
     paddingHorizontal: 24,
     paddingTop: 16,

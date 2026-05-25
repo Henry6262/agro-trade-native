@@ -178,7 +178,7 @@ export const RoleSelectionScreen: React.FC = () => {
     <AuthGuard requireAuth={false} redirectTo="Main">
       <GradientBackground>
         <SafeAreaView style={styles.safeArea}>
-          {/* Fixed top header — logo + brand */}
+          {/* Fixed top header — centered circular logo only */}
           <View style={styles.topHeader}>
             <View style={styles.logoWrapper}>
               <Image
@@ -186,10 +186,6 @@ export const RoleSelectionScreen: React.FC = () => {
                 style={styles.logoImage}
                 resizeMode="cover"
               />
-            </View>
-            <View style={styles.brandText}>
-              <Text style={styles.brandName}>AGRO TRADE</Text>
-              <Text style={styles.brandTagline}>Agricultural marketplace</Text>
             </View>
           </View>
 
@@ -327,7 +323,7 @@ const styles = StyleSheet.create({
     width: 44,
   },
   logoWrapper: {
-    borderRadius: 12,
+    borderRadius: 22,
     elevation: 6,
     height: 44,
     overflow: 'hidden',
@@ -358,7 +354,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomColor: 'rgba(255,255,255,0.07)',
     borderBottomWidth: 1,
-    flexDirection: 'row',
+    flexDirection: 'column',
+    justifyContent: 'center',
     paddingBottom: 12,
     paddingHorizontal: 24,
     paddingTop: 16,
