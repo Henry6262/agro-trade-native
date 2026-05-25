@@ -23,7 +23,11 @@ export class LocationService {
       const response = await fetch(url, {
         headers: { 'User-Agent': 'AgroTrade/1.0' },
       });
-      const data = await response.json();
+      const data = (await response.json()) as Array<{
+        lat: string;
+        lon: string;
+        display_name: string;
+      }>;
       if (data && data.length > 0) {
         return {
           lat: parseFloat(data[0].lat),
@@ -44,7 +48,7 @@ export class LocationService {
       const response = await fetch(url, {
         headers: { 'User-Agent': 'AgroTrade/1.0' },
       });
-      const data = await response.json();
+      const data = (await response.json()) as { display_name?: string } | null;
       return data?.display_name ?? null;
     } catch (error) {
       this.logger.error(`Reverse geocode failed for (${lat}, ${lng})`, error);

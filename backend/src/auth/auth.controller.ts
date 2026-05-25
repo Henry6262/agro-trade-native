@@ -160,7 +160,16 @@ export class AuthController {
       const tokenInfoResponse = await fetch(
         `https://oauth2.googleapis.com/tokeninfo?id_token=${code}`,
       );
-      const tokenPayload = await tokenInfoResponse.json();
+      const tokenPayload = (await tokenInfoResponse.json()) as {
+        error?: string;
+        error_description?: string;
+        sub?: string;
+        email?: string;
+        given_name?: string;
+        family_name?: string;
+        name?: string;
+        picture?: string;
+      };
 
       if (tokenPayload.error) {
         throw new BadRequestException(
@@ -234,7 +243,16 @@ export class AuthController {
       const tokenInfoResponse = await fetch(
         `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`,
       );
-      const tokenPayload = await tokenInfoResponse.json();
+      const tokenPayload = (await tokenInfoResponse.json()) as {
+        error?: string;
+        error_description?: string;
+        sub?: string;
+        email?: string;
+        given_name?: string;
+        family_name?: string;
+        name?: string;
+        picture?: string;
+      };
 
       if (tokenPayload.error) {
         throw new BadRequestException(
