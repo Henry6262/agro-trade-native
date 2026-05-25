@@ -10,6 +10,8 @@ _Auto-generated: 2026-05-25_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `f4ac496` 2026-05-25 — fix(backend): drop ../tsconfig.base.json extends so Docker build works
+- `f9831c3` 2026-05-25 — docs: auto-update progress report [skip ci]
 - `ad8fb8e` 2026-05-25 — fix(backend): inline skipLibCheck and type response.json() for Railway build
 - `dd205c6` 2026-05-25 — docs: auto-update progress report [skip ci]
 - `fcac089` 2026-05-24 — docs: auto-update progress report [skip ci]
@@ -23,7 +25,5 @@ _Auto-generated: 2026-05-25_
 - `668134f` 2026-05-24 — feat(backend): add create-offers endpoint with price validation
 - `b1a81d6` 2026-05-24 — test(backend): restore escrow.service.spec to 38/38 passing + batch \$transactio
 - `e800a37` 2026-05-24 — fix(backend): add ensureNotProduction guard to 3 unguarded seller simulation end
-- `9857015` 2026-05-24 — docs: auto-update progress report [skip ci]
-- `a5bc112` 2026-05-24 — chore: add audit report, security tests, demo-day pitch + deck
 
 ## Open Issues
