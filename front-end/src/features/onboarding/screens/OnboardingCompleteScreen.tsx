@@ -6,7 +6,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../../navigation/types';
 import { MotiView } from 'moti';
 import { Easing } from 'react-native-reanimated';
-import { Check, ShoppingBag, Wheat, Truck, ArrowRight, Sparkles } from 'lucide-react-native';
+import { Check, ShoppingBag, Wheat, Truck, ArrowRight } from 'lucide-react-native';
 import { useAuthStore } from '@stores/auth.store';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useTourStore } from '@stores/tour.store';
@@ -28,6 +28,7 @@ const ROLE_META = {
     color: COLORS.info,
     accentBg: 'rgba(96,165,250,0.18)',
     accentBorder: 'rgba(96,165,250,0.45)',
+    gradient: ['#3B82F6', '#60A5FA'] as const,
     icon: ShoppingBag,
     message:
       'Your dashboard is ready. Browse listings, lock orders into escrow, and pay on delivery.',
@@ -42,6 +43,7 @@ const ROLE_META = {
     color: COLORS.accentGreen,
     accentBg: 'rgba(74,222,128,0.18)',
     accentBorder: 'rgba(74,222,128,0.45)',
+    gradient: ['#16A34A', '#4ADE80'] as const,
     icon: Wheat,
     message: 'Your farm profile is live. Post your harvest and connect with buyers worldwide.',
     perks: [
@@ -55,6 +57,7 @@ const ROLE_META = {
     color: '#A78BFA',
     accentBg: 'rgba(167,139,250,0.18)',
     accentBorder: 'rgba(167,139,250,0.45)',
+    gradient: ['#7C3AED', '#A78BFA'] as const,
     icon: Truck,
     message:
       'Your fleet is registered. Pick up loads, deliver, and get paid the moment delivery is confirmed.',
@@ -248,7 +251,7 @@ export const OnboardingCompleteScreen: React.FC<Props> = ({ navigation }) => {
               variant="primary"
               size="lg"
               fullWidth
-              leftIcon={<Sparkles size={18} color="#FFFFFF" />}
+              gradientColors={meta.gradient}
             />
             <View style={styles.hintRow}>
               <ArrowRight size={11} color="rgba(255,255,255,0.4)" />
@@ -375,10 +378,11 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   perkText: {
-    color: 'rgba(255,255,255,0.75)',
+    color: 'rgba(255,255,255,0.85)',
     flex: 1,
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: '500',
+    lineHeight: 22,
   },
   perksList: {
     backgroundColor: 'rgba(255,255,255,0.04)',

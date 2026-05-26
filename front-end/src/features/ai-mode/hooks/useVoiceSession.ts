@@ -89,6 +89,26 @@ export function useVoiceSession(options: UseVoiceSessionOptions): UseVoiceSessio
       return;
     }
 
+    // Probe the voice-agent /health endpoint first. If the backend isn't
+    // running (e.g. local dev without the python service up, or no API keys
+    // wired yet) skip the real Pipecat connect entirely and go straight to
+    // the simulation fallback — avoids the noisy "Network request failed"
+    // Pipecat error overlay the user otherwise sees.
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2500);
+      const probe = await fetch(VOICE_API_URL + '/health', {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+      if (!probe.ok) throw new Error('health probe non-200');
+    } catch {
+      console.info('[useVoiceSession] Voice backend not reachable — using simulation mode');
+      await connectSimulation();
+      return;
+    }
+
     setIsConnecting(true);
     setSessionError(null);
     setVoiceState('idle');
@@ -118,8 +138,18 @@ export function useVoiceSession(options: UseVoiceSessionOptions): UseVoiceSessio
             setVoiceState('idle');
           },
           onError: (err: any) => {
-            console.error('[Pipecat] Error:', err);
-            setSessionError(err.message || 'Voice connection error');
+            // Treat network errors as a transport failure — drop to sim mode
+            // silently instead of throwing a fatal red-screen overlay at the
+            // user. Real errors (auth, etc) still log but don't crash the UI.
+            const msg = err?.message || err?.data?.message || '';
+            const isNetwork =
+              /network request failed|fetch failed|failed to fetch|ECONN|abort/i.test(msg);
+            if (isNetwork) {
+              console.info('[Pipecat] Network failure — falling back to simulation:', msg);
+            } else {
+              console.warn('[Pipecat] Error:', err);
+            }
+            setSessionError(null);
             setConnected(false);
             setIsConnecting(false);
           },
@@ -170,12 +200,12 @@ export function useVoiceSession(options: UseVoiceSessionOptions): UseVoiceSessio
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to connect to voice AI';
-      console.error('[useVoiceSession] Connect failed:', message);
-      setSessionError(message);
+      console.info('[useVoiceSession] Connect failed, falling back to simulation:', message);
       setConnected(false);
       setIsConnecting(false);
 
-      // Fallback to simulation on connection failure
+      // Silent fallback — clear any prior error and run the simulated session
+      setSessionError(null);
       await connectSimulation();
     }
   }, [

@@ -6,27 +6,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { B } from "../brand";
 import { FadeInUp, CountUp } from "../animations";
 import Device from "../Device";
-import { HERO_SCREENS } from "./HeroScreens";
+import { AgroVoiceChat, PhaseDots } from "../AgroVoiceDemo";
 import { DecryptedText } from "../reactbits/DecryptedText";
 
-const SCREENS = HERO_SCREENS;
-
 function AnimatedPhone() {
-  const [index, setIndex] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => { setIndex((i) => (i + 1) % SCREENS.length); }, 3000);
-    return () => clearInterval(t);
-  }, []);
-  const { Component } = SCREENS[index];
   return (
-    <Device scale={0.55} autoAnimate parallaxStrength={12} rotateStrength={2.5}>
-      <AnimatePresence mode="wait">
-        <motion.div key={SCREENS[index].id} className="w-full h-full"
-          initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -18 }}
-          transition={{ duration: 0.38, ease: [0.4, 0, 0.2, 1] }}>
-          <Component />
-        </motion.div>
-      </AnimatePresence>
+    <Device scale={0.55} autoAnimate parallaxStrength={10} rotateStrength={2}>
+      <AgroVoiceChat />
     </Device>
   );
 }
@@ -74,25 +60,6 @@ function Particles() {
             opacity: p.opacity,
           }}
         />
-      ))}
-    </div>
-  );
-}
-
-function ScreenDots() {
-  const [index, setIndex] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setIndex((i) => (i + 1) % SCREENS.length), 3000);
-    return () => clearInterval(t);
-  }, []);
-  return (
-    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-30">
-      {SCREENS.map((s, i) => (
-        <motion.div key={s.id}
-          animate={{ width: i === index ? 16 : 6, opacity: i === index ? 1 : 0.3 }}
-          transition={{ duration: 0.3 }}
-          className="h-1.5 rounded-full"
-          style={{ background: B.green }} />
       ))}
     </div>
   );
@@ -147,11 +114,11 @@ export function Hero() {
         <div>
           <FadeInUp>
             <div
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium mb-8"
-              style={{ border: `1px solid ${B.glassBorder}`, color: B.wheat, background: "rgba(232,200,112,0.06)", backdropFilter: "blur(12px)" }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold mb-6 tracking-wide"
+              style={{ border: `1px solid rgba(153,69,255,0.30)`, color: "#C4B5FD", background: "rgba(153,69,255,0.08)", backdropFilter: "blur(12px)" }}
             >
-              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ backgroundColor: B.wheat }} />
-              Balkans · Middle East · Asia — Powered by Celo
+              <span className="w-1 h-1 rounded-full animate-pulse" style={{ backgroundColor: "#9945FF" }} />
+              Powered by Solana
             </div>
           </FadeInUp>
 
@@ -161,9 +128,9 @@ export function Hero() {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6 }}>
               <motion.span className="block" style={{
-                fontSize: "clamp(1.8rem, 5vw, 3.8rem)",
+                fontSize: "clamp(3rem, 8vw, 6.5rem)",
                 fontWeight: 950,
-                color: "rgba(240,229,204,0.5)",
+                color: "rgba(240,229,204,0.92)",
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -171,30 +138,31 @@ export function Hero() {
                 Trade grain,
               </motion.span>
               <motion.span className="block italic" style={{
-                fontSize: "clamp(1.8rem, 5vw, 3.8rem)",
+                fontSize: "clamp(3rem, 8vw, 6.5rem)",
                 fontWeight: 950,
                 background: `linear-gradient(135deg, ${B.wheat} 0%, #FFD770 50%, ${B.wheat} 100%)`,
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
                 textShadow: "none",
-                filter: "drop-shadow(0 0 40px rgba(232,200,112,0.35))",
+                filter: "drop-shadow(0 0 50px rgba(232,200,112,0.45))",
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}>
                 not trust.
               </motion.span>
-              <motion.span className="block mt-1" style={{
-                fontSize: "clamp(1.2rem, 3vw, 2.4rem)",
-                fontWeight: 950,
+              <motion.span className="block mt-3" style={{
+                fontSize: "clamp(1.5rem, 3.5vw, 2.8rem)",
+                fontWeight: 800,
                 color: B.cream,
+                lineHeight: 1.15,
               }}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.15 }}>
                 <DecryptedText
-                  text="Escrow-protected. Inspector-verified."
+                  text="Escrow-protected. Voice-onboarded."
                   speed={55}
                   animateOn="view"
                   className="inline"
@@ -205,9 +173,9 @@ export function Hero() {
           </FadeInUp>
 
           <FadeInUp delay={0.18}>
-            <p className="text-sm sm:text-base leading-relaxed mb-10 max-w-xl" style={{ color: B.muted }}>
-              Every payment locks in smart-contract escrow on Celo.
-              Funds release only when an inspector confirms delivery on-site.{" "}
+            <p className="text-lg sm:text-xl leading-relaxed mb-10 max-w-xl" style={{ color: "rgba(240,229,204,0.7)" }}>
+              Voice-onboarded onboarding in seconds. Every payment locks in smart-contract
+              escrow on Solana — funds release only when delivery is verified on-site.{" "}
               <span style={{ color: B.cream }} className="font-semibold">Automatic. Trustless.</span>
             </p>
           </FadeInUp>
@@ -244,30 +212,30 @@ export function Hero() {
         </div>
 
         {/* ── RIGHT: phone with animated onboarding ── */}
-        <FadeInUp delay={0.15} className="hidden lg:flex justify-center">
-          <div className="relative flex justify-center items-center overflow-visible"
-            style={{ perspective: "1000px", minHeight: 600 }}>
+        <FadeInUp delay={0.15} className="hidden lg:flex justify-start">
+          <div className="relative flex flex-col justify-center items-center overflow-visible"
+            style={{ perspective: "1000px", minHeight: 600, transform: "translateX(-40px)" }}>
 
             {/* Glow rings behind phone */}
             <div className="pointer-events-none absolute rounded-full" style={{
-              width: 500, height: 500, top: "50%", left: "50%",
+              width: 460, height: 460, top: "50%", left: "50%",
               transform: "translate(-50%,-50%)",
-              background: "radial-gradient(circle, rgba(232,200,112,0.14) 0%, rgba(232,200,112,0.05) 40%, transparent 70%)",
+              background: "radial-gradient(circle, rgba(153,69,255,0.14) 0%, rgba(20,241,149,0.06) 40%, transparent 70%)",
               filter: "blur(20px)",
             }} />
             <div className="pointer-events-none absolute rounded-full" style={{
-              width: 340, height: 340, top: "50%", left: "50%",
+              width: 320, height: 320, top: "50%", left: "50%",
               transform: "translate(-50%,-50%)",
-              border: "1px solid rgba(232,200,112,0.12)",
+              border: "1px solid rgba(153,69,255,0.18)",
             }} />
             <div className="pointer-events-none absolute rounded-full" style={{
-              width: 480, height: 480, top: "50%", left: "50%",
+              width: 440, height: 440, top: "50%", left: "50%",
               transform: "translate(-50%,-50%)",
-              border: "1px solid rgba(232,200,112,0.06)",
+              border: "1px solid rgba(20,241,149,0.10)",
             }} />
 
-            <ScreenDots />
             <AnimatedPhone />
+            <div className="mt-4 relative z-10"><PhaseDots /></div>
           </div>
         </FadeInUp>
       </div>

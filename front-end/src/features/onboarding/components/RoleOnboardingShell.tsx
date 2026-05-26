@@ -15,7 +15,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MotiView } from 'moti';
-import { Easing } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 import { ArrowLeft, Mail, User, Mic, ArrowRight, type LucideIcon } from 'lucide-react-native';
 import type { OnboardingStackParamList } from '../../../navigation/types';
@@ -53,9 +52,6 @@ export const RoleOnboardingShell: React.FC<RoleOnboardingShellProps> = ({
   aiRole,
   illustration,
   accentColor,
-  accentBg,
-  accentBorder,
-  roleLabel,
   headline,
   subhead,
   companyIcon: CompanyIcon,
@@ -104,25 +100,14 @@ export const RoleOnboardingShell: React.FC<RoleOnboardingShellProps> = ({
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.kav}
         >
-          {/* Header */}
-          <View style={styles.header}>
-            <Pressable
-              onPress={() => navigation.goBack()}
-              hitSlop={12}
-              style={({ pressed }) => [styles.backBtn, pressed && styles.backBtnPressed]}
-            >
-              <ArrowLeft size={20} color="#FFFFFF" />
-            </Pressable>
-
-            <View
-              style={[styles.roleChip, { borderColor: accentBorder, backgroundColor: accentBg }]}
-            >
-              <View style={[styles.roleDot, { backgroundColor: accentColor }]} />
-              <Text style={styles.roleChipText}>{roleLabel}</Text>
-            </View>
-
-            <View style={styles.backBtn} />
-          </View>
+          {/* Floating back button — absolute so it doesn't eat a full row */}
+          <Pressable
+            onPress={() => navigation.goBack()}
+            hitSlop={12}
+            style={({ pressed }) => [styles.backBtnFloating, pressed && styles.backBtnPressed]}
+          >
+            <ArrowLeft size={20} color="#FFFFFF" />
+          </Pressable>
 
           <ScrollView
             contentContainerStyle={styles.scroll}
@@ -137,19 +122,6 @@ export const RoleOnboardingShell: React.FC<RoleOnboardingShellProps> = ({
                 transition={{ type: 'spring', damping: 14, stiffness: 140, delay: 80 }}
                 style={styles.illustrationWrap}
               >
-                <MotiView
-                  pointerEvents="none"
-                  style={[styles.illustrationGlow, { backgroundColor: accentColor }]}
-                  from={{ opacity: 0.25, scale: 1 }}
-                  animate={{ opacity: 0.4, scale: 1.06 }}
-                  transition={{
-                    type: 'timing',
-                    duration: 2200,
-                    loop: true,
-                    repeatReverse: true,
-                    easing: Easing.inOut(Easing.ease),
-                  }}
-                />
                 <Image source={illustration} style={styles.illustration} resizeMode="contain" />
               </MotiView>
 
@@ -208,20 +180,13 @@ export const RoleOnboardingShell: React.FC<RoleOnboardingShellProps> = ({
               <Pressable onPress={handleSwitchToAI}>
                 {({ pressed }) => (
                   <View
-                    style={[
-                      styles.switchCard,
-                      {
-                        borderColor: accentBorder,
-                        backgroundColor: accentBg,
-                        transform: [{ scale: pressed ? 0.985 : 1 }],
-                      },
-                    ]}
+                    style={[styles.switchCard, { transform: [{ scale: pressed ? 0.985 : 1 }] }]}
                   >
-                    <View style={[styles.switchIconRing, { borderColor: accentBorder }]}>
-                      <Mic size={16} color={accentColor} />
-                    </View>
+                    <Mic size={18} color={accentColor} />
                     <View style={styles.switchTextBlock}>
-                      <Text style={styles.switchTitle}>Prefer voice?</Text>
+                      <Text style={[styles.switchTitle, { color: accentColor }]}>
+                        Prefer voice?
+                      </Text>
                       <Text style={styles.switchSubtitle}>Set up by talking, not typing</Text>
                     </View>
                     <ArrowRight size={16} color={accentColor} />
@@ -250,7 +215,7 @@ export const RoleOnboardingShell: React.FC<RoleOnboardingShellProps> = ({
 };
 
 const styles = StyleSheet.create({
-  backBtn: {
+  backBtnFloating: {
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderColor: 'rgba(255,255,255,0.1)',
@@ -258,7 +223,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 40,
     justifyContent: 'center',
+    left: 20,
+    position: 'absolute',
+    top: 8,
     width: 40,
+    zIndex: 10,
   },
   backBtnPressed: {
     backgroundColor: 'rgba(255,255,255,0.1)',
@@ -286,13 +255,6 @@ const styles = StyleSheet.create({
     marginTop: 24,
     padding: 16,
   },
-  header: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
   headline: {
     color: '#FFFFFF',
     fontSize: 24,
@@ -305,25 +267,18 @@ const styles = StyleSheet.create({
   heroBlock: {
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingTop: 8,
+    paddingTop: 56,
   },
   illustration: {
-    height: 140,
-    width: 180,
-  },
-  illustrationGlow: {
-    borderRadius: 999,
-    height: 180,
-    opacity: 0.25,
-    position: 'absolute',
-    width: 180,
+    height: 220,
+    width: 260,
   },
   illustrationWrap: {
     alignItems: 'center',
-    height: 160,
+    height: 230,
     justifyContent: 'center',
-    marginBottom: 8,
-    width: 200,
+    marginBottom: 4,
+    width: 280,
   },
   kav: {
     flex: 1,
@@ -373,23 +328,12 @@ const styles = StyleSheet.create({
   },
   switchCard: {
     alignItems: 'center',
-    borderRadius: 16,
-    borderWidth: 1,
     flexDirection: 'row',
     gap: 12,
     marginHorizontal: 20,
     marginTop: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  switchIconRing: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 16,
-    borderWidth: 1,
-    height: 36,
-    justifyContent: 'center',
-    width: 36,
+    paddingHorizontal: 6,
+    paddingVertical: 8,
   },
   switchSubtitle: {
     color: 'rgba(255,255,255,0.55)',

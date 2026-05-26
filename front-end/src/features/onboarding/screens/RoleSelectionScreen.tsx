@@ -13,7 +13,6 @@ import { useNavigation, CommonActions } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../../navigation/types';
 import { LogIn } from 'lucide-react-native';
-import { Image } from 'react-native';
 import { useOnboardingStore } from '@stores/onboarding.store';
 import { useAuthStore } from '@stores/auth.store';
 import type { User } from '@shared/types';
@@ -81,7 +80,9 @@ export const RoleSelectionScreen: React.FC = () => {
       color: '#60A5FA',
       gradient: ['#3B82F6', '#1E40AF'],
       imageSource: ROLE_IMAGES.buyer,
-      lottieSource: ROLE_LOTTIES.buyer,
+      // Buyer lottie has a white background that clashes with the dark UI;
+      // fall back to the static Buyer.png until a transparent replacement is in.
+      lottieSource: undefined,
     },
     {
       id: 'seller' as const,
@@ -104,11 +105,11 @@ export const RoleSelectionScreen: React.FC = () => {
   const handleRoleSelect = (role: 'buyer' | 'seller' | 'transport') => {
     setRole(role);
     setSelectedRole(role);
-  };
-
-  const handleContinue = () => {
-    if (!selectedRole) return;
-    navigation.navigate('PathSelect', { role: selectedRole });
+    // Let the selection animation breathe for a beat, then auto-advance —
+    // tapping the card IS the commit; no Continue button needed.
+    setTimeout(() => {
+      navigation.navigate('PathSelect', { role });
+    }, 280);
   };
 
   const handleExistingUserSignIn = async () => {
@@ -178,17 +179,6 @@ export const RoleSelectionScreen: React.FC = () => {
     <AuthGuard requireAuth={false} redirectTo="Main">
       <GradientBackground>
         <SafeAreaView style={styles.safeArea}>
-          {/* Fixed top header — centered circular logo only */}
-          <View style={styles.topHeader}>
-            <View style={styles.logoWrapper}>
-              <Image
-                source={require('../../../../assets/agra-logo.png')}
-                style={styles.logoImage}
-                resizeMode="cover"
-              />
-            </View>
-          </View>
-
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
@@ -205,11 +195,11 @@ export const RoleSelectionScreen: React.FC = () => {
                 label={isPending ? 'Signing in...' : 'Sign In'}
                 onPress={handleExistingUserSignIn}
                 variant="secondary"
-                size="lg"
+                size="xl"
                 fullWidth
                 loading={isPending}
                 disabled={isPending}
-                leftIcon={<LogIn size={22} color="rgba(255,255,255,0.85)" />}
+                leftIcon={<LogIn size={26} color="rgba(255,255,255,0.85)" />}
                 style={styles.signInBtn}
               />
 
@@ -220,7 +210,7 @@ export const RoleSelectionScreen: React.FC = () => {
                 <View style={styles.dividerLine} />
               </View>
 
-              {/* Role Cards */}
+              {/* Role Cards — tapping a card commits the role and advances. */}
               <View>
                 {roleCards.map((card, index) => (
                   <AnimatedRoleCard
@@ -239,18 +229,6 @@ export const RoleSelectionScreen: React.FC = () => {
                 ))}
               </View>
 
-              {/* Continue Button */}
-              <View style={styles.continueWrap}>
-                <GlassButton
-                  label="Continue"
-                  onPress={handleContinue}
-                  variant="primary"
-                  fullWidth
-                  disabled={!selectedRole}
-                  size="lg"
-                />
-              </View>
-
               {/* Footer */}
               <Text style={styles.footer}>
                 By continuing, you agree to our Terms of Service and Privacy Policy
@@ -264,24 +242,6 @@ export const RoleSelectionScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  brandName: {
-    color: '#4ADE80',
-    fontSize: 15,
-    fontWeight: '800',
-    letterSpacing: 2.5,
-  },
-  brandTagline: {
-    color: 'rgba(255,255,255,0.35)',
-    fontSize: 11,
-    letterSpacing: 0.3,
-    marginTop: 1,
-  },
-  brandText: {
-    marginLeft: 12,
-  },
-  continueWrap: {
-    marginTop: 20,
-  },
   divider: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -321,21 +281,6 @@ const styles = StyleSheet.create({
     maxWidth: 600,
     width: '100%',
   },
-  logoImage: {
-    height: 44,
-    width: 44,
-  },
-  logoWrapper: {
-    borderRadius: 22,
-    elevation: 6,
-    height: 44,
-    overflow: 'hidden',
-    shadowColor: '#4ADE80',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    width: 44,
-  },
   safeArea: {
     flex: 1,
   },
@@ -352,15 +297,5 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.45)',
     fontSize: 14,
     letterSpacing: 0.1,
-  },
-  topHeader: {
-    alignItems: 'center',
-    borderBottomColor: 'rgba(255,255,255,0.07)',
-    borderBottomWidth: 1,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    paddingBottom: 12,
-    paddingHorizontal: 24,
-    paddingTop: 16,
   },
 });

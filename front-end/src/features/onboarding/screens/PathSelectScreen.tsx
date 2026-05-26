@@ -5,7 +5,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MotiView } from 'moti';
 import { Easing } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
-import { Mic, ArrowLeft, ArrowRight, FileText, Sparkles, Zap } from 'lucide-react-native';
+import { Mic, ArrowLeft, ArrowRight, FileText, Clock } from 'lucide-react-native';
 import type { OnboardingStackParamList } from '../../../navigation/types';
 import { GradientBackground, COLORS } from '@design-system';
 
@@ -90,24 +90,21 @@ export const PathSelectScreen: React.FC = () => {
       />
 
       <SafeAreaView style={styles.safe}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Pressable
-            onPress={() => navigation.goBack()}
-            hitSlop={12}
-            style={({ pressed }) => [styles.backBtn, pressed && styles.backBtnPressed]}
-          >
-            <ArrowLeft size={20} color="#FFFFFF" />
-          </Pressable>
+        {/* Floating back button — absolute so it doesn't eat a full row */}
+        <Pressable
+          onPress={() => navigation.goBack()}
+          hitSlop={12}
+          style={({ pressed }) => [styles.backBtnFloating, pressed && styles.backBtnPressed]}
+        >
+          <ArrowLeft size={20} color="#FFFFFF" />
+        </Pressable>
 
-          <View style={styles.headerCenter}>
-            <View style={[styles.roleChip, { borderColor: meta.border, backgroundColor: meta.bg }]}>
-              <View style={[styles.roleDot, { backgroundColor: meta.glow }]} />
-              <Text style={styles.roleChipText}>{meta.label}</Text>
-            </View>
+        {/* Centered role pill (no surrounding row) */}
+        <View style={styles.roleChipWrap}>
+          <View style={[styles.roleChip, { borderColor: meta.border, backgroundColor: meta.bg }]}>
+            <View style={[styles.roleDot, { backgroundColor: meta.glow }]} />
+            <Text style={styles.roleChipText}>{meta.label}</Text>
           </View>
-
-          <View style={styles.backBtn} />
         </View>
 
         {/* Title block */}
@@ -165,8 +162,7 @@ export const PathSelectScreen: React.FC = () => {
                       </View>
                       <VoiceWaveform color={meta.glow} />
                     </View>
-                    <View style={styles.aiBadge}>
-                      <Sparkles size={11} color={COLORS.accentGold} />
+                    <View style={[styles.aiBadge, { backgroundColor: meta.glow }]}>
                       <Text style={styles.aiBadgeText}>RECOMMENDED</Text>
                     </View>
                   </View>
@@ -176,7 +172,7 @@ export const PathSelectScreen: React.FC = () => {
 
                   <View style={styles.aiFooter}>
                     <View style={styles.aiMeta}>
-                      <Zap size={13} color={meta.glow} />
+                      <Clock size={13} color={meta.glow} />
                       <Text style={[styles.aiMetaText, { color: meta.glow }]}>~60 seconds</Text>
                     </View>
                     <View style={styles.aiCta}>
@@ -248,18 +244,16 @@ const VoiceWaveform: React.FC<{ color: string }> = ({ color }) => {
 const styles = StyleSheet.create({
   aiBadge: {
     alignItems: 'center',
-    backgroundColor: 'rgba(252,211,77,0.14)',
-    borderColor: 'rgba(252,211,77,0.35)',
+    borderColor: 'rgba(255,255,255,0.18)',
     borderRadius: 999,
     borderWidth: 1,
     flexDirection: 'row',
-    gap: 4,
-    paddingHorizontal: 9,
-    paddingVertical: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   aiBadgeText: {
-    color: COLORS.accentGold,
-    fontSize: 9,
+    color: '#FFFFFF',
+    fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1,
   },
@@ -348,7 +342,7 @@ const styles = StyleSheet.create({
     letterSpacing: -0.3,
     marginBottom: 6,
   },
-  backBtn: {
+  backBtnFloating: {
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderColor: 'rgba(255,255,255,0.1)',
@@ -356,7 +350,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 40,
     justifyContent: 'center',
+    left: 20,
+    position: 'absolute',
+    top: 8,
     width: 40,
+    zIndex: 10,
   },
   backBtnPressed: {
     backgroundColor: 'rgba(255,255,255,0.1)',
@@ -382,18 +380,6 @@ const styles = StyleSheet.create({
   footerText: {
     color: 'rgba(255,255,255,0.3)',
     fontSize: 12,
-  },
-  header: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  headerCenter: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'center',
   },
   manualCard: {
     alignItems: 'center',
@@ -450,6 +436,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.6,
     textTransform: 'uppercase',
+  },
+  roleChipWrap: {
+    alignItems: 'center',
+    marginTop: 12,
   },
   roleDot: {
     borderRadius: 4,

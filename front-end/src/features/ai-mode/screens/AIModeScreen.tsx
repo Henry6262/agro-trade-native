@@ -15,7 +15,6 @@ import { MotiView } from 'moti';
 import { Mic, MicOff, ArrowLeft, RotateCcw, Check } from 'lucide-react-native';
 import { GradientBackground, COLORS } from '@design-system';
 import { CharacterAvatar } from '../components/CharacterAvatar';
-import { VoiceStateIndicator } from '../components/VoiceStateIndicator';
 import { ChatBubble } from '../components/ChatBubble';
 import { AIConfirmationModal } from '../components/AIConfirmationModal';
 import { useVoiceSession } from '../hooks/useVoiceSession';
@@ -181,11 +180,13 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
           {/* Character + Live Form Area */}
           <View style={styles.characterSection}>
             <CharacterAvatar role={role} />
-            <VoiceStateIndicator />
 
             {/* Live form preview (shows what AI has captured) */}
             {mode === 'onboarding' && <LiveFormPreview form={onboardingForm} role={role} />}
           </View>
+
+          {/* Separator between avatar and chat transcript */}
+          <View style={styles.sectionSeparator} />
 
           {/* Chat transcript */}
           <View style={styles.chatSection}>
@@ -252,7 +253,7 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
                   <Mic size={32} color="#FFFFFF" />
                 )}
               </MotiView>
-              <Text style={styles.pttLabel}>
+              <Text style={styles.pttLabel} numberOfLines={1}>
                 {isListening ? 'Listening…' : isConnecting ? 'Connecting…' : 'Hold to speak'}
               </Text>
             </TouchableOpacity>
@@ -329,8 +330,8 @@ const styles = StyleSheet.create({
   },
   characterSection: {
     alignItems: 'center',
-    paddingBottom: 12,
-    paddingTop: 4,
+    paddingBottom: 0,
+    paddingTop: 0,
   },
   chatContent: {
     gap: 8,
@@ -481,11 +482,13 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   pttLabel: {
-    bottom: -24,
+    bottom: -22,
     color: 'rgba(255,255,255,0.6)',
     fontSize: 12,
     fontWeight: '500',
     position: 'absolute',
+    textAlign: 'center',
+    width: 180,
   },
   resetBtn: {
     alignItems: 'center',
@@ -508,6 +511,13 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+  },
+  sectionSeparator: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    height: 1,
+    marginBottom: 4,
+    marginHorizontal: 16,
+    marginTop: 0,
   },
   welcomeMessage: {
     alignItems: 'center',

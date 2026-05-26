@@ -15,7 +15,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-na
 import { GLASS, COLORS, ANIM, GRADIENT } from './tokens';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
-type ButtonSize = 'sm' | 'md' | 'lg';
+type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
 
 interface GlassButtonProps {
   label: string;
@@ -27,6 +27,8 @@ interface GlassButtonProps {
   fullWidth?: boolean;
   style?: ViewStyle;
   leftIcon?: React.ReactNode;
+  /** Override the gradient colors for `primary`/`danger` variants. */
+  gradientColors?: readonly [string, string];
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -48,6 +50,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   fullWidth = false,
   style,
   leftIcon,
+  gradientColors,
 }) => {
   const scale = useSharedValue(1);
 
@@ -87,9 +90,9 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   );
 
   if (usesGradient) {
-    const gradientColors = disabled
+    const resolvedGradient = disabled
       ? DISABLED_GRADIENT
-      : (VARIANT_GRADIENTS[variant] ?? GRADIENT.green);
+      : (gradientColors ?? VARIANT_GRADIENTS[variant] ?? GRADIENT.green);
 
     return (
       <AnimatedPressable
@@ -103,7 +106,7 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
         style={[animStyle, isFullWidth, { borderRadius: 12, overflow: 'hidden' }, style]}
       >
         <LinearGradient
-          colors={gradientColors as [string, string]}
+          colors={resolvedGradient as [string, string]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={[styles.gradient, sizeStyle.inner]}
@@ -153,6 +156,10 @@ const SIZE_STYLES: Record<ButtonSize, { inner: ViewStyle; label: TextStyle }> = 
   lg: {
     inner: { paddingHorizontal: 28, paddingVertical: 16, minHeight: 56 },
     label: { fontSize: 17 },
+  },
+  xl: {
+    inner: { paddingHorizontal: 32, paddingVertical: 20, minHeight: 64 },
+    label: { fontSize: 19 },
   },
 };
 

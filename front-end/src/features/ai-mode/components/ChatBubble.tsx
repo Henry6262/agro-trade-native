@@ -40,17 +40,18 @@ const styles = StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.9)',
   },
   bubble: {
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
+    borderRadius: 20,
+    paddingHorizontal: 18,
+    paddingVertical: 13,
   },
   container: {
-    marginVertical: 4,
-    maxWidth: '85%',
+    marginVertical: 6,
+    maxWidth: '88%',
   },
   text: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 18,
+    fontWeight: '500',
+    lineHeight: 26,
   },
   userBubble: {
     backgroundColor: 'rgba(74, 222, 128, 0.2)',
