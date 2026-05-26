@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-05-25_
+_Auto-generated: 2026-05-26_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,9 @@ _Auto-generated: 2026-05-25_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `e8b80b1` 2026-05-26 — fix(deps): regenerate lockfile with npm 10.8.2 for EAS Build
+- `1940791` 2026-05-26 — feat(front-end): polish voice + role-select UI; add landing voice demo
+- `2629eaf` 2026-05-25 — docs: auto-update progress report [skip ci]
 - `d317fda` 2026-05-25 — style(front-end): centered circular logo only in top header
 - `0bc13f6` 2026-05-25 — docs: auto-update progress report [skip ci]
 - `2b6ed65` 2026-05-25 — fix(deps): regenerate root lockfile so npm ci works on EAS Build
@@ -22,8 +25,5 @@ _Auto-generated: 2026-05-25_
 - `7fe1f4d` 2026-05-24 — fix(backend): add utf-8-validate + bufferutil as explicit deps for Railway
 - `a4c1991` 2026-05-24 — docs: auto-update progress report [skip ci]
 - `1fca777` 2026-05-24 — fix(backend): regenerate package-lock.json to include Solana SDK deps
-- `411a0c2` 2026-05-24 — docs: auto-update progress report [skip ci]
-- `1201168` 2026-05-24 — feat(front-end): wire inspectionService and transportService to backend
-- `3f6180f` 2026-05-24 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
