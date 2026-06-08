@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-06-01_
+_Auto-generated: 2026-06-08_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-06-01_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `8893489` 2026-06-01 — docs: auto-update progress report [skip ci]
 - `f4e768a` 2026-05-26 — docs: auto-update progress report [skip ci]
 - `e8b80b1` 2026-05-26 — fix(deps): regenerate lockfile with npm 10.8.2 for EAS Build
 - `1940791` 2026-05-26 — feat(front-end): polish voice + role-select UI; add landing voice demo
@@ -24,6 +25,5 @@ _Auto-generated: 2026-06-01_
 - `dd205c6` 2026-05-25 — docs: auto-update progress report [skip ci]
 - `fcac089` 2026-05-24 — docs: auto-update progress report [skip ci]
 - `7fe1f4d` 2026-05-24 — fix(backend): add utf-8-validate + bufferutil as explicit deps for Railway
-- `a4c1991` 2026-05-24 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
