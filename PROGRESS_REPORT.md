@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-06-08_
+_Auto-generated: 2026-06-15_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-06-08_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `c7deef6` 2026-06-08 — docs: auto-update progress report [skip ci]
 - `8893489` 2026-06-01 — docs: auto-update progress report [skip ci]
 - `f4e768a` 2026-05-26 — docs: auto-update progress report [skip ci]
 - `e8b80b1` 2026-05-26 — fix(deps): regenerate lockfile with npm 10.8.2 for EAS Build
@@ -24,6 +25,5 @@ _Auto-generated: 2026-06-08_
 - `ad8fb8e` 2026-05-25 — fix(backend): inline skipLibCheck and type response.json() for Railway build
 - `dd205c6` 2026-05-25 — docs: auto-update progress report [skip ci]
 - `fcac089` 2026-05-24 — docs: auto-update progress report [skip ci]
-- `7fe1f4d` 2026-05-24 — fix(backend): add utf-8-validate + bufferutil as explicit deps for Railway
 
 ## Open Issues
