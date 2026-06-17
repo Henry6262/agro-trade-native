@@ -117,6 +117,14 @@ export class PlantationRoundsService {
       throw new BadRequestException('Round must be ACTIVE to distribute');
     }
 
+    // Fire on-chain distribution (fire-and-forget; event listener sets DISTRIBUTING in DB)
+    const totalSaleWei = ethers.parseEther(dto.totalSaleCUSD.toString());
+    this.getContract(this.getAdminWallet())
+      .distributeHarvest(round.onChainRoundId, totalSaleWei)
+      .then((tx: ethers.TransactionResponse) => tx.wait())
+      .then(() => this.logger.log(`distributeHarvest on-chain for round ${round.id}`))
+      .catch((err: Error) => this.logger.error(`On-chain distributeHarvest failed: ${err.message}`));
+
     return this.prisma.plantationRound.update({
       where: { id: roundDbId },
       data: { status: PlantationRoundStatus.DISTRIBUTING },

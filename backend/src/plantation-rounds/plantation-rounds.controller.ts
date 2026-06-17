@@ -46,6 +46,15 @@ export class PlantationRoundsController {
     return this.nftsService.getPortfolio(user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('yield/:tokenId')
+  getPendingYield(
+    @Param('tokenId', ParseIntPipe) tokenId: number,
+    @CurrentUser() user: User,
+  ) {
+    return this.stakingService.getPendingYield(tokenId, user.id);
+  }
+
   @Get(':id')
   getRound(@Param('id') id: string) {
     return this.roundsService.getRound(id);
@@ -87,15 +96,6 @@ export class PlantationRoundsController {
     @CurrentUser() user: User,
   ) {
     return this.stakingService.unstakeNft(tokenId, user.id);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('yield/:tokenId')
-  getPendingYield(
-    @Param('tokenId', ParseIntPipe) tokenId: number,
-    @CurrentUser() user: User,
-  ) {
-    return this.stakingService.getPendingYield(tokenId, user.id);
   }
 
   @UseGuards(JwtAuthGuard)
