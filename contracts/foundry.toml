@@ -5,6 +5,10 @@ libs = ["lib"]
 solc = "0.8.28"
 optimizer = true
 optimizer_runs = 200
+remappings = [
+  "@openzeppelin/=lib/openzeppelin-contracts/",
+  "forge-std/=lib/forge-std/src/"
+]
 
 [rpc_endpoints]
 # Celo Alfajores is deprecated — use Celo Sepolia
