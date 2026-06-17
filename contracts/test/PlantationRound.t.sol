@@ -198,4 +198,104 @@ contract PlantationRoundTest is Test {
         vm.expectRevert("Nothing to claim");
         pr.claimDistribution(0);
     }
+
+    function test_closeRound_setsStatusClosed() public {
+        // 1. Create a round
+        uint256 roundId = _createRound();
+        // 2. Fill it
+        vm.prank(investor1);
+        pr.invest(roundId, TOTAL_SHARES);
+        // 3. Unlock capital
+        pr.unlockCapital(roundId);
+        // 4. Farmer distributes harvest
+        vm.prank(farmer);
+        pr.distributeHarvest(roundId, 300 ether);
+        // 5. Admin closes round
+        pr.closeRound(roundId);
+        // 6. Assert status is CLOSED
+        PlantationRound.Round memory r = pr.getRound(roundId);
+        assertEq(uint8(r.status), uint8(PlantationRound.RoundStatus.CLOSED));
+        // 7. Non-admin call reverts with "Not admin"
+        // Need a fresh round in DISTRIBUTING state to test the revert
+        uint256 roundId2 = _createRound();
+        vm.prank(investor1);
+        pr.invest(roundId2, TOTAL_SHARES);
+        pr.unlockCapital(roundId2);
+        vm.prank(farmer);
+        pr.distributeHarvest(roundId2, 300 ether);
+        vm.prank(investor1);
+        vm.expectRevert("Not admin");
+        pr.closeRound(roundId2);
+    }
+
+    function test_claimDistribution_dustGoesToLastClaimer() public {
+        // 1. Create a round with totalShares = 3, pricePerShare = 50 ether (target = 150 ether)
+        vm.prank(farmer);
+        uint256 roundId = pr.createRound("mango", 150 ether, 50 ether, DEADLINE, "ipfs://dust");
+
+        // 2. Investor1 buys all 3 shares (tokenIds 0, 1, 2)
+        vm.prank(investor1);
+        pr.invest(roundId, 3);
+
+        // 3. Unlock capital
+        pr.unlockCapital(roundId);
+
+        // 4. Farmer distributes 151 ether (not evenly divisible by 3)
+        vm.prank(farmer);
+        pr.distributeHarvest(roundId, 151 ether);
+
+        // baseShare = 151e18 / 3 = 50333333333333333333 (integer division in wei)
+        uint256 baseShare = uint256(151 ether) / 3;
+
+        // 5. Claim token 0 — should receive baseShare
+        uint256 before0 = cusd.balanceOf(investor1);
+        vm.prank(investor1);
+        pr.claimDistribution(0);
+        assertEq(cusd.balanceOf(investor1) - before0, baseShare);
+
+        // 6. Claim token 1 — should receive baseShare
+        uint256 before1 = cusd.balanceOf(investor1);
+        vm.prank(investor1);
+        pr.claimDistribution(1);
+        assertEq(cusd.balanceOf(investor1) - before1, baseShare);
+
+        // 7. Claim token 2 (last) — should receive remainder: 151 ether - baseShare*2
+        uint256 expectedLast = 151 ether - baseShare * 2;
+        uint256 before2 = cusd.balanceOf(investor1);
+        vm.prank(investor1);
+        pr.claimDistribution(2);
+        assertEq(cusd.balanceOf(investor1) - before2, expectedLast);
+
+        // 8. Total claimed = baseShare + baseShare + expectedLast = 151 ether exactly
+        assertEq(baseShare + baseShare + expectedLast, 151 ether);
+
+        // 9. Contract cUSD balance equals only the yieldPool fees (no distribution dust locked)
+        uint256 fee = (150 ether * 200) / 10000; // 2% of 150 ether = 3 ether
+        assertEq(cusd.balanceOf(address(pr)), fee);
+    }
+
+    function test_withdrawFees_transfersToRecipient() public {
+        uint256 roundId = _createRound();
+        vm.prank(investor1);
+        pr.invest(roundId, TOTAL_SHARES);
+
+        // yieldPool should have 2% of TARGET
+        uint256 expectedFee = (TARGET * 200) / 10000;
+        assertEq(pr.yieldPool(roundId), expectedFee);
+
+        address feeRecipient = makeAddr("feeRecipient");
+        uint256 beforeRecipient = cusd.balanceOf(feeRecipient);
+
+        // Admin withdraws fees
+        pr.withdrawFees(roundId, feeRecipient);
+
+        // Recipient received the fees
+        assertEq(cusd.balanceOf(feeRecipient) - beforeRecipient, expectedFee);
+        // yieldPool zeroed out
+        assertEq(pr.yieldPool(roundId), 0);
+
+        // Second withdraw should revert
+        vm.expectRevert("No fees to withdraw");
+        pr.withdrawFees(roundId, feeRecipient);
+    }
 }

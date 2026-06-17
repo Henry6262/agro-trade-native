@@ -23,6 +23,7 @@ contract PlantationRound is ERC721, ReentrancyGuard {
         string metadataURI;
         RoundStatus status;
         uint256 totalDistributionCUSD;
+        uint256 claimsMade;
     }
 
     struct TokenInfo {
@@ -47,6 +48,8 @@ contract PlantationRound is ERC721, ReentrancyGuard {
     event SharesPurchased(uint256 indexed roundId, address indexed investor, uint256[] tokenIds);
     event CapitalUnlocked(uint256 indexed roundId, address indexed farmer, uint256 amount);
     event HarvestDistributed(uint256 indexed roundId, uint256 totalCUSD);
+    event RoundClosed(uint256 indexed roundId);
+    event FeesWithdrawn(uint256 indexed roundId, address indexed recipient, uint256 amount);
 
     modifier onlyAdmin() {
         require(msg.sender == admin, "Not admin");
@@ -88,7 +91,8 @@ contract PlantationRound is ERC721, ReentrancyGuard {
             harvestDeadline: harvestDeadline,
             metadataURI: metadataURI,
             status: RoundStatus.OPEN,
-            totalDistributionCUSD: 0
+            totalDistributionCUSD: 0,
+            claimsMade: 0
         });
 
         emit RoundCreated(roundId, msg.sender, cropType, targetCUSD);
@@ -102,7 +106,6 @@ contract PlantationRound is ERC721, ReentrancyGuard {
 
         uint256 grossAmount = round.pricePerShareCUSD * shareCount;
         uint256 fee = (grossAmount * PROTOCOL_FEE_BPS) / 10000;
-        uint256 netAmount = grossAmount - fee;
 
         // Pull gross cUSD from investor
         require(cusd.transferFrom(msg.sender, address(this), grossAmount), "Transfer failed");
@@ -130,8 +133,6 @@ contract PlantationRound is ERC721, ReentrancyGuard {
         }
 
         emit SharesPurchased(roundId, msg.sender, tokenIds);
-        // suppress unused var warning
-        netAmount;
     }
 
     function unlockCapital(uint256 roundId) external onlyAdmin {
@@ -169,12 +170,36 @@ contract PlantationRound is ERC721, ReentrancyGuard {
         Round storage round = rounds[info.roundId];
         require(round.status == RoundStatus.DISTRIBUTING || round.status == RoundStatus.CLOSED, "Not distributing");
 
-        uint256 shareOfDistribution = round.totalDistributionCUSD / round.totalShares;
-        uint256 owed = shareOfDistribution - info.claimedCUSD;
+        uint256 baseShare = round.totalDistributionCUSD / round.totalShares;
+        round.claimsMade += 1;
+        bool isLastClaimer = round.claimsMade == round.totalShares;
+        uint256 owed;
+        if (isLastClaimer) {
+            // Last claimer gets baseShare + all remainder dust
+            uint256 alreadyPaid = baseShare * (round.totalShares - 1);
+            owed = round.totalDistributionCUSD - alreadyPaid - info.claimedCUSD;
+        } else {
+            owed = baseShare - info.claimedCUSD;
+        }
         require(owed > 0, "Nothing to claim");
 
         info.claimedCUSD += owed;
         require(cusd.transfer(msg.sender, owed), "Transfer failed");
+    }
+
+    function closeRound(uint256 roundId) external onlyAdmin {
+        Round storage round = rounds[roundId];
+        require(round.status == RoundStatus.DISTRIBUTING, "Round not distributing");
+        round.status = RoundStatus.CLOSED;
+        emit RoundClosed(roundId);
+    }
+
+    function withdrawFees(uint256 roundId, address recipient) external onlyAdmin {
+        uint256 amount = yieldPool[roundId];
+        require(amount > 0, "No fees to withdraw");
+        yieldPool[roundId] = 0;
+        require(cusd.transfer(recipient, amount), "Transfer failed");
+        emit FeesWithdrawn(roundId, recipient, amount);
     }
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
