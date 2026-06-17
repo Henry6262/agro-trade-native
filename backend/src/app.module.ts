@@ -32,6 +32,7 @@ import { CommodityRegistryModule } from "./commodity-registry/commodity-registry
 import { InvestmentsModule } from "./investments/investments.module";
 import { EbsiModule } from "./ebsi/ebsi.module";
 import { B2gModule } from "./b2g/b2g.module";
+import { PlantationRoundsModule } from "./plantation-rounds/plantation-rounds.module";
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { B2gModule } from "./b2g/b2g.module";
     EscrowModule,
     CommodityRegistryModule,
     InvestmentsModule,
+    PlantationRoundsModule,
     HealthModule,
     EbsiModule,
     B2gModule,
