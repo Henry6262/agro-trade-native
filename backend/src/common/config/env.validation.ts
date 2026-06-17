@@ -44,6 +44,22 @@ export class EnvironmentVariables {
   @IsString()
   @IsOptional()
   PRIVY_APP_SECRET: string;
+
+  @IsString()
+  @IsOptional()
+  PLANTATION_ROUND_CONTRACT_ADDRESS: string;
+
+  @IsString()
+  @IsOptional()
+  GROVE_STAKING_CONTRACT_ADDRESS: string;
+
+  @IsString()
+  @IsOptional()
+  CELO_RPC_URL: string;
+
+  @IsString()
+  @IsOptional()
+  CELO_ADMIN_PRIVATE_KEY: string;
 }
 
 export function validate(config: Record<string, unknown>) {

@@ -42,6 +42,8 @@ model User {
   transportJobs             TransportJob[]
   trucks                    Truck[]
   investmentPreference      UserInvestmentPreference?
+  plantationRounds          PlantationRound[] @relation("SellerPlantationRounds")
+  plantationNfts            PlantationNft[]   @relation("InvestorPlantationNfts")
 
   @@index([email])
   @@index([role])
@@ -1273,4 +1275,60 @@ enum DriverDocumentType {
   TRAINING_CERTIFICATE
   IDENTITY_CARD
   OTHER
+}
+
+enum PlantationRoundStatus {
+  OPEN
+  FUNDED
+  ACTIVE
+  DISTRIBUTING
+  CLOSED
+}
+
+model PlantationRound {
+  id                String                @id @default(cuid())
+  onChainRoundId    Int                   @unique @map("on_chain_round_id")
+  sellerId          String                @map("seller_id")
+  seller            User                  @relation("SellerPlantationRounds", fields: [sellerId], references: [id])
+  cropType          String                @map("crop_type")
+  farmLocation      String                @map("farm_location")
+  targetCUSD        Decimal               @map("target_cusd") @db.Decimal(36, 18)
+  pricePerShareCUSD Decimal               @map("price_per_share_cusd") @db.Decimal(36, 18)
+  totalShares       Int                   @map("total_shares")
+  sharesSold        Int                   @default(0) @map("shares_sold")
+  harvestDeadline   DateTime              @map("harvest_deadline")
+  projectedApyPct   Decimal?              @map("projected_apy_pct") @db.Decimal(10, 4)
+  status            PlantationRoundStatus @default(OPEN)
+  metadataUri       String?               @map("metadata_uri")
+  contractAddress   String                @map("contract_address")
+  nfts              PlantationNft[]
+  createdAt         DateTime              @default(now()) @map("created_at")
+  updatedAt         DateTime              @updatedAt @map("updated_at")
+
+  @@map("plantation_rounds")
+}
+
+model PlantationNft {
+  id          String          @id @default(cuid())
+  tokenId     Int             @unique @map("token_id")
+  roundId     String          @map("round_id")
+  round       PlantationRound @relation(fields: [roundId], references: [id])
+  ownerId     String          @map("owner_id")
+  owner       User            @relation("InvestorPlantationNfts", fields: [ownerId], references: [id])
+  shareIndex  Int             @map("share_index")
+  staking     StakingPosition?
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  @@map("plantation_nfts")
+}
+
+model StakingPosition {
+  id          String        @id @default(cuid())
+  nftId       String        @unique @map("nft_id")
+  nft         PlantationNft @relation(fields: [nftId], references: [id])
+  stakedAt    DateTime      @default(now()) @map("staked_at")
+  unstakedAt  DateTime?     @map("unstaked_at")
+  claimedCUSD Decimal       @default(0) @map("claimed_cusd") @db.Decimal(36, 18)
+
+  @@map("staking_positions")
 }
