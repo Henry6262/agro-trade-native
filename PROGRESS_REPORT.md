@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-06-17_
+_Auto-generated: 2026-06-22_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-06-17_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `7898d87` 2026-06-17 — docs: auto-update progress report [skip ci]
 - `ba3324d` 2026-06-17 — fix(backend): route ordering for yield endpoint + on-chain distributeHarvest cal
 - `6538131` 2026-06-17 — test(backend): jest unit tests for rounds service + staking service
 - `e79bb99` 2026-06-17 — feat(backend): plantation round contract event listener syncs DB state
@@ -24,6 +25,5 @@ _Auto-generated: 2026-06-17_
 - `8893489` 2026-06-01 — docs: auto-update progress report [skip ci]
 - `f4e768a` 2026-05-26 — docs: auto-update progress report [skip ci]
 - `e8b80b1` 2026-05-26 — fix(deps): regenerate lockfile with npm 10.8.2 for EAS Build
-- `1940791` 2026-05-26 — feat(front-end): polish voice + role-select UI; add landing voice demo
 
 ## Open Issues
