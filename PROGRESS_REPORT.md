@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-06-29_
+_Auto-generated: 2026-07-06_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-06-29_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `b29c7f6` 2026-06-29 — docs: auto-update progress report [skip ci]
 - `f8fd3b9` 2026-06-22 — docs: auto-update progress report [skip ci]
 - `7898d87` 2026-06-17 — docs: auto-update progress report [skip ci]
 - `ba3324d` 2026-06-17 — fix(backend): route ordering for yield endpoint + on-chain distributeHarvest cal
@@ -24,6 +25,5 @@ _Auto-generated: 2026-06-29_
 - `b104d6f` 2026-06-15 — docs: auto-update progress report [skip ci]
 - `c7deef6` 2026-06-08 — docs: auto-update progress report [skip ci]
 - `8893489` 2026-06-01 — docs: auto-update progress report [skip ci]
-- `f4e768a` 2026-05-26 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
