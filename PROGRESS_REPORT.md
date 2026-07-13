@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-07-06_
+_Auto-generated: 2026-07-13_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-07-06_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `243b81c` 2026-07-06 — docs: auto-update progress report [skip ci]
 - `b29c7f6` 2026-06-29 — docs: auto-update progress report [skip ci]
 - `f8fd3b9` 2026-06-22 — docs: auto-update progress report [skip ci]
 - `7898d87` 2026-06-17 — docs: auto-update progress report [skip ci]
@@ -24,6 +25,5 @@ _Auto-generated: 2026-07-06_
 - `ebd85fc` 2026-06-17 — feat(contracts): plantationRound ERC-721 + fundraising escrow + Foundry tests
 - `b104d6f` 2026-06-15 — docs: auto-update progress report [skip ci]
 - `c7deef6` 2026-06-08 — docs: auto-update progress report [skip ci]
-- `8893489` 2026-06-01 — docs: auto-update progress report [skip ci]
 
 ## Open Issues
