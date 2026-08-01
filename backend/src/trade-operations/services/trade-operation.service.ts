@@ -154,19 +154,43 @@ export class TradeOperationService {
   }
 
   async update(id: string, dto: UpdateTradeOperationDto) {
-    const trade = await this.prisma.tradeOperation.update({
+    const existing = await this.prisma.tradeOperation.findUnique({
       where: { id },
-      data: {
-        ...dto,
-        updatedAt: new Date(),
-      },
+      include: { buyListing: true },
     });
-
-    if (dto.phase) {
-      await this.updatePhase(id, dto.phase as TradePhase);
+    if (!existing) {
+      throw new NotFoundException("Trade operation not found");
     }
 
-    return trade;
+    let trade: TradeOperation = existing;
+    if (dto.phase && dto.phase !== existing.phase) {
+      trade = await this.updatePhase(id, dto.phase);
+    }
+
+    const data: Prisma.TradeOperationUpdateInput = {};
+    if (dto.status !== undefined) data.status = dto.status;
+    if (dto.sellingPrice !== undefined) {
+      data.sellingPrice = dto.sellingPrice;
+      data.totalRevenue =
+        dto.sellingPrice * Number(existing.buyListing.quantity);
+    }
+
+    if (Object.keys(data).length > 0) {
+      trade = await this.prisma.tradeOperation.update({
+        where: { id },
+        data,
+      });
+    }
+
+    const profit = await this.calculateProfit(id);
+    return {
+      ...trade,
+      profit: {
+        estimated: profit.netProfit,
+        margin: profit.margin,
+        isViable: profit.isViable,
+      },
+    };
   }
 
   async setInitialNegotiationPhase(id: string) {
@@ -346,9 +370,11 @@ export class TradeOperationService {
     );
 
     return {
+      message: "Transport route optimized successfully",
       optimizedRoute: {
         algorithm,
         stops: route,
+        sequence: route,
         totalDistance,
         estimatedDuration,
         estimatedCost,
@@ -451,11 +477,16 @@ export class TradeOperationService {
 
     if (!trade) throw new NotFoundException("Trade operation not found");
 
+    // PATCH is idempotent: repeating the current phase is a successful no-op.
+    if (trade.phase === newPhase) {
+      return trade;
+    }
+
     // Validate transition
     const valid = this.getValidTransitions(trade.phase);
     if (!valid.includes(newPhase)) {
       throw new BadRequestException(
-        `Invalid transition from ${trade.phase} to ${newPhase}`,
+        `Invalid phase transition from ${trade.phase} to ${newPhase}`,
       );
     }
 

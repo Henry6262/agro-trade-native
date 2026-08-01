@@ -2,7 +2,6 @@ import {
   BadRequestException,
   Injectable,
   Logger,
-  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
@@ -38,8 +37,11 @@ export class GroveStakingService {
     return new ethers.Contract(address, GROVE_STAKING_ABI, signer ?? this.getProvider());
   }
 
-  async stakeNft(tokenId: number, userId: string) {
+  async stakeNft(tokenId: string, userId: string) {
     const nft = await this.nftsService.assertOwner(tokenId, userId);
+    if (nft.tokenId === null) {
+      throw new BadRequestException('NFT is not yet confirmed on-chain');
+    }
 
     const existing = await this.prisma.stakingPosition.findUnique({ where: { nftId: nft.id } });
     if (existing && !existing.unstakedAt) throw new BadRequestException('Already staked');
@@ -52,15 +54,18 @@ export class GroveStakingService {
 
     // On-chain stake (fire-and-forget; user must have approved staking contract to take their NFT)
     this.getContract(this.getAdminWallet())
-      .stake(tokenId)
+      .stake(nft.tokenId)
       .then((tx: ethers.TransactionResponse) => tx.wait())
       .catch((err: Error) => this.logger.error(`On-chain stake failed for token ${tokenId}: ${err.message}`));
 
     return position;
   }
 
-  async unstakeNft(tokenId: number, userId: string) {
+  async unstakeNft(tokenId: string, userId: string) {
     const nft = await this.nftsService.assertOwner(tokenId, userId);
+    if (nft.tokenId === null) {
+      throw new BadRequestException('NFT is not yet confirmed on-chain');
+    }
     const position = await this.prisma.stakingPosition.findUnique({ where: { nftId: nft.id } });
     if (!position || position.unstakedAt) throw new BadRequestException('NFT is not staked');
 
@@ -70,26 +75,32 @@ export class GroveStakingService {
     });
 
     this.getContract(this.getAdminWallet())
-      .unstake(tokenId)
+      .unstake(nft.tokenId)
       .then((tx: ethers.TransactionResponse) => tx.wait())
       .catch((err: Error) => this.logger.error(`On-chain unstake failed for token ${tokenId}: ${err.message}`));
 
     return updated;
   }
 
-  async getPendingYield(tokenId: number, userId: string): Promise<string> {
-    await this.nftsService.assertOwner(tokenId, userId);
+  async getPendingYield(tokenId: string, userId: string): Promise<string> {
+    const nft = await this.nftsService.assertOwner(tokenId, userId);
+    if (nft.tokenId === null) {
+      throw new BadRequestException('NFT is not yet confirmed on-chain');
+    }
     const contract = this.getContract();
-    const pending: bigint = await contract.pendingYield(tokenId);
+    const pending: bigint = await contract.pendingYield(nft.tokenId);
     return ethers.formatEther(pending); // cUSD string, human-readable
   }
 
-  async claimYield(tokenId: number, userId: string) {
+  async claimYield(tokenId: string, userId: string) {
     const nft = await this.nftsService.assertOwner(tokenId, userId);
+    if (nft.tokenId === null) {
+      throw new BadRequestException('NFT is not yet confirmed on-chain');
+    }
     const position = await this.prisma.stakingPosition.findUnique({ where: { nftId: nft.id } });
     if (!position || position.unstakedAt) throw new BadRequestException('NFT is not staked');
 
-    const tx = await this.getContract(this.getAdminWallet()).claimYield(tokenId);
+    const tx = await this.getContract(this.getAdminWallet()).claimYield(nft.tokenId);
     await tx.wait();
 
     // DB: update claimedCUSD (approximate — exact value comes from event)

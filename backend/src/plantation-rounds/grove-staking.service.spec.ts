@@ -6,7 +6,7 @@ import { GroveStakingService } from './grove-staking.service';
 import { PlantationNftsService } from './plantation-nfts.service';
 import { PrismaService } from '../prisma/prisma.service';
 
-const mockNft = { id: 'nft-1', tokenId: 42, roundId: 'round-1', ownerId: 'user-1', shareIndex: 0, createdAt: new Date() };
+const mockNft = { id: 'nft-1', tokenId: '42', roundId: 'round-1', ownerId: 'user-1', shareIndex: 0, createdAt: new Date() };
 const mockPosition = { id: 'pos-1', nftId: 'nft-1', stakedAt: new Date(), unstakedAt: null, claimedCUSD: 0 };
 
 const makeNftsMock = () => ({
@@ -62,22 +62,22 @@ describe('GroveStakingService', () => {
   });
 
   it('stakeNft creates a DB staking position', async () => {
-    await service.stakeNft(42, 'user-1');
+    await service.stakeNft('42', 'user-1');
     expect(prismaMock.stakingPosition.upsert).toHaveBeenCalled();
   });
 
   it('stakeNft throws if already staked', async () => {
     prismaMock.stakingPosition.findUnique.mockResolvedValue(mockPosition);
-    await expect(service.stakeNft(42, 'user-1')).rejects.toThrow(BadRequestException);
+    await expect(service.stakeNft('42', 'user-1')).rejects.toThrow(BadRequestException);
   });
 
   it('unstakeNft throws if not staked', async () => {
-    await expect(service.unstakeNft(42, 'user-1')).rejects.toThrow(BadRequestException);
+    await expect(service.unstakeNft('42', 'user-1')).rejects.toThrow(BadRequestException);
   });
 
   it('unstakeNft sets unstakedAt', async () => {
     prismaMock.stakingPosition.findUnique.mockResolvedValue(mockPosition);
-    await service.unstakeNft(42, 'user-1');
+    await service.unstakeNft('42', 'user-1');
     expect(prismaMock.stakingPosition.update).toHaveBeenCalledWith(
       expect.objectContaining({ data: expect.objectContaining({ unstakedAt: expect.any(Date) }) }),
     );

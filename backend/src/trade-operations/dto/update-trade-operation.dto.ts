@@ -3,9 +3,7 @@ import {
   IsNumber,
   IsOptional,
   Min,
-  Max,
   IsEnum,
-  IsBoolean,
   IsDate,
 } from "class-validator";
 import { ApiPropertyOptional } from "@nestjs/swagger";
@@ -39,43 +37,6 @@ export class UpdateTradeOperationDto {
   @IsNumber()
   @Min(0)
   sellingPrice?: number;
-
-  @ApiPropertyOptional({
-    description: "Target profit margin percentage",
-    minimum: 5,
-    maximum: 20,
-    example: 7,
-  })
-  @IsOptional()
-  @IsNumber()
-  @Min(5)
-  @Max(20)
-  targetProfitMargin?: number;
-
-  @ApiPropertyOptional({
-    description: "Expected delivery date",
-    example: "2024-12-31T23:59:59Z",
-  })
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  expectedDeliveryDate?: Date;
-
-  @ApiPropertyOptional({
-    description: "Whether transport has been optimized",
-    example: true,
-  })
-  @IsOptional()
-  @IsBoolean()
-  transportOptimized?: boolean;
-
-  @ApiPropertyOptional({
-    description: "Admin notes or updates",
-    example: "Negotiation progressing well",
-  })
-  @IsOptional()
-  @IsString()
-  adminNotes?: string;
 }
 
 export class FinalizeTradeDto {

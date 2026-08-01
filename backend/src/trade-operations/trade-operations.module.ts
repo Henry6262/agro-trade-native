@@ -10,9 +10,11 @@ import { NegotiationsModule } from "../negotiations/negotiations.module";
 
 // Services
 import { TradeOperationService } from "./services/trade-operation.service";
+import { ProfitCalculationService } from "./services/profit-calculation.service";
 
 // Controllers
 import { TradeOperationController } from "./controllers/trade-operation.controller";
+import { ProfitController } from "./controllers/profit.controller";
 
 @Module({
   imports: [
@@ -25,8 +27,8 @@ import { TradeOperationController } from "./controllers/trade-operation.controll
     AuthModule,
     forwardRef(() => NegotiationsModule),
   ],
-  controllers: [TradeOperationController],
-  providers: [TradeOperationService],
-  exports: [TradeOperationService],
+  controllers: [TradeOperationController, ProfitController],
+  providers: [TradeOperationService, ProfitCalculationService],
+  exports: [TradeOperationService, ProfitCalculationService],
 })
 export class TradeOperationsModule {}

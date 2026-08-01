@@ -53,6 +53,12 @@ export interface TradeOperation {
   _count?: { sellers: number };
 }
 
+export interface UpdateTradeOperationInput {
+  phase?: string;
+  status?: string;
+  sellingPrice?: number;
+}
+
 export interface NegotiationStub {
   id: string;
   status: string;
@@ -150,7 +156,7 @@ export const tradeOperationService = {
 
   updateTradeOperation: async (
     id: string,
-    data: Partial<TradeOperation>
+    data: UpdateTradeOperationInput
   ): Promise<TradeOperation> => {
     const response = await apiClient.patch<TradeOperation>(`/trade-operations/${id}`, data);
     return response.data;

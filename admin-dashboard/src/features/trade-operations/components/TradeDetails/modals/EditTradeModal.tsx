@@ -15,12 +15,7 @@ export const EditTradeModal: React.FC<EditTradeModalProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    sellingPrice: operation.sellingPrice || '',
-    targetProfitMargin: operation.profitMargin || '',
-    expectedDeliveryDate: operation.expectedDeliveryDate
-      ? new Date(operation.expectedDeliveryDate).toISOString().split('T')[0]
-      : '',
-    adminNotes: '',
+    sellingPrice: operation.sellingPrice ?? '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,20 +23,10 @@ export const EditTradeModal: React.FC<EditTradeModalProps> = ({
     setLoading(true);
 
     try {
-      const updateDto: Types.UpdateTradeOperationDto = {
-        adminNotes: formData.adminNotes,
-      };
+      const updateDto: Types.UpdateTradeOperationDto = {};
 
-      if (formData.sellingPrice) {
+      if (formData.sellingPrice !== '') {
         updateDto.sellingPrice = parseFloat(formData.sellingPrice.toString());
-      }
-
-      if (formData.targetProfitMargin) {
-        updateDto.targetProfitMargin = parseFloat(formData.targetProfitMargin.toString());
-      }
-
-      if (formData.expectedDeliveryDate) {
-        updateDto.expectedDeliveryDate = new Date(formData.expectedDeliveryDate);
       }
 
       await onUpdate(updateDto);
@@ -72,62 +57,13 @@ export const EditTradeModal: React.FC<EditTradeModalProps> = ({
             <input
               type="number"
               step="0.01"
+              min="0"
               value={formData.sellingPrice}
               onChange={(e) =>
                 setFormData({ ...formData, sellingPrice: e.target.value })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter selling price per unit"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Note: Cannot update if there are active negotiations
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Target Profit Margin (%)
-            </label>
-            <input
-              type="number"
-              step="0.1"
-              min="5"
-              max="20"
-              value={formData.targetProfitMargin}
-              onChange={(e) =>
-                setFormData({ ...formData, targetProfitMargin: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              placeholder="5-20%"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Expected Delivery Date
-            </label>
-            <input
-              type="date"
-              value={formData.expectedDeliveryDate}
-              onChange={(e) =>
-                setFormData({ ...formData, expectedDeliveryDate: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Admin Notes
-            </label>
-            <textarea
-              value={formData.adminNotes}
-              onChange={(e) =>
-                setFormData({ ...formData, adminNotes: e.target.value })
-              }
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Reason for update or additional notes..."
             />
           </div>
 

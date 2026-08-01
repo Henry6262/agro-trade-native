@@ -2,13 +2,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { PlantationRoundStatus } from '@prisma/client';
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PlantationRoundsService } from './plantation-rounds.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 const mockRound = {
   id: 'round-1',
-  onChainRoundId: 0,
+  onChainRoundId: null,
   sellerId: 'seller-1',
   cropType: 'avocado',
   farmLocation: 'Kenya',
@@ -25,20 +30,32 @@ const mockRound = {
   updatedAt: new Date(),
 };
 
-const makePrismaMock = () => ({
-  plantationRound: {
-    create: jest.fn().mockResolvedValue(mockRound),
-    findUnique: jest.fn().mockResolvedValue(mockRound),
-    findMany: jest.fn().mockResolvedValue([mockRound]),
-    update: jest.fn().mockResolvedValue({ ...mockRound, status: PlantationRoundStatus.ACTIVE }),
-    updateMany: jest.fn().mockResolvedValue({ count: 1 }),
-  },
-  plantationNft: {
-    create: jest.fn().mockResolvedValue({ id: 'nft-1', tokenId: -1 }),
-    findMany: jest.fn().mockResolvedValue([]),
-  },
-  $transaction: jest.fn().mockImplementation((ops: unknown[]) => Promise.all(ops)),
-});
+const makePrismaMock = () => {
+  const mock = {
+    plantationRound: {
+      create: jest.fn().mockResolvedValue(mockRound),
+      findUnique: jest.fn().mockResolvedValue(mockRound),
+      findMany: jest.fn().mockResolvedValue([mockRound]),
+      update: jest.fn().mockResolvedValue({
+        ...mockRound,
+        status: PlantationRoundStatus.ACTIVE,
+      }),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
+    },
+    plantationNft: {
+      create: jest.fn().mockImplementation(({ data }) =>
+        Promise.resolve({
+          id: `nft-${data.shareIndex}`,
+          ...data,
+          createdAt: new Date(),
+        }),
+      ),
+    },
+    $transaction: jest.fn(),
+  };
+  mock.$transaction.mockImplementation((callback) => callback(mock));
+  return mock;
+};
 
 const makeConfigMock = () => ({
   get: jest.fn((key: string) => {
@@ -112,9 +129,77 @@ describe('PlantationRoundsService', () => {
       await expect(service.investInRound('round-1', 'user-1', { shareCount: 2 })).rejects.toThrow(BadRequestException);
     });
 
-    it('creates NFT records for each share', async () => {
-      await service.investInRound('round-1', 'user-1', { shareCount: 2 });
+    it('atomically reserves shares and creates nullable NFT records', async () => {
+      const result = await service.investInRound('round-1', 'user-1', {
+        shareCount: 2,
+      });
+
       expect(prismaMock.$transaction).toHaveBeenCalled();
+      expect(prismaMock.plantationRound.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'round-1',
+          status: PlantationRoundStatus.OPEN,
+          sharesSold: 0,
+          totalShares: { gte: 2 },
+        },
+        data: { sharesSold: { increment: 2 } },
+      });
+      expect(prismaMock.plantationNft.create).toHaveBeenNthCalledWith(1, {
+        data: {
+          tokenId: null,
+          roundId: 'round-1',
+          ownerId: 'user-1',
+          shareIndex: 0,
+        },
+      });
+      expect(prismaMock.plantationNft.create).toHaveBeenNthCalledWith(2, {
+        data: {
+          tokenId: null,
+          roundId: 'round-1',
+          ownerId: 'user-1',
+          shareIndex: 1,
+        },
+      });
+      expect(result).toHaveLength(2);
+    });
+
+    it('marks the round funded when the last share is reserved', async () => {
+      prismaMock.plantationRound.findUnique.mockResolvedValue({
+        ...mockRound,
+        sharesSold: 3,
+      });
+
+      await service.investInRound('round-1', 'user-1', { shareCount: 1 });
+
+      expect(prismaMock.plantationRound.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: {
+            sharesSold: { increment: 1 },
+            status: PlantationRoundStatus.FUNDED,
+          },
+        }),
+      );
+    });
+
+    it('retries from a fresh snapshot after a concurrent reservation', async () => {
+      prismaMock.plantationRound.updateMany
+        .mockResolvedValueOnce({ count: 0 })
+        .mockResolvedValueOnce({ count: 1 });
+
+      await service.investInRound('round-1', 'user-1', { shareCount: 1 });
+
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(2);
+      expect(prismaMock.plantationNft.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('returns a conflict after bounded reservation contention', async () => {
+      prismaMock.plantationRound.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(
+        service.investInRound('round-1', 'user-1', { shareCount: 1 }),
+      ).rejects.toThrow(ConflictException);
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(3);
+      expect(prismaMock.plantationNft.create).not.toHaveBeenCalled();
     });
   });
 
@@ -139,6 +224,7 @@ describe('PlantationRoundsService', () => {
     it('updates status to DISTRIBUTING for valid call', async () => {
       prismaMock.plantationRound.findUnique.mockResolvedValue({
         ...mockRound,
+        onChainRoundId: '0',
         sellerId: 'seller-1',
         status: PlantationRoundStatus.ACTIVE,
       });

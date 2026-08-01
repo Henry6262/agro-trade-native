@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { NegotiationStatus, TradePhase } from '@prisma/client';
@@ -10,6 +10,7 @@ describe('Negotiation Flow - End to End Integration Test', () => {
   let prisma: PrismaService;
   let tradeOperationId: string;
   let adminToken: string = 'Bearer admin-integration-token';
+  let fixtureSequence = 0;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -53,9 +54,10 @@ describe('Negotiation Flow - End to End Integration Test', () => {
 
     beforeEach(async () => {
       // Setup fresh test data for each test
+      const fixtureId = `${process.pid}-${++fixtureSequence}`;
       const admin = await prisma.user.create({
         data: {
-          email: 'admin-e2e-test@agrotrade.com',
+          email: `admin-${fixtureId}-e2e-test@agrotrade.com`,
           name: 'E2E Test Admin',
           role: 'ADMIN',
         },
@@ -63,7 +65,7 @@ describe('Negotiation Flow - End to End Integration Test', () => {
 
       const buyer = await prisma.user.create({
         data: {
-          email: 'buyer-e2e-test@test.com',
+          email: `buyer-${fixtureId}-e2e-test@test.com`,
           name: 'E2E Test Buyer',
           role: 'BUYER',
         },
@@ -71,7 +73,7 @@ describe('Negotiation Flow - End to End Integration Test', () => {
 
       const seller = await prisma.user.create({
         data: {
-          email: 'seller-e2e-test@test.com',
+          email: `seller-${fixtureId}-e2e-test@test.com`,
           name: 'E2E Test Seller',
           role: 'FARMER',
         },
@@ -104,7 +106,7 @@ describe('Negotiation Flow - End to End Integration Test', () => {
 
       const trade = await prisma.tradeOperation.create({
         data: {
-          operationNumber: `INT-E2E-${Date.now()}`,
+          operationNumber: `INT-E2E-${fixtureId}`,
           adminId: admin.id,
           buyListingId: buyListing.id,
           phase: TradePhase.SELLER_NEGOTIATION,

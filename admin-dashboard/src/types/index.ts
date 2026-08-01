@@ -139,8 +139,6 @@ export interface Negotiation {
   saleListingId?: string;
   saleListing?: Pick<SaleListing, 'id'>;
 }
-
-
 export interface TradeSeller {
   id: string;
   tradeOperationId: string;
@@ -428,10 +426,6 @@ export interface UpdateTradeOperationDto {
   phase?: TradePhase;
   status?: TradeStatus;
   sellingPrice?: number;
-  targetProfitMargin?: number;
-  expectedDeliveryDate?: Date;
-  transportOptimized?: boolean;
-  adminNotes?: string;
 }
 
 export interface ProfitData {

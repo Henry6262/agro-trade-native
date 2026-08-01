@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { NegotiationStatus, TradePhase } from '@prisma/client';
@@ -9,6 +9,53 @@ describe('Expiration Handling - Integration Test', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let adminToken: string = 'Bearer admin-token';
+  let fixtureSequence = 0;
+  const fixtureRunId = `${Date.now()}-${process.pid}`;
+
+  const createTradeSellerFixture = async ({
+    label,
+    tradeOperationId,
+    productId,
+    quantity = 100,
+    askingPrice = 350,
+  }: {
+    label: string;
+    tradeOperationId: string;
+    productId: string;
+    quantity?: number;
+    askingPrice?: number;
+  }) => {
+    const fixtureId = `${label}-${fixtureRunId}-${++fixtureSequence}`;
+    const seller = await prisma.user.create({
+      data: {
+        email: `${fixtureId}-expire-test@test.com`,
+        name: `${label} Expiration Test Seller`,
+        role: 'FARMER',
+      },
+    });
+    const saleListing = await prisma.saleListing.create({
+      data: {
+        sellerId: seller.id,
+        productId,
+        quantity,
+        unit: 'TON',
+        askingPrice,
+        status: 'ACTIVE',
+      },
+    });
+
+    return prisma.tradeSeller.create({
+      data: {
+        tradeOperationId,
+        sellerId: seller.id,
+        saleListingId: saleListing.id,
+        requestedQuantity: quantity,
+        offeredQuantity: quantity,
+        unit: 'TON',
+        status: 'NEGOTIATING',
+      },
+    });
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -49,7 +96,7 @@ describe('Expiration Handling - Integration Test', () => {
       // Setup
       const admin = await prisma.user.create({
         data: {
-          email: 'admin-expire-test@agrotrade.com',
+          email: `${fixtureRunId}-admin-expire-test@agrotrade.com`,
           name: 'Expire Test Admin',
           role: 'ADMIN',
         },
@@ -57,7 +104,7 @@ describe('Expiration Handling - Integration Test', () => {
 
       const buyer = await prisma.user.create({
         data: {
-          email: 'buyer-expire-test@test.com',
+          email: `${fixtureRunId}-buyer-expire-test@test.com`,
           name: 'Expire Test Buyer',
           role: 'BUYER',
         },
@@ -65,7 +112,7 @@ describe('Expiration Handling - Integration Test', () => {
 
       const seller = await prisma.user.create({
         data: {
-          email: 'seller-expire-test@test.com',
+          email: `${fixtureRunId}-seller-expire-test@test.com`,
           name: 'Expire Test Seller',
           role: 'FARMER',
         },
@@ -121,6 +168,17 @@ describe('Expiration Handling - Integration Test', () => {
         },
       });
 
+      const midExpiryTradeSeller = await createTradeSellerFixture({
+        label: 'mid-expiry',
+        tradeOperationId: trade.id,
+        productId: product!.id,
+      });
+      const farExpiryTradeSeller = await createTradeSellerFixture({
+        label: 'far-expiry',
+        tradeOperationId: trade.id,
+        productId: product!.id,
+      });
+
       // Create negotiations with different expiration times
       const nearExpiry = await prisma.offerNegotiation.create({
         data: {
@@ -140,7 +198,7 @@ describe('Expiration Handling - Integration Test', () => {
       const midExpiry = await prisma.offerNegotiation.create({
         data: {
           tradeOperationId: trade.id,
-          tradeSellerId: tradeSeller.id,
+          tradeSellerId: midExpiryTradeSeller.id,
           status: NegotiationStatus.PENDING,
           currentOffer: {
             price: 335,
@@ -155,7 +213,7 @@ describe('Expiration Handling - Integration Test', () => {
       const farExpiry = await prisma.offerNegotiation.create({
         data: {
           tradeOperationId: trade.id,
-          tradeSellerId: tradeSeller.id,
+          tradeSellerId: farExpiryTradeSeller.id,
           status: NegotiationStatus.PENDING,
           currentOffer: {
             price: 338,
@@ -210,8 +268,20 @@ describe('Expiration Handling - Integration Test', () => {
     it('should automatically mark expired negotiations', async () => {
       // Create expired negotiation
       const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-      const tradeSeller = await prisma.tradeSeller.findFirst();
-      const trade = await prisma.tradeOperation.findFirst({ where: { status: 'ACTIVE' } });
+      const trade = await prisma.tradeOperation.findFirst({
+        where: {
+          status: 'ACTIVE',
+          operationNumber: { contains: 'EXPIRE' },
+        },
+        include: { buyListing: true },
+      });
+      const tradeSeller = await createTradeSellerFixture({
+        label: 'already-expired',
+        tradeOperationId: trade!.id,
+        productId: trade!.buyListing.productId,
+        quantity: 50,
+        askingPrice: 342,
+      });
 
       const expiredNego = await prisma.offerNegotiation.create({
         data: {
@@ -260,8 +330,20 @@ describe('Expiration Handling - Integration Test', () => {
 
   describe('Grace Period and Extensions', () => {
     it('should allow extending expiration before deadline', async () => {
-      const trade = await prisma.tradeOperation.findFirst({ where: { status: 'ACTIVE' } });
-      const tradeSeller = await prisma.tradeSeller.findFirst({ where: { tradeOperationId: trade!.id } });
+      const trade = await prisma.tradeOperation.findFirst({
+        where: {
+          status: 'ACTIVE',
+          operationNumber: { contains: 'EXPIRE' },
+        },
+        include: { buyListing: true },
+      });
+      const tradeSeller = await createTradeSellerFixture({
+        label: 'extension',
+        tradeOperationId: trade!.id,
+        productId: trade!.buyListing.productId,
+        quantity: 60,
+        askingPrice: 345,
+      });
 
       const negotiation = await prisma.offerNegotiation.create({
         data: {
@@ -310,8 +392,20 @@ describe('Expiration Handling - Integration Test', () => {
     });
 
     it('should limit number of extensions', async () => {
-      const trade = await prisma.tradeOperation.findFirst({ where: { status: 'ACTIVE' } });
-      const tradeSeller = await prisma.tradeSeller.findFirst();
+      const trade = await prisma.tradeOperation.findFirst({
+        where: {
+          status: 'ACTIVE',
+          operationNumber: { contains: 'EXPIRE' },
+        },
+        include: { buyListing: true },
+      });
+      const tradeSeller = await createTradeSellerFixture({
+        label: 'extension-limit',
+        tradeOperationId: trade!.id,
+        productId: trade!.buyListing.productId,
+        quantity: 70,
+        askingPrice: 348,
+      });
 
       const negotiation = await prisma.offerNegotiation.create({
         data: {
@@ -354,14 +448,19 @@ describe('Expiration Handling - Integration Test', () => {
 
   describe('Bulk Expiration Processing', () => {
     it('should handle multiple expirations efficiently', async () => {
-      const trade = await prisma.tradeOperation.findFirst({ where: { status: 'ACTIVE' } });
+      const trade = await prisma.tradeOperation.findFirst({
+        where: {
+          status: 'ACTIVE',
+          operationNumber: { contains: 'EXPIRE' },
+        },
+      });
       
       // Create 10 expired negotiations
       const expiredNegos = await Promise.all(
         Array(10).fill(0).map(async (_, i) => {
           const seller = await prisma.user.create({
             data: {
-              email: `bulk-expire-${i}@test.com`,
+              email: `${fixtureRunId}-bulk-${i}-expire-test@test.com`,
               name: `Bulk Seller ${i}`,
               role: 'FARMER',
             },
@@ -449,8 +548,20 @@ describe('Expiration Handling - Integration Test', () => {
 
   describe('Expiration Recovery', () => {
     it('should allow reactivating expired negotiations with new offer', async () => {
-      const trade = await prisma.tradeOperation.findFirst({ where: { status: 'ACTIVE' } });
-      const tradeSeller = await prisma.tradeSeller.findFirst();
+      const trade = await prisma.tradeOperation.findFirst({
+        where: {
+          status: 'ACTIVE',
+          operationNumber: { contains: 'EXPIRE' },
+        },
+        include: { buyListing: true },
+      });
+      const tradeSeller = await createTradeSellerFixture({
+        label: 'reactivation',
+        tradeOperationId: trade!.id,
+        productId: trade!.buyListing.productId,
+        quantity: 80,
+        askingPrice: 350,
+      });
 
       // Create expired negotiation
       const expired = await prisma.offerNegotiation.create({
