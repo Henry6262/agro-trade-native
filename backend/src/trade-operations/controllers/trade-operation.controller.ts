@@ -42,6 +42,10 @@ import {
   BatchOfferDto,
   CreateOfferDto,
 } from "../../negotiations/dto/negotiation.dto";
+import {
+  parseBoundedIntegerQuery,
+  parseNegotiationStatusQuery,
+} from "../utils/query-params.util";
 
 @ApiTags("Trade Operations")
 @ApiBearerAuth()
@@ -178,24 +182,29 @@ export class TradeOperationController {
   @ApiOperation({ summary: "Get negotiations for a trade operation" })
   async getNegotiations(
     @Param("id") id: string,
-    @Query("status") status?: string,
-    @Query("limit") limit = "100",
-    @Query("offset") offset = "0",
+    @Query("status") status?: unknown,
+    @Query("limit") limit?: unknown,
+    @Query("offset") offset?: unknown,
   ) {
-    let statusFilter: NegotiationStatus | NegotiationStatus[] | undefined;
-    if (status) {
-      statusFilter = status.includes(",")
-        ? (status
-            .split(",")
-            .map((value) => value.trim().toUpperCase()) as NegotiationStatus[])
-        : (status.toUpperCase() as NegotiationStatus);
-    }
+    const statusFilter = parseNegotiationStatusQuery(status);
+    const parsedLimit = parseBoundedIntegerQuery(limit, {
+      field: "limit",
+      defaultValue: 100,
+      min: 1,
+      max: 100,
+    });
+    const parsedOffset = parseBoundedIntegerQuery(offset, {
+      field: "offset",
+      defaultValue: 0,
+      min: 0,
+      max: 100_000,
+    });
 
     const data = await this.negotiationService.getNegotiations(
       id,
       statusFilter,
-      Number(limit),
-      Number(offset),
+      parsedLimit,
+      parsedOffset,
     );
     return { success: true, data };
   }
@@ -208,8 +217,14 @@ export class TradeOperationController {
   @ApiOperation({ summary: "Get expiring negotiations for a trade operation" })
   async getExpiringNegotiations(
     @Param("id") id: string,
-    @Query("hours") hours = "24",
+    @Query("hours") hours?: unknown,
   ) {
+    const parsedHours = parseBoundedIntegerQuery(hours, {
+      field: "hours",
+      defaultValue: 24,
+      min: 1,
+      max: 24 * 30,
+    });
     const data = await this.negotiationService.getNegotiations(
       id,
       NegotiationStatus.PENDING,
@@ -217,7 +232,7 @@ export class TradeOperationController {
       0,
     );
     const now = Date.now();
-    const threshold = now + Number(hours) * 60 * 60 * 1000;
+    const threshold = now + parsedHours * 60 * 60 * 1000;
     const expiringSoon = data.negotiations.filter((negotiation) => {
       const expiry = new Date(negotiation.expiresAt).getTime();
       return expiry > now && expiry <= threshold;
