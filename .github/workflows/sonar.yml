@@ -10,6 +10,8 @@ jobs:
   sonar-backend:
     name: SonarCloud — Backend
     runs-on: ubuntu-latest
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
     defaults:
       run:
         working-directory: backend
@@ -17,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # required for SonarCloud blame data
+          fetch-depth: 0 # required for SonarCloud blame data
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -35,19 +37,22 @@ jobs:
           NODE_ENV: test
 
       - name: SonarCloud Scan — Backend
+        if: ${{ env.SONAR_TOKEN != '' }}
         uses: SonarSource/sonarcloud-github-action@master
         with:
           projectBaseDir: backend
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACKEND }}
+
+      - name: Note missing SonarCloud configuration
+        if: ${{ env.SONAR_TOKEN == '' }}
+        run: echo "SonarCloud scan skipped because SONAR_TOKEN_BACKEND is not configured."
 
   sonar-frontend:
     name: SonarCloud — Frontend
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: front-end
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
 
     steps:
       - uses: actions/checkout@v4
@@ -65,14 +70,18 @@ jobs:
         run: npm ci
 
       - name: Run tests with coverage
-        run: npm run test:coverage
+        run: npm run test:coverage --workspace front-end
         env:
           NODE_ENV: test
 
       - name: SonarCloud Scan — Frontend
+        if: ${{ env.SONAR_TOKEN != '' }}
         uses: SonarSource/sonarcloud-github-action@master
         with:
           projectBaseDir: front-end
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
+
+      - name: Note missing SonarCloud configuration
+        if: ${{ env.SONAR_TOKEN == '' }}
+        run: echo "SonarCloud scan skipped because SONAR_TOKEN_FRONTEND is not configured."

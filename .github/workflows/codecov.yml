@@ -10,6 +10,8 @@ jobs:
   backend-coverage:
     name: Backend Coverage
     runs-on: ubuntu-latest
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     defaults:
       run:
         working-directory: backend
@@ -33,20 +35,24 @@ jobs:
           NODE_ENV: test
 
       - name: Upload backend coverage to Codecov
+        if: ${{ env.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.CODECOV_TOKEN }}
           files: ./backend/coverage/unit/lcov.info
           flags: backend
           name: backend
           fail_ci_if_error: true
 
+      - name: Note missing Codecov configuration
+        if: ${{ env.CODECOV_TOKEN == '' }}
+        run: echo "Codecov upload skipped because CODECOV_TOKEN is not configured."
+
   frontend-coverage:
     name: Frontend Coverage
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: front-end
+    env:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -62,15 +68,20 @@ jobs:
         run: npm ci
 
       - name: Run tests with coverage
-        run: npm run test:coverage
+        run: npm run test:coverage --workspace front-end
         env:
           NODE_ENV: test
 
       - name: Upload frontend coverage to Codecov
+        if: ${{ env.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ env.CODECOV_TOKEN }}
           files: ./front-end/coverage/lcov.info
           flags: frontend
           name: frontend
           fail_ci_if_error: true
+
+      - name: Note missing Codecov configuration
+        if: ${{ env.CODECOV_TOKEN == '' }}
+        run: echo "Codecov upload skipped because CODECOV_TOKEN is not configured."
