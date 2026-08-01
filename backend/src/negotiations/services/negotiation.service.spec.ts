@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { NegotiationService } from './negotiation.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ProfitCalculationService } from '../../trade-operations/services/profit-calculation.service';
+import { TradeOperationService } from '../../trade-operations/services/trade-operation.service';
 import { InspectionService } from '../../inspections/inspection.service';
 import { RealtimeService } from '../../realtime/realtime.service';
 import { NegotiationStatus, TradeStatus, SellerStatus, InspectionPriority } from '@prisma/client';
@@ -47,6 +47,7 @@ const makeTradeSeller = (override: Partial<any> = {}) => ({
 
 const makeBuyListing = (override: Partial<any> = {}) => ({
   id: 'buy-listing-1',
+  buyerId: 'buyer-1',
   productId: 'product-1',
   quantity: 100,
   neededBy: null,
@@ -125,7 +126,10 @@ const mockInspectionService = {
   createInspectionRequest: jest.fn().mockResolvedValue({ id: 'inspection-1' }),
 };
 
-const mockProfitCalculationService = {};
+const mockTradeOperationService = {
+  setInitialNegotiationPhase: jest.fn().mockResolvedValue(undefined),
+  autoAdvancePhase: jest.fn().mockResolvedValue(undefined),
+};
 
 // ─── Suite ───────────────────────────────────────────────────────────────────
 
@@ -139,7 +143,7 @@ describe('NegotiationService', () => {
       providers: [
         NegotiationService,
         { provide: PrismaService, useValue: mockPrisma },
-        { provide: ProfitCalculationService, useValue: mockProfitCalculationService },
+        { provide: TradeOperationService, useValue: mockTradeOperationService },
         { provide: InspectionService, useValue: mockInspectionService },
         { provide: RealtimeService, useValue: mockRealtimeService },
       ],
@@ -193,10 +197,16 @@ describe('NegotiationService', () => {
       await expect(service.sendOffer('trade-1', dto)).rejects.toThrow(BadRequestException);
     });
 
-    it('throws ConflictException when negotiation already exists for seller', async () => {
+    it('updates an existing seller negotiation through the idempotent upsert', async () => {
       mockPrisma.tradeOperation.findUnique.mockResolvedValue(makeTrade());
       mockPrisma.offerNegotiation.findFirst.mockResolvedValue(makeNegotiation());
-      await expect(service.sendOffer('trade-1', dto)).rejects.toThrow(ConflictException);
+      mockPrisma.offerNegotiation.upsert.mockResolvedValue(makeNegotiation());
+      mockPrisma.tradeSeller.update.mockResolvedValue({});
+
+      await expect(service.sendOffer('trade-1', dto)).resolves.toBeDefined();
+      expect(mockPrisma.offerNegotiation.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { tradeSellerId: 'trade-seller-1' } }),
+      );
     });
 
     it('throws BadRequestException when price <= 0', async () => {
@@ -311,7 +321,7 @@ describe('NegotiationService', () => {
       const result = await service.getNegotiations('trade-1');
 
       expect(result.phaseTransition?.allSellersAccepted).toBe(true);
-      expect(result.phaseTransition?.nextPhase).toBe('INSPECTION_REQUIRED');
+      expect(result.phaseTransition?.nextPhase).toBe('INSPECTION_PENDING');
     });
   });
 
@@ -494,7 +504,7 @@ describe('NegotiationService', () => {
       const result = await service.acceptOffer('nego-1');
 
       expect((result as any).phaseTransition?.allSellersAccepted).toBe(true);
-      expect((result as any).phaseTransition?.nextPhase).toBe('INSPECTION_REQUIRED');
+      expect((result as any).phaseTransition?.nextPhase).toBe('INSPECTION_PENDING');
     });
 
     it('includes quantityGap when finalQuantity < requestedQuantity', async () => {
@@ -569,7 +579,7 @@ describe('NegotiationService', () => {
       );
     });
 
-    it('emits offer:expired event after rejection', async () => {
+    it('emits offer:rejected event after rejection', async () => {
       const nego = makeNegotiation({ status: NegotiationStatus.PENDING });
       mockPrisma.offerNegotiation.findUnique.mockResolvedValue(nego);
       mockPrisma.offerNegotiation.update.mockResolvedValue(makeNegotiation({ status: NegotiationStatus.REJECTED }));
@@ -578,7 +588,7 @@ describe('NegotiationService', () => {
 
       expect(mockRealtimeService.emitToUser).toHaveBeenCalledWith(
         nego.tradeSeller.sellerId,
-        'offer:expired',
+        'offer:rejected',
         expect.objectContaining({ id: 'nego-1' }),
       );
     });

@@ -16,7 +16,7 @@ interface TransportManagementProps {
   onUpdate?: () => Promise<void>;
 }
 
-export const TransportManagement: React.FC<TransportManagementProps> = ({ tradeOperation, onUpdate }) => {
+export const TransportManagement: React.FC<TransportManagementProps> = () => {
   const [requests, setRequests] = useState<TransportRequestListItem[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<TransportRequestListItem | null>(null);
   const [requestDetail, setRequestDetail] = useState<TransportRequestSummary | null>(null);

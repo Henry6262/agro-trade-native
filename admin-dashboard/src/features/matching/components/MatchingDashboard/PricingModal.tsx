@@ -12,8 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { handleApiError } from '../../../../utils/errorHandler';
+import { getApiErrorMessage, handleApiError } from '../../../../utils/errorHandler';
 import type { TransportCostResult } from '../../../../types';
 import type { SaleListing, BuyListing } from '../../../../types/listings';
 import api, { tradeOperationService } from '../../../../services/api';
@@ -168,9 +167,9 @@ export const PricingModal: React.FC<PricingModalProps> = ({
 
       onSubmit(sellers);
       onClose();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error creating trade operation:', err);
-      setError(err.response?.data?.message || 'Failed to create trade operation. Please try again.');
+      setError(getApiErrorMessage(err, 'Failed to create trade operation. Please try again.'));
       handleApiError(err, 'Failed to create trade operation');
     } finally {
       setIsSendingOffers(false);

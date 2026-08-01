@@ -1,50 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import type {
-  User,
-  SaleListing,
-  BuyListing,
-  TradeOperation,
-  Negotiation,
-  InspectionRequest,
-  TransportRequestListItem,
-  TransportBidSummary,
-} from '../../../../types';
+import React, { useState } from 'react';
+import type { ScenarioEntity, ScenarioState } from '../../../../types/scenario';
 import { simulationApi } from '../../../../services/simulationApi';
 
-interface TransportJob {
-  id: string;
-  status: string;
-  [key: string]: unknown;
-}
-
-type EntityType =
-  | User
-  | SaleListing
-  | BuyListing
-  | TradeOperation
-  | Negotiation
-  | InspectionRequest
-  | TransportRequestListItem
-  | TransportBidSummary
-  | TransportJob;
-
 interface DatabaseStatePanelProps {
-  scenarioState: {
-    createdUsers: {
-      farmers: User[];
-      buyers: User[];
-      transporters: User[];
-      inspector: User | null;
-    };
-    saleListings: SaleListing[];
-    buyListings: BuyListing[];
-    tradeOperations: TradeOperation[];
-    negotiations: Negotiation[];
-    inspections: InspectionRequest[];
-    transportRequests: TransportRequestListItem[];
-    transportBids: TransportBidSummary[];
-    transportJobs: TransportJob[];
-  };
+  scenarioState: ScenarioState;
   onRefresh: () => void;
 }
 
@@ -54,7 +13,7 @@ export const DatabaseStatePanel: React.FC<DatabaseStatePanelProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<string>('users');
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedEntity, setSelectedEntity] = useState<EntityType | null>(null);
+  const [selectedEntity, setSelectedEntity] = useState<ScenarioEntity | null>(null);
 
   const tabs = [
     { id: 'users', label: 'Users', count: getTotalUsers() },

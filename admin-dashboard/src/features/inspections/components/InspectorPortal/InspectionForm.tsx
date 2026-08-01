@@ -3,7 +3,7 @@ import { X, AlertCircle, CheckCircle, Loader2, Camera } from 'lucide-react';
 import { toast } from 'sonner';
 import type { InspectionRequest } from '../../../../types';
 import axios from 'axios';
-import { handleApiError } from '../../../../utils/errorHandler';
+import { getApiErrorMessage, handleApiError } from '../../../../utils/errorHandler';
 
 const API_BASE = 'http://localhost:4000';
 
@@ -105,9 +105,9 @@ export const InspectionForm: React.FC<InspectionFormProps> = ({
       setTimeout(() => {
         onComplete();
       }, 1500);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error submitting inspection:', err);
-      const errorMsg = err.response?.data?.message || 'Failed to submit inspection results. Please try again.';
+      const errorMsg = getApiErrorMessage(err, 'Failed to submit inspection results. Please try again.');
       setError(errorMsg);
       handleApiError(err, 'Failed to submit inspection results');
     } finally {

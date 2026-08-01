@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ShoppingCart, AlertTriangle, Users, Timer, Package, TrendingUp, Truck, UserCheck } from 'lucide-react';
+import { X, AlertTriangle, Users, Timer, Package, TrendingUp, Truck, UserCheck } from 'lucide-react';
 
 interface ScenarioInfo {
   id: string;

@@ -6,7 +6,14 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/_next/"],
+        disallow: [
+          "/api/",
+          "/_next/",
+          "/auth/",
+          "/blog/",
+          "/dashboard/",
+          "/stablehacks-demo-day",
+        ],
       },
     ],
     sitemap: "https://agrotrade.africa/sitemap.xml",

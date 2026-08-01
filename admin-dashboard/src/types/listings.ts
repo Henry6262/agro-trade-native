@@ -34,6 +34,7 @@ export interface Product {
 
 export interface SaleListing {
   id: string;
+  saleListingId?: string;
   sellerId: string;
   productId: string;
   quantity: number;

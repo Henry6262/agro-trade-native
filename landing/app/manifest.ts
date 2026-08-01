@@ -2,16 +2,16 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "AgroTrade — Secure Agricultural Trading",
-    short_name: "AgroTrade",
+    name: "AgriTek — Raspberry Exception Desk",
+    short_name: "AgriTek",
     description:
-      "Blockchain-secured escrow for agricultural commodity trades. Zero blind trust. From the Balkans to the Middle East and Asia.",
+      "Private pilot for controlled raspberry replacement-load coordination into Spain.",
     start_url: "/",
     display: "standalone",
     background_color: "#0C0904",
     theme_color: "#E8C870",
     orientation: "portrait",
-    categories: ["business", "finance", "productivity"],
+    categories: ["business", "productivity"],
     lang: "en",
     icons: [
       {

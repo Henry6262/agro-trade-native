@@ -42,12 +42,6 @@ export const MetricsSidebar: React.FC<MetricsSidebarProps> = ({ steps, totalDura
     .sort((a, b) => (b.duration || 0) - (a.duration || 0))
     .slice(0, 5);
 
-  // Fastest steps
-  const fastestSteps = [...steps]
-    .filter((s) => s.duration !== undefined && s.duration > 0)
-    .sort((a, b) => (a.duration || 0) - (b.duration || 0))
-    .slice(0, 5);
-
   // Status distribution
   const statusMetrics = {
     pending: steps.filter((s) => s.status === 'pending').length,

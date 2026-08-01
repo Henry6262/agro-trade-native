@@ -98,9 +98,29 @@
     }
 
     window.initMap = initMap;
-  </script>
-  <script async defer
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCyufA02eE2szI8_Q2DSxIa5AabNSik3MA&callback=initMap">
+
+    function loadGoogleMaps() {
+      const apiKey = window.prompt(
+        'Enter a Google Maps browser key restricted to this local test origin:'
+      );
+
+      if (!apiKey) {
+        addLog('Map not loaded: a restricted browser key is required for this test.');
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.async = true;
+      script.defer = true;
+      script.src =
+        'https://maps.googleapis.com/maps/api/js?key=' +
+        encodeURIComponent(apiKey) +
+        '&callback=initMap';
+      script.onerror = () => addLog('Google Maps failed to load. Check the key restrictions.');
+      document.head.appendChild(script);
+    }
+
+    window.addEventListener('DOMContentLoaded', loadGoogleMaps);
   </script>
 </body>
 </html>

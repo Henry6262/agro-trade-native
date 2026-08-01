@@ -3,9 +3,11 @@
 #
 # Architecture:
 #   - lint-typecheck-backend  : TS strict diagnostics + Prisma generate
-#   - lint-typecheck-admin    : ESLint + TS check for admin-dashboard
+#   - lint-typecheck-admin    : ESLint for admin-dashboard
 #   - atctl-report            : Generate & upload consolidated build report
-#   - e2e-tests               : Full E2E suite (needs both lint jobs + postgres + redis)
+#
+# Backend unit, integration, E2E, coverage, and smoke jobs live in
+# backend-test.yml so each suite has an explicit contract and result.
 #
 # Why multi-job?
 #   Backend and admin-dashboard are independent workdirs — parallelising them
@@ -46,8 +48,9 @@ jobs:
 
       - name: Backend TypeScript strict check
         run: |
+          set -o pipefail
           cd backend
-          npx tsc --noEmit --pretty false 2>&1 | tee ../ts-errors-backend.txt || true
+          npx tsc --noEmit --pretty false 2>&1 | tee ../ts-errors-backend.txt
 
       - name: Upload TS diagnostics artifact
         if: always()
@@ -58,7 +61,7 @@ jobs:
           retention-days: 7
 
 # ─────────────────────────────────────────────────────────────────────────────
-# JOB 2 — Admin Dashboard: ESLint + optional TS check
+# JOB 2 — Admin Dashboard: ESLint
 # ─────────────────────────────────────────────────────────────────────────────
   lint-typecheck-admin:
     name: "Admin Dashboard — ESLint"
@@ -76,7 +79,10 @@ jobs:
         run: npm ci --prefix admin-dashboard
 
       - name: Admin Dashboard lint
-        run: cd admin-dashboard && npm run lint 2>&1 | tee ../lint-admin.txt || true
+        run: |
+          set -o pipefail
+          cd admin-dashboard
+          npm run lint 2>&1 | tee ../lint-admin.txt
 
       - name: Upload lint artifact
         if: always()
@@ -135,62 +141,3 @@ jobs:
             lint-admin.txt
             build_report.md
           retention-days: 14
-
-# ─────────────────────────────────────────────────────────────────────────────
-# JOB 4 — E2E tests (postgres + redis services)
-#          Runs after atctl-report (full lint fan-in complete)
-# ─────────────────────────────────────────────────────────────────────────────
-  e2e-tests:
-    name: "E2E tests (postgres + redis)"
-    runs-on: ubuntu-latest
-    needs: atctl-report
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: agrotrade_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Install backend dependencies
-        run: npm ci --prefix backend
-
-      - name: Generate Prisma Client
-        run: cd backend && npx prisma generate
-
-      - name: Run database migrations
-        run: cd backend && npx prisma migrate deploy
-        env:
-          DATABASE_URL: postgres://test:test@localhost:5432/agrotrade_test
-
-      - name: Run E2E tests
-        run: cd backend && npm run test:e2e || true
-        env:
-          DATABASE_URL: postgres://test:test@localhost:5432/agrotrade_test
-          REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test-secret-for-ci
-          NODE_ENV: test

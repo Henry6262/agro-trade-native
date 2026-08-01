@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import api from '../../../../services/api';
-import { API_ENDPOINTS } from '../../../../config/api';
 import { transportAdminService } from '../../../../services/api';
 import { useToast } from '@/hooks/use-toast';
 import type { TransportData, TransportBidSummary } from '../../../../types';
-import { formatLocationString } from '../../../../utils/locationHelpers';
 import { SkeletonCard, CountdownTimer, EnhancedTooltip } from '../../../../components/common';
+import { getApiErrorMessage } from '../../../../utils/errorHandler';
 
 interface TransportManagementPanelProps {
   tradeOperationId: string;
@@ -21,7 +19,6 @@ interface TransportManagementPanelProps {
 
 export const TransportManagementPanel: React.FC<TransportManagementPanelProps> = ({
   tradeOperationId,
-  operationPhase,
   operationStatus,
   hasAcceptedOffers,
   hasCompletedInspections,
@@ -53,9 +50,9 @@ export const TransportManagementPanel: React.FC<TransportManagementPanelProps> =
       const response = await transportAdminService.getByTradeOperation(tradeOperationId);
       setTransportData(response);
       setError(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching transport data:', err);
-      setError('Failed to load transport information');
+      setError(getApiErrorMessage(err, 'Failed to load transport information'));
       setTransportData(null);
     } finally {
       setLoading(false);
@@ -133,17 +130,6 @@ export const TransportManagementPanel: React.FC<TransportManagementPanelProps> =
     } finally {
       setProcessingBid(null);
     }
-  };
-
-  const getStatusBadgeVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      PENDING: 'outline',
-      CONFIRMED: 'default',
-      DECLINED: 'destructive',
-      ACCEPTED: 'default',
-      REJECTED: 'destructive',
-    };
-    return variants[status] || 'outline';
   };
 
   const formatDate = (dateString: string | undefined): string => {

@@ -42,9 +42,7 @@ jobs:
             paths:
               - backend/src
               - front-end/src
-              - contracts/scripts
               - contracts/test
-              - contracts-solana/app
               - contracts-solana/tests
               - admin-dashboard
               - landing

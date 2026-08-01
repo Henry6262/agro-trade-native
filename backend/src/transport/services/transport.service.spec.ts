@@ -4,6 +4,7 @@ import { TransportService } from './transport.service';
 import { PrismaService } from "../../prisma/prisma.service";
 import { TransportCostService } from "./transport-cost.service";
 import { TradeEventsService } from "../../trade-events/trade-events.service";
+import { RealtimeService } from "../../realtime/realtime.service";
 import {
   TransportRequestStatus,
   BidStatus,
@@ -128,6 +129,7 @@ mockPrisma.$transaction = jest.fn((cb: any) => cb(mockPrisma));
 
 const mockTransportCostService = { estimateCost: jest.fn() };
 const mockTradeEventsService = { record: jest.fn().mockResolvedValue({}) };
+const mockRealtimeService = { emitToUser: jest.fn() };
 
 // ─── Suite ───────────────────────────────────────────────────────────────────
 
@@ -141,6 +143,7 @@ describe("TransportService", () => {
         { provide: PrismaService, useValue: mockPrisma },
         { provide: TransportCostService, useValue: mockTransportCostService },
         { provide: TradeEventsService, useValue: mockTradeEventsService },
+        { provide: RealtimeService, useValue: mockRealtimeService },
       ],
     }).compile();
 

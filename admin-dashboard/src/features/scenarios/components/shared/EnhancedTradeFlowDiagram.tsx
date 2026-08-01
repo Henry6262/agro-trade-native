@@ -14,23 +14,7 @@ import {
   type NodeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-
-interface ScenarioState {
-  createdUsers: {
-    farmers: any[];
-    buyers: any[];
-    transporters: any[];
-    inspector: any | null;
-  };
-  saleListings: any[];
-  buyListings: any[];
-  tradeOperations: any[];
-  negotiations: any[];
-  inspections: any[];
-  transportRequests: any[];
-  transportBids: any[];
-  transportJobs: any[];
-}
+import type { ScenarioState } from '../../../../types/scenario';
 
 interface EnhancedTradeFlowDiagramProps {
   scenarioState: ScenarioState;
@@ -70,7 +54,6 @@ const nodeTypes = {
 
 export const EnhancedTradeFlowDiagram: React.FC<EnhancedTradeFlowDiagramProps> = ({
   scenarioState,
-  currentPhase,
 }) => {
   // Determine current active phase
   const activePhase = useMemo(() => {
@@ -86,7 +69,7 @@ export const EnhancedTradeFlowDiagram: React.FC<EnhancedTradeFlowDiagramProps> =
   // Generate nodes with business context
   const nodes: Node[] = useMemo(() => {
     const nodeList: Node[] = [];
-    let yPosition = 50;
+    const yPosition = 50;
     const xSpacing = 250;
 
     // Column 1: Users
@@ -133,7 +116,6 @@ export const EnhancedTradeFlowDiagram: React.FC<EnhancedTradeFlowDiagramProps> =
 
     // Sale Listings
     scenarioState.saleListings.forEach((listing, idx) => {
-      const farmer = scenarioState.createdUsers.farmers[idx];
       nodeList.push({
         id: `sale-${idx}`,
         type: 'business',

@@ -8,6 +8,7 @@ import {
   ToastAndroid,
   SafeAreaView,
   StyleSheet,
+  TouchableOpacity,
 } from 'react-native';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -233,6 +234,23 @@ export const RoleSelectionScreen: React.FC = () => {
               <Text style={styles.footer}>
                 By continuing, you agree to our Terms of Service and Privacy Policy
               </Text>
+
+              {/* Skip — browse as guest */}
+              <TouchableOpacity
+                style={styles.skipBtn}
+                onPress={() => {
+                  login(
+                    { id: 'guest', role: 'BUYER', email: '' } as unknown as User,
+                    'guest',
+                    undefined
+                  );
+                  navigation.dispatch(
+                    CommonActions.reset({ index: 0, routes: [{ name: 'Main' }] }) as any
+                  );
+                }}
+              >
+                <Text style={styles.skipText}>Skip for now</Text>
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -265,6 +283,16 @@ const styles = StyleSheet.create({
     lineHeight: 17,
     marginTop: 20,
     textAlign: 'center',
+  },
+  skipBtn: {
+    alignItems: 'center',
+    marginTop: 16,
+    paddingVertical: 8,
+  },
+  skipText: {
+    color: 'rgba(255,255,255,0.25)',
+    fontSize: 12,
+    textDecorationLine: 'underline',
   },
   heading: {
     color: '#FFFFFF',

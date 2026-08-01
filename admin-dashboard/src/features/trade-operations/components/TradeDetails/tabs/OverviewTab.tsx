@@ -3,18 +3,12 @@ import * as Types from '../../../../../types';
 import { Users, MessageSquare, TrendingUp, ChevronRight } from 'lucide-react';
 import { TradeTimeline } from '../components/TradeTimeline';
 
-interface ProfitData {
-  estimatedProfit?: number;
-  profitMargin?: number;
-  [key: string]: string | number | boolean | undefined;
-}
-
 interface OverviewTabProps {
   operation: Types.TradeOperation;
   negotiations: Types.Negotiation[];
   inspections: Types.InspectionRequest[];
   transport?: Types.TransportSummary;
-  profitData: ProfitData | null;
+  profitData: Types.ProfitData | null;
   loading: boolean;
   onPhaseChange: (newPhase: Types.TradePhase) => void;
   getPhaseColor: (phase: Types.TradePhase) => string;

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   ReactFlow,
   Background,
@@ -11,23 +11,7 @@ import {
   type Edge,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-
-interface ScenarioState {
-  createdUsers: {
-    farmers: any[];
-    buyers: any[];
-    transporters: any[];
-    inspector: any | null;
-  };
-  saleListings: any[];
-  buyListings: any[];
-  tradeOperations: any[];
-  negotiations: any[];
-  inspections: any[];
-  transportRequests: any[];
-  transportBids: any[];
-  transportJobs: any[];
-}
+import type { ScenarioState } from '../../../../types/scenario';
 
 interface TradeFlowDiagramProps {
   scenarioState: ScenarioState;
@@ -36,7 +20,6 @@ interface TradeFlowDiagramProps {
 
 export const TradeFlowDiagram: React.FC<TradeFlowDiagramProps> = ({
   scenarioState,
-  currentPhase,
 }) => {
   // Determine current phase based on state
   const phase = useMemo(() => {

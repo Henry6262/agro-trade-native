@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { transportRequestService } from '../../../../services/transportApi';
+import { getApiErrorMessage } from '../../../../utils/errorHandler';
 
 interface CreateTransportModalProps {
   onClose: () => void;
@@ -22,9 +23,9 @@ export const CreateTransportModal: React.FC<CreateTransportModalProps> = ({ onCl
       toast.success('Transport request created successfully');
       await onCreated();
       onClose();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to create transport request:', err);
-      toast.error(err?.response?.data?.message || 'Failed to create transport request');
+      toast.error(getApiErrorMessage(err, 'Failed to create transport request'));
     } finally {
       setLoading(false);
     }

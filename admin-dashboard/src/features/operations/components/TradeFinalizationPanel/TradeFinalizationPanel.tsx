@@ -14,7 +14,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import api from '../../../../services/api';
 import { API_ENDPOINTS } from '../../../../config/api';
-import type { TradeOperation, TransportData } from '../../../../types';
+import type { InspectionRequest, TradeOperation, TransportData } from '../../../../types';
 import {
   validateWorkflowComplete,
   calculateInspectionSummary,
@@ -34,7 +34,7 @@ import { AnimatedNumber, Confetti, EnhancedTooltip } from '../../../../component
 interface TradeFinalizationPanelProps {
   tradeOperationId: string;
   operation: TradeOperation;
-  inspections: Record<string, unknown>[];
+  inspections: InspectionRequest[];
   transportData: TransportData | null;
   onFinalized: () => void;
 }

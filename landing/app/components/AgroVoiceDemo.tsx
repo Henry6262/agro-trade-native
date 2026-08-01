@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Sparkles, CheckCircle2, Truck, ArrowRight, Play } from "lucide-react";
+import { Mic, Sparkles, CheckCircle2, FileCheck2, ArrowRight, Play } from "lucide-react";
 
 // ── Brand tokens (mirrors iOS app design-system/tokens.ts) ─────────────────
 const GREEN = "#4ADE80";
@@ -18,11 +18,11 @@ const TEXT_MUTED = "rgba(255,255,255,0.55)";
 type Phase = "ask-role" | "ask-product" | "ask-delivery" | "processing" | "done";
 
 export const DEMO_PHASE_LABELS: { key: Phase; label: string }[] = [
-  { key: "ask-role", label: "Role" },
-  { key: "ask-product", label: "Product" },
-  { key: "ask-delivery", label: "Delivery" },
-  { key: "processing", label: "Match" },
-  { key: "done", label: "Live" },
+  { key: "ask-role", label: "Intake" },
+  { key: "ask-product", label: "Scope" },
+  { key: "ask-delivery", label: "Evidence" },
+  { key: "processing", label: "Review" },
+  { key: "done", label: "Draft" },
 ];
 
 // global phase index store so other components (e.g. Hero phase dots) can mirror it
@@ -51,39 +51,39 @@ const SCRIPT: ScriptStep[] = [
   {
     phase: "ask-role",
     durationMs: 5000,
-    agentText: "Hi! What's your role — buyer, seller, inspector, or transporter?",
+    agentText: "Synthetic walkthrough: are you the Spanish buyer or the export packhouse?",
     recordingMs: 3200,
     userBubble: { id: "u1", duration: "0:04" },
   },
   {
     phase: "ask-product",
     durationMs: 5000,
-    agentText: "Great, you're a buyer. What grain are you sourcing and how much?",
+    agentText: "Buyer selected. Is this a pre-sold raspberry replacement request?",
     recordingMs: 3400,
     userBubble: { id: "u2", duration: "0:06" },
   },
   {
     phase: "ask-delivery",
     durationMs: 5000,
-    agentText: "Got it — 50 tons of wheat. What's your delivery timeline and location?",
+    agentText: "Add the target arrival window and required evidence. This prototype does not book freight.",
     recordingMs: 3200,
     userBubble: { id: "u3", duration: "0:05" },
   },
   {
     phase: "processing",
     durationMs: 4500,
-    agentText: "Perfect. Setting up your profile and matching you with verified sellers…",
+    agentText: "Drafting the controlled exception file for human review. No supplier is certified or matched here.",
     recordingMs: 0,
   },
   {
     phase: "done",
     durationMs: 5500,
-    agentText: "Done! Your buyer profile is live. 4 sellers nearby ready to ship.",
+    agentText: "Draft ready. Buyer and exporter would contract and pay directly outside AgriTek.",
     recordingMs: 0,
   },
 ];
 
-// ── Live waveform bars (used both in recording bar + sent bubbles) ─────────
+// ── Waveform bars (used both in recording bar + sent bubbles) ──────────────
 function Waveform({ active, color, bars = 22, height = 22 }: { active: boolean; color: string; bars?: number; height?: number }) {
   return (
     <div className="flex items-center gap-[3px]" style={{ height }} suppressHydrationWarning>
@@ -227,8 +227,8 @@ function RecordingBar({ recording, elapsedMs }: { recording: boolean; elapsedMs:
 function ProcessingPills({ visible }: { visible: boolean }) {
   if (!visible) return null;
   const items = [
-    { label: "Profile complete", delay: 0.3 },
-    { label: "4 sellers matched", delay: 1.1 },
+    { label: "Evidence fields staged", delay: 0.3 },
+    { label: "Human review required", delay: 1.1 },
   ];
   return (
     <div className="self-start flex flex-col gap-1.5 ml-9">
@@ -271,8 +271,8 @@ function DoneCTA({ visible }: { visible: boolean }) {
         boxShadow: `0 8px 20px -8px ${GREEN}66`,
       }}
     >
-      <Truck size={14} color="#0C1F12" strokeWidth={2.5} />
-      <span style={{ color: "#0C1F12", fontSize: 12, fontWeight: 800 }}>View matches</span>
+      <FileCheck2 size={14} color="#0C1F12" strokeWidth={2.5} />
+      <span style={{ color: "#0C1F12", fontSize: 12, fontWeight: 800 }}>Review pilot draft</span>
       <ArrowRight size={13} color="#0C1F12" strokeWidth={2.5} />
     </motion.div>
   );
@@ -395,7 +395,7 @@ export function AgroVoiceChat() {
         </div>
         <div className="flex-1 min-w-0">
           <p style={{ color: TEXT_PRIMARY, fontSize: 13, fontWeight: 800, lineHeight: 1.1 }}>
-            AgroTrade Assistant
+            AgriTek Pilot Desk
           </p>
           <div className="flex items-center gap-1.5 mt-0.5">
             <motion.div
@@ -403,7 +403,7 @@ export function AgroVoiceChat() {
               transition={{ duration: 1.6, repeat: Infinity }}
               style={{ width: 6, height: 6, borderRadius: 3, background: GREEN }}
             />
-            <span style={{ color: TEXT_MUTED, fontSize: 11 }}>Online · Voice mode</span>
+            <span style={{ color: TEXT_MUTED, fontSize: 11 }}>Synthetic walkthrough</span>
           </div>
         </div>
         <div
@@ -414,7 +414,7 @@ export function AgroVoiceChat() {
             border: `1px solid ${GOLD}55`,
           }}
         >
-          <span style={{ color: GOLD, fontSize: 9, fontWeight: 800, letterSpacing: 0.8 }}>AI</span>
+          <span style={{ color: GOLD, fontSize: 9, fontWeight: 800, letterSpacing: 0.8 }}>DEMO</span>
         </div>
       </div>
 

@@ -25,8 +25,8 @@ export const TradeDetails: React.FC<Props> = ({ operation, onClose, onUpdate }) 
   const [loading, setLoading] = useState(false);
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [showCounterModal, setShowCounterModal] = useState<Types.Negotiation | null>(null);
-  const [profitData, setProfitData] = useState<any>(null);
-  const [showReplacementFinder, setShowReplacementFinder] = useState<Types.TradeSeller | null>(null);
+  const [profitData, setProfitData] = useState<Types.ProfitData | null>(null);
+  const [, setShowReplacementFinder] = useState<Types.TradeSeller | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
@@ -144,7 +144,7 @@ export const TradeDetails: React.FC<Props> = ({ operation, onClose, onUpdate }) 
     }
   };
 
-  const handleUpdateTrade = async (updateDto: any) => {
+  const handleUpdateTrade = async (updateDto: Types.UpdateTradeOperationDto) => {
     if (!operation) return;
     
     setLoading(true);

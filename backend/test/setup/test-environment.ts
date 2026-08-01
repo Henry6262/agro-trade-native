@@ -53,14 +53,20 @@ export class TestEnvironment {
   }
 
   async teardown() {
-    // Clean up database
-    await this.cleanDatabase();
+    // Setup can fail before Prisma or Nest is assigned (for example when the
+    // test database is unavailable). Teardown must preserve that root error.
+    if (this.prisma) {
+      await this.cleanDatabase();
+    }
 
-    // Close app
-    await this.app.close();
+    if (this.app) {
+      await this.app.close();
+    }
   }
 
   async cleanDatabase() {
+    if (!this.prisma) return;
+
     // Clean tables in correct order to avoid foreign key constraints
     const tablesToClean = [
       "offerRound",

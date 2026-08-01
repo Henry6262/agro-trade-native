@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -17,8 +17,12 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MotiView } from 'moti';
 import * as Haptics from 'expo-haptics';
 import { ArrowLeft, Mail, User, Mic, ArrowRight, type LucideIcon } from 'lucide-react-native';
+import { useLoginWithOAuth, usePrivy, type OAuthProviderType } from '@privy-io/expo';
 import type { OnboardingStackParamList } from '../../../navigation/types';
 import { GradientBackground, GlassInput, GlassButton, COLORS } from '@design-system';
+import { useAuthStore } from '@stores/auth.store';
+import { apiClient } from '@services/api';
+import type { User as AppUser } from '@shared/types';
 
 type NavProp = NativeStackNavigationProp<OnboardingStackParamList>;
 
@@ -49,6 +53,7 @@ const haptic = () => {
 };
 
 export const RoleOnboardingShell: React.FC<RoleOnboardingShellProps> = ({
+  role,
   aiRole,
   illustration,
   accentColor,
@@ -64,19 +69,54 @@ export const RoleOnboardingShell: React.FC<RoleOnboardingShellProps> = ({
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const canSubmit = name.trim().length > 0 && company.trim().length > 0 && email.trim().length > 0;
+  const { getAccessToken, user: privyUser } = usePrivy();
+  const privyUserRef = useRef(privyUser);
+  privyUserRef.current = privyUser;
+  const { login: loginWithOAuth, state: oauthState } = useLoginWithOAuth({});
+  const { login } = useAuthStore();
 
-  const handleComplete = () => {
+  const canSubmit = name.trim().length > 0 && company.trim().length > 0 && email.trim().length > 0;
+  const isPending = submitting || oauthState.status === 'loading';
+
+  const handleComplete = async () => {
     haptic();
     if (!canSubmit) {
       Alert.alert('A few more details', 'Please fill in all fields to continue.');
       return;
     }
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      if (!privyUserRef.current) {
+        await loginWithOAuth({ provider: 'google' as OAuthProviderType });
+      }
+      const privyToken = await getAccessToken();
+      if (!privyToken) throw new Error('Failed to get sign-in token');
+
+      const authResponse = await apiClient.post<{
+        success: boolean;
+        access_token: string;
+        refresh_token: string;
+        user: Record<string, unknown>;
+      }>('/auth/privy/login', {
+        privyToken,
+        email: email.trim(),
+        name: name.trim(),
+        role: role.toUpperCase(),
+      });
+
+      if (authResponse?.data?.access_token) {
+        const { access_token, refresh_token, user: userData } = authResponse.data;
+        login(userData as unknown as AppUser, access_token, refresh_token);
+        navigation.navigate('OnboardingComplete');
+      } else {
+        Alert.alert('Sign in failed', 'Please try again.');
+      }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      Alert.alert('Sign in failed', msg);
+    } finally {
       setSubmitting(false);
-      navigation.navigate('OnboardingComplete');
-    }, 700);
+    }
   };
 
   const handleSwitchToAI = () => {
@@ -199,13 +239,13 @@ export const RoleOnboardingShell: React.FC<RoleOnboardingShellProps> = ({
           {/* Footer CTA */}
           <View style={styles.footer}>
             <GlassButton
-              label={submitting ? 'Setting up your profile…' : 'Continue'}
+              label={isPending ? 'Signing you in…' : 'Continue'}
               onPress={handleComplete}
               variant="primary"
               size="lg"
               fullWidth
-              loading={submitting}
-              disabled={!canSubmit || submitting}
+              loading={isPending}
+              disabled={!canSubmit || isPending}
             />
           </View>
         </KeyboardAvoidingView>

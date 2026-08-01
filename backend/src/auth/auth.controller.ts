@@ -815,6 +815,20 @@ export class AuthController {
     };
   }
 
+  // ==================== Dev / Test Token ====================
+
+  @Public()
+  @Post("dev/token")
+  @ApiOperation({ summary: "Issue a dev JWT — requires DEV_TOKEN_ENABLED=true env var" })
+  async devToken(@Body() body: { role?: string }) {
+    if (this.configService.get("DEV_TOKEN_ENABLED") !== "true") {
+      throw new BadRequestException("Dev token not enabled");
+    }
+    const user = await this.authService.findOrCreateDevUser(body?.role || "ADMIN");
+    const result = await this.authService.login(user);
+    return this.serializeAuthResult(result, "Dev login successful");
+  }
+
   // ==================== Private Serializers ====================
 
   private serializeAuthResult(

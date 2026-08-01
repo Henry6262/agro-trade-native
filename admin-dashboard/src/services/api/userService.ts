@@ -17,7 +17,7 @@ export const userService = {
   createTestUser: async (
     role: UserRole,
     name?: string,
-    data?: any
+    data?: Record<string, unknown>
   ): Promise<SimulationUser> => {
     const response = await axios.post(
       `${API_BASE}/simulation/users/create-test-user`,

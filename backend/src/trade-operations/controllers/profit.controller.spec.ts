@@ -128,10 +128,10 @@ describe("ProfitController (isolated)", () => {
       expect(response.body.profit).toHaveProperty("grossProfit");
       expect(response.body.profit).toHaveProperty("netProfit");
       expect(response.body.profit).toHaveProperty("profitMargin");
-      expect(response.body).toHaveProperty("breakdown");
-      expect(response.body.breakdown).toHaveProperty("revenue");
-      expect(response.body.breakdown).toHaveProperty("purchaseCosts");
-      expect(response.body.breakdown).toHaveProperty("transportCosts");
+      expect(response.body).toHaveProperty("revenue");
+      expect(response.body).toHaveProperty("costs");
+      expect(response.body.costs).toHaveProperty("purchases");
+      expect(response.body.costs).toHaveProperty("transport");
       expect(mockProfitService.calculateProfit).toHaveBeenCalledTimes(1);
     });
   });

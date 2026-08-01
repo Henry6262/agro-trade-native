@@ -8,14 +8,18 @@ module.exports = {
   rootDir: '.',
   testEnvironment: 'node',
   testRegex: '.e2e-spec.ts$',
+  modulePathIgnorePatterns: ['<rootDir>/dist/'],
   transform: {
-    '^.+\\.(t|j)s$': 'ts-jest',
+    '^.+\\.(t|j)s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   transformIgnorePatterns: ['node_modules/(?!(@faker-js)/)'],
   collectCoverageFrom: [
     'src/**/*.(t|j)s',
     '!src/main.ts',
     '!src/**/*.module.ts',
+    '!src/**/*.spec.ts',
+    '!src/**/*.test.ts',
+    '!src/**/__mocks__/**',
     '!src/**/*.dto.ts',
     '!src/**/*.entity.ts',
     '!src/**/seed/**',
@@ -52,10 +56,5 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/test/setup/jest.setup.ts'],
   moduleNameMapper: {
     '^src/(.*)$': '<rootDir>/src/$1',
-  },
-  globals: {
-    'ts-jest': {
-      isolatedModules: true,
-    },
   },
 };

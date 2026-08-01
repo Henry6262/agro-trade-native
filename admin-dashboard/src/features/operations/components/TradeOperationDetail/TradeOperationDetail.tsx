@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../../../services/api';
 import { API_ENDPOINTS } from '../../../../config/api';
-import type { TradeOperation, Offer } from '../../../../types';
-import { ErrorState, SkeletonCard, EnhancedTooltip } from '../../../../components/common';
+import type { InspectionRequest, Offer, TradeOperation, TransportData } from '../../../../types';
+import { SkeletonCard, EnhancedTooltip } from '../../../../components/common';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,14 +17,15 @@ import { TransportManagementPanel } from '../TransportManagementPanel';
 import { PhaseTransitionPanel } from './PhaseTransitionPanel';
 import { useToast } from '@/hooks/use-toast';
 import { getPhaseColorClasses, getStatusColorClasses } from '../../../../utils/workflowValidation';
+import { getApiErrorMessage } from '../../../../utils/errorHandler';
 
 export const TradeOperationDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [operation, setOperation] = useState<TradeOperation | null>(null);
-  const [inspections, setInspections] = useState<any[]>([]);
-  const [transportData, setTransportData] = useState<any | null>(null);
+  const [inspections, setInspections] = useState<InspectionRequest[]>([]);
+  const [transportData, setTransportData] = useState<TransportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [requestingInspection, setRequestingInspection] = useState<string | null>(null);
@@ -66,9 +67,9 @@ export const TradeOperationDetail: React.FC = () => {
       } else {
         setTransportData(null);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching trade operation data:', err);
-      setError(err.message || 'Failed to load trade operation');
+      setError(getApiErrorMessage(err, 'Failed to load trade operation'));
     } finally {
       setLoading(false);
     }

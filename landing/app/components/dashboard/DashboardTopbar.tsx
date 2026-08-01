@@ -2,7 +2,16 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Bell, CheckCheck, Trash2, Package, Shield, Inbox, Info } from "lucide-react";
+import {
+  Bell,
+  CheckCheck,
+  Trash2,
+  Package,
+  Shield,
+  Inbox,
+  Info,
+  type LucideIcon,
+} from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNotificationStore, type AppNotification } from "@/app/stores/notification.store";
 import { useAuthStore } from "@/app/stores/auth.store";
 
-const TYPE_ICON: Record<string, React.ElementType> = {
+const TYPE_ICON: Record<string, LucideIcon> = {
   trade: Package,
   inspection: Shield,
   offer: Inbox,

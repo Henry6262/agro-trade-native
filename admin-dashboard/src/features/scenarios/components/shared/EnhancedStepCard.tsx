@@ -6,7 +6,7 @@ interface EnhancedStepCardProps {
   index: number;
 }
 
-export const EnhancedStepCard: React.FC<EnhancedStepCardProps> = ({ step, index }) => {
+export const EnhancedStepCard: React.FC<EnhancedStepCardProps> = ({ step }) => {
   const getStatusColor = () => {
     switch (step.status) {
       case 'completed':

@@ -18,7 +18,7 @@
   Copy output into `backend/.env`
 - [ ] **Copy B2G key into .env** (1 min)
   ```
-  B2G_API_KEYS=agro_b2g_741ce5f465e9f75fee7f5c79471d00a9149be4da5ec0668e06bc424cd83a84a8
+  B2G_API_KEYS=replace-with-a-strong-random-key
   ```
 
 ---

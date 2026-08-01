@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { tradeOperationService } from '../../../../services/api';
+import { getApiErrorMessage } from '../../../../utils/errorHandler';
 
 // Phase transition map from SYSTEM_ANALYSIS.md
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -48,9 +49,9 @@ export const PhaseTransitionPanel: React.FC<PhaseTransitionPanelProps> = ({
       toast.success(`Phase advanced to ${targetPhase}`);
       setConfirmPhase(null);
       await onPhaseChanged();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Phase transition failed:', err);
-      toast.error(err?.response?.data?.message || 'Failed to advance phase');
+      toast.error(getApiErrorMessage(err, 'Failed to advance phase'));
     } finally {
       setLoading(false);
     }

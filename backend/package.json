@@ -25,7 +25,7 @@
     "test:e2e": "jest --config ./jest.e2e.config.js --runInBand --forceExit",
     "test:e2e:watch": "jest --config ./jest.e2e.config.js --watch",
     "test:e2e:coverage": "jest --config ./jest.e2e.config.js --coverage",
-    "test:integration": "npm run test:e2e",
+    "test:integration": "jest --config ./jest.integration.config.js --runInBand --forceExit",
     "test:api": "ts-node test/api/test-runner.ts",
     "test:api:watch": "nodemon --watch test --exec ts-node test/api/test-runner.ts",
     "prisma:generate": "prisma generate",

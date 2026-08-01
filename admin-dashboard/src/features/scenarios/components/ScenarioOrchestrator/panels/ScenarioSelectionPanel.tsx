@@ -1,10 +1,11 @@
 import React from 'react';
+import type { ScenarioStep } from '../../../../../types/scenario';
 
 interface ScenarioSelectionPanelProps {
   selectedScenario: string;
   executionMode: 'step' | 'auto';
   autoRunSpeed: number;
-  scenarioSteps: any[];
+  scenarioSteps: ScenarioStep[];
   totalDuration: number;
   onLoadHappyPath: () => void;
   onLoadInspectionFailure: () => void;

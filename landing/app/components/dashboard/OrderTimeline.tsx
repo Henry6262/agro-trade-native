@@ -1,12 +1,22 @@
 "use client";
 
-import { Check, Clock, Truck, Shield, Package, Handshake, Search, X } from "lucide-react";
+import {
+  Check,
+  Clock,
+  Truck,
+  Shield,
+  Package,
+  Handshake,
+  Search,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import type { TradePhase, EscrowStatus } from "@/app/types";
 
 interface TimelineStep {
   phase: TradePhase;
   label: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
 }
 
 const TIMELINE_STEPS: TimelineStep[] = [

@@ -29,7 +29,6 @@ interface ControlsPanelProps {
 }
 
 export const ControlsPanel: React.FC<ControlsPanelProps> = ({
-  selectedScenario,
   scenarioName,
   scenarioDescription,
   stepsCount,

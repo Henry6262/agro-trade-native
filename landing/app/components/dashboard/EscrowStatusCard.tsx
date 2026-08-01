@@ -2,7 +2,15 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Lock, CheckCircle, AlertTriangle, RotateCcw, Clock } from "lucide-react";
+import {
+  Shield,
+  Lock,
+  CheckCircle,
+  AlertTriangle,
+  RotateCcw,
+  Clock,
+  type LucideIcon,
+} from "lucide-react";
 import type { EscrowStatus } from "@/app/types";
 
 interface EscrowStatusCardProps {
@@ -15,7 +23,7 @@ interface EscrowStatusCardProps {
 const ESCROW_CONFIG: Record<EscrowStatus, {
   label: string;
   description: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
   color: string;
   badgeClass: string;
 }> = {

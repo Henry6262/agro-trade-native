@@ -31,6 +31,7 @@ import {
   Shield,
   Settings,
   LogOut,
+  type LucideIcon,
 } from "lucide-react";
 import { useAuth } from "@/app/hooks/useAuth";
 import type { UserRole } from "@/app/types";
@@ -38,7 +39,7 @@ import type { UserRole } from "@/app/types";
 interface NavItem {
   title: string;
   href: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
 }
 
 const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {

@@ -33,7 +33,6 @@ export const ReplacementSellerFinder: React.FC<ReplacementSellerFinderProps> = (
   isOpen,
   onClose,
   tradeOperationId,
-  productId,
   neededQuantity,
   unit,
   onSellersAdded,
@@ -238,7 +237,7 @@ export const ReplacementSellerFinder: React.FC<ReplacementSellerFinderProps> = (
                   />
                 </div>
                 <div className="w-48">
-                  <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+                  <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Sort by..." />
                     </SelectTrigger>

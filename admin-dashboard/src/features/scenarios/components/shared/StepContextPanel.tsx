@@ -88,7 +88,7 @@ export const StepContextPanel: React.FC<StepContextPanelProps> = ({
     }
   };
 
-  const formatDetailValue = (detail: any) => {
+  const formatDetailValue = (detail: BusinessContext['details'][number]) => {
     switch (detail.type) {
       case 'currency':
         return <span className="font-mono font-semibold text-green-600">{detail.value}</span>;
@@ -103,7 +103,7 @@ export const StepContextPanel: React.FC<StepContextPanelProps> = ({
             <div className="flex-1 bg-gray-200 rounded-full h-2 max-w-[100px]">
               <div
                 className="bg-green-500 h-2 rounded-full"
-                style={{ width: `${parseInt(detail.value)}%` }}
+                style={{ width: `${parseInt(String(detail.value))}%` }}
               />
             </div>
           </div>

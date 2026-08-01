@@ -27,11 +27,10 @@ export default function LoginPage() {
             <Wheat className="w-8 h-8 text-brand-wheat" />
           </div>
           <h1 className="text-3xl font-bold text-brand-cream">
-            Welcome to <span className="text-gold">AgroTrade</span>
+            AgroTrade <span className="text-gold">Workflow Prototype</span>
           </h1>
           <p className="text-text-muted text-sm max-w-sm mx-auto">
-            Secure agricultural trading with blockchain escrow protection.
-            Sign in to access your dashboard.
+            Demonstration interface only. It is not connected to a live AgriTek pilot and does not execute trades, payments, custody, settlement or GPS tracking.
           </p>
         </div>
 
@@ -52,7 +51,7 @@ export default function LoginPage() {
                 Connecting...
               </span>
             ) : (
-              "Sign In / Create Account"
+              "Enter Prototype"
             )}
           </button>
 
@@ -64,9 +63,7 @@ export default function LoginPage() {
 
           <div className="text-center">
             <p className="text-text-muted text-xs">
-              Sign in with email, Google, or a crypto wallet.
-              <br />
-              No crypto knowledge required.
+              Authentication is used only to view the prototype role flows.
             </p>
           </div>
         </div>

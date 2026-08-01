@@ -13,7 +13,7 @@ export interface SimulationUser {
 }
 
 export interface TradeState {
-  operation: any;
+  operation: unknown;
   state: {
     phase: string;
     status: string;
@@ -21,7 +21,7 @@ export interface TradeState {
     securedQuantity: number;
     quantityGap: number;
     pendingNegotiations: number;
-    activeTransport: any;
+    activeTransport: unknown;
     inspections: {
       total: number;
       pending: number;
@@ -29,9 +29,9 @@ export interface TradeState {
     };
   };
   actors: {
-    buyer: any;
-    sellers: any[];
-    transporters: any[];
-    inspectors: any[];
+    buyer: SimulationUser | null;
+    sellers: SimulationUser[];
+    transporters: SimulationUser[];
+    inspectors: SimulationUser[];
   };
 }

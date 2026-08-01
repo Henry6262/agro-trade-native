@@ -12,28 +12,28 @@ interface User {
   email: string
   role: SimulationUserRole
   name?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface Product {
   id: string
   name: string
   category: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface SaleListing {
   id: string
   farmerId: string
   productId: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface BuyListing {
   id: string
   buyerId: string
   productId: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface TradeOperation {
@@ -41,41 +41,41 @@ interface TradeOperation {
   buyerId: string
   productId: string
   status: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface Negotiation {
   id: string
   tradeOperationId: string
   sellerId: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface Inspection {
   id: string
   inspectorId: string
   tradeOperationId: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface TransportRequest {
   id: string
   tradeOperationId: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface TransportBid {
   id: string
   transportRequestId: string
   transporterId: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface TransportJob {
   id: string
   transportBidId: string
   transporterId: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface ScenarioContext {
@@ -98,6 +98,12 @@ interface ScenarioContext {
 
 type UserRole = 'FARMER' | 'BUYER' | 'TRANSPORTER' | 'INSPECTOR' | 'ADMIN' | 'COMPANY_ADMIN'
 type EntityType = keyof Omit<ScenarioContext, 'users' | 'products'>
+type ScenarioEntity<EntityKey extends EntityType> = ScenarioContext[EntityKey][number]
+type ResolvedReference<T> = T extends readonly (infer Item)[]
+  ? ResolvedReference<Item>[]
+  : T extends object
+    ? { [Key in keyof T]: ResolvedReference<T[Key]> } & Record<string, unknown>
+    : T
 
 /**
  * Manages scenario execution context with reference resolution
@@ -241,12 +247,16 @@ export class ScenarioContextManager {
   /**
    * Add an entity to the context
    */
-  addEntity(entityType: EntityType, entity: any): void {
+  addEntity<EntityKey extends EntityType>(
+    entityType: EntityKey,
+    entity: ScenarioEntity<EntityKey>
+  ): void {
     if (!(entityType in this.context)) {
       throw new Error(`Invalid entity type: ${entityType}`)
     }
 
-    (this.context[entityType] as any[]).push(entity)
+    const entities = this.context[entityType]
+    entities[entities.length] = entity
 
     if (this.debugMode) {
       console.log(`[ScenarioContext] Added ${entityType}:`, entity.id || 'no-id')
@@ -256,13 +266,16 @@ export class ScenarioContextManager {
   /**
    * Get an entity by type and index
    */
-  getEntity(entityType: EntityType, index: number): any | null {
+  getEntity<EntityKey extends EntityType>(
+    entityType: EntityKey,
+    index: number
+  ): ScenarioEntity<EntityKey> | null {
     if (!(entityType in this.context)) {
       console.error(`[ScenarioContext] Invalid entity type: ${entityType}`)
       return null
     }
 
-    const entities = this.context[entityType] as any[]
+    const entities = this.context[entityType]
     if (index < 0 || index >= entities.length) {
       console.warn(`[ScenarioContext] Entity index out of bounds: ${entityType}[${index}]`)
       return null
@@ -274,13 +287,15 @@ export class ScenarioContextManager {
   /**
    * Get all entities of a type
    */
-  getEntities(entityType: EntityType): any[] {
+  getEntities<EntityKey extends EntityType>(
+    entityType: EntityKey
+  ): Array<ScenarioEntity<EntityKey>> {
     if (!(entityType in this.context)) {
       console.error(`[ScenarioContext] Invalid entity type: ${entityType}`)
       return []
     }
 
-    return this.context[entityType] as any[]
+    return this.context[entityType]
   }
 
   /**
@@ -298,7 +313,9 @@ export class ScenarioContextManager {
   /**
    * Get the most recent entity of a type
    */
-  getLatestEntity(entityType: EntityType): any | null {
+  getLatestEntity<EntityKey extends EntityType>(
+    entityType: EntityKey
+  ): ScenarioEntity<EntityKey> | null {
     const entities = this.getEntities(entityType)
     if (entities.length === 0) {
       return null
@@ -310,18 +327,18 @@ export class ScenarioContextManager {
    * Smart reference resolution
    * Transforms index references to actual IDs
    */
-  resolveReference(payload: any): any {
+  resolveReference<T>(payload: T): ResolvedReference<T> {
     if (!payload || typeof payload !== 'object') {
-      return payload
+      return payload as ResolvedReference<T>
     }
 
     if (Array.isArray(payload)) {
-      return payload.map(item => this.resolveReference(item))
+      return payload.map(item => this.resolveReference(item)) as ResolvedReference<T>
     }
 
-    const resolved: any = {}
+    const resolved: Record<string, unknown> = {}
 
-    for (const [key, value] of Object.entries(payload)) {
+    for (const [key, value] of Object.entries(payload as object)) {
       // Handle user index references
       if (key === 'farmerIndex' && typeof value === 'number') {
         const farmer = this.getUser('FARMER', value)
@@ -392,13 +409,13 @@ export class ScenarioContextManager {
     }
 
     // Include any original keys that weren't transformed
-    for (const [key, value] of Object.entries(payload)) {
+    for (const [key, value] of Object.entries(payload as object)) {
       if (!(key.endsWith('Index') || key === 'productCategory') && !(key in resolved)) {
         resolved[key] = value
       }
     }
 
-    return resolved
+    return resolved as ResolvedReference<T>
   }
 
   /**

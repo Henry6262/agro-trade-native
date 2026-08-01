@@ -9,16 +9,31 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testEnvironment: 'node',
-  testRegex: '.*\.spec\.ts$',
+  // Keep the default suite database-free. Contract/integration suites boot the
+  // full application and run through jest.integration.config.js instead.
+  testMatch: [
+    '<rootDir>/src/**/*.spec.ts',
+    '<rootDir>/tests/dto-snapshots/**/*.spec.ts',
+  ],
+  // HTTP-level controller specs are exercised by the explicit integration
+  // suite. Build artifacts must never be discovered as a second source tree.
+  testPathIgnorePatterns: [
+    '<rootDir>/src/trade-operations/controllers/trade-operation.controller.spec.ts',
+    '<rootDir>/src/trade-operations/controllers/profit.controller.spec.ts',
+  ],
+  modulePathIgnorePatterns: ['<rootDir>/dist/'],
   setupFiles: ['<rootDir>/test/setup/jest.env.js'],
   transform: {
-    '^.+\\.(t|j)s$': 'ts-jest',
+    '^.+\\.(t|j)s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   transformIgnorePatterns: ['node_modules/(?!(@faker-js)/)'],
   collectCoverageFrom: [
     'src/**/*.(t|j)s',
     '!src/main.ts',
     '!src/**/*.module.ts',
+    '!src/**/*.spec.ts',
+    '!src/**/*.test.ts',
+    '!src/**/__mocks__/**',
     '!src/**/*.dto.ts',          // covered by DTO snapshot tests
     '!src/**/*.entity.ts',
     '!src/**/seed/**',
@@ -86,10 +101,5 @@ module.exports = {
 
   moduleNameMapper: {
     '^src/(.*)$': '<rootDir>/src/$1',
-  },
-  globals: {
-    'ts-jest': {
-      isolatedModules: true,
-    },
   },
 };

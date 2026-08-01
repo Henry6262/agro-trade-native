@@ -136,6 +136,8 @@ export interface Negotiation {
   createdAt: string;
   updatedAt: string;
   tradeSeller?: TradeSeller;
+  saleListingId?: string;
+  saleListing?: Pick<SaleListing, 'id'>;
 }
 
 
@@ -378,6 +380,7 @@ export interface TransportJobSummary {
   progress?: number;
   proofOfDelivery?: string | null;
   deliveryPhotos?: string[];
+  documents?: Array<{ type?: string }>;
 }
 
 export interface TransportData {
@@ -421,11 +424,28 @@ export interface CreateTradeOperationDto {
   sellers: CreateTradeSellerInput[];
 }
 
+export interface UpdateTradeOperationDto {
+  phase?: TradePhase;
+  status?: TradeStatus;
+  sellingPrice?: number;
+  targetProfitMargin?: number;
+  expectedDeliveryDate?: Date;
+  transportOptimized?: boolean;
+  adminNotes?: string;
+}
+
+export interface ProfitData {
+  estimatedProfit?: number;
+  profitMargin?: number;
+  [key: string]: string | number | boolean | undefined;
+}
+
 export interface NegotiationSummary {
   id: string;
   tradeSellerId: string;
   sellerId: string;
   sellerName: string;
+  saleListingId?: string;
   status: string;
   offerPrice?: number;
   quantity?: number;

@@ -8,22 +8,22 @@ const problems = [
   {
     n: "01",
     icon: AlertTriangle,
-    title: "Payment Fraud",
-    desc: "Buyers disappear after receiving goods. Farmers lose everything with zero recourse and no legal trail.",
+    title: "A shortage measured in hours",
+    desc: "A late, short or rejected load can leave a Spanish buyer scrambling for qualified replacement fruit before a customer cutoff.",
     accent: "#EF4444",
   },
   {
     n: "02",
     icon: Scale,
-    title: "Quality Disputes",
-    desc: "No independent verification. Buyers claim wrong specs, refuse payment. No mediator. No resolution.",
+    title: "Evidence split across inboxes",
+    desc: "Specifications, analyses, bank details, customs files, inspections and logger records arrive through different people and channels.",
     accent: "#EF4444",
   },
   {
     n: "03",
     icon: FileX,
-    title: "No Paper Trail",
-    desc: "Verbal agreements, no contracts. Zero legal recourse when deals go wrong. The system fails farmers.",
+    title: "Claims without one record",
+    desc: "Origin and arrival teams may use different defect definitions, samples and timestamps, making a fast commercial resolution harder.",
     accent: "#EF4444",
   },
 ];
@@ -31,20 +31,20 @@ const problems = [
 const fixes = [
   {
     icon: ShieldCheck,
-    title: "Smart-Contract Escrow",
-    desc: "Payment locks on Celo blockchain at signing. Released only on confirmed delivery. Code is the middleman — and it never runs.",
+    title: "Written shortage request",
+    desc: "The buyer defines the exact raspberry specification, arrival window, route, pack format, acceptance method and commercial limits first.",
     accent: "#4ADE80",
   },
   {
     icon: UserCheck,
-    title: "Independent Inspector",
-    desc: "A verified inspector confirms quality on-site before shipment. Grade disputes end at pickup — on the record, on-chain.",
+    title: "Controlled evidence gate",
+    desc: "Named operators record supplier, document, analysis, inspection and cold-chain evidence before pickup is authorized.",
     accent: "#4ADE80",
   },
   {
     icon: Database,
-    title: "Immutable Audit Trail",
-    desc: "Every deal, inspection and payment is recorded forever on Celo. Your proof of trade lives on-chain — permanently.",
+    title: "Mirrored inspection record",
+    desc: "Origin and arrival checks use compatible defect definitions, photos, pallet IDs and temperature evidence so exceptions can be compared.",
     accent: "#4ADE80",
   },
 ];
@@ -68,14 +68,14 @@ export function ProblemSection() {
         <FadeInUp>
           <div className="mb-20">
             <span className="text-label" style={{ color: B.wheat }}>
-              The Problem
+              The Exception
             </span>
             <h2 className="mt-4 leading-tight" style={{
               fontSize: "clamp(1.6rem, 4vw, 3rem)",
               fontWeight: 900,
               letterSpacing: "-0.02em",
             }}>
-              <span style={{ color: B.cream }}>&ldquo;$40 billion in agricultural deals.&rdquo;</span>
+              <span style={{ color: B.cream }}>When one raspberry load fails,</span>
               <br />
               <span style={{
                 background: "linear-gradient(135deg, #E8C870, #FFD770, #C4831A)",
@@ -83,12 +83,12 @@ export function ProblemSection() {
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
               }}>
-                &ldquo;Zero payment guarantees.&rdquo;
+                the replacement clock starts.
               </span>
             </h2>
             <p className="mt-5 text-base max-w-2xl leading-relaxed" style={{ color: B.muted }}>
-              Every year, Balkan and Middle Eastern grain traders lose everything to disappeared middlemen,
-              disputed quality claims, and deals built on nothing but a handshake.
+              AgriTek is testing a private exception desk for pre-sold replacement loads into Spain from
+              Portugal or Morocco. The pilot begins with recent evidence and a named buyer need—not a public marketplace listing.
             </p>
           </div>
         </FadeInUp>
@@ -98,12 +98,12 @@ export function ProblemSection() {
           <div style={{ flex: 1, height: 1, background: "linear-gradient(to right, transparent, rgba(239,68,68,0.30))" }} />
           <span className="text-label px-4 py-1.5 rounded-full"
             style={{ color: B.muted, border: `1px solid rgba(255,255,255,0.08)`, background: "rgba(255,255,255,0.03)" }}>
-            without agrotrade
+            unstructured scramble
           </span>
           <div style={{ width: 1, height: 24, background: "rgba(255,255,255,0.1)" }} />
           <span className="text-label px-4 py-1.5 rounded-full"
             style={{ color: "#4ADE80", border: `1px solid rgba(61,122,80,0.25)`, background: "rgba(61,122,80,0.05)" }}>
-            with agrotrade
+            with the AgriTek pilot desk
           </span>
           <div style={{ flex: 1, height: 1, background: "linear-gradient(to left, transparent, rgba(61,122,80,0.25))" }} />
         </div>
@@ -178,7 +178,7 @@ export function ProblemSection() {
 
                     <div className="flex-1">
                       <span className="text-label mb-2 block" style={{ color: f.accent }}>
-                        AgroTrade Fix
+                        Pilot control
                       </span>
                       <h3 className="text-lg font-bold mb-1.5" style={{ color: B.cream }}>{f.title}</h3>
                       <p className="text-sm leading-relaxed" style={{ color: B.muted }}>{f.desc}</p>
@@ -195,7 +195,8 @@ export function ProblemSection() {
           <div className="mt-16 text-center">
             <div className="section-divider mb-6" />
             <p className="text-sm font-semibold" style={{ color: "rgba(232,200,112,0.6)" }}>
-              Every one of these problems is eliminated in AgroTrade.
+              The pilot tests whether one controlled evidence file can make a replacement load faster and more defensible.
+              It does not make AgriTek the seller, buyer, customs principal or guarantor.
             </p>
           </div>
         </FadeInUp>

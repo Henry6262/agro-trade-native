@@ -20,6 +20,7 @@ import {
   RotateCcw,
   DollarSign,
   Loader2,
+  type LucideIcon,
 } from "lucide-react";
 import { apiClient } from "@/app/lib/api";
 import { toast } from "sonner";
@@ -40,7 +41,7 @@ interface TradeWithEscrow {
   createdAt: string;
 }
 
-const ESCROW_BADGE: Record<string, { class: string; icon: React.ElementType }> = {
+const ESCROW_BADGE: Record<string, { class: string; icon: LucideIcon }> = {
   AWAITING_PAYMENT: { class: "border-yellow-500/30 text-yellow-400 bg-yellow-500/10", icon: Lock },
   AWAITING_DELIVERY: { class: "border-blue-500/30 text-blue-400 bg-blue-500/10", icon: Shield },
   COMPLETE: { class: "border-green-500/30 text-green-400 bg-green-500/10", icon: CheckCircle },

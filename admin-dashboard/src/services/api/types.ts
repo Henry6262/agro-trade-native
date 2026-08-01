@@ -12,7 +12,7 @@ export type SimulationUser = {
 };
 
 export type TradeState = {
-  operation: any;
+  operation: unknown;
   state: {
     phase: string;
     status: string;
@@ -20,7 +20,7 @@ export type TradeState = {
     securedQuantity: number;
     quantityGap: number;
     pendingNegotiations: number;
-    activeTransport: any;
+    activeTransport: unknown;
     inspections: {
       total: number;
       pending: number;
@@ -28,9 +28,9 @@ export type TradeState = {
     };
   };
   actors: {
-    buyer: any;
-    sellers: any[];
-    transporters: any[];
-    inspectors: any[];
+    buyer: SimulationUser | null;
+    sellers: SimulationUser[];
+    transporters: SimulationUser[];
+    inspectors: SimulationUser[];
   };
 };

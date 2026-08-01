@@ -16,11 +16,11 @@ export const metadata: Metadata = {
 
   // ── Primary ────────────────────────────────────────────────────────────────
   title: {
-    default: "AgroTrade — Secure Agricultural Trading",
-    template: "%s | AgroTrade",
+    default: "AgriTek — Raspberry Exception Desk",
+    template: "%s | AgriTek",
   },
   description:
-    "Blockchain-secured escrow for B2B agricultural trades. Buyers, sellers, inspectors, and transporters on one platform — no blind trust, no payment risk. From the Balkans to the Middle East and Asia.",
+    "Private pilot for evidence and execution coordination on pre-sold raspberry replacement loads into Spain from Portugal or Morocco.",
 
   // ── Canonical ──────────────────────────────────────────────────────────────
   alternates: {
@@ -29,41 +29,35 @@ export const metadata: Metadata = {
 
   // ── Discovery ──────────────────────────────────────────────────────────────
   keywords: [
-    "agricultural marketplace",
-    "agricultural escrow",
-    "B2B agri trading",
-    "Balkans agriculture",
-    "Eastern Europe grain trade",
-    "Middle East agri import",
-    "blockchain escrow",
-    "cUSD Celo",
-    "farm produce trading",
-    "supply chain security",
-    "food security platform",
-    "agri-fintech",
-    "smart contract escrow",
-    "commodity trading platform",
+    "raspberry supply exception",
+    "fresh produce exception desk",
+    "raspberry replacement load",
+    "Morocco Spain raspberry import",
+    "Portugal Spain raspberry supply",
+    "produce document gate",
+    "cold chain evidence",
+    "arrival inspection coordination",
   ],
   category: "Business",
   authors: [{ name: "AgroTrade", url: BASE_URL }],
-  creator: "AgroTrade",
+  creator: "AgriTek by AgroTrade",
   publisher: "AgroTrade",
 
   // ── Open Graph ─────────────────────────────────────────────────────────────
   openGraph: {
-    title: "AgroTrade — No Blind Trust. Just Trade.",
+    title: "AgriTek — The Raspberry Exception Desk",
     description:
-      "The agricultural trading platform that protects every payment with blockchain escrow on Celo. Starting in the Balkans — built for the world.",
+      "A private pilot for controlled replacement-load coordination into Spain. Direct buyer-exporter trade; no AgriTek custody, title, inventory or credit.",
     url: BASE_URL,
     type: "website",
-    siteName: "AgroTrade",
+    siteName: "AgriTek by AgroTrade",
     locale: "en_US",
     images: [
       {
-        url: "/og-image.png",
+        url: "/og-pilot.png",
         width: 1200,
         height: 630,
-        alt: "AgroTrade — Secure Agricultural Trading Platform",
+        alt: "AgriTek — The Raspberry Exception Desk private pilot",
         type: "image/png",
       },
     ],
@@ -72,10 +66,10 @@ export const metadata: Metadata = {
   // ── Twitter / X ────────────────────────────────────────────────────────────
   twitter: {
     card: "summary_large_image",
-    title: "AgroTrade — No Blind Trust. Just Trade.",
+    title: "AgriTek — The Raspberry Exception Desk",
     description:
-      "Blockchain-secured payments for agricultural trades. From the Balkans to the Middle East and Asia.",
-    images: ["/og-image.png"],
+      "Private raspberry replacement-load pilot into Spain. Buyer contracts and pays the exporter directly.",
+    images: ["/og-pilot.png"],
     // site: "@agrotrade",  // uncomment once handle is live
   },
 
@@ -102,8 +96,8 @@ export const metadata: Metadata = {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
-    "apple-mobile-web-app-title": "AgroTrade",
-    "application-name": "AgroTrade",
+    "apple-mobile-web-app-title": "AgriTek",
+    "application-name": "AgriTek",
     "msapplication-TileColor": "#0C0904",
     "msapplication-TileImage": "/icon-192.png",
   },
@@ -133,7 +127,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} antialiased`}
         style={{ backgroundColor: "#0C0904", color: "#ffffff" }}

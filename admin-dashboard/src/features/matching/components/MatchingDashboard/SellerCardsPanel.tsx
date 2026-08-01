@@ -199,7 +199,7 @@ const SellerCardsPanel: React.FC<SellerCardsPanelProps> = ({
               </p>
             </div>
           </div>
-          <Select value={sortBy} onValueChange={(value) => setSortBy(value as any)}>
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
             <SelectTrigger className="w-[180px] text-sm">
               <SelectValue placeholder="Sort by..." />
             </SelectTrigger>

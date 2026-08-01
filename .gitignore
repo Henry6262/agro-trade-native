@@ -70,6 +70,7 @@ contracts-solana/target/
 
 # Frontend specific
 front-end/.expo/.worktrees/
+front-end/dist-test/
 .worktrees/
 *.docx
 .env.escrow

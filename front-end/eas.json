@@ -28,11 +28,13 @@
     "testflight": {
       "distribution": "store",
       "env": {
-        "EXPO_PUBLIC_ENVIRONMENT": "production"
+        "EXPO_PUBLIC_ENVIRONMENT": "production",
+        "EXPO_PUBLIC_VOICE_API_URL": "https://voice-agent-production-262b.up.railway.app"
       },
       "ios": {
         "simulator": false,
-        "buildConfiguration": "Release"
+        "buildConfiguration": "Release",
+        "image": "latest"
       },
       "autoIncrement": true
     }

@@ -5,7 +5,7 @@ import { X } from 'lucide-react';
 interface EditTradeModalProps {
   operation: Types.TradeOperation;
   onClose: () => void;
-  onUpdate: (updateDto: any) => Promise<void>;
+  onUpdate: (updateDto: Types.UpdateTradeOperationDto) => Promise<void>;
 }
 
 export const EditTradeModal: React.FC<EditTradeModalProps> = ({
@@ -28,7 +28,7 @@ export const EditTradeModal: React.FC<EditTradeModalProps> = ({
     setLoading(true);
 
     try {
-      const updateDto: any = {
+      const updateDto: Types.UpdateTradeOperationDto = {
         adminNotes: formData.adminNotes,
       };
 

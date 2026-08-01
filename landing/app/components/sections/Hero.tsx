@@ -2,30 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { B } from "../brand";
-import { FadeInUp, CountUp } from "../animations";
+import { FadeInUp } from "../animations";
 import Device from "../Device";
 import { AgroVoiceChat, PhaseDots } from "../AgroVoiceDemo";
 import { DecryptedText } from "../reactbits/DecryptedText";
+import { pilotContactHref } from "../../lib/pilotContact";
 
 function AnimatedPhone() {
   return (
     <Device scale={0.55} autoAnimate parallaxStrength={10} rotateStrength={2}>
       <AgroVoiceChat />
     </Device>
-  );
-}
-
-function FloatCard({ children, style, delay = 0, yRange = 9 }: {
-  children: React.ReactNode; style?: React.CSSProperties; delay?: number; yRange?: number;
-}) {
-  return (
-    <motion.div className="absolute z-20" style={style}
-      animate={{ y: [0, -yRange, 0] }}
-      transition={{ duration: 3.5 + delay, repeat: Infinity, ease: "easeInOut", delay }}>
-      {children}
-    </motion.div>
   );
 }
 
@@ -65,12 +54,13 @@ function Particles() {
   );
 }
 
-const stats = [
-  { label: "Active Traders", value: 1200, suffix: "+" },
-  { label: "Secured in Escrow", value: 840, prefix: "$", suffix: "K" },
-  { label: "Countries", value: 12 },
+const pilotScope = [
+  { label: "Product", value: "Fresh raspberry" },
+  { label: "Supply", value: "Portugal / Morocco" },
+  { label: "Destination", value: "Spain" },
 ];
 
+const pilotReviewHref = pilotContactHref("AgriTek raspberry pilot review");
 
 export function Hero() {
   return (
@@ -115,10 +105,10 @@ export function Hero() {
           <FadeInUp>
             <div
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold mb-6 tracking-wide"
-              style={{ border: `1px solid rgba(153,69,255,0.30)`, color: "#C4B5FD", background: "rgba(153,69,255,0.08)", backdropFilter: "blur(12px)" }}
+              style={{ border: `1px solid rgba(232,200,112,0.30)`, color: B.wheat, background: "rgba(232,200,112,0.08)", backdropFilter: "blur(12px)" }}
             >
-              <span className="w-1 h-1 rounded-full animate-pulse" style={{ backgroundColor: "#9945FF" }} />
-              Powered by Solana
+              <span className="w-1 h-1 rounded-full" style={{ backgroundColor: B.wheat }} />
+              Private pilot · controlled access
             </div>
           </FadeInUp>
 
@@ -135,7 +125,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.05 }}>
-                Trade grain,
+                Fix the load,
               </motion.span>
               <motion.span className="block italic" style={{
                 fontSize: "clamp(3rem, 8vw, 6.5rem)",
@@ -150,7 +140,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}>
-                not trust.
+                before the shortage does.
               </motion.span>
               <motion.span className="block mt-3" style={{
                 fontSize: "clamp(1.5rem, 3.5vw, 2.8rem)",
@@ -162,7 +152,7 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.15 }}>
                 <DecryptedText
-                  text="Escrow-protected. Voice-onboarded."
+                  text="The raspberry exception desk."
                   speed={55}
                   animateOn="view"
                   className="inline"
@@ -174,19 +164,29 @@ export function Hero() {
 
           <FadeInUp delay={0.18}>
             <p className="text-lg sm:text-xl leading-relaxed mb-10 max-w-xl" style={{ color: "rgba(240,229,204,0.7)" }}>
-              Voice-onboarded onboarding in seconds. Every payment locks in smart-contract
-              escrow on Solana — funds release only when delivery is verified on-site.{" "}
-              <span style={{ color: B.cream }} className="font-semibold">Automatic. Trustless.</span>
+              AgriTek coordinates the evidence and execution for a pre-sold replacement load
+              when a Spanish buyer faces a time-critical raspberry supply gap.{" "}
+              <span style={{ color: B.cream }} className="font-semibold">One request. One gated file. Named operators.</span>
             </p>
           </FadeInUp>
 
           <FadeInUp delay={0.26}>
             <div className="flex flex-col sm:flex-row items-start gap-3 mb-12">
-              <a href="/auth/login" className="btn-primary">
-                Launch Web Portal <ArrowRight size={16} />
-              </a>
-              <a href="#app" className="btn-secondary">
-                See the App
+              {pilotReviewHref ? (
+                <a href={pilotReviewHref} className="btn-primary">
+                  Request Pilot Review <ArrowRight size={16} />
+                </a>
+              ) : (
+                <span
+                  className="btn-primary cursor-not-allowed opacity-55"
+                  aria-disabled="true"
+                  title="The pilot contact channel has not been verified yet."
+                >
+                  Pilot Contact Pending
+                </span>
+              )}
+              <a href="#how-it-works" className="btn-secondary">
+                See the Exception Workflow
               </a>
             </div>
           </FadeInUp>
@@ -196,15 +196,15 @@ export function Hero() {
               className="grid grid-cols-3 gap-6 max-w-sm"
               style={{ borderTop: `1px solid rgba(232,200,112,0.16)`, paddingTop: "1.25rem" }}
             >
-              {stats.map((s) => (
-                <div key={s.label}>
-                  <div className="text-2xl font-extrabold" style={{
+              {pilotScope.map((item) => (
+                <div key={item.label}>
+                  <div className="text-sm font-extrabold leading-tight" style={{
                     color: B.wheat,
                     textShadow: "0 0 20px rgba(232,200,112,0.5)",
                   }}>
-                    <CountUp target={s.value} prefix={s.prefix} suffix={s.suffix} />
+                    {item.value}
                   </div>
-                  <div className="text-xs mt-0.5 leading-tight" style={{ color: B.muted }}>{s.label}</div>
+                  <div className="text-xs mt-1 leading-tight" style={{ color: B.muted }}>{item.label}</div>
                 </div>
               ))}
             </div>
@@ -236,6 +236,12 @@ export function Hero() {
 
             <AnimatedPhone />
             <div className="mt-4 relative z-10"><PhaseDots /></div>
+            <div
+              className="mt-4 max-w-xs rounded-full px-4 py-2 text-center text-[11px] font-medium"
+              style={{ color: B.muted, border: `1px solid ${B.glassBorder}`, background: "rgba(12,9,4,0.72)" }}
+            >
+              Workflow prototype · no live trade, payment, settlement or GPS data
+            </div>
           </div>
         </FadeInUp>
       </div>

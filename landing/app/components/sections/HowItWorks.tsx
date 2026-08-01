@@ -1,6 +1,6 @@
 "use client";
 
-import { ShoppingCart, Lock, Search, CheckCircle } from "lucide-react";
+import { ClipboardList, FileCheck2, Search, CheckCircle } from "lucide-react";
 import { B } from "../brand";
 import { FadeInUp } from "../animations";
 import { SpotlightCard } from "../reactbits/SpotlightCard";
@@ -10,41 +10,41 @@ import { BlurText } from "../reactbits/BlurText";
 const steps = [
   {
     n: "01",
-    title: "List & Match",
-    desc: "Sellers post produce with specs and price. Buyers browse verified listings and place orders instantly.",
-    icon: ShoppingCart,
-    timing: "< 5 min",
-    onChain: "Transaction recorded on Celo",
+    title: "Define the exception",
+    desc: "The buyer names the shortage, exact raspberry specification, arrival window, permitted origin, customs representative and acceptance method.",
+    icon: ClipboardList,
+    timing: "Buyer-led",
+    onChain: "Record: signed request and specification",
     accent: "#E8C870",
     accentRgb: "232,200,112",
   },
   {
     n: "02",
-    title: "Lock Funds",
-    desc: "Buyer's cUSD payment locks into smart contract escrow. Seller gets confirmation. Zero counterparty risk.",
-    icon: Lock,
-    timing: "Instant",
-    onChain: "cUSD locked in AgroEscrow.sol",
+    title: "Gate the evidence",
+    desc: "AgriTek records exporter, packhouse, lot, analysis, document and bank-verification evidence. Green means complete—not legal or customs clearance.",
+    icon: FileCheck2,
+    timing: "Red / amber / green",
+    onChain: "Record: reviewer, timestamp and open conditions",
     accent: "#C4831A",
     accentRgb: "196,131,26",
   },
   {
     n: "03",
-    title: "Inspect & Ship",
-    desc: "Independent inspector verifies quality on pickup. Transporter bids and ships with live tracking.",
+    title: "Inspect & coordinate",
+    desc: "Named operators capture origin release, pickup, border, arrival and cold-chain evidence. GPS or temperature is live only when a connected device supplies it.",
     icon: Search,
-    timing: "2–24 hrs",
-    onChain: "Inspector credential verified on-chain",
+    timing: "Evidence-backed",
+    onChain: "Record: actor, actual time and source evidence",
     accent: "#E8C870",
     accentRgb: "232,200,112",
   },
   {
     n: "04",
-    title: "Confirm & Release",
-    desc: "Buyer confirms receipt. Escrow releases to seller automatically. The chain records it forever.",
+    title: "Accept, claim and close",
+    desc: "The buyer records acceptance or opens a claim under its direct sale contract. Buyer and exporter resolve payment and remedy through their agreed rails.",
     icon: CheckCircle,
-    timing: "Automatic",
-    onChain: "Smart contract auto-executes",
+    timing: "Direct payment",
+    onChain: "Record: outcome and AgriTek coordination fee",
     accent: "#C4831A",
     accentRgb: "196,131,26",
   },
@@ -71,7 +71,7 @@ export function HowItWorks() {
               letterSpacing: "-0.018em",
             }}>
               <BlurText
-                text="4 steps."
+                text="One exception."
                 className="justify-center"
                 delay={60}
                 style={{ fontSize: "inherit", fontWeight: "inherit", letterSpacing: "inherit", color: B.cream, display: "inline-flex" }}
@@ -83,7 +83,7 @@ export function HowItWorks() {
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
               }}>
-                Zero trust required.
+                One controlled file.
               </span>
             </div>
           </div>
@@ -181,6 +181,20 @@ export function HowItWorks() {
             );
           })}
         </div>
+
+        <FadeInUp delay={0.35}>
+          <div
+            className="mt-10 rounded-2xl px-6 py-5 text-sm leading-relaxed"
+            style={{
+              color: B.muted,
+              background: "rgba(232,200,112,0.05)",
+              border: "1px solid rgba(232,200,112,0.18)",
+            }}
+          >
+            <strong style={{ color: B.cream }}>Transaction boundary:</strong>{" "}
+            the exporter sells directly to the Spanish buyer, the buyer remains importer of record and pays the exporter directly through agreed banking rails. AgriTek never holds customer funds, takes title, owns inventory, extends credit, guarantees either party or clears customs.
+          </div>
+        </FadeInUp>
       </div>
     </section>
   );

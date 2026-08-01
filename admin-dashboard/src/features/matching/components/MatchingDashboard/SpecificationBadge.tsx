@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Specification } from '../../../../utils/specificationHelpers';
-import { formatSpecValue, getSpecDisplayName, getSpecCode, getSpecTooltip } from '../../../../utils/specificationHelpers';
+import { formatSpecValue, getSpecCode, getSpecTooltip } from '../../../../utils/specificationHelpers';
 import { getSpecTheme } from '../../../../styles/designSystem';
 import {
   Tooltip,
@@ -18,7 +18,6 @@ export const SpecificationBadge: React.FC<SpecificationBadgeProps> = ({
   spec,
   variant = 'compact'
 }) => {
-  const displayName = getSpecDisplayName(spec);
   const value = formatSpecValue(spec);
   const code = getSpecCode(spec);
   const theme = getSpecTheme(code);

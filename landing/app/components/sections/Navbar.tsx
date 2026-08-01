@@ -6,10 +6,9 @@ import { Menu, X, ArrowRight } from "lucide-react";
 import { B } from "../brand";
 
 const links = [
-  { href: "#problem", label: "Problem" },
-  { href: "#how-it-works", label: "How It Works" },
-  { href: "#app", label: "App Preview" },
-  { href: "#vault", label: "Security" },
+  { href: "#problem", label: "Pilot Scope" },
+  { href: "#how-it-works", label: "Exception Workflow" },
+  { href: "#cta", label: "Request Review" },
 ];
 
 export function Navbar() {
@@ -24,10 +23,13 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
             <div className="relative w-8 h-8">
-              <Image src="/logo.png" alt="AgroTrade logo" fill className="object-contain" />
+              <Image src="/logo.png" alt="AgroTrade logo" fill sizes="32px" className="object-contain" />
             </div>
             <span className="text-lg font-bold tracking-tight" style={{ color: B.cream }}>
-              Agro<span style={{ color: B.wheat }}>Trade</span>
+              Agri<span style={{ color: B.wheat }}>Tek</span>
+              <span className="ml-2 text-[10px] font-medium uppercase tracking-[0.16em]" style={{ color: B.muted }}>
+                by AgroTrade
+              </span>
             </span>
           </div>
 
@@ -43,7 +45,7 @@ export function Navbar() {
               className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold transition-all hover:opacity-90 active:scale-95"
               style={{ backgroundColor: B.wheat, color: B.bg }}
             >
-              Launch Web Portal
+              Open Prototype
               <ArrowRight size={14} />
             </a>
           </div>
@@ -62,7 +64,7 @@ export function Navbar() {
             ))}
             <a href="/auth/login" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold mt-2"
               style={{ backgroundColor: B.wheat, color: B.bg }} onClick={() => setOpen(false)}>
-              Launch Web Portal
+              Open Prototype
             </a>
           </div>
         )}

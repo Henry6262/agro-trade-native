@@ -16,6 +16,7 @@ import { Mic, MicOff, ArrowLeft, RotateCcw, Check } from 'lucide-react-native';
 import { GradientBackground, COLORS } from '@design-system';
 import { CharacterAvatar } from '../components/CharacterAvatar';
 import { ChatBubble } from '../components/ChatBubble';
+import { TypingIndicator } from '../components/TypingIndicator';
 import { AIConfirmationModal } from '../components/AIConfirmationModal';
 import { useVoiceSession } from '../hooks/useVoiceSession';
 import { useAIModeStore } from '../store/ai-mode.store';
@@ -85,14 +86,14 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
 
   const isListening = voiceState === 'listening';
 
-  // Scroll to bottom on new messages
+  // Scroll to bottom on new messages or when the typing indicator appears
   React.useEffect(() => {
-    if (messages.length > 0) {
+    if (messages.length > 0 || voiceState === 'thinking') {
       setTimeout(() => {
         scrollRef.current?.scrollToEnd({ animated: true });
       }, 100);
     }
-  }, [messages.length]);
+  }, [messages.length, voiceState]);
 
   // Set active on mount, auto-connect
   React.useEffect(() => {
@@ -213,6 +214,8 @@ export const AIModeScreen: React.FC<AIModeScreenProps> = ({ route }) => {
               {messages.map((msg) => (
                 <ChatBubble key={msg.id} message={msg} />
               ))}
+              {/* AI is thinking — three-dot typing bubble on the left */}
+              {voiceState === 'thinking' && <TypingIndicator />}
             </ScrollView>
           </View>
 
