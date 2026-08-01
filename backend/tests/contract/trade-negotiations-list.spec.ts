@@ -42,7 +42,7 @@ describe('GET /api/negotiations/trade-operations/:id/negotiations - List Negotia
         sellerId: testData.users.seller2.id,
         saleListingId: testData.saleListings[1].id,
         requestedQuantity: 50,
-      }
+      },
     ];
 
     for (const seller of sellers) {
@@ -51,7 +51,7 @@ describe('GET /api/negotiations/trade-operations/:id/negotiations - List Negotia
         .set('Authorization', `Bearer ${env.tokens.admin}`)
         .send({ sellers: [seller] })
         .expect(201);
-      
+
       const tradeSellerId = addRes.body.sellersAdded[0].id;
 
       await request(env.app.getHttpServer())
@@ -99,16 +99,13 @@ describe('GET /api/negotiations/trade-operations/:id/negotiations - List Negotia
       expect(response.body.data.totalNegotiations).toBe(2);
     });
 
-    it('should return error response for unknown trade operation', async () => {
-      // Note: getNegotiations in controller has a try-catch that wraps 404
-      // unless I fix it too. Let's see.
+    it('should return 404 for an unknown trade operation', async () => {
       const response = await request(env.app.getHttpServer())
         .get('/api/negotiations/trade-operations/non-existent-id/negotiations')
         .set('Authorization', `Bearer ${env.tokens.admin}`)
-        .expect(200); // Controller currently wraps and returns 200
+        .expect(404);
 
-      expect(response.body.success).toBe(false);
-      expect(response.body.error.message).toContain('not found');
+      expect(response.body.message).toContain('not found');
     });
   });
 });

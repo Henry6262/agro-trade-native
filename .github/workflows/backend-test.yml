@@ -74,7 +74,7 @@ jobs:
           retention-days: 14
 
   integration:
-    name: Integration and contract tests (Postgres + Redis)
+    name: Maintained integration contracts (Postgres + Redis)
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -116,7 +116,7 @@ jobs:
       - run: npx prisma migrate deploy
         name: Apply test database migrations
       - run: npm run test:integration -- --ci
-        name: Run integration and contract suite
+        name: Run maintained integration and contract suite
 
   e2e:
     name: E2E tests (Postgres + Redis)
