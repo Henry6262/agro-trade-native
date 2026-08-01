@@ -215,10 +215,20 @@ AgroTrade is the operational core. **Project Grain Sovereign** extends it upward
 - PostgreSQL
 - Foundry (for contracts)
 
+### Reproducible installs
+
+The backend, admin dashboard, and landing page are independently deployed
+applications. Their local `package-lock.json` files are authoritative for CI
+and deployment. Run their prefixed install commands from the repository root
+so npm targets the standalone lockfile instead of discovering the workspace
+root. The root lockfile is authoritative only for root/mobile workspace
+commands; do not use its transitive versions as the deployment graph for those
+standalone apps.
+
 ### Backend
 ```bash
+npm ci --prefix backend
 cd backend
-npm install
 npx prisma migrate dev
 npm run build
 node dist/main.js
@@ -228,24 +238,24 @@ node dist/main.js
 
 ### Mobile App
 ```bash
+npm ci
 cd front-end
-npm install
 npx expo start
 # Scan QR code with Expo Go (iOS / Android)
 ```
 
 ### Admin Dashboard
 ```bash
+npm ci --prefix admin-dashboard
 cd admin-dashboard
-npm install
 npm run dev
 # Runs on http://localhost:5173
 ```
 
 ### Landing Page
 ```bash
+npm ci --prefix landing
 cd landing
-npm install
 npm run dev
 # Runs on http://localhost:3000
 ```

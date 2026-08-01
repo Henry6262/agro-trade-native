@@ -18,6 +18,8 @@ env:
   REDIS_URL: redis://localhost:6379
   JWT_SECRET: ci-test-secret-key
   PRIVY_APP_ID: ci-privy-app-id
+  GOOGLE_CLIENT_ID: ci-google-client-id
+  GOOGLE_CLIENT_SECRET: ci-google-client-secret
   NODE_ENV: test
 
 jobs:
@@ -37,7 +39,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
           cache-dependency-path: backend/package-lock.json
-      - run: npm ci
+      - run: npm ci --prefix "$GITHUB_WORKSPACE/backend"
         name: Install dependencies
       - run: npx prisma generate
         name: Generate Prisma client
@@ -57,7 +59,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: backend/package-lock.json
-      - run: npm ci
+      - run: npm ci --prefix "$GITHUB_WORKSPACE/backend"
         name: Install dependencies
       - run: npx prisma generate
         name: Generate Prisma client
@@ -107,7 +109,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: backend/package-lock.json
-      - run: npm ci
+      - run: npm ci --prefix "$GITHUB_WORKSPACE/backend"
         name: Install dependencies
       - run: npx prisma generate
         name: Generate Prisma client
@@ -152,7 +154,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: backend/package-lock.json
-      - run: npm ci
+      - run: npm ci --prefix "$GITHUB_WORKSPACE/backend"
         name: Install dependencies
       - run: npx prisma generate
         name: Generate Prisma client
@@ -189,7 +191,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
           cache-dependency-path: backend/package-lock.json
-      - run: npm ci
+      - run: npm ci --prefix "$GITHUB_WORKSPACE/backend"
         name: Install dependencies
       - run: npx prisma generate
         name: Generate Prisma client
