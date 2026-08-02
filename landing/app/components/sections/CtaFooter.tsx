@@ -3,7 +3,9 @@ import Link from 'next/link';
 import { ArrowRight, Banknote, FileCheck2, ShieldCheck, Sparkles } from 'lucide-react';
 import { B } from '../brand';
 import { FadeInUp } from '../animations';
-import { pilotContactEmail, pilotContactHref } from '../../lib/pilotContact';
+import { pilotContactEmail } from '../../lib/pilotContact';
+import { isPilotLeadIntakeReady } from '../../lib/pilotLeadConfig.ts';
+import { PilotLeadForm } from './PilotLeadForm';
 
 const boundaries = [
   { icon: Banknote, label: 'Buyer pays exporter directly' },
@@ -11,9 +13,9 @@ const boundaries = [
   { icon: ShieldCheck, label: 'No AgriTek custody, title or credit' },
 ];
 
-const pilotReviewHref = pilotContactHref('AgriTek trade exception review');
-
 export function CtaFooter() {
+  const pilotLeadIntakeReady = isPilotLeadIntakeReady();
+
   return (
     <footer id="contact" className="experience-section relative overflow-hidden bg-[#060806]">
       <span id="cta" className="absolute -top-24" aria-hidden="true" />
@@ -74,27 +76,35 @@ export function CtaFooter() {
                   whether the workflow can help.
                 </p>
 
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  {pilotReviewHref ? (
-                    <a href={pilotReviewHref} className="btn-primary min-h-12 justify-center">
-                      Request pilot review <ArrowRight size={17} />
-                    </a>
-                  ) : (
-                    <Link href="/experience#brief" className="btn-primary min-h-12 justify-center">
-                      Build your trade brief <ArrowRight size={17} />
+                {pilotLeadIntakeReady ? (
+                  <>
+                    <PilotLeadForm />
+                    <Link
+                      href="/auth/login"
+                      className="mt-2 inline-flex min-h-11 items-center gap-2 text-xs font-bold text-white/44 transition-colors hover:text-white"
+                    >
+                      Or explore the workflow prototype <ArrowRight size={14} />
                     </Link>
-                  )}
-                  <Link href="/auth/login" className="btn-secondary min-h-12 justify-center">
-                    Open workflow prototype
-                  </Link>
-                </div>
-
-                {!pilotReviewHref ? (
-                  <p className="mt-4 text-xs leading-relaxed text-white/35">
-                    The direct pilot inbox is being verified. The brief builder works locally and
-                    does not submit your information.
-                  </p>
-                ) : null}
+                  </>
+                ) : (
+                  <>
+                    <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                      <Link
+                        href="/experience#brief"
+                        className="btn-primary min-h-12 justify-center"
+                      >
+                        Build your trade brief <ArrowRight size={17} />
+                      </Link>
+                      <Link href="/auth/login" className="btn-secondary min-h-12 justify-center">
+                        Open workflow prototype
+                      </Link>
+                    </div>
+                    <p className="mt-4 text-xs leading-relaxed text-white/35">
+                      Direct pilot intake is being verified. The brief builder works locally and
+                      does not submit your information.
+                    </p>
+                  </>
+                )}
               </div>
 
               <div className="border-t border-white/10 bg-black/20 p-7 sm:p-10 lg:border-l lg:border-t-0 lg:p-12">

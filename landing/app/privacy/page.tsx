@@ -37,7 +37,7 @@ export default function PrivacyDraftPage() {
 
       <section>
         <h2 className="mb-3 text-xl font-bold text-white">4. Sharing</h2>
-        <p>Information may be shared only as needed with the buyer, exporter, their authorized operators, customs representative, carrier, inspector, laboratory, insurer or professional advisers involved in the candidate load. Each participant remains responsible for its own legal basis, notices, confidentiality duties and document accuracy.</p>
+        <p>Information may be shared only as needed with the buyer, exporter, their authorized operators, customs representative, carrier, inspector, laboratory, insurer or professional advisers involved in the candidate load. Pilot-enquiry fields are delivered to the configured review inbox through Resend. Each participant remains responsible for its own legal basis, notices, confidentiality duties and document accuracy.</p>
       </section>
 
       <section>
