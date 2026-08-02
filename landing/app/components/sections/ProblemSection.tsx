@@ -1,205 +1,116 @@
-"use client";
+'use client';
 
-import { AlertTriangle, Scale, FileX, ShieldCheck, UserCheck, Database } from "lucide-react";
-import { B } from "../brand";
-import { FadeInUp, StaggerChildren, StaggerItem } from "../animations";
+import { Clock3, EyeOff, Scale, Trash2, ArrowDownRight, ShieldCheck } from 'lucide-react';
+import { B } from '../brand';
+import { FadeInUp, StaggerChildren, StaggerItem } from '../animations';
 
-const problems = [
+const pressurePoints = [
   {
-    n: "01",
-    icon: AlertTriangle,
-    title: "A shortage measured in hours",
-    desc: "A late, short or rejected load can leave a Spanish buyer scrambling for qualified replacement fruit before a customer cutoff.",
-    accent: "#EF4444",
+    icon: Trash2,
+    title: 'Waste',
+    text: 'Qualified supply stays invisible while perishable product, time and working capital are lost.',
   },
   {
-    n: "02",
+    icon: Clock3,
+    title: 'Delay',
+    text: 'Calls, spreadsheets and document chains move slower than fresh produce and customer cutoffs.',
+  },
+  {
+    icon: EyeOff,
+    title: 'Opacity',
+    text: 'Neither side sees one complete, current version of the trade when the decision matters most.',
+  },
+  {
     icon: Scale,
-    title: "Evidence split across inboxes",
-    desc: "Specifications, analyses, bank details, customs files, inspections and logger records arrive through different people and channels.",
-    accent: "#EF4444",
-  },
-  {
-    n: "03",
-    icon: FileX,
-    title: "Claims without one record",
-    desc: "Origin and arrival teams may use different defect definitions, samples and timestamps, making a fast commercial resolution harder.",
-    accent: "#EF4444",
+    title: 'Exploitation',
+    text: 'Information asymmetry leaves producers and buyers negotiating with unequal visibility and leverage.',
   },
 ];
 
-const fixes = [
-  {
-    icon: ShieldCheck,
-    title: "Written shortage request",
-    desc: "The buyer defines the exact raspberry specification, arrival window, route, pack format, acceptance method and commercial limits first.",
-    accent: "#4ADE80",
-  },
-  {
-    icon: UserCheck,
-    title: "Controlled evidence gate",
-    desc: "Named operators record supplier, document, analysis, inspection and cold-chain evidence before pickup is authorized.",
-    accent: "#4ADE80",
-  },
-  {
-    icon: Database,
-    title: "Mirrored inspection record",
-    desc: "Origin and arrival checks use compatible defect definitions, photos, pallet IDs and temperature evidence so exceptions can be compared.",
-    accent: "#4ADE80",
-  },
+const doctrine = [
+  'Name the requirement before sourcing begins.',
+  'Show the evidence behind every green light.',
+  'Keep responsibility visible at every handoff.',
+  'Escalate the next action before the clock wins.',
 ];
 
 export function ProblemSection() {
   return (
-    <section id="problem" className="relative py-28 px-6 lg:px-32 overflow-hidden">
-      {/* ── Background: pure dark ── */}
-      <div className="absolute inset-0 z-0" style={{ backgroundColor: "#0C0904" }} />
-      {/* Red atmospheric glow — left (problem side) */}
-      <div className="pointer-events-none absolute inset-0 z-0" style={{
-        background: "radial-gradient(ellipse 55% 60% at 10% 50%, rgba(196,101,74,0.10) 0%, transparent 60%)",
-      }} />
-      {/* Green atmospheric glow — right (solution side) */}
-      <div className="pointer-events-none absolute inset-0 z-0" style={{
-        background: "radial-gradient(ellipse 55% 60% at 90% 50%, rgba(61,122,80,0.09) 0%, transparent 60%)",
-      }} />
-
-      <div className="max-w-6xl mx-auto relative z-10">
-        {/* Header */}
+    <section
+      id="problem"
+      aria-labelledby="problem-title"
+      className="experience-section relative overflow-hidden bg-[#090705]"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_52%,rgba(208,102,79,0.12),transparent_32%),radial-gradient(circle_at_88%_46%,rgba(74,141,97,0.10),transparent_34%)]" />
+      <div className="relative mx-auto grid max-w-7xl gap-16 px-5 py-24 sm:px-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-start lg:py-36">
         <FadeInUp>
-          <div className="mb-20">
-            <span className="text-label" style={{ color: B.wheat }}>
-              The Exception
+          <div className="lg:sticky lg:top-28">
+            <span className="section-kicker" style={{ color: B.danger }}>
+              The fight
             </span>
-            <h2 className="mt-4 leading-tight" style={{
-              fontSize: "clamp(1.6rem, 4vw, 3rem)",
-              fontWeight: 900,
-              letterSpacing: "-0.02em",
-            }}>
-              <span style={{ color: B.cream }}>When one raspberry load fails,</span>
-              <br />
-              <span style={{
-                background: "linear-gradient(135deg, #E8C870, #FFD770, #C4831A)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}>
-                the replacement clock starts.
+            <h2 id="problem-title" className="section-title mt-4">
+              The enemy is
+              <span className="block" style={{ color: B.danger }}>
+                opacity.
               </span>
             </h2>
-            <p className="mt-5 text-base max-w-2xl leading-relaxed" style={{ color: B.muted }}>
-              AgriTek is testing a private exception desk for pre-sold replacement loads into Spain from
-              Portugal or Morocco. The pilot begins with recent evidence and a named buyer need—not a public marketplace listing.
+            <p className="mt-7 max-w-xl text-base leading-relaxed text-white/55 sm:text-lg">
+              Not a country. Not a people. The fight is against preventable loss, blind commitments,
+              scattered evidence and hidden extraction at the moment decisions matter most.
             </p>
+
+            <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.025] p-5">
+              <div className="flex items-center gap-2" style={{ color: B.greenBright }}>
+                <ShieldCheck size={17} />
+                <span className="text-xs font-extrabold uppercase tracking-[0.16em]">
+                  Operating doctrine
+                </span>
+              </div>
+              <p className="mt-4 text-xl font-semibold leading-snug text-white/84">
+                Proof before promises. Dignity in every role. Responsibility at every handoff.
+              </p>
+            </div>
           </div>
         </FadeInUp>
 
-        {/* VS divider label */}
-        <div className="flex items-center gap-4 mb-8">
-          <div style={{ flex: 1, height: 1, background: "linear-gradient(to right, transparent, rgba(239,68,68,0.30))" }} />
-          <span className="text-label px-4 py-1.5 rounded-full"
-            style={{ color: B.muted, border: `1px solid rgba(255,255,255,0.08)`, background: "rgba(255,255,255,0.03)" }}>
-            unstructured scramble
-          </span>
-          <div style={{ width: 1, height: 24, background: "rgba(255,255,255,0.1)" }} />
-          <span className="text-label px-4 py-1.5 rounded-full"
-            style={{ color: "#4ADE80", border: `1px solid rgba(61,122,80,0.25)`, background: "rgba(61,122,80,0.05)" }}>
-            with the AgriTek pilot desk
-          </span>
-          <div style={{ flex: 1, height: 1, background: "linear-gradient(to left, transparent, rgba(61,122,80,0.25))" }} />
-        </div>
-
-        {/* 2-col layout */}
-        <div className="grid lg:grid-cols-2 gap-5 lg:gap-6">
-          {/* ── Left: Problems ── */}
-          <StaggerChildren stagger={0.13} className="flex flex-col gap-4">
-            {problems.map((p) => {
-              const Icon = p.icon;
-              return (
-                <StaggerItem key={p.title}>
-                  <div
-                    className="flex gap-5 p-6 rounded-2xl items-start relative overflow-hidden"
-                    style={{
-                      background: "rgba(239,68,68,0.04)",
-                      backdropFilter: "blur(20px)",
-                      WebkitBackdropFilter: "blur(20px)",
-                      border: `1px solid ${p.accent}28`,
-                      boxShadow: `0 0 40px ${p.accent}0A, 0 4px 32px rgba(0,0,0,0.6)`,
-                    }}
-                  >
-                    {/* Left danger strip */}
-                    <div className="absolute left-0 top-0 bottom-0 w-0.5 rounded-r-full"
-                      style={{ background: `linear-gradient(to bottom, transparent, ${p.accent}80, transparent)` }} />
-
-                    {/* Faded number */}
-                    <span className="absolute right-3 bottom-1 font-black leading-none select-none pointer-events-none"
-                      style={{ fontSize: "7rem", color: p.accent, opacity: 0.06 }}>
-                      {p.n}
+        <div>
+          <StaggerChildren stagger={0.08} className="grid gap-3 sm:grid-cols-2">
+            {pressurePoints.map(({ icon: Icon, title, text }, index) => (
+              <StaggerItem key={title} className="h-full">
+                <article className="operator-card h-full min-h-56">
+                  <div className="flex items-center justify-between">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[rgba(208,102,79,0.22)] bg-[rgba(208,102,79,0.08)]">
+                      <Icon size={19} style={{ color: B.danger }} />
+                    </div>
+                    <span className="font-mono text-[10px] font-bold tracking-[0.18em] text-white/25">
+                      0{index + 1}
                     </span>
-
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-                      style={{ backgroundColor: `${p.accent}18`, border: `1px solid ${p.accent}25` }}>
-                      <Icon size={18} style={{ color: p.accent }} />
-                    </div>
-
-                    <div className="flex-1 relative z-10">
-                      <h3 className="text-lg font-bold mb-1.5" style={{ color: B.cream }}>{p.title}</h3>
-                      <p className="text-sm leading-relaxed" style={{ color: B.muted }}>{p.desc}</p>
-                    </div>
                   </div>
-                </StaggerItem>
-              );
-            })}
+                  <h3 className="mt-7 text-xl font-extrabold text-white/90">{title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-white/48">{text}</p>
+                </article>
+              </StaggerItem>
+            ))}
           </StaggerChildren>
 
-          {/* ── Right: Fixes ── */}
-          <StaggerChildren stagger={0.13} className="flex flex-col gap-4">
-            {fixes.map((f) => {
-              const Icon = f.icon;
-              return (
-                <StaggerItem key={f.title}>
-                  <div
-                    className="flex gap-5 p-6 rounded-2xl items-start relative overflow-hidden"
-                    style={{
-                      background: "rgba(61,122,80,0.06)",
-                      backdropFilter: "blur(20px)",
-                      WebkitBackdropFilter: "blur(20px)",
-                      border: `1px solid rgba(61,122,80,0.24)`,
-                      boxShadow: `0 0 40px rgba(61,122,80,0.08), 0 4px 32px rgba(0,0,0,0.55)`,
-                    }}
-                  >
-                    {/* Green accent strip */}
-                    <div className="absolute left-0 top-0 bottom-0 w-0.5 rounded-r-full"
-                      style={{ background: `linear-gradient(to bottom, transparent, ${f.accent}90, transparent)` }} />
-
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-                      style={{ backgroundColor: `${f.accent}18`, border: `1px solid ${f.accent}28` }}>
-                      <Icon size={18} style={{ color: f.accent }} />
-                    </div>
-
-                    <div className="flex-1">
-                      <span className="text-label mb-2 block" style={{ color: f.accent }}>
-                        Pilot control
-                      </span>
-                      <h3 className="text-lg font-bold mb-1.5" style={{ color: B.cream }}>{f.title}</h3>
-                      <p className="text-sm leading-relaxed" style={{ color: B.muted }}>{f.desc}</p>
-                    </div>
-                  </div>
-                </StaggerItem>
-              );
-            })}
-          </StaggerChildren>
+          <FadeInUp delay={0.2}>
+            <div
+              className="mt-4 overflow-hidden rounded-2xl border"
+              style={{ borderColor: `${B.wheat}2E`, background: `${B.wheat}09` }}
+            >
+              {doctrine.map((item, index) => (
+                <div
+                  key={item}
+                  className="flex items-center gap-4 px-5 py-4 text-sm text-white/65"
+                  style={{ borderTop: index ? '1px solid rgba(255,255,255,0.07)' : undefined }}
+                >
+                  <ArrowDownRight size={15} style={{ color: B.wheat }} />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </FadeInUp>
         </div>
-
-        {/* Bottom closing line */}
-        <FadeInUp delay={0.5}>
-          <div className="mt-16 text-center">
-            <div className="section-divider mb-6" />
-            <p className="text-sm font-semibold" style={{ color: "rgba(232,200,112,0.6)" }}>
-              The pilot tests whether one controlled evidence file can make a replacement load faster and more defensible.
-              It does not make AgriTek the seller, buyer, customs principal or guarantor.
-            </p>
-          </div>
-        </FadeInUp>
       </div>
     </section>
   );

@@ -1,26 +1,26 @@
-import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import { ThemeProvider } from "next-themes";
-import { Providers } from "./providers";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Geist } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
+import { Providers } from './providers';
+import './globals.css';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
-const BASE_URL = "https://agrotrade.africa";
+const BASE_URL = 'https://agrotrade.africa';
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
 
   // ── Primary ────────────────────────────────────────────────────────────────
   title: {
-    default: "AgriTek — Raspberry Exception Desk",
-    template: "%s | AgriTek",
+    default: 'AgriTek — Trade Operating System',
+    template: '%s | AgriTek',
   },
   description:
-    "Private pilot for evidence and execution coordination on pre-sold raspberry replacement loads into Spain from Portugal or Morocco.",
+    'One evidence-backed workflow for cross-border produce trade—from buyer requirement and supply readiness to inspection, movement, acceptance and claims.',
 
   // ── Canonical ──────────────────────────────────────────────────────────────
   alternates: {
@@ -29,77 +29,77 @@ export const metadata: Metadata = {
 
   // ── Discovery ──────────────────────────────────────────────────────────────
   keywords: [
-    "raspberry supply exception",
-    "fresh produce exception desk",
-    "raspberry replacement load",
-    "Morocco Spain raspberry import",
-    "Portugal Spain raspberry supply",
-    "produce document gate",
-    "cold chain evidence",
-    "arrival inspection coordination",
+    'agricultural trade operating system',
+    'cross-border produce trade',
+    'agricultural supply chain evidence',
+    'produce trade workflow',
+    'Morocco Portugal Spain trade corridor',
+    'raspberry supply exception',
+    'fresh produce exception desk',
+    'raspberry replacement load',
+    'Morocco Spain raspberry import',
+    'Portugal Spain raspberry supply',
+    'produce document gate',
+    'cold chain evidence',
+    'arrival inspection coordination',
   ],
-  category: "Business",
-  authors: [{ name: "AgroTrade", url: BASE_URL }],
-  creator: "AgriTek by AgroTrade",
-  publisher: "AgroTrade",
+  category: 'Business',
+  authors: [{ name: 'AgroTrade', url: BASE_URL }],
+  creator: 'AgriTek by AgroTrade',
+  publisher: 'AgroTrade',
 
   // ── Open Graph ─────────────────────────────────────────────────────────────
   openGraph: {
-    title: "AgriTek — The Raspberry Exception Desk",
+    title: 'AgriTek — Move Food. Move Trust.',
     description:
-      "A private pilot for controlled replacement-load coordination into Spain. Direct buyer-exporter trade; no AgriTek custody, title, inventory or credit.",
+      'The evidence-backed operating workflow for every critical handoff in cross-border produce trade. Starting with a private Morocco/Portugal-to-Spain raspberry pilot.',
     url: BASE_URL,
-    type: "website",
-    siteName: "AgriTek by AgroTrade",
-    locale: "en_US",
+    type: 'website',
+    siteName: 'AgriTek by AgroTrade',
+    locale: 'en_US',
     images: [
       {
-        url: "/og-pilot.png",
-        width: 1200,
-        height: 630,
-        alt: "AgriTek — The Raspberry Exception Desk private pilot",
-        type: "image/png",
+        url: '/visuals/agritek-cold-chain-hero.jpg',
+        width: 1808,
+        height: 870,
+        alt: 'AgriTek cold-chain operators preparing a raspberry trade corridor',
+        type: 'image/jpeg',
       },
     ],
   },
 
   // ── Twitter / X ────────────────────────────────────────────────────────────
   twitter: {
-    card: "summary_large_image",
-    title: "AgriTek — The Raspberry Exception Desk",
-    description:
-      "Private raspberry replacement-load pilot into Spain. Buyer contracts and pays the exporter directly.",
-    images: ["/og-pilot.png"],
+    card: 'summary_large_image',
+    title: 'AgriTek — Move Food. Move Trust.',
+    description: 'One operating record for the critical handoffs in cross-border produce trade.',
+    images: ['/visuals/agritek-cold-chain-hero.jpg'],
     // site: "@agrotrade",  // uncomment once handle is live
   },
 
   // ── Icons ──────────────────────────────────────────────────────────────────
   icons: {
     icon: [
-      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: '/favicon-16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
     ],
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
-    other: [
-      { rel: "mask-icon", url: "/logo.png" },
-    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    other: [{ rel: 'mask-icon', url: '/logo.png' }],
   },
 
   // ── PWA / theme colour ─────────────────────────────────────────────────────
   // Note: manifest.ts handles the full PWA manifest at /manifest.json
   // This sets the browser chrome colour on mobile
   other: {
-    "theme-color": "#E8C870",
-    "color-scheme": "dark",
-    "mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "black-translucent",
-    "apple-mobile-web-app-title": "AgriTek",
-    "application-name": "AgriTek",
-    "msapplication-TileColor": "#0C0904",
-    "msapplication-TileImage": "/icon-192.png",
+    'theme-color': '#070907',
+    'color-scheme': 'dark',
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    'apple-mobile-web-app-title': 'AgriTek',
+    'application-name': 'AgriTek',
+    'msapplication-TileColor': '#0C0904',
+    'msapplication-TileImage': '/icon-192.png',
   },
 
   // ── Crawling ───────────────────────────────────────────────────────────────
@@ -109,9 +109,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   },
 
@@ -130,8 +130,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} antialiased`}
-        style={{ backgroundColor: "#0C0904", color: "#ffffff" }}
+        style={{ backgroundColor: '#070907', color: '#ffffff' }}
       >
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <Providers>{children}</Providers>
         </ThemeProvider>

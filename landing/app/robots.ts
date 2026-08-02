@@ -1,22 +1,23 @@
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
-        userAgent: "*",
-        allow: "/",
+        userAgent: '*',
+        allow: '/',
         disallow: [
-          "/api/",
-          "/_next/",
-          "/auth/",
-          "/blog/",
-          "/dashboard/",
-          "/stablehacks-demo-day",
+          '/api/',
+          '/_next/',
+          '/auth/',
+          '/blog/',
+          '/dashboard/',
+          '/experience',
+          '/stablehacks-demo-day',
         ],
       },
     ],
-    sitemap: "https://agrotrade.africa/sitemap.xml",
-    host: "https://agrotrade.africa",
+    sitemap: 'https://agrotrade.africa/sitemap.xml',
+    host: 'https://agrotrade.africa',
   };
 }
