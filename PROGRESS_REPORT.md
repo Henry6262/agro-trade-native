@@ -10,6 +10,8 @@ _Auto-generated: 2026-08-03_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `5e87919` 2026-08-03 — fix(vercel): make Next SWC dependency portable (#133)
+- `9fac45c` 2026-08-03 — docs: auto-update progress report [skip ci]
 - `cbd72cb` 2026-07-27 — docs: auto-update progress report [skip ci]
 - `ab31ab2` 2026-07-20 — docs: auto-update progress report [skip ci]
 - `aebee1a` 2026-07-13 — docs: auto-update progress report [skip ci]
@@ -23,7 +25,5 @@ _Auto-generated: 2026-08-03_
 - `76a471e` 2026-06-17 — feat(backend): plantation-rounds controller + module + AppModule wiring
 - `fe8eff4` 2026-06-17 — feat(backend): add PlantationNftsService and GroveStakingService
 - `aadef0f` 2026-06-17 — feat(backend): plantation rounds service — create, invest, distribute, list
-- `510a61d` 2026-06-17 — feat(backend): dtos, contracts abi constants, env var declarations for plantatio
-- `33bc1b8` 2026-06-17 — fix(contracts): fix PlantationRound — CLOSED state, dust claim, fee withdrawal, 
 
 ## Open Issues
