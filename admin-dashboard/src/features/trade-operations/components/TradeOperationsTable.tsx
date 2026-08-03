@@ -4,7 +4,6 @@ import { tradeOperationService } from '../../../services/api';
 import { format } from 'date-fns';
 import { 
   Eye, 
-  Edit, 
   Trash2, 
   Plus, 
   RefreshCw, 

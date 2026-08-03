@@ -1,44 +1,29 @@
-import { Navbar } from "./components/sections/Navbar";
-import { Hero } from "./components/sections/Hero";
-
-import { GlobalReach } from "./components/sections/GlobalReach";
-import { ProblemSection } from "./components/sections/ProblemSection";
-import { HowItWorks } from "./components/sections/HowItWorks";
-import { AppShowcase } from "./components/sections/AppShowcase";
-import { LiveDealFlow } from "./components/sections/LiveDealFlow";
-import { RolesSection } from "./components/sections/RolesSection";
-import { VaultSection } from "./components/sections/VaultSection";
-import { SkyHarvestSection } from "./components/sections/SkyHarvestSection";
-import { CtaFooter } from "./components/sections/CtaFooter";
-import { SectionDivider } from "./components/SectionDivider";
-import { JsonLd } from "./components/JsonLd";
+import { Navbar } from './components/sections/Navbar';
+import { GlobalHero } from './components/sections/GlobalHero';
+import { ProblemSection } from './components/sections/ProblemSection';
+import { CorridorControlSection } from './components/sections/CorridorControlSection';
+import { TradeStackSection } from './components/sections/TradeStackSection';
+import { HowItWorks } from './components/sections/HowItWorks';
+import { RoleJourneysSection } from './components/sections/RoleJourneysSection';
+import { ReadinessLedger } from './components/sections/ReadinessLedger';
+import { MissionSection } from './components/sections/MissionSection';
+import { CtaFooter } from './components/sections/CtaFooter';
+import { JsonLd } from './components/JsonLd';
 
 export default function LandingPage() {
   return (
-    <main style={{ backgroundColor: "#0C0904" }}>
+    <main id="main-content" style={{ backgroundColor: '#070907' }}>
       <JsonLd />
       <Navbar />
-      <Hero />
-      <div style={{ paddingLeft: "7.5%", paddingRight: "7.5%" }}>
-        <SectionDivider />
-        <GlobalReach />
-        <SectionDivider />
-        <ProblemSection />
-        <SectionDivider />
-        <HowItWorks />
-        <SectionDivider />
-        <AppShowcase />
-        <SectionDivider />
-        <SkyHarvestSection />
-        <SectionDivider />
-        <LiveDealFlow />
-        <SectionDivider />
-        <RolesSection />
-        <SectionDivider />
-        <VaultSection />
-        <SectionDivider />
-        <CtaFooter />
-      </div>
+      <GlobalHero />
+      <ProblemSection />
+      <CorridorControlSection />
+      <TradeStackSection />
+      <HowItWorks />
+      <RoleJourneysSection />
+      <ReadinessLedger />
+      <MissionSection />
+      <CtaFooter />
     </main>
   );
 }

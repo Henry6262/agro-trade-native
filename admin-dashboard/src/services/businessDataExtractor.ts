@@ -27,6 +27,59 @@ export interface BusinessContext {
   };
 }
 
+interface BusinessLocation {
+  address?: string;
+  city?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+interface BusinessData {
+  role?: string;
+  companyName?: string;
+  name?: string;
+  email?: string;
+  location?: BusinessLocation;
+  deliveryLocation?: BusinessLocation;
+  verified?: boolean;
+  productType?: string;
+  productCategory?: string;
+  quantity?: number;
+  unit?: string;
+  pricePerTon?: number;
+  pricePerUnit?: number;
+  maxPricePerTon?: number;
+  maxPricePerUnit?: number;
+  latitude?: number;
+  longitude?: number;
+  adminMargin?: number;
+  buyerCommission?: number;
+  sellerCommission?: number;
+  requestedQuantity?: number;
+  offeredPrice?: number;
+  expiresAt?: string;
+  priority?: string;
+  inspectorName?: string;
+  passed?: boolean;
+  result?: string;
+  qualityScore?: number;
+  moistureContent?: number;
+  proteinLevel?: number;
+  notes?: string;
+  distanceKm?: number;
+  estimatedDuration?: number;
+  estimatedHours?: number;
+  bidAmount?: number;
+  budget?: number;
+  pickupLat?: number;
+  pickupLng?: number;
+  deliveryLat?: number;
+  deliveryLng?: number;
+  fleetSize?: number;
+  action?: string;
+}
+
 export class BusinessDataExtractor {
   private static formatCurrency(amount: number): string {
     return new Intl.NumberFormat('en-US', {
@@ -41,7 +94,7 @@ export class BusinessDataExtractor {
     return `${quantity.toLocaleString()} ${unit}`;
   }
 
-  private static formatLocation(location: any): string {
+  private static formatLocation(location?: BusinessLocation): string {
     if (!location) return 'Location not specified';
     if (location.address) return location.address;
     if (location.city && location.country) return `${location.city}, ${location.country}`;
@@ -51,8 +104,13 @@ export class BusinessDataExtractor {
     return 'Location provided';
   }
 
-  static extractContext(step: ScenarioStep, result?: any): BusinessContext {
-    const { action, data, actor } = step;
+  private static asBusinessData(value: unknown): BusinessData | null {
+    return typeof value === 'object' && value !== null ? value as BusinessData : null;
+  }
+
+  static extractContext(step: ScenarioStep, result?: unknown): BusinessContext {
+    const { action } = step;
+    const data = this.asBusinessData(step.data) || {};
 
     switch (action) {
       case 'createTestUser':
@@ -96,18 +154,18 @@ export class BusinessDataExtractor {
 
       case 'adminSelectBid':
       case 'completeDelivery':
-        return this.extractTransportStatusContext(data, result);
+        return this.extractTransportStatusContext(data);
 
       case 'completeTrade':
-        return this.extractTradeCompletionContext(data, result);
+        return this.extractTradeCompletionContext();
 
       default:
-        return this.extractGenericContext(step, result);
+        return this.extractGenericContext(step);
     }
   }
 
-  private static extractUserContext(data: any, result?: any): BusinessContext {
-    const user = result || data;
+  private static extractUserContext(data: BusinessData, result?: unknown): BusinessContext {
+    const user = this.asBusinessData(result) || data;
     const roleIcons: Record<string, string> = {
       FARMER: '👨‍🌾',
       SELLER: '👨‍🌾',
@@ -155,8 +213,8 @@ export class BusinessDataExtractor {
     return context;
   }
 
-  private static extractSaleListingContext(data: any, result?: any): BusinessContext {
-    const listing = result || data;
+  private static extractSaleListingContext(data: BusinessData, result?: unknown): BusinessContext {
+    const listing = this.asBusinessData(result) || data;
 
     return {
       primary: {
@@ -197,8 +255,8 @@ export class BusinessDataExtractor {
     };
   }
 
-  private static extractBuyListingContext(data: any, result?: any): BusinessContext {
-    const listing = result || data;
+  private static extractBuyListingContext(data: BusinessData, result?: unknown): BusinessContext {
+    const listing = this.asBusinessData(result) || data;
 
     return {
       primary: {
@@ -239,8 +297,8 @@ export class BusinessDataExtractor {
     };
   }
 
-  private static extractTradeOperationContext(data: any, result?: any): BusinessContext {
-    const operation = result || data;
+  private static extractTradeOperationContext(data: BusinessData, result?: unknown): BusinessContext {
+    const operation = this.asBusinessData(result) || data;
 
     return {
       primary: {
@@ -275,15 +333,15 @@ export class BusinessDataExtractor {
     };
   }
 
-  private static extractNegotiationContext(data: any, result: any = {}, type: 'sent' | 'accepted'): BusinessContext {
-    const negotiation = result || data;
+  private static extractNegotiationContext(data: BusinessData, result: unknown, type: 'sent' | 'accepted'): BusinessContext {
+    const negotiation = this.asBusinessData(result) || data;
 
     const icon = type === 'sent' ? '📤' : '✅';
     const title = type === 'sent' ? 'Offer Sent' : 'Offer Accepted';
     const statusType = type === 'sent' ? 'info' : 'success';
     const statusMessage = type === 'sent' ? 'Awaiting Response' : 'Deal Confirmed';
 
-    const details: any[] = [
+    const details: BusinessContext['details'] = [
       {
         label: 'Quantity',
         value: this.formatQuantity(negotiation.requestedQuantity || negotiation.quantity, 'tons'),
@@ -327,7 +385,8 @@ export class BusinessDataExtractor {
     };
   }
 
-  private static extractInspectionRequestContext(data: any, result?: any): BusinessContext {
+  private static extractInspectionRequestContext(data: BusinessData, result?: unknown): BusinessContext {
+    const resultData = this.asBusinessData(result);
     return {
       primary: {
         icon: '🔬',
@@ -349,7 +408,7 @@ export class BusinessDataExtractor {
         },
         {
           label: 'Inspector',
-          value: result?.inspectorName || 'Assigning Inspector...',
+          value: resultData?.inspectorName || 'Assigning Inspector...',
           icon: '🔍',
           type: 'text',
         },
@@ -361,8 +420,8 @@ export class BusinessDataExtractor {
     };
   }
 
-  private static extractInspectionResultContext(data: any, result?: any): BusinessContext {
-    const inspection = result || data;
+  private static extractInspectionResultContext(data: BusinessData, result?: unknown): BusinessContext {
+    const inspection = this.asBusinessData(result) || data;
     const passed = inspection.passed || inspection.result === 'PASSED';
 
     return {
@@ -404,8 +463,8 @@ export class BusinessDataExtractor {
     };
   }
 
-  private static extractTransportRequestContext(data: any, result?: any): BusinessContext {
-    const transport = result || data;
+  private static extractTransportRequestContext(data: BusinessData, result?: unknown): BusinessContext {
+    const transport = this.asBusinessData(result) || data;
 
     return {
       primary: {
@@ -452,8 +511,8 @@ export class BusinessDataExtractor {
     };
   }
 
-  private static extractTransportBidContext(data: any, result: any = {}): BusinessContext {
-    const bid = result || data;
+  private static extractTransportBidContext(data: BusinessData, result?: unknown): BusinessContext {
+    const bid = this.asBusinessData(result) || data;
 
     return {
       primary: {
@@ -494,7 +553,7 @@ export class BusinessDataExtractor {
     };
   }
 
-  private static extractTransportStatusContext(data: any, result?: any): BusinessContext {
+  private static extractTransportStatusContext(data: BusinessData): BusinessContext {
     const isDelivery = data.action === 'completeDelivery';
 
     return {
@@ -530,7 +589,7 @@ export class BusinessDataExtractor {
     };
   }
 
-  private static extractTradeCompletionContext(data: any, result?: any): BusinessContext {
+  private static extractTradeCompletionContext(): BusinessContext {
     return {
       primary: {
         icon: '🎉',
@@ -570,7 +629,7 @@ export class BusinessDataExtractor {
     };
   }
 
-  private static extractGenericContext(step: ScenarioStep, result?: any): BusinessContext {
+  private static extractGenericContext(step: ScenarioStep): BusinessContext {
     return {
       primary: {
         icon: '⚙️',

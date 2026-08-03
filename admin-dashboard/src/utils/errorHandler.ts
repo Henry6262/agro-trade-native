@@ -1,6 +1,14 @@
 import { toast } from 'sonner';
 import axios from 'axios';
 
+export const getApiErrorMessage = (error: unknown, fallbackMessage: string): string => {
+  if (axios.isAxiosError<{ message?: string }>(error)) {
+    return error.response?.data?.message || fallbackMessage;
+  }
+
+  return error instanceof Error && error.message ? error.message : fallbackMessage;
+};
+
 export const handleApiError = (error: unknown, fallbackMessage = 'An error occurred') => {
   if (axios.isAxiosError(error)) {
     const message = error.response?.data?.message || fallbackMessage;

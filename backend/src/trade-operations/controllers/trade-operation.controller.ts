@@ -20,17 +20,32 @@ import {
   ApiBearerAuth,
 } from "@nestjs/swagger";
 import { TradeOperationService } from "../services/trade-operation.service";
+import { ProfitCalculationService } from "../services/profit-calculation.service";
 import { NegotiationService } from "../../negotiations/services/negotiation.service";
+import { TransportCostService } from "../../transport/services/transport-cost.service";
+import { PrismaService } from "../../prisma/prisma.service";
 import { JwtAuthGuard } from "../../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../../auth/guards/roles.guard";
 import { Roles } from "../../auth/decorators/roles.decorator";
-import { UserRole, TradePhase } from "@prisma/client";
+import { UserRole, TradePhase, NegotiationStatus } from "@prisma/client";
 import {
   AddSellersDto,
   CreateOffersDto,
   CreateTradeOperationDto,
 } from "../dto/create-trade-operation.dto";
 import { UpdateTradeOperationDto } from "../dto/update-trade-operation.dto";
+import {
+  CalculateTransportRequestDto,
+  CalculateTransportResponseDto,
+} from "../dto/operations-extra.dto";
+import {
+  BatchOfferDto,
+  CreateOfferDto,
+} from "../../negotiations/dto/negotiation.dto";
+import {
+  parseBoundedIntegerQuery,
+  parseNegotiationStatusQuery,
+} from "../utils/query-params.util";
 
 @ApiTags("Trade Operations")
 @ApiBearerAuth()
@@ -39,7 +54,10 @@ import { UpdateTradeOperationDto } from "../dto/update-trade-operation.dto";
 export class TradeOperationController {
   constructor(
     private readonly tradeOperationService: TradeOperationService,
+    private readonly profitCalculationService: ProfitCalculationService,
     private readonly negotiationService: NegotiationService,
+    private readonly transportCostService: TransportCostService,
+    private readonly prisma: PrismaService,
   ) {}
 
   @Post()
@@ -116,9 +134,137 @@ export class TradeOperationController {
   }
 
   @Get(":id")
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: "Get trade operation by ID" })
   async findOne(@Param("id") id: string) {
     return await this.tradeOperationService.findOne(id);
+  }
+
+  /**
+   * Backward-compatible negotiation route used by the mobile client.
+   * The canonical route remains /negotiations/trade-operations/:id/offers.
+   */
+  @Post(":id/offers")
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Send an offer for a trade operation" })
+  async sendOffer(
+    @Param("id") id: string,
+    @Body() dto: CreateOfferDto,
+  ) {
+    const negotiation = await this.negotiationService.sendOffer(id, dto);
+    return { success: true, data: negotiation };
+  }
+
+  /**
+   * Backward-compatible batch route used by the mobile client.
+   */
+  @Post(":id/offers/batch")
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: "Send batch offers for a trade operation" })
+  async sendBatchOffers(
+    @Param("id") id: string,
+    @Body() dto: BatchOfferDto,
+  ) {
+    const result = await this.negotiationService.sendBatchOffers(
+      id,
+      dto.offers,
+    );
+    return { success: true, data: result };
+  }
+
+  /**
+   * Backward-compatible list route used by the mobile client.
+   */
+  @Get(":id/negotiations")
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: "Get negotiations for a trade operation" })
+  async getNegotiations(
+    @Param("id") id: string,
+    @Query("status") status?: unknown,
+    @Query("limit") limit?: unknown,
+    @Query("offset") offset?: unknown,
+  ) {
+    const statusFilter = parseNegotiationStatusQuery(status);
+    const parsedLimit = parseBoundedIntegerQuery(limit, {
+      field: "limit",
+      defaultValue: 100,
+      min: 1,
+      max: 100,
+    });
+    const parsedOffset = parseBoundedIntegerQuery(offset, {
+      field: "offset",
+      defaultValue: 0,
+      min: 0,
+      max: 100_000,
+    });
+
+    const data = await this.negotiationService.getNegotiations(
+      id,
+      statusFilter,
+      parsedLimit,
+      parsedOffset,
+    );
+    return { success: true, data };
+  }
+
+  /**
+   * Backward-compatible expiring-negotiations route used by the mobile client.
+   */
+  @Get(":id/negotiations/expiring")
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: "Get expiring negotiations for a trade operation" })
+  async getExpiringNegotiations(
+    @Param("id") id: string,
+    @Query("hours") hours?: unknown,
+  ) {
+    const parsedHours = parseBoundedIntegerQuery(hours, {
+      field: "hours",
+      defaultValue: 24,
+      min: 1,
+      max: 24 * 30,
+    });
+    const data = await this.negotiationService.getNegotiations(
+      id,
+      NegotiationStatus.PENDING,
+      100,
+      0,
+    );
+    const now = Date.now();
+    const threshold = now + parsedHours * 60 * 60 * 1000;
+    const expiringSoon = data.negotiations.filter((negotiation) => {
+      const expiry = new Date(negotiation.expiresAt).getTime();
+      return expiry > now && expiry <= threshold;
+    });
+    const expired = data.negotiations.filter(
+      (negotiation) => new Date(negotiation.expiresAt).getTime() <= now,
+    );
+
+    return {
+      success: true,
+      data: {
+        expiringSoon: expiringSoon.map((negotiation) => ({
+          id: negotiation.id,
+          hoursRemaining: negotiation.hoursUntilExpiry || 0,
+          urgency:
+            (negotiation.hoursUntilExpiry || 0) < 6
+              ? "HIGH"
+              : (negotiation.hoursUntilExpiry || 0) < 12
+                ? "MEDIUM"
+                : "LOW",
+          recommendedAction:
+            (negotiation.hoursUntilExpiry || 0) < 6
+              ? "Follow up immediately"
+              : "Schedule follow-up",
+        })),
+        summary: {
+          total: data.negotiations.length,
+          expiringSoon: expiringSoon.length,
+          expired: expired.length,
+        },
+      },
+    };
   }
 
   @Post(":id/sellers")
@@ -172,6 +318,85 @@ export class TradeOperationController {
     return await this.tradeOperationService.optimizeTransport(id, algorithm);
   }
 
+  @Post("calculate-transport")
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: "Calculate transport costs for sellers to a buyer address",
+  })
+  async calculateTransport(
+    @Body() dto: CalculateTransportRequestDto,
+  ): Promise<CalculateTransportResponseDto> {
+    const buyerAddress = await this.prisma.address.findUnique({
+      where: { id: dto.buyerAddressId },
+    });
+    if (
+      buyerAddress?.latitude == null ||
+      buyerAddress?.longitude == null
+    ) {
+      throw new BadRequestException(
+        "Buyer address with valid coordinates is required",
+      );
+    }
+
+    const [users, listings] = await Promise.all([
+      this.prisma.user.findMany({
+        where: { id: { in: dto.sellerIds } },
+        include: { addresses: true },
+      }),
+      this.prisma.saleListing.findMany({
+        where: { sellerId: { in: dto.sellerIds } },
+        include: { address: true },
+      }),
+    ]);
+
+    const sellerLocations = dto.sellerIds.flatMap((sellerId) => {
+      const listingAddress = listings.find(
+        (listing) =>
+          listing.sellerId === sellerId &&
+          listing.address?.latitude != null &&
+          listing.address?.longitude != null,
+      )?.address;
+      const userAddress = users
+        .find((user) => user.id === sellerId)
+        ?.addresses.find(
+          (address) =>
+            address.latitude != null && address.longitude != null,
+        );
+      const address = listingAddress ?? userAddress;
+      return address?.latitude != null && address.longitude != null
+        ? [{ id: sellerId, lat: address.latitude, lng: address.longitude }]
+        : [];
+    });
+
+    if (sellerLocations.length === 0) {
+      throw new BadRequestException(
+        "No selected seller has an address with valid coordinates",
+      );
+    }
+
+    const results = await this.transportCostService.calculateTransportCosts(
+      sellerLocations,
+      { lat: buyerAddress.latitude, lng: buyerAddress.longitude },
+    );
+    const totalCost = results.reduce(
+      (sum, result) => sum + result.transportCost,
+      0,
+    );
+
+    const missingCount = dto.sellerIds.length - sellerLocations.length;
+    return {
+      success: true,
+      results,
+      totalCost: Math.round(totalCost * 100) / 100,
+      currency: "EUR",
+      warnings:
+        missingCount > 0
+          ? [`Skipped ${missingCount} seller(s) without coordinates.`]
+          : undefined,
+    };
+  }
+
   @Post(":id/finalize")
   @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
@@ -180,14 +405,23 @@ export class TradeOperationController {
     return await this.tradeOperationService.finalizeTrade(id);
   }
 
-  @Put(":id")
+  @Patch(":id")
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: "Update trade operation" })
   async update(@Param("id") id: string, @Body() dto: UpdateTradeOperationDto) {
     return await this.tradeOperationService.update(id, dto);
   }
 
-  @Post(":id/phase")
+  @Put(":id")
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: "Update trade operation (legacy PUT alias)" })
+  async updateWithPut(
+    @Param("id") id: string,
+    @Body() dto: UpdateTradeOperationDto,
+  ) {
+    return await this.tradeOperationService.update(id, dto);
+  }
+
   @Patch(":id/phase")
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: "Update trade phase" })
@@ -195,9 +429,37 @@ export class TradeOperationController {
     return await this.tradeOperationService.updatePhase(id, phase);
   }
 
+  @Post(":id/phase")
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: "Update trade phase (legacy POST alias)" })
+  async updatePhaseWithPost(
+    @Param("id") id: string,
+    @Body("phase") phase: TradePhase,
+  ) {
+    return await this.tradeOperationService.updatePhase(id, phase);
+  }
+
   @Get(":id/profit")
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: "Get trade profit calculation" })
   async getProfit(@Param("id") id: string) {
-    return await this.tradeOperationService.calculateProfit(id);
+    const data = await this.profitCalculationService.calculateProfit(id);
+    const netProfit = data.profit.netProfit;
+    const profitMargin = data.profit.profitMargin;
+
+    // Keep the detailed contract under `data`, while preserving the flat
+    // fields consumed by older mobile and E2E clients.
+    return {
+      success: true,
+      revenue: data.revenue.totalRevenue,
+      purchaseCost: data.costs.purchases.totalCost,
+      transportCost:
+        data.costs.transport.actualCost ?? data.costs.transport.estimatedCost,
+      netProfit,
+      margin: profitMargin,
+      profitMargin,
+      isViable: profitMargin >= 5,
+      data,
+    };
   }
 }

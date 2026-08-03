@@ -46,7 +46,7 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
               type="radio"
               value="ACCEPTED"
               checked={response === 'ACCEPTED'}
-              onChange={(e) => setResponse(e.target.value as any)}
+              onChange={() => setResponse('ACCEPTED')}
             />
             <span>Accept Offer</span>
           </label>
@@ -56,7 +56,7 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
               type="radio"
               value="REJECTED"
               checked={response === 'REJECTED'}
-              onChange={(e) => setResponse(e.target.value as any)}
+              onChange={() => setResponse('REJECTED')}
             />
             <span>Reject Offer</span>
           </label>
@@ -66,7 +66,7 @@ export const CounterOfferModal: React.FC<CounterOfferModalProps> = ({
               type="radio"
               value="COUNTERED"
               checked={response === 'COUNTERED'}
-              onChange={(e) => setResponse(e.target.value as any)}
+              onChange={() => setResponse('COUNTERED')}
             />
             <span>Counter Offer</span>
           </label>

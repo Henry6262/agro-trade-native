@@ -4,9 +4,12 @@ import { buyerService } from './buyerService';
 import { sellerService } from './sellerService';
 import { transporterService } from './transporterService';
 import { inspectorService } from './inspectorService';
+import type { Negotiation } from '../scenarioContext';
+import type { ScenarioPayload } from '../../types/scenario';
+import { requireScenarioInspectionResult } from '../../utils/scenarioValidation';
 
 export const scenarioHelpers = {
-  createSaleListing: async (data: any) => {
+  createSaleListing: async (data: ScenarioPayload) => {
     console.log('[API] Creating sale listing with data:', data);
 
     // Resolve farmer ID from context
@@ -31,7 +34,7 @@ export const scenarioHelpers = {
     return result;
   },
 
-  createBuyListing: async (data: any) => {
+  createBuyListing: async (data: ScenarioPayload) => {
     console.log('[API] Creating buy listing with data:', data);
 
     // Resolve buyer ID from context
@@ -60,7 +63,7 @@ export const scenarioHelpers = {
     return result;
   },
 
-  createTradeOperation: async (data: any) => {
+  createTradeOperation: async (data: ScenarioPayload) => {
     console.log('[API] Creating trade operation with data:', data);
 
     // Resolve buy listing ID from context
@@ -84,7 +87,7 @@ export const scenarioHelpers = {
     return result;
   },
 
-  initiateNegotiation: async (data: any) => {
+  initiateNegotiation: async (data: ScenarioPayload) => {
     console.log('[API] Initiating negotiation with data:', data);
 
     // Resolve trade operation ID from context
@@ -142,7 +145,7 @@ export const scenarioHelpers = {
 
     // Store negotiations in context (assuming result contains array of negotiations)
     if (result.negotiations) {
-      result.negotiations.forEach((negotiation: any) => {
+      result.negotiations.forEach((negotiation: Negotiation) => {
         scenarioContext.addEntity('negotiations', negotiation);
       });
     } else if (result.negotiation) {
@@ -153,7 +156,7 @@ export const scenarioHelpers = {
     return result;
   },
 
-  respondToNegotiation: async (data: any) => {
+  respondToNegotiation: async (data: ScenarioPayload) => {
     console.log('[API] Responding to negotiation with data:', data);
 
     // Resolve negotiation ID from context
@@ -197,7 +200,7 @@ export const scenarioHelpers = {
     return result;
   },
 
-  requestInspection: async (data: any) => {
+  requestInspection: async (data: ScenarioPayload) => {
     console.log('[API] Requesting inspection with data:', data);
 
     // Resolve trade operation ID from context
@@ -225,8 +228,9 @@ export const scenarioHelpers = {
     return result;
   },
 
-  submitInspection: async (data: any) => {
+  submitInspection: async (data: ScenarioPayload) => {
     console.log('[API] Submitting inspection with data:', data);
+    const inspectionResult = requireScenarioInspectionResult(data.result);
 
     // Resolve inspection ID from context
     const inspection = scenarioContext.getEntity('inspections', data.inspectionIndex || 0);
@@ -244,7 +248,7 @@ export const scenarioHelpers = {
     const result = await inspectorService.submitResults(inspector.id, {
       inspectionId: inspection.id,
       qualityScore: data.qualityScore || 85,
-      result: data.result || 'PASSED',
+      result: inspectionResult,
       notes: data.notes,
     });
 
@@ -252,7 +256,7 @@ export const scenarioHelpers = {
     return result;
   },
 
-  createTransportRequest: async (data: any) => {
+  createTransportRequest: async (data: ScenarioPayload) => {
     console.log('[API] Creating transport request with data:', data);
 
     // Resolve trade operation ID from context
@@ -302,7 +306,7 @@ export const scenarioHelpers = {
     return result;
   },
 
-  submitTransportBid: async (data: any) => {
+  submitTransportBid: async (data: ScenarioPayload) => {
     console.log('[API] Submitting transport bid with data:', data);
 
     // Resolve transport request ID from context
@@ -333,7 +337,7 @@ export const scenarioHelpers = {
     return result;
   },
 
-  acceptTransportBid: async (data: any) => {
+  acceptTransportBid: async (data: ScenarioPayload) => {
     console.log('[API] Accepting transport bid with data:', data);
 
     // Resolve transport request ID from context

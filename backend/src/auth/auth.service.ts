@@ -197,6 +197,18 @@ export class AuthService {
     });
   }
 
+  async findOrCreateDevUser(role: string): Promise<User> {
+    const safeRole = (['ADMIN', 'FARMER', 'BUYER', 'TRANSPORTER', 'INSPECTOR'].includes(role.toUpperCase())
+      ? role.toUpperCase()
+      : 'ADMIN') as User['role'];
+    const email = `dev-${safeRole.toLowerCase()}@agrotrade.dev`;
+    return this.prisma.user.upsert({
+      where: { email },
+      update: { lastLogin: new Date() },
+      create: { email, name: `Dev ${safeRole}`, role: safeRole },
+    });
+  }
+
   /**
    * Verify Privy JWT token and extract user information
    * This method fetches Privy's public keys and verifies the token signature

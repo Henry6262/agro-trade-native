@@ -4,6 +4,7 @@ Handles bot spawning, room creation, and RTVI messaging.
 """
 
 import os
+import time
 import asyncio
 import uuid
 from contextlib import asynccontextmanager
@@ -18,6 +19,7 @@ from dotenv import load_dotenv
 from loguru import logger
 
 from .bot import run_voice_bot
+from .prompts import resolve_prompt
 
 load_dotenv()
 
@@ -39,13 +41,17 @@ async def create_daily_room(room_name: str, expire_seconds: int) -> str:
             headers={"Authorization": f"Bearer {DAILY_API_KEY}"},
             json={
                 "name": room_name,
-                "privacy": "private",
+                "privacy": "public",
                 "properties": {
-                    "exp": int(asyncio.get_event_loop().time()) + expire_seconds,
+                    "exp": int(time.time()) + expire_seconds,
                     "enable_screenshare": False,
                     "enable_chat": False,
                     "start_video_off": True,
                     "start_audio_off": False,
+                    # Public is fine here: each room is UUID-namespaced and
+                    # auto-expires. Bot joins without a token and the client
+                    # still uses a meeting token for identity tracking.
+                    "enable_prejoin_ui": False,
                 },
             },
         ) as resp:
@@ -66,7 +72,7 @@ async def create_daily_token(room_name: str, expire_minutes: int) -> str:
                 "properties": {
                     "room_name": room_name,
                     "is_owner": False,
-                    "exp": int(asyncio.get_event_loop().time()) + expire_minutes * 60,
+                    "exp": int(time.time()) + expire_minutes * 60,
                 },
             },
         ) as resp:
@@ -81,7 +87,10 @@ async def create_daily_token(room_name: str, expire_minutes: int) -> str:
 class StartSessionRequest(BaseModel):
     role: str = Field(..., description="User role: seller, buyer, or transporter")
     mode: str = Field(default="assistant", description="Session mode: onboarding or assistant")
-    language: str = Field(default="bg", description="Language code")
+    language: str = Field(
+        default="bg-BG",
+        description="BCP-47 language tag from device locale (e.g. bg-BG, en-US, ro-RO, es-ES)",
+    )
 
 
 class StartSessionResponse(BaseModel):
@@ -150,11 +159,17 @@ async def start_session(
 
         session_id = uuid.uuid4().hex
 
+        # Resolve a localized prompt + greeting from the device language tag
+        localized = resolve_prompt(request.language)
+
         # Spawn the bot in the background
         bot_task = asyncio.create_task(
             run_voice_bot(
                 room_url=room_url,
                 token=None,  # Bot uses API key, not token
+                system_prompt=localized.prompt,
+                language=localized.language,
+                greeting=localized.greeting,
             ),
             name=f"bot-{session_id}",
         )
@@ -170,7 +185,10 @@ async def start_session(
 
         bot_task.add_done_callback(cleanup_task)
 
-        logger.info(f"✅ Session {session_id} started for role={request.role}, mode={request.mode}")
+        logger.info(
+            f"✅ Session {session_id} started role={request.role} mode={request.mode} "
+            f"lang={localized.language}"
+        )
 
         return StartSessionResponse(
             room_url=room_url,

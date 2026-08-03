@@ -1,16 +1,25 @@
-"use client";
+'use client';
 
-import { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Bell, CheckCheck, Trash2, Package, Shield, Inbox, Info } from "lucide-react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useNotificationStore, type AppNotification } from "@/app/stores/notification.store";
-import { useAuthStore } from "@/app/stores/auth.store";
+import { useEffect, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import {
+  Bell,
+  CheckCheck,
+  Inbox,
+  Info,
+  Package,
+  Shield,
+  Trash2,
+  type LucideIcon,
+} from 'lucide-react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useNotificationStore, type AppNotification } from '@/app/stores/notification.store';
+import { useAuthStore } from '@/app/stores/auth.store';
 
-const TYPE_ICON: Record<string, React.ElementType> = {
+const TYPE_ICON: Record<string, LucideIcon> = {
   trade: Package,
   inspection: Shield,
   offer: Inbox,
@@ -18,94 +27,172 @@ const TYPE_ICON: Record<string, React.ElementType> = {
 };
 
 const TYPE_COLOR: Record<string, string> = {
-  trade: "text-emerald-400",
-  inspection: "text-green-400",
-  offer: "text-lime-400",
-  system: "text-text-muted",
+  trade: 'text-emerald-400',
+  inspection: 'text-green-400',
+  offer: 'text-brand-wheat',
+  system: 'text-text-muted',
 };
 
+const PAGE_LABELS = [
+  { path: '/dashboard/admin/operations', label: 'Trade records' },
+  { path: '/dashboard/admin/transport', label: 'Movement' },
+  { path: '/dashboard/admin/escrow', label: 'Escrow lab' },
+  { path: '/dashboard/admin/users', label: 'Participants' },
+  { path: '/dashboard/admin', label: 'Operations overview' },
+  { path: '/dashboard/buyer/marketplace', label: 'Supply prototype' },
+  { path: '/dashboard/buyer/orders', label: 'Buyer requirements' },
+  { path: '/dashboard/buyer', label: 'Buyer overview' },
+  { path: '/dashboard/seller/listings', label: 'Supply records' },
+  { path: '/dashboard/seller/offers', label: 'Requests and offers' },
+  { path: '/dashboard/seller/trades', label: 'Trade records' },
+  { path: '/dashboard/seller/portfolio', label: 'Product portfolio' },
+  { path: '/dashboard/seller', label: 'Exporter overview' },
+  { path: '/dashboard/inspector', label: 'Inspection workspace' },
+  { path: '/dashboard/transporter', label: 'Logistics workspace' },
+  { path: '/dashboard/settings', label: 'Workspace settings' },
+] as const;
+
+function getPageLabel(pathname: string) {
+  return (
+    PAGE_LABELS.find(({ path }) => pathname === path || pathname.startsWith(`${path}/`))?.label ??
+    'Trade workspace'
+  );
+}
+
 export function DashboardTopbar() {
-  const unreadCount = useNotificationStore((s) => s.unreadCount);
-  const notifications = useNotificationStore((s) => s.notifications);
-  const markRead = useNotificationStore((s) => s.markRead);
-  const markAllRead = useNotificationStore((s) => s.markAllRead);
-  const clear = useNotificationStore((s) => s.clear);
-  const role = useAuthStore((s) => s.user?.role) ?? "buyer";
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const notifications = useNotificationStore((state) => state.notifications);
+  const markRead = useNotificationStore((state) => state.markRead);
+  const markAllRead = useNotificationStore((state) => state.markAllRead);
+  const clear = useNotificationStore((state) => state.clear);
+  const role = useAuthStore((state) => state.user?.role) ?? 'buyer';
+  const pathname = usePathname();
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const bellRef = useRef<HTMLButtonElement>(null);
+  const pageLabel = getPageLabel(pathname);
 
-  // Close panel on outside click
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+    function handleClickOutside(event: MouseEvent) {
+      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
         setOpen(false);
       }
     }
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setOpen(false);
+        bellRef.current?.focus();
+      }
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
   }, [open]);
 
-  function handleNotificationClick(n: AppNotification) {
-    markRead(n.id);
+  function handleNotificationClick(notification: AppNotification) {
+    markRead(notification.id);
     setOpen(false);
 
-    if (n.tradeId) {
-      if (role === "buyer") {
-        router.push(`/dashboard/buyer/orders/${n.tradeId}`);
-      } else if (role === "seller" && n.type === "offer") {
-        router.push("/dashboard/seller/offers");
-      } else if (role === "seller") {
-        router.push("/dashboard/seller/trades");
-      } else if (role === "admin") {
-        router.push("/dashboard/admin/operations");
-      } else {
-        router.push("/dashboard");
-      }
+    if (!notification.tradeId) return;
+
+    if (role === 'buyer') {
+      router.push(`/dashboard/buyer/orders/${notification.tradeId}`);
+    } else if (role === 'seller' && notification.type === 'offer') {
+      router.push('/dashboard/seller/offers');
+    } else if (role === 'seller') {
+      router.push('/dashboard/seller/trades');
+    } else if (role === 'admin') {
+      router.push('/dashboard/admin/operations');
+    } else {
+      router.push('/dashboard');
     }
   }
 
   return (
-    <header className="flex items-center justify-between h-14 px-4 border-b border-brand-border bg-brand-bg/80 backdrop-blur-lg sticky top-0 z-30">
-      <div className="flex items-center gap-3">
-        <SidebarTrigger className="text-text-muted hover:text-brand-cream transition-colors" />
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-brand-border bg-brand-bg/90 px-3 backdrop-blur-xl sm:px-5">
+      <div className="flex min-w-0 items-center gap-3">
+        <SidebarTrigger
+          className="shrink-0 text-text-muted transition-colors hover:text-brand-cream"
+          aria-label="Toggle workspace navigation"
+        />
+        <div className="min-w-0 border-l border-white/10 pl-3">
+          <p className="text-[9px] font-bold uppercase tracking-[0.17em] text-brand-wheat/70">
+            AgriTek workspace
+          </p>
+          <h1 className="truncate text-sm font-bold text-brand-cream sm:text-base">{pageLabel}</h1>
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Notification bell + dropdown */}
+      <div className="flex items-center gap-2 sm:gap-3">
+        <span className="hidden rounded-full border border-emerald-400/15 bg-emerald-400/[0.055] px-3 py-1.5 text-[10px] font-semibold text-emerald-300 lg:inline-flex">
+          Evidence-backed workflow
+        </span>
+
         <div className="relative" ref={panelRef}>
           <button
-            onClick={() => setOpen(!open)}
-            className="relative p-2 rounded-lg hover:bg-green-600/10 transition-colors"
+            ref={bellRef}
+            type="button"
+            id="notification-trigger"
+            onClick={() => setOpen((current) => !current)}
+            className="relative rounded-lg p-2 text-text-muted transition-colors hover:bg-brand-wheat/8 hover:text-brand-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-wheat"
+            aria-label={
+              unreadCount > 0 ? `Prototype activity, ${unreadCount} unread` : 'Prototype activity'
+            }
+            aria-expanded={open}
+            aria-controls="notification-panel"
+            aria-haspopup="dialog"
           >
-            <Bell className="w-5 h-5 text-text-muted" />
+            <Bell className="size-5" aria-hidden="true" />
             {unreadCount > 0 && (
-              <Badge className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 text-[10px] font-bold bg-brand-danger text-white border-0 flex items-center justify-center">
-                {unreadCount > 9 ? "9+" : unreadCount}
+              <Badge
+                className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center border-0 bg-brand-danger px-1 text-[10px] font-bold text-white"
+                aria-hidden="true"
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
               </Badge>
             )}
           </button>
 
-          {/* Notification Panel */}
           {open && (
-            <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-card border border-brand-border rounded-xl shadow-2xl overflow-hidden z-50">
-              {/* Panel header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-brand-border">
-                <h3 className="text-sm font-semibold text-brand-cream">
-                  Notifications
-                </h3>
+            <div
+              id="notification-panel"
+              role="dialog"
+              aria-modal="false"
+              aria-labelledby="notification-panel-title"
+              className="absolute right-0 top-full z-50 mt-2 w-[min(calc(100vw-2rem),24rem)] overflow-hidden rounded-2xl border border-brand-border bg-card shadow-2xl"
+            >
+              <div className="flex items-center justify-between border-b border-brand-border px-4 py-3">
+                <div>
+                  <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-brand-wheat/70">
+                    Prototype record
+                  </p>
+                  <h2
+                    id="notification-panel-title"
+                    className="mt-0.5 text-sm font-semibold text-brand-cream"
+                  >
+                    Activity
+                  </h2>
+                </div>
                 <div className="flex items-center gap-1">
                   {unreadCount > 0 && (
                     <Button
                       variant="ghost"
                       size="sm"
                       onClick={markAllRead}
-                      className="text-xs text-text-muted hover:text-brand-cream h-7 px-2"
+                      className="h-8 px-2 text-xs text-text-muted hover:text-brand-cream"
+                      aria-label="Mark all prototype activity as read"
                     >
-                      <CheckCheck className="w-3.5 h-3.5 mr-1" />
+                      <CheckCheck className="mr-1 size-3.5" aria-hidden="true" />
                       Read all
                     </Button>
                   )}
@@ -114,62 +201,70 @@ export function DashboardTopbar() {
                       variant="ghost"
                       size="sm"
                       onClick={clear}
-                      className="text-xs text-text-muted hover:text-red-400 h-7 px-2"
+                      className="size-8 p-0 text-text-muted hover:text-red-400"
+                      aria-label="Clear all prototype activity"
+                      title="Clear all activity"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="size-3.5" aria-hidden="true" />
                     </Button>
                   )}
                 </div>
               </div>
 
-              {/* Notification list */}
-              <ScrollArea className="max-h-80">
+              <ScrollArea className="max-h-80" aria-label="Prototype activity list">
                 {notifications.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 text-text-muted">
-                    <Bell className="w-8 h-8 mb-2 opacity-40" />
-                    <p className="text-sm">No notifications yet</p>
-                    <p className="text-xs mt-1">
-                      Trade updates will appear here in real time.
+                  <div className="flex flex-col items-center justify-center px-6 py-10 text-center text-text-muted">
+                    <Bell className="mb-3 size-8 opacity-35" aria-hidden="true" />
+                    <p className="text-sm font-semibold text-brand-cream">No activity recorded</p>
+                    <p className="mt-1 max-w-56 text-xs leading-5">
+                      Demonstration workflow updates will appear here when actions are recorded.
                     </p>
                   </div>
                 ) : (
                   <div className="divide-y divide-brand-border">
-                    {notifications.slice(0, 20).map((n) => {
-                      const Icon = TYPE_ICON[n.type] || Info;
-                      const color = TYPE_COLOR[n.type] || "text-text-muted";
+                    {notifications.slice(0, 20).map((notification) => {
+                      const Icon = TYPE_ICON[notification.type] || Info;
+                      const color = TYPE_COLOR[notification.type] || 'text-text-muted';
 
                       return (
                         <button
-                          key={n.id}
-                          onClick={() => handleNotificationClick(n)}
-                          className={`w-full text-left px-4 py-3 hover:bg-green-600/5 transition-colors ${
-                            !n.read ? "bg-green-600/[0.03]" : ""
+                          type="button"
+                          key={notification.id}
+                          onClick={() => handleNotificationClick(notification)}
+                          className={`w-full px-4 py-3 text-left transition-colors hover:bg-brand-wheat/[0.035] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-wheat ${
+                            !notification.read ? 'bg-brand-wheat/[0.025]' : ''
                           }`}
+                          aria-label={`${notification.title}. ${notification.message}. ${formatTimeAgo(
+                            notification.createdAt,
+                          )}`}
                         >
                           <div className="flex items-start gap-3">
-                            <div className={`mt-0.5 ${color}`}>
-                              <Icon className="w-4 h-4" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p
+                            <span className={`mt-0.5 ${color}`}>
+                              <Icon className="size-4" aria-hidden="true" />
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="flex items-center gap-2">
+                                <span
                                   className={`text-sm font-medium ${
-                                    n.read ? "text-text-muted" : "text-brand-cream"
+                                    notification.read ? 'text-text-muted' : 'text-brand-cream'
                                   }`}
                                 >
-                                  {n.title}
-                                </p>
-                                {!n.read && (
-                                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 flex-shrink-0" />
+                                  {notification.title}
+                                </span>
+                                {!notification.read && (
+                                  <span
+                                    className="size-1.5 shrink-0 rounded-full bg-brand-wheat"
+                                    aria-hidden="true"
+                                  />
                                 )}
-                              </div>
-                              <p className="text-xs text-text-muted mt-0.5 line-clamp-1">
-                                {n.message}
-                              </p>
-                              <p className="text-[10px] text-text-muted/60 mt-1">
-                                {formatTimeAgo(n.createdAt)}
-                              </p>
-                            </div>
+                              </span>
+                              <span className="mt-0.5 block line-clamp-2 text-xs leading-5 text-text-muted">
+                                {notification.message}
+                              </span>
+                              <span className="mt-1 block text-[10px] text-text-muted/60">
+                                {formatTimeAgo(notification.createdAt)}
+                              </span>
+                            </span>
                           </div>
                         </button>
                       );
@@ -186,10 +281,8 @@ export function DashboardTopbar() {
 }
 
 function formatTimeAgo(dateStr: string): string {
-  const seconds = Math.floor(
-    (Date.now() - new Date(dateStr).getTime()) / 1000
-  );
-  if (seconds < 60) return "Just now";
+  const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (seconds < 60) return 'Just now';
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);

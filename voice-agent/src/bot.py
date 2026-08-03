@@ -1,6 +1,6 @@
 """
-Pipecat Voice Bot Pipeline (v1.2.1)
-Orchestrates Deepgram STT → Gemini LLM → Cartesia TTS
+Pipecat Voice Bot Pipeline (v2.0.0)
+Single-service speech-to-speech via Gemini Live (STT + LLM + TTS unified).
 """
 
 import os
@@ -19,10 +19,12 @@ from pipecat.processors.aggregators.llm_response_universal import (
     LLMContextAggregatorPair,
     LLMUserAggregatorParams,
 )
-from pipecat.processors.frameworks.rtvi import RTVIProcessor
-from pipecat.services.cartesia.tts import CartesiaTTSService
-from pipecat.services.deepgram.stt import DeepgramSTTService
-from pipecat.services.google.llm import GoogleLLMService
+from pipecat.processors.frameworks.rtvi import RTVIObserver, RTVIProcessor
+from pipecat.services.google.gemini_live.llm import (
+    GeminiLiveLLMService,
+    GeminiModalities,
+    GeminiVADParams,
+)
 from pipecat.transports.daily.transport import DailyParams, DailyTransport
 
 
@@ -30,9 +32,18 @@ async def run_voice_bot(
     room_url: str,
     token: Optional[str] = None,
     system_prompt: Optional[str] = None,
+    language: str = "bg-BG",
+    greeting: Optional[str] = None,
 ):
     """
     Main bot entry point. Connects to a Daily.co room and runs the voice pipeline.
+
+    Args:
+        room_url: Daily.co room URL
+        token: optional meeting token for the bot
+        system_prompt: localized system instruction
+        language: BCP-47 language tag (e.g. "bg-BG", "en-US", "ro-RO")
+        greeting: developer message used to trigger the opening line in that language
     """
 
     # ─── Transport ───────────────────────────────────────────────────────────
@@ -48,21 +59,21 @@ async def run_voice_bot(
         ),
     )
 
-    # ─── Services ────────────────────────────────────────────────────────────
-    stt = DeepgramSTTService(api_key=os.getenv("DEEPGRAM_API_KEY", ""))
-
-    tts = CartesiaTTSService(
-        api_key=os.getenv("CARTESIA_API_KEY", ""),
-        settings=CartesiaTTSService.Settings(
-            voice="71a7ad14-091c-4e8e-a314-022ece01c121",  # Bulgarian-optimized voice
-        ),
-    )
-
-    llm = GoogleLLMService(
+    # ─── Single speech-to-speech service ─────────────────────────────────────
+    # Gemini Live handles STT + LLM + TTS natively in one streaming connection.
+    # NOTE: the native-audio model auto-detects language from the system prompt
+    # and rejects explicit BCP-47 codes it doesn't whitelist (e.g. "bg-BG" →
+    # error 1007 "Unsupported language code"). So we do NOT pass `language`; the
+    # localized system_instruction + greeting drive the spoken language instead.
+    llm = GeminiLiveLLMService(
         api_key=os.getenv("GOOGLE_API_KEY", ""),
-        settings=GoogleLLMService.Settings(
+        settings=GeminiLiveLLMService.Settings(
+            model="models/gemini-2.5-flash-native-audio-preview-12-2025",
             system_instruction=system_prompt or _default_system_prompt(),
+            voice="Aoede",  # warm, conversational — best fit for AgroTrade onboarding
+            modalities=GeminiModalities.AUDIO,
             temperature=0.7,
+            vad=GeminiVADParams(silence_duration_ms=500),
         ),
     )
 
@@ -77,14 +88,13 @@ async def run_voice_bot(
     rtvi = RTVIProcessor()
 
     # ─── Pipeline ────────────────────────────────────────────────────────────
+    # No separate STT/TTS — Gemini Live consumes audio in and emits audio out.
     pipeline = Pipeline(
         [
             transport.input(),      # User audio in
             rtvi,                   # RTVI protocol handler (mobile client depends on this)
-            stt,                    # Speech-to-text
-            user_aggregator,        # Collect user transcription
-            llm,                    # Language model
-            tts,                    # Text-to-speech
+            user_aggregator,        # Collect user transcription (from Gemini)
+            llm,                    # Gemini Live: audio-in → audio-out
             transport.output(),     # Bot audio out
             assistant_aggregator,   # Collect assistant response
         ]
@@ -96,14 +106,19 @@ async def run_voice_bot(
             enable_metrics=True,
             enable_usage_metrics=True,
         ),
+        observers=[RTVIObserver(rtvi)],
     )
 
     # ─── Event handlers ──────────────────────────────────────────────────────
     @transport.event_handler("on_client_connected")
     async def on_client_connected(transport, client):
-        logger.info(f"Client connected: {client}")
+        logger.info(f"[bot v2.1 no-lang] Client connected: {client} (req_lang={language})")
         context.add_message(
-            {"role": "developer", "content": "Please greet the user in Bulgarian and ask how you can help them today."}
+            {
+                "role": "developer",
+                "content": greeting
+                or "Please greet the user warmly in their language and ask how you can help them today.",
+            }
         )
         await task.queue_frames([LLMRunFrame()])
 

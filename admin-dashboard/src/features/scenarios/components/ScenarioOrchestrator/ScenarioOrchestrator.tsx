@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { simulationApi, scenarioContext } from '../../../../services/simulationApi';
-import type { UserRole, SimulationUser } from '../../../../services/simulationApi';
-import type { ScenarioStep } from '../../../../types/scenario';
+import type { SimulationUser } from '../../../../services/simulationApi';
+import type { ScenarioPayload, ScenarioState, ScenarioStep } from '../../../../types/scenario';
+import { getApiErrorMessage } from '../../../../utils/errorHandler';
+import {
+  requireScenarioInspectionResult,
+  requireScenarioPayload,
+  requireScenarioUserRole,
+} from '../../../../utils/scenarioValidation';
 import {
   getHappyPathScenario,
   getInspectionFailureScenario,
@@ -18,24 +24,6 @@ import { MetricsSidebar } from '../shared/MetricsSidebar';
 import { TradeFlowDiagram } from '../shared/TradeFlowDiagram';
 import { DatabaseStatePanel } from '../shared/DatabaseStatePanel';
 import { ScenarioBuilder } from '../shared/ScenarioBuilder';
-
-// Tracked entity state
-interface ScenarioState {
-  createdUsers: {
-    farmers: SimulationUser[];
-    buyers: SimulationUser[];
-    transporters: SimulationUser[];
-    inspector: SimulationUser | null;
-  };
-  saleListings: any[];
-  buyListings: any[];
-  tradeOperations: any[];
-  negotiations: any[];
-  inspections: any[];
-  transportRequests: any[];
-  transportBids: any[];
-  transportJobs: any[];
-}
 
 export const ScenarioOrchestrator: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -90,8 +78,8 @@ export const ScenarioOrchestrator: React.FC = () => {
       await simulationApi.auth.login(loginEmail, loginPassword);
       setIsAuthenticated(true);
       loadUsers();
-    } catch (error: any) {
-      setLoginError(error.response?.data?.message || 'Login failed');
+    } catch (error) {
+      setLoginError(getApiErrorMessage(error, 'Login failed'));
     }
   };
 
@@ -199,78 +187,79 @@ export const ScenarioOrchestrator: React.FC = () => {
 
     try {
       let result;
+      const payload = requireScenarioPayload(step.payload ?? step.data, step.action);
 
       switch (step.action) {
         case 'createTestUser':
-          result = await handleCreateTestUser(step.payload);
+          result = await handleCreateTestUser(payload);
           break;
 
         case 'createFarmerSaleListing':
-          result = await handleCreateFarmerSaleListing(step.payload);
+          result = await handleCreateFarmerSaleListing(payload);
           break;
 
         case 'createBuyListing':
-          result = await handleCreateBuyListing(step.payload);
+          result = await handleCreateBuyListing(payload);
           break;
 
         case 'createTradeOperation':
-          result = await handleCreateTradeOperation(step.payload);
+          result = await handleCreateTradeOperation(payload);
           break;
 
         case 'sendOffers':
-          result = await handleSendOffers(step.payload);
+          result = await handleSendOffers(payload);
           break;
 
         case 'acceptOffer':
-          result = await handleAcceptOffer(step.payload);
+          result = await handleAcceptOffer(payload);
           break;
 
         case 'counterOffer':
-          result = await handleCounterOffer(step.payload);
+          result = await handleCounterOffer(payload);
           break;
 
         case 'acceptCounterOffer':
-          result = await handleAcceptCounterOffer(step.payload);
+          result = await handleAcceptCounterOffer(payload);
           break;
 
         case 'assignInspector':
-          result = await handleAssignInspector(step.payload);
+          result = await handleAssignInspector(payload);
           break;
 
         case 'submitResults':
-          result = await handleSubmitResults(step.payload);
+          result = await handleSubmitResults(payload);
           break;
 
         case 'createTransport':
-          result = await handleCreateTransport(step.payload);
+          result = await handleCreateTransport(payload);
           break;
 
         case 'completeDelivery':
-          result = await handleCompleteDelivery(step.payload);
+          result = await handleCompleteDelivery(payload);
           break;
 
         case 'completeTrade':
-          result = await handleCompleteTrade(step.payload);
+          result = await handleCompleteTrade(payload);
           break;
 
         case 'rejectOffer':
-          result = await handleRejectOffer(step.payload);
+          result = await handleRejectOffer(payload);
           break;
 
         case 'createTransportRequest':
-          result = await handleCreateTransportRequest(step.payload);
+          result = await handleCreateTransportRequest(payload);
           break;
 
         case 'transporterSubmitBid':
-          result = await handleTransporterSubmitBid(step.payload);
+          result = await handleTransporterSubmitBid(payload);
           break;
 
         case 'adminSelectBid':
-          result = await handleAdminSelectBid(step.payload);
+          result = await handleAdminSelectBid(payload);
           break;
 
         case 'updatePricing':
-          result = await handleUpdatePricing(step.payload);
+          result = await handleUpdatePricing(payload);
           break;
 
         default:
@@ -288,12 +277,13 @@ export const ScenarioOrchestrator: React.FC = () => {
       if (step.action === 'createTestUser') {
         await loadUsers();
       }
-    } catch (error: any) {
+    } catch (error) {
       const duration = Date.now() - startTime;
       console.error(`Step ${stepIndex} failed:`, error);
+      const errorMessage = getApiErrorMessage(error, 'Unknown error');
       updatedSteps[stepIndex].status = 'failed';
-      updatedSteps[stepIndex].result = { error: error.message };
-      updatedSteps[stepIndex].error = error.message;
+      updatedSteps[stepIndex].result = { error: errorMessage };
+      updatedSteps[stepIndex].error = errorMessage;
       updatedSteps[stepIndex].duration = duration;
       setScenarioSteps(updatedSteps);
       setTotalDuration((prev) => prev + duration);
@@ -301,9 +291,10 @@ export const ScenarioOrchestrator: React.FC = () => {
   };
 
   // Action handlers with dynamic payload resolution
-  const handleCreateTestUser = async (payload: any) => {
+  const handleCreateTestUser = async (payload: ScenarioPayload) => {
+    const role = requireScenarioUserRole(payload.role);
     const user = await simulationApi.createTestUser(
-      payload.role,
+      role,
       payload.name,
       payload.data
     );
@@ -311,22 +302,22 @@ export const ScenarioOrchestrator: React.FC = () => {
     // Track created user
     setScenarioState((prev) => {
       const newState = { ...prev };
-      if (payload.role === 'FARMER') {
+      if (role === 'FARMER') {
         newState.createdUsers.farmers.push(user);
-      } else if (payload.role === 'BUYER') {
+      } else if (role === 'BUYER') {
         newState.createdUsers.buyers.push(user);
-      } else if (payload.role === 'TRANSPORTER') {
+      } else if (role === 'TRANSPORTER') {
         newState.createdUsers.transporters.push(user);
-      } else if (payload.role === 'INSPECTOR') {
+      } else if (role === 'INSPECTOR') {
         newState.createdUsers.inspector = user;
       }
       return newState;
     });
 
-    return { user, message: `Created ${payload.role}: ${user.name || user.email}` };
+    return { user, message: `Created ${role}: ${user.name || user.email}` };
   };
 
-  const handleCreateFarmerSaleListing = async (payload: any) => {
+  const handleCreateFarmerSaleListing = async (payload: ScenarioPayload) => {
     const farmer = scenarioState.createdUsers.farmers[payload.farmerIndex];
     if (!farmer) {
       throw new Error(`Farmer at index ${payload.farmerIndex} not found`);
@@ -352,7 +343,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     };
   };
 
-  const handleCreateBuyListing = async (payload: any) => {
+  const handleCreateBuyListing = async (payload: ScenarioPayload) => {
     const buyerIndex = payload.buyerIndex !== undefined ? payload.buyerIndex : 0;
     const buyer = scenarioState.createdUsers.buyers[buyerIndex];
     if (!buyer) {
@@ -378,7 +369,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     };
   };
 
-  const handleCreateTradeOperation = async (payload: any) => {
+  const handleCreateTradeOperation = async (payload: ScenarioPayload) => {
     const buyListingIndex = payload.buyListingIndex !== undefined ? payload.buyListingIndex : 0;
     const buyListing = scenarioState.buyListings[buyListingIndex];
     if (!buyListing) {
@@ -404,14 +395,14 @@ export const ScenarioOrchestrator: React.FC = () => {
     };
   };
 
-  const handleSendOffers = async (payload: any) => {
+  const handleSendOffers = async (payload: ScenarioPayload) => {
     const tradeOpIndex = payload.tradeOpIndex !== undefined ? payload.tradeOpIndex : 0;
     const tradeOperation = scenarioState.tradeOperations[tradeOpIndex];
     if (!tradeOperation) {
       throw new Error(`Trade operation at index ${tradeOpIndex} not created yet`);
     }
 
-    const offers = payload.offers.map((offer: any) => {
+    const offers = payload.offers.map((offer) => {
       const farmer = scenarioState.createdUsers.farmers[offer.farmerIndex];
       const saleListing = scenarioState.saleListings[offer.farmerIndex];
 
@@ -444,7 +435,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     };
   };
 
-  const handleAcceptOffer = async (payload: any) => {
+  const handleAcceptOffer = async (payload: ScenarioPayload) => {
     const farmer = scenarioState.createdUsers.farmers[payload.farmerIndex];
     const negotiation = scenarioState.negotiations[payload.negotiationIndex];
 
@@ -464,7 +455,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     };
   };
 
-  const handleCounterOffer = async (payload: any) => {
+  const handleCounterOffer = async (payload: ScenarioPayload) => {
     const farmer = scenarioState.createdUsers.farmers[payload.farmerIndex];
     const negotiation = scenarioState.negotiations[payload.negotiationIndex];
 
@@ -485,7 +476,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     };
   };
 
-  const handleAcceptCounterOffer = async (payload: any) => {
+  const handleAcceptCounterOffer = async (payload: ScenarioPayload) => {
     const negotiation = scenarioState.negotiations[payload.negotiationIndex];
 
     if (!negotiation) {
@@ -500,7 +491,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     };
   };
 
-  const handleRejectOffer = async (payload: any) => {
+  const handleRejectOffer = async (payload: ScenarioPayload) => {
     const farmer = scenarioState.createdUsers.farmers[payload.farmerIndex];
     const negotiation = scenarioState.negotiations[payload.negotiationIndex];
     if (!farmer || !negotiation) {
@@ -511,7 +502,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     return { result, message: `Farmer ${farmer.name} rejected offer` };
   };
 
-  const handleCreateTransportRequest = async (payload: any) => {
+  const handleCreateTransportRequest = async (payload: ScenarioPayload) => {
     const tradeOpIndex = payload.tradeOpIndex !== undefined ? payload.tradeOpIndex : 0;
     const tradeOperation = scenarioState.tradeOperations[tradeOpIndex];
     if (!tradeOperation) {
@@ -535,7 +526,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     return { result, message: `Created transport request (${result.distanceKm.toFixed(1)}km)` };
   };
 
-  const handleTransporterSubmitBid = async (payload: any) => {
+  const handleTransporterSubmitBid = async (payload: ScenarioPayload) => {
     const transporter = scenarioState.createdUsers.transporters[payload.transporterIndex];
     const transportRequest = scenarioState.transportRequests[payload.requestIndex !== undefined ? payload.requestIndex : 0];
     const tradeOperation = scenarioState.tradeOperations[payload.tradeOpIndex !== undefined ? payload.tradeOpIndex : 0];
@@ -559,7 +550,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     return { result, message: `Transporter bid: €${payload.bidAmount} (${payload.estimatedDuration}h)` };
   };
 
-  const handleAdminSelectBid = async (payload: any) => {
+  const handleAdminSelectBid = async (payload: ScenarioPayload) => {
     const transportRequest = scenarioState.transportRequests[payload.requestIndex !== undefined ? payload.requestIndex : 0];
     const bid = scenarioState.transportBids[payload.bidIndex];
 
@@ -580,7 +571,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     return { result, message: `Selected bid: €${result.winningBid.bidAmount}` };
   };
 
-  const handleUpdatePricing = async (payload: any) => {
+  const handleUpdatePricing = async (payload: ScenarioPayload) => {
     const negotiation = scenarioState.negotiations[payload.negotiationIndex];
     if (!negotiation) {
       throw new Error('Negotiation not found');
@@ -595,7 +586,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     return { result, message: `Price updated to €${payload.newPrice}` };
   };
 
-  const handleAssignInspector = async (payload: any) => {
+  const handleAssignInspector = async (payload: ScenarioPayload) => {
     const tradeOpIndex = payload.tradeOpIndex !== undefined ? payload.tradeOpIndex : 0;
     const tradeOperation = scenarioState.tradeOperations[tradeOpIndex];
     if (!tradeOperation) {
@@ -624,7 +615,8 @@ export const ScenarioOrchestrator: React.FC = () => {
     };
   };
 
-  const handleSubmitResults = async (payload: any) => {
+  const handleSubmitResults = async (payload: ScenarioPayload) => {
+    const inspectionResult = requireScenarioInspectionResult(payload.result);
     const inspector = scenarioState.createdUsers.inspector;
     const inspection = scenarioState.inspections[payload.inspectionIndex];
 
@@ -639,17 +631,17 @@ export const ScenarioOrchestrator: React.FC = () => {
     const result = await simulationApi.inspector.submitResults(inspector.id, {
       inspectionId: inspection.id,
       qualityScore: payload.qualityScore,
-      result: payload.result,
+      result: inspectionResult,
       notes: payload.notes,
     });
 
     return {
       result,
-      message: `Inspection ${payload.result}: quality ${payload.qualityScore}`,
+      message: `Inspection ${inspectionResult}: quality ${payload.qualityScore}`,
     };
   };
 
-  const handleCreateTransport = async (payload: any) => {
+  const handleCreateTransport = async (payload: ScenarioPayload) => {
     const tradeOpIndex = payload.tradeOpIndex !== undefined ? payload.tradeOpIndex : 0;
     const tradeOperation = scenarioState.tradeOperations[tradeOpIndex];
     if (!tradeOperation) {
@@ -685,7 +677,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     };
   };
 
-  const handleCompleteDelivery = async (payload: any) => {
+  const handleCompleteDelivery = async (payload: ScenarioPayload) => {
     const transporterIndex = payload.transporterIndex !== undefined ? payload.transporterIndex : 0;
     const transporter = scenarioState.createdUsers.transporters[transporterIndex];
     const jobIndex = payload.jobIndex !== undefined ? payload.jobIndex : 0;
@@ -711,7 +703,7 @@ export const ScenarioOrchestrator: React.FC = () => {
     };
   };
 
-  const handleCompleteTrade = async (payload: any) => {
+  const handleCompleteTrade = async (payload: ScenarioPayload) => {
     const tradeOpIndex = payload.tradeOpIndex !== undefined ? payload.tradeOpIndex : 0;
     const tradeOperation = scenarioState.tradeOperations[tradeOpIndex];
     if (!tradeOperation) {
@@ -760,13 +752,6 @@ export const ScenarioOrchestrator: React.FC = () => {
       newBreakpoints.add(stepIndex);
     }
     setBreakpoints(newBreakpoints);
-  };
-
-  // Jump to specific step
-  const jumpToStep = (stepIndex: number) => {
-    if (stepIndex >= 0 && stepIndex < scenarioSteps.length) {
-      setCurrentStep(stepIndex);
-    }
   };
 
   // Login screen

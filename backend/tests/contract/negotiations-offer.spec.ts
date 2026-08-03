@@ -9,8 +9,6 @@ describe('Negotiations Offer Contract Test', () => {
   beforeAll(async () => {
     env = new TestEnvironment();
     await env.setup();
-    // Seed once at start
-    testData = await env.seedTestData();
   }, 90000);
 
   afterAll(async () => {
@@ -18,9 +16,9 @@ describe('Negotiations Offer Contract Test', () => {
   }, 90000);
 
   beforeEach(async () => {
-    // Just create a fresh trade operation for each test
-    // Disabling heavy cleanups to avoid remote DB timeouts during E2E verification
-    
+    await env.cleanDatabase();
+    testData = await env.seedTestData();
+
     const createResponse = await request(env.app.getHttpServer())
       .post('/api/trade-operations')
       .set('Authorization', `Bearer ${env.tokens.admin}`)
@@ -39,21 +37,17 @@ describe('Negotiations Offer Contract Test', () => {
       .post(`/api/trade-operations/${tradeOperationId}/sellers`)
       .set('Authorization', `Bearer ${env.tokens.admin}`)
       .send({
-        sellers: [{
-          sellerId: testData.users.seller1.id,
-          saleListingId: testData.saleListings[0].id,
-          requestedQuantity: 50,
-        }]
+        sellers: [
+          {
+            sellerId: testData.users.seller1.id,
+            saleListingId: testData.saleListings[0].id,
+            requestedQuantity: 50,
+          },
+        ],
       })
       .expect(201);
-    
-    const tradeSellerId = addRes.body.sellersAdded[0].id;
 
-    // Advance to SELLER_NEGOTIATION phase so negotiations are allowed
-    await request(env.app.getHttpServer())
-      .patch(`/api/trade-operations/${tradeOperationId}/phase`)
-      .set('Authorization', `Bearer ${env.tokens.admin}`)
-      .send({ phase: 'SELLER_NEGOTIATION' });
+    const tradeSellerId = addRes.body.sellersAdded[0].id;
 
     const response = await request(env.app.getHttpServer())
       .post(`/api/negotiations/trade-operation/${tradeOperationId}`)
@@ -71,7 +65,7 @@ describe('Negotiations Offer Contract Test', () => {
       currentOffer: {
         price: 340,
         quantity: 50,
-      }
+      },
     });
   }, 30000);
 
@@ -81,24 +75,19 @@ describe('Negotiations Offer Contract Test', () => {
       .post(`/api/trade-operations/${tradeOperationId}/sellers`)
       .set('Authorization', `Bearer ${env.tokens.admin}`)
       .send({
-        sellers: [{
-          sellerId: testData.users.seller1.id,
-          saleListingId: testData.saleListings[0].id,
-          requestedQuantity: 50,
-        }]
+        sellers: [
+          {
+            sellerId: testData.users.seller1.id,
+            saleListingId: testData.saleListings[0].id,
+            requestedQuantity: 50,
+          },
+        ],
       })
       .expect(201);
 
     const tradeSellerId = addRes.body.sellersAdded[0].id;
-    
-    // Advance to SELLER_NEGOTIATION phase so negotiations are allowed
-    await request(env.app.getHttpServer())
-      .patch(`/api/trade-operations/${tradeOperationId}/phase`)
-      .set('Authorization', `Bearer ${env.tokens.admin}`)
-      .send({ phase: 'SELLER_NEGOTIATION' })
-      .expect(200);
 
-    await request(env.app.getHttpServer())
+    const offerResponse = await request(env.app.getHttpServer())
       .post(`/api/negotiations/trade-operation/${tradeOperationId}`)
       .set('Authorization', `Bearer ${env.tokens.admin}`)
       .send({ tradeSellerId, price: 300, quantity: 50 })
@@ -106,10 +95,9 @@ describe('Negotiations Offer Contract Test', () => {
 
     // 2. Counter as seller
     const response = await request(env.app.getHttpServer())
-      .post(`/api/negotiations/trade-operation/${tradeOperationId}/counter`)
-      .set('Authorization', `Bearer ${env.tokens.seller1}`)
+      .post(`/api/negotiations/${offerResponse.body.data.id}/counter`)
+      .set('Authorization', `Bearer ${env.tokens.seller}`)
       .send({
-        tradeSellerId,
         price: 320,
         quantity: 50,
       })
@@ -125,40 +113,35 @@ describe('Negotiations Offer Contract Test', () => {
       .post(`/api/trade-operations/${tradeOperationId}/sellers`)
       .set('Authorization', `Bearer ${env.tokens.admin}`)
       .send({
-        sellers: [{
-          sellerId: testData.users.seller1.id,
-          saleListingId: testData.saleListings[0].id,
-          requestedQuantity: 50,
-        }]
+        sellers: [
+          {
+            sellerId: testData.users.seller1.id,
+            saleListingId: testData.saleListings[0].id,
+            requestedQuantity: 50,
+          },
+        ],
       })
       .expect(201);
 
     const tradeSellerId = addRes.body.sellersAdded[0].id;
-    
-    // Advance to SELLER_NEGOTIATION phase so negotiations are allowed
-    await request(env.app.getHttpServer())
-      .patch(`/api/trade-operations/${tradeOperationId}/phase`)
-      .set('Authorization', `Bearer ${env.tokens.admin}`)
-      .send({ phase: 'SELLER_NEGOTIATION' })
-      .expect(200);
 
-    await request(env.app.getHttpServer())
+    const offerResponse = await request(env.app.getHttpServer())
       .post(`/api/negotiations/trade-operation/${tradeOperationId}`)
       .set('Authorization', `Bearer ${env.tokens.admin}`)
       .send({ tradeSellerId, price: 300, quantity: 50 })
       .expect(201);
 
     await request(env.app.getHttpServer())
-      .post(`/api/negotiations/trade-operation/${tradeOperationId}/counter`)
-      .set('Authorization', `Bearer ${env.tokens.seller1}`)
-      .send({ tradeSellerId, price: 320, quantity: 50 })
+      .post(`/api/negotiations/${offerResponse.body.data.id}/counter`)
+      .set('Authorization', `Bearer ${env.tokens.seller}`)
+      .send({ price: 320, quantity: 50 })
       .expect(201);
 
     // 2. Accept as admin
     await request(env.app.getHttpServer())
-      .post(`/api/negotiations/trade-operation/${tradeOperationId}/accept`)
+      .post(`/api/negotiations/${offerResponse.body.data.id}/accept`)
       .set('Authorization', `Bearer ${env.tokens.admin}`)
-      .send({ tradeSellerId })
+      .send({})
       .expect(200);
 
     // 3. Verify trade status and profit
@@ -177,11 +160,13 @@ describe('Negotiations Offer Contract Test', () => {
       .post(`/api/trade-operations/${tradeOperationId}/sellers`)
       .set('Authorization', `Bearer ${env.tokens.admin}`)
       .send({
-        sellers: [{
-          sellerId: testData.users.seller1.id,
-          saleListingId: testData.saleListings[0].id,
-          requestedQuantity: 50,
-        }]
+        sellers: [
+          {
+            sellerId: testData.users.seller1.id,
+            saleListingId: testData.saleListings[0].id,
+            requestedQuantity: 50,
+          },
+        ],
       });
     const tradeSellerId = addRes.body.sellersAdded[0].id;
 

@@ -1,42 +1,30 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
+import { Roles } from '../../auth/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../auth/guards/roles.guard';
 import { ProfitCalculationService } from '../services/profit-calculation.service';
 
+@ApiTags('Profit Calculations')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
 @Controller('profit')
 export class ProfitController {
   constructor(private readonly profitService: ProfitCalculationService) {}
 
   @Get(':tradeOperationId/calculate')
   async calculateProfit(@Param('tradeOperationId') tradeOperationId: string) {
-    return this.profitService.calculateProfit(tradeOperationId);
-  }
-
-  @Post(':tradeOperationId/impact')
-  async calculateProfitImpact(@Param('tradeOperationId') _tradeOperationId: string, @Body() dto: unknown) {
-    return this.profitService.calculateProfitImpact(dto);
-  }
-
-  @Post(':tradeOperationId/optimize')
-  async optimizeProfitMargins(@Param('tradeOperationId') _tradeOperationId: string, @Body() dto: unknown) {
-    return this.profitService.optimizeProfitMargins(dto);
-  }
-
-  @Post('validate-margins')
-  async validateMargins(@Body() dto: unknown) {
-    return this.profitService.validateMargins(dto);
-  }
-
-  @Get('cumulative')
-  async getCumulativeProfit(@Query() query: unknown) {
-    return this.profitService.getCumulativeProfit(query);
-  }
-
-  @Post('forecast')
-  async forecastProfit(@Body() dto: unknown) {
-    return this.profitService.forecastProfit(dto);
-  }
-
-  @Get('benchmarks')
-  async getBenchmarks() {
-    return this.profitService.getBenchmarks();
+    const calculation = await this.profitService.calculateProfit(tradeOperationId);
+    return {
+      ...calculation,
+      breakdown: {
+        revenue: calculation.revenue.totalRevenue,
+        purchaseCosts: calculation.costs.purchases.totalCost,
+        transportCosts:
+          calculation.costs.transport.actualCost ?? calculation.costs.transport.estimatedCost,
+      },
+    };
   }
 }

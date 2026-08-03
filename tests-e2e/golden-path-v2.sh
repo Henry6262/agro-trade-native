@@ -1,9 +1,16 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjbW9yaHEyYnIwMDBjNndiNXo5eDQ1NTh1IiwiZW1haWwiOiJhZG1pbkBhZ3JvdHJhZGUuY29tIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzc3OTE2NzQyLCJleHAiOjE3Nzg1MjE1NDJ9.Gtjg0e95v12HCvzd2QJrhCMPhLCA9YEmSu_uAj6Cz9Q"
-API="http://localhost:4000/api"
+TOKEN="${AGRITEK_E2E_TOKEN:-}"
+API="${AGRITEK_API_URL:-http://localhost:4000/api}"
 PRODUCT_ID="cmorh7o9j001t79ewkp04tddp"  # soft_wheat
+
+if [[ -z "$TOKEN" ]]; then
+  echo "AGRITEK_E2E_TOKEN is required. Supply a short-lived local test token." >&2
+  exit 1
+fi
+
+TOKEN="${TOKEN#Bearer }"
 
 echo "🌾 AgroTrade Golden Path E2E Test"
 echo "=================================="

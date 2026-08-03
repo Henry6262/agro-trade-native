@@ -8,6 +8,7 @@
 
 import { useCallback, useRef, useEffect, useState } from 'react';
 import { Platform } from 'react-native';
+import * as Localization from 'expo-localization';
 import { useAIModeStore } from '../store/ai-mode.store';
 import type { AIActionPayload } from '../types';
 
@@ -35,10 +36,27 @@ try {
 }
 
 // ─── Config ──────────────────────────────────────────────────────────────────
+// In production, set EXPO_PUBLIC_VOICE_API_URL to the deployed voice-agent URL
+// (e.g. https://voice-agent-production.up.railway.app). Falls back to local
+// dev defaults for simulator / emulator.
 const VOICE_API_URL =
-  Platform.OS === 'android'
+  process.env['EXPO_PUBLIC_VOICE_API_URL'] ||
+  (Platform.OS === 'android'
     ? 'http://10.0.2.2:8000' // Android emulator → localhost
-    : 'http://localhost:8000'; // iOS simulator
+    : 'http://localhost:8000'); // iOS simulator
+
+/**
+ * Read the device's preferred language as a BCP-47 tag (e.g. "bg-BG", "en-US").
+ * Falls back to Bulgarian — primary market.
+ */
+function getDeviceLanguageTag(): string {
+  try {
+    const locales = Localization.getLocales();
+    return locales?.[0]?.languageTag || 'bg-BG';
+  } catch {
+    return 'bg-BG';
+  }
+}
 
 interface UseVoiceSessionOptions {
   role: 'seller' | 'buyer' | 'transporter';
@@ -158,21 +176,38 @@ export function useVoiceSession(options: UseVoiceSessionOptions): UseVoiceSessio
 
       // 3. Listen for transcripts and messages
       if (RTVIEvent) {
+        // User speech. UserTranscript fires for BOTH partial and final results.
+        // Only commit a chat bubble on the FINAL transcript — otherwise every
+        // partial creates a duplicate/garbled bubble. While the user is still
+        // speaking (partials), show the "listening" state; once final, switch
+        // to "thinking" so the typing indicator appears.
         client.on(RTVIEvent.UserTranscript, (data: any) => {
-          const text = data?.text || '';
-          if (text) {
+          const text = (data?.text || '').trim();
+          const isFinal = data?.final !== false; // default true if undefined
+          if (!text) return;
+          if (isFinal) {
             addUserMessage(text);
+            setVoiceState('thinking');
+          } else {
+            setVoiceState('listening');
           }
-          setVoiceState('thinking');
         });
 
+        // AI speech, sentence-aggregated → one clean bubble per sentence.
         client.on(RTVIEvent.BotTranscript, (data: any) => {
-          const text = data?.text || '';
+          const text = (data?.text || '').trim();
           if (text) {
             addAssistantMessage(text);
             setVoiceState('talking');
           }
         });
+
+        // The AI started speaking → it's no longer "thinking", hide typing dots.
+        if (RTVIEvent.BotStartedSpeaking) {
+          client.on(RTVIEvent.BotStartedSpeaking, () => {
+            setVoiceState('talking');
+          });
+        }
 
         client.on(RTVIEvent.BotStoppedSpeaking, () => {
           setVoiceState('idle');
@@ -193,10 +228,13 @@ export function useVoiceSession(options: UseVoiceSessionOptions): UseVoiceSessio
 
       clientRef.current = client;
 
-      // 2. Connect — this calls /start, spawns the bot, and joins the Daily room
+      // 2. Connect — this calls /start, spawns the bot, and joins the Daily room.
+      // Language is auto-detected from the device locale so the user never has
+      // to touch a settings screen — Bulgarian phone speaks Bulgarian, etc.
+      const language = getDeviceLanguageTag();
       await client.startBotAndConnect({
         endpoint: VOICE_API_URL + '/start',
-        body: { role, mode, language: 'bg' },
+        body: { role, mode, language },
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to connect to voice AI';
@@ -266,15 +304,36 @@ export function useVoiceSession(options: UseVoiceSessionOptions): UseVoiceSessio
     setConnected(true);
     setIsConnecting(false);
 
-    const welcomeMessages: Record<string, string> = {
-      seller: 'Здравейте! Ще ви помогна да създадете профил и първата си оферта. Как се казвате?',
-      buyer:
-        'Здравейте! Ще ви помогна да намерите продукция и да направите заявка. Как се казвате?',
-      transporter: 'Здравейте! Ще ви помогна да регистрирате камиона си. Как се казвате?',
+    const lang = (getDeviceLanguageTag().split('-')[0] || 'bg') as 'bg' | 'en' | 'ro' | 'es';
+    const welcome: Record<'bg' | 'en' | 'ro' | 'es', Record<string, string>> = {
+      bg: {
+        seller: 'Здравейте! Ще ви помогна да създадете профил и първата си оферта. Как се казвате?',
+        buyer:
+          'Здравейте! Ще ви помогна да намерите продукция и да направите заявка. Как се казвате?',
+        transporter: 'Здравейте! Ще ви помогна да регистрирате камиона си. Как се казвате?',
+      },
+      en: {
+        seller:
+          "Hi! I'll help you set up your profile and create your first offer. What's your name?",
+        buyer: "Hi! I'll help you find produce and place a request. What's your name?",
+        transporter: "Hi! I'll help you register your truck. What's your name?",
+      },
+      ro: {
+        seller: 'Salut! Te voi ajuta să-ți creezi profilul și prima ofertă. Cum te numești?',
+        buyer: 'Salut! Te voi ajuta să găsești produse și să faci o cerere. Cum te numești?',
+        transporter: 'Salut! Te voi ajuta să-ți înregistrezi camionul. Cum te numești?',
+      },
+      es: {
+        seller:
+          'Hola! Te ayudaré a configurar tu perfil y crear tu primera oferta. ¿Cómo te llamas?',
+        buyer: 'Hola! Te ayudaré a encontrar productos y hacer un pedido. ¿Cómo te llamas?',
+        transporter: 'Hola! Te ayudaré a registrar tu camión. ¿Cómo te llamas?',
+      },
     };
+    const set = welcome[lang] || welcome.bg;
 
     setTimeout(() => {
-      addAssistantMessage(welcomeMessages[role] || 'Здравейте! Как мога да ви помогна?');
+      addAssistantMessage(set[role] || welcome.bg[role] || 'Hello! How can I help?');
       setVoiceState('talking');
       setTimeout(() => setVoiceState('idle'), 4000);
     }, 300);

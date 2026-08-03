@@ -66,7 +66,7 @@ interface NavigationItem {
 export default function DashboardMainScreen() {
   const navigation = useNavigation<DashboardMainScreenNavigationProp>();
   const route = useRoute<DashboardMainScreenRouteProp>();
-  const { user, isAuthenticated } = useAuthStore();
+  const { user, isAuthenticated, _hasHydrated } = useAuthStore();
 
   const [activeSection, setActiveSection] = useState('overview');
 
@@ -87,6 +87,7 @@ export default function DashboardMainScreen() {
 
   // Ensure authenticated users stay on dashboard
   React.useEffect(() => {
+    if (!_hasHydrated) return; // wait for AsyncStorage to finish loading
     if (!isAuthenticated) {
       navigation.navigate('Onboarding' as never);
     }
@@ -104,7 +105,7 @@ export default function DashboardMainScreen() {
       };
       checkPendingListing();
     }
-  }, [isAuthenticated, navigation, route.params]);
+  }, [_hasHydrated, isAuthenticated, navigation, route.params]);
 
   // Push notifications: register token with backend
   React.useEffect(() => {

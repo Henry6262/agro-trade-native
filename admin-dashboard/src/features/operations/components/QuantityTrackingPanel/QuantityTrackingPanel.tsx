@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AnimatedProgress, EnhancedTooltip } from '../../../../components/common';
+import { EnhancedTooltip } from '../../../../components/common';
 import type { Offer, BuyListing } from '../../../../types/listings';
 
 interface QuantityTrackingPanelProps {

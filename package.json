@@ -4,7 +4,6 @@
   "workspaces": [
     "backend",
     "front-end",
-    "contracts",
     "contracts-solana",
     "admin-dashboard",
     "landing"

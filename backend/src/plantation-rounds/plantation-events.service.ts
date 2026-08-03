@@ -45,27 +45,32 @@ export class PlantationEventsService implements OnModuleInit {
         ) => {
           this.logger.log(`RoundCreated event: roundId=${roundId}`);
           try {
-            // Find the most recent OPEN round with matching cropType that still has a
-            // placeholder (negative) onChainRoundId, assigned by the create handler.
+            // Find the most recent matching round that is still awaiting chain
+            // reconciliation. The uint256 ID is stored as an exact decimal string.
             const round = await this.prisma.plantationRound.findFirst({
               where: {
-                onChainRoundId: { lt: 0 },
+                onChainRoundId: null,
                 cropType,
-                status: PlantationRoundStatus.OPEN,
+                status: {
+                  in: [
+                    PlantationRoundStatus.OPEN,
+                    PlantationRoundStatus.FUNDED,
+                  ],
+                },
               },
               orderBy: { createdAt: 'desc' },
             });
             if (round) {
               await this.prisma.plantationRound.update({
                 where: { id: round.id },
-                data: { onChainRoundId: Number(roundId) },
+                data: { onChainRoundId: roundId.toString() },
               });
               this.logger.log(
                 `Updated PlantationRound ${round.id} → onChainRoundId=${roundId}`,
               );
             } else {
               this.logger.warn(
-                `RoundCreated: no matching OPEN round with placeholder id for cropType=${cropType}`,
+                `RoundCreated: no matching pending round awaiting reconciliation for cropType=${cropType}`,
               );
             }
           } catch (err) {
@@ -84,7 +89,7 @@ export class PlantationEventsService implements OnModuleInit {
           );
           try {
             const round = await this.prisma.plantationRound.findFirst({
-              where: { onChainRoundId: Number(roundId) },
+              where: { onChainRoundId: roundId.toString() },
             });
             if (!round) {
               this.logger.warn(
@@ -93,24 +98,52 @@ export class PlantationEventsService implements OnModuleInit {
               return;
             }
 
-            // Update placeholder NFT records (tokenId < 0) with real tokenIds from chain.
-            // Placeholders are created with -(Date.now()) - i, so all are negative.
-            const placeholders = await this.prisma.plantationNft.findMany({
-              where: { roundId: round.id, tokenId: { lt: 0 } },
-              orderBy: { shareIndex: 'asc' },
-              take: tokenIds.length,
-            });
-
-            await Promise.all(
-              placeholders.map((nft, i) =>
-                this.prisma.plantationNft.update({
-                  where: { id: nft.id },
-                  data: { tokenId: Number(tokenIds[i]) },
-                }),
-              ),
+            // Resolve each token's authoritative share index from the contract.
+            // This avoids assigning concurrent events to whichever nullable rows
+            // happen to be returned first.
+            const assignments = await Promise.all(
+              tokenIds.map(async (tokenId) => {
+                const tokenInfo = await contract.getTokenInfo(tokenId);
+                const shareIndexBigInt = BigInt(
+                  tokenInfo.shareIndex ?? tokenInfo[1],
+                );
+                if (
+                  shareIndexBigInt < 0n ||
+                  shareIndexBigInt >= BigInt(round.totalShares)
+                ) {
+                  throw new Error(
+                    `Invalid share index ${shareIndexBigInt} for round ${round.id}`,
+                  );
+                }
+                return {
+                  shareIndex: Number(shareIndexBigInt),
+                  tokenId: tokenId.toString(),
+                };
+              }),
             );
+
+            await this.prisma.$transaction(async (tx) => {
+              for (const assignment of assignments) {
+                const updated = await tx.plantationNft.updateMany({
+                  where: {
+                    roundId: round.id,
+                    shareIndex: assignment.shareIndex,
+                    OR: [
+                      { tokenId: null },
+                      { tokenId: assignment.tokenId },
+                    ],
+                  },
+                  data: { tokenId: assignment.tokenId },
+                });
+                if (updated.count !== 1) {
+                  throw new Error(
+                    `No matching reserved share ${assignment.shareIndex} for round ${round.id}`,
+                  );
+                }
+              }
+            });
             this.logger.log(
-              `Updated ${placeholders.length} PlantationNft records for round ${round.id}`,
+              `Reconciled ${assignments.length} PlantationNft records for round ${round.id}`,
             );
           } catch (err) {
             this.logger.error(
@@ -126,7 +159,7 @@ export class PlantationEventsService implements OnModuleInit {
           this.logger.log(`CapitalUnlocked event: roundId=${roundId}`);
           try {
             await this.prisma.plantationRound.updateMany({
-              where: { onChainRoundId: Number(roundId) },
+              where: { onChainRoundId: roundId.toString() },
               data: { status: PlantationRoundStatus.ACTIVE },
             });
           } catch (err) {
@@ -143,7 +176,7 @@ export class PlantationEventsService implements OnModuleInit {
           this.logger.log(`HarvestDistributed event: roundId=${roundId}`);
           try {
             await this.prisma.plantationRound.updateMany({
-              where: { onChainRoundId: Number(roundId) },
+              where: { onChainRoundId: roundId.toString() },
               data: { status: PlantationRoundStatus.DISTRIBUTING },
             });
           } catch (err) {

@@ -129,15 +129,17 @@ describe('PATCH /api/trade-operations/:id/phase - Contract Test', () => {
         .expect(200);
 
       // 4. Accept negotiation
-      await request(env.app.getHttpServer())
+      const negotiationResponse = await request(env.app.getHttpServer())
         .post(`/api/negotiations/trade-operation/${tradeOperationId}`)
         .set('Authorization', `Bearer ${env.tokens.admin}`)
-        .send({ tradeSellerId, price: 300, quantity: 10 });
+        .send({ tradeSellerId, price: 300, quantity: 10 })
+        .expect(201);
 
       await request(env.app.getHttpServer())
-        .post(`/api/negotiations/trade-operation/${tradeOperationId}/accept`)
+        .post(`/api/negotiations/${negotiationResponse.body.data.id}/accept`)
         .set('Authorization', `Bearer ${env.tokens.admin}`)
-        .send({ tradeSellerId });
+        .send({})
+        .expect(200);
 
       // 5. Now transition to INSPECTION_PENDING
       await request(env.app.getHttpServer())

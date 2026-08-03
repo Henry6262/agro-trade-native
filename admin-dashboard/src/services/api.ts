@@ -96,15 +96,7 @@ export const tradeOperationService = {
     return data;
   },
 
-  async update(id: string, updateDto: Partial<{
-    phase: Types.TradePhase;
-    status: Types.TradeStatus;
-    sellingPrice: number;
-    targetProfitMargin: number;
-    expectedDeliveryDate: Date;
-    transportOptimized: boolean;
-    adminNotes: string;
-  }>): Promise<Types.TradeOperation> {
+  async update(id: string, updateDto: Types.UpdateTradeOperationDto): Promise<Types.TradeOperation> {
     const { data } = await api.patch(
       API_ENDPOINTS.tradeOperations.byId(id),
       updateDto,
@@ -214,7 +206,7 @@ export const inspectionService = {
     return data;
   },
 
-  async create(dto: any): Promise<Types.InspectionRequest> {
+  async create(dto: Omit<Types.InspectionRequest, 'id'>): Promise<Types.InspectionRequest> {
     const { data } = await api.post('/inspections', dto);
     return data;
   },
@@ -280,12 +272,12 @@ export const saleListingService = {
 
 // Profit Calculation Service
 export const profitService = {
-  async calculate(tradeOperationId: string): Promise<any> {
+  async calculate(tradeOperationId: string): Promise<Types.ProfitData> {
     const response = await api.get(`/trade-operations/${tradeOperationId}/profit`);
     return response.data?.data || response.data || {};
   },
 
-  async getScenarios(tradeOperationId: string): Promise<any[]> {
+  async getScenarios(tradeOperationId: string): Promise<Record<string, unknown>[]> {
     const { data } = await api.get(`/trade-operations/${tradeOperationId}/scenarios`);
     return data;
   },

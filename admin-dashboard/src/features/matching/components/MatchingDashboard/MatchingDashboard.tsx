@@ -97,9 +97,9 @@ export const MatchingDashboard: React.FC = () => {
     negotiations.forEach(neg => {
       // Try multiple paths to get the sale listing ID
       const saleListingId =
-        (neg as any).saleListingId ||
+        neg.saleListingId ||
         neg.tradeSeller?.saleListingId ||
-        (neg as any).saleListing?.id;
+        neg.saleListing?.id;
 
       if (saleListingId) {
         map.set(saleListingId, neg);
@@ -113,7 +113,7 @@ export const MatchingDashboard: React.FC = () => {
       negotiations: negotiations.map(n => ({
         id: n.id,
         status: n.status,
-        saleListingId: (n as any).saleListingId || n.tradeSeller?.saleListingId,
+        saleListingId: n.saleListingId || n.tradeSeller?.saleListingId,
       })),
     });
 
@@ -127,7 +127,7 @@ export const MatchingDashboard: React.FC = () => {
     >();
 
     if (tradeOperationDetails?.sellers) {
-      tradeOperationDetails.sellers.forEach((seller: any) => {
+      tradeOperationDetails.sellers.forEach((seller) => {
         const saleListingId =
           seller?.saleListingId ||
           seller?.saleListing?.id ||
@@ -144,9 +144,9 @@ export const MatchingDashboard: React.FC = () => {
 
     negotiations.forEach((neg) => {
       const saleListingId =
-        (neg as any).saleListingId ||
+        neg.saleListingId ||
         neg.tradeSeller?.saleListingId ||
-        (neg as any).saleListing?.id;
+        neg.saleListing?.id;
 
       if (saleListingId) {
         map.set(saleListingId, {
@@ -179,7 +179,7 @@ export const MatchingDashboard: React.FC = () => {
     const map = new Map<string, SellerInspectionStatus>();
 
     if (tradeOperationDetails?.sellers) {
-      tradeOperationDetails.sellers.forEach((seller: any) => {
+      tradeOperationDetails.sellers.forEach((seller) => {
         const saleListingId =
           seller?.saleListingId ||
           seller?.saleListing?.id ||
@@ -239,7 +239,7 @@ export const MatchingDashboard: React.FC = () => {
       return null;
     }
 
-    return tradeOperationDetails.sellers.find((seller: any) => {
+    return tradeOperationDetails.sellers.find((seller) => {
       const saleListingId =
         seller?.saleListingId ||
         seller?.saleListing?.id ||
@@ -370,7 +370,7 @@ export const MatchingDashboard: React.FC = () => {
       const freshNegotiations = response.negotiations || [];
 
       // Map the response format to our expected Negotiation format
-      const mappedNegotiations = freshNegotiations.map((n: any) => ({
+      const mappedNegotiations = freshNegotiations.map((n) => ({
         id: n.id,
         tradeSellerId: n.tradeSellerId,
         status: n.status,
@@ -817,17 +817,6 @@ export const MatchingDashboard: React.FC = () => {
     });
   };
 
-  // Clear selection
-  const handleClearSelection = () => {
-    setSelectedOrder(null);
-    setSelectedSellers([]);
-    setAvailableSellers([]);
-    setTransportEstimates({});
-    setTransportError(null);
-    setTransportLoading(false);
-    setTransportWarnings([]);
-  };
-
   // Map markers for buyers
   const buyerMarkers = selectedOrder
     ? [
@@ -889,7 +878,7 @@ export const MatchingDashboard: React.FC = () => {
             selectedBuyerId={selectedOrder?.id}
             selectedSellerId={highlightedSellerId}
             selectedSellerIds={selectedSellers.map((s) => s.seller.id)}
-            onBuyerClick={(id) => {
+            onBuyerClick={() => {
               // Optionally handle buyer pin click
             }}
             onSellerClick={(id) => {

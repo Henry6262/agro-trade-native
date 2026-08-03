@@ -1,28 +1,23 @@
-// AgroTrade Brand Palette — Green Theme
-// Primary: Branded forest green (ecosystem color)
-// Accents: Complementary green shades for hierarchy
-// Neutral: Pure black, white, gray for text and backgrounds
+// AgriTek operating palette.
+// Harvest gold marks value and the next action. Living green is reserved for
+// verified progress. Terracotta is reserved for a real exception or risk.
 export const B = {
-  bg: "#0C0904",                              // Deep dark soil
-  bg2: "#110D07",                             // Alternate warm dark
-  card: "#160F08",                            // Card background
-  // GREEN PRIMARY BRAND COLOR — All accent elements use this
-  green: "#3D7A50",                           // Forest green — PRIMARY brand color
-  greenLight: "#10b981",                      // Medium green — secondary accent
-  greenBright: "#34d399",                     // Bright emerald — hover states
-  greenExtra: "#6ee7b7",                      // Light green — subtle accents
-  // Legacy (for backwards compatibility, now deprecated)
-  wheat: "#3D7A50",                           // Remapped to green (DO NOT USE DIRECTLY)
-  amber: "#10b981",                           // Remapped to green light (DO NOT USE DIRECTLY)
-  // Text & borders
-  cream: "#F0E5CC",                           // Warm cream — primary text
-  muted: "#8B7B68",                           // Warm muted earth
-  border: "rgba(61, 122, 80, 0.12)",          // Subtle green border
-  borderStrong: "rgba(61, 122, 80, 0.28)",    // Stronger green border
-  danger: "#C4654A",                          // Terracotta — danger/error
-  // Glassmorphism helpers (green-based)
-  glass: "rgba(61, 122, 80, 0.045)",
-  glassBorder: "rgba(61, 122, 80, 0.14)",
-  glassShadow: "0 4px 32px rgba(0,0,0,0.55), inset 0 1px 0 rgba(61,122,80,0.07)",
-  glassHover: "rgba(61, 122, 80, 0.07)",
+  bg: '#070907',
+  bg2: '#0D100C',
+  card: '#11140F',
+  green: '#4A8D61',
+  greenLight: '#63A978',
+  greenBright: '#79C98F',
+  greenExtra: '#A3D9B0',
+  wheat: '#D8B35D',
+  amber: '#C6812A',
+  cream: '#F4EEDC',
+  muted: '#9A927F',
+  border: 'rgba(216, 179, 93, 0.13)',
+  borderStrong: 'rgba(216, 179, 93, 0.30)',
+  danger: '#D0664F',
+  glass: 'rgba(15, 19, 14, 0.72)',
+  glassBorder: 'rgba(216, 179, 93, 0.15)',
+  glassShadow: '0 24px 80px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.05)',
+  glassHover: 'rgba(216, 179, 93, 0.07)',
 } as const;

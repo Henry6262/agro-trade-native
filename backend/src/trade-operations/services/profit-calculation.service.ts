@@ -1,35 +1,89 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class ProfitCalculationService {
-  async calculateProfit(_tradeOperationId: string) {
+  constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Prisma-backed calculation restored from the original trade-profit service.
+   * Agreed seller quantities take precedence for partially sourced trades.
+   */
+  async calculateProfit(tradeOperationId: string) {
+    const trade = await this.prisma.tradeOperation.findUnique({
+      where: { id: tradeOperationId },
+      include: {
+        buyListing: true,
+        sellers: true,
+        transportCostCalculations: {
+          orderBy: { calculatedAt: 'desc' },
+          take: 1,
+        },
+      },
+    });
+
+    if (!trade) {
+      throw new NotFoundException('Trade operation not found');
+    }
+
+    const agreedSellers = trade.sellers.filter(
+      (seller) => seller.agreedQuantity != null && seller.agreedPrice != null,
+    );
+    const purchaseBreakdown = agreedSellers.map((seller) => {
+      const quantity = Number(seller.agreedQuantity);
+      const price = Number(seller.agreedPrice);
+      return {
+        sellerId: seller.sellerId,
+        quantity,
+        price,
+        totalCost: quantity * price,
+      };
+    });
+    const purchaseCost = purchaseBreakdown.reduce((sum, seller) => sum + seller.totalCost, 0);
+    const agreedQuantity = purchaseBreakdown.reduce((sum, seller) => sum + seller.quantity, 0);
+    const quantity = agreedSellers.length > 0 ? agreedQuantity : Number(trade.buyListing.quantity);
+    const sellingPrice = Number(trade.sellingPrice ?? 0);
+    const totalRevenue = sellingPrice * quantity;
+    const estimatedTransportCost = Number(trade.estimatedTransportCost ?? 0);
+    const actualTransportCost =
+      trade.actualTransportCost == null ? undefined : Number(trade.actualTransportCost);
+    const transportCost = actualTransportCost ?? estimatedTransportCost;
+    const grossProfit = totalRevenue - purchaseCost;
+    const netProfit = grossProfit - transportCost;
+    const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+    const latestTransportCalculation = trade.transportCostCalculations[0];
+
     return {
-      profit: { grossProfit: 0, netProfit: 0, profitMargin: 0 },
-      breakdown: { revenue: {}, purchaseCosts: {}, transportCosts: {} },
+      tradeOperationId,
+      revenue: {
+        sellingPrice,
+        quantity,
+        totalRevenue,
+      },
+      costs: {
+        purchases: {
+          totalCost: purchaseCost,
+          avgPrice: quantity > 0 ? purchaseCost / quantity : 0,
+          breakdown: purchaseBreakdown,
+        },
+        transport: {
+          estimatedCost: estimatedTransportCost,
+          actualCost: actualTransportCost,
+          distance: Number(trade.totalDistanceKm ?? latestTransportCalculation?.totalDistance ?? 0),
+          ratePerKm: Number(latestTransportCalculation?.baseRatePerKm ?? 0.15),
+        },
+        totalCosts: purchaseCost + transportCost,
+      },
+      profit: {
+        grossProfit,
+        netProfit,
+        profitMargin,
+        currency: trade.currency || 'EUR',
+      },
+      status: {
+        isEstimated: trade.phase !== 'COMPLETED',
+        lastUpdated: trade.updatedAt,
+      },
     };
-  }
-
-  async calculateProfitImpact(_dto: unknown) {
-    return { estimatedProfit: 0, profitMargin: 0, profitChange: 0, viability: 'UNKNOWN' };
-  }
-
-  async optimizeProfitMargins(_dto: unknown) {
-    return { optimizedPrices: { buyerPrice: 0, sellerPrices: [] }, expectedProfit: 0, expectedMargin: 0 };
-  }
-
-  async validateMargins(_dto: unknown) {
-    return { validations: [], summary: { totalViable: 0 } };
-  }
-
-  async getCumulativeProfit(_query: unknown) {
-    return { totalRevenue: 0, totalCosts: 0, totalProfit: 0, averageMargin: 0, operationCount: 0, breakdown: {} };
-  }
-
-  async forecastProfit(_dto: unknown) {
-    return { forecastedProfit: 0, forecastedMargin: 0, confidence: 0, breakdown: [] };
-  }
-
-  async getBenchmarks() {
-    return { minimumMargin: 5, targetMargin: 7, optimalMargin: 10, industryAverage: 7.5, currentPerformance: 0 };
   }
 }

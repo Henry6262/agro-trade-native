@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Progress } from '@/components/ui/progress';
 
 interface AnimatedProgressProps {
   value: number;

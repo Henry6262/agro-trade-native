@@ -1,38 +1,32 @@
-import type { MetadataRoute } from "next";
+import type { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://agrotrade.africa";
+  const base = 'https://agrotrade.africa';
 
   return [
     {
       url: base,
       lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1.0,
+      changeFrequency: 'weekly',
+      priority: 1,
     },
     {
-      url: `${base}/#how-it-works`,
+      url: `${base}/corridors/iberia-berries`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
+      changeFrequency: 'monthly',
       priority: 0.8,
     },
     {
-      url: `${base}/#roles`,
+      url: `${base}/privacy`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.8,
+      changeFrequency: 'yearly',
+      priority: 0.2,
     },
     {
-      url: `${base}/#vault`,
+      url: `${base}/terms`,
       lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-    {
-      url: `${base}/#cta`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.9,
+      changeFrequency: 'yearly',
+      priority: 0.2,
     },
   ];
 }

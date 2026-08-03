@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TradePhase, TradeStatus } from '../../../../types';
 import type { TradeSeller } from '../../../../types';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -12,6 +12,7 @@ import { NegotiationsDetailPanel } from './NegotiationsDetailPanel';
 import { InspectionRequestButton } from './InspectionRequestButton';
 import api from '../../../../services/api';
 import { API_ENDPOINTS } from '../../../../config/api';
+import { getApiErrorMessage } from '../../../../utils/errorHandler';
 
 interface SellerDetail extends TradeSeller {
   name?: string;
@@ -79,9 +80,9 @@ export const OfferDetailsModal: React.FC<OfferDetailsModalProps> = ({ open, oper
 
       const response = await api.get(API_ENDPOINTS.tradeOperations.byId(operationId));
       setOperation(response.data);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error fetching operation details:', err);
-      setError(err.response?.data?.message || 'Failed to fetch operation details');
+      setError(getApiErrorMessage(err, 'Failed to fetch operation details'));
     } finally {
       setLoading(false);
     }

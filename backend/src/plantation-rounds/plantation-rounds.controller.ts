@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   Query,
   UseGuards,
@@ -49,7 +48,7 @@ export class PlantationRoundsController {
   @UseGuards(JwtAuthGuard)
   @Get('yield/:tokenId')
   getPendingYield(
-    @Param('tokenId', ParseIntPipe) tokenId: number,
+    @Param('tokenId') tokenId: string,
     @CurrentUser() user: User,
   ) {
     return this.stakingService.getPendingYield(tokenId, user.id);
@@ -83,7 +82,7 @@ export class PlantationRoundsController {
   @UseGuards(JwtAuthGuard)
   @Post('stake/:tokenId')
   stakeNft(
-    @Param('tokenId', ParseIntPipe) tokenId: number,
+    @Param('tokenId') tokenId: string,
     @CurrentUser() user: User,
   ) {
     return this.stakingService.stakeNft(tokenId, user.id);
@@ -92,7 +91,7 @@ export class PlantationRoundsController {
   @UseGuards(JwtAuthGuard)
   @Post('unstake/:tokenId')
   unstakeNft(
-    @Param('tokenId', ParseIntPipe) tokenId: number,
+    @Param('tokenId') tokenId: string,
     @CurrentUser() user: User,
   ) {
     return this.stakingService.unstakeNft(tokenId, user.id);
@@ -101,7 +100,7 @@ export class PlantationRoundsController {
   @UseGuards(JwtAuthGuard)
   @Post('claim/:tokenId')
   claimYield(
-    @Param('tokenId', ParseIntPipe) tokenId: number,
+    @Param('tokenId') tokenId: string,
     @CurrentUser() user: User,
   ) {
     return this.stakingService.claimYield(tokenId, user.id);

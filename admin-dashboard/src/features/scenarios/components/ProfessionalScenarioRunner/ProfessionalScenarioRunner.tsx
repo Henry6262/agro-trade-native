@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { simulationApi } from '../../../../services/simulationApi';
 import { scenarioContext } from '../../../../services/scenarioContext';
-import type { ScenarioStep } from '../../../../types/scenario';
+import type { ScenarioResult, ScenarioState, ScenarioStep } from '../../../../types/scenario';
+import { getApiErrorMessage } from '../../../../utils/errorHandler';
 import { EnhancedTradeFlowDiagram } from '../shared/EnhancedTradeFlowDiagram';
 import { StepContextPanel } from '../shared/StepContextPanel';
 import { ScenarioSelectorModal } from '../shared/ScenarioSelectorModal';
@@ -18,23 +19,6 @@ import {
 } from '../../../../scenarios';
 import { LoginPanel, ControlsPanel } from './panels';
 import { stepExecutor } from './services/stepExecutor';
-
-interface ScenarioState {
-  createdUsers: {
-    farmers: any[];
-    buyers: any[];
-    transporters: any[];
-    inspector: any | null;
-  };
-  saleListings: any[];
-  buyListings: any[];
-  tradeOperations: any[];
-  negotiations: any[];
-  inspections: any[];
-  transportRequests: any[];
-  transportBids: any[];
-  transportJobs: any[];
-}
 
 const scenarios = {
   'happy-path': {
@@ -159,7 +143,7 @@ export const ProfessionalScenarioRunner: React.FC = () => {
   }, [executionMode, isRunning, currentStep, steps, executionSpeed]);
 
   // Update scenario state based on results
-  const updateScenarioState = useCallback((result: any, step: ScenarioStep) => {
+  const updateScenarioState = useCallback((result: ScenarioResult, step: ScenarioStep) => {
     if (!result) return;
 
     // User creation - already handled by simulationApi, but sync local state
@@ -266,11 +250,11 @@ export const ProfessionalScenarioRunner: React.FC = () => {
       setSteps(updatedSteps);
       setCurrentStep((prev) => prev + 1);
 
-    } catch (error: any) {
+    } catch (error) {
       updatedSteps[currentStep] = {
         ...step,
         status: 'failed',
-        error: error.message || 'Unknown error occurred',
+        error: getApiErrorMessage(error, 'Unknown error occurred'),
       };
       setSteps(updatedSteps);
       setIsRunning(false);

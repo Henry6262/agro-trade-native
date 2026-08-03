@@ -206,6 +206,47 @@ describe("TradeOperationService", () => {
     ).rejects.toThrow(BadRequestException);
   });
 
+  it("updates schema-backed status and selling price fields", async () => {
+    const existing = makeTrade({
+      buyListing: {
+        buyerId: "buyer-1",
+        quantity: new Prisma.Decimal(10),
+      },
+    });
+    const updated = makeTrade({
+      status: TradeStatus.ON_HOLD,
+      sellingPrice: new Prisma.Decimal(175),
+      buyListing: existing.buyListing,
+    });
+    prisma.tradeOperation.findUnique
+      .mockResolvedValueOnce(existing)
+      .mockResolvedValueOnce(updated);
+    prisma.tradeOperation.update.mockResolvedValue(updated);
+
+    const result = await service.update("trade-1", {
+      status: TradeStatus.ON_HOLD,
+      sellingPrice: 175,
+    });
+
+    expect(prisma.tradeOperation.update).toHaveBeenCalledWith({
+      where: { id: "trade-1" },
+      data: {
+        status: TradeStatus.ON_HOLD,
+        sellingPrice: 175,
+        totalRevenue: 1750,
+      },
+    });
+    expect(result).toEqual(
+      expect.objectContaining({
+        status: TradeStatus.ON_HOLD,
+        profit: expect.objectContaining({
+          estimated: expect.any(Number),
+          margin: expect.any(Number),
+        }),
+      }),
+    );
+  });
+
   it("calculates profit from trade revenue, seller costs, and transport costs", async () => {
     prisma.tradeOperation.findUnique.mockResolvedValue(
       makeTrade({

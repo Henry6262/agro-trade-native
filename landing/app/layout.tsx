@@ -1,26 +1,26 @@
-import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import { ThemeProvider } from "next-themes";
-import { Providers } from "./providers";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Geist } from 'next/font/google';
+import { ThemeProvider } from 'next-themes';
+import { Providers } from './providers';
+import './globals.css';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
-const BASE_URL = "https://agrotrade.africa";
+const BASE_URL = 'https://agrotrade.africa';
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
 
   // ── Primary ────────────────────────────────────────────────────────────────
   title: {
-    default: "AgroTrade — Secure Agricultural Trading",
-    template: "%s | AgroTrade",
+    default: 'AgriTek — Trade Operating System',
+    template: '%s | AgriTek',
   },
   description:
-    "Blockchain-secured escrow for B2B agricultural trades. Buyers, sellers, inspectors, and transporters on one platform — no blind trust, no payment risk. From the Balkans to the Middle East and Asia.",
+    'One evidence-backed workflow for cross-border produce trade—from buyer requirement and supply readiness to inspection, movement, acceptance and claims.',
 
   // ── Canonical ──────────────────────────────────────────────────────────────
   alternates: {
@@ -29,83 +29,77 @@ export const metadata: Metadata = {
 
   // ── Discovery ──────────────────────────────────────────────────────────────
   keywords: [
-    "agricultural marketplace",
-    "agricultural escrow",
-    "B2B agri trading",
-    "Balkans agriculture",
-    "Eastern Europe grain trade",
-    "Middle East agri import",
-    "blockchain escrow",
-    "cUSD Celo",
-    "farm produce trading",
-    "supply chain security",
-    "food security platform",
-    "agri-fintech",
-    "smart contract escrow",
-    "commodity trading platform",
+    'agricultural trade operating system',
+    'cross-border produce trade',
+    'agricultural supply chain evidence',
+    'produce trade workflow',
+    'Morocco Portugal Spain trade corridor',
+    'raspberry supply exception',
+    'fresh produce exception desk',
+    'raspberry replacement load',
+    'Morocco Spain raspberry import',
+    'Portugal Spain raspberry supply',
+    'produce document gate',
+    'cold chain evidence',
+    'arrival inspection coordination',
   ],
-  category: "Business",
-  authors: [{ name: "AgroTrade", url: BASE_URL }],
-  creator: "AgroTrade",
-  publisher: "AgroTrade",
+  category: 'Business',
+  authors: [{ name: 'AgroTrade', url: BASE_URL }],
+  creator: 'AgriTek by AgroTrade',
+  publisher: 'AgroTrade',
 
   // ── Open Graph ─────────────────────────────────────────────────────────────
   openGraph: {
-    title: "AgroTrade — No Blind Trust. Just Trade.",
+    title: 'AgriTek — Move Food. Move Trust.',
     description:
-      "The agricultural trading platform that protects every payment with blockchain escrow on Celo. Starting in the Balkans — built for the world.",
+      'The evidence-backed operating workflow for every critical handoff in cross-border produce trade. Starting with a private Morocco/Portugal-to-Spain raspberry pilot.',
     url: BASE_URL,
-    type: "website",
-    siteName: "AgroTrade",
-    locale: "en_US",
+    type: 'website',
+    siteName: 'AgriTek by AgroTrade',
+    locale: 'en_US',
     images: [
       {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "AgroTrade — Secure Agricultural Trading Platform",
-        type: "image/png",
+        url: '/visuals/agritek-cold-chain-hero.jpg',
+        width: 1808,
+        height: 870,
+        alt: 'AgriTek cold-chain operators preparing a raspberry trade corridor',
+        type: 'image/jpeg',
       },
     ],
   },
 
   // ── Twitter / X ────────────────────────────────────────────────────────────
   twitter: {
-    card: "summary_large_image",
-    title: "AgroTrade — No Blind Trust. Just Trade.",
-    description:
-      "Blockchain-secured payments for agricultural trades. From the Balkans to the Middle East and Asia.",
-    images: ["/og-image.png"],
+    card: 'summary_large_image',
+    title: 'AgriTek — Move Food. Move Trust.',
+    description: 'One operating record for the critical handoffs in cross-border produce trade.',
+    images: ['/visuals/agritek-cold-chain-hero.jpg'],
     // site: "@agrotrade",  // uncomment once handle is live
   },
 
   // ── Icons ──────────────────────────────────────────────────────────────────
   icons: {
     icon: [
-      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: '/favicon-16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
     ],
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
-    ],
-    other: [
-      { rel: "mask-icon", url: "/logo.png" },
-    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+    other: [{ rel: 'mask-icon', url: '/logo.png' }],
   },
 
   // ── PWA / theme colour ─────────────────────────────────────────────────────
   // Note: manifest.ts handles the full PWA manifest at /manifest.json
   // This sets the browser chrome colour on mobile
   other: {
-    "theme-color": "#E8C870",
-    "color-scheme": "dark",
-    "mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-capable": "yes",
-    "apple-mobile-web-app-status-bar-style": "black-translucent",
-    "apple-mobile-web-app-title": "AgroTrade",
-    "application-name": "AgroTrade",
-    "msapplication-TileColor": "#0C0904",
-    "msapplication-TileImage": "/icon-192.png",
+    'theme-color': '#070907',
+    'color-scheme': 'dark',
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    'apple-mobile-web-app-title': 'AgriTek',
+    'application-name': 'AgriTek',
+    'msapplication-TileColor': '#0C0904',
+    'msapplication-TileImage': '/icon-192.png',
   },
 
   // ── Crawling ───────────────────────────────────────────────────────────────
@@ -115,9 +109,9 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   },
 
@@ -133,11 +127,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} antialiased`}
-        style={{ backgroundColor: "#0C0904", color: "#ffffff" }}
+        style={{ backgroundColor: '#070907', color: '#ffffff' }}
       >
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
           <Providers>{children}</Providers>
         </ThemeProvider>

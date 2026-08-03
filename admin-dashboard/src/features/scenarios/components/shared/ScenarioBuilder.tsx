@@ -177,7 +177,7 @@ export const ScenarioBuilder: React.FC<ScenarioBuilderProps> = ({ onSaveScenario
               try {
                 const parsed = JSON.parse(e.target.value);
                 setCurrentStep({ ...currentStep, payload: parsed });
-              } catch (err) {
+              } catch {
                 // Invalid JSON, ignore
               }
             }}

@@ -39,6 +39,9 @@ const resolveRequestWithPackageExports = (context, moduleName, platform) => {
 // Keep package exports enabled for other packages
 config.resolver.unstable_enablePackageExports = true;
 
+// Allow Metro to bundle 3D asset files
+config.resolver.assetExts = [...(config.resolver.assetExts ?? []), 'glb', 'gltf', 'bin'];
+
 // Add polyfills for Node.js modules used by Privy
 config.resolver.extraNodeModules = {
   ...config.resolver.extraNodeModules,

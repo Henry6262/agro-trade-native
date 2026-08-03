@@ -73,13 +73,13 @@ describe('POST /api/negotiations/:id/accept - Accept Offer Contract Test', () =>
         })
         .expect(200);
 
-      // Response is direct object for accept. 
+      // Response is direct object for accept.
       // Note: Decimal fields (finalPrice, finalQuantity) are returned as Strings in JSON
       expect(response.body).toMatchObject({
         id: negotiationId,
         status: 'ACCEPTED',
-        finalPrice: "335",
-        finalQuantity: "50",
+        finalPrice: '335',
+        finalQuantity: '50',
       });
 
       // Verify database updates
@@ -115,7 +115,7 @@ describe('POST /api/negotiations/:id/accept - Accept Offer Contract Test', () =>
         agreedPrice: expect.any(Object), // Decimal object in prisma
         agreedQuantity: expect.any(Object), // Decimal object in prisma
       });
-      
+
       expect(updatedTradeSeller.agreedPrice.toNumber()).toBe(335);
       expect(updatedTradeSeller.agreedQuantity.toNumber()).toBe(50);
     });
@@ -144,7 +144,7 @@ describe('POST /api/negotiations/:id/accept - Accept Offer Contract Test', () =>
       expect(response.body).toHaveProperty('phaseTransition');
       expect(response.body.phaseTransition).toMatchObject({
         allSellersAccepted: true,
-        nextPhase: 'INSPECTION_REQUIRED',
+        nextPhase: 'INSPECTION_PENDING',
       });
     });
 

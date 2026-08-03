@@ -37,17 +37,17 @@ describe('POST /api/transport/bids - Transport Bids Contract Test', () => {
       data: {
         user: { connect: { id: testData.users.buyer.id } },
         addressType: 'OTHER',
-        street: "Buyer Street",
-        country: "Bulgaria",
+        street: 'Buyer Street',
+        country: 'Bulgaria',
         latitude: 42.6977,
         longitude: 23.3219,
-      }
+      },
     });
-    
+
     // Update buyListing to use this address
     await env.prisma.buyListing.update({
       where: { id: testData.buyListing.id },
-      data: { deliveryAddressId: buyerAddress.id }
+      data: { deliveryAddressId: buyerAddress.id },
     });
 
     // 3. Add accepted seller with address (REQUIRED for transport request)
@@ -55,17 +55,17 @@ describe('POST /api/transport/bids - Transport Bids Contract Test', () => {
       data: {
         user: { connect: { id: testData.users.seller1.id } },
         addressType: 'FARM',
-        street: "Seller Street",
-        country: "Bulgaria",
+        street: 'Seller Street',
+        country: 'Bulgaria',
         latitude: 42.1,
         longitude: 23.2,
-      }
+      },
     });
-    
+
     // Update sale listing with address
     await env.prisma.saleListing.update({
       where: { id: testData.saleListings[0].id },
-      data: { addressId: sellerAddress.id }
+      data: { addressId: sellerAddress.id },
     });
 
     await env.prisma.tradeSeller.create({
@@ -79,13 +79,13 @@ describe('POST /api/transport/bids - Transport Bids Contract Test', () => {
         status: 'ACCEPTED',
         agreedPrice: 340,
         agreedQuantity: 50,
-      }
+      },
     });
 
     // 4. Transition trade to TRANSPORT_MATCHING phase
     await env.prisma.tradeOperation.update({
       where: { id: tradeOperationId },
-      data: { phase: 'TRANSPORT_MATCHING' }
+      data: { phase: 'TRANSPORT_MATCHING' },
     });
 
     // 5. Create a transport request
@@ -98,10 +98,10 @@ describe('POST /api/transport/bids - Transport Bids Contract Test', () => {
         requiredVehicleType: 'FLATBED',
         biddingDeadline: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
       });
-    
+
     expect(transportReqResponse.status).toBe(201);
 
-    transportRequestId = transportReqResponse.body.id;
+    transportRequestId = transportReqResponse.body.data.id;
   }, 30000);
 
   describe('Transport Bid Contract', () => {
@@ -111,17 +111,20 @@ describe('POST /api/transport/bids - Transport Bids Contract Test', () => {
         .set('Authorization', `Bearer ${env.tokens.transporter}`)
         .send({
           transportRequestId: transportRequestId,
-          amount: 2500,
-          estimatedDays: 2,
-          vehicleDetails: '25-ton Flatbed Truck',
+          bidAmount: 2500,
+          truckCount: 2,
+          estimatedDuration: 48,
+          vehicleType: 'FLATBED',
+          vehicleCapacity: 25,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         })
         .expect(201);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.data).toMatchObject({
         id: expect.any(String),
         transportRequestId: transportRequestId,
         transporterId: testData.users.transporter.id,
-        amount: 2500,
+        bidAmount: 2500,
         status: 'PENDING',
       });
     });
@@ -132,8 +135,12 @@ describe('POST /api/transport/bids - Transport Bids Contract Test', () => {
         .set('Authorization', `Bearer ${env.tokens.transporter}`)
         .send({
           transportRequestId: transportRequestId,
-          amount: -100,
-          estimatedDays: 2,
+          bidAmount: -100,
+          truckCount: 1,
+          estimatedDuration: 24,
+          vehicleType: 'FLATBED',
+          vehicleCapacity: 25,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         })
         .expect(400);
     });
@@ -144,8 +151,12 @@ describe('POST /api/transport/bids - Transport Bids Contract Test', () => {
         .set('Authorization', `Bearer ${env.tokens.transporter}`)
         .send({
           transportRequestId: 'non-existent-id',
-          amount: 2000,
-          estimatedDays: 1,
+          bidAmount: 2000,
+          truckCount: 1,
+          estimatedDuration: 24,
+          vehicleType: 'FLATBED',
+          vehicleCapacity: 25,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
         })
         .expect(404);
     });

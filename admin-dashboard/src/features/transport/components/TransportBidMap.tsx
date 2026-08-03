@@ -4,11 +4,9 @@ import {
   LoadScript,
   Marker,
   InfoWindow,
-  Polyline,
-  DirectionsService,
   DirectionsRenderer,
 } from '@react-google-maps/api';
-import { Truck, Package, MapPin, DollarSign, Clock, Star, Navigation, X } from 'lucide-react';
+import { Truck, DollarSign, Clock, Star, X } from 'lucide-react';
 
 interface TransportBid {
   id: string;
@@ -88,7 +86,6 @@ export default function TransportBidMap({
   googleMapsApiKey,
 }: TransportBidMapProps) {
   const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
-  const [map, setMap] = useState<google.maps.Map | null>(null);
   const [directionsResponse, setDirectionsResponse] = useState<google.maps.DirectionsResult | null>(null);
   const [showRoute, setShowRoute] = useState(false);
 
@@ -116,7 +113,6 @@ export default function TransportBidMap({
 
   // Fit map to bounds when loaded
   const onLoad = useCallback((map: google.maps.Map) => {
-    setMap(map);
     map.fitBounds(bounds);
   }, [bounds]);
 

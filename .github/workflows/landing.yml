@@ -1,0 +1,42 @@
+name: Landing intake contract
+
+on:
+  push:
+    paths:
+      - 'landing/**'
+      - '.github/workflows/landing.yml'
+  pull_request:
+    paths:
+      - 'landing/**'
+      - '.github/workflows/landing.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  landing:
+    name: Test, typecheck, and build landing
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: landing
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: landing/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test intake contract
+        run: npm test
+
+      - name: Build landing
+        run: npm run build

@@ -16,9 +16,8 @@ describe("TradeOperationController (e2e)", () => {
   let tradeOperationService: any;
   let authToken: string;
 
-  // Mock JWT token for admin user
-  const mockAdminToken =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEyMyIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTcwNDAwMDAwMH0.mock-signature";
+  // Non-credential sentinel: JwtAuthGuard is overridden below, so no signed JWT is needed.
+  const mockAdminToken = "mock-admin-token";
 
   beforeAll(async () => {
     // Create mock negotiation service
@@ -31,6 +30,9 @@ describe("TradeOperationController (e2e)", () => {
 
     // Create mock trade operation service
     tradeOperationService = {
+      create: jest.fn(),
+      findAll: jest.fn(),
+      setInitialNegotiationPhase: jest.fn().mockResolvedValue(undefined),
       findMatchingSellers: jest.fn().mockResolvedValue([
         {
           sellerId: "user-seller-1",
@@ -163,26 +165,6 @@ describe("TradeOperationController (e2e)", () => {
         ],
       };
 
-      const mockBuyListing = {
-        id: "buy-listing-123",
-        buyerId: "buyer-456",
-        productId: "product-123",
-        status: "ACTIVE", // Required by controller
-        quantity: { toNumber: () => 100 }, // Prisma Decimal
-        maxPricePerUnit: { toNumber: () => 380 }, // Prisma Decimal
-        unit: "TON",
-        buyer: {
-          id: "buyer-456",
-          name: "Test Buyer",
-          email: "buyer@test.com",
-        },
-        product: {
-          id: "product-123",
-          name: "wheat",
-          displayName: "Wheat",
-        },
-      };
-
       const mockTradeOperation = {
         id: "trade-op-789",
         operationNumber: "OP-1234567890",
@@ -231,12 +213,7 @@ describe("TradeOperationController (e2e)", () => {
         ],
       };
 
-      (prisma.buyListing.findUnique as jest.Mock).mockResolvedValue(
-        mockBuyListing,
-      );
-      (prisma.tradeOperation.create as jest.Mock).mockResolvedValue(
-        mockTradeOperation,
-      );
+      tradeOperationService.create.mockResolvedValue(mockTradeOperation);
       (
         negotiationService.createTradeSellersWithOffers as jest.Mock
       ).mockResolvedValue(mockNegotiationsResponse);
@@ -316,10 +293,9 @@ describe("TradeOperationController (e2e)", () => {
         .query({ maxDistance: 100 })
         .expect(200);
 
-      expect(response.body).toHaveProperty("sellers");
-      expect(response.body.sellers).toHaveLength(2);
-      expect(response.body).toHaveProperty("totalQuantityAvailable");
-      expect(response.body).toHaveProperty("averagePrice");
+      expect(response.body).toBeInstanceOf(Array);
+      expect(response.body).toHaveLength(2);
+      expect(response.body[0]).toHaveProperty("sellerId", "user-seller-1");
     });
   });
 
@@ -349,10 +325,9 @@ describe("TradeOperationController (e2e)", () => {
         .send(selectDto)
         .expect(201); // POST without @HttpCode returns 201 Created
 
-      expect(response.body).toHaveProperty("message");
-      expect(response.body).toHaveProperty("sellersAdded");
-      expect(response.body.sellersAdded).toBeInstanceOf(Array);
-      expect(response.body.sellersAdded.length).toBe(2);
+      expect(response.body).toBeInstanceOf(Array);
+      expect(response.body).toHaveLength(2);
+      expect(response.body[0]).toHaveProperty("id", "trade-seller-1");
     });
   });
 
@@ -406,12 +381,12 @@ describe("TradeOperationController (e2e)", () => {
         },
       ];
 
-      (prisma.tradeOperation.findMany as jest.Mock).mockResolvedValue(
-        mockOperations,
-      );
-      (prisma.tradeOperation.count as jest.Mock).mockResolvedValue(
-        mockOperations.length,
-      );
+      tradeOperationService.findAll.mockResolvedValue({
+        data: mockOperations,
+        total: mockOperations.length,
+        page: 1,
+        limit: 20,
+      });
 
       const response = await request(app.getHttpServer())
         .get("/api/trade-operations")

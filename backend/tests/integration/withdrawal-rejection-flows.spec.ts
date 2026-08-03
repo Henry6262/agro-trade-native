@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+import request from 'supertest';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { NegotiationStatus, TradePhase } from '@prisma/client';
@@ -10,6 +10,40 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
   let prisma: PrismaService;
   let adminToken: string = 'Bearer admin-token';
   let sellerToken: string = 'Bearer seller-token';
+  let fixtureSequence = 0;
+  const fixtureRunId = `${Date.now()}-${process.pid}`;
+
+  const createBuyListingFixture = async ({
+    label,
+    productId,
+    quantity,
+    maxPricePerUnit,
+  }: {
+    label: string;
+    productId: string;
+    quantity: number;
+    maxPricePerUnit: number;
+  }) => {
+    const fixtureId = `${label}-${fixtureRunId}-${++fixtureSequence}`;
+    const buyer = await prisma.user.create({
+      data: {
+        email: `${fixtureId}-wr-test@test.com`,
+        name: `${label} WR Test Buyer`,
+        role: 'BUYER',
+      },
+    });
+
+    return prisma.buyListing.create({
+      data: {
+        buyerId: buyer.id,
+        productId,
+        quantity,
+        unit: 'TON',
+        maxPricePerUnit,
+        status: 'ACTIVE',
+      },
+    });
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -50,7 +84,7 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
       // Setup
       const admin = await prisma.user.create({
         data: {
-          email: 'admin-wr-test@agrotrade.com',
+          email: `${fixtureRunId}-admin-wr-test@agrotrade.com`,
           name: 'WR Test Admin',
           role: 'ADMIN',
         },
@@ -58,7 +92,7 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
 
       const buyer = await prisma.user.create({
         data: {
-          email: 'buyer-wr-test@test.com',
+          email: `${fixtureRunId}-buyer-wr-test@test.com`,
           name: 'WR Test Buyer',
           role: 'BUYER',
         },
@@ -66,7 +100,7 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
 
       const seller = await prisma.user.create({
         data: {
-          email: 'seller-wr-test@test.com',
+          email: `${fixtureRunId}-seller-wr-test@test.com`,
           name: 'WR Test Seller',
           role: 'FARMER',
         },
@@ -206,18 +240,13 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
     it('should handle bulk withdrawal when changing strategy', async () => {
       // Create trade with multiple active negotiations
       const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-      const buyer = await prisma.user.findFirst({ where: { role: 'BUYER' } });
       const product = await prisma.product.findFirst();
 
-      const buyListing = await prisma.buyListing.create({
-        data: {
-          buyerId: buyer!.id,
-          productId: product!.id,
-          quantity: 300,
-          unit: 'TON',
-          maxPricePerUnit: 390,
-          status: 'ACTIVE',
-        },
+      const buyListing = await createBuyListingFixture({
+        label: 'bulk',
+        productId: product!.id,
+        quantity: 300,
+        maxPricePerUnit: 390,
       });
 
       const trade = await prisma.tradeOperation.create({
@@ -239,7 +268,7 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
         Array(3).fill(0).map(async (_, i) => {
           const seller = await prisma.user.create({
             data: {
-              email: `bulk-wr-seller${i}@test.com`,
+              email: `${fixtureRunId}-bulk-${i}-wr-test@test.com`,
               name: `Bulk Seller ${i}`,
               role: 'FARMER',
             },
@@ -336,11 +365,18 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
         { price: 318, reason: 'Price below market rate' },
       ];
 
+      const buyListing = await createBuyListingFixture({
+        label: 'rejection-analysis',
+        productId: product!.id,
+        quantity: 100,
+        maxPricePerUnit: 370,
+      });
+
       const trade = await prisma.tradeOperation.create({
         data: {
           operationNumber: `WR-FLOW-REJECT-${Date.now()}`,
           adminId: admin!.id,
-          buyListingId: (await prisma.buyListing.findFirst())!.id,
+          buyListingId: buyListing.id,
           phase: TradePhase.SELLER_NEGOTIATION,
           status: 'ACTIVE',
           profitMargin: 9,
@@ -354,7 +390,7 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
         rejectionReasons.map(async (data, i) => {
           const seller = await prisma.user.create({
             data: {
-              email: `reject-seller${i}@test.com`,
+              email: `${fixtureRunId}-reject-${i}-wr-test@test.com`,
               name: `Reject Seller ${i}`,
               role: 'FARMER',
             },
@@ -440,11 +476,18 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
       const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
       const product = await prisma.product.findFirst();
 
+      const buyListing = await createBuyListingFixture({
+        label: 'cascade',
+        productId: product!.id,
+        quantity: 200,
+        maxPricePerUnit: 375,
+      });
+
       const trade = await prisma.tradeOperation.create({
         data: {
           operationNumber: `WR-FLOW-CASCADE-${Date.now()}`,
           adminId: admin!.id,
-          buyListingId: (await prisma.buyListing.findFirst())!.id,
+          buyListingId: buyListing.id,
           phase: TradePhase.SELLER_NEGOTIATION,
           status: 'ACTIVE',
           profitMargin: 8,
@@ -457,7 +500,7 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
       // Create lead seller and followers
       const leadSeller = await prisma.user.create({
         data: {
-          email: 'lead-seller-wr@test.com',
+          email: `${fixtureRunId}-lead-seller-wr-test@test.com`,
           name: 'Market Leader Seller',
           role: 'FARMER',
         },
@@ -467,7 +510,7 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
         Array(2).fill(0).map((_, i) =>
           prisma.user.create({
             data: {
-              email: `follower-seller${i}@test.com`,
+              email: `${fixtureRunId}-follower-${i}-wr-test@test.com`,
               name: `Follower Seller ${i}`,
               role: 'FARMER',
             },
@@ -573,11 +616,18 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
       const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
       const product = await prisma.product.findFirst();
 
+      const buyListing = await createBuyListingFixture({
+        label: 'recovery',
+        productId: product!.id,
+        quantity: 100,
+        maxPricePerUnit: 378,
+      });
+
       const trade = await prisma.tradeOperation.create({
         data: {
           operationNumber: `WR-FLOW-RECOVERY-${Date.now()}`,
           adminId: admin!.id,
-          buyListingId: (await prisma.buyListing.findFirst())!.id,
+          buyListingId: buyListing.id,
           phase: TradePhase.SELLER_NEGOTIATION,
           status: 'ACTIVE',
           profitMargin: 7.5,
@@ -590,7 +640,7 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
       // Create rejected seller
       const rejectedSeller = await prisma.user.create({
         data: {
-          email: 'rejected-seller-recovery@test.com',
+          email: `${fixtureRunId}-rejected-recovery-wr-test@test.com`,
           name: 'Rejected Seller',
           role: 'FARMER',
         },
@@ -624,7 +674,7 @@ describe('Withdrawal and Rejection Flows - Integration Test', () => {
         Array(3).fill(0).map(async (_, i) => {
           const seller = await prisma.user.create({
             data: {
-              email: `alt-seller${i}-recovery@test.com`,
+              email: `${fixtureRunId}-alt-${i}-recovery-wr-test@test.com`,
               name: `Alternative Seller ${i}`,
               role: 'FARMER',
             },

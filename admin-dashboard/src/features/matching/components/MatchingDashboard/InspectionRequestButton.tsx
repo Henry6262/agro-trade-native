@@ -17,6 +17,7 @@ import { ClipboardCheck, Loader2, AlertCircle } from 'lucide-react';
 import type { TradeSeller } from '../../../../types';
 import api from '../../../../services/api';
 import { API_ENDPOINTS } from '../../../../config/api';
+import { getApiErrorMessage } from '../../../../utils/errorHandler';
 
 interface InspectionRequestButtonProps {
   tradeOperationId: string;
@@ -98,7 +99,7 @@ export const InspectionRequestButton: React.FC<InspectionRequestButtonProps> = (
       });
 
       // Submit batch inspection request
-      const response = await api.post(API_ENDPOINTS.inspections.batch, {
+      await api.post(API_ENDPOINTS.inspections.batch, {
         tradeOperationId,
         inspections: inspectionRequests,
       });
@@ -110,9 +111,9 @@ export const InspectionRequestButton: React.FC<InspectionRequestButtonProps> = (
       // Close dialog and notify parent
       setOpen(false);
       onInspectionRequested?.();
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error creating inspection requests:', err);
-      const errorMsg = err.response?.data?.message || 'Failed to create inspection requests';
+      const errorMsg = getApiErrorMessage(err, 'Failed to create inspection requests');
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {

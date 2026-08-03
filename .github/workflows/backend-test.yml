@@ -1,29 +1,179 @@
-name: Backend Unit & Regression Tests
+name: Backend Test Matrix
 
 on:
   pull_request:
     branches: [main, dev]
     paths:
       - 'backend/**'
+      - '.github/workflows/backend-test.yml'
   push:
     branches: [main, dev]
     paths:
       - 'backend/**'
+      - '.github/workflows/backend-test.yml'
+
+env:
+  NODE_VERSION: '20'
+  DATABASE_URL: postgresql://test:test@localhost:5432/agrotrade_test
+  REDIS_URL: redis://localhost:6379
+  JWT_SECRET: ci-test-secret-key
+  PRIVY_APP_ID: ci-privy-app-id
+  GOOGLE_CLIENT_ID: ci-google-client-id
+  GOOGLE_CLIENT_SECRET: ci-google-client-secret
+  NODE_ENV: test
 
 jobs:
-  test:
-    name: Run Backend Tests (Node ${{ matrix.node-version }})
+  unit:
+    name: Unit tests (Node ${{ matrix.node-version }}, no live DB)
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [20, 22]
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --prefix "$GITHUB_WORKSPACE/backend"
+        name: Install dependencies
+      - run: npx prisma generate
+        name: Generate Prisma client
+      - run: npm test -- --ci --runInBand
+        name: Run database-free unit suite
+
+  coverage:
+    name: Unit coverage gate (thresholds enforced)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --prefix "$GITHUB_WORKSPACE/backend"
+        name: Install dependencies
+      - run: npx prisma generate
+        name: Generate Prisma client
+      - run: npm run test:cov -- --ci --runInBand
+        name: Run coverage gate
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-unit-coverage
+          path: backend/coverage/unit/
+          retention-days: 14
+
+  integration:
+    name: Maintained integration contracts (Postgres + Redis)
+    runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:15
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
-          POSTGRES_DB: test
+          POSTGRES_DB: agrotrade_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --prefix "$GITHUB_WORKSPACE/backend"
+        name: Install dependencies
+      - run: npx prisma generate
+        name: Generate Prisma client
+      - run: npx prisma migrate deploy
+        name: Apply test database migrations
+      - run: npm run test:integration -- --ci
+        name: Run maintained integration and contract suite
+
+  e2e:
+    name: E2E tests (Postgres + Redis)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: agrotrade_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --prefix "$GITHUB_WORKSPACE/backend"
+        name: Install dependencies
+      - run: npx prisma generate
+        name: Generate Prisma client
+      - run: npx prisma migrate deploy
+        name: Apply test database migrations
+      - run: npm run test:e2e -- --ci
+        name: Run E2E suite
+
+  smoke:
+    name: Production server smoke (/api/health)
+    needs: [unit, integration, e2e]
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: agrotrade_test
         ports:
           - 5432:5432
         options: >-
@@ -33,81 +183,39 @@ jobs:
           --health-retries 5
     defaults:
       run:
-        working-directory: ./backend
-
+        working-directory: backend
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
           cache-dependency-path: backend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Generate Prisma client
-        run: npx prisma generate
-
-      - name: Run unit & regression tests
-        run: npm test -- --ci --coverage --forceExit
-        env:
-          DATABASE_URL: "postgresql://test:test@localhost:5432/test"
-          JWT_SECRET: "ci-test-secret-key"
-          NODE_ENV: "test"
-
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report-node${{ matrix.node-version }}
-          path: backend/coverage/
-          retention-days: 14
-
-  smoke:
-    name: Smoke Test (Server starts & /health responds)
-    needs: test
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v6
-        with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Generate Prisma client
-        run: npx prisma generate
-
-      - name: Start server in background
+      - run: npm ci --prefix "$GITHUB_WORKSPACE/backend"
+        name: Install dependencies
+      - run: npx prisma generate
+        name: Generate Prisma client
+      - run: npx prisma migrate deploy
+        name: Apply test database migrations
+      - run: npm run build
+        name: Build production server
+      - name: Start production server
         run: |
-          npm run start &
-          echo $! > /tmp/server.pid
-          sleep 4
+          npm run start:prod &
+          echo $! > /tmp/agrotrade-server.pid
         env:
-          DATABASE_URL: "postgresql://test:test@localhost:5432/test"
-          JWT_SECRET: "ci-test-secret-key"
-          NODE_ENV: "test"
-          PORT: "3000"
-
-      - name: Check /health endpoint
-        run: |
-          curl --retry 5 --retry-delay 2 --fail http://localhost:3000/health
-          echo "✅ Smoke test passed"
-
+          PORT: '3000'
+          ENABLE_SWAGGER: 'false'
+      - name: Check /api/health endpoint
+        run: >-
+          curl --retry 10 --retry-delay 2 --retry-connrefused
+          --fail --show-error http://localhost:3000/api/health
       - name: Stop server
         if: always()
-        run: kill $(cat /tmp/server.pid) || true
+        run: |
+          if [ -f /tmp/agrotrade-server.pid ]; then
+            server_pid="$(cat /tmp/agrotrade-server.pid)"
+            if kill -0 "$server_pid" 2>/dev/null; then
+              kill "$server_pid"
+            fi
+          fi

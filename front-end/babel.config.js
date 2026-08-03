@@ -4,6 +4,7 @@ module.exports = function (api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
+      '@babel/plugin-transform-class-static-block',
       // NativeWind (react-native-css-interop) babel transforms.
       // Written out manually instead of using 'nativewind/babel' preset because
       // react-native-css-interop/babel.js hardcodes 'react-native-worklets/plugin'

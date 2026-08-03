@@ -12,7 +12,6 @@ interface ProgressDashboardProps {
 export const ProgressDashboard: React.FC<ProgressDashboardProps> = ({
   scenarioName,
   steps,
-  currentStepIndex,
   isRunning,
   totalDuration,
 }) => {

@@ -5,7 +5,7 @@
  * Ensures all prerequisites are met before allowing phase transitions.
  */
 
-import type { TradeOperation, Offer } from '../types';
+import type { InspectionRequest, Offer, TradeOperation, TransportData } from '../types';
 
 export interface WorkflowValidationResult {
   canFinalize: boolean;
@@ -135,7 +135,7 @@ export const validateWorkflowComplete = (
 /**
  * Calculates inspection summary from inspection results
  */
-export const calculateInspectionSummary = (inspections: any[]): InspectionSummary => {
+export const calculateInspectionSummary = (inspections: InspectionRequest[]): InspectionSummary => {
   const total = inspections.length;
   const completed = inspections.filter(i => i.status === 'COMPLETED').length;
   const pending = inspections.filter(i => ['PENDING', 'SCHEDULED', 'IN_PROGRESS'].includes(i.status)).length;
@@ -164,7 +164,7 @@ export const calculateInspectionSummary = (inspections: any[]): InspectionSummar
 /**
  * Calculates transport summary from transport data
  */
-export const calculateTransportSummary = (transportData: any | null): TransportSummary => {
+export const calculateTransportSummary = (transportData: TransportData | null): TransportSummary => {
   if (!transportData) {
     return {
       hasRequest: false,
@@ -182,7 +182,7 @@ export const calculateTransportSummary = (transportData: any | null): TransportS
     job?.proofOfDelivery ||
       (Array.isArray(job?.deliveryPhotos) && job.deliveryPhotos.length > 0) ||
       (Array.isArray(job?.documents) &&
-        job.documents.some((doc: any) =>
+        job.documents.some((doc) =>
           typeof doc?.type === 'string' && doc.type.toLowerCase().includes('proof')
         ))
   );

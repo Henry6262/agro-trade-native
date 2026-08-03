@@ -1,9 +1,13 @@
 import { simulationApi } from '../../../../../services/simulationApi';
 import { scenarioContext } from '../../../../../services/scenarioContext';
-import type { ScenarioStep } from '../../../../../types/scenario';
+import type { ScenarioResult, ScenarioStep } from '../../../../../types/scenario';
+import {
+  requireScenarioPayload,
+  requireScenarioUserRole,
+} from '../../../../../utils/scenarioValidation';
 
 export interface StepExecutionResult {
-  result: any;
+  result: ScenarioResult;
   duration: number;
 }
 
@@ -13,14 +17,14 @@ export class StepExecutor {
     let result;
 
     // Get the data/payload (normalize field name)
-    const stepData = step.data || step.payload;
+    const stepData = requireScenarioPayload(step.data ?? step.payload, step.action);
 
     // Execute based on action type - simplified with context manager
     switch (step.action) {
       case 'createTestUser':
         // API expects (role, name, data) as separate params
         result = await simulationApi.createTestUser(
-          stepData.role,
+          requireScenarioUserRole(stepData.role),
           stepData.name,
           stepData.data
         );
@@ -113,7 +117,7 @@ export class StepExecutor {
         break;
 
       case 'transporterStartJob':
-      case 'startTransport':
+      case 'startTransport': {
         const transporter = scenarioContext.getUser('TRANSPORTER', stepData.transporterIndex || 0);
         const job = scenarioContext.getLatestEntity('transportJobs');
         if (transporter && job) {
@@ -122,11 +126,12 @@ export class StepExecutor {
           throw new Error('Transporter or job not found in context');
         }
         break;
+      }
 
       case 'transporterComplete':
       case 'completeDelivery':
       case 'transporterDeliver':
-      case 'markDelivered':
+      case 'markDelivered': {
         const transporter2 = scenarioContext.getUser('TRANSPORTER', stepData.transporterIndex || 0);
         const job2 = scenarioContext.getLatestEntity('transportJobs');
         if (transporter2 && job2) {
@@ -139,10 +144,11 @@ export class StepExecutor {
           throw new Error('Transporter or job not found in context');
         }
         break;
+      }
 
       case 'completeTrade':
       case 'finalizeTrade':
-      case 'closeTrade':
+      case 'closeTrade': {
         const tradeOp = scenarioContext.getCurrentTradeOperation();
         if (tradeOp) {
           result = await simulationApi.admin.completeTrade(tradeOp.id);
@@ -150,6 +156,7 @@ export class StepExecutor {
           throw new Error('Trade operation not found in context');
         }
         break;
+      }
 
       // Additional dispute and resolution actions
       case 'raiseDispute':
