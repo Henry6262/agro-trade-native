@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-07-27_
+_Auto-generated: 2026-08-03_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-07-27_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `cbd72cb` 2026-07-27 — docs: auto-update progress report [skip ci]
 - `ab31ab2` 2026-07-20 — docs: auto-update progress report [skip ci]
 - `aebee1a` 2026-07-13 — docs: auto-update progress report [skip ci]
 - `243b81c` 2026-07-06 — docs: auto-update progress report [skip ci]
@@ -24,6 +25,5 @@ _Auto-generated: 2026-07-27_
 - `aadef0f` 2026-06-17 — feat(backend): plantation rounds service — create, invest, distribute, list
 - `510a61d` 2026-06-17 — feat(backend): dtos, contracts abi constants, env var declarations for plantatio
 - `33bc1b8` 2026-06-17 — fix(contracts): fix PlantationRound — CLOSED state, dust claim, fee withdrawal, 
-- `ebd85fc` 2026-06-17 — feat(contracts): plantationRound ERC-721 + fundraising escrow + Foundry tests
 
 ## Open Issues
