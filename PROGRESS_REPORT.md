@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-08-10_
+_Auto-generated: 2026-08-17_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-08-10_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `8766361` 2026-08-10 — docs: auto-update progress report [skip ci]
 - `853cfef` 2026-08-03 — docs: auto-update progress report [skip ci]
 - `5e87919` 2026-08-03 — fix(vercel): make Next SWC dependency portable (#133)
 - `9fac45c` 2026-08-03 — docs: auto-update progress report [skip ci]
@@ -24,6 +25,5 @@ _Auto-generated: 2026-08-10_
 - `6538131` 2026-06-17 — test(backend): jest unit tests for rounds service + staking service
 - `e79bb99` 2026-06-17 — feat(backend): plantation round contract event listener syncs DB state
 - `76a471e` 2026-06-17 — feat(backend): plantation-rounds controller + module + AppModule wiring
-- `fe8eff4` 2026-06-17 — feat(backend): add PlantationNftsService and GroveStakingService
 
 ## Open Issues
