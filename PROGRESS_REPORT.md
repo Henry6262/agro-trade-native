@@ -1,5 +1,5 @@
 # Progress Report
-_Auto-generated: 2026-08-24_
+_Auto-generated: 2026-08-31_
 
 ## Issue Summary
 | Category | Count |
@@ -10,6 +10,7 @@ _Auto-generated: 2026-08-24_
 | Unlabeled | 0 |
 
 ## Recent Commits (last 15)
+- `5ddc163` 2026-08-24 — docs: auto-update progress report [skip ci]
 - `f9dc498` 2026-08-17 — docs: auto-update progress report [skip ci]
 - `8766361` 2026-08-10 — docs: auto-update progress report [skip ci]
 - `853cfef` 2026-08-03 — docs: auto-update progress report [skip ci]
@@ -24,6 +25,5 @@ _Auto-generated: 2026-08-24_
 - `7898d87` 2026-06-17 — docs: auto-update progress report [skip ci]
 - `ba3324d` 2026-06-17 — fix(backend): route ordering for yield endpoint + on-chain distributeHarvest cal
 - `6538131` 2026-06-17 — test(backend): jest unit tests for rounds service + staking service
-- `e79bb99` 2026-06-17 — feat(backend): plantation round contract event listener syncs DB state
 
 ## Open Issues
